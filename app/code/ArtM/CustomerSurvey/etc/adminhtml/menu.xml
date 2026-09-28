@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="ArtM_CustomerSurvey::customersurvey"
+             title="Customer Surveys"
+             module="ArtM_CustomerSurvey"
+             sortOrder="360"
+             parent="ArtM_BlogEsg::BlogEsgmenu"
+             resource="ArtM_CustomerSurvey::customersurvey"/>
+
+        <add id="ArtM_CustomerSurvey::question_bank"
+             title="Question Bank"
+             module="ArtM_CustomerSurvey"
+             sortOrder="10"
+             parent="ArtM_CustomerSurvey::customersurvey"
+             action="customersurvey/question/index"
+             resource="ArtM_CustomerSurvey::question_bank"/>
+
+           <add id="ArtM_CustomerSurvey::locations"
+               title="Locations"
+               module="ArtM_CustomerSurvey"
+               sortOrder="20"
+               parent="ArtM_CustomerSurvey::customersurvey"
+               action="customersurvey/location/index"
+               resource="ArtM_CustomerSurvey::locations"/>
+
+           <add id="ArtM_CustomerSurvey::survey_journeys"
+               title="Survey Journeys"
+               module="ArtM_CustomerSurvey"
+               sortOrder="30"
+               parent="ArtM_CustomerSurvey::customersurvey"
+               action="customersurvey/survey/index"
+               resource="ArtM_CustomerSurvey::survey_journeys"/>
+
+           <add id="ArtM_CustomerSurvey::reports"
+               title="Reports &amp; Analytics"
+               module="ArtM_CustomerSurvey"
+               sortOrder="40"
+               parent="ArtM_CustomerSurvey::customersurvey"
+               action="customersurvey/report/index"
+               resource="ArtM_CustomerSurvey::reports"/>
+    </menu>
+</config>

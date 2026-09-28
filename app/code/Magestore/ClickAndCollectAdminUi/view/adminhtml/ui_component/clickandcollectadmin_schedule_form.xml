@@ -1,0 +1,1287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2016 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form_data_source
+            </item>
+        </item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+        <item name="childrenFromMeta" xsi:type="boolean">true</item>
+        <item name="reverseMetadataMerge" xsi:type="boolean">true</item>
+    </argument>
+    <settings>
+        <buttons>
+            <button name="back">
+                <url path="*/*/index"/>
+                <class>back</class>
+                <label translate="true">Back</label>
+            </button>
+            <button name="reset">
+                <class>reset</class>
+                <label translate="true">Reset</label>
+            </button>
+            <button name="save_and_continue" class="Magestore\ClickAndCollectAdminUi\Block\Adminhtml\Edit\SaveAndContinueButton"/>
+            <button name="save_and_new" class="Magestore\ClickAndCollectAdminUi\Block\Adminhtml\Edit\SaveAndNewButton"/>
+            <button name="save" >
+                <class>save primary</class>
+                <label translate="true">Save Schedule</label>
+            </button>
+        </buttons>
+        <label translate="true">Schedule</label>
+        <dataScope>data</dataScope>
+        <namespace>clickandcollectadmin_schedule_form</namespace>
+        <deps>
+            <dep>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="clickandcollectadmin_schedule_form_data_source" component="Magento_Ui/js/form/provider">
+        <settings>
+            <submitUrl path="*/*/save"/>
+        </settings>
+        <dataProvider class="Magestore\ClickAndCollectAdminUi\Ui\DataProvider\Schedule\Form\Schedule"
+                      name="clickandcollectadmin_schedule_form_data_source">
+            <settings>
+                <requestFieldName>schedule_id</requestFieldName>
+                <primaryFieldName>schedule_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <fieldset name="schedule_information_section">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="collapsible" xsi:type="boolean">false</item>
+                <item name="dataScope" xsi:type="string">schedule_information_section</item>
+            </item>
+        </argument>
+        <settings>
+            <label />
+        </settings>
+        <fieldset name="general_information">
+            <settings>
+                <label translate="true">General Information</label>
+            </settings>
+            <field name="schedule_name" formElement="input">
+                <settings>
+                    <dataType>text</dataType>
+                    <dataScope>schedule_name</dataScope>
+                    <label translate="true">Schedule Name</label>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                    </validation>
+                </settings>
+            </field>
+        </fieldset>
+        <fieldset name="monday_information">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Monday</item>
+                    <item name="collapsible" xsi:type="boolean">true</item>
+                    <item name="opened" xsi:type="boolean">true</item>
+                </item>
+            </argument>
+            <field name="monday_status" formElement="select">
+                <settings>
+                    <label>Status</label>
+                    <dataType>text</dataType>
+                    <dataScope>monday_status</dataScope>
+                    <required>true</required>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                    </validation>
+                    <switcherConfig>
+                        <rules>
+                            <rule name="0">
+                                <value>0</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.monday_information.monday_open_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">false</param>
+                                        </params>
+                                    </action>
+                                    <action name="1">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.monday_information.monday_close_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">false</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                            <rule name="1">
+                                <value>1</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.monday_information.monday_open_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">true</param>
+                                        </params>
+                                    </action>
+                                    <action name="1">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.monday_information.monday_close_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">true</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                        </rules>
+                        <enabled>true</enabled>
+                    </switcherConfig>
+                </settings>
+                <formElements>
+                    <select>
+                        <settings>
+                            <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\OpenCloseStatus"/>
+                        </settings>
+                    </select>
+                </formElements>
+            </field>
+            <container name="monday_open_group" component="Magento_Ui/js/form/components/group" sortOrder="20">
+                <argument name="data" xsi:type="array">
+                    <item name="type" xsi:type="string">group</item>
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Opening Time</item>
+                        <item name="required" xsi:type="boolean">true</item>
+                        <item name="validateWholeGroup" xsi:type="boolean">true</item>
+                        <item name="dataScope" xsi:type="string">monday_open_group</item>
+                        <item name="additionalClasses" xsi:type="array">
+                            <item name="admin__field-group-date-time" xsi:type="boolean">true</item>
+                            <item name="admin__control-grouped-date" xsi:type="boolean">true</item>
+                        </item>
+                        <item name="breakLine" xsi:type="boolean">false</item>
+                    </item>
+                </argument>
+                <field name="monday_open_hour" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-hour">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <labelVisible>false</labelVisible>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Hours"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+                <field name="monday_open_min" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-min">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <label>:</label>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Minutes"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+            </container>
+            <container name="monday_close_group" component="Magento_Ui/js/form/components/group" sortOrder="30">
+                <argument name="data" xsi:type="array">
+                    <item name="type" xsi:type="string">group</item>
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Closing Time</item>
+                        <item name="required" xsi:type="boolean">true</item>
+                        <item name="validateWholeGroup" xsi:type="boolean">true</item>
+                        <item name="dataScope" xsi:type="string">monday_close_group</item>
+                        <item name="additionalClasses" xsi:type="array">
+                            <item name="admin__field-group-date-time" xsi:type="boolean">true</item>
+                            <item name="admin__control-grouped-date" xsi:type="boolean">true</item>
+                        </item>
+                        <item name="breakLine" xsi:type="boolean">false</item>
+                    </item>
+                </argument>
+                <field name="monday_close_hour" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-hour">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <labelVisible>false</labelVisible>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Hours"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+                <field name="monday_close_min" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-min">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <label>:</label>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Minutes"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+            </container>
+            <button name="apply_to_all">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="formElement" xsi:type="string">container</item>
+                        <item name="componentType" xsi:type="string">container</item>
+                        <item name="component" xsi:type="string">Magestore_ClickAndCollectAdminUi/js/element/apply-to-all</item>
+                        <item name="title" xsi:type="string">Apply to All</item>
+                    </item>
+                </argument>
+            </button>
+        </fieldset>
+
+        <fieldset name="tuesday_information">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Tuesday</item>
+                    <item name="collapsible" xsi:type="boolean">true</item>
+                    <item name="opened" xsi:type="boolean">true</item>
+                </item>
+            </argument>
+            <field name="tuesday_status" formElement="select">
+                <settings>
+                    <label>Status</label>
+                    <dataType>text</dataType>
+                    <dataScope>tuesday_status</dataScope>
+                    <required>true</required>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                    </validation>
+                    <switcherConfig>
+                        <rules>
+                            <rule name="0">
+                                <value>0</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.tuesday_information.tuesday_open_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">false</param>
+                                        </params>
+                                    </action>
+                                    <action name="1">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.tuesday_information.tuesday_close_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">false</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                            <rule name="1">
+                                <value>1</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.tuesday_information.tuesday_open_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">true</param>
+                                        </params>
+                                    </action>
+                                    <action name="1">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.tuesday_information.tuesday_close_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">true</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                        </rules>
+                        <enabled>true</enabled>
+                    </switcherConfig>
+                </settings>
+                <formElements>
+                    <select>
+                        <settings>
+                            <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\OpenCloseStatus"/>
+                        </settings>
+                    </select>
+                </formElements>
+            </field>
+            <container name="tuesday_open_group" component="Magento_Ui/js/form/components/group" sortOrder="20">
+                <argument name="data" xsi:type="array">
+                    <item name="type" xsi:type="string">group</item>
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Opening Time</item>
+                        <item name="required" xsi:type="boolean">true</item>
+                        <item name="validateWholeGroup" xsi:type="boolean">true</item>
+                        <item name="dataScope" xsi:type="string">tuesday_open_group</item>
+                        <item name="additionalClasses" xsi:type="array">
+                            <item name="admin__field-group-date-time" xsi:type="boolean">true</item>
+                            <item name="admin__control-grouped-date" xsi:type="boolean">true</item>
+                        </item>
+                        <item name="breakLine" xsi:type="boolean">false</item>
+                    </item>
+                </argument>
+                <field name="tuesday_open_hour" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-hour">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <labelVisible>false</labelVisible>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Hours"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+                <field name="tuesday_open_min" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-min">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <label>:</label>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Minutes"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+            </container>
+            <container name="tuesday_close_group" component="Magento_Ui/js/form/components/group" sortOrder="30">
+                <argument name="data" xsi:type="array">
+                    <item name="type" xsi:type="string">group</item>
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Closing Time</item>
+                        <item name="required" xsi:type="boolean">true</item>
+                        <item name="validateWholeGroup" xsi:type="boolean">true</item>
+                        <item name="dataScope" xsi:type="string">tuesday_close_group</item>
+                        <item name="additionalClasses" xsi:type="array">
+                            <item name="admin__field-group-date-time" xsi:type="boolean">true</item>
+                            <item name="admin__control-grouped-date" xsi:type="boolean">true</item>
+                        </item>
+                        <item name="breakLine" xsi:type="boolean">false</item>
+                    </item>
+                </argument>
+                <field name="tuesday_close_hour" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-hour">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <labelVisible>false</labelVisible>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Hours"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+                <field name="tuesday_close_min" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-min">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <label>:</label>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Minutes"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+            </container>
+        </fieldset>
+
+        <fieldset name="wednesday_information">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Wednesday</item>
+                    <item name="collapsible" xsi:type="boolean">true</item>
+                    <item name="opened" xsi:type="boolean">true</item>
+                </item>
+            </argument>
+            <field name="wednesday_status" formElement="select">
+                <settings>
+                    <label>Status</label>
+                    <dataType>text</dataType>
+                    <dataScope>wednesday_status</dataScope>
+                    <required>true</required>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                    </validation>
+                    <switcherConfig>
+                        <rules>
+                            <rule name="0">
+                                <value>0</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.wednesday_information.wednesday_open_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">false</param>
+                                        </params>
+                                    </action>
+                                    <action name="1">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.wednesday_information.wednesday_close_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">false</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                            <rule name="1">
+                                <value>1</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.wednesday_information.wednesday_open_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">true</param>
+                                        </params>
+                                    </action>
+                                    <action name="1">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.wednesday_information.wednesday_close_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">true</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                        </rules>
+                        <enabled>true</enabled>
+                    </switcherConfig>
+                </settings>
+                <formElements>
+                    <select>
+                        <settings>
+                            <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\OpenCloseStatus"/>
+                        </settings>
+                    </select>
+                </formElements>
+            </field>
+            <container name="wednesday_open_group" component="Magento_Ui/js/form/components/group" sortOrder="20">
+                <argument name="data" xsi:type="array">
+                    <item name="type" xsi:type="string">group</item>
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Opening Time</item>
+                        <item name="required" xsi:type="boolean">true</item>
+                        <item name="validateWholeGroup" xsi:type="boolean">true</item>
+                        <item name="dataScope" xsi:type="string">wednesday_open_group</item>
+                        <item name="additionalClasses" xsi:type="array">
+                            <item name="admin__field-group-date-time" xsi:type="boolean">true</item>
+                            <item name="admin__control-grouped-date" xsi:type="boolean">true</item>
+                        </item>
+                        <item name="breakLine" xsi:type="boolean">false</item>
+                    </item>
+                </argument>
+                <field name="wednesday_open_hour" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-hour">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <labelVisible>false</labelVisible>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Hours"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+                <field name="wednesday_open_min" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-min">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <label>:</label>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Minutes"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+            </container>
+            <container name="wednesday_close_group" component="Magento_Ui/js/form/components/group" sortOrder="30">
+                <argument name="data" xsi:type="array">
+                    <item name="type" xsi:type="string">group</item>
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Closing Time</item>
+                        <item name="required" xsi:type="boolean">true</item>
+                        <item name="validateWholeGroup" xsi:type="boolean">true</item>
+                        <item name="dataScope" xsi:type="string">wednesday_close_group</item>
+                        <item name="additionalClasses" xsi:type="array">
+                            <item name="admin__field-group-date-time" xsi:type="boolean">true</item>
+                            <item name="admin__control-grouped-date" xsi:type="boolean">true</item>
+                        </item>
+                        <item name="breakLine" xsi:type="boolean">false</item>
+                    </item>
+                </argument>
+                <field name="wednesday_close_hour" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-hour">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <labelVisible>false</labelVisible>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Hours"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+                <field name="wednesday_close_min" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-min">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <label>:</label>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Minutes"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+            </container>
+        </fieldset>
+
+        <fieldset name="thursday_information">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Thursday</item>
+                    <item name="collapsible" xsi:type="boolean">true</item>
+                    <item name="opened" xsi:type="boolean">true</item>
+                </item>
+            </argument>
+            <field name="thursday_status" formElement="select">
+                <settings>
+                    <label>Status</label>
+                    <dataType>text</dataType>
+                    <dataScope>thursday_status</dataScope>
+                    <required>true</required>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                    </validation>
+                    <switcherConfig>
+                        <rules>
+                            <rule name="0">
+                                <value>0</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.thursday_information.thursday_open_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">false</param>
+                                        </params>
+                                    </action>
+                                    <action name="1">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.thursday_information.thursday_close_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">false</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                            <rule name="1">
+                                <value>1</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.thursday_information.thursday_open_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">true</param>
+                                        </params>
+                                    </action>
+                                    <action name="1">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.thursday_information.thursday_close_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">true</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                        </rules>
+                        <enabled>true</enabled>
+                    </switcherConfig>
+                </settings>
+                <formElements>
+                    <select>
+                        <settings>
+                            <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\OpenCloseStatus"/>
+                        </settings>
+                    </select>
+                </formElements>
+            </field>
+            <container name="thursday_open_group" component="Magento_Ui/js/form/components/group" sortOrder="20">
+                <argument name="data" xsi:type="array">
+                    <item name="type" xsi:type="string">group</item>
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Opening Time</item>
+                        <item name="required" xsi:type="boolean">true</item>
+                        <item name="validateWholeGroup" xsi:type="boolean">true</item>
+                        <item name="dataScope" xsi:type="string">thursday_open_group</item>
+                        <item name="additionalClasses" xsi:type="array">
+                            <item name="admin__field-group-date-time" xsi:type="boolean">true</item>
+                            <item name="admin__control-grouped-date" xsi:type="boolean">true</item>
+                        </item>
+                        <item name="breakLine" xsi:type="boolean">false</item>
+                    </item>
+                </argument>
+                <field name="thursday_open_hour" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-hour">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <labelVisible>false</labelVisible>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Hours"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+                <field name="thursday_open_min" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-min">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <label>:</label>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Minutes"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+            </container>
+            <container name="thursday_close_group" component="Magento_Ui/js/form/components/group" sortOrder="30">
+                <argument name="data" xsi:type="array">
+                    <item name="type" xsi:type="string">group</item>
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Closing Time</item>
+                        <item name="required" xsi:type="boolean">true</item>
+                        <item name="validateWholeGroup" xsi:type="boolean">true</item>
+                        <item name="dataScope" xsi:type="string">thursday_close_group</item>
+                        <item name="additionalClasses" xsi:type="array">
+                            <item name="admin__field-group-date-time" xsi:type="boolean">true</item>
+                            <item name="admin__control-grouped-date" xsi:type="boolean">true</item>
+                        </item>
+                        <item name="breakLine" xsi:type="boolean">false</item>
+                    </item>
+                </argument>
+                <field name="thursday_close_hour" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-hour">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <labelVisible>false</labelVisible>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Hours"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+                <field name="thursday_close_min" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-min">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <label>:</label>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Minutes"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+            </container>
+        </fieldset>
+
+        <fieldset name="friday_information">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Friday</item>
+                    <item name="collapsible" xsi:type="boolean">true</item>
+                    <item name="opened" xsi:type="boolean">true</item>
+                </item>
+            </argument>
+            <field name="friday_status" formElement="select">
+                <settings>
+                    <label>Status</label>
+                    <dataType>text</dataType>
+                    <dataScope>friday_status</dataScope>
+                    <required>true</required>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                    </validation>
+                    <switcherConfig>
+                        <rules>
+                            <rule name="0">
+                                <value>0</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.friday_information.friday_open_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">false</param>
+                                        </params>
+                                    </action>
+                                    <action name="1">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.friday_information.friday_close_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">false</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                            <rule name="1">
+                                <value>1</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.friday_information.friday_open_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">true</param>
+                                        </params>
+                                    </action>
+                                    <action name="1">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.friday_information.friday_close_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">true</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                        </rules>
+                        <enabled>true</enabled>
+                    </switcherConfig>
+                </settings>
+                <formElements>
+                    <select>
+                        <settings>
+                            <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\OpenCloseStatus"/>
+                        </settings>
+                    </select>
+                </formElements>
+            </field>
+            <container name="friday_open_group" component="Magento_Ui/js/form/components/group" sortOrder="20">
+                <argument name="data" xsi:type="array">
+                    <item name="type" xsi:type="string">group</item>
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Opening Time</item>
+                        <item name="required" xsi:type="boolean">true</item>
+                        <item name="validateWholeGroup" xsi:type="boolean">true</item>
+                        <item name="dataScope" xsi:type="string">friday_open_group</item>
+                        <item name="additionalClasses" xsi:type="array">
+                            <item name="admin__field-group-date-time" xsi:type="boolean">true</item>
+                            <item name="admin__control-grouped-date" xsi:type="boolean">true</item>
+                        </item>
+                        <item name="breakLine" xsi:type="boolean">false</item>
+                    </item>
+                </argument>
+                <field name="friday_open_hour" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-hour">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <labelVisible>false</labelVisible>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Hours"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+                <field name="friday_open_min" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-min">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <label>:</label>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Minutes"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+            </container>
+            <container name="friday_close_group" component="Magento_Ui/js/form/components/group" sortOrder="30">
+                <argument name="data" xsi:type="array">
+                    <item name="type" xsi:type="string">group</item>
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Closing Time</item>
+                        <item name="required" xsi:type="boolean">true</item>
+                        <item name="validateWholeGroup" xsi:type="boolean">true</item>
+                        <item name="dataScope" xsi:type="string">friday_close_group</item>
+                        <item name="additionalClasses" xsi:type="array">
+                            <item name="admin__field-group-date-time" xsi:type="boolean">true</item>
+                            <item name="admin__control-grouped-date" xsi:type="boolean">true</item>
+                        </item>
+                        <item name="breakLine" xsi:type="boolean">false</item>
+                    </item>
+                </argument>
+                <field name="friday_close_hour" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-hour">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <labelVisible>false</labelVisible>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Hours"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+                <field name="friday_close_min" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-min">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <label>:</label>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Minutes"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+            </container>
+        </fieldset>
+
+        <fieldset name="saturday_information">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Saturday</item>
+                    <item name="collapsible" xsi:type="boolean">true</item>
+                    <item name="opened" xsi:type="boolean">true</item>
+                </item>
+            </argument>
+            <field name="saturday_status" formElement="select">
+                <settings>
+                    <label>Status</label>
+                    <dataType>text</dataType>
+                    <dataScope>saturday_status</dataScope>
+                    <required>true</required>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                    </validation>
+                    <switcherConfig>
+                        <rules>
+                            <rule name="0">
+                                <value>0</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.saturday_information.saturday_open_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">false</param>
+                                        </params>
+                                    </action>
+                                    <action name="1">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.saturday_information.saturday_close_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">false</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                            <rule name="1">
+                                <value>1</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.saturday_information.saturday_open_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">true</param>
+                                        </params>
+                                    </action>
+                                    <action name="1">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.saturday_information.saturday_close_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">true</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                        </rules>
+                        <enabled>true</enabled>
+                    </switcherConfig>
+                </settings>
+                <formElements>
+                    <select>
+                        <settings>
+                            <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\OpenCloseStatus"/>
+                        </settings>
+                    </select>
+                </formElements>
+            </field>
+            <container name="saturday_open_group" component="Magento_Ui/js/form/components/group" sortOrder="20">
+                <argument name="data" xsi:type="array">
+                    <item name="type" xsi:type="string">group</item>
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Opening Time</item>
+                        <item name="required" xsi:type="boolean">true</item>
+                        <item name="validateWholeGroup" xsi:type="boolean">true</item>
+                        <item name="dataScope" xsi:type="string">saturday_open_group</item>
+                        <item name="additionalClasses" xsi:type="array">
+                            <item name="admin__field-group-date-time" xsi:type="boolean">true</item>
+                            <item name="admin__control-grouped-date" xsi:type="boolean">true</item>
+                        </item>
+                        <item name="breakLine" xsi:type="boolean">false</item>
+                    </item>
+                </argument>
+                <field name="saturday_open_hour" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-hour">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <labelVisible>false</labelVisible>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Hours"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+                <field name="saturday_open_min" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-min">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <label>:</label>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Minutes"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+            </container>
+            <container name="saturday_close_group" component="Magento_Ui/js/form/components/group" sortOrder="30">
+                <argument name="data" xsi:type="array">
+                    <item name="type" xsi:type="string">group</item>
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Closing Time</item>
+                        <item name="required" xsi:type="boolean">true</item>
+                        <item name="validateWholeGroup" xsi:type="boolean">true</item>
+                        <item name="dataScope" xsi:type="string">saturday_close_group</item>
+                        <item name="additionalClasses" xsi:type="array">
+                            <item name="admin__field-group-date-time" xsi:type="boolean">true</item>
+                            <item name="admin__control-grouped-date" xsi:type="boolean">true</item>
+                        </item>
+                        <item name="breakLine" xsi:type="boolean">false</item>
+                    </item>
+                </argument>
+                <field name="saturday_close_hour" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-hour">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <labelVisible>false</labelVisible>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Hours"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+                <field name="saturday_close_min" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-min">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <label>:</label>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Minutes"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+            </container>
+        </fieldset>
+
+        <fieldset name="sunday_information">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Sunday</item>
+                    <item name="collapsible" xsi:type="boolean">true</item>
+                    <item name="opened" xsi:type="boolean">true</item>
+                </item>
+            </argument>
+            <field name="sunday_status" formElement="select">
+                <settings>
+                    <label>Status</label>
+                    <dataType>text</dataType>
+                    <dataScope>sunday_status</dataScope>
+                    <required>true</required>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                    </validation>
+                    <switcherConfig>
+                        <rules>
+                            <rule name="0">
+                                <value>0</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.sunday_information.sunday_open_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">false</param>
+                                        </params>
+                                    </action>
+                                    <action name="1">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.sunday_information.sunday_close_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">false</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                            <rule name="1">
+                                <value>1</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.sunday_information.sunday_open_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">true</param>
+                                        </params>
+                                    </action>
+                                    <action name="1">
+                                        <target>clickandcollectadmin_schedule_form.clickandcollectadmin_schedule_form.schedule_information_section.sunday_information.sunday_close_group</target>
+                                        <callback>visible</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">true</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                        </rules>
+                        <enabled>true</enabled>
+                    </switcherConfig>
+                </settings>
+                <formElements>
+                    <select>
+                        <settings>
+                            <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\OpenCloseStatus"/>
+                        </settings>
+                    </select>
+                </formElements>
+            </field>
+            <container name="sunday_open_group" component="Magento_Ui/js/form/components/group" sortOrder="20">
+                <argument name="data" xsi:type="array">
+                    <item name="type" xsi:type="string">group</item>
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Opening Time</item>
+                        <item name="required" xsi:type="boolean">true</item>
+                        <item name="validateWholeGroup" xsi:type="boolean">true</item>
+                        <item name="dataScope" xsi:type="string">sunday_open_group</item>
+                        <item name="additionalClasses" xsi:type="array">
+                            <item name="admin__field-group-date-time" xsi:type="boolean">true</item>
+                            <item name="admin__control-grouped-date" xsi:type="boolean">true</item>
+                        </item>
+                        <item name="breakLine" xsi:type="boolean">false</item>
+                    </item>
+                </argument>
+                <field name="sunday_open_hour" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-hour">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <labelVisible>false</labelVisible>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Hours"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+                <field name="sunday_open_min" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-min">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <label>:</label>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Minutes"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+            </container>
+            <container name="sunday_close_group" component="Magento_Ui/js/form/components/group" sortOrder="30">
+                <argument name="data" xsi:type="array">
+                    <item name="type" xsi:type="string">group</item>
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Closing Time</item>
+                        <item name="required" xsi:type="boolean">true</item>
+                        <item name="validateWholeGroup" xsi:type="boolean">true</item>
+                        <item name="dataScope" xsi:type="string">sunday_close_group</item>
+                        <item name="additionalClasses" xsi:type="array">
+                            <item name="admin__field-group-date-time" xsi:type="boolean">true</item>
+                            <item name="admin__control-grouped-date" xsi:type="boolean">true</item>
+                        </item>
+                        <item name="breakLine" xsi:type="boolean">false</item>
+                    </item>
+                </argument>
+                <field name="sunday_close_hour" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-hour">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <labelVisible>false</labelVisible>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Hours"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+                <field name="sunday_close_min" formElement="select">
+                    <settings>
+                        <additionalClasses>
+                            <class name="admin__field-date-time-min">true</class>
+                            <class name="admin__field-date">true</class>
+                        </additionalClasses>
+                        <dataType>text</dataType>
+                        <label>:</label>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Minutes"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+            </container>
+        </fieldset>
+    </fieldset>
+</form>

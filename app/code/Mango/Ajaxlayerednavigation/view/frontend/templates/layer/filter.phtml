@@ -1,0 +1,47 @@
+<?php
+/**
+ * Template for filter items block
+ *
+ * @var $block \Magento\LayeredNavigation\Block\Navigation\FilterRenderer
+ */
+?>
+<?php
+$filter_is_active = $filter->isFilterActive();
+$active_filter_items = $filter->getActiveFilterItems();
+?>
+<ol style="max-height:<?= $ajax_helper->getConfigValue("list_max_height");?>px;" class="items filter-items-list <?php if ($filter_is_active):
+    ?>active-filters-list <?php
+endif; ?>" id="filter-<?= $attribute->getAttributeCode();?>">
+    <?php foreach ($filterItems as $filterItem): ?>
+        <li class="item <?php if ($active_filter_items && in_array($filterItem->getValue(), $active_filter_items)):
+            ?>active-filter-option <?php endif; ?>">
+            <?php if ($filterItem->getCount() > 0): ?>
+                <a class="layered-navigation-filter-link" 
+                   href="<?= $block->escapeUrl($filterItem->getUrl()) ?>" 
+                   data-value="<?= $filterItem->getValue();?>">
+                    <?= /* @escapeNotVerified */ $filterItem->getLabel() ?>
+                    <?php if ($this->helper(\Magento\Catalog\Helper\Data::class)->shouldDisplayProductCountOnLayer()): ?>
+                        <span class="count"><?= /* @escapeNotVerified */ $filterItem->getCount()?><span class="filter-count-label">
+                            <?php if ($filterItem->getCount() == 1):
+                                ?> <?= /* @escapeNotVerified */ __('item')?><?php
+                            else:
+                                ?> <?= /* @escapeNotVerified */ __('items') ?><?php
+                            endif;?></span></span>
+                    <?php endif; ?>
+                </a>
+            <?php else:?>
+                <span class="layered-navigation-filter-no-count">
+                    <?= /* @escapeNotVerified */ $filterItem->getLabel() ?>
+                    <?php if ($this->helper(\Magento\Catalog\Helper\Data::class)->shouldDisplayProductCountOnLayer()): ?>
+                        <span class="count"><?= /* @escapeNotVerified */ $filterItem->getCount()?><span class="filter-count-label">
+                            <?php if ($filterItem->getCount() == 1):
+                                ?><?= /* @escapeNotVerified */ __('item')?><?php
+else:
+    ?><?= /* @escapeNotVerified */ __('items') ?><?php
+endif;?></span></span>
+                    <?php endif; ?>
+                </span>
+            <?php endif; ?>
+        </li>
+    <?php endforeach ?>
+</ol>

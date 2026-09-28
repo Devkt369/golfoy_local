@@ -1,0 +1,787 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$helper = $objectManager->get(\ArtM\RecommendedSort\Helper\Data::class);
+$tree = $helper->getCategoryTree();
+
+if ($tree !== null) {
+    function printCategoryTree($node, $level = 0)
+    {
+        if (!$node || !is_array($node)) return;
+
+        $hasChildren = !empty($node['children']);
+        $liClass = $level <= 0 ? ' class="category-item active"' : ' class="category-item active extra-level"';
+
+        echo '<li' . $liClass . ' data-id="' . $node['id'] . '">';
+
+        if ($hasChildren) {
+            echo '<span class="toggle-btn"><span class="tags"></span></span> ';
+        } else {
+            echo '<span class="no-toggle"></span>';
+        }
+
+        echo "<input type='checkbox' cat_id='" . $node['id'] . "' />";
+
+        if (!empty($node['thumbnail'])) {
+            echo '<img src="' . htmlspecialchars($node['thumbnail']) . '" alt="" style="width:24px; height:24px; margin-right:5px; vertical-align:middle;" />';
+        }
+
+        if (!empty($node['url'])) {
+            echo '<a href="' . htmlspecialchars($node['url']) . '" target="_blank">' . htmlspecialchars($node['name']) . '</a>';
+        } else {
+            echo "<span class='category-name'>" . htmlspecialchars($node['name']) . "</span>";
+        }
+
+        if ($hasChildren) {
+            echo '<ul class="children sub-children" >';
+            foreach ($node['children'] as $childNode) {
+                if ($childNode) {
+                    printCategoryTree($childNode, $level + 1);
+                }
+            }
+            echo '</ul>';
+        }
+
+        echo '</li>';
+    }
+}
+
+?>
+
+<div class="main_column">
+    <div class="top_block">
+        <form method="post" id="configuration_sorting">
+            <div class="top-bar">
+                <div class="section-title">
+                    <div class="title-Filter">Filters:</div>
+                    <label for="select_all">Select All</label>
+                    <input type="checkbox" class="selected_all" id="select_all" name="select_all">
+                </div>
+
+                <div class="float_left_Id">
+                    <input type="text" name="cat_ids">
+                    <input class="submitSort" type="submit" value="Sort">
+                </div>
+            </div>
+
+            <div class="filters-wrapper">
+                <div class="filter-group">
+                    <input type="checkbox" value="created_date" name="created_date" id="created_date">
+                    <label for="created_date">Created Date</label>
+                </div>
+
+                <div class="filter-group">
+                    <input type="checkbox" value="high_discount" name="high_discount" id="high_discount">
+                    <label for="high_discount">High Discount</label>
+                </div>
+
+                <div class="filter-group">
+                    <input type="checkbox" value="rating" name="rating" id="rating">
+                    <label for="rating">Product Rating</label>
+                </div>
+
+                <div class="filter-group">
+                    <input type="checkbox" value="salable_qty" name="salable_qty" id="salable_qty">
+                    <label for="salable_qty">Salable Qty</label>
+                </div>
+
+                <div class="filter-group">
+                    <input type="checkbox" value="updated_date" name="updated_date" id="updated_date">
+                    <label for="updated_date">Updated Date</label>
+                </div>
+
+                <div class="filter-group">
+                    <input type="checkbox" value="availability_compare" name="availability_compare" id="availability_compare" disabled checked>
+                    <label for="availability_compare">Availability: Golfoy vs Other</label>
+                </div>
+
+                <div class="filter-group">
+                    <input type="checkbox" value="feature" name="feature" id="feature" disabled checked>
+                    <label for="feature">Feature</label>
+                </div>
+
+                <div class="filter-group">
+                    <input type="checkbox" value="size_roll" name="size_roll" id="size_roll">
+                    <label for="size_roll">Size Roll</label>
+                </div>
+            </div>
+        </form>
+
+    </div>
+    <div class="bottom_block_main">
+        <div class="wrapper">
+
+            <div class="left-column">
+                <input type="text" id="categorySearch" placeholder="Search categories..." style="width: 100%; padding: 6px; margin-bottom: 10px; font-size: 14px;">
+
+                <?php
+                printCategoryTree($tree);
+                ?>
+            </div>
+
+            <div class="product-info-details"></div>
+
+            <!-- Right Column -->
+            <div class="right-col">
+                <input type="checkbox" id="show_all" name="show_all">
+                <label for="show_all">Show Details On Click</label>
+            </div>
+            <div class="right-column">
+                <div class="section-title">Select Category</div>
+                <p>Your selected category will be displayed here.</p>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div id="my-modal" style="display:none;">
+    <p>Your Process has beed completed !</p>
+</div>
+
+<script type="text/javascript">
+    require(['jquery', 'Magento_Ui/js/modal/modal'], function($, modal) {
+
+        var popup = $('#my-modal');
+        modal({
+            type: 'popup',
+            responsive: true,
+            innerScroll: true,
+            title: 'Success',
+            modalClass: 'confirm',
+            buttons: [{
+                text: $.mage.__('OK'),
+                class: 'action-primary',
+                click: function() {
+                    // Get selected radio
+                    var selectedRadio = popup.find('input[name="data_selection"]:checked');
+
+                    if (selectedRadio.length === 0) {
+                        alert('Please select an item.');
+                        return;
+                    }
+
+                    var filters = selectedRadio.val(); // get value
+                    var productId = selectedRadio.data('product-id'); // get product-id
+                    var categoryId = selectedRadio.data('category-id'); // get product-id
+
+                    // console.log('Selected filters:', filters);
+                    // console.log('Selected product ID:', productId);
+
+                    // Send to AJAX
+                    $.ajax({
+                        url: '<?php echo $this->getUrl("artm_recommendedsort/background/recalculateprocess", ["_secure" => true]); ?>',
+                        type: 'POST',
+                        data: {
+                            filters: filters,
+                            product_id: productId,
+                            category_id: categoryId
+                        },
+                        showLoader: true,
+                        success: function(response) {
+                            console.log('Recalculation done:', response);
+                            alert('Points recalculate Processed');
+                        },
+                        error: function(err) {
+                            console.error('Error:', err);
+                        }
+                    });
+
+                    this.closeModal();
+                }
+            }]
+        }, popup);
+
+        $(document).ready(function() {
+
+            const productsPerPage = 10;
+
+            function renderTable(products, page = 1, categoryId) {
+                const startIndex = (page - 1) * productsPerPage;
+                const endIndex = startIndex + productsPerPage;
+                const paginated = products.slice(startIndex, endIndex);
+
+                let html = '<table class="table table-bordered table-striped product-data-table sortingOrderTable">';
+                html += '<thead class="table-dark">';
+                html += '<tr>';
+                html += '<th>Serial No</th>';
+                html += '<th class="pid sortable">Product Id</th>';
+                html += '<th>Image</th>';
+                html += '<th class="pname sortable">Name</th>';
+                html += '<th class="spoint sortable">Sorting Point</th>';
+                html += '<th>Points</th>';
+                html += '<th class="tpoints sortable">Total Points</th>';
+                html += '<th>Availability</th>';
+                html += '<th>Action</th>';
+                html += '</tr></thead><tbody>';
+
+                let serial = startIndex + 1;
+
+                paginated.forEach(function(product) {
+                    html += '<tr>';
+                    html += '<td>' + serial++ + '</td>';
+                    html += '<td>' + (product.id ?? '-') + '</td>';
+                    html += '<td>' +
+                        (product.image ?
+                            '<img src="' + product.image + '" alt="' + product.name + '" class="img-thumbnail" style="width: 80px;">' :
+                            '<span class="text-muted">No Image</span>') +
+                        '</td>';
+                    html += '<td class="productName">' + (product.name ?? '-') + '</td>';
+                    html += '<td>' + (product.sorting_point ?? '-') + '</td>';
+                    html += '<td class="valuesCol">' +
+                        `
+                            <div class="rating-points"><span class="title">Rating: </span><span class="priceValues">${product.rating ?? '-'}</span></div>
+                            <div class="size-roll-per"><span class="title">(Per) Size Roll: </span><span class="priceValues">${product.size_roll_points_percentage ?? '-'}</span></div>
+                            <div class="discount-poitns"><span class="title">Discount: </span><span class="priceValues">${product.high_discount_points ?? '-'}</span></div>
+                            <div class="create-date-points"><span class="title">Created Date: </span><span class="priceValues">${product.created_date_points ?? '-'}</span></div>
+                            <div class="latest-points"><span class="title">Latest Updated: </span><span class="priceValues">${product.latest_updated_points ?? '-'}</span></div>
+                            <div class="size-role-value"><span class="title">Size Roll HTML: </span><span class="priceValues">${product.available_size_roll_value ?? '-'}</span></div>
+                            <div class="is-feature"><span class="title">Is Feature: </span><span class="priceValues">${product.is_feature ?? '-'}</span></div>
+                        `
+                    '</td>';
+                    html += '<td>' + (product.total_points ?? '-') + '</td>';
+                    html += '<td class="availability-row">' +
+                        '<div class="availRow">' +
+                        '<span class="availLabel">CGC:</span> ' +
+                        '<span class="availValue cgcValue">' + (product.availability_cgc ?? '-') + '</span>' +
+                        '</div>' +
+                        '<div class="availRow">' +
+                        '<span class="availLabel">Golfoy:</span> ' +
+                        '<span class="availValue golfoyValue">' + (product.availability_golfoy ?? '-') + '</span>' +
+                        '</div>' +
+                        '<div class="availRow">' +
+                        '<span class="availLabel">Other:</span> ' +
+                        '<span class="availValue otherValue">' + (product.availability_other ?? '-') + '</span>' +
+                        '</div>';
+
+
+                    '</td>';
+                    html += '<td class="actionRow"><form class="update-points-form"><input type="number" class="product-checkbox" data-id="' + (product.id ?? '') + '" rel="' + categoryId + '"><button type="submit">Update</button></form><button class="recalculate-product" rel="' + categoryId + '" data-id="' + (product.id ?? '') + '">Recalculate</button></td>';
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table>';
+                return html;
+            }
+
+
+            function renderPagination(products, currentPage) {
+                const totalPages = Math.ceil(products.length / productsPerPage);
+                if (totalPages <= 1) return '';
+
+                let paginationHtml = '<nav><ul class="pagination">';
+
+                for (let i = 1; i <= totalPages; i++) {
+                    paginationHtml += '<li class="page-item ' + (i === currentPage ? 'active' : '') + '">';
+                    paginationHtml += '<button class="page-link page-btn" data-page="' + i + '">' + i + '</button>';
+                    paginationHtml += '</li>';
+                }
+
+                paginationHtml += '</ul></nav>';
+                return paginationHtml;
+            }
+
+            $('li.category-item span.category-name').on('click', function(e) {
+                e.preventDefault();
+                $('li.category-item span.category-name').removeClass('active');
+                $(this).addClass('active');
+                const categoryText = $(this).text();
+                const categoryId = $(this).parents('li.category-item').data('id');
+                const $container = $('.right-column');
+                const currentCategoryId = jQuery('form.update-points-form input.product-checkbox').attr('rel');
+
+                if (currentCategoryId == categoryId) {
+                    return;
+                }
+
+                if (!categoryId) {
+                    alert('Category ID not found.');
+                    return;
+                }
+
+                $.ajax({
+                    url: '<?php echo $this->getUrl('artm_recommendedsort/index/getproducts', ['_secure' => true]); ?>',
+                    type: 'GET',
+                    data: {
+                        category_id: categoryId,
+                        form_key: window.FORM_KEY
+                    },
+                    showLoader: true,
+                    success: function(response) {
+                        if (response.error) {
+                            alert(response.message || 'An error occurred.');
+                            return;
+                        }
+                        const productData = response.products || [];
+                        if (productData.length === 0) {
+                            $container.html('<div class="alert alert-warning">No products found.</div>');
+                            return;
+                        }
+
+                        productData.sort((a, b) => b.sorting_point - a.sorting_point);
+                        let currentPage = 1;
+
+                        let filteredProducts = productData;
+
+                        function renderAll(inputValue = '') {
+                            const totalRecords = filteredProducts.length;
+                            const start = (currentPage - 1) * productsPerPage + 1;
+                            const end = Math.min(start + productsPerPage - 1, totalRecords);
+
+                            const summary = `
+                                <div class="mb-2">
+                                    <div class="section-title">${categoryText}</div>
+                                    <div class="showingNo">Showing ${start}–${end} of ${totalRecords} records</div>
+                                </div>
+                            `;
+
+                            const searchForm = `
+                                    <div class="mb-3 d-flex gap-2 productsSearch">
+                                        <input type="text" id="productSearchInput" class="form-control" value="${inputValue}" placeholder="Search by Product ID or Name">
+                                        <button id="searchButton" class="btn btn-primary">Search</button>
+                                        <button id="resetButton" class="btn btn-primary">Reset</button>
+                                    </div>
+                                `;
+
+                            const tableHtml = renderTable(filteredProducts, currentPage, categoryId);
+                            const paginationHtml = renderPagination(filteredProducts, currentPage);
+
+                            $container.html(summary + searchForm + tableHtml + paginationHtml);
+                        }
+                        renderAll();
+                        filteredProducts = [...productData];
+
+
+                        let sortField = 'sorting_point'; // default sort
+                        let sortDirection = 'desc';
+
+                        function sortProducts(field, direction) {
+                            filteredProducts.sort((a, b) => {
+                                let valA = a[field] ?? 0;
+                                let valB = b[field] ?? 0;
+
+                                // Try to parse numeric if possible
+                                if (!isNaN(valA)) valA = parseFloat(valA);
+                                if (!isNaN(valB)) valB = parseFloat(valB);
+
+                                // For string comparison, fallback to lowercase
+                                if (typeof valA === 'string') valA = valA.toLowerCase();
+                                if (typeof valB === 'string') valB = valB.toLowerCase();
+
+                                if (valA < valB) return direction === 'asc' ? -1 : 1;
+                                if (valA > valB) return direction === 'asc' ? 1 : -1;
+                                return 0;
+                            });
+                        }
+
+                        $container.off('click', '#searchButton').on('click', '#searchButton', function() {
+                            const query = $('#productSearchInput').val().toLowerCase().trim();
+
+                            filteredProducts = productData.filter(product => {
+                                const name = (product.name || '').toLowerCase();
+                                const id = String(product.id || '');
+                                return name.includes(query) || id.includes(query);
+                            });
+
+                            currentPage = 1;
+                            renderAll(query);
+                        });
+
+                        $container.off('click', '#resetButton').on('click', '#resetButton', function() {
+                            const query = '';
+
+                            filteredProducts = productData.filter(product => {
+                                const name = (product.name || '').toLowerCase();
+                                const id = String(product.id || '');
+                                return name.includes(query) || id.includes(query);
+                            });
+
+                            currentPage = 1;
+                            renderAll();
+                        });
+
+                        $container.off('click', 'th.sortable').on('click', 'th.sortable', function() {
+                            const classList = $(this).attr('class').split(/\s+/);
+                            let clickedField = null;
+
+                            if (classList.includes('pid')) clickedField = 'id';
+                            else if (classList.includes('pname')) clickedField = 'name';
+                            else if (classList.includes('spoint')) clickedField = 'sorting_point';
+                            else if (classList.includes('tpoints')) clickedField = 'total_points';
+                            else if (classList.includes('sno')) clickedField = 'serial';
+
+                            if (!clickedField) return;
+
+                            // toggle sort direction if same field clicked again
+                            if (sortField === clickedField) {
+                                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                            } else {
+                                sortField = clickedField;
+                                sortDirection = 'asc';
+                            }
+
+                            if (clickedField === 'serial') {
+                                // no sorting needed for serial, just reset to original order
+                                filteredProducts = [...productData];
+                            } else {
+                                sortProducts(sortField, sortDirection);
+                            }
+
+                            currentPage = 1;
+                            renderAll();
+                        });
+
+                        $container.off('keypress', '#productSearchInput').on('keypress', '#productSearchInput', function(e) {
+                            if (e.which === 13) {
+                                $('#searchButton').click();
+                                $('#productSearchInput').focus();
+
+                                const input = $('#productSearchInput')[0];
+                                input.setSelectionRange(input.value.length, input.value.length);
+
+                            }
+                        });
+
+                        $container.off('click', '.page-btn').on('click', '.page-btn', function() {
+                            const newPage = parseInt($(this).data('page'));
+                            if (!isNaN(newPage)) {
+                                currentPage = newPage;
+                                renderAll();
+                            }
+                        });
+
+                    },
+                    error: function() {
+                        alert('AJAX error. Please try again.');
+                    }
+                });
+            });
+
+            $('input[type="checkbox"][cat_id]').on('change', function() {
+                var parentCatId = $(this).attr('cat_id');
+                var textInput = $('form#configuration_sorting input[type="text"]');
+                var isChecked = $(this).prop('checked');
+                var children = $(this).closest('li.category-item').find('.children input[type="checkbox"]');
+                children.prop('checked', isChecked);
+                updateCheckedCatIds(textInput);
+            });
+
+            function updateCheckedCatIds(textInput) {
+                var selectedCategories = [];
+                $('li.category-item input[type="checkbox"]:checked').each(function() {
+                    selectedCategories.push($(this).attr("cat_id"));
+                });
+                textInput.val(selectedCategories.join(","));
+            }
+
+
+
+
+            $('#configuration_sorting').on('submit', function(event) {
+                event.preventDefault();
+                var selectedNames = [];
+
+                jQuery('form#configuration_sorting input[type="checkbox"]:checked').each(function() {
+                    selectedNames.push($(this).attr('name'));
+                });
+
+                var catIds = $('input[name="cat_ids"]').val();
+                if (!catIds) {
+                    alert('Please select at least one category.');
+                    return;
+                }
+                var dataToSend = {
+                    filters: selectedNames,
+                    cat_ids: catIds,
+                    // form_key: window.FORM_KEY 
+                };
+
+                // Perform the AJAX request
+                $.ajax({
+                    url: '<?php echo $this->getUrl('artm_recommendedsort/index/updatedata', ['_secure' => true]); ?>',
+                    type: 'GET',
+                    data: dataToSend,
+                    showLoader: true,
+                    success: function(response) {
+                        // Handle the response (you can manipulate the DOM or show a message)
+                        console.log('Set batch Response:', response);
+                        // popup.modal('openModal');
+                        alert('Sorting job has been created successfully.');
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle errors
+                        console.error('Error:', error);
+                    }
+                });
+            });
+
+
+            $(document).on('submit', '.update-points-form', function(event) {
+                event.preventDefault();
+                var $form = $(this);
+                var $input = $form.find('.product-checkbox');
+                var productId = $input.data('id');
+                var categoryId = $input.attr('rel');
+                var pointsValue = $input.val();
+
+                $.ajax({
+                    url: '<?php echo $this->getUrl('artm_recommendedsort/index/updatepoints', ['_secure' => true]); ?>',
+                    type: 'POST', // Use POST for sending data to update something
+                    data: {
+                        // Data to send to the server. Your controller will receive these as parameters.
+                        product_id: productId,
+                        category_id: categoryId,
+                        points: pointsValue
+                    },
+                    showLoader: true,
+                    success: function(response) {
+                        console.log('Update successful!', response);
+                        alert("Points updated successfully");
+                    },
+
+                    error: function(xhr, status, error) {
+                        console.error('An error occurred:', error);
+                    }
+                });
+            });
+
+            $(document).on('click', '.recalculate-product', function() {
+                var $button = $(this); // The button that was clicked
+                var productId = $button.data('id');
+                var category_id = $button.attr('rel');
+                $button.prop('disabled', true).text('Recalculating...');
+                $.ajax({
+                    url: '<?php echo $this->getUrl('artm_recommendedsort/index/recalculate', ['_secure' => true]); ?>',
+                    type: 'POST',
+                    data: {
+                        product_id: productId,
+                        category_id: category_id
+                    },
+                    showLoader: true,
+                    success: function(response) {
+                        console.log("response", response);
+                        if (response.message === 'index_all') {
+                            $button.prop('disabled', false).text('Recalculate');
+                            return;
+                        }
+                        var htmlContent = '<div class="data-list">';
+                        response.data.forEach(function(item, index) {
+                            var radioId = 'data-item-' + item.id;
+                            htmlContent += '<div class="data-item" style="margin-bottom:10px;">';
+                            htmlContent += '<input type="radio" id="' + radioId + '" data-category-id="' + response.category_id + '" name="data_selection" value="' + JSON.parse(item.filters) + '" data-product-id="' + productId + '"';
+                            htmlContent += '<label for="' + radioId + '">';
+                            htmlContent += 'ID: ' + item.id + ' | Filters: ' + JSON.parse(item.filters);
+                            htmlContent += '</label>';
+                            htmlContent += '</div>';
+                        });
+                        htmlContent += '</div>';
+                        popup.html(htmlContent);
+
+                        popup.modal('openModal');
+                        $button.prop('disabled', false).text('Recalculate');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('An error occurred during recalculation:', error);
+                        alert('An error occurred. Please try again.' + productId);
+                    }
+                });
+            });
+
+            $(document).on('change', "input#show_all", function() {
+                if (!$(this).is(':checked')) {
+                    $(".product-info-details").text("");
+                }
+            });
+
+            $(document).on('click', 'table.product-data-table tr', function() {
+                if (!$("#show_all").is(':checked')) {
+                    return;
+                }
+                var productId = $(this).find('td:eq(1)').text();
+
+                if (productId) {
+
+                    $.ajax({
+                        url: '<?php echo $this->getUrl('artm_recommendedsort/background/getproductdata', ['_secure' => true]); ?>',
+                        type: 'POST',
+                        data: {
+                            product_id: productId
+                        },
+                        showLoader: true,
+                        success: function(response) {
+                            renderProductInfo(response.data);
+                        },
+
+                        error: function(xhr, status, error) {
+                            console.error('An error occurred:', error);
+                        }
+                    });
+                } else {
+                    console.log("The second cell is empty or could not be found.");
+                }
+            });
+
+
+            function renderProductInfo(productData) {
+                if (!productData || typeof productData !== 'object') return;
+
+                const parent = $(`
+                    <div class="custom-product-block">
+                        <h2>(${productData.product_id})</h2>
+                        <h2>${productData.name}</h2>
+                        <div class="main-product-info">
+                            <img src="${productData.image}" alt="${productData.name}" class="main-product-img" />
+                            <div class="main-product-meta">
+                                <div class="rating">${productData.rating_html || 'No ratings yet'}</div>
+                                <div class="price-html">
+                                    <div class="regular_price">${productData.regular_price}</div>
+                                    <div class="price">${productData.price_html}</div>
+                                </div>
+                                ${productData.percent_off > 0 ? `<div class="off">(${productData.percent_off}% OFF)</div>` : ''}
+                                <div class="variant-sources">
+                                    ${(productData.sources ?? []).map(source => `
+                                        <span class="source-item ${source.qty > 0 ? 'in-stock' : 'out-of-stock'}">
+                                            ${source.source_code}: ${source.qty}
+                                        </span>
+                                    `).join('')}
+                                </div>
+                                <div class="timestamps">
+                                    <small><strong>Created:</strong> ${productData.created_at}</small><br/>
+                                    <small><strong>Updated:</strong> ${productData.updated_at}</small>
+                                    <small><strong>Is Featured:</strong> ${productData.isfeatured  > 0 ? 'Yes' : 'No'}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        ${Array.isArray(productData.children) && productData.children.length ? `
+                            <h3>Variants</h3>
+                            <div class="variant-wrapper">
+                                ${productData.children.map(child => `
+                                    <div class="variant-item">
+                                        <div class="variant-name">${child.name}</div>
+                                        <div class="price-html">
+                                            <div class="variant-regular_price">${child.regular_price}</div>
+                                            <div class="variant-price">${child.price_html}</div>
+                                        </div>    
+                                        ${child.percent_off > 0 ? `<div class="variant-off">(${child.percent_off}% OFF)</div>` : ''}
+                                        <div class="variant-sources">
+                                            ${child.sources.map(source => `
+                                                <span class="source-item ${source.qty > 0 ? 'in-stock' : 'out-of-stock'}">
+                                                    ${source.source_code}: ${source.qty}
+                                                </span>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `);
+
+                // Append to .product-info-details
+                $(".product-info-details").text("");
+                $('.product-info-details').append(parent);
+            }
+
+            // Expand/Collapse Toggle
+            $('.toggle-btn').on('click', function() {
+                const $childUl = $(this).siblings('ul.children');
+
+                // Clear existing content inside the toggle button
+                $(this).empty();
+
+                if ($childUl.is(':visible')) {
+                    $childUl.slideUp();
+                    $(this)
+                        .removeClass('open')
+                        .addClass('closed')
+                        .append('<div class="close-arrow-icon"></div>'); // Insert close icon inside
+                } else {
+                    $childUl.slideDown();
+                    $(this)
+                        .removeClass('closed')
+                        .addClass('open')
+                        .append('<div class="open-arrow-icon"></div>'); // Insert open icon inside
+                }
+            });
+
+            //here adding div
+            $('li.category-item.singlecat-item').each(function() {
+                // Check if it doesn't already exist to avoid duplication
+                if ($(this).find('.icon-subMenu').length === 0) {
+                    $(this).append('<div class="icon-subMenu"></div>');
+                }
+            });
+
+            $('.category-item.active').each(function() {
+                const $item = $(this);
+                const $childrenUl = $item.children('ul.children');
+
+                if ($childrenUl.length) {
+                    $childrenUl.show(); // Or use .slideDown() if you want animation
+
+                    // Replace the content of .toggle-btn with open-arrow-icon div
+                    $item.children('.toggle-btn')
+                        .empty() // Clear existing [+]/[−] or anything else
+                        .removeClass('closed')
+                        .addClass('open')
+                        .append('<div class="open-arrow-icon"></div>');
+                }
+                jQuery('li.category-item.active.extra-level .open-arrow-icon').trigger('click');
+            });
+
+            $('#select_all').on('change', function() {
+                var isChecked = $(this).is(':checked');
+
+                $('.filter-group input[type="checkbox"]').each(function() {
+                    if (!$(this).is(':disabled')) {
+                        $(this).prop('checked', isChecked);
+                    }
+                });
+            });
+
+            // Category Search
+            $('#categorySearch').on('keyup', function() {
+                const searchTerm = $(this).val().toLowerCase();
+
+                $('.left-column li.category-item').each(function() {
+                    const text = $(this).text().toLowerCase();
+
+                    if (text.indexOf(searchTerm) > -1) {
+                        $(this).show();
+                        $(this).parents('ul').show();
+                        $(this).parents('li').find('> .toggle-btn').text('[−]');
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+
+        });
+    });
+</script>
+
+<style>
+    .price-html {
+        display: flex;
+    }
+
+    .regular_price,
+    .variant-regular_price {
+        text-decoration: line-through;
+    }
+
+    .product-info-details {
+        max-height: 600px;
+        overflow: scroll;
+        z-index: 99;
+    }
+
+    th.sortable {
+        cursor: pointer;
+    }
+
+    th.sortable::after {
+        content: ' ↕';
+        font-size: 0.8em;
+        color: #ccc;
+    }
+</style>

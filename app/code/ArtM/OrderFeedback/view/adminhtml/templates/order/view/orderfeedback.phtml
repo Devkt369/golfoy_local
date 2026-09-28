@@ -1,0 +1,110 @@
+<style>
+    .box.box-order_feedback strong.box-title span {
+        font-size: 16px;
+    }
+    .form_content-order_feedback {
+        margin: 10px 0px;
+    }
+    .form_content-order_feedback input {
+
+    margin: 8px 0px;
+        max-width: 200px;
+    }
+    
+    #orderfeedback-textarea-response{                                                    
+        width: 100%;
+        min-height: 100px;
+        margin-top: 10px;
+        max-width: 300px;
+    }
+    .order_feedback_details_line span {
+        font-size: 12px;
+        font-weight: 400;
+        color: #686868;
+        font-weight: 800;
+    }
+    .box.box-order_feedback.order-review {
+        display: block;
+    }
+</style>
+
+<?php    
+
+$objectManager =  \Magento\Framework\App\ObjectManager::getInstance(); 
+
+$storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+$store = $storeManager->getStore();
+$baseUrl = $store->getBaseUrl();
+
+
+    $order_id = $this->getRequest()->getParam('order_id');
+    $flag = false;
+
+    if( $order_id != null ){
+         
+        
+        $_objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $order = $_objectManager ->create('Magento\Sales\Model\Order');
+        
+        $order->load( $order_id );
+        $getIncrementId = $order->getIncrementId( $order_id );
+        
+                $order_feedback = $order->getData('orderfeedback');
+                
+                $orderfeedback = $_objectManager ->create('ArtM\OrderFeedback\Model\Maintable');
+                $orderfeedback_collection = $orderfeedback->getCollection()->addFieldToFilter('order_id', $getIncrementId);
+
+                if( $orderfeedback_collection->count() != 0 ){
+                    foreach($orderfeedback_collection as $orderfeedback){
+                        $rating = $orderfeedback['rating'];
+                        $review = $orderfeedback['review'];
+                        $response = $orderfeedback['response'];
+                        $delivery_notes = $orderfeedback['delivery_notes'];
+                    }
+    ?>
+                    <section class="admin__page-section order_feedback">
+                        <div class="admin__page-section-title">
+                            <span class="title">Order Feedback</span>
+                        </div>
+                        <div class="admin__page-section-content">
+                            <div class="box box-order_feedback order-review">
+                                <div class="box-content">
+                                    <div class="form_content-order_feedback">
+                                        <div class="box box-order_feedback order-review">
+                                            <div class="order_feedback_details_line"><b>Rating:</b> <?= $rating; ?></div>
+                                            <div class="order_feedback_details_line"><b>Review:</b> <?= $review; ?></div>
+                                            <?php
+                                                echo '<div class="order_feedback_details_line"><b>Response : </b><br>'.$response.'</div>';
+                                                echo '<div class="order_feedback_details_line"><b>Delivery Notes : </b>'.$delivery_notes.'</div>';
+                                            ?>
+                                                <form name="orderfeedback_form" class="orderfeedback_form" action="<?= $this->getResponseSaveUrl(); ?>" method="get" enctype="multipart/form-data">
+                                                    <input type="hidden" name="order_id" value="<?php echo $getIncrementId;  ?>" />
+                                                    <textarea name="feedback_response" id="orderfeedback-textarea-response" maxlength="1000" class="form-control" placeholder="Please add response, What was done to saisfy customer's need"></textarea>
+                                                    <br>
+                                                    <input type="submit" value="Submit" class="action primary" />
+                                                </form>
+                                            <?php
+                                            ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>           
+<?php
+                }else{
+                    ?>
+
+                <section class="admin__page-section order_feedback">
+                    <div class="admin__page-section-title">
+                        <span class="title">Order Feedback</span>
+                    </div>
+                    <div class="admin__page-section-content">
+                        No Feedback Received
+                    </div>
+                </section>
+<?php
+                }
+    }
+?>
+

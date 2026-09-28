@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <!-- Override shipment items.phtml -->
+        <referenceBlock name="shipment_items">
+            <action method="setTemplate">
+                <argument name="template" xsi:type="string">ArtM_ShipmentTracking::order/shipment/items.phtml</argument>
+            </action>
+        </referenceBlock>
+        
+        <!-- Override tracking link.phtml -->
+        <referenceBlock name="track-all-link">
+            <action method="setTemplate">
+                <argument name="template" xsi:type="string">ArtM_ShipmentTracking::tracking/link.phtml</argument>
+            </action>
+        </referenceBlock>
+        <referenceContainer name="content">
+            <block class="Magento\Framework\View\Element\Template"
+                   name="order.top.block"
+                   template="ArtM_ShipmentTracking::order/top-header.phtml"
+                   before="-"/>
+        </referenceContainer>
+    </body>
+</page>

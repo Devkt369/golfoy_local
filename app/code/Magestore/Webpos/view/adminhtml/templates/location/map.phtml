@@ -1,0 +1,77 @@
+<?php
+
+/**
+ * Magestore
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Magestore.com license that is
+ * available through the world-wide-web at this URL:
+ * http://www.magestore.com/license-agreement.html
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade this extension to newer
+ * version in the future.
+ *
+ * @category    Magestore
+ * @package     Magestore_Webpos
+ * @copyright   Copyright (c) 2012 Magestore (http://www.magestore.com/)
+ * @license     http://www.magestore.com/license-agreement.html
+ */
+
+?>
+<?php
+/** @var \Magestore\Webpos\Block\Adminhtml\Location\Edit\Tab\General\Renderer\Map $block */
+?>
+<div class="map-container">
+    <div class="map-control-box">
+        <input type="text" size="40" class="map-inp-search input-text"
+               placeholder="<?= /* @noEscape */ __('Enter a location to search') ?>" />
+        <button type="button" class="map-btn-search primary" title="<?= /* @noEscape */ __('Search') ?>">
+            <span><?= /* @noEscape */ __('Search') ?></span>
+        </button>
+        <button type="button" title="<?= /* @noEscape */ __('Reset Map') ?>" class="map-btn-reset primary">
+            <span><?= /* @noEscape */ __('Reset Map') ?></span>
+        </button>
+    </div>
+    <div class="mapbox" style="height: 400px"></div>
+    <span class="message" style="display: block;top: 27px;">
+        <?= /* @noEscape */ __('Click on map or drag the marker to set location position.') ?><br/>
+        <?= /* @noEscape */ __(
+            'The information in popup will help you to get location information'
+                . 'of your location in Google Map faster.'
+        ) ?>
+    </span>
+</div>
+<script id="map-template" class="map-template" type="text/x-magento-template">
+    <div class="map-infowindow">
+        <span class="formattedAddress">Address: <%- data.formattedAddress %></span><br />
+        <span class="city">City: <%- data.city %></span><br />
+        <span class="postcode">Zip Code: <%- data.postcode %></span><br />
+        <span class="country">Country: <%- data.countryName %></span><br />
+        <span class="region">State: <%- data.region %></span><br />
+        <button type="button" class="apply-to-form primary"><?= /* @noEscape */ __('Apply to Form') ?></button>
+    </div>
+</script>
+<script>
+  require(['jquery','Magestore_Webpos/js/location/map'], function($) {
+    $(document).ready(function($) {
+      window.mapIsShow = false;
+      $(document).scroll(function() {
+        if (!window.mapIsShow && $(this).scrollTop() > 300) {
+            $('.mapbox').gmap($.extend(<?= /* @noEscape */ $block->getOptionMapJson() ?>,{
+            searchBox: '.map-inp-search',
+            searchBtn: '.map-btn-search',
+            resetBtn: '.map-btn-reset',
+            mapControlBox: '.map-control-box',
+            applyToFormBtn: '.apply-to-form',
+            googlemapTab: '#locaton-edit-tabs-tab-item-googlemap-section',
+          }));
+          window.mapIsShow = true;
+        }
+      });
+    });
+  });
+  window.googleMapApiKey= "<?= /* @noEscape */ $block->getGoolgeApiKey()?>";
+</script>

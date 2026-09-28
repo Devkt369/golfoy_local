@@ -1,0 +1,170 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>    
+        <referenceBlock name="customer-account-navigation-product-reviews-link" remove="true"/>
+        <referenceBlock name="customer-account-navigation-tradein-link" remove="true"/>
+        <referenceBlock name="customer-account-navigation-giftvoucher-index-index" remove="true"/>
+        <referenceBlock name="custom.footer.text" remove="true"/>
+
+        <referenceBlock name="advanced-search-link" remove="true"/>
+        <referenceContainer name="header.panel" remove="true"/>
+        <referenceContainer name="page.top">
+           <referenceBlock name="store.links" remove="true" />
+        </referenceContainer>
+        <referenceContainer name="columns.top">
+            <referenceBlock name="page.main.title" remove="true" />
+        </referenceContainer>
+        
+                
+         <referenceContainer name="header-wrapper">
+            <block class="Magento\Framework\View\Element\Template" name="header" template="Magento_Theme::Customer/Header/header.phtml" after="-" >
+                <block class="Magento\Customer\Block\Account\Link" name="my-account-link">
+                    <arguments>
+                        <argument name="label" xsi:type="string" translate="true">My Account</argument>
+                        <argument name="sortOrder" xsi:type="number">110</argument>
+                    </arguments>
+                </block>
+            </block>
+         </referenceContainer>
+        
+        <referenceContainer name="header.container">
+            <block class="Magento\Framework\View\Element\Template" name="notice_header" before="header-wrapper" template="Magento_Theme::header/notice.phtml">
+            </block> 
+            <block class="Magento\Framework\View\Element\Template" name="popup_header" before="header-wrapper" template="Magento_Theme::popup.phtml"/>
+        </referenceContainer>
+        <move element="top.search" as="topSearch" destination="header" after="logo"/>
+<!--        <move element="logo" destination="header" after="-"/>-->
+        <move element="minicart" destination="header" after="-"/>
+        
+        <move element="logo" destination="header" after="-"/>
+        
+        <block class="Magento\Customer\Block\Account\RegisterLink" name="register-link">
+            <arguments>
+                <argument name="label" xsi:type="string" translate="true">Sign up</argument>
+            </arguments>
+        </block>
+        
+        <move element="register-link" destination="header" after="-" />
+        <move element="wish-list-link" destination="header" after="-" />
+        <move element="authorization-link" destination="header" after="-" />
+        
+        
+        <referenceContainer name="footer" remove="true" />
+                <referenceContainer name="footer-container">
+                    <container name="custom_footer" as="custom_footer" label="Page Footer" htmlTag="div" htmlClass="container-fluid">
+                        <block class="Magento\Framework\View\Element\Template" name="block_footer" as="block_footer" template="Magento_Theme::footer/footer.phtml">
+                        </block>
+                    </container>
+                </referenceContainer>
+                
+<!-- new modal footer may-26-2023 -->
+                <container name="offerpopup_after_footer" as="offerpopup_after_footer" label="Offerpopup After Footer" htmlTag="div" htmlClass="container-fluid modal_popup_new">
+                    <block class="Magento\Framework\View\Element\Template" name="block_offerpopup_after_footer" template="Magento_Theme::catalog/product/view/offer_popup.phtml">
+                    </block>
+                </container>
+        
+        <!-- Mage_Newsletter -->
+        <referenceBlock name="block_footer">
+            <block class="Magento\Newsletter\Block\Subscribe" name="form.subscribe" as="subscribe_custom" before="-" template="Magento_Newsletter::forms/subscribe.phtml"/>
+        </referenceBlock>
+        
+        
+        <referenceBlock name="store.menu">
+            
+            <block class="Magento\Customer\Block\Account\Dashboard\Info" name="customer_account_sidebar_info" before="catalog.topnav" template="Magento_Theme::header/sidebar/profile.phtml" >
+            </block>
+            
+            <block class="Magento\Framework\View\Element\Template" name="customer_account_sidebar_signin_signup_banner" before="customer_account_sidebar_info" template="Magento_Theme::header/sidebar/sign_in_banner.phtml" >
+            </block>
+            
+            <block class="Magento\Framework\View\Element\Template" name="customer_account_sidebar_logout" after="catalog.topnav" template="Magento_Theme::header/sidebar/logout_button.phtml" ></block>
+        </referenceBlock>
+        
+            
+        <referenceContainer name="product.info.type">
+            <container name="product_top" label="Product Details" htmlTag="div" htmlClass="product_page_namedetails" before="-" >
+                <block class="Magento\Catalog\Block\Product\View" name="top_names" template="Magento_Theme::catalog/product/view/top_names.phtml" ></block>
+            </container>
+        </referenceContainer>
+        <move element="product.info.review" destination="product_top" after="top_names" />
+        
+        <referenceContainer name="alert.urls">
+            <block class="Magento\Framework\View\Element\Template" name="price_g_text" template="Magento_Theme::catalog/product/view/price_g_text.phtml" after='-'></block>
+        </referenceContainer>
+        
+        
+        <referenceContainer name="product.info.social">
+             <block class="Magento\Catalog\Block\Product\View" name="emi_text" template="Magento_Theme::catalog/product/view/emi_text.phtml" after='-'></block>
+        </referenceContainer>
+        <!-- <referenceContainer name="product.info.main">
+            <block class="Magento\Catalog\Block\Product\View" name="emi_text" template="Magento_Theme::catalog/product/view/emi_text.phtml" before='-'></block>
+
+        </referenceContainer> -->
+        
+        
+        <referenceContainer name="product.info.main">
+            <block class="Magento\Catalog\Block\Product\View" after="estimation_delivery" template="Magento_Theme::catalog/product/view/expert_advice.phtml" name="product_expert_advice" />
+            <block class="Magento\Catalog\Block\Product\View" name="inclusive_text" template="Magento_Theme::catalog/product/view/inclusive_text.phtml" before='product.price.tier'></block>
+            <block class="Magento\Catalog\Block\Product\View" after="inclusive_text" template="Magento_Theme::catalog/product/view/need_help.phtml" name="need_help" />
+        </referenceContainer>   
+
+<!--        compare button move-->
+<!--        <move element="addto" destination="product_info_form_content" after="addtocart" />-->
+        <move element="addto" destination="product.info.options.wrapper.bottom" after="-" />
+        
+        <move element="category.description" destination="content" before="product_list_toolbar"/>
+
+        
+        <referenceContainer name="product.info.main">
+            <block class="Magento\Catalog\Block\Product\View" after="need_help" template="Magento_Theme::catalog/product/view/no-cost-emi.phtml" name="no_cost" />
+            <block class="Magento\Catalog\Block\Product\View" name="estimation_delivery" template="Magento_Theme::catalog/product/view/estimation_delivery.phtml" after="need_help"/>
+        </referenceContainer>
+        
+<!--        Sub categories or blocks on top of category-->
+        <referenceContainer name="category.view.container">
+            <block class="Magento\Catalog\Block\Category\View" name="category.image" template="Magento_Catalog::category/image.phtml"/>
+            <block class="Magento\Catalog\Block\Category\View" name="category_top_block" template="Magento_Theme::catalog/category/top_block.phtml" after="breadcrumbs" />
+            
+        </referenceContainer>
+        
+        <referenceContainer name="after.body.start">
+            <block template="Magento_Theme::head/after_body_start.phtml" name="after_body_start_scripts_custom"/>
+        </referenceContainer>
+        
+        
+        <referenceContainer name="main.content.fullwidth">
+<!--            <referenceBlock name="catalog.leftnav" remove="true" />-->
+        </referenceContainer>
+        
+        
+<!--        <move element="checkout.cart.coupon" destination="cart.summary" before="-"/>-->
+        <move element="checkout.cart.coupon" destination="checkout.cart.form.before" before="-"/>
+
+        <referenceBlock name="customer-account-navigation-newsletter-subscriptions-link" remove="true"/>
+        <referenceBlock name="customer-account-navigation-downloadable-products-link" remove="true"/>
+        <referenceBlock name="customer-account-navigation-account-edit-link" remove="true"/>
+        
+        <move element="customer.wishlist.item.review" destination="customer.wishlist.items" after="customer.wishlist.item.inner"/>
+
+        
+<!--        <move element="bundle.summary" destination="product.info.main" after="-" />-->
+        
+        <move element="bundle.options.container" destination="product.info.main" after="inclusive_text" />
+        <move element="product.info.addtocart.bundle" destination="bundle.summary" after="-" />
+        <move element="view.addto.wishlist" destination="product.info.addtocart.additional" after="-" />
+        <!--
+        <move element="product.info.options.wrapper" destination="product.info.main" after="inclusive_text" />
+        <move element="bundle.summary" destination="product.info.main" after="inclusive_text" />
+        <move element="bundle.product.options.wrapper" destination="product.info.main" before="bundle.summary" />-->
+        <referenceContainer name="before.body.end">
+            <block class="Magento\Framework\View\Element\Template" name="spin" template="Magento_Theme::html/header/spin_wheel.phtml" />
+        </referenceContainer>
+        
+    </body>
+</page>

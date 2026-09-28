@@ -1,0 +1,10 @@
+hello
+<?php 
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+ $_product = $objectManager->create('\Magento\Catalog\Model\Product');
+       $allTiers     = $_product->getTierPrice();
+                        $checktiers   = array_values($allTiers);
+                        $tierPrices   = json_encode($checktiers);
+                       echo $tierPrices;
+
+?>

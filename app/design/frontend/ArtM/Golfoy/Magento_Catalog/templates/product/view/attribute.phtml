@@ -1,0 +1,104 @@
+<style>
+.youtbe_video.desktop_images iframe
+ {
+    max-width: 100%;
+    height: auto;
+}
+.product-info-main video {
+    display: none;
+}
+</style>
+<?php
+$_helper = $this->helper(\Magento\Catalog\Helper\Output::class);
+$_product = $block->getProduct();
+
+if (!$_product instanceof \Magento\Catalog\Model\Product) {
+    return;
+}
+
+$_call = $block->getAtCall();
+$_code = $block->getAtCode(); // description / short_description
+$_className = $block->getCssClass();
+$_attributeAddAttribute = $block->getAddAttribute();
+
+$customDesc = trim((string) $_product->getData('image_desktop_description'));
+
+if ($_code == 'description' && $customDesc != ''):
+?>
+
+    <!-- Custom Long Description -->
+    <div class="col-md-12 des float-right">
+
+        <?= /* @noEscape */ $_product->getData('image_desktop_description'); ?>
+        <?= /* @noEscape */ $_product->getData('image_mobile_description'); ?>
+
+    </div>
+
+<?php else: ?>
+
+    <!-- Default Output (Short Description + Normal Description) -->
+    <?php
+    if ($_code == 'short_description') {
+        $_value = $_helper->productAttribute(
+            $_product,
+            $_product->getShortDescription(),
+            'short_description'
+        );
+    } else {
+        ?>
+            <!-- Product Video -->
+            <?php if ($_product->getVideo() && $_product->getData('video') != ''): ?>
+                <?php
+                    $vsrc = $block->getBaseUrl() . 'media/product_videos/' . $_product->getVideo();
+                ?>
+                <video style="width:100%;height:auto;" playsinline autoplay loop muted>
+                    <source src="<?= $vsrc ?>" type="video/mp4"/>
+                </video>
+            <?php endif; ?>
+        <?php
+        $_value = $_helper->productAttribute(
+            $_product,
+            $_product->getDescription(),
+            'description'
+        );
+    }
+    ?>
+
+    <?php if ($_value): ?>
+        <div class="product attribute <?= $block->escapeHtmlAttr($_className) ?>">
+            <div class="value">
+                <?= /* @noEscape */ $_value ?>
+            </div>
+        </div>
+    <?php endif; ?>
+
+<?php endif; ?>
+
+<script>
+    require(['jquery'], function($) {
+        $(document).ready(function() {
+            
+            var windowWidth = $(window).width();
+            function displayHiddenImages() {
+                
+                if (windowWidth > 768) {
+                    $(".mobile_images").attr("src", "");
+                    $(".desktop_images").each(function () {
+                        $(this).attr("src", $(this).attr("data-src"));
+                    });
+                } else {
+                    $(".desktop_images").attr("src", "");
+                    $(".mobile_images").each(function () {
+                        $(this).attr("src", $(this).attr("data-src"));
+                    });
+                }
+            }
+            displayHiddenImages();
+            
+            // $(window).scroll(function() {
+            //     displayHiddenImages();
+            // });
+            
+        });
+    });
+</script>

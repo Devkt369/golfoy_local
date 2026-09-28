@@ -1,0 +1,107 @@
+<?php
+/**
+ * @var \ArtM\InventoryPlanner\Block\Adminhtml\Sync $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$startDateValue = $block->getSelectedStartDateValue();
+$startDateSelected = $block->getSelectedStartDate() !== null;
+$rows = $block->getReportRows();
+$syncStats = $block->getSyncStats();
+?>
+<div class="artm-inventory-planner">
+    <div class="artm-page-header">
+        <h2><?= $escaper->escapeHtml(__('Sync Data')) ?></h2>
+        <p><?= $escaper->escapeHtml(__('Manually (re)calculate weekly qty sold per SKU from a chosen start date through today.')) ?></p>
+    </div>
+
+    <div class="artm-card">
+        <form method="get" action="<?= $escaper->escapeUrl($block->getFormActionUrl()) ?>" class="artm-filter-form">
+            <div class="artm-filter-field">
+                <label for="artm_start_date"><?= $escaper->escapeHtml(__('Start Date')) ?></label>
+                <input type="text"
+                       id="artm_start_date"
+                       name="start_date"
+                       class="input-text admin__control-text"
+                       value="<?= $escaper->escapeHtmlAttr($startDateValue) ?>"
+                       data-mage-init='{"calendar":{"dateFormat":"yy-mm-dd"}}'
+                       autocomplete="off"/>
+            </div>
+            <div class="artm-filter-field artm-filter-submit">
+                <button type="submit" class="action-primary scalable"><?= $escaper->escapeHtml(__('Calculate')) ?></button>
+            </div>
+        </form>
+
+        <?php if (!$startDateSelected): ?>
+            <div class="message message-notice">
+                <?= $escaper->escapeHtml(__('Select a start date and click Calculate to generate the report.')) ?>
+            </div>
+        <?php elseif (!$rows): ?>
+            <div class="message message-notice">
+                <?= $escaper->escapeHtml(__('No sales found from the selected start date through today.')) ?>
+            </div>
+        <?php elseif ($syncStats !== null): ?>
+            <div class="artm-sync-report">
+                <h4 class="artm-sync-report-title"><?= $escaper->escapeHtml(__('Sync Report')) ?></h4>
+                <p class="artm-sync-report-range">
+                    <?= $escaper->escapeHtml(__('Current syncing started from')) ?>
+                    <strong>#<?= (int) $syncStats['from_order_id'] ?></strong> (<?= $escaper->escapeHtml((string) $syncStats['from_order_date']) ?>)
+                    <?= $escaper->escapeHtml(__('to')) ?>
+                    <strong>#<?= (int) $syncStats['to_order_id'] ?></strong> (<?= $escaper->escapeHtml((string) $syncStats['to_order_date']) ?>).
+                </p>
+                <div class="artm-stat-grid">
+                    <div class="artm-stat-tile">
+                        <span class="artm-stat-label"><?= $escaper->escapeHtml(__('Last Order Id Synced')) ?></span>
+                        <span class="artm-stat-value">#<?= (int) $syncStats['to_order_id'] ?></span>
+                    </div>
+                    <div class="artm-stat-tile">
+                        <span class="artm-stat-label"><?= $escaper->escapeHtml(__('Total Scanned Orders')) ?></span>
+                        <span class="artm-stat-value"><?= (int) $syncStats['total_scanned_orders'] ?></span>
+                    </div>
+                    <div class="artm-stat-tile">
+                        <span class="artm-stat-label"><?= $escaper->escapeHtml(__('Total Synced Orders')) ?></span>
+                        <span class="artm-stat-value"><?= (int) $syncStats['total_synced_orders'] ?></span>
+                    </div>
+                    <div class="artm-stat-tile">
+                        <span class="artm-stat-label"><?= $escaper->escapeHtml(__('Total Item Ids')) ?></span>
+                        <span class="artm-stat-value"><?= (int) $syncStats['total_item_ids'] ?></span>
+                    </div>
+                    <div class="artm-stat-tile">
+                        <span class="artm-stat-label"><?= $escaper->escapeHtml(__('Total Unique SKUs')) ?></span>
+                        <span class="artm-stat-value"><?= (int) $syncStats['total_unique_skus'] ?></span>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <?php if ($rows): ?>
+        <div class="artm-table-card">
+            <div class="artm-table-wrapper">
+                <table class="artm-report-table data-grid">
+                    <thead>
+                        <tr>
+                            <th><?= $escaper->escapeHtml(__('Product ID')) ?></th>
+                            <th><?= $escaper->escapeHtml(__('SKU')) ?></th>
+                            <th><?= $escaper->escapeHtml(__('Week')) ?></th>
+                            <th><?= $escaper->escapeHtml(__('From Date')) ?></th>
+                            <th><?= $escaper->escapeHtml(__('To Date')) ?></th>
+                            <th><?= $escaper->escapeHtml(__('Qty Sold')) ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($rows as $row): ?>
+                            <tr>
+                                <td><?= (int) $row['product_id'] ?></td>
+                                <td><?= $escaper->escapeHtml($row['sku']) ?></td>
+                                <td><?= $escaper->escapeHtml($row['week_label']) ?></td>
+                                <td><?= $escaper->escapeHtml($row['from_date']) ?></td>
+                                <td><?= $escaper->escapeHtml($row['to_date']) ?></td>
+                                <td><?= $escaper->escapeHtml((string) $row['qty_sold']) ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>

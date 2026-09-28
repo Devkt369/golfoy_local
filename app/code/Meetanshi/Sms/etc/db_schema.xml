@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="giftvoucher" resource="default">
+        <column xsi:type="boolean" name="expiry_reminder" nullable="false" default="false" comment="Send Sms Expiry Reminder"/>
+    </table>
+    
+    <table name="artm_sms_queue" resource="default" engine="innodb" comment="SMS Queue Table">
+        <column xsi:type="int" name="entity_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="varchar" name="mobile_number" nullable="false" length="20" comment="Mobile Number"/>
+        <column xsi:type="text" name="message_payload" nullable="false" comment="SMS Message Payload"/>
+        <column xsi:type="varchar" name="observer_name" nullable="true" length="255" comment="Observer Name"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="20" default="pending" comment="Status (pending, sent, failed)"/>
+        <column xsi:type="int" name="attempts" nullable="false" unsigned="true" default="0" comment="Number of sending attempts"/>
+        <column xsi:type="text" name="error_message" nullable="true" comment="Error message if failed"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+        <column xsi:type="timestamp" name="scheduled_at" nullable="true" comment="Scheduled Send Time"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <index referenceId="ARTM_SMS_QUEUE_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+        <index referenceId="ARTM_SMS_QUEUE_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+</schema>

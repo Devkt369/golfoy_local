@@ -1,0 +1,244 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$loginCustomerId = $this->helper('ArtM\TradeIn\Helper\Data')->getLoginCustomerId();
+$block = $this->getLayout()->createBlock(\ArtM\TradeIn\Block\Adminhtml\Tradeform\Tradeform::class);
+$data = array();
+$tradeInData = $block->getTradeInData(1, 10000, $loginCustomerId, $data);
+?>
+
+<style>
+    .tradein-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 25px;
+        padding: 30px;
+        background: #f4f6f8;
+        font-family: "Segoe UI", sans-serif;
+    }
+
+    .thank_you_message_tradein .continue_button {
+        border-top: 0px;
+
+    }
+
+    .thank_you_message_tradein .col-md-12.card_feedback_row hr {
+        display: none;
+    }
+
+    .trade-card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        position: relative;
+        transition: transform 0.2s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .trade-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .slider-wrapper {
+        position: relative;
+        width: 100%;
+        height: 200px;
+        overflow: hidden;
+    }
+
+    .slider-wrapper img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        /* display: none; */
+        transition: opacity 0.5s ease-in-out;
+        border-bottom: 1px solid #eee;
+    }
+
+    .slider-wrapper img.active {
+        display: block !important;
+    }
+
+    .slider-controls {
+        position: absolute;
+        top: 50%;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        transform: translateY(-50%);
+        padding: 0 10px;
+    }
+
+    .slider-controls button {
+        background: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        border: none;
+        padding: 6px 12px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 4px;
+        z-index: 10;
+    }
+
+    .card-content {
+        padding: 18px;
+    }
+
+    .card-title {
+        font-size: 17px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .card-meta {
+        font-size: 14px;
+        color: #444;
+        margin-bottom: 6px;
+    }
+
+    .card-meta strong {
+        display: inline-block;
+        width: 100px;
+        color: #222;
+    }
+
+    .status-badge {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: capitalize;
+        color: #fff;
+    }
+
+    .status-badge {
+        z-index: 9;
+    }
+
+    .status-pending {
+        background-color: #f0ad4e;
+    }
+
+    .status-posted {
+        background-color: #007bff;
+    }
+
+    .status-reviewing {
+        background-color: #17a2b8;
+    }
+
+    .status-answered {
+        background-color: #28a745;
+    }
+
+    .status-rejected {
+        background-color: #dc3545;
+    }
+</style>
+
+<div class="tradein-container">
+    <?php if ($tradeInData->getData()) : ?>
+        <?php foreach ($tradeInData as $index => $item) : ?>
+            <?php
+            $imageNames = $item->getImages();
+            $imageUrls = array_filter(array_map('trim', explode(',', $imageNames)));
+            $status = ucfirst(strtolower($item->getStatus()));
+            $statusClass = 'status-' . strtolower($status);
+            $sliderId = "slider_" . $index;
+            $i = 0;
+            ?>
+            <div class="trade-card">
+                <div class="status-badge <?php echo $statusClass; ?>"><?php echo $status; ?></div>
+
+                <div class="slider-wrapper" id="<?php echo $sliderId; ?>">
+                    <?php if (!empty($imageUrls)): ?>
+                        <?php foreach ($imageUrls as $i => $imageUrl): ?>
+                            <img class="<?php echo $i === 1 ? 'active' : ''; ?>" src="<?php echo $this->getBaseUrl() . 'pub/media/review_images/' . $imageUrl; ?>" alt="Trade Image">
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <img class="active" src="https://via.placeholder.com/300x180?text=No+Image" alt="No Image">
+                    <?php endif; ?>
+
+                    <?php if (count($imageUrls) > 1): ?>
+                        <div class="slider-controls">
+                            <button onclick="prevSlide('<?php echo $sliderId; ?>')">&#10094;</button>
+                            <button onclick="nextSlide('<?php echo $sliderId; ?>')">&#10095;</button>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="card-content">
+                    <div class="card-title">Trade ID: <?php echo $item->getAdId(); ?></div>
+                    <div class="card-meta"><strong>Equipment:</strong> <?php echo $item->getEquipment(); ?></div>
+                    <div class="card-meta"><strong>Brand:</strong> <?php echo $item->getBrand(); ?></div>
+                    <div class="card-meta"><strong>Model:</strong> <?php echo $item->getModel(); ?></div>
+                    <div class="card-meta"><strong>Specs:</strong> <?php echo $item->getSpecification(); ?></div>
+                    <div class="card-meta"><strong>Condition:</strong> <?php echo $item->getCondition(); ?></div>
+                    <div class="card-meta"><strong>Date:</strong>
+                        <?php
+                        $dateTime = new DateTime($item->getCreatedAt());
+                        echo $dateTime->format('F j, Y');
+                        ?>
+                    </div>
+
+                    <?php if ((int)$item->getShowCustomerExpectedPrice() === 1): ?>
+                        <div class="card-meta"><strong>Customer Expected Price:</strong> <?php echo "Rs.".htmlspecialchars($item->getCustomerExpectedPrice()); ?></div>
+                    <?php endif; ?>
+                    <?php if ((int)$item->getShowOurOfferedPrice() === 1): ?>
+                        <div class="card-meta"><strong>Our Offered Price:</strong> <?php echo "Rs.".htmlspecialchars($item->getOurOfferedPrice()); ?></div>
+                    <?php endif; ?>
+
+                    <?php
+                    $paymentCommentData = $item->getPaymentComment();
+                    $commentData = json_decode($paymentCommentData ?? '', true);
+
+                    if (is_array($commentData)) {
+                        if (!empty($commentData['payment_comment'])) {
+                            echo '<div class="card-meta"><strong>Comment:</strong> ' . htmlspecialchars($commentData['payment_comment']) . '</div>';
+                        }
+                        if (!empty($commentData['ref_id'])) {
+                            echo '<div class="card-meta"><strong>Ref ID:</strong> ' . htmlspecialchars($commentData['ref_id']) . '</div>';
+                        }
+                        if (!empty($commentData['amount'])) {
+                            echo '<div class="card-meta"><strong>Amount:</strong> ₹' . htmlspecialchars($commentData['amount']) . '</div>';
+                        }
+                    }
+                    ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    <?php else : ?>
+        <p>You haven't made any trade offers yet.</p>
+    <?php endif; ?>
+</div>
+
+<script>
+    function nextSlide(id) {
+        const container = document.getElementById(id);
+        const images = container.querySelectorAll('img');
+        images.forEach(img => {
+            img.style.display = 'none';
+        });
+        let current = Array.from(images).findIndex(img => img.classList.contains('active'));
+        images[current].classList.remove('active');
+        let next = (current + 1) % images.length;
+        images[next].classList.add('active');
+    }
+
+    function prevSlide(id) {
+        const container = document.getElementById(id);
+        const images = container.querySelectorAll('img');
+        images.forEach(img => {
+            img.style.display = 'none';
+        });
+        let current = Array.from(images).findIndex(img => img.classList.contains('active'));
+        images[current].classList.remove('active');
+        let prev = (current - 1 + images.length) % images.length;
+        images[prev].classList.add('active');
+    }
+</script>

@@ -1,0 +1,896 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+
+$storeConfig = $objectManager->get(\Magento\Framework\App\Config\ScopeConfigInterface::class);
+$reactConfigValue = $storeConfig->getValue('react_config/general/enable', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+
+$scriptStringForReact = <<<script
+        require(["jquery", "bootstrap"], function(jQuery) {
+            jQuery(document).ready(function() {
+            
+            jQuery(document).on("click", ".single_alpha_brands_menu .alpha_heading_menu , li.ui-menu-item.all-category , ul.submenu li.category-item.ui-menu-item a.ui-menu-item-wrapper", function(e) {
+                if (jQuery(window).width() < 768) {
+                    jQuery('span.action.nav-toggle').click();
+                }
+            });
+
+            function updateLinkMenu() {
+                jQuery("li.level-top.parent").each(function() {
+                    var firstAnchor = jQuery(this).find("a.ui-menu-item-wrapper").first();
+                    var relHrefValue = firstAnchor.attr("rel-href");
+                    jQuery(this).find("li.ui-menu-item.all-category a").attr("rel-href", relHrefValue);
+                    firstAnchor.removeAttr("rel-href");
+                });
+            }
+            if (jQuery(window).width() < 768) {
+                setInterval(updateLinkMenu, 2000);
+                if (jQuery(this).parent().hasClass("level-top parent ui-menu-item")) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+            
+            jQuery(document).on("click", "#gfmyBtn", function (e) {
+                jQuery("#gfmore").toggle("slow", function () {
+                // check paragraph once toggle effect is completed
+                if (jQuery("#gfmore").is(":visible")) {
+                    jQuery("#gfdots").hide();
+                    jQuery("#gfmyBtn").html("Read less");
+                } else {
+                    jQuery("#gfdots").show();
+                    jQuery("#gfmyBtn").html("Read more");
+                }
+                });
+            });
+            
+            jQuery(document).on("click", "div#narrow-by-list .filter-options-item .filter-options-title", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if(jQuery(this).parent('.filter-options-item').hasClass('active')){
+                    jQuery(this).parent('.filter-options-item').removeClass('active');
+                } else{
+                    jQuery(this).parent('.filter-options-item').addClass('active');
+                }
+            });
+    script;
+
+if ($reactConfigValue) {
+    $scriptStringForReact .= <<<script
+                jQuery(document).on("click", ".ui-menu-item-wrapper", function (e) {
+                    if (jQuery(window).width() < 768) {
+                        if (jQuery(this).parent().hasClass("level-top parent ui-menu-item")) {
+                            e.preventDefault();
+                            return; 
+                        }
+                    }
+                });
+                jQuery(document).on("click", "li.level-top.parent", function (e) {
+                    if (jQuery(window).width() < 768) { 
+                        if (jQuery(this).closest("#ui-id-1").length) { 
+                            e.preventDefault(); 
+                            return; 
+                        }
+                    }
+                });
+    script;
+} else {
+    $scriptStringForReact .= <<<script
+                jQuery(document).on("click", ".ui-menu-item-wrapper , li.ui-menu-item.all-category a", function (e) {
+                    var url = jQuery(this).attr("rel-href");
+                    if (url) {
+                        window.location.href = url;
+                    }
+                });
+    script;
+}
+
+$scriptStringForReact .= <<<script
+            });
+        });
+    script;
+
+?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $scriptStringForReact, false) ?>
+<div id="react-menu"></div>
+
+<script type="text/javascript">
+    /*
+    require(['react', 'react-dom'], function (React, ReactDOM) {
+        const { useState, useEffect } = React;
+
+        function CategoryMenu() {
+            const [categories, setCategories] = useState([]);
+
+            useEffect(() => {
+                let query = `
+                    {
+                    categories(filters: { parent_id: { eq: "2" } }) {
+                            items {
+                                id
+                                name
+                                url_path
+                                include_in_menu
+                                children {
+                                    id
+                                    name
+                                    url_path
+                                    include_in_menu
+                                    children {
+                                        id
+                                        name
+                                        url_path
+                                        include_in_menu
+                                    }
+                                }
+                            }
+                        }
+                    }
+                `;
+
+                fetch('/graphql', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    setCategories(data.data.categories.items);
+                })
+                .catch(error => console.error('Error fetching categories:', error));
+            }, []);
+
+            function handleCategoryClick(event, categoryUrl) {
+                event.preventDefault();
+                const mainContentDiv = document.querySelector("#maincontent");
+
+                if (!mainContentDiv) {
+                    // If not on category page, redirect first
+                    window.location.href = `/${categoryUrl}.html`;
+                } else {
+                    // If on category page, update content dynamically
+                    window.history.pushState({}, '', `/${categoryUrl}.html`);
+                    document.dispatchEvent(new Event('urlChange'));
+                }
+            }
+
+            function renderCategory(category) {
+                return category.include_in_menu == 1 &&
+                    React.createElement(
+                        'li',
+                        { key: category.id, className: 'level0 category-item level-top parent' },
+                        React.createElement(
+                            'a',
+                            {
+                                href: `/${category.url_path}.html`,
+                                className: 'level-top collapsed',
+                                onClick: (e) => handleCategoryClick(e, category.url_path)
+                            },
+                            React.createElement("span", { title: category.name }, category.name)
+                        ),
+                        category.children.length > 0 &&
+                        React.createElement(
+                            'ul',
+                            { className: 'level0 submenu' },
+                            category.children
+                                .filter(subcategory => subcategory.include_in_menu == 1) // ✅ Ensure submenu categories are also included
+                                .map(subcategory =>
+                                    React.createElement(
+                                        'li',
+                                        { key: subcategory.id, className: 'level1 category-item parent' },
+                                        React.createElement(
+                                            'a',
+                                            {
+                                                href: `/${subcategory.url_path}.html`,
+                                                onClick: (e) => handleCategoryClick(e, subcategory.url_path)
+                                            },
+                                            React.createElement("span", { title: subcategory.name }, subcategory.name)
+                                        ),
+                                        subcategory.children.length > 0 &&
+                                        React.createElement(
+                                            'ul',
+                                            { className: 'level1 submenu' },
+                                            subcategory.children
+                                                .filter(subSubcategory => subSubcategory.include_in_menu == 1) // ✅ Ensure 2nd-level submenu categories are included
+                                                .map(subSubcategory =>
+                                                    React.createElement(
+                                                        'li',
+                                                        { key: subSubcategory.id, className: 'level2 category-item' },
+                                                        React.createElement(
+                                                            'a',
+                                                            {
+                                                                href: `/${subSubcategory.url_path}.html`,
+                                                                className: 'menu-item',
+                                                                onClick: (e) => handleCategoryClick(e, subSubcategory.url_path)
+                                                            },
+                                                            React.createElement("span", { title: subSubcategory.name }, subSubcategory.name)
+                                                        )
+                                                    )
+                                                )
+                                        )
+                                    )
+                                )
+                        )
+                    );
+            }
+
+            
+
+            return React.createElement('ul', null , categories.map(renderCategory)) ;
+        }
+        
+        
+        
+        ReactDOM.render(
+            React.createElement(CategoryMenu),
+            document.querySelector('nav.navigation')
+        );
+    });*/
+
+    // Listen for URL changes and load category products dynamically
+    /*document.addEventListener("urlChange", function () {
+        const currentUrl = window.location.pathname;
+        fetch(currentUrl)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, "text/html");
+
+                const newMainContent = doc.querySelector(".catalog-category-view #maincontent");
+                if (newMainContent) {
+                    document.querySelector(".catalog-category-view #maincontent").innerHTML = newMainContent.innerHTML;
+                }
+            })
+            .catch(error => console.error("Error loading category content:", error));
+    });*/
+</script>
+
+<style>
+    div#narrow-by-list .filter-options-content label.swatch-option-label span.swatch-option.text {
+        margin-left: 0px !important;
+        text-align: left;
+    }
+
+    div#narrow-by-list .filter-options-title {
+        margin-bottom: 0px !important;
+    }
+
+    li.level0.category-item.level-top.parent:hover>ul {
+        display: inline-block;
+        margin-top: 40px;
+    }
+
+    .catalog-category-view .columns>div {
+        float: left;
+    }
+
+    .wizzy-search-results-rendered .catalog-category-view .columns>div {
+        float: none;
+    }
+
+    /*body.loading::after {
+      content: '';
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, 
+        #ff0000 25%, 
+        #ff4d4d 25%, 
+        #ff4d4d 50%, 
+        #ff0000 50%, 
+        #ff0000 75%, 
+        #ff4d4d 75%, 
+        #ff4d4d);
+      background-size: 200% 100%;
+      animation: shiftLine 2s linear infinite;
+      z-index: 1000;
+    }
+
+    @keyframes shiftLine {
+      0% { background-position: 0 0; }
+      100% { background-position: 100% 0; }
+    }*/
+    .loading .sections.nav-sections .section-items.nav-sections-items.mage-tabs-disabled {
+        background-color: #fff;
+        font-weight: bold;
+        position: relative;
+        border-bottom: 3px solid red;
+        animation: flicker 2s infinite alternate;
+    }
+
+    /* Flickering effect */
+    @keyframes flicker {
+        0% {
+            border-bottom-color: #e60023;
+        }
+
+        30% {
+            border-bottom-color: #e60023;
+        }
+
+        40% {
+            border-bottom-color: white;
+        }
+
+        50% {
+            border-bottom-color: #e60023;
+        }
+
+        70% {
+            border-bottom-color: #e60023;
+        }
+
+        80% {
+            border-bottom-color: white;
+        }
+
+        90% {
+            border-bottom-color: #e60023;
+        }
+
+        100% {
+            border-bottom-color: #e60023;
+        }
+    }
+
+    div#breadcrumbs {
+        width: 100%;
+    }
+
+    .image_flickering {
+        min-height: 260px;
+    }
+
+    .flickering {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite linear;
+        border-radius: 5px;
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: -200% 0;
+        }
+
+        100% {
+            background-position: 200% 0;
+        }
+    }
+
+    .border-line-up {
+
+        border-bottom: 1px solid #dedede;
+    }
+
+    .swatch-attribute-options>label>* {
+        float: left;
+        margin: 0px;
+    }
+
+    .swatch-attribute-options>label {
+        margin: 0px;
+    }
+
+    .category-description {
+        display: inline-block;
+        text-align: left;
+    }
+
+    div#subcategories_and_data {
+        width: 100%;
+    }
+
+    .flickering .image_prd_of_cat {
+        background: transparent;
+        opacity: 0;
+    }
+
+    div#layered-filter-block .block-actions.filter-actions>span:first-of-type {
+        border: 1px solid #e60023;
+        color: #e60023;
+        font-weight: 600;
+        padding: 5px 10px;
+        font-size: 11px;
+        text-decoration: none;
+    }
+
+    div#layered-navigation-state ol.items li.item {
+        margin-right: 10px;
+    }
+    @media only screen and (max-width: 768px) {
+        nav.navigation li.level0.category-item.level-top.parent:hover>ul {
+            margin-top: 0px;
+        }
+
+        div#layered-navigation-state li.item-label.brand-status-label {
+            display: none !important;
+        }
+
+        div#layered-navigation-state span.filter-label {
+            display: none;
+        }
+
+        div#layered-navigation-state ol.items li.item {
+            margin-right: 5px;
+            font-size: 12px !important;
+        }
+
+
+        .block-content.filter-content.full_filter_block {
+            z-index: 1111111 !important;
+        }
+
+        body.loading .whatsapp_bar_pc {
+            background-color: #fff;
+            font-weight: bold;
+            /* position: relative; */
+            border-bottom: 3px solid red;
+            animation: flicker 2s infinite alternate;
+        }
+
+        div#layered-navigation-state ol.items li.item {
+            font-weight: 500 !important;
+            font-size: 9px;
+        }
+
+        div#layered-navigation-state ol.items li.item-label {
+            display: inline-block;
+            width: 100%;
+            margin-bottom: 1px;
+            margin-top: 2px;
+        }
+
+        .block-content.filter-content div#cross_btn {
+            display: none !important;
+        }
+
+        .block-content.filter-content.full_filter_block div#cross_btn {
+            display: inline-block !important;
+            line-height: 15px;
+            margin-top: -22px;
+            bottom: 10px;
+        }
+
+        .block-content.filter-content.full_filter_block div#cross_btn:before {
+            content: "View Results";
+            font-size: 11px;
+            border: 1px solid #e60023;
+            background-color: #e60023;
+            color: white;
+            padding: 7px 10px 5px;
+            border-radius: 5px;
+            top: -11px !important;
+            position: relative;
+            right: -15px;
+        }
+
+        .sidebar.sidebar-main {
+            z-index: 999 !important;
+        }
+
+        .whatsapp_bar_pc {
+            z-index: 1;
+        }
+
+        .page-products .columns {
+            z-index: 0;
+        }
+
+        ol.product-items>li.product-item {
+            margin-bottom: 20px;
+        }
+
+        .filter-options-item:not(.active) .filter-options-content {
+            display: none !important;
+        }
+    }
+
+    @media only screen and (min-width: 768px) {
+
+        /*  
+        .columns .column.main , .columns .sidebar.sidebar-main{
+            float: left;
+        }
+        .columns .sidebar.sidebar-main{
+            width: 20%;
+        }
+        .columns .column.main{
+            width: 80%;
+        }
+    */
+        .sections.nav-sections nav.navigation {
+            position: relative;
+        }
+    }
+
+    div#layered-filter-block {
+        position: relative !important;
+    }
+
+    body.homepage main#maincontent {
+        padding: 0px;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    input.swatch-option-checkbox {
+        display: none;
+    }
+
+    .swatch-option-label span.swatch-option.text:before {
+        font: normal normal normal 14px / 1 FontAwesome;
+        content: "\f096";
+        margin-right: 8px;
+        font-size: 16px;
+        margin-top: 0px;
+        float: left;
+    }
+
+    label.swatch-option-label.active-filter span.swatch-option.text:before {
+        content: "\f046";
+
+    }
+
+    body.catalog-category-view .page-wrapper>.breadcrumbs {
+        display: none;
+    }
+
+    body.full_width main#maincontent {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    body:not(.page-layout-playersbag) div#main_category_image {
+        display: none;
+    }
+
+    .page-layout-playersbag main#maincontent .columns div#subcategories_and_data,
+    .page-layout-playersbag main#maincontent .columns div#breadcrumbs,
+    .page-layout-playersbag main#maincontent .columns>.column.main .toolbar.toolbar-products,
+    .page-layout-playersbag main#maincontent .columns .sidebar.sidebar-main {
+        display: none;
+    }
+
+    .page-layout-playersbag main#maincontent .columns>.column.main {
+        width: 100% !important;
+        padding: 15px !important;
+    }
+
+    .page-layout-playersbag main#maincontent {
+        padding: 0px !important;
+    }
+
+    .page-layout-playersbag .catalog-category-view li.item.product.product-item {
+        margin-left: 0.5% !important;
+        margin-right: 0.5% !important;
+    }
+
+    .sizerolldiv_container {
+        text-align: left;
+        padding-left: 10px;
+    }
+
+    .catalog-category-view .express_icon {
+        margin-top: 0px !important;
+        width: 100%;
+        text-align: left;
+    }
+
+    .catalog-category-view .product.details.product-item-details {
+        padding-bottom: 0px;
+    }
+
+    .page-layout-playersbag .products.wrapper.grid.products-grid {
+        width: 100%;
+        max-width: 1280px;
+        margin: auto !important;
+    }
+
+    .page-layout-playersbag .columns {
+        background-color: whitesmoke;
+    }
+
+    .page-layout-playersbag .product-image-photo.category_page_full_image.animation_div {
+        mix-blend-mode: initial !important;
+    }
+
+    .page-layout-playersbag .product-item-info {
+        border: 1px solid transparent;
+        border-radius: 38px;
+        box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+        background: white;
+    }
+
+    .page-layout-playersbag span.product-image-wrapper {
+        mix-blend-mode: initial !important;
+        border-radius: 38px;
+
+    }
+
+    .page-layout-playersbag .tags .tag {
+        margin-left: 2px;
+        margin-right: 16px;
+    }
+
+    .page-layout-playersbag span.product-image-container {
+        border-radius: 38px;
+    }
+
+    .page-layout-playersbag .product-item-info .brand_name {
+        font-size: 16px;
+    }
+
+    .page-layout-playersbag img.product-image-photo.category_page_full_image.animation_div {
+        border-radius: 38px;
+    }
+
+    .page-layout-playersbag .product.details.product-item-details {
+        padding: 0px 10px 10px 10px !important;
+        background: white;
+        border-radius: 0px 0px 38px 38px;
+    }
+
+    .filter-options-item.filter_color .swatch-option-label img {
+        margin-left: 0px !important;
+        border-radius: 5px !important;
+        height: 20px !important;
+        width: 20px !important;
+        border: none;
+    }
+
+    .filter-options-item.filter_color .swatch-option-label {
+        display: inline-block !important;
+        float: left;
+        margin: 8px;
+    }
+
+    label.swatch-option-label.active-filter img {
+        border: 1px solid #434343 !important;
+    }
+
+    .filter-options-item:not(.filter_color) label.swatch-option-label {
+        width: 100%;
+    }
+
+    /*body:not(.catalog-product-view) .breadcrumbs,
+    body:not(.catalog-category-view) .breadcrumbs {
+        display: none;
+    }*/
+    @media screen and (max-width: 480px) {
+        div#ajaxlist-reload-layered-navigation .block-content.filter-content.full_filter_block {
+            z-index: 11111111 !important;
+        }
+
+        .filter-active.catalog-category-view footer.page-footer {
+            z-index: -11;
+        }
+        .wizzy-search-results-rendered .page-wrapper {
+            min-height: auto;
+        }
+    }
+
+    .catalog-category-view .columns>.breadcrumbs {
+        display: none;
+    }
+    .block-actions.filter-actions span span,div#layered-navigation-state ol.items li.item a:after,.toolbar.toolbar-products ul.items.pages-items li.item {
+        cursor: pointer;
+    }
+    .category-view {
+        width : 100%;
+    }
+    div#choosen_sizes {
+        width: 100%;
+    }
+    .swatch_block img.swatch_img {
+        margin-left: 0px !important;
+        border-radius: 5px !important;
+        height: 20px !important;
+        width: 20px !important;
+    }
+    .swatch_block > .swatch{
+        display: inline;
+        margin-right: 5px;
+    }
+    .swatch_block > .swatch img {
+        margin-bottom: 5px;
+        cursor: pointer;
+        box-shadow: 0px 0px 3px -1px black;
+    }
+    .modaloverlay_size_outerbox {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .modaloverlay_size_innerbox {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        min-width: 300px;
+        max-width: 90%;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        position: relative;
+    }
+
+    .closebtn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 18px;
+        border: none;
+        background: none;
+        cursor: pointer;
+    }   
+    .category_top_block.flickering {
+        height: 70px;
+        margin-bottom: 20px;
+        margin-top: 20px;
+    }
+    .filter-options-item:not(.active) .filter-options-content {
+        height: 0px;
+        overflow: hidden;
+        margin: 0px !important;
+    }
+    #layered-filter-block.collapsible-filters .filter-options-item .filter-options-title:after{
+        cursor: pointer;
+    }
+    body.search-index-index.page-layout-1column.no-filter-active.wizzy-search-results-rendered .column.main {
+        min-height: auto;
+        padding-bottom: unset;
+    }
+
+    .loading-more {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        top: -200px;
+        position: relative;
+    }
+    
+    .loading-more span {
+        width: 4px;
+        height: 4px;
+        background-color: #000;
+        /* border-radius: 50%; */
+        display: inline-block;
+        animation: waveBlink 1.2s infinite;
+    }
+    
+    .loading-more span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+    
+    .loading-more span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+    .loading-more span:nth-child(4) {
+        animation-delay: 0.6s;
+    }
+    .loading-more span:nth-child(5) {
+        animation-delay: 0.8s;
+    }
+    
+    @keyframes waveBlink {
+        0% {
+            opacity: 0.2;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1.5);
+        }
+        100% {
+            opacity: 0.2;
+            transform: scale(1);
+        }
+    }
+    a.explore-brand.react-comp h5.explore-all-brand {
+        text-align: center;
+        color: #000000b5;
+    }
+    a.explore-brand.react-comp:hover{
+        text-decoration: none;
+    }
+</style>
+
+
+<!--
+
+on every click of website, check the type of page using graphql
+if new url is category then load content from category_page_products.phtml by making the ProductList function globally accessible,
+if it is cms page, then load content and paste it .
+else just do redirection
+
+call the same function on page load as well. but do not do redirection in else condition for this case
+
+-->
+
+
+<script>
+    window.addEventListener("popstate", () => {
+        const mainContent = document.querySelector("main#maincontent");
+        if (mainContent) {
+            mainContent.style.display = "block";
+        }
+    });
+</script>
+<script>
+    require(['jquery'], function($) {
+        $(document).ready(function($) {
+            
+          jQuery(document).on('click', '.swatch_img', function () {
+              var $swatch = jQuery(this);
+              var productImgUrl = $swatch.data('product_img_url');
+
+              if (!productImgUrl) return;
+
+              // Find the closest product block (li.item.product)
+              var $productItem = $swatch.closest('li.item.product');
+
+              // Find the main product image inside that block
+              var $mainImg = $productItem.find('.product-image-photo');
+
+              // Update the image src and alt attributes
+              if ($mainImg.length) {
+                $mainImg.attr('src', productImgUrl);
+                $mainImg.attr('alt', $swatch.attr('alt'));
+              }
+            });
+
+        });
+
+    });
+</script>
+<script>
+    require(["jquery", "bootstrap"], function (jQuery) {
+    jQuery(document).ready(function () {
+      setTimeout(function(){
+        var $sliderHtmlElements = jQuery(".slider_html_here");
+        if ($sliderHtmlElements.length) {
+          $sliderHtmlElements.each(function () {
+            var $this = jQuery(this);
+            var url = window.location.origin + "/common/productslider/slider";
+            var catId = $this.attr("param_catid");
+            var heading = $this.attr("param_heading");
+            var numPrds = $this.attr("param_numproducts");
+              jQuery.ajax({
+                url: url,
+                type: "POST",
+                dataType: "json",
+                data: { cat_id: catId, heading: heading, num_prds: numPrds },
+                success: function (response) {
+                  $this.html(response.output);
+                  $this
+                    .find(".product_content_product_slider_inside")
+                    .each(function () {
+                      var $productItems = jQuery(this).find(".product-items");
+                      var prdCount = $productItems.find("li").length;
+                      var widthPerSlide = $productItems.find("li").outerWidth();
+                      $productItems.width(widthPerSlide * prdCount);
+
+                      var windowWidth = jQuery(window).width();
+                      var slidesMoveOnClick = Math.floor(windowWidth / widthPerSlide);
+                      var scrollLeft = $productItems.scrollLeft();
+                      var totalWidthToMove = slidesMoveOnClick * prdCount;
+                    });
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                  console.log(textStatus, errorThrown);
+                },
+              });
+            
+          })
+        }
+      },3000);
+    });
+});
+</script>

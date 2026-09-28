@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+
+<!--    <event name="sales_order_save_after">-->
+<!--        <observer name="snapmint_prevent_order_email" instance="Snapcommerce\Snapmint\Observer\PreventOrderEmailObserver" />-->
+<!--    </event>-->
+<!--    -->
+<!--    <event name="checkout_onepage_controller_success_action">-->
+<!--        <observer name="snapmint_prevent_success_email" instance="Snapcommerce\Snapmint\Observer\PreventOrderEmailObserver" />-->
+<!--    </event>-->
+
+    <event name="sales_model_service_quote_submit_success">
+        <observer name="snapmint_quote_submit_success" instance="Snapcommerce\Snapmint\Observer\QuoteSubmitSuccessObserver" />
+    </event>
+
+    <event name="sales_order_save_after">
+        <observer name="snapmint_processingorder_emailsend" instance="Snapcommerce\Snapmint\Observer\OrderStatusChangeObserver" />
+    </event>
+
+    
+    <event name="sales_order_creditmemo_refund">
+        <observer name="snapcommerce_snapmint_refund_observer" instance="Snapcommerce\Snapmint\Observer\RefundObserver" />
+    </event>
+</config>

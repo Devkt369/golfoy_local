@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="catalog_product_save_after">
+        <observer name="artm_clear_graphql_cache_product" instance="ArtM\GraphqlCache\Observer\ClearGraphqlCache"/>
+    </event>
+    <event name="catalog_category_save_after">
+        <observer name="artm_clear_graphql_cache_category" instance="ArtM\GraphqlCache\Observer\ClearGraphqlCache"/>
+    </event>
+    <event name="inventory_source_items_save_after">
+        <observer name="artm_clear_graphql_cache_inventory" instance="ArtM\GraphqlCache\Observer\ClearGraphqlCache"/>
+    </event>
+    <event name="cataloginventory_stock_item_save_after">
+        <observer name="artm_clear_graphql_cache_stock" instance="ArtM\GraphqlCache\Observer\ClearGraphqlCache"/>
+    </event>
+    <event name="catalog_product_attribute_update_before">
+        <observer name="artm_clear_graphql_cache_attr" instance="ArtM\GraphqlCache\Observer\ClearGraphqlCache"/>
+    </event>
+</config>

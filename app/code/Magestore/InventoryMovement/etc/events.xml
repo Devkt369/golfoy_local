@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2017 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="inventory_movement_log">
+        <observer name="inventory_movement_log_observer" instance="Magestore\InventoryMovement\Observer\InventoryMovementLog"/>
+    </event>
+    <event name="inventory_movement_log_skip_default">
+        <observer name="inventory_movement_log_skip_default" instance="Magestore\InventoryMovement\Observer\InventoryMovementLogSkipDefault"/>
+    </event>
+    <event name="inventory_movement_log_disable_skip_log">
+        <observer name="inventory_movement_log_disable_skip_log" instance="Magestore\InventoryMovement\Observer\InventoryMovementLogDisableSkipLog"/>
+    </event>
+    <event name="pos_order_save_after">
+        <observer name="potential_error_order_notify_after_pos_order_save" instance="Magestore\InventoryMovement\Observer\NotifyUnsyncedPosOrder"/>
+    </event>
+</config>

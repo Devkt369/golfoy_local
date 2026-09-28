@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2020 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="webpos">
+            <group id="second_display" translate="label" sortOrder="10" type="text"
+                   showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Customer Display Screen</label>
+                <field id="second_display_image" translate="label" sortOrder="10" type="image"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Customer Display Image</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Image\Pdf</backend_model>
+                    <upload_dir config="system/filesystem/media" scope_info="1">second_display/image</upload_dir>
+                    <base_url type="media" scope_info="1">second_display/image</base_url>
+                    <comment>
+                        <![CDATA[Click to upload image in the POS Customer Screen.<br/>Supported file: jpeg, png. Recommend size is 1366*768 px]]></comment>
+                </field>
+                <field id="second_display_enable" translate="label" sortOrder="20" type="select"
+                       showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Enable Customer Screen</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

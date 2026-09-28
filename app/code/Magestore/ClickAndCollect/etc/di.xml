@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Magestore\ClickAndCollectApi\Api\Data\PackageInterface"
+                type="Magestore\ClickAndCollect\Model\Package"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\Data\PackageItemInterface"
+                type="Magestore\ClickAndCollect\Model\PackageItem"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\Data\PackageSearchResultsInterface"
+                type="Magestore\ClickAndCollect\Model\PackageSearchResults"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\PackageRepositoryInterface"
+                type="Magestore\ClickAndCollect\Model\PackageRepository"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\Data\PackageItemSearchResultsInterface"
+                type="Magestore\ClickAndCollect\Model\PackageItemSearchResults"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\PackageItemRepositoryInterface"
+                type="Magestore\ClickAndCollect\Model\PackageItemRepository"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\Data\ScheduleInterface" type="Magestore\ClickAndCollect\Model\Schedule"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\ScheduleRepositoryInterface" type="Magestore\ClickAndCollect\Model\ScheduleRepository"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\Data\ScheduleSearchResultsInterface" type="Magestore\ClickAndCollect\Model\ScheduleSearchResults"/>
+
+    <preference for="Magestore\ClickAndCollectApi\Api\Data\SpecialDayInterface" type="Magestore\ClickAndCollect\Model\SpecialDay"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\SpecialDayRepositoryInterface" type="Magestore\ClickAndCollect\Model\SpecialDayRepository"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\Data\SpecialDaySearchResultsInterface" type="Magestore\ClickAndCollect\Model\SpecialDaySearchResults"/>
+
+    <preference for="Magestore\ClickAndCollectApi\Api\Data\LocationSpecialDayLinkInterface"
+                type="Magestore\ClickAndCollect\Model\LocationSpecialDayLink"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\Data\LocationSpecialDayLinkSearchResultsInterface"
+                type="Magestore\ClickAndCollect\Model\LocationSpecialDayLinkSearchResults"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\GetLocationSpecialDayLinksInterface"
+                type="Magestore\ClickAndCollect\Model\LocationSpecialDayLink\GetLocationSpecialDayLinks"/>
+
+    <preference for="Magestore\ClickAndCollectApi\Api\GetDistanceInterface" type="Magestore\ClickAndCollect\Model\DistanceProvider\GoogleMap\GetDistance"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\GetLocationsOrderedByDistanceInterface" type="Magestore\ClickAndCollect\Model\GetLocationsOrderedByDistance"/>
+
+    <preference for="Magestore\ClickAndCollectApi\Api\DataProvider\GetScheduleByIdInterface"
+                type="Magestore\ClickAndCollect\Model\DataProvider\GetScheduleById"/>
+
+    <preference for="Magestore\ClickAndCollectApi\Api\DataProvider\CheckIsClickAndCollectOrderInterface"
+                type="Magestore\ClickAndCollect\Model\DataProvider\IsClickAndCollectOrder"/>
+
+    <preference for="Magestore\ClickAndCollectApi\Api\GetLocationsByProductSkuInterface"
+                type="Magestore\ClickAndCollect\Model\GetLocationsByProductSku"/>
+
+    <preference for="Magestore\ClickAndCollectApi\Api\GetLocationScheduleInterface"
+                type="Magestore\ClickAndCollect\Model\Location\GetLocationSchedule"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\GetLocationSpecialDaysInterface"
+                type="Magestore\ClickAndCollect\Model\Location\GetLocationSpecialDays"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\GetStoreScheduleOnDateInterface"
+                type="Magestore\ClickAndCollect\Model\Location\GetStoreScheduleOnDate"/>
+
+    <preference for="Magestore\ClickAndCollect\Model\Order\OrderPickupStatusResolverInterface" type="Magestore\ClickAndCollect\Model\Order\OrderPickupStatusResolver"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\Order\IsEnoughQtyInStockInterface"
+                type="Magestore\ClickAndCollect\Model\Order\IsEnoughQtyInStock"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\Package\SavePackageInterface" type="Magestore\ClickAndCollect\Model\Package\SavePackage"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\Package\CancelPackageInterface" type="Magestore\ClickAndCollect\Model\Package\CancelPackage"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\Package\DeliverPackageInterface" type="Magestore\ClickAndCollect\Model\Package\DeliverPackage"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\Package\ValidatePackageInterface" type="Magestore\ClickAndCollect\Model\Package\ValidatePackage"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\Package\AddItemsToNewPackageInterface" type="Magestore\ClickAndCollect\Model\Package\AddItemsToNewPackage"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\Package\ProcessSourceInventoryFromPackageInterface" type="Magestore\ClickAndCollect\Model\Package\ProcessSourceInventoryFromPackage"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\Package\GetCurrentLocationIdInterface" type="Magestore\ClickAndCollect\Model\Package\GetCurrentLocationId"/>
+    <preference for="Magestore\ClickAndCollectApi\Api\Order\GetTotalClickAndCollectOrderByLocationStatusInterface" type="Magestore\ClickAndCollect\Model\Order\GetTotalClickAndCollectOrderByLocationStatus"/>
+
+    <preference for="Magestore\ClickAndCollectApi\Api\Order\GetTotalDeliveredThisWeekByLocationInterface"
+                type="Magestore\ClickAndCollect\Model\Order\GetTotalDeliveredThisWeekByLocation"/>
+
+    <preference for="Magestore\ClickAndCollectApi\Api\GetPickUpInformationInterface"
+                type="Magestore\ClickAndCollect\Model\GetPickUpInformation"/>
+
+    <preference for="Magestore\ClickAndCollectApi\Api\GoogleMap\GetMapImageFromPositionInterface"
+                type="Magestore\ClickAndCollect\Model\GoogleMap\GetMapImageFromPosition"/>
+
+    <preference for="Magestore\ClickAndCollectApi\Api\Order\GetTotalNeedToPackInterface"
+                type="Magestore\ClickAndCollect\Model\Order\GetTotalNeedToPack"/>
+
+    <!-- Stock movement -->
+    <type name="Magestore\InventoryMovementApi\Model\ActionTypes">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="clickandcollect" xsi:type="string">clickandcollect</item>
+            </argument>
+        </arguments>
+    </type>
+    <!-- End: Stock movement -->
+
+    <preference for="Magestore\ClickAndCollectApi\Api\DataProvider\GetSpecialDayByIdInterface"
+                type="Magestore\ClickAndCollect\Model\DataProvider\GetSpecialDayById"/>
+
+    <type name="Magento\Quote\Model\Quote\Address">
+        <plugin name="manage_assignment_of_click_and_collect_to_quote_address" type="Magestore\ClickAndCollect\Plugin\Quote\Address\ManageAssignmentOfPickupLocationToQuoteAddress" sortOrder="20" />
+    </type>
+
+    <type name="Magento\Quote\Model\ResourceModel\Quote\Address\Collection">
+        <plugin name="add_click_collect_to_quote_address" type="Magestore\ClickAndCollect\Plugin\Quote\AddressCollection\GetPickupLocationInformationPlugin" sortOrder="20" />
+    </type>
+
+    <type name="Magento\Quote\Model\ResourceModel\Quote\Address">
+        <plugin name="load_click_collect_for_quote_address" type="Magestore\ClickAndCollect\Plugin\Quote\Address\LoadPickupLocationForQuoteAddress" sortOrder="30" />
+    </type>
+
+    <type name="Magento\Sales\Api\OrderRepositoryInterface">
+        <plugin name="save_pickup_location_for_order" type="Magestore\ClickAndCollect\Plugin\Sales\Order\SaveClickCollectInformationForOrderPlugin"/>
+    </type>
+
+    <type name="Magento\Quote\Api\BillingAddressManagementInterface">
+        <plugin name="do_not_use_billing_address_for_shipping_for_click_collect_quote" type="Magestore\ClickAndCollect\Plugin\Quote\DoNotUseBillingAddressForShipping" sortOrder="20" />
+    </type>
+    <type name="Magento\Quote\Model\Quote\Address\ToOrder">
+        <plugin name="click_collect_set_pickup_location_to_order_during_address_conversion" type="Magestore\ClickAndCollect\Plugin\Quote\SetPickupInformationToOrder" sortOrder="20" />
+    </type>
+
+    <type name="Magestore\Webpos\Model\ResourceModel\Location\Location">
+        <plugin name="load_click_collect_for_location_webpos" type="Magestore\ClickAndCollect\Plugin\Location\LoadDataForLocationWebpos" sortOrder="30" />
+    </type>
+
+    <!-- Plugin search order webpos -->
+    <type name="Magestore\Webpos\Model\Sales\OrderSearchRepository">
+        <plugin name="filter_click_and_collect_order_in_webpos_order_search" type="Magestore\ClickAndCollect\Plugin\Webpos\FilterClickAndCollectOrderInSearchOrderPlugin"/>
+    </type>
+    <type name="Magestore\Webpos\Api\Data\Checkout\OrderInterface">
+        <plugin name="load_click_collect_data_for_order_click_and_collect" type="Magestore\ClickAndCollect\Plugin\Sales\Order\LoadDataForOrderClickAndCollect" sortOrder="10" />
+    </type>
+
+    <preference for="Magestore\ClickAndCollectApi\Api\DataProvider\GetStockIdsLinkedToSameSourcesWithStockInterface"
+                type="Magestore\ClickAndCollect\Model\DataProvider\GetStockIdsLinkedToSameSourcesWithStock"/>
+
+    <preference for="Magestore\ClickAndCollectApi\Api\SortLocationsAlgorithmByDistanceInterface"
+                type="Magestore\ClickAndCollect\Model\SortLocationsAlgorithmByDistance"/>
+</config>

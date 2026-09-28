@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="webpos_location_storepickup_store_map" resource="default" engine="innodb" comment="Webpos Location Store Pickup Store Map">
+        <column xsi:type="int" name="storepickup_id" unsigned="true" nullable="false" comment="Store Pickup Id"/>
+        <column xsi:type="varchar" name="source_code" length="255" nullable="true" comment="Source Code"/>
+        <column xsi:type="int" name="stock_id" unsigned="true" nullable="true" comment="Stock Id"/>
+        <column xsi:type="int" name="location_id" unsigned="true" nullable="true" comment="Location Id"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="storepickup_id"/>
+        </constraint>
+    </table>
+    <table name="clickandcollect_migrate_log" resource="default" engine="innodb" comment="Click And Collect Migrate Log">
+        <column xsi:type="int" name="log_id" identity="true" unsigned="true" nullable="false" comment="Log Id"/>
+        <column xsi:type="timestamp" name="logged_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Logged At"/>
+        <column xsi:type="text" name="message" nullable="false" comment="Message"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="log_id"/>
+        </constraint>
+    </table>
+    <table name="sales_order" resource="sales" engine="innodb" comment="Sales Flat Order">
+        <column xsi:type="varchar" name="shipping_description_backup" nullable="true" length="1024"
+                comment="Shipping Description Backup"/>
+    </table>
+</schema>

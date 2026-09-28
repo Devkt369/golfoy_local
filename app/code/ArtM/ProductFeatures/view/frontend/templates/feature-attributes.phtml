@@ -1,0 +1,216 @@
+<style>
+  .features-attr-div{
+    width:100%; clear:both; margin:20px auto; text-align:center;float:left;border:none;
+}
+.feature-attr-item{
+    text-align: center !important;
+    padding: 0px;
+    margin-bottom: 0px;
+    min-height: 150px;
+    width: 150px;
+    float: none;
+    display: inline-block;
+}
+.feature-attr-item > center {
+    border: 0px solid #eaeaea;
+    padding: 8px 10px 15px 10px;
+    border-radius: 5px;
+}
+.feature-attr-item > center > .label {
+    display: inline-block;
+    width: 100%;
+    padding-bottom: 6px;
+}
+.feature-attr-item img{width:50px !important; height:auto;margin:10px auto;}
+    .feature-attr-item .label{
+        font-weight: 600;
+        font-size: 12px;
+    }
+.featureinfoicon {
+    position: relative;
+    bottom: 3px;
+    left: 0px;
+    background: transparent !important;
+    padding: 0;
+    max-width: 16px;
+    display: inline-block;
+    /* border: 1px solid red !important; */
+    line-height: 0px;
+}
+.feature-attr-item >center> img {
+    max-width: 60px;
+    min-height: auto !important;
+}
+.featureinfoicon + .tooltiptexts {
+    visibility: hidden;
+    width: 300px;
+    max-width: 300px;
+    background-color: #f7f7f7;
+    color: black;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 111;
+    bottom: 50%;
+    right: -150px;
+    font-weight: 500;
+    font-size: 11px;
+    border: 1px solid #d7d7d7;
+}
+    .feature-attr-item img {
+    min-height: 100px !important;
+    width: auto !important;
+}
+    @media(max-width:768px){
+        
+        .featureinfoicon + .tooltiptexts {
+            width: 250px;
+            right: -50px;
+            
+        }
+    }
+.featureinfoicon:hover + .tooltiptexts {
+  visibility: visible;
+}
+span.glyphicon.glyphicon-info-sign.ballicon::before {
+    font-family: 'icons-blank-theme';
+    content: 'i';
+    font-size: 9px;
+    background: #444;
+    color: #fff;
+    border-radius: 50%;
+    letter-spacing: 0px;
+    padding: 1px 5px 3px;
+   
+}
+@media only screen and (max-width:768px){
+    span.glyphicon.glyphicon-info-sign.ballicon::before {
+        padding: 1px 1px 2px;
+    }
+} 
+.feature-attr-item span.text {
+    font-size: 11px;
+    background-color: #f6f6f6;
+    border: 1px solid #e6e6e6;
+    padding: 3px 5px 2px;
+    display: inline-block;
+    border-radius: 5px;
+    font-weight: 500;
+}
+span.tooltiptexts {
+    white-space: break-spaces;
+}
+.feature-attr-heading {
+    text-align: left !important;
+}
+/* text */
+.features_title p {
+    font-weight: 700;
+    font-size: 17px;
+}
+</style>
+<script type="text/javascript">
+    require(['jquery'],function(jQuery){
+        jQuery(document).ready(function() {
+            setCustomTooltipPosition();
+                jQuery('span.tooltiptexts').attr('scrolling_c' , 'no' );
+            jQuery(window).scroll(function(){
+                setCustomTooltipPosition();
+                jQuery('span.tooltiptexts').attr('scrolling_c' , 'yes' );
+                
+            });
+            function setCustomTooltipPosition(){
+                jQuery('span.tooltiptexts').each(function(){
+                    var left_scroll = jQuery(this).offset().left;
+                    jQuery(this).attr('left' , left_scroll);
+                    
+                    var window_width = jQuery(window).width();
+                    var tooltip_width = jQuery(this).width();
+                    
+                    jQuery(this).attr('ats' , left_scroll +" - "+ window_width + " - " + tooltip_width);
+                    
+                    
+                    if( (window_width - tooltip_width) < left_scroll){
+                        jQuery(this).attr('on_right' , 'yes' + (window_width - tooltip_width) < left_scroll);
+                        var should_left_step1 = window_width - left_scroll;
+                        var should_left_step2 = tooltip_width - should_left_step1;
+                        
+//                        jQuery(this).css('left' , (left_scroll - should_left_step2));
+                        
+                        
+                        jQuery(this).css('right' , 0);
+                    }else{
+                        jQuery(this).attr('on_right' , 'no' + (window_width - tooltip_width) < left_scroll);
+                    }
+                    if( left_scroll < 10){
+                        jQuery(this).css('left' , 0);
+                        
+                    }
+                    
+                });
+            }
+        });
+    });
+</script>
+
+
+
+<?php $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$helper = $objectManager->get('\ArtM\ProductFeatures\Helper\Data');
+$viewModel = $block->getData('viewModel');
+$product = $viewModel->getProduct();
+$attrs = $viewModel->getFeaturedAttr();
+
+$blockhtml= $this->getLayout()
+->createBlock('Magento\Cms\Block\Block')
+->setBlockId('product_feature_data')
+->toHtml();
+
+$multiselectarray = [];
+$selectarray = [];
+$boolarray = [];
+foreach ($attrs as $attr){
+    $attr = trim($attr);
+    if($attr !='' && $product->hasData($attr)){
+        $attrdata = $viewModel->getAttrdata($attr);
+        $type = $attrdata['type'];
+        $label = $attrdata['label'];
+        $selOption = $product->getAttributeText($attr);
+        if($selOption != '' ){
+            $tmparray = ['label' => $label, 'attr' => $attr, 'selOption' => $selOption, 'blockhtml' => $blockhtml];
+            if($type == 'multiselect'){           
+                $multiselectarray[] = $tmparray;
+            }elseif($type == 'boolean'){
+                $boolarray[] =  $tmparray;
+            }else{
+                $selectarray[] =  $tmparray;
+            }
+        }
+    }
+}
+echo '<div class="features-attr-div row col-lg-12 col-md-12 col-sm-12 col-xs-12">';
+if (count($selectarray) > 1 || count($boolarray) > 1 || count($multiselectarray) > 1) {
+    echo '<div class="features_title"><p>THE FINER DETAILS</p></div>';
+} else {
+    echo '<div class="features_title" style="display: none;"><p>THE FINER DETAILS</p></div>';
+}
+
+foreach ($selectarray as $V) {
+    echo '<div class="feature-attr-item col-lg-2 col-md-2 col-sm-4 col-xs-6">';
+    echo $helper->getSelecthtml($V['label'], $V['attr'], $V['selOption'], $V['blockhtml']);
+    echo "</div>";
+}
+foreach ($boolarray as $V) {
+    if (strtolower($V['selOption']) != 'no') {
+        echo '<div class="feature-attr-item col-lg-2 col-md-2 col-sm-4 col-xs-6">';
+        echo $helper->getBoolhtml($V['label'], $V['attr'], $V['selOption'], $V['blockhtml']);
+        echo "</div>";
+    }
+}
+foreach ($multiselectarray as $V) {
+    echo $helper->getMultiselecthtml($V['label'], $V['attr'], $V['selOption'], $V['blockhtml']);
+}
+
+echo "</div>";
+

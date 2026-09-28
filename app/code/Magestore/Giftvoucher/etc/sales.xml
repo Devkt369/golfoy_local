@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2017 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Sales:etc/sales.xsd">
+    <section name="quote">
+        <group name="totals">
+            <item name="giftvoucher" instance="Magestore\Giftvoucher\Model\Total\Quote\Giftvoucher" sort_order="470"/>
+            <!-- <item name="tax" instance="Magento\Tax\Model\Sales\Total\Quote\Tax" sort_order="210"/> -->
+        </group>
+    </section>
+    <section name="order_invoice">
+        <group name="totals">
+            <item name="giftvoucher" instance="Magestore\Giftvoucher\Model\Total\Order\Invoice\Giftvoucher" sort_order="400"/>
+        </group>
+    </section>
+    <section name="order_creditmemo">
+        <group name="totals">
+            <item name="giftvoucher" instance="Magestore\Giftvoucher\Model\Total\Order\Creditmemo\Giftvoucher" sort_order="270"/>
+        </group>
+    </section>
+    <order>
+        <available_product_type name="giftvoucher"/>
+    </order>
+</config>

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * ArtM SeparateBundleCart Dependency Injection Configuration
+ *
+ * @author ArtM
+ * @package ArtM_SeparateBundleCart
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Plugin for Add to Cart Controller -->
+    <type name="Magento\Checkout\Controller\Cart\Add">
+        <plugin name="artm_separate_bundle_cart_controller" 
+                type="ArtM\SeparateBundleCart\Plugin\Controller\CartAdd" 
+                sortOrder="10" 
+                disabled="false"/>
+    </type>
+</config>

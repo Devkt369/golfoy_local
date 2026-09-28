@@ -1,0 +1,12 @@
+<?php 
+
+namespace ArtM\PartnersAuthentication\Model;
+use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
+
+class ContactUs extends \Magento\Framework\Model\AbstractModel
+{
+    public function _construct()
+    {
+        $this->_init('ArtM\PartnersAuthentication\Model\ResourceModel\ContactUs');
+    }
+}

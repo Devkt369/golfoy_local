@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="webpos_performance_track" resource="default" engine="innodb" comment="Webpos Performance Track">
+        <column xsi:type="int" name="log_id" padding="11" unsigned="false" nullable="false" identity="true"
+                comment="Log Id"/>
+        <column xsi:type="varchar" name="action_code" length="100" nullable="false" default="" comment="action_code"/>
+        <column xsi:type="datetime" name="from" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="from"/>
+        <column xsi:type="datetime" name="to" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="to"/>
+        <column xsi:type="smallint" name="total_count" unsigned="true" nullable="false" default="0" comment="total_count"/>
+        <column xsi:type="decimal" name="average" unsigned="true" nullable="false" precision="12" scale="4"
+                default="0" comment="average"/>
+        <column xsi:type="int" name="pos_id" padding="11" unsigned="false" nullable="false" default="0"
+                comment="pos_id"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="log_id"/>
+        </constraint>
+    </table>
+    <table name="webpos_performance_aggregated" resource="default" engine="innodb" comment="Webpos Performance Track">
+        <column xsi:type="int" name="id" padding="11" unsigned="false" nullable="false" identity="true"
+                comment="Log Id"/>
+        <column xsi:type="varchar" name="action_code" length="100" nullable="false" default="" comment="action_code"/>
+        <column xsi:type="date" name="period" comment="Period"/>
+        <column xsi:type="smallint" name="total_count" unsigned="true" nullable="false" default="0" comment="total_count"/>
+        <column xsi:type="decimal" name="average" unsigned="true" nullable="false" precision="12" scale="4"
+                default="0" comment="average"/>
+        <column xsi:type="int" name="pos_id" padding="11" unsigned="false" nullable="false" default="0" comment="pos_id"/>
+        <column xsi:type="int" name="weight" padding="2" unsigned="false" nullable="false" default="1" comment="weight"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+</schema>

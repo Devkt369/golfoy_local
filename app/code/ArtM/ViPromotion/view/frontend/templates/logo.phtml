@@ -1,0 +1,69 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/**
+ * @var \Magento\Theme\Block\Html\Header\Logo $block
+ */
+$storeName = $block->getThemeName() ? $block->getThemeName() : $block->getLogoAlt();
+
+/**
+ * @var \Magento\Theme\ViewModel\Block\Html\Header\LogoSizeResolverInterface|null $logoSizeResolver
+ */
+$logoSizeResolver = $block->getLogoSizeResolver();
+$logoWidth = $logoSizeResolver !== null && $logoSizeResolver->getWidth()
+    ? $logoSizeResolver->getWidth()
+    : $block->getLogoWidth();
+$logoHeight = $logoSizeResolver !== null && $logoSizeResolver->getHeight()
+    ? $logoSizeResolver->getHeight()
+    : $block->getLogoHeight();
+?>
+<span data-action="toggle-nav" class="action nav-toggle"><span><?= $block->escapeHtml(__('Toggle Nav')) ?></span></span>
+<a
+    class="logo"
+    href="<?= $block->escapeUrl($block->getUrl('')) ?>"
+    title="<?= $block->escapeHtmlAttr($storeName) ?>"
+    aria-label="store logo">
+    <img src="<?= $block->escapeUrl($block->getLogoSrc()) ?>"
+         title="<?= $block->escapeHtmlAttr($block->getLogoAlt()) ?>"
+         alt="<?= $block->escapeHtmlAttr($block->getLogoAlt()) ?>"
+            <?= $logoWidth ? 'width="' . $block->escapeHtmlAttr($logoWidth) . '"' : '' ?>
+            <?= $logoHeight ? 'height="' . $block->escapeHtmlAttr($logoHeight) . '"' : '' ?>
+    />
+</a>
+
+
+<script>
+require(['jquery'], function ($) {
+
+    $(document).ready(function () {
+
+        $.get('/vipromotion/customer/index', function (res) {
+
+            window.vipcustomerData = res;
+            $(document).trigger('vipcustomerDataLoaded', [res]);
+
+            if (res.success && res.logo_url) {
+                $('.logo img').attr('src', res.logo_url);
+            }
+
+            if (res.initial_image_url) {
+                setTimeout(function () {
+                    $('.customer-profile__avatar .customer-profile__avatar-initial')
+                        .css({
+                            'background-image': 'url(' + res.initial_image_url + ')',
+                            'background-size': 'cover',
+                            'background-position': 'center'
+                        });
+                    $('.customer-profile__avatar .customer-profile__avatar-initial').text('');
+                }, 500);
+            }
+
+        });
+
+    });
+
+});
+</script>

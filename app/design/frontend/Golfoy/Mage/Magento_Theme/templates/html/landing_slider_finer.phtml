@@ -1,0 +1,71 @@
+<div class="col-xs-12 header-left" style="padding: 0px 0px 10px 0px !important">
+    <div class="heading_golfoy_left">
+        <h2 style="padding: 0px 5px; !important">Experience the Finest</h2>
+    </div>
+</div>
+
+<div id="block_finer" class="background-container">
+    <div class="row full_block_web">
+        <a href="https://golfoy.com/clubs.html"><img class="background-image" src="https://golfoy.com/media/wysiwyg/2024/landing/full_width/Experience-the-Finest-Mobile.jpg" alt="Taylormade-Qi10" loading="lazy" /></a>
+    </div>
+    <div class="slider-container">
+        <button class="slider-btn prev-btn" onclick="scrollLeftFun(this)">❮</button>
+        <div class="product-grid">
+            <div class="product-card">
+                <a href="https://golfoy.com/clubs/by-brand/odyssey-putter.html">
+                    <img src="https://golfoy.com/media/wysiwyg/2024/landing/five_width/Odyssey-Mobilee.png" alt="gfore" loading="lazy">
+                </a>
+            </div>
+
+            <div class="product-card">
+                <a href="https://golfoy.com/clubs/by-brand/titleist.html">
+                    <img src="https://golfoy.com/media/wysiwyg/2024/landing/five_width/Titleist-Mobilee.png" alt="adidas" loading="lazy">
+                </a>
+
+            </div>
+            <div class="product-card">
+                <a href="https://golfoy.com/clubs/by-brand/honma.html">
+                    <img src="https://golfoy.com/media/wysiwyg/2024/landing/five_width/Honma-Mobilee.png" alt="oscar" loading="lazy">
+                </a>
+
+            </div>
+            <div class="product-card">
+                <a href="https://golfoy.com/clubs/by-brand/scotty-cameron-putters.html">
+                    <img src="https://golfoy.com/media/wysiwyg/2024/landing/five_width/Scotty-Cameron-Mobilee.png" alt="viper" loading="lazy">
+                </a>
+
+            </div>
+            <div class="product-card">
+                <a href="https://golfoy.com/clubs/by-brand/ping.html">
+                    <img src="https://golfoy.com/media/wysiwyg/2024/landing/five_width/Ping-Mobilee.png" alt="viper" loading="lazy">
+                </a>
+            </div>
+        </div>
+        <button class="slider-btn next-btn" onclick="scrollRight(this)">❯</button>
+    </div>
+</div>
+
+<script>
+    const productGrid = document.querySelector('.product-grid');
+    const cardWidth = document.querySelector('.product-card').offsetWidth + 20; 
+
+    function scrollLeftFun(button) {
+        const productGrid = button.nextElementSibling;
+        const cardWidth = productGrid.querySelector('.product-card').offsetWidth + 20; 
+
+        productGrid.scrollBy({
+            left: -cardWidth * 3,
+            behavior: 'smooth',
+        });
+    }
+
+    function scrollRight(button) {
+        const productGrid = button.previousElementSibling; 
+        const cardWidth = productGrid.querySelector('.product-card').offsetWidth + 20;
+
+        productGrid.scrollBy({
+            left: cardWidth * 3, 
+            behavior: 'smooth',
+        });
+    }
+</script>

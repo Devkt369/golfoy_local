@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="artm_pg_pages" resource="default" engine="innodb" comment="ArtM Page Groups Pages">
+        <column xsi:type="int" name="page_id" unsigned="true" nullable="false" identity="true" comment="Page ID"/>
+        <column xsi:type="varchar" name="title" nullable="false" length="255" comment="Title"/>
+        <column xsi:type="varchar" name="identifier" nullable="false" length="255" comment="Identifier"/>
+        <column xsi:type="int" name="sort_order" nullable="false" default="0" comment="Sort Order"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="page_id"/>
+        </constraint>
+    </table>
+
+    <table name="artm_pg_groups" resource="default" engine="innodb" comment="ArtM Page Groups Group Items">
+        <column xsi:type="int" name="group_id" unsigned="true" nullable="false" identity="true" comment="Group ID"/>
+        <column xsi:type="int" name="page_id" unsigned="true" nullable="false" comment="Page ID"/>
+        <column xsi:type="varchar" name="title" nullable="false" length="255" comment="Group Title"/>
+        <column xsi:type="int" name="sort_order" nullable="false" default="0" comment="Sort Order"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="group_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="ARTM_PG_GROUPS_PAGE_ID_ARTM_PG_PAGES_PAGE_ID"
+                    table="artm_pg_groups" column="page_id"
+                    referenceTable="artm_pg_pages" referenceColumn="page_id"
+                    onDelete="CASCADE"/>
+        <index referenceId="ARTM_PG_GROUPS_PAGE_ID" indexType="btree">
+            <column name="page_id"/>
+        </index>
+        <index referenceId="ARTM_PG_GROUPS_SORT_ORDER" indexType="btree">
+            <column name="sort_order"/>
+        </index>
+    </table>
+
+    <table name="artm_pg_group_images" resource="default" engine="innodb" comment="ArtM Page Groups - Group Images">
+        <column xsi:type="int" name="image_id" unsigned="true" nullable="false" identity="true" comment="Image ID"/>
+        <column xsi:type="int" name="group_id" unsigned="true" nullable="false" comment="Group ID"/>
+        <column xsi:type="varchar" name="image_path" nullable="false" length="255" comment="Image Path (relative to pagegroups/)"/>
+        <column xsi:type="int" name="sort_order" nullable="false" default="0" comment="Sort Order"/>
+        <column xsi:type="varchar" name="visibility_mode" nullable="false" length="20" default="keep" comment="Visibility Mode: keep/show/hide"/>
+        <column xsi:type="datetime" name="start_at" nullable="true" comment="Visibility Start Datetime"/>
+        <column xsi:type="datetime" name="end_at" nullable="true" comment="Visibility End Datetime"/>
+        <column xsi:type="smallint" name="is_hidden" nullable="false" default="0" comment="Manual Hidden Flag"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="image_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="ARTM_PG_GROUP_IMAGES_GROUP_ID_ARTM_PG_GROUPS_GROUP_ID"
+                    table="artm_pg_group_images" column="group_id"
+                    referenceTable="artm_pg_groups" referenceColumn="group_id"
+                    onDelete="CASCADE"/>
+        <index referenceId="ARTM_PG_GROUP_IMAGES_GROUP_ID" indexType="btree">
+            <column name="group_id"/>
+        </index>
+    </table>
+
+    <table name="artm_pg_attributes" resource="default" engine="innodb" comment="ArtM Page Groups - Attribute Catalog">
+        <column xsi:type="int" name="attribute_id" unsigned="true" nullable="false" identity="true" comment="Attribute ID"/>
+        <column xsi:type="varchar" name="attribute_code" nullable="false" length="64" comment="Attribute Code"/>
+        <column xsi:type="varchar" name="label" nullable="false" length="255" comment="Attribute Label"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="attribute_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_PG_ATTRIBUTES_ATTRIBUTE_CODE_UNQ">
+            <column name="attribute_code"/>
+        </constraint>
+    </table>
+
+    <table name="artm_pg_group_attributes" resource="default" engine="innodb" comment="ArtM Page Groups - Group Attributes">
+        <column xsi:type="int" name="group_attribute_id" unsigned="true" nullable="false" identity="true" comment="Group Attribute ID"/>
+        <column xsi:type="int" name="group_id" unsigned="true" nullable="false" comment="Group ID"/>
+        <column xsi:type="int" name="attribute_id" unsigned="true" nullable="false" comment="Attribute ID"/>
+        <column xsi:type="int" name="sort_order" nullable="false" default="0" comment="Sort Order"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="group_attribute_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="ARTM_PG_GROUP_ATTRIBUTES_GROUP_ID_ARTM_PG_GROUPS_GROUP_ID"
+                    table="artm_pg_group_attributes" column="group_id"
+                    referenceTable="artm_pg_groups" referenceColumn="group_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="ARTM_PG_GROUP_ATTRIBUTES_ATTRIBUTE_ID_ARTM_PG_ATTRIBUTES_ATTRIBUTE_ID"
+                    table="artm_pg_group_attributes" column="attribute_id"
+                    referenceTable="artm_pg_attributes" referenceColumn="attribute_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="unique" referenceId="ARTM_PG_GROUP_ATTRIBUTES_GROUP_ATTR_UNQ">
+            <column name="group_id"/>
+            <column name="attribute_id"/>
+        </constraint>
+        <index referenceId="ARTM_PG_GROUP_ATTRIBUTES_GROUP_ID" indexType="btree">
+            <column name="group_id"/>
+        </index>
+    </table>
+
+    <table name="artm_pg_image_attribute_values" resource="default" engine="innodb" comment="ArtM Page Groups - Image Attribute Values">
+        <column xsi:type="int" name="value_id" unsigned="true" nullable="false" identity="true" comment="Value ID"/>
+        <column xsi:type="int" name="image_id" unsigned="true" nullable="false" comment="Image ID"/>
+        <column xsi:type="int" name="group_attribute_id" unsigned="true" nullable="false" comment="Group Attribute ID"/>
+        <column xsi:type="text" name="value_text" nullable="false" comment="Attribute Value"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="value_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="ARTM_PG_IMAGE_ATTR_VALUES_IMAGE_ID_ARTM_PG_GROUP_IMAGES_IMAGE_ID"
+                    table="artm_pg_image_attribute_values" column="image_id"
+                    referenceTable="artm_pg_group_images" referenceColumn="image_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="foreign" referenceId="ARTM_PG_IMAGE_ATTR_VALUES_GROUP_ATTR_ID_ARTM_PG_GROUP_ATTRIBUTES_GROUP_ATTRIBUTE_ID"
+                    table="artm_pg_image_attribute_values" column="group_attribute_id"
+                    referenceTable="artm_pg_group_attributes" referenceColumn="group_attribute_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="unique" referenceId="ARTM_PG_IMAGE_ATTR_VALUES_IMAGE_ATTR_UNQ">
+            <column name="image_id"/>
+            <column name="group_attribute_id"/>
+        </constraint>
+        <index referenceId="ARTM_PG_IMAGE_ATTR_VALUES_IMAGE_ID" indexType="btree">
+            <column name="image_id"/>
+        </index>
+    </table>
+</schema>

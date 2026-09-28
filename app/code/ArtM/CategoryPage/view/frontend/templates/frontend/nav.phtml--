@@ -1,0 +1,237 @@
+<?php
+/** @var \ArtM\CategoryPage\Block\Frontend\Page $block */
+?>
+<div id="artm-categorypage-nav" class="artm-categorypage-nav-shell" data-page-config='<?= $block->escapeHtmlAttr($block->getPageConfigJson()) ?>'>
+    <style>
+        /* ── Mobile only: hide on desktop ───────────────── */
+        .artm-categorypage-nav-shell {
+            display: none;
+        }
+        @media (max-width: 767px) {
+            .artm-categorypage-nav-shell {
+                display: block;
+                position: relative;
+            }
+        }
+
+        /* ── Trigger button (replaces menu) ─────────────── */
+        #artm-nav-trigger {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border: none;
+            background: transparent;
+            color: inherit;
+            white-space: nowrap;
+        }
+
+        #artm-nav-trigger svg {
+            transition: transform .2s ease;
+        }
+
+        #artm-nav-trigger.is-open svg {
+            transform: rotate(180deg);
+        }
+
+        /* ── Dropdown panel ─────────────────────────────── */
+        #artm-nav-dropdown {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            background: rgba(0,0,0,0.35);
+        }
+
+        #artm-nav-dropdown.is-open {
+            display: block;
+        }
+
+        #artm-nav-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            max-height: 100vh;
+            background: #fff;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            display: grid;
+            grid-template-columns: minmax(200px, 260px) minmax(0, 1fr);
+            overflow: hidden;
+        }
+
+        /* ── Sidebar ─────────────────────────────────────── */
+        #artm-nav-sidebar {
+            background: #f8f8f8;
+            overflow-y: auto;
+            max-height: 100vh;
+            padding: 12px 0;
+            border-right: 1px solid #ededed;
+        }
+
+        .artm-nav-sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            border-bottom: 1px solid #ededed;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background .15s;
+        }
+
+        .artm-nav-sidebar-item:hover,
+        .artm-nav-sidebar-item.is-active {
+            background: #fff;
+            color: #e60023;
+        }
+
+        .artm-nav-sidebar-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 5px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        /* ── Content area ────────────────────────────────── */
+        #artm-nav-content {
+            overflow-y: auto;
+            max-height: 100vh;
+            padding: 20px;
+        }
+
+        /* ── Close button ────────────────────────────────── */
+        #artm-nav-close {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #333;
+            z-index: 10;
+            line-height: 1;
+        }
+    </style>
+
+    <button id="artm-nav-trigger" type="button" aria-label="Categories">
+        Shop by Category
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 4.5L7 9.5L12 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </button>
+
+    <div id="artm-nav-dropdown">
+        <div id="artm-nav-panel">
+            <button id="artm-nav-close" type="button" aria-label="Close">&times;</button>
+            <div id="artm-nav-sidebar">
+                <?php $firstCat = true; foreach ($block->getSidebarCategories() as $cat): ?>
+                    <?php
+                        $catName = $cat['name'] ?? '';
+                        $catId   = (int)($cat['category_id'] ?? 0);
+                        $catImg  = $cat['image'] ?? '';
+                    ?>
+                    <div class="artm-nav-sidebar-item<?= $firstCat ? ' is-active' : '' ?>"
+                         data-category-id="<?= $catId ?>">
+                        <?php if (!empty($catImg)): ?>
+                            <img class="artm-nav-sidebar-icon"
+                                 src="<?= $block->escapeUrl($catImg) ?>"
+                                 alt="<?= $block->escapeHtmlAttr($catName) ?>"/>
+                        <?php else: ?>
+                            <span class="artm-nav-sidebar-icon"
+                                  style="background:#e2e8f0;display:inline-block;"></span>
+                        <?php endif; ?>
+                        <?= $block->escapeHtml($catName) ?>
+                    </div>
+                <?php $firstCat = false; endforeach; ?>
+            </div>
+            <div id="artm-nav-content">
+                <div id="artm-nav-content-inner">
+                    <p style="color:#aaa;padding:20px 0;">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+    (function () {
+        var config = <?= /* @noEscape */ $block->getPageConfigJson() ?>;
+        var trigger = document.getElementById('artm-nav-trigger');
+        var dropdown = document.getElementById('artm-nav-dropdown');
+        var closeBtn = document.getElementById('artm-nav-close');
+        var sidebar = document.getElementById('artm-nav-sidebar');
+        var contentInner = document.getElementById('artm-nav-content-inner');
+        var currentCategoryId = null;
+
+        function openNav() {
+            dropdown.classList.add('is-open');
+            trigger.classList.add('is-open');
+            // Load first category on open
+            var firstItem = sidebar.querySelector('.artm-nav-sidebar-item');
+            if (firstItem && currentCategoryId !== parseInt(firstItem.dataset.categoryId)) {
+                loadCategory(parseInt(firstItem.dataset.categoryId), firstItem);
+            }
+        }
+
+        function closeNav() {
+            dropdown.classList.remove('is-open');
+            trigger.classList.remove('is-open');
+        }
+
+        trigger.addEventListener('click', function (e) {
+            e.stopPropagation();
+            dropdown.classList.contains('is-open') ? closeNav() : openNav();
+        });
+
+        closeBtn.addEventListener('click', closeNav);
+
+        dropdown.addEventListener('click', function (e) {
+            if (e.target === dropdown) closeNav();
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeNav();
+        });
+
+        function loadCategory(categoryId, itemEl) {
+            if (currentCategoryId === categoryId) return;
+            currentCategoryId = categoryId;
+
+            sidebar.querySelectorAll('.artm-nav-sidebar-item').forEach(function (el) {
+                el.classList.remove('is-active');
+            });
+            if (itemEl) itemEl.classList.add('is-active');
+
+            contentInner.innerHTML = '<p style="color:#aaa;padding:20px 0;">Loading...</p>';
+
+            fetch(config.loadUrl + '?category_id=' + categoryId + '&store_id=' + config.storeId, {
+                headers: {'X-Requested-With': 'XMLHttpRequest'}
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                contentInner.innerHTML = data.html || '<p style="color:#aaa">No products found.</p>';
+            })
+            .catch(function () {
+                contentInner.innerHTML = '<p style="color:#e00">Failed to load.</p>';
+            });
+        }
+
+        sidebar.querySelectorAll('.artm-nav-sidebar-item').forEach(function (item) {
+            item.addEventListener('click', function () {
+                loadCategory(parseInt(item.dataset.categoryId), item);
+            });
+        });
+    })();
+    }); // end DOMContentLoaded
+    </script>
+</div>

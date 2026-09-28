@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="artm_inventoryplanner_weekly_sales" resource="default" engine="innodb" comment="Inventory Planner Weekly Qty Sold Per SKU">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="product_id" padding="10" unsigned="true" nullable="false" comment="Product ID"/>
+        <column xsi:type="varchar" name="sku" length="64" nullable="false" comment="SKU"/>
+        <column xsi:type="date" name="week_start" nullable="false" comment="Week Start Date"/>
+        <column xsi:type="date" name="week_end" nullable="false" comment="Week End Date"/>
+        <column xsi:type="decimal" name="qty_sold" scale="4" precision="12" unsigned="false" nullable="false" default="0" comment="Qty Sold"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Last Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <!-- Lets Sync Now / Calculate upsert the same product+sku+week row instead of duplicating it. -->
+        <constraint xsi:type="unique" referenceId="ARTM_INV_PLANNER_WEEKLY_SALES_PRODUCT_SKU_WEEK_START">
+            <column name="product_id"/>
+            <column name="sku"/>
+            <column name="week_start"/>
+        </constraint>
+        <index referenceId="ARTM_INV_PLANNER_WEEKLY_SALES_SKU" indexType="btree">
+            <column name="sku"/>
+        </index>
+        <index referenceId="ARTM_INV_PLANNER_WEEKLY_SALES_WEEK_START" indexType="btree">
+            <column name="week_start"/>
+        </index>
+    </table>
+    <table name="artm_inventoryplanner_inventory_snapshot" resource="default" engine="innodb" comment="Inventory Planner Product Inventory Snapshot">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="product_id" padding="10" unsigned="true" nullable="false" comment="Product ID"/>
+        <column xsi:type="varchar" name="sku" length="64" nullable="false" comment="SKU"/>
+        <column xsi:type="decimal" name="total_salable_qty" scale="4" precision="12" unsigned="false" nullable="false" default="0" comment="Total Salable Qty"/>
+        <column xsi:type="decimal" name="total_selected_source_qty" scale="4" precision="12" unsigned="false" nullable="false" default="0" comment="Total Qty In Settings-Selected Sources"/>
+        <column xsi:type="text" name="source_breakdown" nullable="true" comment="Per Selected-Source Qty Breakdown (JSON)"/>
+        <column xsi:type="datetime" name="calculated_at" nullable="false" comment="Calculated At (IST)"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <!-- One snapshot per product - re-syncing a product replaces its previous snapshot. -->
+        <constraint xsi:type="unique" referenceId="ARTM_INV_PLANNER_INVENTORY_SNAPSHOT_PRODUCT_ID">
+            <column name="product_id"/>
+        </constraint>
+    </table>
+</schema>

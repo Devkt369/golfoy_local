@@ -1,0 +1,441 @@
+<style>
+    body#html-body .row.polo-brand-container {
+        background-color: whitesmoke;
+        padding: 30px !important;
+        display: flex;
+        align-items: center;
+        margin: 30px 14px 50px 14px !important;
+        border-radius: 5px;
+    }
+
+    .row.polo-brand-container h2 {
+        font-size: 26px;
+        margin-top: 0px;
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: black;
+        font-family: "headpro";
+    }
+
+    .row.polo-brand-container p {
+        color: black;
+        margin-bottom: 5px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .polo-product-grids-block p {
+        text-transform: unset;
+    }
+
+    .polo-new-container {
+        overflow: hidden;
+        width: 100%;
+        position: relative;
+        padding: 30px 0px 40px 0px;
+    }
+
+    .polo-product-grids-block h4 {
+        text-transform: uppercase;
+        font-size: 13px;
+        font-weight: bold;
+        color: black;
+        margin-top: 20px !important;
+    }
+
+    .polo-product-grids-block.active h4 {
+        margin-top: 0px !important;
+    }
+
+    #polo-new-scrollContainer {
+        display: flex;
+        transition: transform 0.5s ease;
+        will-change: transform;
+    }
+
+    .polo-product-grids-block {
+        flex: 0 0 33.3333%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+        padding: 0 20px;
+        transition: transform 0.5s ease;
+    }
+
+    .polo-product-grids-block a {
+        text-decoration: none;
+    }
+
+    .polo-product-grids-block.active {
+        transform: scale(1.2);
+        z-index: 10;
+    }
+
+    .polo-product-grids-block img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        display: block;
+        transition: transform 0.5s ease;
+    }
+
+    .polo-product-grids-block.active img {
+        transform: scale(1);
+        margin: 25px 0px;
+    }
+
+    .polo-product-grids-block h4,
+    .polo-product-grids-block p {
+        margin: 5px 0 0 0;
+        text-align: center;
+    }
+
+    .polo-new-scroll-btn {
+        position: absolute;
+        top: 45%;
+        transform: translateY(-50%);
+        background-color: #ffffffb0;
+        border: none;
+        width: 35px;
+        height: 35px;
+        cursor: pointer;
+        border-radius: 50% !important;
+        font-size: 18px;
+        z-index: 9999;
+        box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+    }
+
+    .polo-new-prev-btn {
+        left: 10px;
+    }
+
+    .slider-new-next-btn {
+        right: 10px;
+    }
+
+    .polo-new-item {
+        overflow: hidden;
+    }
+
+    .polo-product-grids-block p {
+        font-weight: 500 !important;
+        margin-top: 5px !important;
+        font-size: 11px !important;
+    }
+
+    /* Tablet (768px - 1024px) */
+    @media (max-width: 1024px) and (min-width: 768px) {
+        .row.polo-brand-container {
+            flex-direction: column;
+            padding: 20px !important;
+            margin: 20px 10px 40px 10px !important;
+        }
+
+        .row.polo-brand-container .col-sm-3,
+        .row.polo-brand-container .col-sm-9 {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .polo-product-grids-block {
+            flex: 0 0 40%;
+            padding: 0 10px;
+        }
+
+        .polo-product-grids-block h4 {
+            font-size: 15px;
+        }
+
+        .polo-product-grids-block p {
+            font-size: 11px;
+        }
+    }
+
+    @media only screen and (max-width:768px) {
+
+        .row.polo-brand-container p,
+        .row.polo-brand-container h2 {
+            text-align: center;
+        }
+    }
+
+    /* Mobile (up to 767px) */
+    @media (max-width: 767px) {
+        .row.polo-brand-container {
+            flex-direction: column;
+            padding: 15px !important;
+            margin: 15px 5px 30px 5px !important;
+        }
+
+        .row.polo-brand-container p,
+        .row.polo-brand-container h2 {
+            text-align: center;
+        }
+
+        .row.polo-brand-container .col-sm-3,
+        .row.polo-brand-container .col-sm-9 {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .polo-product-grids-block {
+            flex: 0 0 60%;
+            padding: 0 5px;
+        }
+
+        .polo-product-grids-block h4 {
+            font-size: 16px;
+        }
+
+        .polo-product-grids-block.active img {
+            margin: 20px 0px;
+        }
+
+        .polo-product-grids-block p {
+            font-size: 10px !important;
+        }
+
+        .polo-new-scroll-btn {
+            width: 30px;
+            height: 30px;
+            padding: 0px;
+            font-size: 16px;
+        }
+    }
+
+    @media only screen and (max-width: 480px) {
+        body#html-body .row.polo-brand-container {
+            padding: 30px 10px !important;
+        }
+    }
+</style>
+<div class="row polo-brand-container">
+
+    <div class="col-sm-3">
+        <p>Featured</p>
+        <h2>Polo Collection</h2>
+    </div>
+    <div class="col-sm-9">
+        <button class="polo-new-scroll-btn polo-new-prev-btn" onclick="poloNewScrollLeft()">
+            &#10094;
+        </button>
+        <div class="polo-new-container">
+            <div class="slider-new-scroll-container" id="polo-new-scrollContainer">
+                <div class="polo-product-grids-block">
+                    <a class="react-comp" href="https://golfoy.com/all-golf-brands-india/j-lindeberg/by-type/collection/heath-collection.html">
+                        <div class="polo-new-item"><img src="https://golfoy.com/media/wysiwyg/2025/landing_page/sep/jlindeberg-polo.jpg" alt="jlindeberg-polo"></div>
+                        <h4>J.lindeberg</h4>
+                        <p>Heath Collection</p>
+                    </a>
+
+                </div>
+                <div class="polo-product-grids-block">
+                    <a class="react-comp" href="https://golfoy.com/all-golf-brands-india/buy-footjoy-shoes-and-gloves-india/footjoy-t-shirts/footjoy-speckle-collection.html">
+                        <div class="polo-new-item"><img src="https://golfoy.com/media/wysiwyg/2025/landing_page/sep/footjoy-polo.jpg" alt="footjoy"></div>
+                        <h4>Footjoy</h4>
+                        <p>Speckle Collection</p>
+                    </a>
+
+                </div>
+                <div class="polo-product-grids-block">
+                    <a class="react-comp" href="https://golfoy.com/all-golf-brands-india/j-lindeberg/collection/kv-collection.html">
+                        <div class="polo-new-item"><img src="https://golfoy.com/media/wysiwyg/2025/landing_page/sep/jlindeberg-kv-polo.jpg" alt="jlindeberg"></div>
+                        <h4>JLindeberg</h4>
+                        <p>KV Collection</p>
+                    </a>
+
+                </div>
+                <div class="polo-product-grids-block">
+                    <a class="react-comp" href="https://golfoy.com/all-golf-brands-india/buy-viper-golf-gloves-and-accesorries/viper-golf-t-shirt/viper-golf-classic-polo.html#1240">
+                        <div class="polo-new-item"><img src="https://golfoy.com/media/wysiwyg/2025/landing_page/sep/vipergolf-polo.jpg" alt="vipergolf"></div>
+                        <h4>Viper Golf</h4>
+                        <p>Classic Polo</p>
+                    </a>
+
+                </div>
+                <div class="polo-product-grids-block">
+                    <a class="react-comp" href="https://golfoy.com/all-golf-brands-india/ping-golf-store-india/t-shirt/ping-lindum-collection.html">
+                        <div class="polo-new-item"><img src="https://golfoy.com/media/wysiwyg/2025/landing_page/sep/ping-polo.jpg" alt="Ping" alt="ping"></div>
+                        <h4>Ping</h4>
+                        <p>Lindum Collection</p>
+                    </a>
+
+                </div>
+                <div class="polo-product-grids-block">
+                    <a class="react-comp" href="https://golfoy.com/all-golf-brands-india/jack-nicklaus/t-shirt/jack-nicklaus-printed-collection.html">
+                        <div class="polo-new-item"><img src="https://golfoy.com/media/wysiwyg/2025/landing_page/sep/jacknicklaus-polo.jpg" alt="Jack Nicklaus" alt="jacknicklaus"></div>
+                        <h4>Jack Nicklaus</h4>
+                        <p>Printed Collection</p>
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+        <button class="polo-new-scroll-btn slider-new-next-btn" onclick="poloNewScrollRight()">
+            &#10095;
+        </button>
+    </div>
+
+</div>
+<script>
+    function initializePoloSlider() {
+        const container = document.getElementById('polo-new-scrollContainer');
+
+        if (!container || container.dataset.initialized === 'true') return;
+        container.dataset.initialized = 'true';
+
+        let items = Array.from(container.children);
+        let centerIndex = 1;
+        let isAnimating = false;
+        let lastTouchX = 0;
+        let lastTouchTime = 0;
+
+        function updateActive(animate = true) {
+            items = Array.from(container.children); // refresh list in case DOM changed
+            if (!items.length) return;
+
+            // prevent invalid index
+            if (centerIndex < 0) centerIndex = 0;
+            if (centerIndex >= items.length) centerIndex = items.length - 1;
+            if (!items[centerIndex]) return;
+
+            items.forEach(item => item.classList.remove('active'));
+            items[centerIndex].classList.add('active');
+
+            const containerWidth = container.offsetWidth;
+            const itemCenter = items[centerIndex].offsetLeft + items[centerIndex].offsetWidth / 2;
+            const scrollPos = itemCenter - containerWidth / 2;
+
+            container.style.transition = animate ? 'transform 0.5s ease' : 'none';
+            container.style.transform = `translateX(${-scrollPos}px)`;
+        }
+
+        function shiftNext(steps = 1) {
+            if (isAnimating) return;
+            isAnimating = true;
+            centerIndex += steps;
+            updateActive();
+
+            container.addEventListener('transitionend', function handler() {
+                for (let i = 0; i < steps; i++) {
+                    const first = items.shift();
+                    container.appendChild(first);
+                    items.push(first);
+                }
+                centerIndex -= steps;
+                updateActive(false);
+                isAnimating = false;
+                container.removeEventListener('transitionend', handler);
+            });
+        }
+
+        function shiftPrev(steps = 1) {
+            if (isAnimating) return;
+            isAnimating = true;
+            for (let i = 0; i < steps; i++) {
+                const last = items.pop();
+                container.insertBefore(last, container.firstChild);
+                items.unshift(last);
+            }
+            centerIndex += steps;
+            updateActive(false);
+
+            centerIndex -= steps;
+            requestAnimationFrame(() => updateActive(true));
+
+            container.addEventListener('transitionend', function handler() {
+                isAnimating = false;
+                container.removeEventListener('transitionend', handler);
+            });
+        }
+
+        // --- SWIPE HANDLING ---
+        let startX = 0;
+        let startTime = 0;
+        container.addEventListener('touchstart', e => {
+            startX = e.touches[0].clientX;
+            startTime = Date.now();
+        });
+
+        container.addEventListener('touchend', e => {
+            const endX = e.changedTouches[0].clientX;
+            const diff = endX - startX;
+            const elapsed = Date.now() - startTime;
+
+            if (Math.abs(diff) > 30) {
+                const velocity = Math.abs(diff / elapsed);
+                const steps = velocity > 0.8 ? 3 : velocity > 0.5 ? 2 : 1;
+                if (diff < 0) shiftNext(steps);
+                else shiftPrev(steps);
+            }
+        });
+
+        // --- BUTTONS ---
+        const nextBtn = document.querySelector('.slider-new-next-btn');
+        const prevBtn = document.querySelector('.polo-new-prev-btn');
+
+        if (nextBtn && !nextBtn.dataset.listenerAdded) {
+            nextBtn.addEventListener('click', () => shiftNext(1));
+            nextBtn.dataset.listenerAdded = 'true';
+        }
+        if (prevBtn && !prevBtn.dataset.listenerAdded) {
+            prevBtn.addEventListener('click', () => shiftPrev(1));
+            prevBtn.dataset.listenerAdded = 'true';
+        }
+
+        updateActive(false);
+
+        if (!window.poloResizeListenerAdded) {
+            window.addEventListener('resize', () => updateActive(false));
+            window.poloResizeListenerAdded = true;
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializePoloSlider);
+    } else {
+        initializePoloSlider();
+    }
+
+    window.initializePoloSlider = initializePoloSlider;
+
+    if (typeof window.poloObserver === 'undefined') {
+        window.poloObserver = new MutationObserver(function (mutations) {
+            mutations.forEach(mutation => {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach(node => {
+                        if (node.nodeType === 1 &&
+                            (node.id === 'polo-new-scrollContainer' ||
+                             (node.querySelector && node.querySelector('#polo-new-scrollContainer')))) {
+                            setTimeout(initializePoloSlider, 200);
+                        }
+                    });
+                }
+            });
+        });
+
+        const targetNode = document.querySelector('#maincontent') || document.body;
+        window.poloObserver.observe(targetNode, { childList: true, subtree: true });
+    }
+
+    if (typeof window.poloIntervalChecker === 'undefined') {
+        window.poloIntervalChecker = setInterval(() => {
+            const container = document.getElementById('polo-new-scrollContainer');
+            if (container && !container.dataset.initialized) {
+                initializePoloSlider();
+            }
+        }, 500);
+
+        setTimeout(() => {
+            if (window.poloIntervalChecker) {
+                clearInterval(window.poloIntervalChecker);
+                window.poloIntervalChecker = undefined;
+            }
+        }, 30000);
+    }
+</script>

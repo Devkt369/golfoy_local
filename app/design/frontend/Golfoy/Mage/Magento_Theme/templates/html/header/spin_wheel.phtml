@@ -1,0 +1,2109 @@
+<?php
+
+/**
+ * Spin Wheel Test Template - Requires User Login
+ */
+
+// Check if user is logged in
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$customerSession = $objectManager->get('\Magento\Customer\Model\Session');
+
+if (!$customerSession->isLoggedIn()) {
+?>
+    <script>
+        function openWheelManually() {
+            jQuery(".account_icon_header.header_icon").click();
+        }
+    </script>
+<?php
+    return;
+}
+
+// User is logged in, get customer info for personalization
+$customer = $customerSession->getCustomer();
+$customerName = $customer->getFirstname();
+$customerId = $customer->getId();
+
+// Check if customer has already spun in the last 24 hours
+$resource = $objectManager->get('\Magento\Framework\App\ResourceConnection');
+$connection = $resource->getConnection();
+$tableName = $resource->getTableName('customer_spin_wheel_coupons');
+
+// Create table if it doesn't exist
+$createTableSql = "CREATE TABLE IF NOT EXISTS `{$tableName}` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `customer_id` int(11) NOT NULL,
+    `coupon_code` varchar(100) NOT NULL,
+    `offer_name` varchar(200) NOT NULL,
+    `offer_tagline` varchar(200) NOT NULL,
+    `spin_date` datetime NOT NULL,
+    `expires_at` datetime NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `customer_id` (`customer_id`),
+    KEY `expires_at` (`expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+try {
+    $connection->query($createTableSql);
+} catch (Exception $e) {
+    // Table might already exist, continue
+}
+
+// Check for existing spin in last 24 hours
+$select = $connection->select()
+    ->from($tableName)
+    ->where('customer_id = ?', $customerId)
+    ->where('expires_at > NOW()')
+    ->order('spin_date DESC')
+    ->limit(1);
+
+$existingSpin = $connection->fetchRow($select);
+$hasRecentSpin = !empty($existingSpin);
+
+// Handle AJAX request to reset spin (for testing)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['reset_spin'])) {
+    try {
+        // Delete customer's spin records
+        $connection->delete($tableName, ['customer_id = ?' => $customerId]);
+
+        if (
+            !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+        ) {
+            echo json_encode(['success' => true, 'message' => 'Spin reset successfully']);
+            exit;
+        } else {
+            // Redirect to refresh the page
+            header('Location: ' . $_SERVER['REQUEST_URI']);
+            exit;
+        }
+    } catch (Exception $e) {
+        error_log('Error resetting spin wheel: ' . $e->getMessage());
+        if (
+            !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest'
+        ) {
+            echo json_encode(['success' => false, 'message' => 'Error resetting spin']);
+            exit;
+        }
+    }
+}
+
+// Handle AJAX request to save coupon
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['coupon_code'])) {
+    // Set JSON header
+    header('Content-Type: application/json');
+
+    try {
+        // Log the request for debugging
+        error_log('Spin wheel coupon save attempt - Customer ID: ' . $customerId . ', Coupon: ' . $_POST['coupon_code']);
+
+        $data = [
+            'customer_id' => $customerId,
+            'coupon_code' => $_POST['coupon_code'],
+            'offer_name' => $_POST['offer_name'],
+            'offer_tagline' => $_POST['offer_tagline'],
+            'spin_date' => date('Y-m-d H:i:s'),
+            'expires_at' => date('Y-m-d H:i:s', strtotime('+24 hours'))
+        ];
+
+        // Insert the coupon record
+        $connection->insert($tableName, $data);
+
+        error_log('Spin wheel coupon saved successfully to database');
+
+        // Always return JSON response for AJAX
+        echo json_encode(['success' => true, 'message' => 'Coupon saved successfully']);
+        exit;
+    } catch (Exception $e) {
+        error_log('Error saving spin wheel coupon: ' . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Error saving coupon: ' . $e->getMessage()]);
+        exit;
+    }
+}
+
+// Sample offers array with probability weights
+// Higher probability = more likely to win
+// Total should add up to 100 for easier understanding
+$offers = [
+    [
+        'offername' => '₹500 OFF',
+        'tagline' => 'On orders above Rs. 5000*',
+        'coupon' => 'SNW5-98IB',
+        'probability' => 45
+    ],
+    [
+        'offername' => 'Free VG Balls*',
+        'tagline' => 'Free Viper Golf Balls Sleeve On order above Rs. 3500',
+        'coupon' => 'VGBALLSLEEVE',
+        'probability' => 3
+    ],
+    [
+        'offername' => '₹500 OFF*',
+        'tagline' => 'On orders above Rs. 5000*',
+        'coupon' => 'SNW5-98IB',
+        'probability' => 46
+    ],
+    [
+        'offername' => 'Free Titleist Balls*',
+        'tagline' => 'Free Titleist Pro V1 Balls Sleeve On order above 5000',
+        'coupon' => 'PROV1SLEEVE',
+        'probability' => 3
+    ],
+    [
+        'offername' => 'Extra 10% Off',
+        'tagline' => 'Not applicable on Clearance products',
+        'coupon' => 'EXTRASNW10',
+        'probability' => 3
+    ]
+];
+
+$offersJson = json_encode($offers);
+?>
+
+<!-- Trigger Button -->
+<button id="openWheelBtn" class="open-wheel-btn" onclick="openWheelManually()">🎯 Spin to Win!</button>
+
+<!-- Temporary Reset Button for Testing -->
+<button id="resetSpinBtn" class="reset-spin-btn" onclick="resetSpin()">🔄 Reset Spin (Testing)</button>
+
+<!-- Overlay -->
+<div id="wheelOverlay" class="wheel-overlay"></div>
+
+<!-- Slide-in Wheel Container -->
+<div id="spinWheelModal" class="spin-wheel-container">
+    <button id="closeWheelBtn" class="close-wheel-btn">✕</button>
+
+    <?php if ($hasRecentSpin): ?>
+        <!-- Already Spun Message -->
+        <div class="already-spun-container">
+            <h2 class="wheel-title">Hello <?php echo $this->escapeHtml($customerName); ?>!</h2>
+            <div class="already-spun-message">
+                <div class="spin-cooldown-icon">⏰</div>
+                <h3>You've Already Claimed Your Reward!</h3>
+                <div class="current-coupon">
+                    <h4>Your Current Coupon:</h4>
+                    <div class="coupon-display">
+                        <input type="text" id="existingCouponCode" value="<?php echo $this->escapeHtml($existingSpin['coupon_code']); ?>" readonly>
+                        <button id="copyExistingBtn" class="copy-btn">COPY</button>
+                    </div>
+                    <p class="coupon-details">
+                        <strong><?php echo $this->escapeHtml($existingSpin['offer_name']); ?></strong><br>
+                        <?php echo $this->escapeHtml($existingSpin['offer_tagline']); ?>
+                    </p>
+                </div>
+            </div>
+        </div>
+    <?php else: ?>
+        <h2 class="wheel-title">Hello <?php echo $this->escapeHtml($customerName); ?>! Spin to Win Amazing Offers!</h2>
+    <?php endif; ?>
+
+    <?php if (!$hasRecentSpin): ?>
+        <div class="wheel-wrapper">
+            <div class="wheel-pointer"></div>
+            <div id="spinWheel" class="wheel-container">
+                <svg viewBox="0 0 400 400" style="width: 100%; height: 100%;">
+                    <?php
+                    $numOffers = count($offers);
+                    $anglePerSegment = 360 / $numOffers;
+                    $colors = ['#fb6850', '#30abb1', '#7d64bd', '#f87082', '#3ebbbd', '#219a52'];
+
+                    for ($i = 0; $i < $numOffers; $i++):
+                        $startAngle = $i * $anglePerSegment;
+                        $endAngle = ($i + 1) * $anglePerSegment;
+
+                        // Convert to radians
+                        $startRad = deg2rad($startAngle - 90); // -90 to start from top
+                        $endRad = deg2rad($endAngle - 90);
+
+                        // Calculate path coordinates (200,200 is center, 180 is radius)
+                        $startX = 200 + 180 * cos($startRad);
+                        $startY = 200 + 180 * sin($startRad);
+                        $endX = 200 + 180 * cos($endRad);
+                        $endY = 200 + 180 * sin($endRad);
+
+                        // Large arc flag: 1 if angle > 180 degrees
+                        $largeArcFlag = ($anglePerSegment > 180) ? 1 : 0;
+
+                        // Text position for offer name only
+                        $textAngle = ($startAngle + $endAngle) / 2 - 90;
+                        $textRad = deg2rad($textAngle);
+
+                        // Offer name position (centered in segment)
+                        $offerX = 200 + 120 * cos($textRad);
+                        $offerY = 200 + 120 * sin($textRad);
+
+                        // Handle text wrapping for long offer names
+                        $offerName = $offers[$i]['offername'];
+                        $maxLength = 15;
+                        if (strlen($offerName) > $maxLength) {
+                            // Find the space closest to the middle
+                            $middle = strlen($offerName) / 2;
+                            $spacePos = strpos($offerName, ' ', intval($middle));
+                            if ($spacePos === false) {
+                                $spacePos = strrpos($offerName, ' ', -$maxLength);
+                            }
+                            if ($spacePos !== false && $spacePos > 0) {
+                                $line1 = substr($offerName, 0, $spacePos);
+                                $line2 = substr($offerName, $spacePos + 1);
+                            } else {
+                                // No space found, split at middle
+                                $line1 = substr($offerName, 0, $middle);
+                                $line2 = substr($offerName, $middle);
+                            }
+                        } else {
+                            $line1 = $offerName;
+                            $line2 = '';
+                        }
+
+                        $color = $colors[$i % count($colors)];
+                    ?>
+                        <!-- Segment <?php echo $i; ?>: <?php echo $this->escapeHtml($offers[$i]['offername']); ?> -->
+                        <path d="M 200 200 L <?php echo $startX; ?> <?php echo $startY; ?> A 180 180 0 <?php echo $largeArcFlag; ?> 1 <?php echo $endX; ?> <?php echo $endY; ?> Z"
+                            fill="<?php echo $color; ?>" stroke="#fff" stroke-width="2" />
+                        <text x="<?php echo $offerX; ?>" y="<?php echo $offerY; ?>" fill="white" text-anchor="middle" font-weight="bold" font-size="16" transform="rotate(<?php echo $textAngle; ?> <?php echo $offerX; ?> <?php echo $offerY; ?>)">
+                            <tspan><?php echo $this->escapeHtml($line1); ?></tspan>
+                            <?php if ($line2): ?>
+                                <tspan x="<?php echo $offerX; ?>" dy="1.2em"><?php echo $this->escapeHtml($line2); ?></tspan>
+                            <?php endif; ?>
+                        </text>
+                    <?php endfor; ?>
+                </svg>
+            </div>
+            <button id="spinButton" class="spin-btn" onclick="testSpin()">SPIN NOW!</button>
+        </div>
+
+        <div id="result-section" class="result-section" style="display: none;">
+            <div class="congratulations">Congratulations!</div>
+            <div class="won-offer">
+                <div class="offer-name" id="wonOfferName"></div>
+                <div class="offer-tagline" id="wonOfferTagline"></div>
+            </div>
+            <div class="coupon-section">
+                <label>Your Coupon Code:</label>
+                <div class="coupon-display">
+                    <input type="text" id="couponCode" readonly>
+                    <button id="copyButton" class="copy-btn">COPY</button>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>
+
+<style>
+    button#resetSpinBtn {
+        display: none;
+    }
+
+    button#openWheelBtn {
+        display: none;
+    }
+
+    /* Trigger Button */
+    .open-wheel-btn {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 15px 25px;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 25px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        z-index: 1000;
+    }
+
+    .open-wheel-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Temporary Reset Button for Testing */
+    .reset-spin-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 20px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        z-index: 1000;
+        opacity: 0.8;
+    }
+
+    .reset-spin-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        opacity: 1;
+    }
+
+    /* Overlay */
+    .spinwheeladd .wheel-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 9999999999 !important;
+    }
+
+    .wheel-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Spin Wheel Container - Slide from Left */
+    .spin-wheel-container {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        max-width: 600px;
+        height: 100vh;
+        z-index: 99999999999999 !important;
+        padding: 60px 20px 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        transition: left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        z-index: 1002;
+        overflow-y: auto;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        box-sizing: border-box;
+    }
+
+    .spin-wheel-container.active {
+        left: 0;
+    }
+
+    /* Close Button */
+    .close-wheel-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .close-wheel-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+    }
+
+    /* Already Spun Styles */
+    .already-spun-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .already-spun-message {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 30px;
+        backdrop-filter: blur(10px);
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .spin-cooldown-icon {
+        font-size: 4em;
+        margin-bottom: 15px;
+    }
+
+    .already-spun-message h3 {
+        font-size: 1.8em;
+        margin-bottom: 15px;
+        color: #ffd700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .already-spun-message p {
+        font-size: 1.1em;
+        margin-bottom: 20px;
+        opacity: 0.9;
+    }
+
+    .countdown-timer {
+        font-size: 2em;
+        font-weight: bold;
+        color: #ff6b6b;
+        margin-bottom: 25px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .current-coupon {
+        margin-top: 25px;
+        padding-top: 25px;
+        border-top: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .current-coupon h4 {
+        font-size: 1.3em;
+        margin-bottom: 15px;
+        color: #fff;
+    }
+
+    .coupon-details {
+        margin-top: 15px;
+        font-size: 1em;
+        opacity: 0.8;
+    }
+
+    .wheel-title {
+        font-size: 15px;
+        margin-bottom: 50px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        font-weight: bold;
+        margin-top: 0;
+    }
+
+    .wheel-wrapper {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 20px;
+        width: 400px;
+        height: 400px;
+    }
+
+    .wheel-container {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+        border: 8px solid #fff;
+        position: relative;
+        overflow: hidden;
+        transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+
+    .wheel-segment {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        top: 0;
+        left: 0;
+        transform-origin: 200px 200px;
+        overflow: hidden;
+    }
+
+    .wheel-segment:before {
+        content: '';
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        transform-origin: 0 200px;
+        clip-path: polygon(0 0, 200px 0, 100px 200px);
+    }
+
+    .wheel-segment-content {
+        position: absolute;
+        top: 50px;
+        left: 50px;
+        width: 100px;
+        height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+        text-align: center;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        font-size: 12px;
+        line-height: 1.2;
+        transform: rotate(30deg);
+    }
+
+    .offer-name {
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 2px;
+    }
+
+    .offer-tagline {
+        font-size: 10px;
+        font-weight: normal;
+    }
+
+    .wheel-pointer {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 20px solid transparent;
+        border-right: 20px solid transparent;
+        border-top: 30px solid #ff6b6b;
+        z-index: 10;
+        filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3));
+    }
+
+    @media (max-width: 768px) {
+        .wheel-pointer {
+            top: -12px;
+            border-left-width: 15px;
+            border-right-width: 15px;
+            border-top-width: 25px;
+        }
+    }
+
+    .spin-btn {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 80px;
+        height: 80px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        z-index: 5;
+        border-radius: 50% !important;
+    }
+
+    .spin-btn:hover {
+        transform: translate(-50%, -50%) scale(1.1);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .spin-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    .spin-btn.disabled {
+        background: #ff6b6b !important;
+        cursor: not-allowed !important;
+        transform: translate(-50%, -50%) scale(1) !important;
+    }
+
+    .result-section {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 20px;
+        backdrop-filter: blur(10px);
+        width: 100%;
+        max-width: 500px;
+        box-sizing: border-box;
+    }
+
+    .congratulations {
+        font-size: 1.8em;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #ffd700;
+    }
+
+    .won-offer {
+        margin-bottom: 25px;
+    }
+
+    .offer-name {
+        font-size: 15px;
+        font-weight: bold;
+        color: #fff;
+        margin-bottom: 5px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .offer-tagline {
+        font-size: 13px;
+        color: #f0f0f0;
+        margin-bottom: 20px;
+    }
+
+    .coupon-section label {
+        display: block;
+        font-size: 1.1em;
+        margin-bottom: 10px;
+        color: #f0f0f0;
+    }
+
+    .coupon-display {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    #couponCode {
+        padding: 12px 20px;
+        font-size: 1.2em;
+        font-weight: bold;
+        border: 2px solid #fff;
+        border-radius: 8px;
+        background: #fff;
+        color: #333;
+        text-align: center;
+        min-width: 200px;
+        height: 44px;
+    }
+
+    input#existingCouponCode {
+        height: 44px;
+        font-weight: 600;
+        padding-left: 20px;
+    }
+
+    .copy-btn {
+        padding: 12px 20px;
+        background: #e60023;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .copy-btn:hover {
+        background: #219a52;
+        transform: translateY(-2px);
+    }
+
+    .copy-btn.copied {
+        background: #2ecc71;
+    }
+
+    .sections.nav-sections {
+        z-index: 11;
+    }
+
+    .spinwheeladd header.page-header.fixed {
+        z-index: 1 !important;
+    }
+
+    /* Mobile Responsive - Slide from Bottom */
+    @media (max-width: 768px) {
+        .spin-wheel-container {
+            left: 0 !important;
+            top: 100%;
+            bottom: auto;
+            width: 100%;
+            max-width: 100%;
+            height: 100%;
+            max-height: 90vh;
+            border-radius: 20px 20px 0 0;
+            transition: top 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            padding: 50px 15px 20px;
+            justify-content: flex-start;
+        }
+
+        .spin-wheel-container.active {
+            top: 5vh;
+        }
+
+        .wheel-title {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        .wheel-wrapper {
+            width: 300px;
+            height: 300px;
+            max-width: 85vw;
+            max-height: 40vh;
+            margin-bottom: 15px;
+        }
+
+        .spin-btn {
+            width: 60px;
+            height: 60px;
+            font-size: 12px;
+        }
+
+        .coupon-display {
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        #couponCode {
+            margin-bottom: 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .result-section {
+            margin-top: 15px;
+            padding: 15px;
+            width: 100%;
+        }
+
+        .open-wheel-btn {
+            bottom: 20px;
+            left: 50%;
+            top: auto;
+            transform: translateX(-50%);
+            font-size: 14px;
+            padding: 12px 20px;
+        }
+
+        .close-wheel-btn {
+            top: 10px;
+            right: 10px;
+            width: 35px;
+            height: 35px;
+            font-size: 16px;
+        }
+    }
+</style>
+
+<script>
+    (function() {
+        // Ensure this script only runs once
+        if (window.spinWheelInitialized) {
+            return;
+        }
+        window.spinWheelInitialized = true;
+
+        // Offers data - dynamically generated from PHP array - make it global
+        window.offers = <?php echo $offersJson; ?>;
+
+        console.log('Spin wheel offers loaded:', window.offers);
+
+        // Utility functions for DOM manipulation (jQuery alternative)
+        function $(selector) {
+            if (typeof selector === 'string') {
+                return document.querySelector(selector);
+            }
+            return selector;
+        }
+
+        function $$(selector) {
+            return document.querySelectorAll(selector);
+        }
+
+        function fadeIn(element, duration) {
+            duration = duration || 300;
+            element.style.opacity = '0';
+            element.style.display = 'block';
+
+            var start = performance.now();
+
+            function animate(time) {
+                var elapsed = time - start;
+                var progress = elapsed / duration;
+
+                if (progress < 1) {
+                    element.style.opacity = progress;
+                    requestAnimationFrame(animate);
+                } else {
+                    element.style.opacity = '1';
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function fadeOut(element, duration) {
+            duration = duration || 300;
+            var start = performance.now();
+            var startOpacity = parseFloat(element.style.opacity) || 1;
+
+            function animate(time) {
+                var elapsed = time - start;
+                var progress = elapsed / duration;
+
+                if (progress < 1) {
+                    element.style.opacity = startOpacity * (1 - progress);
+                    requestAnimationFrame(animate);
+                } else {
+                    element.style.opacity = '0';
+                    element.style.display = 'none';
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        // Initialize wheel functionality
+        function initSpinWheel() {
+            console.log('Initializing SVG spin wheel...');
+
+            wheelContainer = $('#spinWheel');
+            if (!wheelContainer) {
+                console.log('Spin wheel canvas not found, retrying...');
+                setTimeout(initSpinWheel, 100);
+                return;
+            }
+
+            console.log('Canvas found:', canvas);
+
+            // Force canvas setup multiple times
+            function forceCanvasSetup() {
+                canvas.width = 400;
+                canvas.height = 400;
+                canvas.style.display = 'block';
+                canvas.style.maxWidth = '100%';
+                canvas.style.border = '2px solid #333'; // Add border to see if canvas exists
+                console.log('Forced canvas dimensions to 400x400');
+            }
+
+            forceCanvasSetup();
+
+            var ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Could not get canvas 2d context');
+                return;
+            }
+
+            var centerX = canvas.width / 2;
+            var centerY = canvas.height / 2;
+            var radius = 180;
+
+            console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
+            console.log('Canvas context obtained successfully');
+
+            var isSpinning = false;
+            var currentRotation = 0;
+
+            // Colors for wheel segments
+            var colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'];
+
+            function drawWheel() {
+                console.log('Drawing wheel with offers:', offers);
+
+                if (!offers || offers.length === 0) {
+                    console.error('No offers available for wheel');
+                    return;
+                }
+
+                // Re-get context in case it was lost
+                if (!ctx || !canvas.getContext) {
+                    console.log('Re-getting canvas context...');
+                    ctx = canvas.getContext('2d');
+                }
+
+                if (!ctx) {
+                    console.error('Canvas context not available');
+                    return;
+                }
+
+                // Ensure canvas dimensions are set
+                if (canvas.width !== 400 || canvas.height !== 400) {
+                    canvas.width = 400;
+                    canvas.height = 400;
+                    centerX = canvas.width / 2;
+                    centerY = canvas.height / 2;
+                    console.log('Reset canvas dimensions');
+                }
+
+                var numSegments = offers.length;
+                var anglePerSegment = (2 * Math.PI) / numSegments;
+
+                console.log('Number of segments:', numSegments);
+                console.log('Canvas context:', ctx);
+                console.log('Center X:', centerX, 'Center Y:', centerY, 'Radius:', radius);
+
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Draw background circle first
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                ctx.fillStyle = '#f0f0f0';
+                ctx.fill();
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                console.log('Drawing', numSegments, 'segments');
+
+                // Draw a simple colored wheel with text
+                for (var i = 0; i < numSegments; i++) {
+                    var startAngle = (i * anglePerSegment) + currentRotation;
+                    var endAngle = startAngle + anglePerSegment;
+
+                    console.log('Drawing segment', i, 'color:', colors[i % colors.length]);
+
+                    try {
+                        // Draw segment
+                        ctx.beginPath();
+                        ctx.moveTo(centerX, centerY);
+                        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                        ctx.closePath();
+                        ctx.fillStyle = colors[i % colors.length];
+                        ctx.fill();
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+
+                        // Draw text - simplified
+                        ctx.save();
+                        ctx.translate(centerX, centerY);
+                        ctx.rotate(startAngle + anglePerSegment / 2);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 14px Arial';
+                        ctx.textAlign = 'center';
+
+                        // Draw offer name at 70% radius
+                        ctx.fillText(offers[i].offername, radius * 0.7, -5);
+
+                        // Draw tagline
+                        ctx.font = '10px Arial';
+                        ctx.fillText(offers[i].tagline, radius * 0.7, 8);
+
+                        ctx.restore();
+
+                        console.log('Successfully drew segment', i);
+                    } catch (e) {
+                        console.error('Error drawing segment', i, ':', e);
+                    }
+                }
+
+                console.log('Wheel drawing completed');
+            }
+
+            function spinWheel() {
+                if (isSpinning) return;
+
+                console.log('Starting CSS spin...');
+
+                isSpinning = true;
+                var spinButton = $('#spinButton');
+                spinButton.disabled = true;
+                spinButton.textContent = '';
+
+                var resultSection = $('#result-section');
+                if (resultSection) {
+                    resultSection.style.display = 'none';
+                }
+
+                var wheelContainer = $('#spinWheel');
+                if (!wheelContainer) {
+                    console.error('Wheel container not found');
+                    return;
+                }
+
+                // Random rotation (at least 5 full rotations)
+                var randomRotation = 1800 + Math.random() * 1800; // 1800-3600 degrees
+                var finalRotation = currentRotation + randomRotation;
+
+                console.log('Spinning to:', finalRotation, 'degrees');
+
+                // Apply CSS rotation
+                wheelContainer.style.transform = 'rotate(' + finalRotation + 'deg)';
+
+                // Wait for animation to complete
+                setTimeout(function() {
+                    currentRotation = finalRotation % 360;
+                    console.log('Spin completed, final rotation:', currentRotation);
+                    determineWinner();
+                    isSpinning = false;
+                    spinButton.disabled = false;
+                    spinButton.textContent = 'SPIN NOW!';
+                }, 4000); // Match CSS transition duration
+            }
+
+            function determineWinner() {
+                var numSegments = offers.length;
+                var anglePerSegment = 360 / numSegments; // Dynamic degrees per segment based on offers array
+
+                // The pointer is at the top, so calculate which segment is under it
+                var normalizedRotation = (360 - (currentRotation % 360)) % 360;
+                var segmentIndex = Math.floor(normalizedRotation / anglePerSegment);
+
+                // Ensure valid index
+                segmentIndex = Math.max(0, Math.min(segmentIndex, offers.length - 1));
+
+                var winner = offers[segmentIndex];
+
+                console.log('Winner calculation:', {
+                    currentRotation: currentRotation,
+                    normalizedRotation: normalizedRotation,
+                    segmentIndex: segmentIndex,
+                    winner: winner.offername
+                });
+
+                // Show result
+                showResult(winner);
+            }
+
+            function showResult(winner) {
+                $('#wonOfferName').textContent = winner.offername;
+                $('#wonOfferTagline').textContent = winner.tagline;
+                $('#couponCode').value = winner.coupon;
+                fadeIn($('#result-section'), 500);
+            }
+
+            // Copy coupon code functionality
+            function setupCopyButton() {
+                var copyButton = $('#copyButton');
+                if (copyButton) {
+                    copyButton.addEventListener('click', function() {
+                        var couponCode = $('#couponCode');
+                        couponCode.select();
+                        couponCode.setSelectionRange(0, 99999); // For mobile devices
+
+                        try {
+                            document.execCommand('copy');
+                            playClickSound();
+                            this.textContent = 'COPIED!';
+                            this.classList.add('copied');
+                            setTimeout(() => {
+                                this.textContent = 'COPY';
+                                this.classList.remove('copied');
+                            }, 2000);
+                        } catch (err) {
+                            console.error('Failed to copy text: ', err);
+                            // Fallback for modern browsers
+                            if (navigator.clipboard) {
+                                navigator.clipboard.writeText(couponCode.value).then(() => {
+                                    playClickSound();
+                                    this.textContent = 'COPIED!';
+                                    this.classList.add('copied');
+                                    setTimeout(() => {
+                                        this.textContent = 'COPY';
+                                        this.classList.remove('copied');
+                                    }, 2000);
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+
+
+
+            // Setup spin button
+            function setupSpinButton() {
+                console.log('Setting up spin button...');
+                var spinButton = $('#spinButton');
+                if (spinButton) {
+                    console.log('Spin button found, adding click handler');
+                    spinButton.addEventListener('click', function(event) {
+                        event.preventDefault(); // Prevent any default behavior
+                        console.log('Spin button clicked!');
+                        testSpin();
+                    });
+                } else {
+                    console.error('Spin button not found!');
+                }
+            }
+
+            // Handle window resize
+            function handleResize() {
+                drawWheel();
+            }
+
+            // Aggressive persistent drawing
+            var drawInterval;
+
+            function aggressiveDraw() {
+                // Force canvas setup every time
+                forceCanvasSetup();
+
+                // Get fresh context
+                ctx = canvas.getContext('2d');
+                centerX = canvas.width / 2;
+                centerY = canvas.height / 2;
+
+                console.log('Aggressive draw attempt...');
+
+                // Simple test draw first
+                ctx.fillStyle = 'blue';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'white';
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('LOADING WHEEL...', centerX, centerY);
+
+                // Then draw the actual wheel
+                setTimeout(function() {
+                    drawWheel();
+                }, 100);
+            }
+
+            // Initial aggressive draw
+            aggressiveDraw();
+
+            // Very frequent redrawing to combat React
+            drawInterval = setInterval(function() {
+                console.log('Interval redraw...');
+                aggressiveDraw();
+            }, 200);
+
+            // Add mutation observer to detect canvas changes
+            if (window.MutationObserver) {
+                var observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'attributes' && mutation.target === canvas) {
+                            console.log('Canvas attributes changed, redrawing...');
+                            setTimeout(persistentDraw, 50);
+                        }
+                    });
+                });
+
+                observer.observe(canvas, {
+                    attributes: true,
+                    attributeFilter: ['width', 'height', 'style']
+                });
+            }
+
+            // Also watch for canvas context loss and restoration
+            canvas.addEventListener('webglcontextlost', function(e) {
+                console.log('Canvas context lost');
+                e.preventDefault();
+            });
+
+            canvas.addEventListener('webglcontextrestored', function() {
+                console.log('Canvas context restored, redrawing...');
+                setTimeout(persistentDraw, 50);
+            });
+
+            // Initialize everything
+            setupSpinButton();
+            setupCopyButton();
+
+            // Clean up interval when needed
+            if (window.cleanupSpinWheel) {
+                var originalCleanup = window.cleanupSpinWheel;
+                window.cleanupSpinWheel = function() {
+                    if (drawInterval) {
+                        clearInterval(drawInterval);
+                    }
+                    originalCleanup();
+                };
+            } else {
+                window.cleanupSpinWheel = function() {
+                    if (drawInterval) {
+                        clearInterval(drawInterval);
+                    }
+                    window.removeEventListener('resize', handleResize);
+                    window.spinWheelInitialized = false;
+                };
+            }
+
+            // Add resize listener
+            window.addEventListener('resize', handleResize);
+
+            // Cleanup function for when content is replaced
+            window.cleanupSpinWheel = function() {
+                window.removeEventListener('resize', handleResize);
+                window.spinWheelInitialized = false;
+            };
+        }
+
+        // Direct setup - no delays
+        console.log('Starting immediate setup...');
+
+        function setupSpin() {
+            var wheelContainer = document.getElementById('spinWheel');
+            var spinButton = document.getElementById('spinButton');
+
+            console.log('Found wheel:', wheelContainer);
+            console.log('Found button:', spinButton);
+
+            if (spinButton && wheelContainer) {
+                // Remove any existing listeners
+                spinButton.onclick = null;
+
+                // Add new click handler
+                spinButton.onclick = function() {
+                    console.log('SPIN BUTTON CLICKED!');
+
+                    var offers = window.offers;
+
+                    if (!offers) {
+                        console.error('Offers not available!');
+                        return;
+                    }
+
+                    // Disable button during spin
+                    spinButton.disabled = true;
+                    spinButton.textContent = '';
+
+                    // Select winner based on probability
+                    var winner = selectWinnerByProbability();
+
+                    if (!winner) {
+                        console.error('Failed to select winner!');
+                        spinButton.disabled = false;
+                        spinButton.textContent = 'SPIN NOW!';
+                        return;
+                    }
+
+                    var winnerIndex = offers.findIndex(o => o.coupon === winner.coupon);
+
+                    console.log('Selected winner by probability:', winner);
+                    console.log('Winner index:', winnerIndex);
+
+                    // Calculate rotation to land on the selected winner
+                    var numSegments = offers.length;
+                    var degreesPerSegment = 360 / numSegments;
+
+                    // Calculate the angle for this segment (segment center)
+                    var targetAngle = (winnerIndex * degreesPerSegment) + (degreesPerSegment / 2);
+
+                    // We need to rotate so that this segment ends up at the pointer (top = 0°)
+                    // Since wheel rotates clockwise, we calculate how much to rotate
+                    var baseRotation = 360 - targetAngle;
+
+                    // Add multiple full rotations for visual effect (5-8 spins)
+                    var fullRotations = (5 + Math.floor(Math.random() * 4)) * 360;
+                    var randomRotation = fullRotations + baseRotation;
+
+                    console.log('Target segment angle:', targetAngle + '°');
+                    console.log('Base rotation needed:', baseRotation + '°');
+                    console.log('Total rotation:', randomRotation + '°');
+
+                    // Apply rotation
+                    wheelContainer.style.transition = 'transform 4s cubic-bezier(0.25, 0.1, 0.25, 1)';
+                    wheelContainer.style.transform = 'rotate(' + randomRotation + 'deg)';
+
+                    // Handle result after animation
+                    setTimeout(function() {
+                        console.log('Spin completed');
+                        console.log('Final winner (pre-selected by probability):', winner);
+
+                        // Don't re-enable button - saveCouponToCustomer will hide it if successful
+
+                        // Show result
+                        var resultSection = document.getElementById('result-section');
+                        var wonOfferName = document.getElementById('wonOfferName');
+                        var wonOfferTagline = document.getElementById('wonOfferTagline');
+                        var couponCode = document.getElementById('couponCode');
+
+                        if (wonOfferName) wonOfferName.textContent = winner.offername;
+                        if (wonOfferTagline) wonOfferTagline.textContent = winner.tagline;
+                        if (couponCode) couponCode.value = winner.coupon;
+                        if (resultSection) {
+                            resultSection.style.opacity = '0';
+                            resultSection.style.display = 'block';
+                            setTimeout(function() {
+                                resultSection.style.opacity = '1';
+                            }, 100);
+                        }
+
+                        // Save coupon to database
+                        console.log('Calling saveCouponToCustomer with winner:', winner);
+                        saveCouponToCustomer(winner);
+                    }, 4000);
+
+                    return false;
+                };
+
+                console.log('Click handler setup complete!');
+                return true;
+            } else {
+                console.log('Elements not found yet, retrying...');
+                return false;
+            }
+        }
+
+        // Try setup multiple times
+        var setupAttempts = 0;
+        var setupInterval = setInterval(function() {
+            setupAttempts++;
+            console.log('Setup attempt:', setupAttempts);
+
+            if (setupSpin() || setupAttempts > 10) {
+                clearInterval(setupInterval);
+                console.log('Setup completed or max attempts reached');
+            }
+        }, 200);
+    })();
+
+    // Global variables to prevent multiple spins
+    var hasSpunToday = false;
+    var isSpinInProgress = false;
+
+    // Function to select winner based on probability weights
+    function selectWinnerByProbability() {
+        var offers = window.offers;
+
+        if (!offers || offers.length === 0) {
+            console.error('Offers not loaded!');
+            return null;
+        }
+
+        // Calculate total probability
+        var totalProbability = offers.reduce(function(sum, offer) {
+            return sum + (offer.probability || 0);
+        }, 0);
+
+        // Generate random number between 0 and total probability
+        var random = Math.random() * totalProbability;
+
+        console.log('Total probability:', totalProbability);
+        console.log('Random value:', random);
+
+        // Find which offer this random number falls into
+        var cumulativeProbability = 0;
+        for (var i = 0; i < offers.length; i++) {
+            cumulativeProbability += (offers[i].probability || 0);
+            if (random <= cumulativeProbability) {
+                console.log('Selected offer:', offers[i].offername, '(probability: ' + offers[i].probability + '%)');
+                return offers[i];
+            }
+        }
+
+        // Fallback to last offer (shouldn't happen)
+        return offers[offers.length - 1];
+    }
+
+    // Global test function that should always work
+    function testSpin() {
+        console.log('TEST SPIN FUNCTION CALLED!');
+
+        var wheelContainer = document.getElementById('spinWheel');
+        var spinButton = document.getElementById('spinButton');
+
+        // Check if user has already spun or spin is in progress
+        if (hasSpunToday || isSpinInProgress) {
+            console.log('Spin blocked - hasSpunToday:', hasSpunToday, 'isSpinInProgress:', isSpinInProgress);
+            return;
+        }
+
+        if (!wheelContainer) {
+            alert('Wheel container not found!');
+            return;
+        }
+
+        // Play click sound
+        playClickSound();
+
+        console.log('Starting spin animation...');
+
+        // Set flags to prevent multiple spins
+        isSpinInProgress = true;
+
+        // Disable button
+        if (spinButton) {
+            spinButton.disabled = true;
+            spinButton.textContent = '';
+        }
+
+        // Random rotation
+        var randomRotation = 1800 + Math.random() * 1800;
+
+        // Apply CSS transition and rotation
+        wheelContainer.style.transition = 'transform 4s cubic-bezier(0.25, 0.1, 0.25, 1)';
+        wheelContainer.style.transform = 'rotate(' + randomRotation + 'deg)';
+
+        console.log('Applied rotation:', randomRotation + 'deg');
+
+        // Handle completion
+        setTimeout(function() {
+            console.log('Spin animation completed');
+
+            // Don't re-enable button here - let saveCouponToCustomer handle it after saving
+
+            // Calculate winner based on where the wheel stopped
+            var offers = <?php echo $offersJson; ?>;
+
+            // Calculate which segment the pointer is on
+            var finalRotation = randomRotation % 360;
+            var numSegments = offers.length;
+            var degreesPerSegment = 360 / numSegments;
+
+            // The segments are positioned dynamically based on offers array length
+            // Segment 0 starts at top (0°) and goes clockwise
+            // The pointer is at 0° (top). When wheel rotates clockwise:
+            // We need to find which original segment is now at the pointer position
+
+            // Correct formula: which original segment is now at the pointer position
+            var segmentIndex = Math.floor((360 - finalRotation) / degreesPerSegment) % numSegments;
+
+            var winner = offers[segmentIndex];
+
+            console.log('Random rotation applied:', randomRotation + '°');
+            console.log('Final rotation (remainder):', finalRotation + '°');
+            console.log('Number of segments:', numSegments);
+            console.log('Degrees per segment:', degreesPerSegment + '°');
+            console.log('Reverse calculation:', (360 - finalRotation));
+            console.log('Calculated segment index:', segmentIndex);
+
+            // Generate dynamic segment mapping for debug
+            var segmentMapping = offers.map((offer, index) => {
+                return index + '=' + offer.offername;
+            }).join(', ');
+            console.log('Segment mapping:', segmentMapping);
+            console.log('Winner:', winner.offername, '-', winner.tagline, '(' + winner.coupon + ')');
+
+            // Visual debugging - which segment should be under pointer after rotation
+            var segmentUnderPointer = Math.floor((360 - finalRotation) / degreesPerSegment) % numSegments;
+            console.log('Expected segment under pointer:', segmentUnderPointer);
+            console.log('Pointer should be on:', offers[segmentUnderPointer].offername);
+
+            var resultSection = document.getElementById('result-section');
+            var wonOfferName = document.getElementById('wonOfferName');
+            var wonOfferTagline = document.getElementById('wonOfferTagline');
+            var couponCode = document.getElementById('couponCode');
+
+            if (wonOfferName) wonOfferName.textContent = winner.offername;
+            if (wonOfferTagline) wonOfferTagline.textContent = winner.tagline;
+            if (couponCode) couponCode.value = winner.coupon;
+            if (resultSection) {
+                resultSection.style.display = 'block';
+                resultSection.style.opacity = '1';
+            }
+
+            // Play winning sound
+            setTimeout(function() {
+                playWinSound();
+            }, 500);
+
+            // Setup copy button for the result
+            setTimeout(function() {
+                setupResultCopyButton();
+            }, 100);
+
+            // Save coupon to customer account
+            saveCouponToCustomer(winner);
+
+        }, 4000);
+    }
+
+    // Save coupon to customer account via AJAX
+    function saveCouponToCustomer(winner) {
+        console.log('saveCouponToCustomer called with:', winner);
+
+        // Get form key
+        var formKeyValue = getFormKey();
+
+        // Create form data
+        var formData = new FormData();
+        formData.append('coupon_code', winner.coupon);
+        formData.append('offer_name', winner.offername);
+        formData.append('offer_tagline', winner.tagline);
+        formData.append('form_key', formKeyValue);
+
+        // Send AJAX request to save coupon
+        fetch(window.location.href, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Server response:', data);
+
+                if (data.success) {
+                    console.log('Coupon saved successfully to database');
+
+                    // Set flags to prevent future spins
+                    hasSpunToday = true;
+                    isSpinInProgress = false;
+
+                    // Hide the spin button completely
+                    var spinButton = document.getElementById('spinButton');
+                    if (spinButton) {
+                        spinButton.style.display = 'none';
+                        spinButton.disabled = true;
+                    }
+                } else {
+                    console.error('Failed to save coupon:', data.message);
+
+                    // Reset flags on failure
+                    isSpinInProgress = false;
+
+                    // Re-enable button
+                    var spinButton = document.getElementById('spinButton');
+                    if (spinButton) {
+                        spinButton.disabled = false;
+                        spinButton.textContent = 'SPIN NOW!';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error saving coupon:', error);
+
+                // Reset flags on error to allow retry
+                isSpinInProgress = false;
+
+                // Re-enable button on error
+                var spinButton = document.getElementById('spinButton');
+                if (spinButton) {
+                    spinButton.disabled = false;
+                    spinButton.textContent = 'SPIN NOW!';
+                }
+            });
+    }
+
+    // Get Magento form key
+    function getFormKey() {
+        var formKey = '';
+        var formKeyInputs = document.querySelectorAll('input[name="form_key"]');
+        if (formKeyInputs.length > 0) {
+            formKey = formKeyInputs[0].value;
+        } else {
+            // Try to get from cookies
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.indexOf('form_key=') === 0) {
+                    formKey = cookie.substring(9);
+                    break;
+                }
+            }
+        }
+        return formKey;
+    }
+
+    // Show debug information on screen
+    function showDebugInfo(message, type) {
+        // Remove existing debug box
+        var existingBox = document.getElementById('debugInfoBox');
+        if (existingBox) {
+            existingBox.remove();
+        }
+
+        // Create debug box
+        var debugBox = document.createElement('div');
+        debugBox.id = 'debugInfoBox';
+        debugBox.style.position = 'fixed';
+        debugBox.style.top = '10px';
+        debugBox.style.right = '10px';
+        debugBox.style.maxWidth = '500px';
+        debugBox.style.maxHeight = '80vh';
+        debugBox.style.overflow = 'auto';
+
+        var bgColor = type === 'success' ? '#d4edda' : (type === 'info' ? '#d1ecf1' : '#f8d7da');
+        var borderColor = type === 'success' ? '#28a745' : (type === 'info' ? '#17a2b8' : '#dc3545');
+
+        debugBox.style.backgroundColor = bgColor;
+        debugBox.style.border = '2px solid ' + borderColor;
+        debugBox.style.borderRadius = '8px';
+        debugBox.style.padding = '15px';
+        debugBox.style.zIndex = '99999';
+        debugBox.style.fontFamily = 'monospace';
+        debugBox.style.fontSize = '12px';
+        debugBox.style.color = '#000';
+        debugBox.style.whiteSpace = 'pre-wrap';
+        debugBox.style.wordBreak = 'break-word';
+        debugBox.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+
+        // Add close button
+        var closeBtn = document.createElement('button');
+        closeBtn.textContent = '✕ Close';
+        closeBtn.style.position = 'absolute';
+        closeBtn.style.top = '10px';
+        closeBtn.style.right = '10px';
+        closeBtn.style.padding = '5px 10px';
+        closeBtn.style.cursor = 'pointer';
+        var btnColor = type === 'success' ? '#28a745' : (type === 'info' ? '#17a2b8' : '#dc3545');
+        closeBtn.style.backgroundColor = btnColor;
+        closeBtn.style.color = 'white';
+        closeBtn.style.border = 'none';
+        closeBtn.style.borderRadius = '4px';
+        closeBtn.onclick = function() {
+            debugBox.remove();
+        };
+
+        // Add copy button
+        var copyBtn = document.createElement('button');
+        copyBtn.textContent = '📋 Copy';
+        copyBtn.style.position = 'absolute';
+        copyBtn.style.top = '10px';
+        copyBtn.style.right = '80px';
+        copyBtn.style.padding = '5px 10px';
+        copyBtn.style.cursor = 'pointer';
+        copyBtn.style.backgroundColor = '#007bff';
+        copyBtn.style.color = 'white';
+        copyBtn.style.border = 'none';
+        copyBtn.style.borderRadius = '4px';
+        copyBtn.onclick = function() {
+            navigator.clipboard.writeText(message).then(function() {
+                copyBtn.textContent = '✓ Copied!';
+                setTimeout(function() {
+                    copyBtn.textContent = '📋 Copy';
+                }, 2000);
+            });
+        };
+
+        // Add message
+        var messageDiv = document.createElement('div');
+        messageDiv.style.marginTop = '35px';
+        messageDiv.textContent = message;
+
+        debugBox.appendChild(closeBtn);
+        debugBox.appendChild(copyBtn);
+        debugBox.appendChild(messageDiv);
+        document.body.appendChild(debugBox);
+    }
+
+    // Sound Effects Functions
+    function createAudioContext() {
+        try {
+            // Create audio context for sound generation
+            window.audioContext = window.audioContext || new(window.AudioContext || window.webkitAudioContext)();
+            return window.audioContext;
+        } catch (e) {
+            console.log('Web Audio API not supported');
+            return null;
+        }
+    }
+
+
+
+    function playWinSound() {
+        var audioContext = createAudioContext();
+        if (!audioContext) return;
+
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+
+        // Create a celebratory winning sound
+        var notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+
+        notes.forEach(function(frequency, index) {
+            setTimeout(function() {
+                var oscillator = audioContext.createOscillator();
+                var gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+
+                // Create a bell-like envelope
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.5);
+            }, index * 150);
+        });
+
+        console.log('Playing win sound...');
+    }
+
+    function playClickSound() {
+        return;
+        var audioContext = createAudioContext();
+        if (!audioContext) return;
+
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+
+        // Create a button click sound
+        var oscillator = audioContext.createOscillator();
+        var gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+    }
+
+    // Initialize audio context on first user interaction
+    document.addEventListener('click', function initAudio() {
+        createAudioContext();
+        document.removeEventListener('click', initAudio);
+    }, {
+        once: true
+    });
+
+    // Countdown timer functionality
+    function initCountdownTimer() {
+        var countdownElement = document.getElementById('countdown-timer');
+        if (!countdownElement) return;
+
+        // Get expiration time from PHP (pass it via data attribute)
+        var expirationTime = <?php echo $hasRecentSpin ? "new Date('" . $existingSpin['expires_at'] . "').getTime()" : '0'; ?>;
+
+        function updateCountdown() {
+            var now = new Date().getTime();
+            var distance = expirationTime - now;
+
+            if (distance > 0) {
+                var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                countdownElement.innerHTML =
+                    String(hours).padStart(2, '0') + ':' +
+                    String(minutes).padStart(2, '0') + ':' +
+                    String(seconds).padStart(2, '0');
+            } else {
+                countdownElement.innerHTML = "Time's up! Refresh the page to spin again!";
+                clearInterval(countdownInterval);
+            }
+        }
+
+        // Update immediately and then every second
+        updateCountdown();
+        var countdownInterval = setInterval(updateCountdown, 1000);
+    }
+
+    // Setup copy button for result section coupon
+    function setupResultCopyButton() {
+        // Set up copy button with retry mechanism
+        function trySetupCopyButton() {
+            var copyButton = document.getElementById('copyButton');
+            if (copyButton) {
+                console.log('Result copy button found, setting up functionality');
+
+                // Remove any existing event listeners
+                copyButton.onclick = null;
+
+                copyButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Result copy button clicked');
+
+                    var couponCode = document.getElementById('couponCode');
+                    if (couponCode) {
+                        // Select the text
+                        couponCode.select();
+                        couponCode.setSelectionRange(0, 99999);
+
+                        // Try to copy using different methods
+                        var copySuccess = false;
+
+                        try {
+                            // Method 1: document.execCommand (older browsers)
+                            if (document.execCommand('copy')) {
+                                copySuccess = true;
+                                console.log('Copied using execCommand');
+                            }
+                        } catch (err) {
+                            console.log('execCommand failed:', err);
+                        }
+
+                        if (!copySuccess && navigator.clipboard) {
+                            // Method 2: Clipboard API (modern browsers)
+                            navigator.clipboard.writeText(couponCode.value).then(() => {
+                                copySuccess = true;
+                                console.log('Copied using Clipboard API');
+                                updateCopyButtonState(this);
+                            }).catch(err => {
+                                console.log('Clipboard API failed:', err);
+                            });
+                        }
+
+                        if (copySuccess) {
+                            updateCopyButtonState(this);
+                        }
+                    } else {
+                        console.error('Coupon code input not found');
+                    }
+                });
+
+                return true;
+            }
+            return false;
+        }
+
+        // Try immediately
+        if (!trySetupCopyButton()) {
+            // Retry every 500ms for up to 10 seconds
+            var attempts = 0;
+            var interval = setInterval(function() {
+                attempts++;
+                if (trySetupCopyButton() || attempts > 20) {
+                    clearInterval(interval);
+                }
+            }, 500);
+        }
+    }
+
+    function updateCopyButtonState(button) {
+        playClickSound();
+        button.textContent = 'COPIED!';
+        button.classList.add('copied');
+        setTimeout(function() {
+            button.textContent = 'COPY';
+            button.classList.remove('copied');
+        }, 2000);
+    }
+
+    // Setup copy button for existing coupon
+    function setupExistingCopyButton() {
+        var copyBtn = document.getElementById('copyExistingBtn');
+        if (copyBtn) {
+            copyBtn.addEventListener('click', function() {
+                var couponInput = document.getElementById('existingCouponCode');
+                if (couponInput) {
+                    couponInput.select();
+                    couponInput.setSelectionRange(0, 99999);
+
+                    try {
+                        document.execCommand('copy');
+                        playClickSound();
+                        this.textContent = 'COPIED!';
+                        this.classList.add('copied');
+                        setTimeout(() => {
+                            this.textContent = 'COPY';
+                            this.classList.remove('copied');
+                        }, 2000);
+                    } catch (err) {
+                        if (navigator.clipboard) {
+                            navigator.clipboard.writeText(couponInput.value).then(() => {
+                                playClickSound();
+                                this.textContent = 'COPIED!';
+                                this.classList.add('copied');
+                                setTimeout(() => {
+                                    this.textContent = 'COPY';
+                                    this.classList.remove('copied');
+                                }, 2000);
+                            });
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // Wheel Modal Functionality
+    function initWheelModal() {
+        console.log('Initializing wheel modal...');
+
+        var openBtn = document.getElementById('openWheelBtn');
+        var closeBtn = document.getElementById('closeWheelBtn');
+        var modal = document.getElementById('spinWheelModal');
+        var overlay = document.getElementById('wheelOverlay');
+
+        console.log('Found elements:', {
+            openBtn: openBtn,
+            closeBtn: closeBtn,
+            modal: modal,
+            overlay: overlay
+        });
+
+        function openWheel() {
+            console.log('Opening wheel...');
+            if (modal && overlay) {
+                playClickSound();
+                modal.classList.add('active');
+                overlay.classList.add('active');
+                document.body.classList.add('spinwheeladd'); // Add class
+                document.body.style.overflow = 'hidden'; // Prevent background scroll
+                console.log('Wheel opened successfully');
+            } else {
+                console.error('Modal or overlay not found!');
+            }
+        }
+
+        function closeWheel() {
+            if (modal && overlay) {
+                playClickSound();
+                modal.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.classList.remove('spinwheeladd'); // Remove class
+                document.body.style.overflow = ''; // Restore scroll
+                console.log('Wheel closed successfully');
+            }
+        }
+
+
+        // Event listeners
+        if (openBtn) {
+            openBtn.addEventListener('click', openWheel);
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeWheel);
+        }
+
+        // Close on overlay click
+        if (overlay) {
+            overlay.addEventListener('click', closeWheel);
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
+                closeWheel();
+            }
+        });
+
+        console.log('Wheel modal functionality initialized');
+    }
+
+    // Initialize modal when DOM is ready - with multiple retry attempts
+    function tryInitModal() {
+        console.log('Attempting to initialize modal...');
+        var openBtn = document.getElementById('openWheelBtn');
+        if (openBtn) {
+            initWheelModal();
+            return true;
+        }
+        console.log('Open button not found yet...');
+        return false;
+    }
+
+    // Try initialization immediately
+    if (!tryInitModal()) {
+        // If not ready, wait for DOM
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(tryInitModal, 100);
+            });
+        } else {
+            // DOM is ready, but elements might not be there yet
+            setTimeout(function() {
+                if (!tryInitModal()) {
+                    // Last resort - keep trying every 100ms for up to 2 seconds
+                    var attempts = 0;
+                    var interval = setInterval(function() {
+                        attempts++;
+                        console.log('Retry attempt:', attempts);
+                        if (tryInitModal() || attempts > 20) {
+                            clearInterval(interval);
+                            if (attempts > 20) {
+                                console.error('Failed to initialize modal after 20 attempts');
+                            }
+                        }
+                    }, 100);
+                }
+            }, 100);
+        }
+    }
+
+    // Initialize countdown and existing coupon functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if user has already spun today
+        var alreadySpunContainer = document.querySelector('.already-spun-container');
+        if (alreadySpunContainer) {
+            hasSpunToday = true;
+            console.log('User has already spun today - disabling spin functionality');
+        } else {
+            console.log('User can spin today - enabling spin functionality');
+        }
+
+        initCountdownTimer();
+        setupExistingCopyButton();
+        setupResultCopyButton(); // Add this line
+    });
+
+    // Fallback function for manual opening
+    function openWheelManually() {
+        console.log('Manual wheel opening triggered...');
+        var modal = document.getElementById('spinWheelModal');
+        var overlay = document.getElementById('wheelOverlay');
+
+        if (modal && overlay) {
+            playClickSound();
+            modal.classList.add('active');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            document.body.classList.add('spinwheeladd');
+            console.log('Wheel opened manually');
+
+            // Also set up close functionality if not already done
+            var closeBtn = document.getElementById('closeWheelBtn');
+            if (closeBtn && !closeBtn.onclick) {
+                closeBtn.onclick = function() {
+                    closeWheelManually();
+                };
+            }
+
+            if (overlay && !overlay.onclick) {
+                overlay.onclick = function() {
+                    closeWheelManually();
+                };
+            }
+        } else {
+            console.error('Modal elements not found:', {
+                modal,
+                overlay
+            });
+            alert('Wheel elements not found!');
+        }
+    }
+
+    function closeWheelManually() {
+        console.log('Manual wheel closing triggered...');
+        var modal = document.getElementById('spinWheelModal');
+        var overlay = document.getElementById('wheelOverlay');
+
+        if (modal && overlay) {
+            playClickSound();
+            modal.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.classList.remove('spinwheeladd');
+            document.body.style.overflow = '';
+            console.log('Wheel closed manually');
+        }
+    }
+
+    // Temporary function to reset spin for testing
+    function resetSpin() {
+        if (confirm('Are you sure you want to reset your spin? This will allow you to spin again.')) {
+            console.log('Resetting spin for testing...');
+
+            // Create form data
+            var formData = new FormData();
+            formData.append('reset_spin', '1');
+            formData.append('form_key', getFormKey());
+
+            // Send AJAX request to reset spin
+            fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Spin reset successfully');
+                    playClickSound();
+                    alert('Spin reset successfully! You can now spin again.');
+                    // Refresh the page to show the updated state
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error resetting spin:', error);
+                    alert('Error resetting spin. Please try again.');
+                });
+        }
+    }
+</script>

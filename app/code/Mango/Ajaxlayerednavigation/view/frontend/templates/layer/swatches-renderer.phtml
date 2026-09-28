@@ -1,0 +1,145 @@
+<?php
+/** @var $block \Magento\Swatches\Block\LayeredNavigation\RenderLayered */
+
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+//    $httpmanager = $objectManager->get('\Magento\Framework\App\Request\Http');
+    $httpmanager = $objectManager->get('Magento\Framework\App\Request\Http');  
+
+    
+    
+?>
+<?php $swatchData = $block->getSwatchData();
+
+$swatchData["filter_is_active"] = false;
+$swatchData["active_filter_items"] = false;
+?>
+<?php $block->setData("filter_is_active", $swatchData["filter_is_active"]); ?>
+<div class="swatch-attribute swatch-layered <?= $swatchData['attribute_code'] ?> <?php if ($swatchData["filter_is_active"]): ?>active-filters-list <?php endif; ?>" attribute-code="<?= $swatchData['attribute_code'] ?>" attribute-id="174">
+    <div class="swatch-attribute-options clearfix filter-items-list">
+        
+        <?php
+            $attr_label = $swatchData['attribute_code'];
+            $class= '';
+     
+            $param = $httpmanager->getParam( $attr_label );
+     
+     
+        ?>
+        
+        <!--$swatchData['attribute_code']-->
+                                                                    
+        <?php foreach ($swatchData['options'] as $option => $label): ?>
+          <?php
+            $curr_attr_val = array();
+            $curr_attr_val = $swatchData["active_filter_items"];
+            if( $param != '' ){
+                
+                $shirt_size_arr = explode(',' , $param );
+                if( in_array($option, $shirt_size_arr ) ){
+//                    echo "class found";
+                    $class = "active-filter-option";
+                }else{
+//                    echo "class not found";
+                    $class = "";
+                }
+            }
+     
+                
+            /*
+            if( $param != '' ){
+                echo "param found<br>";
+                $attr = $httpmanager->getParam($attr_label);
+                
+                $shirt_size_arr = explode(',' , $attr );
+                echo "curr_attr_val: ".$curr_attr_val;
+                echo "swatchData : ".$swatchData["active_filter_items"];
+                echo "<br>";
+                echo "shirt_size_arr: ".print_r($shirt_size_arr);
+                echo "<br>";
+    
+                if( in_array($curr_attr_val, $shirt_size_arr ) ){
+                    $class = "active-filter-option";
+                }else{
+                    $class = "";
+                }
+            }else{
+                echo "param not found";
+            }
+            */
+//            echo 'class is :'.$class."<br>";
+          ?>
+        
+            <a href="<?= /* @escapeNotVerified */ $label['link'] ?>" 
+               class="swatch-option-link-layered <?php if ($swatchData["active_filter_items"] && in_array($option, $swatchData["active_filter_items"])):
+                    ?>active-filter-option <?php
+endif; ?><?= $class; ?>">
+          
+                <?php if (isset($swatchData['swatches'][$option]['type'])) { ?>
+                    <?php
+                    switch ($swatchData['swatches'][$option]['type']) {
+                        case '3':
+                            ?>
+                            <div class="swatch-option <?= /* @escapeNotVerified */ $label['custom_style'] ?>"
+                                 option-type="3"
+                                 option-id="<?= /* @escapeNotVerified */ $option ?>"
+                                 option-label="<?= /* @escapeNotVerified */ $label['label'] ?>"
+                                 option-tooltip-thumb=""
+                                 option-tooltip-value=""
+                                 ></div>
+                                    <?php
+                            break;
+                        case '2':
+                            ?>
+                            <?php $swatchThumbPath = $block->getSwatchPath('swatch_thumb', $swatchData['swatches'][$option]['value']);
+                            ?>
+                            <?php $swatchImagePath = $block->getSwatchPath('swatch_image', $swatchData['swatches'][$option]['value']);
+                            ?>
+                            <div class="swatch-option image <?= /* @escapeNotVerified */ $label['custom_style'] ?>"
+                                 option-type="2"
+                                 option-id="<?= /* @escapeNotVerified */ $option ?>"
+                                 option-label="<?= /* @escapeNotVerified */ $label['label'] ?>"
+                                 option-tooltip-thumb="<?= /* @escapeNotVerified */ $swatchThumbPath ?>"
+                                 option-tooltip-value=""
+                                 style="background: url(<?= /* @escapeNotVerified */ $swatchImagePath ?>) no-repeat center; background-size: initial;"></div>
+                                    <?php
+                            break;
+                        case '1':
+                            ?>
+                            <div class="swatch-option color <?= /* @escapeNotVerified */ $label['custom_style'] ?>"
+                            option-type="1"
+                            option-id="<?= /* @escapeNotVerified */ $option ?>"
+                            option-label="<?= /* @escapeNotVerified */ $label['label'] ?>"
+                            option-tooltip-thumb=""
+                            option-tooltip-value="<?= /* @escapeNotVerified */ $swatchData['swatches'][$option]['value'] ?>"
+                            style="background: <?= /* @escapeNotVerified */ $swatchData['swatches'][$option]['value'] ?> no-repeat center; background-size: initial;"></div>
+                            <?php
+                            break;
+                        case '0':
+                        default:
+                            ?>
+                            <div class="swatch-option text <?= /* @escapeNotVerified */ $label['custom_style'] ?>"
+                            option-type="0"
+                            option-id="<?= /* @escapeNotVerified */ $option ?>"
+                            option-label="<?= /* @escapeNotVerified */ $label['label'] ?>"
+                            option-tooltip-thumb=""
+                            option-tooltip-value=""
+                            ><?= /* @escapeNotVerified */ $swatchData['swatches'][$option]['value'] ?>
+                            <?php if(isset($label['count'])) {echo " (".$label['count'].")";} ?>
+                            </div>
+                            <?php
+                            break;
+                    }
+                    ?>
+    <?php } ?>
+            </a>
+<?php endforeach; ?>
+    </div>
+</div>
+
+<script>
+    require(["jquery", "jquery/ui", "Magento_Swatches/js/swatch-renderer"], function ($) {
+        $('.swatch-layered.<?= /* @escapeNotVerified */ $swatchData['attribute_code'] ?>')
+                .find('[option-type="1"], [option-type="2"], [option-type="0"], [option-type="3"]')
+                .SwatchRendererTooltip();
+    });
+</script>

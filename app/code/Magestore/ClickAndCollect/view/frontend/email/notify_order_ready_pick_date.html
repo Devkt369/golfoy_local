@@ -1,0 +1,57 @@
+<!--
+/**
+ * Copyright © Magestore. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<!--@subject {{trans "Notification about your order's ready pick date"}} @-->
+<!--@vars {
+"var locationName":"Location Name",
+"var order.increment_id":"Order Id",
+"var order.map_image":"Order Click and Collect Map Image",
+"var order.map_url":"Order Click and Collect Map Url",
+"var order_data.customer_name":"Guest Customer Name",
+"var store.frontend_name":"Store Frontend Name",
+"var ready_pick_date_formatted":"Order Created At (datetime)",
+"var order.click_and_collect_info.store_name":"Order Click and Collect Store Name",
+"var order.click_and_collect_info.phone":"Order Click and Collect Phone",
+"var order.click_and_collect_info.address":"Order Click and Collect Address",
+"var order.click_and_collect_info":"Order Click and Collect Info",
+"var order":"Order",
+"var order.has_click_and_collect_info":"Order Has Click and Collect Info"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+<table>
+    <tr class="email-intro">
+        <p class="greeting">{{trans "%name," name=$order_data.customer_name}}</p>
+        <p>
+            {{trans "Thank you for your order from %store_name." store_name=$store.frontend_name}}
+        </p>
+        <p>
+            {{trans "Your order  #%increment_id will be ready to be collected on %ready_pick_date at %location_name." increment_id=$order.increment_id ready_pick_date=$ready_pick_date_formatted location_name=$locationName |raw}}
+        </p>
+    </tr>
+    <tr class="email-summary">
+        <td>
+            <h3>{{trans 'Address Information'}}</h3>
+            <hr/>
+        </td>
+    </tr>
+    <tr class="email-information">
+        <table class="order-details">
+            {{if order.has_click_and_collect_info}}
+            <p>{{trans "Telephone: %telephone" telephone=$order.click_and_collect_info.phone}}</p>
+            <p>{{trans "Address: %store_address" store_address=$order.click_and_collect_info.address}}</p>
+            {{/if}}
+            {{if order.map_image}}
+            <p>
+                <a href="{{var order.map_url}}">
+                    <img src="{{var order.map_image}}" alt="google_map"/>
+                </a>
+            </p>
+            {{/if}}
+        </table>
+    </tr>
+</table>
+{{template config_path="design/email/footer_template"}}

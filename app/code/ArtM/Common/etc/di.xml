@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+        <type name="Magento\Checkout\Block\Checkout\AttributeMerger">
+                <plugin name="ArtM_checkout_phone_number" type="ArtM\Common\Plugin\PhoneValidationPlugin" sortOrder="10"/>
+        </type>
+        <preference for="Magento\Review\Controller\Product\Post" type="ArtM\Common\Controller\Review\Post" />
+        <preference for="Magento\Swatches\Block\LayeredNavigation\RenderLayered" type="ArtM\Common\Block\LayeredNavigation\RenderLayeredCount" />
+        <type name="Magento\Sitemap\Model\ResourceModel\Cms\Page">
+                <plugin name="artm_common_sitemap_page" type="ArtM\Common\Plugin\Sitemap\Page" />
+        </type>
+        <type name="Magento\Sitemap\Model\ResourceModel\Catalog\Category">
+                <plugin name="artm_common_sitemap_category" type="ArtM\Common\Plugin\Sitemap\Category" />
+        </type>
+        <type name="Magento\Sitemap\Model\ResourceModel\Catalog\Product">
+                <plugin name="artm_common_sitemap_product" type="ArtM\Common\Plugin\Sitemap\Product" />
+        </type>
+
+        <type name="Magento\Checkout\Block\Checkout\LayoutProcessor">
+                <plugin disabled="false" name="artm_common_Plugin_Block_Checkout_LayoutProcessor" sortOrder="100" type="ArtM\Common\Plugin\Block\Checkout\LayoutProcessor"/>
+        </type>
+        <type name="ArtM\Common\Logger\ChangephoneLogger">
+                <arguments>
+                        <argument name="handler" xsi:type="object">ArtM\Common\Logger\Handler</argument>
+                </arguments>
+        </type>
+        <type name="ArtM\SFMC\Logger\Handler">
+                <arguments>
+                        <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+                </arguments>
+        </type>
+        <type name="ArtM\Common\Logger\GiftCardLogger">
+                <arguments>
+                        <argument name="name" xsi:type="string">Common</argument>
+                        <argument name="handlers" xsi:type="array">
+                                <item name="product" xsi:type="object">ArtM\Common\Logger\GiftCardHandler</item>
+                        </argument>
+                </arguments>
+        </type>
+        <preference for="Magento\Tax\Model\Calculation\TotalBaseCalculator" type="ArtM\Common\Model\Calculation\CustomTotalBaseCalculator"/>
+        <preference for="Magento\Tax\Model\Calculation\RowBaseCalculator" type="ArtM\Common\Model\Calculation\CustomRowBaseCalculator"/>
+        <type name="Magento\Tax\Model\Sales\Total\Quote\CommonTaxCollector">
+                <plugin name="common_tax_collector_plugin" type="ArtM\Common\Plugin\Tax\Model\Sales\Total\Quote\CommonTaxCollectorPlugin" />
+        </type>
+        <preference for="Magento\Sales\Controller\Adminhtml\Order\AddComment" type="ArtM\Common\Controller\Adminhtml\Order\AddComment" />
+        <preference for="Magento\CheckoutAgreements\Model\AgreementsConfigProvider" type="ArtM\Common\Model\AgreementsConfigProvider"/>
+        <type name="Magento\Checkout\Model\CompositeConfigProvider">
+                <arguments>
+                        <argument name="configProviders" xsi:type="array">
+                                <item name="checkout_agreements_config_provider" xsi:type="object">ArtM\Common\Model\AgreementsConfigProvider</item>
+                        </argument>
+                </arguments>
+        </type>
+        <type name="Magento\Tax\Model\ResourceModel\Sales\Order\Relation">
+                <plugin name="remove_pos_order_from_relation" type="ArtM\Common\Plugin\Sales\Order\RelationPlugin" />
+        </type>
+        <preference for="Magento\Customer\Model\Validator\Name" type="ArtM\Common\Model\Validator\Name"/>
+        <preference for="Magento\Checkout\Controller\Cart\UpdateItemQty" type="ArtM\Common\Controller\Cart\UpdateItemQty" />
+        <preference for="Magento\ConfigurableProduct\Model\Inventory\ChangeParentStockStatus"
+                        type="ArtM\Common\Model\Inventory\ChangeParentStockStatus"/>
+        <type name="Magento\Sales\Model\Service\CreditmemoService">
+                <plugin name="shipment_creditmemo_plugin" type="ArtM\Common\Plugin\Service\CreditmemoServicePlugin" />
+        </type>
+        <preference for="Magento\Sales\Model\Order\Pdf\Shipment" type="ArtM\Common\Model\Order\Pdf\Shipment" />
+        <type name="Magento\Sales\Model\Order\Pdf\Invoice">
+        </type>
+        <preference for="Magento\Sales\Model\Order\Pdf\Invoice" type="ArtM\Common\Pdf\CustomInvoicePdf" />
+        <preference for="Magento\Sales\Model\Order\Pdf\Shipment" type="ArtM\Common\Pdf\CustomShipmentPdf" />
+        <preference for="Magento\Sales\Model\Order\Pdf\Creditmemo" type="ArtM\Common\Pdf\CustomCreditmemoPdf" />
+
+        <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+                <arguments>
+                        <argument name="collections" xsi:type="array">
+                                <item name="sales_order_grid_data_source" xsi:type="string">ArtM\Common\Model\ResourceModel\Sales\Order\Grid\Collection</item>
+                        </argument>
+                </arguments>
+        </type>
+
+        <type name="Magento\Theme\Model\View\Design">
+                <arguments>
+                        <argument name="themes" xsi:type="array">
+                                <item name="adminhtml" xsi:type="string">Golfoy/Golfoy</item>
+                        </argument>
+                </arguments>
+        </type>
+
+</config>

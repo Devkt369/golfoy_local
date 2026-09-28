@@ -1,0 +1,116 @@
+<?xml version="1.0" ?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">recommended_sort_listing_grid.recommended_sort_listing_grid_data_source</item>
+            <item name="deps" xsi:type="string">recommended_sort_listing_grid.recommended_sort_listing_grid_data_source</item>
+        </item>
+        <item name="spinner" xsi:type="string">columns</item>
+        <item name="buttons" xsi:type="array">
+            <item name="add" xsi:type="array">
+                <item name="name" xsi:type="string">add</item>
+                <item name="label" xsi:type="string" translate="true">Initiate all</item>
+                <item name="class" xsi:type="string">primary</item>
+                <item name="url" xsi:type="string">artm_recommendedsort/index/initiateall</item>
+            </item>
+        </item>
+    </argument>
+    <dataSource name="recommended_sort_listing_grid_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider</argument>
+            <argument name="name" xsi:type="string">recommended_sort_listing_grid_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">id</argument>
+            <argument name="requestFieldName" xsi:type="string">id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+                    <item name="update_url" xsi:type="url" path="mui/index/render" />
+                    <item name="storageConfig" xsi:type="array">
+                        <item name="indexField" xsi:type="string">id</item>
+                    </item>
+                </item>
+            </argument>
+        </argument>
+    </dataSource>
+    <listing>
+        <listingToolbar>
+            <bookmark name="bookmarks" />
+            <columnsControls name="columns_controls" />
+            <filters>
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="applied" xsi:type="array">
+                            <item name="is_approved" xsi:type="string">1</item>
+                        </item>
+                    </item>
+                </argument>
+            </filters>
+            <paging name="listing_paging" />
+        </listingToolbar>
+    </listing>
+
+    <columns name="columns">
+        <column name="id">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">ID</label>
+            </settings>
+        </column>
+        <column name="filters">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Filters</label>
+            </settings>
+        </column>
+        <column name="categories" class="ArtM\RecommendedSort\Ui\Component\Listing\Column\CategoryBreadcrumb">
+            <settings>
+                <label translate="true">Categories</label>
+                <sortable>false</sortable>
+                <filter>false</filter>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+            </settings>
+        </column>
+        <column name="started_at">
+            <settings>
+                <filter>dateRange</filter>
+                <label translate="true">Started At</label>
+            </settings>
+        </column>
+        <column name="completed_at">
+            <settings>
+                <filter>dateRange</filter>
+                <label translate="true">Completed At</label>
+            </settings>
+        </column>
+        <column name="status">
+            <settings>
+                <label translate="true">Status</label>
+            </settings>
+        </column>
+        <column name="error_message">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Error</label>
+            </settings>
+        </column>
+        <column name="output_log" class="ArtM\RecommendedSort\Ui\Component\Listing\Column\LogFileDownload">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
+                    <item name="sortOrder" xsi:type="number">100</item>
+                    <item name="label" xsi:type="string" translate="true">Log File</item>
+                </item>
+            </argument>
+        </column>
+        <column name="action" class="ArtM\RecommendedSort\Ui\Component\Listing\Column\Actions">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
+                    <item name="sortOrder" xsi:type="number">100</item>
+                    <item name="label" xsi:type="string" translate="true">Initiate</item>
+                </item>
+            </argument>
+        </column>
+    </columns>
+
+</listing>

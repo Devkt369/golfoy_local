@@ -1,0 +1,31 @@
+<?php
+$product = $block->getProduct();
+if (!$product) {
+    return;
+}
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$blogHelper = $objectManager->get(\ArtM\BlogEsg\Helper\Data::class);
+
+/** Attribute set name */
+$attributeSetName = '';
+$eavConfig = $objectManager->get(\Magento\Eav\Model\Config::class);
+$entityType = $eavConfig->getEntityType(\Magento\Catalog\Model\Product::ENTITY);
+$attributeSet = $entityType->getAttributeSetCollection()
+    ->getItemById($product->getAttributeSetId());
+
+if ($attributeSet) {
+    $attributeSetName = (string)$attributeSet->getAttributeSetName();
+}
+
+/** Blog data */
+$blogData = $blogHelper->getrow(strtolower($attributeSetName));
+$upperText = $blogData[0]['uppertext'] ?? '';
+?>
+
+<?php if ($upperText): ?>
+    <div class="buying_tips buying_tips_product_page">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" clip-rule="evenodd" fill-rule="evenodd" height="300" image-rendering="optimizeQuality" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" viewBox="0 0 18062 18062" width="300" version="1.1"><g width="100%" height="100%" transform="matrix(1,0,0,1,0,0)"><g id="Layer_x0020_1"><path d="m9031 7211c-586 0-1063-477-1063-1063s477-1063 1063-1063 1063 477 1063 1063-477 1063-1063 1063zm-2185 8280c-416-89-729-460-729-902 0-1984-590-2624-1214-3302-627-682-1275-1386-1275-3376 0-2980 2424-5404 5403-5404 2980 0 5404 2424 5404 5404 0 1990-649 2694-1276 3376-624 678-1214 1318-1214 3302 0 442-312 813-729 902v1204c0 117-94 211-211 211h-553v945c0 116-95 211-212 211h-2418c-117 0-212-95-212-211v-945h-553c-116 0-211-94-211-211zm2185-12560c-2746 0-4980 2234-4980 4980 0 1824 565 2439 1164 3089 651 708 1325 1440 1325 3589 0 275 224 499 500 499h16 1 3948 1 17c275 0 499-224 499-499 0-2149 674-2881 1325-3589 599-650 1164-1265 1164-3089 0-2746-2234-4980-4980-4980zm-1762 13552h553 2418 553v-972h-3524zm765 1156h1995v-733h-1995zm997-15947c-117 0-212-95-212-211v-1269c0-117 95-212 212-212s212 95 212 212v1269c0 116-95 211-212 211zm3366 902c-36 0-73-9-106-28-101-59-136-188-77-289l634-1099c59-101 188-136 289-78 101 59 136 188 78 289l-635 1099c-39 68-110 106-183 106zm2464 2464c-73 0-144-38-184-106-58-101-23-231 78-289l1099-634c101-59 231-24 289 77s24 231-77 289l-1099 635c-34 19-70 28-106 28zm2171 3366h-1269c-117 0-212-95-212-212s95-212 212-212h1269c116 0 211 95 211 212s-95 212-211 212zm-11367-5830c-73 0-144-38-183-106l-635-1099c-58-101-23-230 78-289 101-58 231-24 289 78l635 1099c58 101 23 230-78 289-33 19-70 28-106 28zm-2464 2464c-36 0-72-9-105-28l-1099-635c-102-58-136-188-78-289 59-101 188-136 289-77l1099 634c101 59 136 188 78 289-39 68-111 106-184 106zm-901 3366h-1269c-117 0-212-95-212-212s95-212 212-212h1269c116 0 211 95 211 212s-95 212-211 212zm6731 4510c-586 0-1063-477-1063-1063v-3069c0-587 477-1064 1063-1064s1063 477 1063 1064v3069c0 586-477 1063-1063 1063zm0-4772c-353 0-640 287-640 639v3070c0 353 287 640 640 640 353 0 640-287 640-640v-3069c0-353-287-640-640-640zm0-2654c-353 0-640 287-640 640s287 640 640 640 640-287 640-640-287-640-640-640z" fill="#e60023" fill-opacity="1" data-original-color="#000000ff" stroke="none" stroke-opacity="1"/></g></g></svg>
+        <span class="text_bt"><?= $block->escapeHtml($upperText) ?></span>
+    </div>
+<?php endif; ?>

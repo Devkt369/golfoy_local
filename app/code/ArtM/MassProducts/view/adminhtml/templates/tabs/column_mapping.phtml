@@ -1,0 +1,51 @@
+<?php
+/** @var \Magento\Backend\Block\Template $block */
+$listUrl = $block->getUrl('massproducts/mapping/tabList');
+$saveUrl = $block->getUrl('massproducts/mapping/tabSave');
+$deleteUrl = $block->getUrl('massproducts/mapping/tabDelete');
+$attributesUrl = $block->getUrl('massproducts/mapping/tabAttributes');
+?>
+<div id="artm-column-mapping-tab-root">
+    <div id="artm-colmap-msg" class="message" style="display:none;"></div>
+
+    <div style="margin-bottom:12px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+        <div>
+            <label for="artm-colmap-new-column"><strong><?= $block->escapeHtml(__('Column Name')) ?></strong></label><br/>
+            <input id="artm-colmap-new-column" type="text" class="admin__control-text" style="min-width:260px;"/>
+        </div>
+        <div>
+            <label for="artm-colmap-new-attribute"><strong><?= $block->escapeHtml(__('Mapped Attribute ID')) ?></strong></label><br/>
+            <select id="artm-colmap-new-attribute" class="admin__control-select" style="min-width:320px;">
+                <option value=""><?= $block->escapeHtml(__('-- Select Attribute --')) ?></option>
+            </select>
+        </div>
+        <div>
+            <button id="artm-colmap-add-btn" type="button" class="action-primary">
+                <span><?= $block->escapeHtml(__('Add')) ?></span>
+            </button>
+        </div>
+    </div>
+
+    <table class="data-grid" style="width:100%;">
+        <thead>
+            <tr>
+                <th><?= $block->escapeHtml(__('Column Name')) ?></th>
+                <th><?= $block->escapeHtml(__('Mapped Attribute ID')) ?></th>
+                <th><?= $block->escapeHtml(__('Actions')) ?></th>
+            </tr>
+        </thead>
+        <tbody id="artm-colmap-body"></tbody>
+    </table>
+</div>
+
+<script>
+require(['ArtM_MassProducts/js/column-mapping-tab'], function (initColumnMappingTab) {
+    initColumnMappingTab({
+        rootSelector: '#artm-column-mapping-tab-root',
+        listUrl: '<?= $block->escapeJs($listUrl) ?>',
+        saveUrl: '<?= $block->escapeJs($saveUrl) ?>',
+        deleteUrl: '<?= $block->escapeJs($deleteUrl) ?>',
+        attributesUrl: '<?= $block->escapeJs($attributesUrl) ?>'
+    });
+});
+</script>

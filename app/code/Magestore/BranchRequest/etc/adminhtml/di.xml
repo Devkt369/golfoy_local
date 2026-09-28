@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2016 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <virtualType name="Magestore\BranchRequest\Ui\DataProvider\InventoryTransfer\Form\Modifier\Pool"
+                 type="Magento\Ui\DataProvider\Modifier\Pool">
+        <arguments>
+            <argument name="modifiers" xsi:type="array">
+
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Magestore\BranchRequest\Ui\DataProvider\InventoryTransfer\Form\InventoryTransfer">
+        <arguments>
+            <argument name="pool" xsi:type="object">
+                Magestore\BranchRequest\Ui\DataProvider\InventoryTransfer\Form\Modifier\Pool
+            </argument>
+        </arguments>
+    </type>
+
+    <virtualType name="Magento\Catalog\Ui\DataProvider\Product\Form\Modifier\Pool">
+        <arguments>
+            <argument name="modifiers" xsi:type="array">
+                <item name="racket" xsi:type="array">
+                    <item name="class" xsi:type="string">
+                        Magestore\BranchRequest\Ui\DataProvider\Product\Form\Modifier\Racket
+                    </item>
+                    <item name="sortOrder" xsi:type="number">901</item>
+                </item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Magento\Inventory\Model\ResourceModel\SourceItem\SaveMultiple">
+        <plugin name="source_item_save_multiple_with_racker"
+                type="Magestore\BranchRequest\Plugin\Inventory\Model\ResourceModel\SourceItem\SaveMultiple"/>
+    </type>
+
+    <type name="Magento\InventoryCatalogAdminUi\Model\GetSourceItemsDataBySku">
+        <plugin name="add_racket_to_source_item_data"
+                type="Magestore\BranchRequest\Plugin\InventoryCatalogAdminUi\Model\GetSourceItemsDataBySkuPlugin"/>
+    </type>
+</config>

@@ -1,0 +1,165 @@
+<?php
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+
+    $_helper = $this->helper(Magento\Catalog\Helper\Output::class);
+    $_product = $block->getProduct();
+    
+    if (!$_product instanceof \Magento\Catalog\Model\Product) {
+        return;
+    }
+
+    $_call = $block->getAtCall();
+    $_code = $block->getAtCode();
+    $_className = $block->getCssClass();
+    $_attributeLabel = $block->getAtLabel();
+    $_attributeType = $block->getAtType();
+    $_attributeAddAttribute = $block->getAddAttribute();
+
+    $renderLabel = true;
+    // if defined as 'none' in layout, do not render
+    if ($_attributeLabel == 'none') {
+        $renderLabel = false;
+    }
+
+    if ($_attributeLabel && $_attributeLabel == 'default') {
+        $_attributeLabel = $_product->getResource()->getAttribute($_code)->getStoreLabel();
+    }
+    if ($_attributeType && $_attributeType == 'text') {
+        $_attributeValue = ($_helper->productAttribute($_product, $_product->$_call(), $_code))
+            ? $_product->getAttributeText($_code)
+            : '';
+    } else {
+        $_attributeValue = $_helper->productAttribute($_product, $_product->$_call(), $_code);
+    }
+
+
+
+
+
+    $faqdata_object = $objectManager->create('\ArtM\BlogFaq\Helper\Data');
+
+    $attributeSet = $objectManager->create('Magento\Eav\Api\AttributeSetRepositoryInterface');
+    $attributeSetRepository = $attributeSet->get($_product->getAttributeSetId());
+    $attribute_set_name = $attributeSetRepository->getAttributeSetName();
+
+    $faqdata_data = $faqdata_object->getrow( strtolower($attribute_set_name) );
+    if( $faqdata_data ){
+        $attributesetname = $faqdata_data[0]['attributesetname'];
+        $attribute_faq_block = $faqdata_data[0]['bloglink'];
+    }else{
+        $attributesetname = '';
+        $attribute_faq_block = '';
+    }
+
+?>
+
+<div class="row">
+    <div class="col-md-12 des float-right">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="heading_product_description hide">Description</div>
+            </div>
+        </div>
+        
+         <!--------------product video in description ------------>
+         <?php         
+        if($_product->getVideo() && $_product->getData('video') != ''){
+            $vsrc = 'https://golfoy.com/pub/media/product_videos/'.$_product->getVideo();
+          ?> 
+         <video style="width:100%;height:auto;"width="520" height="350" playsinline autoplay loop muted>
+            <source src="<?php echo $vsrc; ?>" type="video/mp4"/>
+            Your browser does not support the video tag.
+        </video>        
+        <?php  } ?> 
+        <!-------------------------->
+        
+        <?php
+        
+            $description = $_product->getData('image_desktop_description');
+            $description = trim((string) $description);
+            if( $description != '' ){
+                echo '<style>div#description_custom {
+                    padding-left: 0px !important;
+                    padding-right: 0px !important;
+                }</style>';
+                echo $_product->getData('image_desktop_description');
+                echo $_product->getData('image_mobile_description');
+            }else{
+                echo $this->helper(Magento\Catalog\Helper\Output::class)->productAttribute(
+                    $block->getProduct(),
+                    $block->getProduct()->getDescription(), 'description',
+                );
+            }
+        ?>
+    </div>
+    
+    
+    <div class="col-md-12 faqs_description">
+        <?php
+
+            $static_block_content_attribute_based = $this->getLayout()->createBlock('Magento\Cms\Block\Block')->setBlockId($attribute_faq_block)->toHtml();
+        
+            $faq_block_product_base = $_product->getData('faq_block');
+            if($faq_block_product_base != ''){
+                $static_block_content_product_based = $this->getLayout()->createBlock('Magento\Cms\Block\Block')->setBlockId($faq_block_product_base)->toHtml();
+            }else{
+                $static_block_content_product_based = '';
+            }
+                
+                
+            if( trim($static_block_content_attribute_based) != '' or trim($static_block_content_product_based) != '' ){ 
+        ?>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <h2 class="heading_product_description">FAQs</h2>
+                    </div>
+                </div>
+        <?php
+            }
+        
+            //$bloglink
+
+            if( trim($static_block_content_attribute_based) == '' ){ 
+                // if static block then print else load by link
+//                echo "no faqs";
+            }else{
+        ?>
+            <div class="attribute_based_faq_block faq_block_common">
+                <div class="row hide subheading_product_block">
+                    <div class="col-xs-12">
+                        <div class="subheading_product_description">Attribute Based FAQs</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="questions_product_description"><?php echo $static_block_content_attribute_based; ?></div>
+                    </div>
+                </div>
+            </div>
+
+        <?php
+            }
+        ?>
+        <?php
+                    if( trim($static_block_content_product_based) != '' ){ 
+        ?>
+                    <div class="product_based_faq_block faq_block_common">
+                        <div class="row hide subheading_product_block">
+                            <div class="col-xs-12">
+                                <div class="subheading_product_description">Product Based FAQs</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <div class="questions_product_description"><?php echo $static_block_content_product_based; ?></div>
+                            </div>
+                        </div>
+                    </div>
+
+        <?php
+                }
+        ?>
+       
+    </div>
+    
+</div>

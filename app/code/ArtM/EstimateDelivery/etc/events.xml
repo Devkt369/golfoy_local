@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <!--
+        checkout_submit_all_after fires after the order is fully saved and committed.
+        Using direct SQL so both sales_order and sales_order_grid are updated in one observer.
+    -->
+    <event name="checkout_submit_all_after">
+        <observer name="artm_save_estimation_dates" instance="ArtM\EstimateDelivery\Observer\SaveEstimationDates" />
+    </event>
+</config>

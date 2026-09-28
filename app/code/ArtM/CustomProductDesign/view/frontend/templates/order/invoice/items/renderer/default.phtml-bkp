@@ -1,0 +1,194 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var  $block \Magento\Sales\Block\Order\Item\Renderer\DefaultRenderer */
+$_item = $block->getItem();
+?>
+<script>
+// require([
+//     'jquery',
+//     'Magento_Ui/js/modal/modal'
+// ], function ($, modal) {
+//     'use strict';
+
+//     window.openCustomizationPopup = function(url) {
+//         if (!window.customizationPopup) {
+//             var options = {
+//                 type: 'popup',
+//                 responsive: true,
+//                 innerScroll: true,
+//                 title: $.mage.__('Customization Details'),
+//                 modalClass: 'customization-popup-modal',
+//                 buttons: [{
+//                     text: $.mage.__('Close'),
+//                     class: 'action secondary',
+//                     click: function () {
+//                         this.closeModal();
+//                     }
+//                 }]
+//             };
+
+//             window.customizationPopup = $('<div/>').modal(options);
+//         }
+
+//         $.get(url, function(response) {
+//             window.customizationPopup.html(response).trigger('contentUpdated');
+//             window.customizationPopup.modal('openModal');
+//         });
+//     };
+// });
+    require(['jquery'], function($) {
+        window.openCustomizationPopup = function(url) {
+            $.get(url, function(response) {
+                $('#customization-popup-content').html(response);
+                $('#customization-popup').fadeIn();
+            });
+        };
+        $('#customization-popup-close').on('click', function() {
+            $('#customization-popup').fadeOut();
+            $('#customization-popup-content').html('');
+        });
+        // Optional: close when clicking outside modal
+        $('#customization-popup').on('click', function(e) {
+            if (e.target === this) {
+                $('#customization-popup').fadeOut();
+                $('#customization-popup-content').html('');
+            }
+        });
+    });
+</script>
+
+<style>
+.customization-details {
+    padding: 20px;
+}
+.customization-details h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+.customization-area {
+    margin-bottom: 30px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 20px;
+}
+.customization-area:last-child {
+    border-bottom: none;
+}
+.customization-area h3 {
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+.customization-image {
+    margin: 15px 0;
+}
+.customization-image img {
+    max-width: 100%;
+    height: auto;
+}
+.customization-text {
+    margin-top: 10px;
+}
+.modal-popup .modal-title {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+}
+.modal-popup .modal-content {
+    padding: 20px;
+}
+</style>
+<?php /** @var  $block \Magento\Sales\Block\Order\Item\Renderer\DefaultRenderer */ ?>
+<?php $_item = $block->getItem() ?>
+<?php $_order = $block->getItem()->getOrderItem()->getOrder() ?>
+<?php  $sku = $block->getSku(); 
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+//$productModel = $objectManager->get('\Magento\Catalog\Model\Product');
+//$product = $productModel->loadByAttribute('sku', $sku);
+$productModel = $objectManager->create('\Magento\Catalog\Model\ProductRepository');
+$product = $productModel->get($sku);
+$hsncode = $product->getHsnCode();  
+$optionText =  $hsncode;
+$attr = $product->getResource()->getAttribute('hsn_code');
+if ($attr->usesSource()) {
+$optionText = $attr->getSource()->getOptionText($hsncode);
+}
+?>
+<tr id="order-item-row-<?= (int) $_item->getId() ?>">
+    <td class="col name" data-th="<?= $block->escapeHtml(__('Product Name')) ?>">
+        <strong class="product name product-item-name" style="text-transform:capitalize;"><?= $block->escapeHtml($_item->getName()) ?></strong>
+        <?php if ($_options = $block->getItemOptions()): ?>
+            <dl class="item-options">
+            <?php foreach ($_options as $_option): ?>
+                <?php if (isset($_option['label']) && $_option['label'] === 'Customization'): ?>
+                    <?php 
+                        $optionValue = isset($_option['print_value']) ? $_option['print_value'] : $_option['value'];
+                        $helper = $this->helper('ArtM\CustomProductDesign\Helper\Data');
+                        echo $helper->getCustomizationLink($optionValue);
+                    ?>
+                <?php else: ?>
+                    <dt><?= $block->escapeHtml($_option['label']) ?></dt>
+                    <?php if (!$block->getPrintStatus()): ?>
+                        <?php $_formatedOptionValue = $block->getFormatedOptionValue($_option) ?>
+                        <dd<?= (isset($_formatedOptionValue['full_view']) ? ' class="tooltip wrapper"' : '') ?>>
+                            <?php
+                            $formatedval = $_formatedOptionValue['value'];
+                            if (strpos($formatedval, 'session_id') !== false) {
+                                echo 'Image Uploaded';
+                            } else {
+                                echo $block->escapeHtml($_formatedOptionValue['value'], ['a']);
+                            }
+                            ?>
+
+                            <?php if (isset($_formatedOptionValue['full_view'])): ?>
+                                <div class="tooltip content">
+                                    <dl class="item options">
+                                        <dt><?= $block->escapeHtml($_option['label']) ?></dt>
+                                        <dd><?= $block->escapeHtml($_formatedOptionValue['full_view']) ?></dd>
+                                    </dl>
+                                </div>
+                            <?php endif; ?>
+                        </dd>
+                    <?php else: ?>
+                        <?php if (strpos($_option['value'], 'session_id') !== false): ?>
+                            <dd>Image Uploaded</dd>
+                        <?php else: ?>
+                            <dd><?= $block->escapeHtml($_option['print_value'] ?? $_option['value']) ?></dd>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                <?php endif; ?>
+            <?php endforeach; ?>
+
+            </dl>
+        <?php endif; ?>
+        <?php $addInfoBlock = $block->getProductAdditionalInformationBlock(); ?>
+        <?php if ($addInfoBlock): ?>
+            <?= $addInfoBlock->setItem($_item->getOrderItem())->toHtml() ?>
+        <?php endif; ?>
+        <?= $block->escapeHtml($_item->getDescription()) ?>
+    </td>
+    <td class="col sku" data-th="<?= $block->escapeHtml(__('SKU')) ?>" style="word-wrap: break-word;">
+        <?= /* @noEscape */ $block->prepareSku($block->getSku()) ?>
+    </td>
+    <td class="col hsn" data-th="<?= $block->escapeHtml(__('HSN Code')) ?>">
+        <span class="qty summary"><?php echo $optionText; ?></span>
+    </td>
+    <td class="col price" data-th="<?= $block->escapeHtml(__('Price')) ?>">
+        <?= $block->getItemPriceHtml() ?>
+    </td>
+    <td class="col qty" data-th="<?= $block->escapeHtml(__('Qty Invoiced')) ?>">
+        <span class="qty summary"><?= (float) $_item->getQty() ?></span>    </td>
+   
+    <td class="col subtotal" data-th="<?= $block->escapeHtml(__('Subtotal')) ?>">
+        <?= $block->getItemRowTotalHtml() ?>
+    </td>
+</tr>
+
+<div id="customization-popup" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:9999;">
+    <div style="background:#fff;margin:40px auto;padding:20px;width:90vw;max-width:600px;border-radius:8px;position:relative;">
+        <span id="customization-popup-close" style="position:absolute;top:10px;right:10px;cursor:pointer;font-size:22px;">&times;</span>
+        <div id="customization-popup-content"></div>
+    </div>
+</div>

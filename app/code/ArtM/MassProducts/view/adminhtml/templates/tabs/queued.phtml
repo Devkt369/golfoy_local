@@ -1,0 +1,479 @@
+<?php
+/** @var \Magento\Backend\Block\Template $block */
+$matrixUrl = $block->getUrl('massproducts/queued/tabMatrix');
+$moveToDraftUrl = $block->getUrl('massproducts/queued/moveToDraft');
+?>
+
+<div id="artm-queued-products-tab-root">
+	<div style="margin-bottom: 16px;">
+		<button id="artm-process-all-queued" type="button" class="action-primary">Process All Queued Products</button>
+	</div>
+	<style>
+		#artm-queued-products-tab-root .artm-queued-toolbar {
+			display: flex;
+			gap: 8px;
+			align-items: center;
+			margin-bottom: 12px;
+			flex-wrap: wrap;
+		}
+		#artm-queued-products-tab-root .artm-queued-table-wrap {
+			overflow: auto;
+		}
+		#artm-queued-products-tab-root .artm-queued-table {
+				// --- Process All Queued Products ---
+				$('#artm-process-all-queued').off('click').on('click', function () {
+					alert('DEBUG: Process All button clicked');
+					var $btn = $(this);
+					$btn.prop('disabled', true).text('Processing...');
+					$.ajax({
+						url: '<?= $block->getUrl('massproducts/queued/processAll') ?>',
+						type: 'POST',
+						dataType: 'json',
+						data: {form_key: window.FORM_KEY || ''}
+					}).done(function (resp) {
+						if (!resp || !resp.success) {
+							alert('Unable to process queued products.');
+							$btn.prop('disabled', false).text('Process All Queued Products');
+							return;
+						}
+						var processed = resp.processed || [];
+						processed.forEach(function (row) {
+							var $tr = $('#artm-queued-groups').find('tr[data-id="' + row.id + '"]');
+							if ($tr.length) {
+								$tr.addClass('artm-row-moved-out');
+								$tr.find('input,button,select,textarea').prop('disabled', true);
+								var actionHtml = '';
+								if (row.status === 'success') {
+									actionHtml = '<span class="artm-row-moved-label">Product Added</span>';
+									$tr.find('td:eq(6)').html('<span class="artm-queued-badge">success</span>');
+								} else {
+									actionHtml = '<span class="artm-row-moved-label" style="background:#fee2e2;color:#b91c1c;">Failed</span>';
+									$tr.find('td:eq(6)').html('<span class="artm-queued-badge" style="background:#fee2e2;color:#b91c1c;">failed</span>');
+								}
+								$tr.find('td:last').html(actionHtml);
+							}
+						});
+						// Renumber rows
+						var $rows = $('#artm-queued-groups').find('tr');
+						$rows.each(function (i) {
+							$(this).find('td:eq(1)').text(i + 1);
+						});
+						alert(resp.message || 'All queued products processed.');
+						$btn.prop('disabled', false).text('Process All Queued Products');
+					}).fail(function () {
+						alert('Unable to process queued products.');
+						$btn.prop('disabled', false).text('Process All Queued Products');
+					});
+				});
+			});
+			</script>
+			overflow: auto;
+		}
+		#artm-queued-products-tab-root .artm-table-fullscreen .artm-queued-table thead {
+			position: sticky;
+			top: 0;
+			z-index: 5;
+			background: #eef2f7;
+		}
+		#artm-queued-products-tab-root .artm-table-fullscreen .artm-queued-table {
+			font-size: 10px;
+			line-height: 1.25;
+		}
+		#artm-queued-products-tab-root .artm-table-fullscreen .artm-queued-table th,
+		#artm-queued-products-tab-root .artm-table-fullscreen .artm-queued-table td {
+			padding: 2px !important;
+		}
+		#artm-queued-products-tab-root .artm-ready-btn {
+			font-size: 11px;
+			padding: 5px 10px;
+			border: 1px solid #818cf8;
+			border-radius: 3px;
+			cursor: pointer;
+			font-weight: 600;
+			background: #e0e7ff;
+			color: #1d4ed8;
+		}
+		#artm-queued-products-tab-root .artm-ready-btn:hover {
+			background: #c7d2fe;
+		}
+		#artm-queued-products-tab-root .artm-row-moved-out td {
+			opacity: 0.75;
+			background: #f8fafc !important;
+		}
+		#artm-queued-products-tab-root .artm-row-moved-label {
+			display: inline-block;
+			padding: 2px 6px;
+			border-radius: 10px;
+			background: #dbeafe;
+			color: #1d4ed8;
+			font-size: 11px;
+			font-weight: 700;
+		}
+	</style>
+
+	<div class="message message-notice notice">
+		<div><?= $block->escapeHtml(__('Queued tab shows products waiting for processing.')) ?></div>
+	</div>
+
+	<div class="artm-queued-toolbar">
+		<label><input type="checkbox" id="artm-queued-select-all" /> <?= $block->escapeHtml(__('Select All')) ?></label>
+		<button type="button" class="action-secondary" id="artm-queued-mass-draft"><span><?= $block->escapeHtml(__('Mass Draft')) ?></span></button>
+		<button type="button" class="action-secondary" id="artm-queued-expand-table"><span><?= $block->escapeHtml(__('Expand')) ?></span></button>
+	</div>
+
+	<div id="artm-queued-msg" class="message" style="display:none;"></div>
+	<div id="artm-queued-groups"></div>
+</div>
+
+<script>
+require(['jquery'], function ($) {
+	alert('DEBUG: Queued tab JS loaded');
+	'use strict';
+	var moveToDraftUrl = '<?= $block->escapeJs($moveToDraftUrl) ?>';
+
+	function esc(value) {
+		return String(value == null ? '' : value)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#039;');
+	}
+
+	function showMessage(type, msg) {
+		var cls = type === 'success' ? 'message-success success' : 'message-error error';
+		$('#artm-queued-msg').attr('class', 'message ' + cls).html('<div>' + esc(msg || '') + '</div>').show();
+	}
+
+	function refreshTabCounts() {
+		$(document).trigger('artm:massproducts:refreshTabCounts');
+	}
+
+	function selectedIds() {
+		return $('.artm-queued-row-check:checked').map(function () {
+			return parseInt($(this).data('id'), 10) || 0;
+		}).get().filter(function (x) { return x > 0; });
+	}
+
+	function markRowsMoved(ids, label) {
+		(ids || []).forEach(function (id) {
+			var safeId = parseInt(id, 10) || 0;
+			if (safeId <= 0) {
+				return;
+			}
+			var $tr = $('#artm-queued-groups').find('tr[data-id="' + safeId + '"]');
+			if (!$tr.length) {
+				return;
+			}
+			$tr.addClass('artm-row-moved-out');
+			$tr.find('input,button,select,textarea').prop('disabled', true);
+			$tr.find('td:last').html('<span class="artm-row-moved-label">' + esc(label || 'Moved') + '</span>');
+		});
+	}
+
+	function moveToDraft(ids) {
+		ids = (ids || []).filter(function (x) { return x > 0; });
+		if (!ids.length) {
+			showMessage('error', 'No rows selected.');
+			return;
+		}
+
+		$.ajax({
+			url: moveToDraftUrl,
+			type: 'POST',
+			dataType: 'json',
+			data: {
+				form_key: window.FORM_KEY || '',
+				ids: ids
+			}
+		}).done(function (resp) {
+			if (!resp || !resp.success) {
+				showMessage('error', resp && resp.message ? resp.message : 'Unable to move rows to draft.');
+				return;
+			}
+			markRowsMoved(ids, 'Moved to Draft');
+			refreshTabCounts();
+		}).fail(function (xhr) {
+			var msg = 'Unable to move rows to draft.';
+			if (xhr && xhr.responseJSON && xhr.responseJSON.message) {
+				msg = xhr.responseJSON.message;
+			} else if (xhr && xhr.responseText) {
+				var body = String(xhr.responseText || '');
+				var bodyLower = body.toLowerCase();
+				if (bodyLower.indexOf('<!doctype html') !== -1 || bodyLower.indexOf('<html') !== -1) {
+					msg = 'Admin session/key seems expired. Please refresh the page and try again.';
+				} else {
+					msg = body;
+				}
+			}
+			showMessage('error', msg);
+		});
+	}
+
+	function bindActions() {
+		$('.artm-queued-check-set').off('change').on('change', function () {
+			$('.artm-queued-row-check').prop('checked', $(this).is(':checked'));
+		});
+
+		$('#artm-queued-select-all').off('change').on('change', function () {
+			$('.artm-queued-row-check').prop('checked', $(this).is(':checked'));
+			$('.artm-queued-check-set').prop('checked', $(this).is(':checked'));
+		});
+
+		$('#artm-queued-mass-draft').off('click').on('click', function (e) {
+			e.preventDefault();
+			moveToDraft(selectedIds());
+		});
+
+		$('.artm-queued-row-draft').off('click').on('click', function (e) {
+			e.preventDefault();
+			var id = parseInt($(this).data('id'), 10) || 0;
+			if (id > 0) {
+				moveToDraft([id]);
+			}
+		});
+
+		// Attach Process All handler here so it works after AJAX render
+		$('#artm-process-all-queued').off('click').on('click', function () {
+			alert('DEBUG: Process All button clicked');
+			var $btn = $(this);
+			$btn.prop('disabled', true).text('Processing...');
+			$.ajax({
+				url: '<?= $block->getUrl('massproducts/queued/processAll') ?>',
+				type: 'POST',
+				dataType: 'json',
+				data: {form_key: window.FORM_KEY || ''}
+			}).done(function (resp) {
+				if (!resp || !resp.success) {
+					alert('Unable to process queued products.');
+					$btn.prop('disabled', false).text('Process All Queued Products');
+					return;
+				}
+				var processed = resp.processed || [];
+				processed.forEach(function (row) {
+					var $tr = $('#artm-queued-groups').find('tr[data-id="' + row.id + '"]');
+					if ($tr.length) {
+						$tr.addClass('artm-row-moved-out');
+						$tr.find('input,button,select,textarea').prop('disabled', true);
+						var actionHtml = '';
+						if (row.status === 'success') {
+							actionHtml = '<span class="artm-row-moved-label">Product Added</span>';
+							$tr.find('td:eq(6)').html('<span class="artm-queued-badge">success</span>');
+						} else {
+							actionHtml = '<span class="artm-row-moved-label" style="background:#fee2e2;color:#b91c1c;">Failed</span>';
+							$tr.find('td:eq(6)').html('<span class="artm-queued-badge" style="background:#fee2e2;color:#b91c1c;">failed</span>');
+						}
+						$tr.find('td:last').html(actionHtml);
+					}
+				});
+				// Renumber rows
+				var $rows = $('#artm-queued-groups').find('tr');
+				$rows.each(function (i) {
+					$(this).find('td:eq(1)').text(i + 1);
+				});
+				alert(resp.message || 'All queued products processed.');
+				$btn.prop('disabled', false).text('Process All Queued Products');
+			}).fail(function () {
+				alert('Unable to process queued products.');
+				$btn.prop('disabled', false).text('Process All Queued Products');
+			});
+		});
+	}
+
+	function applyPagination() {
+		var $table = $('#artm-queued-groups').find('table.artm-queued-table').first();
+		if (!$table.length) {
+			return;
+		}
+
+		var $tbody = $table.find('tbody').first();
+		var $rows = $tbody.children('tr');
+		var $singleRow = $rows.length === 1 ? $rows.eq(0) : $();
+		var noDataRow = $singleRow.length && $singleRow.find('td[colspan]').length > 0 && $singleRow.find('input,button,select,textarea').length === 0;
+
+		var $host = $('#artm-queued-groups').find('.artm-queued-table-pager-host').first();
+		$host.find('.artm-table-pager').remove();
+		if (!$rows.length || noDataRow) {
+			return;
+		}
+
+		var sizes = [10, 25, 50, 100];
+		var perPage = parseInt($table.data('artmPerPage'), 10) || 10;
+		if ($.inArray(perPage, sizes) === -1) {
+			perPage = 10;
+		}
+
+		var currentPage = parseInt($table.data('artmCurrentPage'), 10) || 1;
+		var totalPages = Math.max(1, Math.ceil($rows.length / perPage));
+		if (currentPage > totalPages) {
+			currentPage = totalPages;
+		}
+
+		var start = (currentPage - 1) * perPage;
+		var end = start + perPage;
+		$rows.hide().slice(start, end).show();
+
+		$table.data('artmPerPage', perPage);
+		$table.data('artmCurrentPage', currentPage);
+
+		var html = [];
+		html.push('<div class="artm-table-pager">');
+		html.push('<div class="artm-table-pager-left">');
+		html.push('<label>Show</label>');
+		html.push('<select class="artm-pager-size admin__control-select">');
+		$.each(sizes, function (_, size) {
+			html.push('<option value="' + size + '"' + (size === perPage ? ' selected="selected"' : '') + '>' + size + '</option>');
+		});
+		html.push('</select>');
+		html.push('<span>per page</span>');
+		html.push('</div>');
+		html.push('<div class="artm-table-pager-right">');
+		html.push('<button type="button" class="action-secondary artm-pager-prev"' + (currentPage <= 1 ? ' disabled="disabled"' : '') + '><span>Prev</span></button>');
+		html.push('<span>Page ' + currentPage + ' of ' + totalPages + '</span>');
+		html.push('<button type="button" class="action-secondary artm-pager-next"' + (currentPage >= totalPages ? ' disabled="disabled"' : '') + '><span>Next</span></button>');
+		html.push('</div>');
+		html.push('</div>');
+
+		$host.html(html.join(''));
+
+		$('#artm-queued-groups .artm-pager-size').off('change.artmPager').on('change.artmPager', function () {
+			$table.data('artmPerPage', parseInt($(this).val(), 10) || 10);
+			$table.data('artmCurrentPage', 1);
+			applyPagination();
+		});
+
+		$('#artm-queued-groups .artm-pager-prev').off('click.artmPager').on('click.artmPager', function () {
+			var page = parseInt($table.data('artmCurrentPage'), 10) || 1;
+			$table.data('artmCurrentPage', Math.max(1, page - 1));
+			applyPagination();
+		});
+
+		$('#artm-queued-groups .artm-pager-next').off('click.artmPager').on('click.artmPager', function () {
+			var page = parseInt($table.data('artmCurrentPage'), 10) || 1;
+			$table.data('artmCurrentPage', page + 1);
+			applyPagination();
+		});
+	}
+
+	function loadMatrix() {
+		$.ajax({
+			url: '<?= $block->escapeJs($matrixUrl) ?>',
+			type: 'GET',
+			dataType: 'json'
+		}).done(function (resp) {
+			if (!resp || !resp.success) {
+				showMessage('error', resp && resp.message ? resp.message : 'Unable to load queued products.');
+				return;
+			}
+
+			var rows = resp.rows || [];
+			if (!rows.length) {
+				$('#artm-queued-groups').html('<div class="message message-notice notice"><div>No queued products found.</div></div>');
+				return;
+			}
+
+			var html = [];
+			html.push('<div class="artm-queued-table-wrap">');
+			html.push('<table class="data-grid artm-queued-table">');
+			html.push('<thead><tr>');
+			html.push('<th style="width:40px;"><input type="checkbox" class="artm-queued-check-set" /></th>');
+			html.push('<th>ID</th>');
+			html.push('<th>SKU</th>');
+			html.push('<th>Product Name</th>');
+			html.push('<th>Attribute Set</th>');
+			html.push('<th>Operation</th>');
+			html.push('<th>Status</th>');
+			html.push('<th>Updated At</th>');
+			html.push('<th>Last Cron Run</th>');
+			html.push('<th>Actions</th>');
+			html.push('</tr></thead><tbody>');
+
+			$.each(rows, function (_, row) {
+				html.push('<tr data-id="' + esc(row.entity_id || '') + '">');
+				html.push('<td><input type="checkbox" class="artm-queued-row-check" data-id="' + esc(row.entity_id || '') + '"/></td>');
+				html.push('<td>' + esc(row.entity_id || '') + '</td>');
+				html.push('<td>' + esc(row.sku || '') + '</td>');
+				html.push('<td>' + esc(row.product_name || '') + '</td>');
+				html.push('<td>' + esc(row.attribute_set || '') + '</td>');
+				html.push('<td>' + esc(row.operation_type || 'create') + '</td>');
+				html.push('<td><span class="artm-queued-badge">' + esc(row.status || 'queued') + '</span></td>');
+				html.push('<td>' + esc(row.updated_at || '') + '</td>');
+				html.push('<td>' + esc(row.last_cron_run || '') + '</td>');
+				html.push('<td><button type="button" class="artm-ready-btn artm-queued-row-draft" data-id="' + esc(row.entity_id || '') + '">Draft it</button></td>');
+				html.push('</tr>');
+			});
+
+			html.push('</tbody></table></div><div class="artm-queued-table-pager-host"></div>');
+			$('#artm-queued-groups').html(html.join(''));
+			$('#artm-queued-msg').hide();
+			$('#artm-queued-select-all').prop('checked', false);
+			bindActions();
+			applyPagination();
+		}).fail(function () {
+			showMessage('error', 'Unable to load queued products.');
+		});
+	}
+
+	loadMatrix();
+
+	$('#artm-queued-expand-table').off('click').on('click', function () {
+		var $btn = $(this);
+		var $wrap = $('#artm-queued-groups .artm-queued-table-wrap').first();
+		if (!$wrap.length) {
+			return;
+		}
+		var expanded = $wrap.hasClass('artm-table-fullscreen');
+		if (expanded) {
+			$wrap.removeClass('artm-table-fullscreen');
+			$btn.find('span').text('Expand');
+		} else {
+			$wrap.addClass('artm-table-fullscreen');
+			$btn.find('span').text('Exit Fullscreen');
+		}
+	});
+});
+	// --- Process All Queued Products ---
+	$('#artm-process-all-queued').off('click').on('click', function () {
+		var $btn = $(this);
+		$btn.prop('disabled', true).text('Processing...');
+		$.ajax({
+			url: '<?= $block->getUrl('massproducts/queued/processAll') ?>',
+			type: 'POST',
+			dataType: 'json',
+			data: {form_key: window.FORM_KEY || ''}
+		}).done(function (resp) {
+			if (!resp || !resp.success) {
+				alert('Unable to process queued products.');
+				$btn.prop('disabled', false).text('Process All Queued Products');
+				return;
+			}
+			var processed = resp.processed || [];
+			processed.forEach(function (row) {
+				var $tr = $('#artm-queued-groups').find('tr[data-id="' + row.id + '"]');
+				if ($tr.length) {
+					$tr.addClass('artm-row-moved-out');
+					$tr.find('input,button,select,textarea').prop('disabled', true);
+					var actionHtml = '';
+					if (row.status === 'success') {
+						actionHtml = '<span class="artm-row-moved-label">Product Added</span>';
+						$tr.find('td:eq(6)').html('<span class="artm-queued-badge">success</span>');
+					} else {
+						actionHtml = '<span class="artm-row-moved-label" style="background:#fee2e2;color:#b91c1c;">Failed</span>';
+						$tr.find('td:eq(6)').html('<span class="artm-queued-badge" style="background:#fee2e2;color:#b91c1c;">failed</span>');
+					}
+					$tr.find('td:last').html(actionHtml);
+				}
+			});
+			// Renumber rows
+			var $rows = $('#artm-queued-groups').find('tr');
+			$rows.each(function (i) {
+				$(this).find('td:eq(1)').text(i + 1);
+			});
+			alert(resp.message || 'All queued products processed.');
+			$btn.prop('disabled', false).text('Process All Queued Products');
+		}).fail(function () {
+			alert('Unable to process queued products.');
+			$btn.prop('disabled', false).text('Process All Queued Products');
+		});
+	});
+</script>

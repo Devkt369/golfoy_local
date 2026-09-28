@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2016 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Magestore_OrderSuccess::all">
+                    <resource id="Magestore_AdjustStock::inventory">
+                        <resource id="Magestore_AdjustStock::stockcontrol">
+                            <!--Branch Request Section-->
+                            <resource id="Magestore_BranchRequest::manage" title="Manage Branch Request" translate="title" sortOrder="25">
+                                <resource id="Magestore_BranchRequest::addnew" title="Add New Branch Request" translate="title" sortOrder="10"/>
+                                <resource id="Magestore_BranchRequest::save" title="Save Branch Request" translate="title" sortOrder="20"/>
+                                <resource id="Magestore_BranchRequest::start" title="Start Branch Request" translate="title" sortOrder="30"/>
+                                <resource id="Magestore_BranchRequest::send_email" title="Send Email Branch Request" translate="title" sortOrder="35"/>
+                                <resource id="Magestore_BranchRequest::cancel" title="Cancel Branch Request" translate="title" sortOrder="40"/>
+                                <resource id="Magestore_BranchRequest::approve" title="Approve Branch Request" translate="title" sortOrder="50"/>
+                                <resource id="Magestore_BranchRequest::delivery" title="Delivery Branch Request" translate="title" sortOrder="60"/>
+                                <resource id="Magestore_BranchRequest::receive" title="Receive Branch Request Products" translate="title" sortOrder="70"/>
+                                <resource id="Magestore_BranchRequest::closed" title="Mark as Closed" translate="title" sortOrder="80"/>
+                                </resource>
+                            <!--End Branch Request Section-->
+                        </resource>
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

@@ -1,0 +1,338 @@
+<?php
+namespace ArtM\EstimateDelivery\Helper;
+
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
+use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Inventory\Model\ResourceModel\SourceItem\CollectionFactory as SourceItemCollectionFactory;
+use Magento\Framework\App\CacheInterface;
+use ArtM\EstimateDelivery\Model\DeliveryCache;
+use ArtM\EstimateDelivery\Model\DeliveryCacheFactory;
+use ArtM\EstimateDelivery\Model\ResourceModel\DeliveryCache as DeliveryCacheResource;
+use Magento\Catalog\Model\Product\Type;
+use DateTime;
+
+class Data extends AbstractHelper
+{
+    const CACHE_KEY = 'artm_estimatedelivery_source_config';
+
+    protected $productRepository;
+    protected $sourceItemCollection;
+    protected $cache;
+    protected $deliveryCacheFactory;
+    protected $deliveryCacheResource;
+
+    public function __construct(
+        Context $context,
+        ProductRepositoryInterface $productRepository,
+        SourceItemCollectionFactory $sourceItemCollection,
+        CacheInterface $cache,
+        DeliveryCacheFactory $deliveryCacheFactory,
+        DeliveryCacheResource $deliveryCacheResource
+    ) {
+        parent::__construct($context);
+        $this->productRepository = $productRepository;
+        $this->sourceItemCollection = $sourceItemCollection;
+        $this->cache = $cache;
+        $this->deliveryCacheFactory = $deliveryCacheFactory;
+        $this->deliveryCacheResource = $deliveryCacheResource;
+    }
+
+    /**
+     * Return Estimated Delivery Date for given SKU
+     */
+    public function getEstimatedDeliveryDate(string $sku): array
+    {
+        if($this->getConfigValue('artm_estimatedelivery/general/enabled') != 1) {
+            return [
+                'dispatch_days'            => 0,
+                'delivery_days'            => 0,
+                'total_days'               => 0,
+                'estimated_delivery_date'  => null,
+                'source_code'              => null,
+                'group'                    => null,
+                'express_shipping'         => false
+            ];
+        }
+
+        $config = $this->getCachedConfig();
+
+        $productSource = $this->getProductSource($sku);
+
+        $group = $this->getSourceGroupBySourceCode($productSource, $config);
+
+        $dispatch = isset($config[$group]['dispatch']) ? (int)$config[$group]['dispatch'] : 0;
+        $delivery = isset($config[$group]['delivery']) ? (int)$config[$group]['delivery'] : 0;
+
+        $totalDays = $dispatch + $delivery;
+        $date = new \DateTime();
+        $date->modify("+{$totalDays} days");
+
+        $expressShipping = ($group === 'own');
+
+        return [
+            'dispatch_days'            => $dispatch,
+            'delivery_days'            => $delivery,
+            'total_days'               => $totalDays,
+            'estimated_delivery_date'  => $date->format('Y-m-d'),
+            'source_code'              => $productSource,
+            'group'                    => $group,
+            'express_shipping'         => $expressShipping
+        ];
+    }
+
+    /**
+     * Determine product source using MSI
+     */
+    public function getProductSource($sku)
+    {
+        $config = $this->getCachedConfig();
+
+        $ownSources    = $config['own']['sources'] ?? [];
+        $otherSources  = $config['other']['sources'] ?? [];
+        $customSources = $config['custom']['sources'] ?? [];
+
+        $collection = $this->sourceItemCollection->create();
+        $collection->addFieldToFilter('sku', $sku);
+
+        $foundOwn = null;
+        $foundOther = null;
+        $foundCustom = null;
+
+        foreach ($collection->getData() as $row) {
+            $qty        = $row['quantity'] ?? 0;
+            $status     = $row['status'] ?? 0;
+            $sourceCode = $row['source_code'] ?? '';
+
+            if ($qty <= 0 || $status != 1) {
+                continue;
+            }
+
+            if (in_array($sourceCode, $ownSources, true)) {
+                $foundOwn = $sourceCode;
+            } elseif (in_array($sourceCode, $otherSources, true)) {
+                $foundOther = $sourceCode;
+            } elseif (in_array($sourceCode, $customSources, true)) {
+                $foundCustom = $sourceCode;
+            }
+        }
+
+        return $foundOwn ?? $foundOther ?? $foundCustom;
+    }
+
+
+    /**
+     * Identify group for the source
+     */
+    protected function getSourceGroupBySourceCode(?string $sourceCode, array $config): string
+    {
+        if (!$sourceCode) {
+            return 'other'; // fallback
+        }
+
+        foreach ($config as $group => $data) {
+            if (in_array($sourceCode, $data['sources'])) {
+                return $group;
+            }
+        }
+
+        return 'other';
+    }
+
+    /**
+     * Load all config & cache for faster future calls
+     */
+    protected function getCachedConfig(): array
+    {
+        // $cached = $this->cache->load(self::CACHE_KEY);
+
+        // if ($cached) {
+        //     return json_decode($cached, true);
+        // }
+
+        $config = [
+            'own' => [
+                'sources'  => $this->getConfigArray('artm_estimatedelivery/own_source/all_source'),
+                'dispatch' => $this->getConfigValue('artm_estimatedelivery/own_source/dispatch_time'),
+                'delivery' => $this->getConfigValue('artm_estimatedelivery/own_source/delivery_time'),
+            ],
+            'other' => [
+                'sources'  => $this->getConfigArray('artm_estimatedelivery/other_source/all_source'),
+                'dispatch' => $this->getConfigValue('artm_estimatedelivery/other_source/dispatch_time'),
+                'delivery' => $this->getConfigValue('artm_estimatedelivery/other_source/delivery_time'),
+            ],
+            'custom' => [
+                'sources'  => $this->getConfigArray('artm_estimatedelivery/custom_source/all_source'),
+                'dispatch' => $this->getConfigValue('artm_estimatedelivery/custom_source/dispatch_time'),
+                'delivery' => $this->getConfigValue('artm_estimatedelivery/custom_source/delivery_time'),
+            ],
+        ];
+
+        // Save cache for 24 hours
+        // $this->cache->save(json_encode($config), self::CACHE_KEY, [], 86400);
+
+        return $config;
+    }
+
+    /**
+     * Get comma-separated config as array
+     */
+    protected function getConfigArray($path): array
+    {
+        $value = $this->scopeConfig->getValue($path);
+        return $value ? explode(',', $value) : [];
+    }
+
+    /**
+     * Get simple config value
+     */
+    protected function getConfigValue($path)
+    {
+        return $this->scopeConfig->getValue($path);
+    }
+
+    public function IsEnabled()
+    {
+        return $this->getConfigValue('artm_estimatedelivery/general/enabled');
+    }
+
+    /**
+     * Get cached delivery data for product (FAST METHOD)
+     */
+    public function getCachedDeliveryData($productId): ?array
+    {
+        if (!$this->IsEnabled()) {
+            return null;
+        }
+
+        $cachedData = $this->deliveryCacheResource->getCacheByProductId($productId);
+        
+        if ($cachedData) {
+            $cacheModel = $this->deliveryCacheFactory->create();
+            $cacheModel->setData($cachedData);
+            
+            if ($cacheModel->isCacheValid()) {
+                // Convert to expected format
+                return [
+                    'dispatch_days' => $cachedData['dispatch_days'],
+                    'delivery_days' => $cachedData['delivery_days'], 
+                    'total_days' => $cachedData['total_days'],
+                    'express_shipping' => (bool)$cachedData['express_shipping'],
+                    'min_delivery_days' => $cachedData['min_delivery_days'],
+                    'max_delivery_days' => $cachedData['max_delivery_days'],
+                    'product_type' => $cachedData['product_type'],
+                    'simple_product_ids' => $cachedData['simple_product_ids'] ? json_decode($cachedData['simple_product_ids'], true) : []
+                ];
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Store delivery data in cache
+     */
+    public function saveCacheData($productId, $sku, $productType, $data, $simpleIds = null): void
+    {
+        $cacheModel = $this->deliveryCacheFactory->create();
+        
+        // Check if record exists
+        $existingData = $this->deliveryCacheResource->getCacheByProductId($productId);
+        if ($existingData) {
+            $cacheModel->load($existingData['cache_id']);
+        }
+
+        $cacheModel->setData([
+            'product_id' => $productId,
+            'product_type' => $productType,
+            'sku' => $sku,
+            'simple_product_ids' => $simpleIds ? json_encode($simpleIds) : null,
+            'dispatch_days' => $data['dispatch_days'] ?? null,
+            'delivery_days' => $data['delivery_days'] ?? null,
+            'total_days' => $data['total_days'],
+            'express_shipping' => $data['express_shipping'] ? 1 : 0,
+            'min_delivery_days' => $data['min_delivery_days'] ?? null,
+            'max_delivery_days' => $data['max_delivery_days'] ?? null,
+            'calculated_at' => date('Y-m-d H:i:s'),
+            'is_valid' => 1
+        ]);
+
+        $this->deliveryCacheResource->save($cacheModel);
+    }
+
+    /**
+     * Calculate and cache delivery data for any product
+     */
+    public function calculateAndCacheDelivery($productId): ?array
+    {
+        try {
+            $product = $this->productRepository->getById($productId);
+            $sku = $product->getSku();
+            $productType = $product->getTypeId();
+
+            if ($productType == Type::TYPE_SIMPLE) {
+                // Simple product - calculate directly
+                $deliveryData = $this->getEstimatedDeliveryDate($sku);
+                
+                $cacheData = [
+                    'dispatch_days' => $deliveryData['dispatch_days'],
+                    'delivery_days' => $deliveryData['delivery_days'],
+                    'total_days' => $deliveryData['dispatch_days'] + $deliveryData['delivery_days'],
+                    'express_shipping' => $deliveryData['express_shipping'],
+                    'min_delivery_days' => null,
+                    'max_delivery_days' => null
+                ];
+
+                $this->saveCacheData($productId, $sku, 'simple', $cacheData);
+                return $cacheData;
+
+            } else if ($productType == 'configurable') {
+                // Configurable product - calculate for all children
+                $childProducts = $product->getTypeInstance()->getUsedProducts($product);
+                $allDeliveryDays = [];
+                $childIds = [];
+
+                foreach ($childProducts as $childProduct) {
+                    $childDelivery = $this->getEstimatedDeliveryDate($childProduct->getSku());
+                    $childTotalDays = $childDelivery['dispatch_days'] + $childDelivery['delivery_days'];
+                    $allDeliveryDays[] = $childTotalDays;
+                    $childIds[] = $childProduct->getId();
+
+                    // Save individual simple products  
+                    $childCacheData = [
+                        'dispatch_days' => $childDelivery['dispatch_days'],
+                        'delivery_days' => $childDelivery['delivery_days'], 
+                        'total_days' => $childTotalDays,
+                        'express_shipping' => $childDelivery['express_shipping'],
+                        'min_delivery_days' => null,
+                        'max_delivery_days' => null
+                    ];
+                    $this->saveCacheData($childProduct->getId(), $childProduct->getSku(), 'simple', $childCacheData);
+                }
+
+                if (!empty($allDeliveryDays)) {
+                    $minDays = min($allDeliveryDays);
+                    $maxDays = max($allDeliveryDays);
+
+                    $configurableCacheData = [
+                        'dispatch_days' => null,
+                        'delivery_days' => null,
+                        'total_days' => $minDays, // Show minimum for configurable
+                        'express_shipping' => false,
+                        'min_delivery_days' => $minDays,
+                        'max_delivery_days' => $maxDays
+                    ];
+
+                    $this->saveCacheData($productId, $sku, 'configurable', $configurableCacheData, $childIds);
+                    return $configurableCacheData;
+                }
+            }
+
+        } catch (\Exception $e) {
+            // Log error but don't break the flow
+            $this->_logger->error('EstimateDelivery cache calculation failed: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+}

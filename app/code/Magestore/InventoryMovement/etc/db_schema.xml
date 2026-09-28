@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="os_inventory_movement" resource="default" engine="innodb" comment="Inventory Movement">
+        <column xsi:type="varchar" name="inventory_movement_id" length="255" nullable="false" comment="Inventory Movement Id"/>
+        <column xsi:type="varchar" name="source_code" length="255" nullable="false" comment="Source Code"/>
+        <column xsi:type="varchar" name="source_name" length="64" nullable="true" comment="Source Name"/>
+        <column xsi:type="datetime" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Movement created at"/>
+        <column xsi:type="smallint" name="is_in_stock" unsigned="true" nullable="false" identity="false"
+                default="0" comment="Is In Stock"/>
+        <column xsi:type="int" name="product_id" unsigned="true" nullable="false" comment="Product ID"/>
+        <column xsi:type="varchar" name="product_name" length="64" nullable="true" comment="Product Name"/>
+        <column xsi:type="varchar" name="product_sku" length="64" nullable="true" comment="Product SKU"/>
+        <column xsi:type="varchar" name="action_type" length="64" nullable="true" comment="Action Type"/>
+        <column xsi:type="decimal" name="new_qty" precision="12" scale="4" unsigned="false" nullable="true"
+                comment="New Qty"/>
+        <column xsi:type="decimal" name="change_qty" precision="12" scale="4" unsigned="false" nullable="true"
+                comment="Change Qty"/>
+        <column xsi:type="decimal" name="old_qty" precision="12" scale="4" unsigned="false" nullable="true"
+                comment="Old Qty"/>
+        <column xsi:type="text" name="metadata" nullable="true" comment="Metadata"/>
+        <column xsi:type="text" name="note" nullable="true" comment="Note"/>
+        <column xsi:type="varchar" name="user_type" length="64" nullable="true" comment="User Type"/>
+        <column xsi:type="varchar" name="user_name" length="64" nullable="true" comment="User Name"/>
+        <column xsi:type="int" name="user_id" padding="11" unsigned="false"  nullable="true" comment="User Type"/>
+        <column xsi:type="smallint" name="status" unsigned="true" nullable="false" identity="false"
+                default="1" comment="Status"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="inventory_movement_id"/>
+        </constraint>
+    </table>
+    <table name="os_order_potential_error" resource="default" engine="innodb" comment="Order Potential Error">
+        <column xsi:type="int" name="id" padding="11" unsigned="false" nullable="false" identity="true" comment="ID"/>
+        <column xsi:type="int" name="order_id" unsigned="true" nullable="false" comment="Order ID"/>
+        <column xsi:type="varchar" name="order_increment_id" length="64" nullable="false" comment="Order Increment ID"/>
+        <column xsi:type="datetime" name="created_at" on_update="false" nullable="false" comment="Order Created At"/>
+        <column xsi:type="int" name="store_id" unsigned="true" nullable="true" comment="Store ID"/>
+        <column xsi:type="varchar" name="status" length="64" nullable="true" comment="Order Status"/>
+        <column xsi:type="varchar" name="state" length="64" nullable="true" comment="Order State"/>
+        <column xsi:type="varchar" name="type" length="64" nullable="false" comment="Order Type"/>
+        <column xsi:type="varchar" name="base_currency_code" length="3" nullable="true" comment="Order Base Currency Code"/>
+        <column xsi:type="decimal" name="grand_total" precision="12" scale="4" unsigned="false" nullable="true"
+                comment="Grand Total"/>
+        <column xsi:type="decimal" name="total_paid_amount" precision="12" scale="4" unsigned="false" nullable="true"
+                comment="Total Paid Amount"/>
+        <column xsi:type="decimal" name="total_refunded_amount" precision="12" scale="4" unsigned="false" nullable="true"
+                comment="Total Refunded Amount"/>
+        <column xsi:type="decimal" name="total_qty_ordered" precision="12" scale="4" unsigned="false" nullable="true"
+                comment="Total Qty Ordered"/>
+        <column xsi:type="decimal" name="total_virtual_qty" precision="12" scale="4" unsigned="false" nullable="true"
+                comment="Total Virtual Qty"/>
+        <column xsi:type="decimal" name="total_qty_shipped" precision="12" scale="4" unsigned="false" nullable="true"
+                comment="Total Qty Shipped"/>
+        <column xsi:type="decimal" name="total_qty_shipped_actual" precision="12" scale="4" unsigned="false" nullable="true"
+                comment="Total Qty Shipped Actual"/>
+        <column xsi:type="decimal" name="total_qty_invoiced" precision="12" scale="4" unsigned="false" nullable="true"
+                comment="Total Qty Invoiced"/>
+        <column xsi:type="decimal" name="total_qty_invoiced_actual" precision="12" scale="4" unsigned="false" nullable="true"
+                comment="Total Qty Invoiced Actual"/>
+        <column xsi:type="decimal" name="total_qty_refunded" precision="12" scale="4" unsigned="false" nullable="true"
+                comment="Total Qty Refunded"/>
+        <column xsi:type="decimal" name="total_qty_refunded_actual" precision="12" scale="4" unsigned="false" nullable="true"
+                comment="Total Qty Refunded Actual"/>
+        <column xsi:type="decimal" name="total_qty_canceled" precision="12" scale="4" unsigned="false" nullable="true"
+                comment="Total Qty Canceled"/>
+        <column xsi:type="text" name="information" nullable="true" comment="Information"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+</schema>

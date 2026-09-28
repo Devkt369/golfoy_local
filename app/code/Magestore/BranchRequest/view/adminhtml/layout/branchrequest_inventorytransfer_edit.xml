@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2016 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-2columns-left" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="editor"/>
+    <update handle="styles"/>
+    <update handle="branchrequest_timeline"/>
+    <head>
+        <css src="Magestore_BranchRequest::css/transferstock.css"/>
+    </head>
+    <body>
+        <referenceContainer name="messages.wrapper">
+            <block class="Magestore\BranchRequest\Block\Adminhtml\InventoryTransfer\Import\NoticeMessage" name="transferstock_success_message" template="Magestore_BranchRequest::import/message.phtml" before="-"/>
+        </referenceContainer>
+        <referenceContainer name="content">
+            <uiComponent name="os_branchrequest_edit_form"/>
+            <block class="Magestore\BranchRequest\Block\Adminhtml\InventoryTransfer\Import\Form" name="import-form" template="Magestore_BranchRequest::import/form.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

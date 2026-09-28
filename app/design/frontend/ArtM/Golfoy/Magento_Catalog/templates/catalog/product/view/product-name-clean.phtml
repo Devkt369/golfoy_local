@@ -1,0 +1,25 @@
+<?php
+/**
+ * Custom Product Name Template (without brand) - Main Title
+ * 
+ * @var \Magento\Catalog\Block\Product\View $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \ArtM\Common\ViewModel\ProductData $productData
+ */
+$productData = $block->getData('product_data');
+if (!$productData) {
+    // Fallback to original product name if ViewModel not available
+    echo '<div class="page-title-wrapper product"><h1 class="page-title"><span class="base">' . $escaper->escapeHtml($block->getProduct()->getName()) . '</span></h1></div>';
+    return;
+}
+
+$cleanProductName = $productData->getCleanProductName();
+if (!$cleanProductName) {
+    return;
+}
+?>
+<div class="page-title-wrapper product">
+    <h1 class="page-title">
+        <span class="base" data-ui-id="page-title-wrapper"><?= $escaper->escapeHtml($cleanProductName) ?></span>
+    </h1>
+</div>

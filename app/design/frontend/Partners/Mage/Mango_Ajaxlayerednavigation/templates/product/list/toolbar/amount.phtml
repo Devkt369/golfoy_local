@@ -1,0 +1,17 @@
+<?php
+// @codingStandardsIgnoreFile
+?>
+<p class="toolbar-amount" id="toolbar-amount">  
+    <?php 
+    if ($block->getCollection()->getSize() == 1) :?>
+        <?= $block->escapeHtml(
+            __('%1 Item', '<span class="toolbar-number">' . $block->getCollection()->getSize() . '</span>'),
+            ['span']
+        ) ?>
+    <?php else :?>
+        <?= $block->escapeHtml(
+            __('%1 Items', '<span class="toolbar-number">' . $block->getCollection()->getSize() . '</span>'),
+            ['span']
+        ) ?>
+    <?php endif; ?>
+</p>

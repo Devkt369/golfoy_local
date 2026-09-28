@@ -1,0 +1,137 @@
+<?php
+
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var \Magento\Customer\Block\Form\Login\Info $block */
+?>
+<?php if ($block->getRegistration()->isAllowed()) : ?>
+    <div class="modal-fade" id="signon_button" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content" id="loginModalContent">
+                <div class="modal-body" id="modal-body_sso">
+                    <div class='sign-up-forms-details'>
+                        <div class='sign-up-content'>
+                            <div class='login-heading'>
+                                <img src='https://golfoy.com/media/partners/Golfoy-partners-black.png' title='Golfoy.com: India Online Golf Shop' alt='Golfoy.com India Online Golf Shop' loading='lazy' width='403' height='103'>
+                            </div>
+                            <div class='enter_email'>
+                                <form action='' method='post' id='enter_email'>
+                                    <div class='form-group'>
+                                        <input type='email' name='email' class='email-input' placeholder='Enter email' required>
+                                        <lable for='email' class='email-label'>E-mail Address</lable>
+                                    </div>
+                                    <div class='form-group'>
+                                        <input type='password' name='password' maxlength='20' class='password-input' placeholder='Password' required>
+                                        <label for='password' class='password-label'>Password</label>
+                                    </div>
+                                    <span toggle='#password-field' class='fa fa-fw fa-eye-slash field_icon toggle-password'></span>
+
+                                    <input type='hidden' name='pagetype' value='enter_password'>
+                                    <div class='custom-button'>
+                                        <h2 class='forget-password' id='forget-password'>Forgot Password</h2>
+                                        <!-- <h2 class='use-number' id='use_number'>Use Mobile Number</h2> -->
+                                    </div>
+                                    <div class='terms-condition-content'>
+                                        <p>By clicking on Log In, I agree to <a href='/terms-and-conditions' class='acnhor_page'>Terms of Service </a>& <a href='/privacy-policy-cookie-restriction-mode'
+                                                class='acnhor_page'>Privacy Policy </a>
+                                    </div>
+                                    <button type='submit' class='button-submit'>Log In</button>
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="guest-user">
+                        <p>Didn't have an account?</p>
+                        <button class="create-account" id="create_account" onclick="window.location.href='/contact'">Contact Us</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+<!-- here 1-nov-css -->
+<style>
+    #back-to-use_number {
+        display: none;
+    }
+    #use_number {
+        display: none;
+    }
+    button#create_account {
+        color: rgb(230, 0, 35);
+        background-color: white;
+        text-decoration: underline;
+        padding: 0px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .guest-user {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .guest-user p {
+        margin: 0px;
+        color: gray;
+        font-size: 12px;
+        margin-right: 10px;
+    }
+
+    .login-container div#modal-body_sso {
+        padding: 30px 50px;
+    }
+
+    .terms-condition-content p {
+        display: none;
+    }
+
+    .revert-back {
+        left: -30px;
+    }
+
+    div#loginModalContent {
+        background: #f9f9f9;
+    }
+
+    .sign-up-content h2 {
+        color: #e60023;
+    }
+
+    .page-wrapper {
+        background: #f9f9f9;
+    }
+
+    @media only screen and (min-width: 768px) and (max-width: 1439px) {
+        .login-container div#signon_button {
+            top: 120px !important;
+        }
+    }
+
+    @media only screen and (min-width: 1439px) and (max-width: 1920px) {
+        .login-container div#signon_button {
+            top: 270px !important;
+        }
+    }
+
+    @media only screen and (max-width:768px) {
+        .login-container div#signon_button {
+            top: 170px !important;
+        }
+
+        .login-container div#modal-body_sso {
+            padding: 30px 20px;
+        }
+    }
+
+    @media only screen and (max-width:480px) {
+        .login-container .revert-back {
+            left: -15px !important;
+        }
+    }
+</style>

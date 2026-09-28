@@ -1,0 +1,264 @@
+<link rel="stylesheet" href="<?= $block->getViewFileUrl('css/bootstrap/bootstrap.css') ?>">
+
+<style>
+    .blog-page {
+        font-family: 'spartan';
+
+    }
+
+    .blog-page .at-share-btn-elements {
+        width: 340px !important;
+    }
+
+    .item.post-categories {
+        border: 1px solid black;
+    }
+
+    .item.post-tags {
+        border: 1px solid black;
+    }
+
+    .post-info>div {
+        margin-bottom: 20px;
+    }
+
+    .item.post-categories>i {
+        display: none;
+    }
+
+    .mf-blog-icon.mfbi-tags {
+        display: none;
+    }
+
+    .blog_label_sec {
+        border: 1px solid #1919199e;
+        background: black;
+        padding: 12px;
+        font-size: 13px;
+        text-transform: uppercase;
+        font-weight: 700;
+
+    }
+
+    .blog_label_sec>span {
+        color: white !important;
+    }
+
+    .blog_sec_list {
+        display: inline-grid;
+    }
+
+    .blog_sec_list {
+        font-weight: 600;
+        margin-top: 15px;
+        width: 100%;
+    }
+
+    .blog_sec_list>* {
+        margin: 0px;
+        padding-left: 30px;
+        padding-bottom: 6px;
+        width: 100%;
+        text-transform: capitalize;
+
+    }
+
+    .blog_sec_list>*:not(:last-child) {
+        border-bottom: 1px solid #d4d0d0 !important;
+    }
+
+    /* 12-may-2023 */
+
+    .blog_sec_list a:hover {
+        color: black;
+        text-decoration: none;
+        opacity: .7;
+        background-color: #e7e7e7;
+    }
+
+    .blog_sec_list>*:not(:last-child) {
+        border-bottom: 1px solid #ebebeb !important;
+    }
+
+    .blog_sec_list>* {
+        width: 100%;
+        text-transform: capitalize;
+        font-size: 11px;
+        padding: 7px 5px 7px 15px;
+    }
+
+    .item.post-categories,
+    .item.post-tags {
+        border-radius: 5px;
+    }
+
+    div#atstbx a.at-icon-wrapper.at-share-btn.at-svc-facebook span.at-label,
+    div#atstbx a.at-icon-wrapper.at-share-btn.at-svc-twitter span.at-label {
+        display: none;
+    }
+
+    .item.post-posed-date {
+        margin: 10px 0px 5px;
+    }
+
+    .at-share-tbx-element .at-icon-wrapper svg {
+        width: 25px !important;
+        height: 32px !important;
+        margin-left: 4px;
+    }
+
+    .at-share-tbx-element .at-icon-wrapper {
+        width: 33px;
+        height: 33px;
+    }
+
+    .at-share-btn-elements {
+        width: auto;
+        max-width: 100%;
+    }
+
+    .blog_sec_list a {
+        color: black !important;
+    }
+
+    .post-bottom button[type=submit] {
+        background-color: #e60023;
+        font-size: 15px;
+        font-weight: 600;
+        font-family: 'spartan' !important;
+        padding: 12px 23px;
+    }
+</style>
+<?php
+/**
+ * Copyright © Magefan (support@magefan.com). All rights reserved.
+ * Please visit Magefan.com for license details (https://magefan.com/end-user-license-agreement).
+ *
+ * Glory to Ukraine! Glory to the heroes!
+ */
+?>
+<?php
+/**
+ * Blog post view template
+ *
+ * @var $block \Magefan\Blog\Block\Post\View
+ */
+?>
+<?php
+$_post = $block->getPost();
+$_postUrl = $_post->getPostUrl();
+$_postName = $block->escapeHtml($_post->getTitle(), null);
+$title = $_post->getTitle();
+?>
+<style>
+    .post_view_page {
+        width: 100% !important;
+        padding-left: 0px !important;
+        margin: auto;
+        max-width: 100% !important;
+    }
+
+    .blog-post-view .column.main {
+        width: 100% !important;
+    }
+
+    .blog-post-view .breadcrumbs {
+        padding-left: 33px !important;
+        padding-top: 20px;
+        padding-bottom: 0px !important;
+        margin-bottom: 0;
+    }
+
+    /* add head */
+    .post_content_heading h5 {
+        font-size: 13px;
+        text-transform: capitalize !important;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .at_flat_counter {
+        padding: 0 12px;
+        line-height: 34px !important;
+    }
+
+    h1.blog_main_title {
+        font-size: 22px !important;
+        margin-bottom: 20px;
+        background-color: #f8f9f9;
+        padding: 12px 10px 8px;
+        border-radius: 5px;
+        font-weight: 700;
+        font-family: 'spartan';
+        text-align: center;
+    }
+
+    .blog-page h1.page-title {
+        display: none !important;
+    }
+
+    .post_additional_content {
+        font-family: 'spartan';
+    }
+
+    .col_blogs_Sec h3 a,
+    .col_blogs_Sec h3 {
+        font-size: 14px;
+        text-align: center;
+        margin: 0px auto;
+        color: black;
+        font-family: 'spartan';
+    }
+
+    .block.comments,
+    .post-bottom {
+        display: none;
+    }
+</style>
+<div class="container-fluid post_view_page">
+    <div class="row post_view_page_row">
+        <div class="col-sm-9 col-xs-12 post_content">
+            <div class="post-view">
+                <div class="post-holder post-holder-<?= (int)$_post->getId() ?>">
+                    <div class="post-content">
+                        <h1 class="blog_main_title"><?= $title ?></h1>
+                        <div class="post-description clearfix">
+                            <?php if ($featuredImage = $_post->getFeaturedImage()) { ?>
+                                <?php
+                                $featuredImgAlt = $_post->getData('featured_img_alt');
+                                if (!$featuredImgAlt) {
+                                    $featuredImgAlt = $_postName;
+                                }
+                                ?>
+                                <div class="post-ftimg-hld">
+                                    <img src="<?= $block->escapeUrl($featuredImage) ?>"
+                                        alt="<?= $block->escapeHtml($featuredImgAlt) ?>" />
+                                </div>
+                            <?php } ?>
+                            <div class="post-text-hld">
+                                <?= /*@noEscape*/ $block->getContent() ?>
+                                <div class="clear clearfix"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="post-bottom">
+                        <?= $block->getChildHtml('blog.post.bottom') ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+       
+
+        <div class="col-sm-3 col-xs-12 post_additional_content">
+            <div class="post_content_heading"><h5>share on</h5></div>
+            <?php if ($block->displayAddThisToolbox()) : ?>
+                <div class="post-header">
+                    <div class="addthis_toolbox addthis_inline_share_toolbox" addthis:url="<?= $block->escapeUrl($_postUrl) ?>">
+                    </div>
+                    <?= $block->getInfoHtml() ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>

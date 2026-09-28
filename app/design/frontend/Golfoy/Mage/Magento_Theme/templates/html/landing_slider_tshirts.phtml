@@ -1,0 +1,73 @@
+<div class="col-xs-12 header-left" style="padding: 30px 0px 20px 0px !important;">
+    <div class="heading_golfoy_left">
+        <h2 style="padding: 0px 5px !important;">T-Shirts Collection</h2>
+    </div>
+</div>
+
+<div id="block_tshirts" class="background-container">
+    <div class="row full_block_web">
+        <a href="https://golfoy.com/golf-apparels/apparel-category/golf-t-shirts.html?product_list_order=p_low_to_high">
+            <img class="background-image" src="https://golfoy.com/media/wysiwyg/2024/landing/five_width/T-shirts/T- Shirts-Collection-Mobile-650.jpg" alt="Taylormade-Qi10" loading="lazy" /></a>
+    </div>
+
+    <div class="slider-container">
+        <button class="slider-btn prev-btn" onclick="scrollLeftFun(this)">❮</button>
+        <div class="product-grid">
+            <div class="product-card">
+                <a href="https://golfoy.com/golf-apparels/apparel-category/golf-t-shirts.html?brand=128">
+                    <img src="https://golfoy.com/media/wysiwyg/2024/landing/five_width/T-shirts/FootJoy-Mobile-1.png" alt="gfore">
+                </a>
+                <div class="product_info"><a href="https://golfoy.com/golf-apparels/apparel-category/golf-t-shirts.html?brand=128"><span> Shop Now ></span></a></div>
+            </div>
+            <div class="product-card">
+                <a href="https://golfoy.com/golf-apparels/apparel-category/golf-t-shirts.html?brand=3736">
+                    <img src="https://golfoy.com/media/wysiwyg/2024/landing/five_width/T-shirts/G_fore-Mobile-1.png" alt="adidas" loading="lazy">
+                </a>
+                <div class="product_info"><a href="https://golfoy.com/golf-apparels/apparel-category/golf-t-shirts.html?brand=3736"><span> Shop Now ></span></a></div>
+            </div>
+            <div class="product-card">
+                <a href="https://golfoy.com/golf-apparels/apparel-category/golf-t-shirts.html?brand=4550">
+                    <img src="https://golfoy.com/media/wysiwyg/2024/landing/five_width/T-shirts/JLindeberg-Mobile-1.png" alt="oscar" loading="lazy">
+                </a>
+                <div class="product_info"><a href="https://golfoy.com/golf-apparels/apparel-category/golf-t-shirts.html?brand=4550"><span> Shop Now ></span></a></div>
+            </div>
+            <div class="product-card">
+                <a href="https://golfoy.com/golf-apparels/apparel-category/golf-t-shirts.html?brand=3008">
+                    <img src="https://golfoy.com/media/wysiwyg/2024/landing/five_width/T-shirts/Oscar-jacobson-Mobile-1.png" alt="viper" loading="lazy">
+                </a>
+                <div class="product_info"><a href="https://golfoy.com/golf-apparels/apparel-category/golf-t-shirts.html?brand=3008"><span> Shop Now ></span></a></div>
+            </div>
+            <div class="product-card">
+                <a href="https://golfoy.com/golf-apparels/apparel-category/golf-t-shirts.html?brand=1408">
+                    <img src="https://golfoy.com/media/wysiwyg/2024/landing/five_width/T-shirts/Travis-Mathew-Mobile-1.png" alt="viper" loading="lazy">
+                </a>
+                <div class="product_info"><a href="https://golfoy.com/golf-apparels/apparel-category/golf-t-shirts.html?brand=1408"><span> Shop Now ></span></a></div>
+            </div>
+        </div>
+        <button class="slider-btn next-btn" onclick="scrollRight(this)">❯</button>
+    </div>
+</div>
+<script>
+    const productGrid = document.querySelector('.product-grid');
+    const cardWidth = document.querySelector('.product-card').offsetWidth + 20;
+
+    function scrollLeftFun(button) {
+        const productGrid = button.nextElementSibling;
+        const cardWidth = productGrid.querySelector('.product-card').offsetWidth + 20;
+
+        productGrid.scrollBy({
+            left: -cardWidth * 3,
+            behavior: 'smooth',
+        });
+    }
+
+    function scrollRight(button) {
+        const productGrid = button.previousElementSibling;
+        const cardWidth = productGrid.querySelector('.product-card').offsetWidth + 20;
+
+        productGrid.scrollBy({
+            left: cardWidth * 3,
+            behavior: 'smooth',
+        });
+    }
+</script>

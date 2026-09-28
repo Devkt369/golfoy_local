@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="ArtM_RecommendedSort::recommendedsort" title="Recommended Sort" module="ArtM_RecommendedSort" sortOrder="600" resource="ArtM_RecommendedSort::recommendedsort" parent="ArtM_BlogEsg::BlogEsgmenu" />
+        <add id="ArtM_RecommendedSort::index" title="Index" module="ArtM_RecommendedSort" sortOrder="20"  action="artm_recommendedsort/index/index" resource="ArtM_RecommendedSort::recommendedsort" parent="ArtM_RecommendedSort::recommendedsort" />
+        <!-- <add id="ArtM_RecommendedSort::background" title="Recommended Indexer" module="ArtM_RecommendedSort" sortOrder="20"  action="artm_recommendedsort/background/process" resource="ArtM_RecommendedSort::recommendedsort" parent="ArtM_RecommendedSort::recommendedsort" /> -->
+        <add id="ArtM_RecommendedSort::processlisting" title="Batch" module="ArtM_RecommendedSort" sortOrder="30"  action="artm_recommendedsort/recommendsortListing/processlisting" resource="ArtM_RecommendedSort::recommendedsort" parent="ArtM_RecommendedSort::recommendedsort" />
+        <add id="ArtM_RecommendedSort::queuelisting" title="Queue" module="ArtM_RecommendedSort" sortOrder="40"  action="artm_recommendedsort/queueobserver/index" resource="ArtM_RecommendedSort::recommendedsort" parent="ArtM_RecommendedSort::recommendedsort" />
+        <add id="ArtM_RecommendedSort::manual_index" title="Manual Edits" module="ArtM_RecommendedSort" sortOrder="50"  action="artm_recommendedsort/manual/index" resource="ArtM_RecommendedSort::recommendedsort" parent="ArtM_RecommendedSort::recommendedsort" />
+    </menu>
+</config>

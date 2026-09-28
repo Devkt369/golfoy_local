@@ -1,0 +1,351 @@
+<?php
+$myt =  $this->getLayout()->createBlock('Magento\Cms\Block\Block')->setBlockId('freebie_callout')->toHtml();
+if (trim($myt) != '') {
+
+	//$myt = '0,16260,19075,19717,19150,2022-01-11,';
+	$myp = explode(",", $myt);
+	$date_now = date("Y-m-d");
+	$dategiven = date($myp[5]);
+	$origin = new DateTime($date_now);
+	$target = new DateTime($dategiven);
+	$interval = $origin->diff($target);
+	$timestamp = $interval->format('%r%a') * 24 * 60 * 60;
+
+	$prd1 = $myp[1];
+	$prd2 = $myp[2];
+	$prd3 = $myp[3];
+	$prd4 = $myp[4];
+	$prds = array();
+	array_push($prds, $prd1, $prd2, $prd3, $prd4);
+
+	if ($dategiven >= $date_now) {
+?>
+		<div class="container data_landing_page">
+			<div class="data_landing_page_inside">
+				<div class="row">
+					<div class="col-sm-6 col-xs-12">
+						<div class="heading_golfoy left">
+							<h1>Flash deals</h1>
+						</div>
+					</div>
+					<div class="col-sm-6 col-xs-8 dealtimer">
+						<input type="hidden" id="timeof" value="<?php echo $timestamp; ?>"> <span id="countdown" class="timer"></span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="flashdeal container">
+			<div class="row tflashdeal outer_width_js">
+				<div class="row tflashdeal inner_width_js">
+					<?php
+					$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+					$productRepository = $objectManager->get('\Magento\Catalog\Model\ProductRepository');
+
+					foreach ($prds as $prdid) {
+						if ($_product = $objectManager->get('Magento\Catalog\Model\Product')->load($prdid)) {
+
+
+							echo "<div class='flash_deal_single_prd'>";
+							if ($_product->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE) {
+
+
+								$_configChild = $_product->getTypeInstance()->getUsedProductIds($_product);
+								$getChildId = array();
+								foreach ($_configChild as $child) {
+									$getChildId[] = $child;
+								}
+
+								$first_id = $getChildId[0];
+							} else {
+
+								$first_id = $prdid;
+							}
+
+
+							$prd_id_for_tier_price = $first_id;
+
+							$product_first_simple = $objectManager->create('Magento\Catalog\Model\Product')->load($first_id);
+
+							$sku = $_product->getSku();
+
+							$producturl_url = $productRepository->get($sku);
+
+							$producturl = $producturl_url->getProductUrl();
+
+					?>
+							<div class="tflashdeal-box">
+								<div>
+									<a href="<?php echo $producturl; ?>">
+										<div class="product-image"> <img src="<?php echo $_product->getMediaConfig()->getMediaUrl($_product->getImage()); ?>">
+										</div>
+									</a>
+									<div class="flash-product-name">
+										<p> <a href="<?php echo $producturl; ?>"><?php echo $_product->getName(); ?></a></p>
+									</div>
+									<?php
+
+									?>
+									<?php
+
+
+									$regular_price = $product_first_simple->getPrice();
+									$finalPriceAmt = $product_first_simple->getPriceInfo()->getPrice('final_price')->getValue();
+									if ((int)$finalPriceAmt == (int)$regular_price) {
+										echo '<label>MRP: </label>';
+										$class = 'mrp_here';
+									} else {
+										$class = '';
+									}
+									echo "<div class='price_html_category_page configurable_product " . $class . "'>";
+									echo $objectManager->get('Magento\Catalog\Block\Product\View')->getProductPrice($product_first_simple);
+									echo "</div>";
+									?>
+									<div class="col-xs-12 grab_now_button">
+										<a href="<?php echo $producturl; ?>">
+											<div>shop now</div>
+										</a>
+									</div>
+									<br />
+								</div>
+							</div>
+				<?php
+
+							echo "</div>";
+						} else {
+
+							echo "product not found";
+						}
+					}
+				}
+				?>
+				</div>
+			</div>
+		</div>
+		<script>
+			var upgradeTime = document.getElementById("timeof").value;
+			var seconds = upgradeTime;
+
+			function timer() {
+				var days = Math.floor(seconds / 24 / 60 / 60);
+				var hoursLeft = Math.floor((seconds) - (days * 86400));
+				var hours = Math.floor(hoursLeft / 3600);
+				var minutesLeft = Math.floor((hoursLeft) - (hours * 3600));
+				var minutes = Math.floor(minutesLeft / 60);
+				var remainingSeconds = seconds % 60;
+
+				function pad(n) {
+					return (n < 10 ? "0" + n : n);
+				}
+				document.getElementById('countdown').innerHTML = "<span>" + pad(days) + "D  </span><span>" + pad(hours) + "H  </span><span>" + pad(minutes) + "M  </span><span>" + pad(remainingSeconds) + "S </span>";
+				if (seconds == 0) {
+					clearInterval(countdownTimer);
+					document.getElementById('countdown').innerHTML = "Completed";
+				} else {
+					seconds--;
+				}
+			}
+			var countdownTimer = setInterval('timer()', 1000);
+		</script>
+		<style>
+			.special-box p,
+			.mrp-box p {
+				margin-bottom: 5px;
+			}
+
+			.flash_deal_single_prd {
+				display: inline-block;
+			}
+
+			.tflashdeal.outer_width_js {
+				overflow: auto;
+			}
+
+			.you-saved-text,
+			.special-text,
+			.mrp-text,
+			.you-saved-price {
+				font-size: 12px;
+				text-align: center;
+				font-weight: 600;
+				color: #555;
+				font-family: 'Spartan', sans-serif;
+			}
+
+			.special-price,
+			.special-box {
+				color: #e60023 !important;
+				font-size: 14px !important;
+				font-weight: 600;
+				font-family: 'Spartan', sans-serif;
+			}
+
+			.mrp-text {
+				color: #555;
+				font-size: 11px !important;
+				font-weight: 600;
+				font-family: 'Spartan', sans-serif;
+			}
+
+			.mrp-price strike {
+				font-size: 11px;
+				font-weight: 600;
+				font-family: 'Spartan', sans-serif;
+			}
+
+			.flash-product-name p a {
+				font-size: 14px;
+				font-weight: 500;
+				text-decoration: none;
+				color: #000;
+				text-align: center;
+				font-family: 'Spartan', sans-serif;
+			}
+
+			.flash-product-name p a:hover {
+				color: #e60023;
+				font-family: 'Spartan', sans-serif;
+			}
+
+			.you-saved-text,
+			.you-saved-price {
+				color: #e60023;
+			}
+
+			.tflashdeal-box>div:hover {
+				box-shadow: 2px 2px 7px 2px #afafaf;
+				transition: all .3s;
+			}
+
+			.tflashdeal-box>div {
+				padding: 10px 10px 30px;
+				box-shadow: 1px 1px 3px 0px #afafaf;
+				border-radius: 3px;
+				max-width: 280px;
+				padding: 10px;
+				float: left;
+				text-align: center;
+				margin-bottom: 12px;
+				padding-bottom: 24px;
+				min-height: 510px;
+				margin-left: 10px;
+				margin-right: 10px;
+			}
+
+			.tflashdeal {
+				width: 1220px;
+				margin: 0px auto;
+			}
+
+			.flashdeal {
+				overflow-x: unset;
+				overflow-y: unset;
+				clear: both;
+			}
+
+			.special-price {
+				font-size: 16px !important;
+				font-family: 'Spartan', sans-serif;
+			}
+
+			@media screen and (max-width: 1092px) {
+				.tflashdeal-box {
+					width: 300px;
+					float: left;
+					display: inline-block;
+				}
+			}
+
+			@media screen and (max-width: 678px) {
+				.you-saved-text {
+					font-size: 10px;
+				}
+
+				.flashdeal {
+					overflow-x: scroll;
+					overflow-y: hidden;
+				}
+			}
+
+			.flash-product-name {
+				max-height: 63px;
+				overflow-y: hidden;
+				min-height: 63px;
+				margin-bottom: 1px;
+			}
+
+			.grab_now_button {
+				padding: 0px !important;
+				margin-top: -5px !important;
+				max-width: 160px !important;
+				margin: auto !important;
+				float: none !important;
+				background: #0e0e0e;
+				border-radius: 20px;
+				position: relative;
+				bottom: 3px;
+			}
+
+			.grab_now_button a {
+				text-decoration: none;
+				background: #1e1e1e !important;
+			}
+
+			.grab_now_button a div {
+				color: #ffffff;
+				color: #ffffff;
+				padding: 10px;
+				font-size: 12px;
+				font-family: 'Spartan', sans-serif;
+				text-align: center;
+				font-weight: bold;
+				text-transform: uppercase;
+			}
+
+			.you-saved {
+				margin-bottom: 32px;
+			}
+
+			.dealtimer {
+				color: #e60023;
+				font-size: 14px;
+				font-weight: bold;
+				position: relative;
+				float: right;
+				top: 39px;
+				right: 44px;
+			}
+
+			#countdown {
+				float: right;
+				margin-bottom: 10px;
+				padding-left: 0px;
+				padding-right: 7px;
+				background: #bfbfbf1c;
+				min-width: 200px;
+				position: relative;
+				right: -31px;
+			}
+
+			span#countdown span {
+				margin-left: 16px !important;
+				width: 80px !important;
+			}
+
+			@media screen and (max-width: 677px) {
+				.dealtimer {
+					right: 0px;
+					top: -39px;
+				}
+
+				#countdown {
+					float: left;
+					margin-bottom: 10px;
+					padding-top: 6px;
+				}
+			}
+		</style>
+
+	<?php
+}
+	?>

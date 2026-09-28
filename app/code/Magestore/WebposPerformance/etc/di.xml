@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Magestore\WebposPerformanceApi\Api\Data\PerformanceTrackInterface" type="Magestore\WebposPerformance\Model\PerformanceTrack"/>
+    <preference for="Magestore\WebposPerformanceApi\Api\PerformanceTrackRepositoryInterface" type="Magestore\WebposPerformance\Model\PerformanceTrackRepository"/>
+
+
+    <!--
+         ~ Start: Inject POS statistic items to core reports statistics
+         -->
+    <virtualType name="PosPerformanceStatistic" type="Magestore\WebposPerformance\Model\Statistics\PosPerformanceStatistic">
+        <arguments>
+            <argument name="id" xsi:type="string">pos_performance</argument>
+            <argument name="title" xsi:type="string">POS Performance Request</argument>
+            <argument name="comment" xsi:type="string">POS Performance Overview</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Magento\Reports\Model\ResourceModel\Refresh\Collection">
+        <plugin name="add_pos_performance_reports_to_refresh_collection"
+                type="Magestore\WebposPerformance\Plugin\Reports\RefreshCollectionPlugin"/>
+    </type>
+
+    <type name="Magestore\WebposPerformance\Model\StatisticsManagement">
+        <arguments>
+            <argument name="posPerformanceStatistics" xsi:type="array">
+                <item name="pos_performance" xsi:type="object">PosPerformanceStatistic</item>
+            </argument>
+        </arguments>
+    </type>
+    <!--
+      ~ End: Inject POS statistic items to core reports statistics
+      -->
+    <type name="Magestore\WebposPerformance\Model\ActionTypes">
+        <arguments>
+            <argument name="criticalAction" xsi:type="array">
+                <item name="search_product" xsi:type="string">Search Product</item>
+                <item name="search_customer" xsi:type="string">Search Customer</item>
+                <item name="search_order" xsi:type="string">Search Order</item>
+                <item name="scan_barcode" xsi:type="string">Scan Barcode</item>
+                <item name="place_order" xsi:type="string">Place Order</item>
+            </argument>
+
+            <argument name="highPriorityAction" xsi:type="array">
+                <item name="take_shipment" xsi:type="string">Take Shipment</item>
+                <item name="take_payment" xsi:type="string">Take Payment</item>
+                <item name="refund" xsi:type="string">Refund</item>
+                <item name="reorder" xsi:type="string">Reorder</item>
+                <item name="cancel_order" xsi:type="string">Cancel Order</item>
+                <item name="hold_order" xsi:type="string">Hold Order</item>
+                <item name="reprint" xsi:type="string">RePrint</item>
+            </argument>
+
+            <argument name="lowPriorityAction" xsi:type="array">
+                <item name="enter_to_pos" xsi:type="string">Enter to POS</item>
+                <item name="send_email" xsi:type="string">Send Email</item>
+                <item name="add_note" xsi:type="string">Add Note</item>
+            </argument>
+        </arguments>
+    </type>
+
+</config>

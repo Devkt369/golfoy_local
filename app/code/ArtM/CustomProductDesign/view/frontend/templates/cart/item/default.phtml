@@ -1,0 +1,629 @@
+<?php
+
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// phpcs:disable Magento2.Templates.ThisInTemplate
+// phpcs:disable Magento2.Files.LineLength.MaxExceeded
+
+/** @var $block \Magento\Checkout\Block\Cart\Item\Renderer */
+//$edarray= array(); 
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$chelper = $objectManager->get('ArtM\Common\Helper\Data');
+$_item = $block->getItem();
+// die('asdfdf');/
+$product = $_item->getProduct();
+$isVisibleProduct = $product->isVisibleInSiteVisibility();
+/** @var \Magento\Msrp\Helper\Data $helper */
+$helper = $this->helper(Magento\Msrp\Helper\Data::class);
+$canApplyMsrp = $helper->isShowBeforeOrderConfirm($product) && $helper->isMinimalPriceLessMsrp($product);
+?>
+<?php $edatearray = date('F d, Y'); ?>
+<tbody class="cart item cart_page_single_prd">
+    <tr class="item-info">
+        <td>
+            <div class="inside_cart_item">
+                <table class="table_inside_cart_item">
+                    <button class="view-action-button"></button>
+                    <tbody>
+                        <tr>
+                            <td data-th="<?= $block->escapeHtmlAttr(__('Item')) ?>" class="col item">
+                                <div class="row cart_page_single_prd_inside_box">
+                                    <div class="col-sm-3 col-xs-2 single_prd_image_left">
+                                        <?php if ($block->hasProductUrl()) : ?>
+                                            <a href="<?= $block->escapeUrl($block->getProductUrl()) ?>"
+                                                title="<?= $block->escapeHtmlAttr($block->getProductName()) ?>"
+                                                tabindex="-1"
+                                                class="product-item-photo">
+                                            <?php else : ?>
+                                                <span class="product-item-photo">
+                                                <?php endif; ?>
+                                                <?= $block->getImage($block->getProductForThumbnail(), 'cart_page_product_thumbnail')->toHtml() ?>
+                                                <?php if ($block->hasProductUrl()) : ?>
+                                            </a>
+                                        <?php else : ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="col-sm-9 col-xs-10 single_prd_details_right">
+                                        <div class="product-item-details">
+                                            <strong class="product-item-name">
+
+                                                <?php if ($block->hasProductUrl()) : ?>
+                                                    <a href="<?= $block->escapeUrl($block->getProductUrl()) ?>"><?= $block->escapeHtml($block->getProductName()) ?></a>
+                                                <?php else : ?>
+                                                    <?= $block->escapeHtml($block->getProductName()) ?>
+                                                <?php endif; ?>
+                                            </strong>
+
+                                            <?php if ($_options = $block->getOptionList()) : ?>
+                                                <dl class="item-options">
+                                                    <?php foreach ($_options as $_option) : ?>
+                                                        <?php $_formatedOptionValue = $block->getFormatedOptionValue($_option) ?>
+                                                        <dt><?= $block->escapeHtml($_option['label']) ?></dt>
+                                                        <dd>
+                                                            <?php if (isset($_formatedOptionValue['full_view'])) :
+                                                                $formatedval = $_formatedOptionValue['full_view'];
+                                                                if (strpos($formatedval, 'customprint/') !== false) {
+                                                                    $toshow = $chelper->optionImage($formatedval);
+                                                                    echo $toshow;
+                                                                } elseif (stripos($formatedval, 'golfoy.com') !== false) {
+                                                                    echo '<div class="pre-define-img"><img src="' . $formatedval . '"></div>';
+                                                                } else {
+                                                                    echo $formatedval;
+                                                                }
+                                                            ?>
+                                                            <?php else :
+                                                                $formatedval = $_formatedOptionValue['value'];
+                                                                if (strpos($formatedval, 'customprint/') !== false) {
+                                                                    $toshow = $chelper->optionImage($formatedval);
+                                                                    echo $toshow;
+                                                                } else {
+                                                                    echo $formatedval;
+                                                                }  ?>
+                                                            <?php endif; ?>
+                                                        </dd>
+                                                    <?php endforeach; ?>
+                                                </dl>
+                                            <?php endif; ?>
+                                            <?php if ($messages = $block->getMessages()) :
+                                                $errmsgcount = 0; ?>
+                                                <?php foreach ($messages as $message) :
+                                                    if ($message['type'] == 'error') {
+                                                        $errmsgcount++;
+                                                    }
+                                                    if ($message['type'] == 'error' && $errmsgcount > 1) { ?>
+                                                        <div class="hide cart item message <?= $block->escapeHtmlAttr($message['type']) ?>">
+                                                            <div><?= $block->escapeHtml($message['text']) ?></div>
+                                                        </div>
+                                                    <?php } else { ?>
+                                                        <div class="cart item message <?= $block->escapeHtmlAttr($message['type']) ?>">
+                                                            <div><?= $block->escapeHtml($message['text']) ?></div>
+                                                        </div>
+                                                <?php   }
+                                                endforeach; ?>
+                                            <?php endif; ?>
+                                            <?php $addInfoBlock = $block->getProductAdditionalInformationBlock(); ?>
+                                            <?php if ($addInfoBlock) : ?>
+                                                <?= $addInfoBlock->setItem($_item)->toHtml() ?>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="row qty_price_details">
+                                            <div class="col-xs-5 qty_cart_page">
+                                                <div class="field qty">
+                                                    <div class="control qty">
+                                                        <div class="qty_box_cart">
+                                                            <span class="dec-qty_box_cart cart_qty_button">
+                                                                <span>
+                                                                    -
+                                                                </span>
+                                                            </span>
+                                                            <span class="input-qty_box_cart">
+                                                                <input id="cart-<?= $block->escapeHtmlAttr($_item->getId()) ?>-qty"
+                                                                    name="cart[<?= $block->escapeHtmlAttr($_item->getId()) ?>][qty]"
+                                                                    data-cart-item-id="<?= $block->escapeHtmlAttr($_item->getSku()) ?>"
+                                                                    value="<?= $block->escapeHtmlAttr($block->getQty()) ?>"
+                                                                    type="number"
+                                                                    size="4"
+                                                                    step="any"
+                                                                    title="<?= $block->escapeHtmlAttr(__('Qty')) ?>"
+                                                                    class="input-text qty"
+                                                                    data-validate="{required:true,'validate-greater-than-zero':true}"
+                                                                    data-role="cart-item-qty" />
+                                                            </span>
+                                                            <span class="inc-qty_box_cart cart_qty_button">
+                                                                <span>
+                                                                    +
+                                                                </span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <button type="submit"
+                                                    name="update_cart_action"
+                                                    data-cart-item-update=""
+                                                    value="update_qty"
+                                                    title="<?= $block->escapeHtmlAttr(__('Update Shopping Cart')) ?>"
+                                                    class="action-update">
+                                                    <span><?= $block->escapeHtml(__('Update')) ?></span>
+                                                </button>
+                                            </div>
+                                            <div class="col-xs-7 price_cart_page">
+                                                <div class="old_price_cart_page">
+                                                    <?php if ($canApplyMsrp) : ?>
+                                                        <span class="pricing msrp">
+                                                            <span class="msrp notice"><?= $block->escapeHtml(__('See price before order confirmation.')) ?></span>
+                                                            <?php $helpLinkId = 'cart-msrp-help-' . $_item->getId(); ?>
+                                                            <a href="#" class="action help map"
+                                                                id="<?= ($block->escapeHtmlAttr($helpLinkId)) ?>"
+                                                                data-mage-init='{"addToCart":{
+                                                                                    "helpLinkId": "#<?= $block->escapeJs($block->escapeHtml($helpLinkId)) ?>",
+                                                                                    "productName": "<?= $block->escapeJs($block->escapeHtml($product->getName())) ?>",
+                                                                                    "showAddToCart": false
+                                                                                    }
+                                                                                }'>
+                                                                <span><?= $block->escapeHtml(__("What's this?")) ?></span>
+                                                            </a>
+                                                        </span>
+                                                    <?php else : ?>
+                                                        <?= str_replace(trim(strip_tags($block->getRowTotalHtml($_item))), '', $block->getUnitPriceHtml($_item)); ?>
+                                                    <?php endif; ?>
+                                                    <span class="qty_multiply">
+                                                        <?php
+                                                        if ($block->escapeHtmlAttr($block->getQty()) > 1) {
+                                                            echo " x " . $block->escapeHtmlAttr($block->getQty());
+                                                        }
+                                                        ?>
+                                                    </span>
+                                                </div>
+                                                <div class="final_price_cart_page">
+                                                    <?php if ($canApplyMsrp) : ?>
+                                                        <span class="cart msrp subtotal">--</span>
+                                                    <?php else : ?>
+                                                        <?= $block->getRowTotalHtml($_item) ?>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </td>
+                        </tr>
+                        <tr class="item-actions">
+                            <td colspan="4">
+                                <div class="actions-toolbar">
+                                    <?= /* @noEscape */ $block->getActions($_item) ?>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <?php
+            $dataJson = $_item->getData('custom_design_userdata_ids');
+            $jsonObjects = $dataJson ? preg_split('/(?<=\})\s*(?=\{)/', $dataJson) : [];
+            $hasCustomization = false;
+
+            // Check if we have valid JSON data
+            if ($jsonObjects) {
+                foreach ($jsonObjects as $jsonStr) {
+                    if (json_decode($jsonStr, true)) {
+                        $hasCustomization = true;
+                        break;
+                    }
+                }
+            }
+
+            if ($hasCustomization): ?>
+                <div class="custom-print-data-blocks">
+                    <?php
+                    // Split JSON objects by "}{"
+                    $jsonObjects = preg_split('/(?<=\})\s*(?=\{)/', $dataJson);
+                    $overallTotalPrice = 0; // Initialize total price variable
+                    $mediaUrl = $block->getUrl('pub/media/') ?: '/pub/media/';
+
+                    // Calculate overall total price once
+                    if ($jsonObjects) {
+                        foreach ($jsonObjects as $jsonStr) {
+                            $data = json_decode($jsonStr, true);
+                            if ($data && isset($data['additional_data'])) {
+                                $additionalData = json_decode($data['additional_data'], true);
+                                $totalPrice = $additionalData['total_price'] ?? 0;
+                                $overallTotalPrice += $totalPrice;
+                            }
+                        }
+                    }
+
+                    // Display heading with total price
+                    if (!isset($headingDisplayed)): ?>
+                        <div class="custom-print-data-block_heading">
+                            <span class="customize-text">Customized Details</span>
+                            <span class="customize-text total-cost">Printing Cost: ₹<?php echo htmlspecialchars($overallTotalPrice); ?></span>
+                        </div>
+                        <?php $headingDisplayed = true; ?>
+                    <?php endif; ?>
+
+                    <?php
+                    // Process each JSON object
+                    if ($jsonObjects) {
+                        foreach ($jsonObjects as $jsonStr) {
+                            $data = json_decode($jsonStr, true);
+                            if ($data && isset($data['additional_data'])) {
+                                $imageUrl = $mediaUrl . $data['img_path'];
+                                $additionalData = json_decode($data['additional_data'], true);
+                    ?>
+                                <div class="custom-print-data">
+                                    <div class="custom-print-inner-blocks">
+                                        <div class="custom-print-data-img">
+                                            <a href="<?php echo htmlspecialchars($imageUrl); ?>" target="_blank" rel="noopener noreferrer">
+                                                <img src="<?php echo htmlspecialchars($imageUrl); ?>" alt="Custom Print Image" style="max-width:100px;" />
+                                            </a>
+                                        </div>
+                                        <div class="right-boxes">
+                                            <?php foreach ($additionalData['price_breakdown'] as $area):
+                                                $areaId = $area['area_id'];
+                                                $assetInfo = $additionalData['asset_paths'][$areaId] ?? null;
+                                            ?>
+                                                <div class="custom-card-block">
+                                                    <div class="custom-area">
+                                                        <span>Area:</span> <?php echo htmlspecialchars($area['areaname'] ?: 'N/A'); ?>
+                                                    </div>
+                                                    <div class="custom-content <?php echo htmlspecialchars($area['area_filled_with']); ?>">
+                                                        <p>Printing type: <?php echo htmlspecialchars($area['area_filled_with']); ?></p>
+                                                        <p>Asset:
+                                                            <?php if ($area['area_filled_with'] === 'image' && isset($assetInfo['path'])): ?>
+                                                                <a href="<?php echo htmlspecialchars($mediaUrl . $assetInfo['path']); ?>" target="_blank">View image</a>
+                                                            <?php elseif ($area['area_filled_with'] === 'text' && isset($assetInfo['data'])): ?>
+                                                                <?php echo htmlspecialchars(
+                                                                    sprintf(
+                                                                        '%s / %s / %spx / %s / %s',
+                                                                        $assetInfo['data']['text'] ?? 'N/A',
+                                                                        $assetInfo['data']['font'] ?? 'N/A',
+                                                                        $assetInfo['data']['size'] ?? 'N/A',
+                                                                        $assetInfo['data']['color'] ?? 'N/A',
+                                                                        $assetInfo['data']['align'] ?? 'N/A'
+                                                                    )
+                                                                ); ?>
+                                                            <?php else: ?>
+                                                                N/A
+                                                            <?php endif; ?>
+                                                        </p>
+                                                        <p>Price: <span>₹<?php echo htmlspecialchars($area['price_for_this_type']); ?></span></p>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                    <?php
+                            }
+                        }
+                    }
+                    ?>
+                </div>
+            <?php endif; ?>
+        </td>
+
+    </tr>
+</tbody>
+
+
+
+
+<script>
+    require(['jquery'], function(jQuery) {
+        jQuery(document).ready(function() {
+            jQuery(document).on("click", ".view-action-button", function(e) {
+                e.preventDefault();
+                jQuery(this).siblings(".table_inside_cart_item").addClass("active_delete");
+            });
+            jQuery("body").click(function() {
+                jQuery(".table_inside_cart_item").removeClass("active_delete");
+            });
+            jQuery('table.table_inside_cart_item').each(function() {
+                var heightOfCartSinglePrd = jQuery(this).height();
+                var finalPadding = ((heightOfCartSinglePrd - 15) / 2) - 23;
+                var finalPadding = finalPadding / 2;
+                // console.log('finalPadding', finalPadding);
+                if (jQuery(this).find('.actions-toolbar').hasClass('gift-cart-btns')) {
+
+                } else {
+                    jQuery(this).find('.actions-toolbar').children('a.action.action-delete, a.action.action-edit').each(function() {
+                        var currentStyle = jQuery(this).attr('style') || '';
+                        jQuery(this).attr('style', currentStyle + 'padding-top: ' + finalPadding + 'px !important; padding-bottom: ' + finalPadding + 'px !important;');
+                    });
+                }
+            });
+
+        });
+    });
+</script>
+
+<style>
+    .custom-print-data img {
+        max-width: 83px !important;
+    }
+
+    .custom-print-data p {
+        font-size: 10px;
+        font-weight: 600;
+        margin-bottom: 0px;
+    }
+
+    .custom-print-data-img p {
+        color: #e60023;
+        margin-top: 5px;
+        text-align: center;
+    }
+
+    .custom-print-data {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .custom-print-data-blocks {
+        border: 1px solid #F6F6F6;
+        border-radius: 0px 0px 10px 10px;
+        padding: 10px;
+        margin-bottom: 30px;
+        display: flex;
+        gap: 12px;
+        border-top-color: #F6F6F6;
+        flex-wrap: wrap;
+        border-top: 0px !important;
+    }
+
+    .custom-print-inner-blocks {
+        display: flex;
+        align-items: start;
+        border-radius: 10px;
+        gap: 10px;
+        overflow: hidden;
+        border: 1px solid #80808024;
+    }
+
+    .inside_cart_item table {
+        margin-bottom: unset;
+    }
+
+    .pre-define-img img {
+        max-width: 100px;
+    }
+
+    .col-xs-5.qty_cart_page button.action.update:before {
+        content: '';
+    }
+
+    .col-xs-5.qty_cart_page .field.qty {
+        display: table;
+    }
+
+    .row.qty_price_details button.action-update {
+        padding: 5px;
+        left: 25px;
+        position: relative;
+        margin-top: 5px;
+        font-size: 11px;
+        color: #494745;
+        font-weight: 500;
+    }
+
+    form#form-validate .cart.main.actions {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    button.action.update.hide {
+        display: none !important;
+    }
+
+    button#empty_cart_button {
+        margin-left: 10px;
+    }
+
+    @media (max-width:768px) {
+        .qty_cart_page {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .row.qty_price_details button.action-update {
+            position: unset;
+        }
+
+        .qty_box_cart {
+            display: flex;
+            justify-content: center;
+        }
+    }
+
+    a.product-item-photo img {
+        background-color: #efefef7d;
+        mix-blend-mode: darken;
+    }
+
+    a.product-item-photo {
+        display: inline-block;
+        background-color: #efefef7d;
+        mix-blend-mode: darken;
+    }
+
+    @media only screen and (min-width : 768px) and (max-width : 1080px) {
+        .checkout-cart-index .product_slider_container li.item.product.product-item {
+            width: 260px !important;
+        }
+    }
+
+    .checkout-cart-index .block.widget.amrelated-grid-wrapper.block-products-list.grid .block-title strong {
+        font-family: headpro;
+        font-weight: 700 !important;
+        padding-top: 30px;
+        font-size: 20px !important;
+        border: unset !important;
+    }
+
+    .amrelated-grid-wrapper .slick-slide {
+        margin: 0 10px !important;
+    }
+</style>
+
+<style>
+    .custom-content {
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    .right-boxes {
+        display: block;
+        gap: 10px;
+    }
+
+    .right-boxes.grid-apply {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0px;
+    }
+
+    .custom-card-block {
+        padding: 0;
+        background-color: #f9f9f9;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        max-width: 180px;
+        box-shadow: rgba(14, 63, 126, 0.06) 0px 0px 0px 1px, rgba(42, 51, 70, 0.03) 0px 1px 1px -0.5px, rgba(42, 51, 70, 0.04) 0px 2px 2px -1px, rgba(42, 51, 70, 0.04) 0px 3px 3px -1.5px, rgba(42, 51, 70, 0.03) 0px 5px 5px -2.5px, rgba(42, 51, 70, 0.03) 0px 10px 10px -5px, rgba(42, 51, 70, 0.03) 0px 24px 24px -8px;
+    }
+
+    .custom-card-block .custom-area {
+        background-color: #e3e3e3;
+        padding: 9px 10px 5px 10px;
+        border-bottom: 1px solid #00000012;
+        font-size: 10px;
+    }
+
+    .custom-area span {
+        font-weight: 600;
+        color: #404040;
+        font-size: 11px;
+    }
+
+    .custom-card-block .content {
+        padding: 10px 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .custom-card-block .content p {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .custom-card-block .content span {
+        font-weight: bold;
+    }
+
+    span.customize-text {
+        color: #646464;
+        font-weight: 600;
+    }
+
+    /* Tablet */
+    @media (max-width: 1024px) {
+        .right-boxes {
+            flex: 1 1 100%;
+        }
+    }
+
+    /* Mobile */
+    @media (max-width: 600px) {
+        .custom-card-block .content p {
+            font-size: 13px;
+        }
+
+        .custom-print-data {
+            margin-bottom: 10px;
+            justify-content: center;
+        }
+
+        .custom-print-inner-blocks {
+            width: 100%;
+            justify-content: space-around;
+        }
+    }
+
+    .custom-print-data.multiple-inner>.custom-print-inner-blocks {
+        flex: 0 0 calc(50% - 12px);
+        box-sizing: border-box;
+    }
+
+    .inside_cart_item {
+        margin: 10px 0px 0px 0px;
+    }
+
+    tbody.cart.item.cart_page_single_prd .inside_cart_item {
+        border-radius: 10px 10px 0px 0px !important;
+    }
+
+    .custom-print-data-block_heading {
+        position: absolute;
+        background: white;
+        padding: 3px 10px;
+        border-radius: 5px;
+        font-size: 10px;
+        margin-top: -23px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .custom-print-data-block_heading .total-cost {
+        color: #646464 !important;
+        border-left: 1px solid #e0e0e0;
+        padding-left: 15px;
+    }
+
+    .custom-content:not(.image)>p:nth-child(2) {
+        font-weight: 400;
+        margin-bottom: 10px;
+    }
+</style>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".right-boxes").forEach(function(box) {
+            const blocks = box.querySelectorAll(".custom-card-block");
+
+            if (blocks.length > 1) {
+                box.classList.add("grid-apply"); // apply grid for multiple blocks
+            } else {
+                box.classList.remove("grid-apply"); // keep single block as normal
+            }
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Select all .custom-print-data containers
+        const containers = document.querySelectorAll(".custom-print-data");
+
+        containers.forEach(function(container) {
+            // Count how many .custom-print-inner-blocks are inside
+            const innerBlocks = container.querySelectorAll(".custom-print-inner-blocks");
+
+            if (innerBlocks.length > 1) {
+                // Add class if more than 1 inner block
+                container.classList.add("multiple-inner");
+            } else {
+                // Remove class if 1 or 0 inner blocks
+                container.classList.remove("multiple-inner");
+            }
+        });
+    });
+</script>

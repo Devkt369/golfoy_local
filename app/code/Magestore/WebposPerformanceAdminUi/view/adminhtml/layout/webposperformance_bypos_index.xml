@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2016 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="styles"/>
+    <head>
+        <css src="Magestore_WebposPerformanceAdminUi/css/report_by.css" />
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="Magestore\WebposPerformanceAdminUi\Block\Adminhtml\PosRanking" name="by.action" template="Magestore_WebposPerformanceAdminUi::performance_by_pos.phtml" >
+                <block class="Magestore\WebposPerformanceAdminUi\Block\Adminhtml\RankingGrid\DateRange" name="date.range" template="Magestore_WebposPerformanceAdminUi::grid/date_range.phtml" />
+                <block class="Magestore\WebposPerformanceAdminUi\Block\Adminhtml\PosRanking\PosList" name="pos.list" template="Magestore_WebposPerformanceAdminUi::pos/pos_list.phtml" />
+                <block class="Magestore\WebposPerformanceAdminUi\Block\Adminhtml\PosRanking\PosDetail" name="pos.detail" template="Magestore_WebposPerformanceAdminUi::pos/pos_detail.phtml" />
+            </block>
+        </referenceContainer>
+    </body>
+</page>

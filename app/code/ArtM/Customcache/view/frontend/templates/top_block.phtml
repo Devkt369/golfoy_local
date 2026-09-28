@@ -1,0 +1,21 @@
+<?php
+/** @var $block \Magento\Framework\View\Element\Template */
+$icons = $block->getData('icons');
+if (!$icons || !is_array($icons)) return;
+?>
+<div class="subcategory-icons-row">
+    <?php foreach ($icons as $icon): ?>
+        <div class="subcategory-icon-item">
+            <a href="<?= htmlspecialchars($icon['url']) ?>" class="subcategory-icon-link">
+                <?php if (!empty($icon['image'])): ?>
+                    <div class="subcategory-icon-image-wrapper">
+                        <img src="<?= $icon['image'] ?>" alt="<?= $icon['name'] ?>" class="subcategory-icon-img" />
+                    </div>
+                <?php endif; ?>
+                <div class="subcategory-icon-name">
+                    <?= $icon['name'] ?>
+                </div>
+            </a>
+        </div>
+    <?php endforeach; ?>
+</div>

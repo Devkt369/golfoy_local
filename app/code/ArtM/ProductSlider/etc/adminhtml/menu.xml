@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="ArtM_ProductSlider::productslider"
+             title="Product Sliders"
+             module="ArtM_ProductSlider"
+             sortOrder="200"
+             parent="ArtM_BlogEsg::BlogEsgmenu"
+             resource="ArtM_ProductSlider::productslider"/>
+
+        <add id="ArtM_ProductSlider::manage_sliders"
+             title="Manage Sliders"
+             module="ArtM_ProductSlider"
+             sortOrder="10"
+             parent="ArtM_ProductSlider::productslider"
+             action="artm_productslider/slider/index"
+             resource="ArtM_ProductSlider::manage_sliders"/>
+
+        <add id="ArtM_ProductSlider::manage_slider_groups"
+             title="Manage Slider Groups"
+             module="ArtM_ProductSlider"
+             sortOrder="20"
+             parent="ArtM_ProductSlider::productslider"
+             action="artm_productslider/group/index"
+             resource="ArtM_ProductSlider::manage_slider_groups"/>
+
+        <add id="ArtM_ProductSlider::settings"
+             title="Settings"
+             module="ArtM_ProductSlider"
+             sortOrder="30"
+             parent="ArtM_ProductSlider::productslider"
+             action="artm_productslider/settings/index"
+             resource="ArtM_ProductSlider::settings"/>
+    </menu>
+</config>

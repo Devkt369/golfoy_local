@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<!--
+  ~ Copyright © 2018 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Magestore_ClickAndCollectGraphQl::click_and_collect_api" sortOrder="50" title="Click And Collect Api">
+                    <resource id="Magestore_ClickAndCollectGraphQl::get_order_list" sortOrder="10" title="Get all orders" />
+                    <resource id="Magestore_ClickAndCollectGraphQl::get_summary" sortOrder="20" title="Get click and collect summary" />
+                    <resource id="Magestore_ClickAndCollectGraphQl::create_package" sortOrder="30" title="Create Package" />
+                    <resource id="Magestore_ClickAndCollectGraphQl::cancel_package" sortOrder="40" title="Cancel Package" />
+                    <resource id="Magestore_ClickAndCollectGraphQl::delivery_package" sortOrder="50" title="Deliver Package" />
+                    <resource id="Magestore_ClickAndCollectGraphQl::set_ready_pick_date" sortOrder="60" title="Set Ready Pick Date" />
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

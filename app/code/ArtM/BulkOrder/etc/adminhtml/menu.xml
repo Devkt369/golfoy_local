@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="ArtM_BulkOrder::BulkOrder" 
+             title="Bulk Orders" 
+             module="ArtM_BulkOrder" 
+             sortOrder="400" 
+             resource="ArtM_BulkOrder::index" 
+             parent="ArtM_BlogEsg::BlogEsgmenu" />
+
+        <add id="ArtM_BulkOrder::Manage" 
+             title="Manage Bulk Orders" 
+             module="ArtM_BulkOrder" 
+             sortOrder="100" 
+             action="artm_bulkorder/index" 
+             resource="ArtM_BulkOrder::index" 
+             parent="ArtM_BulkOrder::BulkOrder" />
+
+        <add id="ArtM_BulkOrder::DealersBulkorder" 
+             title="Dealers Bulk Order" 
+             module="ArtM_BulkOrder" 
+             sortOrder="200" 
+             action="artm_bulkorder/partnersbulkcsv/csvlist" 
+             resource="ArtM_BulkOrder::partnersbulkorder" 
+             parent="ArtM_BulkOrder::BulkOrder" />
+    </menu>
+</config>

@@ -1,0 +1,139 @@
+<?php
+$queryList = $block->getQueryList();
+
+$statusLabels = [
+    '1' => 'Open',
+    '2' => 'Awaiting',
+    '3' => 'Resolved',
+    '4' => 'Not Valid',
+    '5' => 'Asign with Expert'
+];
+
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page
+$pageSize = 10; // Number of records per page
+$totalRecords = count($queryList); // Total number of records
+$totalPages = ceil($totalRecords / $pageSize); // Total pages
+
+// Calculate the starting index of the records for the current page
+$startIndex = ($page - 1) * $pageSize;
+$pagedQueryList = array_slice($queryList, $startIndex, $pageSize); 
+
+if (!empty($pagedQueryList)) {
+    echo '<p>Total Queries: ' . $totalRecords . '</p>'; // Display total records
+
+    echo '<table class="query_chatbox_queries">';
+    echo '<tr>
+            <th>ID</th>
+            <th>Query Type</th>
+            <th>Comment</th>
+            <th>Status</th>
+            <th>Response</th>
+            <th>Asked on</th>
+          </tr>';
+
+    foreach ($pagedQueryList as $query) {
+        $query_type = htmlspecialchars($query['query_type']);
+        $comment = htmlspecialchars($query['query']);
+        $content = '';
+        
+        
+        echo '<tr>';
+        echo '<td>' . htmlspecialchars($query['query_id']) . '</td>';
+        echo '<td class="query_type">' . htmlspecialchars($query['query_type']) . '</td>';
+        echo '<td>' . $comment . '</td>';
+        
+        $status_class = str_replace(" " , '', $statusLabels[ $query['status'] ] ) ;
+        
+        $status_text = strtolower( $statusLabels[ $query['status'] ] );
+        if( $status_text == "resolved" ){
+            $status_text = "Answered";
+            $content = $query['response_result'];
+            
+        }else if( $status_text == "asign with expert" ){
+            $content = "Your query is assigned to an Expert. They will answer it shortly.";
+        }else if( $status_text == "open" ){
+            $status_text = "Pending";
+        }
+        
+        echo '<td class="status_query status_'.strtolower( $status_class ).'"><div class="status">' . $status_text . '</div></td>';
+        
+            
+//        echo '<td class="view_query_td"><a href="' . $block->getUrl('querychatbox/chatbox/queryview', ['id' => $query['id']]) . '"> <div class="view_query"></div> </a></td>';
+        
+        
+        echo '<td class="view_query_td">';
+        if($content != ''){
+            echo '<div class="show_response_button" href="' . $block->getUrl('querychatbox/chatbox/queryview', ['id' => $query['id']]) . '"> <div class="view_query" query_type="'.$query_type.'" content="'.$content.'" comment="'.$comment.'">View</div> </div>';
+        }
+        echo '</td>';
+        
+        $date = new DateTime( $query['created_at'] );
+        $formattedDate = $date->format('l, jS M Y');
+    
+        echo '<td>'.$formattedDate.'</td>';
+        echo '</tr>';
+    }
+    
+    echo '</table>';
+
+    // Pagination controls
+    echo '<div class="pagination">';
+    if ($page > 1) {
+        echo '<a class="previous" href="?page=' . ($page - 1) . '">Previous</a> ';
+    }
+    for ($i = 1; $i <= $totalPages; $i++) {
+        if($i == $page){
+            $class="active";
+        }else{
+            $class="";
+        }
+        echo '<a class="'.$class.'" href="?page=' . $i . '">' . $i . '</a> ';
+    }
+    if ($page < $totalPages) {
+        echo '<a class="next" href="?page=' . ($page + 1) . '">Next</a>';
+    }
+    echo '</div>';
+} else {
+    echo 'No queries found.';
+}
+
+?>
+<script>
+    
+    require(['jquery'], function($) {
+        jQuery(document).ready(function() {
+            jQuery(".show_response_button").click(function(){
+                var query_type = jQuery(this).children('.view_query').attr("query_type");
+                var content = jQuery(this).children('.view_query').attr("content");
+                var comment = jQuery(this).children('.view_query').attr("comment");
+                
+                jQuery(".chatbox_model_title").html( query_type );
+                jQuery(".chatbox_model_body").children('.comment').html( comment );
+                jQuery(".chatbox_model_body").children('.response').html( content );
+                
+                jQuery(".show_response").click();
+            });
+        });
+    });
+    
+</script>
+<button type="button" class="hide show_response" data-toggle="modal" data-target="#chatbox_response"></button>
+
+<div id="chatbox_response" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content chatbox_model_content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title chatbox_model_title">Modal Header</h4>
+      </div>
+      <div class="modal-body chatbox_model_body">
+          <div class="comment"><p>Fetching Comment...</p></div>
+          <div class="response"><p>Fetching Response...</p></div>
+        
+      </div>
+    </div>
+
+  </div>
+</div>

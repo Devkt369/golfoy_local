@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/customersurvey/eligible" method="POST">
+        <service class="ArtM\CustomerSurvey\Api\SurveyEngineInterface" method="getEligibleSurveys"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customersurvey/impression" method="POST">
+        <service class="ArtM\CustomerSurvey\Api\SurveyEngineInterface" method="trackImpression"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customersurvey/closed" method="POST">
+        <service class="ArtM\CustomerSurvey\Api\SurveyEngineInterface" method="trackClosed"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customersurvey/popup-open" method="POST">
+        <service class="ArtM\CustomerSurvey\Api\SurveyEngineInterface" method="trackPopupOpen"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customersurvey/answered" method="POST">
+        <service class="ArtM\CustomerSurvey\Api\SurveyEngineInterface" method="trackAnswered"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+
+    <route url="/V1/customersurvey/submit" method="POST">
+        <service class="ArtM\CustomerSurvey\Api\SurveyEngineInterface" method="submitAnswers"/>
+        <resources>
+            <resource ref="anonymous"/>
+        </resources>
+    </route>
+</routes>

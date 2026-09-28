@@ -1,0 +1,413 @@
+<style>
+    .team-slider.jl_ss25 img {
+        border-radius: 10px;
+    }
+
+    button.prev-slide.left_arrow:after {
+        content: '\e617';
+    }
+
+    button.next-slide.right_arrow::after {
+        content: '\e608';
+
+    }
+
+    .team-slider.jl_ss25 .heading_golfoy_left h2 {
+        font-size: 26px !important;
+    }
+
+    .team-slider.jl_ss25 .slider-images-tour .slider_arrows .right_arrow:after,
+    .team-slider.jl_ss25 .slider-images-tour .slider_arrows .left_arrow:before {
+        height: 125px !important;
+        width: 44px !important;
+        content: "";
+        background-repeat: no-repeat !important;
+        display: block;
+        background-size: contain !important;
+    }
+
+    .team-slider.jl_ss25 div#full_block {
+        padding: 0px 10px 40px 10px;
+    }
+
+    .team-slider.jl_ss25 img.mobile {
+        display: none;
+    }
+
+    .team-slider.jl_ss25 .products {
+        margin: 10px 0 0px 0px;
+    }
+
+    .team-slider.jl_ss25 .slider-images-tour .slider_arrows .right_arrow:after {
+        background: url(http://golfoy.com/pub/media/right-arrow.svg) !important;
+    }
+
+    .team-slider.jl_ss25 .slider-images-tour .slider_arrows .left_arrow:before {
+        background: url(http://golfoy.com/pub/media/left-arrow.svg) !important;
+    }
+
+    .team-slider.jl_ss25 button.next-slide:after,
+    .team-slider.jl_ss25 button.prev-slide:after {
+        display: none;
+    }
+
+    .team-slider.jl_ss25 h2,
+    .team-slider.jl_ss25 p {
+        text-align: center;
+        font-family: "headpro";
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .team-slider.jl_ss25 .slider-images-tour .right_arrow,
+    .team-slider.jl_ss25 .slider-images-tour .left_arrow {
+        position: absolute;
+        margin-top: 117px !important;
+        display: inline-block;
+        float: left;
+    }
+
+    .team-slider.jl_ss25 .slider-images-tour .right_arrow {
+        right: -35px !important;
+    }
+
+    .team-slider.jl_ss25 .slider-images-tour .left_arrow {
+        left: -30px !important;
+    }
+
+    .team-slider.jl_ss25 .slider-images-tour .slider_arrows {
+        position: relative;
+        z-index: 111;
+        width: 100%;
+        margin-top: 0;
+        height: 0;
+        left: 0;
+        float: left;
+        cursor: pointer;
+    }
+
+    .team-slider.jl_ss25 .slider-images-tour .slider_arrows>div {
+        opacity: 1 !important;
+        transition: opacity .3s ease;
+    }
+
+    .team-slider.jl_ss25 ol#sliderWrapper {
+        overflow-x: scroll;
+        white-space: nowrap;
+        cursor: grab;
+        padding: 0;
+        width: auto !important;
+        scrollbar-width: none;
+    }
+
+    .team-slider.jl_ss25 .slider-header p {
+        padding: 0px 16px;
+        font-weight: 600;
+        padding-bottom: 10px;
+        padding-top: 5px;
+        text-transform: uppercase;
+        font-size: 16px;
+        color: black;
+    }
+
+    .team-slider.jl_ss25 .slider-images-tour {
+        padding: 16px 0px 0px 0px;
+        height: auto;
+    }
+
+    .team-slider.jl_ss25 .slider-item {
+        width: 100%;
+        max-width: 165px;
+        flex-shrink: 0;
+        margin: 0 6px;
+        padding-right: 0px;
+    }
+
+    .team-slider.jl_ss25 .slider-images-tour .slider-container {
+        position: relative;
+        top: 0px;
+        align-items: center;
+    }
+
+    .team-slider.jl_ss25 a.slider-wrapper-child {
+        display: inline-block;
+        text-decoration: none;
+    }
+
+    .team-slider.jl_ss25 .slider-item p {
+        text-transform: uppercase;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 20px 0px 10px 0px;
+        overflow: hidden;
+        background: transparent;
+        border-radius: 0px 0px 5px 5px;
+        color: black;
+    }
+
+    .team-slider.jl_ss25 .slider-item img {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .team-slider.jl_ss25 .team-slider>div {
+        display: inline-block;
+        width: 100%;
+    }
+
+    .team-slider.jl_ss25 .slider-header {
+        margin-top: 10px;
+    }
+
+    .team-slider.jl_ss25 {
+        text-align: center;
+
+        padding: 0px;
+
+        margin: 0px;
+
+        background: #efe9e1;
+
+        border-radius: 5px;
+    }
+
+    .team-slider.jl_ss25 .golfoy_player-logo {
+        font-size: 24px;
+        height: 48px;
+        width: 180px;
+        font-weight: 700;
+        margin-top: 25px;
+        display: inline-block;
+    }
+
+    .team-slider.jl_ss25 .slider-images-tour .slider-container button {
+        position: absolute;
+        top: 5%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-weight: 300;
+        font-family: monospace;
+        transition: all 0.3s ease;
+        background: transparent;
+    }
+
+    button.next-slide:after,
+    button.prev-slide:after {
+        font-family: 'icons-blank-theme';
+        text-shadow: 1px 0px #696969;
+        color: white;
+    }
+
+    .team-slider.jl_ss25 .prev-slide {
+        left: 0px;
+    }
+
+    .team-slider.jl_ss25 .next-slide {
+        right: 0px;
+    }
+
+    .team-slider.jl_ss25 .slider-footer {
+        margin-top: 30px;
+    }
+
+    .web-padding .col-sm-12 {
+        padding: 0px 40px;
+    }
+
+    @media only screen and (max-width:768px) {
+        .team-slider .hidden-xs-web {
+            display: block;
+        }
+
+        .team-slider.jl_ss25 div#full_block {
+            padding: 0px;
+        }
+
+        .team-slider.jl_ss25 .heading_golfoy_left h2 {
+            font-size: 20px !important;
+        }
+
+        .team-slider.jl_ss25 .row.full_block_web .col-xs-12 {
+            padding: 0px 0px;
+        }
+
+        .slider-images-tour {
+            margin: 20px 0px 0px 0px;
+        }
+
+        button.next-slide:after,
+        button.prev-slide:after {
+            font-family: 'icons-blank-theme';
+            text-shadow: 1px 0px #696969;
+            color: white;
+        }
+
+        .team-slider.jl_ss25 .slider-item p {
+            padding: 10px 0px 0px 0px;
+        }
+
+        .products {
+            margin: 10px 0px 0px 0px;
+        }
+
+        .team-slider.jl_ss25 .slider-images-tour {
+            height: auto;
+        }
+
+        .team-slider.jl_ss25 .slider-header {
+            margin-top: 0;
+
+        }
+
+        .team-slider.jl_ss25 .slider-images-tour {
+            padding: 0px 5px 0px 0px;
+        }
+
+        .team-slider.jl_ss25 img.web {
+            display: none;
+        }
+
+        .team-slider.jl_ss25 img.mobile {
+            display: block;
+            width: 100%;
+        }
+
+        .team-slider.jl_ss25 .slider-item {
+            width: 110px;
+            padding-right: 0px;
+        }
+
+        .team-slider.jl_ss25 .slider-images-tour .slider-container {
+            position: relative;
+            top: -10px !important;
+        }
+
+        .team-slider.jl_ss25 .slider-images-tour .slider-container button {
+            margin-top: 60px !important;
+            top: 0px;
+        }
+
+        .team-slider.jl_ss25 .slider-header p {
+            font-size: 12px;
+            padding-top: 5px;
+            text-align: center;
+        }
+
+        .team-slider.jl_ss25 .slider-item p {
+            font-size: 1.1rem;
+        }
+
+        .team-slider.jl_ss25 .slider-images-tour .slider_arrows {
+            margin-top: -15px;
+        }
+
+        .team-slider.jl_ss25 .heading_golfoy_left h2 {
+            text-align: center;
+        }
+
+        .team-slider.jl_ss25 .slider-footer button.explore-btn.action.primary {
+            font-size: 1rem;
+        }
+
+        .team-slider.jl_ss25 .slider-wrapper {
+            white-space: nowrap;
+            overflow-x: scroll;
+            scrollbar-width: none;
+        }
+
+        .team-slider.jl_ss25 {
+            padding: 0px 5px 25px 5px;
+            margin: 0;
+        }
+
+
+        .team-slider.jl_ss25 button.next-slide:after,
+        .team-slider.jl_ss25 button.prev-slide:after {
+            display: block;
+            font-size: 60px !important;
+        }
+    }
+
+    @media only screen and (max-width:400px) {
+        .team-slider.jl_ss25 .heading_golfoy_left h2 {
+            font-size: 14px !important;
+            padding: 0px;
+        }
+    }
+
+    @media only screen and (max-width:320px) {
+        .team-slider.jl_ss25 .heading_golfoy_left h2 {
+            font-size: 12px !important;
+            padding: 0px;
+        }
+    }
+</style>
+
+<div class="team-slider jl_ss25 m-top m-bottom">
+    <div class="slider-header">
+        <div class="col-xs-12">
+            <div class="row heading_golfoy_block_bg">
+
+                <div class="heading_golfoy center underline">
+
+                    <h2>Iconic Design from Stockholm
+
+                    </h2>
+
+                    <hr style="display: block !important; width: 100px !important; border-bottom: 2px solid #000 !important; padding-top: 0px !important; clear: both !important; border-top: 0 !important;">
+
+                </div>
+            </div>
+        </div>
+        <div id="full_block" class="hidden-xs-web">
+            <div class="row full_block_web web-padding">
+                <div class="col-sm-12"><a href="https://golfoy.com/all-golf-brands-india/j-lindeberg.html"><img class="web" src="https://golfoy.com/media/wysiwyg/2025/NOV-LANDING-PAGE/web/jl/JL-fullwidth-web.jpg" alt="JL-fullwidth" loading="lazy"> </a></div>
+                <div class="col-xs-12"><a href="https://golfoy.com/all-golf-brands-india/j-lindeberg.html"><img class="mobile" src="https://golfoy.com/media/wysiwyg/2025/NOV-LANDING-PAGE/mobile/jl/JL-fullwidth-mob.jpg" alt="JL-SS-25" loading="lazy"> </a></div>
+            </div>
+        </div>
+        <!-- <div class="slider-images-tour">
+        <div class="slider-container">
+            <button class="prev-slide left_arrow"></button>
+            <ol class="slider-wrapper products list items product-itemss" id="sliderWrapper" style="cursor: grab;">
+                <a href="https://golfoy.com/all-golf-brands-india/j-lindeberg/polos.html#1809" class="slider-wrapper-child">
+                    <div class="slider-item">
+                        <img src="https://golfoy.com/media/wysiwyg/2025/NOV-LANDING-PAGE/web/polo.jpg" loading="lazy" alt="Polos">
+                        <p>Polos</p>
+                    </div>
+                </a>
+                <a href="https://golfoy.com/all-golf-brands-india/j-lindeberg/men-s-collection/by-type/trousers.html#1798" class="slider-wrapper-child">
+                    <div class="slider-item">
+                        <img src="https://golfoy.com/media/wysiwyg/2025/NOV-LANDING-PAGE/web/trouser.jpg" loading="lazy" alt="Trousers">
+                        <p>Trousers</p>
+                    </div>
+                </a>
+                <a href="https://golfoy.com/all-golf-brands-india/j-lindeberg/headwear.html" class="slider-wrapper-child">
+                    <div class="slider-item">
+                        <img src="https://golfoy.com/media/wysiwyg/2025/NOV-LANDING-PAGE/web/headwear.jpg" loading="lazy" alt="headwear">
+                        <p>Headwear</p>
+                    </div>
+                </a>
+                <a href="https://golfoy.com/golf-apparels/top-brands/j-lindeberg/by-type/lifestyle.html" class="slider-wrapper-child">
+                    <div class="slider-item">
+                        <img src="https://golfoy.com/media/wysiwyg/2025/NOV-LANDING-PAGE/web/lifestyles.jpg" loading="lazy" alt="lifestyles">
+                        <p>lifestyle</p>
+                    </div>
+                </a>
+                <a href="https://golfoy.com/golf-apparels/top-brands/j-lindeberg/by-type/womens.html" class="slider-wrapper-child">
+                    <div class="slider-item">
+                        <img src="https://golfoy.com/media/wysiwyg/2025/NOV-LANDING-PAGE/web/women.jpg" loading="lazy" alt="women">
+                        <p>Women</p>
+                    </div>
+                </a>
+                <a href="https://golfoy.com/discount-section.html?brand=4550" class="slider-wrapper-child">
+                    <div class="slider-item">
+                        <img src="https://golfoy.com/media/wysiwyg/2025/NOV-LANDING-PAGE/web/sale.jpg" loading="lazy" alt="sale">
+                        <p style="color: #e60023;">Sale</p>
+                    </div>
+                </a>
+            </ol>
+            <button class="next-slide right_arrow"></button>
+        </div>
+    </div> -->
+    </div>
+</div>

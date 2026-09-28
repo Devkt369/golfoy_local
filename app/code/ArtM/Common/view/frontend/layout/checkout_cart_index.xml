@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @author Amasty Team
+ * @copyright Copyright (c) Amasty (https://www.amasty.com)
+ * @package Automatic Related Products for Magento 2
+ */-->
+
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content.bottom">
+            <container name="last_order_product" htmlTag="div" htmlClass="last-order-product" after="-">
+                <block class="ArtM\Common\Block\Cart\PreviousOrderedProduct" ifconfig="common/previousorder/previousorderproduct" name="previous_order_product" template="ArtM_Common::cart/previous-ordered-product.phtml" />
+            </container>
+        </referenceContainer>
+    </body>
+</page>

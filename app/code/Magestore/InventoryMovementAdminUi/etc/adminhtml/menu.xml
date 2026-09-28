@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2020 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <update id="Magestore_AdjustStock::inventory"
+                title="Inventory Management"
+                translate="title"
+                module="Magestore_InventoryMovementAdminUi"
+                sortOrder="20"
+                resource="Magestore_AdjustStock::inventory"/>
+        <add id="Magestore_InventoryMovementAdminUi::action_logs"
+             title="Action Logs"
+             translate="title"
+             module="Magestore_InventoryMovementAdminUi"
+             parent="Magestore_AdjustStock::inventory"
+             sortOrder="200"
+             resource="Magestore_InventoryMovementAdminUi::action_logs"/>
+        <add id="Magestore_InventoryMovementAdminUi::inventory_movement"
+             title="Inventory Movement"
+             module="Magestore_InventoryMovementAdminUi"
+             translate="title"
+             sortOrder="10"
+             parent="Magestore_InventoryMovementAdminUi::action_logs"
+             resource="Magestore_InventoryMovementAdminUi::inventory_movement"
+             action="inventorymovement/inventorymovement/index"/>
+        <add id="Magestore_InventoryMovementAdminUi::orders_potential_error"
+             title="Potential Error Orders"
+             module="Magestore_InventoryMovementAdminUi"
+             translate="title"
+             sortOrder="30"
+             parent="Magestore_InventoryMovementAdminUi::action_logs"
+             resource="Magestore_InventoryMovementAdminUi::orders_potential_error"
+             action="inventorymovement/orderspotentialerror/index"/>
+        <add id="Magestore_InventoryMovementAdminUi::settings"
+             title="Inventory Movement Settings"
+             module="Magestore_InventoryMovementAdminUi"
+             translate="title"
+             sortOrder="100"
+             parent="Magestore_InventoryMovementAdminUi::action_logs"
+             resource="Magestore_InventoryMovementAdminUi::config"
+             action="adminhtml/system_config/edit/section/inventory_movement"/>
+    </menu>
+</config>

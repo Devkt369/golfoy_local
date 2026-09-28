@@ -1,0 +1,265 @@
+<?php
+/** @var \ArtM\CustomerSurvey\Block\Adminhtml\Question\Edit $block */
+
+$question = $block->getQuestion();
+$types = $block->getQuestionTypes();
+$statuses = $block->getStatusOptions();
+$optionBasedTypes = $block->getOptionBasedTypes();
+$options = $block->getOptions();
+?>
+
+<div class="admin__page-section customersurvey-admin customersurvey-edit">
+    <div class="admin__page-section-title title-flex">
+        <h2>
+            <?= (int)$question->getQuestionId()
+                ? $block->escapeHtml(__('Edit Question #%1', (int)$question->getQuestionId()))
+                : $block->escapeHtml(__('New Question')) ?>
+        </h2>
+        <div>
+            <button type="button"
+                    class="action-secondary"
+                    onclick="setLocation('<?= $block->escapeUrl($block->getUrl('customersurvey/question/index')) ?>')">
+                <span><?= $block->escapeHtml(__('Back')) ?></span>
+            </button>
+        </div>
+    </div>
+
+    <form id="question_form"
+          action="<?= $block->escapeUrl($block->getUrl('customersurvey/question/save')) ?>"
+          method="post"
+          enctype="multipart/form-data">
+        <?= $block->getBlockHtml('formkey') ?>
+        <input type="hidden" name="question_id" value="<?= (int)$question->getQuestionId() ?>"/>
+
+        <div class="panel">
+            <h3><?= $block->escapeHtml(__('Question Details')) ?></h3>
+
+            <div class="field-row">
+                <div class="field">
+                    <label for="title" class="required"><span><?= $block->escapeHtml(__('Title')) ?></span></label>
+                    <input id="title" name="title" type="text" required="required"
+                           class="admin__control-text"
+                           value="<?= $block->escapeHtmlAttr((string)$question->getTitle()) ?>"/>
+                </div>
+
+                <div class="field">
+                    <label for="type" class="required"><span><?= $block->escapeHtml(__('Type')) ?></span></label>
+                    <select id="type" name="type" class="admin__control-select" required="required">
+                        <option value=""><?= $block->escapeHtml(__('Select Type')) ?></option>
+                        <?php foreach ($types as $typeCode => $typeLabel): ?>
+                            <option value="<?= $block->escapeHtmlAttr($typeCode) ?>"
+                                <?= $question->getType() === $typeCode ? 'selected' : '' ?>>
+                                <?= $block->escapeHtml($typeLabel) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="field-row">
+                <div class="field">
+                    <label for="is_required"><span><?= $block->escapeHtml(__('Is Required')) ?></span></label>
+                    <select id="is_required" name="is_required" class="admin__control-select">
+                        <option value="1" <?= (int)$question->getIsRequired() === 1 ? 'selected' : '' ?>><?= $block->escapeHtml(__('Yes')) ?></option>
+                        <option value="0" <?= (int)$question->getIsRequired() === 0 ? 'selected' : '' ?>><?= $block->escapeHtml(__('No')) ?></option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="status"><span><?= $block->escapeHtml(__('Status')) ?></span></label>
+                    <select id="status" name="status" class="admin__control-select">
+                        <?php foreach ($statuses as $value => $label): ?>
+                            <option value="<?= (int)$value ?>" <?= (int)$question->getStatus() === (int)$value ? 'selected' : '' ?>>
+                                <?= $block->escapeHtml($label) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="field-row">
+                <div class="field">
+                    <label for="sort_order"><span><?= $block->escapeHtml(__('Sort Order')) ?></span></label>
+                    <input id="sort_order" name="sort_order" type="number" class="admin__control-text"
+                           value="<?= (int)$question->getSortOrder() ?>"/>
+                </div>
+
+                <div class="field checkbox-range" id="checkbox_range">
+                    <div class="range-grid">
+                        <div>
+                            <label for="min_selection"><span><?= $block->escapeHtml(__('Min Selection')) ?></span></label>
+                            <input id="min_selection" name="min_selection" type="number" min="0" class="admin__control-text"
+                                   value="<?= $question->getMinSelection() !== null ? (int)$question->getMinSelection() : '' ?>"/>
+                        </div>
+                        <div>
+                            <label for="max_selection"><span><?= $block->escapeHtml(__('Max Selection')) ?></span></label>
+                            <input id="max_selection" name="max_selection" type="number" min="0" class="admin__control-text"
+                                   value="<?= $question->getMaxSelection() !== null ? (int)$question->getMaxSelection() : '' ?>"/>
+                        </div>
+                    </div>
+                    <p class="note"><?= $block->escapeHtml(__('Used only for checkbox type.')) ?></p>
+                </div>
+            </div>
+
+            <div class="field full-width">
+                <label for="description"><span><?= $block->escapeHtml(__('Description')) ?></span></label>
+                <textarea id="description" name="description" rows="4" class="admin__control-textarea"><?= $block->escapeHtml((string)$question->getDescription()) ?></textarea>
+            </div>
+        </div>
+
+        <div class="panel" id="option_panel">
+            <div class="title-flex">
+                <h3><?= $block->escapeHtml(__('Question Options')) ?></h3>
+                <button type="button" id="add_option" class="action-secondary"><span><?= $block->escapeHtml(__('Add Option')) ?></span></button>
+            </div>
+
+            <div class="note"><?= $block->escapeHtml(__('Options are used for radio, checkbox, dropdown, and image selection types.')) ?></div>
+
+            <table class="data-grid" id="option_table">
+                <thead>
+                <tr>
+                    <th><?= $block->escapeHtml(__('Title')) ?></th>
+                    <th><?= $block->escapeHtml(__('Value')) ?></th>
+                    <th><?= $block->escapeHtml(__('Image')) ?></th>
+                    <th><?= $block->escapeHtml(__('Sort Order')) ?></th>
+                    <th><?= $block->escapeHtml(__('Actions')) ?></th>
+                </tr>
+                </thead>
+                <tbody id="option_rows">
+                <?php foreach ($options as $index => $option): ?>
+                    <tr>
+                        <td>
+                            <input type="hidden" name="options[<?= (int)$index ?>][option_id]" value="<?= (int)$option->getOptionId() ?>"/>
+                            <input type="text" name="options[<?= (int)$index ?>][title]" class="admin__control-text" value="<?= $block->escapeHtmlAttr((string)$option->getTitle()) ?>"/>
+                        </td>
+                        <td>
+                            <input type="text" name="options[<?= (int)$index ?>][value]" class="admin__control-text" value="<?= $block->escapeHtmlAttr((string)$option->getValue()) ?>"/>
+                        </td>
+                        <td>
+                            <input type="hidden" name="options[<?= (int)$index ?>][existing_image]" value="<?= $block->escapeHtmlAttr((string)$option->getImage()) ?>"/>
+                            <?php if ($option->getImage()): ?>
+                                <div class="image-preview-wrap">
+                                    <img src="<?= $block->escapeUrl($block->getOptionImageUrl((string)$option->getImage())) ?>" alt="Option Image" class="image-preview"/>
+                                    <label>
+                                        <input type="checkbox" name="options[<?= (int)$index ?>][delete_image]" value="1"/>
+                                        <?= $block->escapeHtml(__('Remove')) ?>
+                                    </label>
+                                </div>
+                            <?php endif; ?>
+                            <input type="file" name="option_images[<?= (int)$index ?>]" class="admin__control-file" accept="image/*"/>
+                        </td>
+                        <td>
+                            <input type="number" name="options[<?= (int)$index ?>][sort_order]" class="admin__control-text" value="<?= (int)$option->getSortOrder() ?>"/>
+                        </td>
+                        <td>
+                            <button type="button" class="action-delete remove-option"><?= $block->escapeHtml(__('Remove')) ?></button>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="actions-row">
+            <button type="submit" class="action-primary" name="back" value="0"><span><?= $block->escapeHtml(__('Save')) ?></span></button>
+            <button type="submit" class="action-secondary" name="back" value="1"><span><?= $block->escapeHtml(__('Save and Continue')) ?></span></button>
+            <?php if ((int)$question->getQuestionId()): ?>
+                <button type="button"
+                        class="action-delete"
+                        onclick="if(confirm('<?= $block->escapeJs(__('Delete this question?')) ?>')){setLocation('<?= $block->escapeUrl($block->getUrl('customersurvey/question/delete', ['question_id' => (int)$question->getQuestionId()])) ?>')}"
+                >
+                    <span><?= $block->escapeHtml(__('Delete')) ?></span>
+                </button>
+            <?php endif; ?>
+        </div>
+    </form>
+</div>
+
+<script>
+    require([], function () {
+        var optionBasedTypes = <?= /* @noEscape */ json_encode(array_values($optionBasedTypes)) ?>;
+        var typeEl = document.getElementById('type');
+        var panelEl = document.getElementById('option_panel');
+        var checkboxRange = document.getElementById('checkbox_range');
+        var optionRows = document.getElementById('option_rows');
+        var addBtn = document.getElementById('add_option');
+        var formEl = document.getElementById('question_form');
+        var optionIndex = <?= (int)count($options) ?>;
+
+        function toggleConditionalSections() {
+            var selectedType = typeEl.value;
+            panelEl.style.display = optionBasedTypes.indexOf(selectedType) !== -1 ? 'block' : 'none';
+            checkboxRange.style.display = selectedType === 'checkbox' ? 'block' : 'none';
+        }
+
+        function optionRowTemplate(idx) {
+            return '<tr>' +
+                '<td><input type="text" name="options[' + idx + '][title]" class="admin__control-text"/></td>' +
+                '<td><input type="text" name="options[' + idx + '][value]" class="admin__control-text"/></td>' +
+                '<td>' +
+                '<input type="hidden" name="options[' + idx + '][existing_image]" value=""/>' +
+                '<input type="file" name="option_images[' + idx + ']" class="admin__control-file" accept="image/*"/>' +
+                '</td>' +
+                '<td><input type="number" name="options[' + idx + '][sort_order]" class="admin__control-text" value="0"/></td>' +
+                '<td><button type="button" class="action-delete remove-option"><?= $block->escapeJs(__('Remove')) ?></button></td>' +
+                '</tr>';
+        }
+
+        function bindRemoveOptionButtons() {
+            var buttons = document.querySelectorAll('.remove-option');
+            buttons.forEach(function (btn) {
+                btn.onclick = function () {
+                    this.closest('tr').remove();
+                };
+            });
+        }
+
+        addBtn.addEventListener('click', function () {
+            optionRows.insertAdjacentHTML('beforeend', optionRowTemplate(optionIndex));
+            optionIndex++;
+            bindRemoveOptionButtons();
+        });
+
+        typeEl.addEventListener('change', toggleConditionalSections);
+
+        formEl.addEventListener('submit', function (event) {
+            if (typeEl.value === 'checkbox') {
+                var minSelection = parseInt(document.getElementById('min_selection').value || '0', 10);
+                var maxSelection = parseInt(document.getElementById('max_selection').value || '0', 10);
+
+                if (minSelection < 0 || maxSelection < 0) {
+                    alert('<?= $block->escapeJs(__('Min/Max selection cannot be negative.')) ?>');
+                    event.preventDefault();
+                    return;
+                }
+
+                if (minSelection > maxSelection) {
+                    alert('<?= $block->escapeJs(__('Min selection cannot be greater than max selection.')) ?>');
+                    event.preventDefault();
+                    return;
+                }
+            }
+
+            if (optionBasedTypes.indexOf(typeEl.value) !== -1) {
+                var hasAnyOption = false;
+                optionRows.querySelectorAll('tr').forEach(function (row) {
+                    var titleInput = row.querySelector('input[name*="[title]"]');
+                    var valueInput = row.querySelector('input[name*="[value]"]');
+                    var hasTitle = titleInput && titleInput.value.trim() !== '';
+                    var hasValue = valueInput && valueInput.value.trim() !== '';
+                    if (hasTitle || hasValue) {
+                        hasAnyOption = true;
+                    }
+                });
+
+                if (!hasAnyOption) {
+                    alert('<?= $block->escapeJs(__('Please add at least one option for this question type.')) ?>');
+                    event.preventDefault();
+                }
+            }
+        });
+
+        bindRemoveOptionButtons();
+        toggleConditionalSections();
+    });
+</script>

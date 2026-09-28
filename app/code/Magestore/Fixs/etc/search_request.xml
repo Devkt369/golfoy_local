@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<requests xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="urn:magento:framework:Search/etc/search_request.xsd">
+    <request query="webpos_productsearch_fulltext" index="webpos_productsearch_fulltext">
+        <queries>
+            <query xsi:type="matchQuery" value="$search_term$" name="webpos_search_key">
+                <match field="name"/>
+                <match field="sku"/>
+                <match field="barcode"/>
+                <match field="name" matchCondition="match_phrase_prefix"/>
+                <match field="sku" matchCondition="match_phrase_prefix"/>
+                <match field="barcode" matchCondition="match_phrase_prefix"/>
+            </query>
+        </queries>
+    </request>
+</requests>

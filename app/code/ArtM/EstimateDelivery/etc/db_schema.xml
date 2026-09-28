@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="sales_order" resource="sales" engine="innodb" comment="Sales Order Table">
+        <column xsi:type="datetime" name="estimated_delivery_early" nullable="true" comment="Estimated Delivery Early"/>
+        <column xsi:type="datetime" name="estimated_delivery_last" nullable="true" comment="Estimated Delivery Last"/>
+    </table>
+
+    <table name="sales_order_grid" resource="sales" engine="innodb" comment="Sales Order Grid Table">
+        <column xsi:type="datetime" name="estimated_delivery_early" nullable="true" comment="Estimated Delivery Early"/>
+        <column xsi:type="datetime" name="estimated_delivery_last" nullable="true" comment="Estimated Delivery Last"/>
+    </table>
+
+</schema>

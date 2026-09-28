@@ -1,0 +1,45 @@
+<?php
+namespace ArtM\Attrtopproducts\Helper;
+
+use Exception;
+class Data extends \Magento\Framework\App\Helper\AbstractHelper
+{
+    private $productRepository;
+    private $prHelper;
+    public function __construct(    
+        \Magento\Framework\App\Helper\Context $context,    
+        \Magento\Catalog\Model\ProductRepository $productRepository,		
+        \Magento\Framework\Pricing\Helper\Data $prHelper,
+		array $data = []
+    ){		
+		$this->productRepository = $productRepository;
+        $this->prHelper = $prHelper;
+		parent::__construct($context);
+    }    
+    public function catTopProductsHtml($prids){
+        $return = '';
+        $prds = explode(',',$prids);       
+        if(!empty($prds)){
+           // $return .= "<table><tbody><tr><th>Serial No.</th><th>Golf Shoes</th><th>Our Special Price</th></tr>";
+            $i = 1;
+            foreach($prds as $prd){
+                try{
+                    $product = $this->productRepository->getById( trim($prd) );
+                   
+                    if ($product->isSalable()) {
+                        $productname =   "<a href='".$product->getProductUrl()."' >". $product->getName() ."</a>";
+                        $formattedPrice = $this->prHelper->currency($product->getFinalPrice(), true, false);
+    
+                        $return  .= "<tr><td> $i </td><td> $productname <td> $formattedPrice </td> </tr>";
+                        
+                        $i++;
+                    }
+                }catch(\Magento\Framework\Exception\NoSuchEntityException){
+                    return $return;  
+                }
+            }
+           // $return .= "</tbody></table>";
+        }
+        return $return;  
+    }
+}

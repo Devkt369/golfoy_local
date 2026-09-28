@@ -1,0 +1,33 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+?>
+
+<script>
+    require(['jquery', 'bootstrap'],function(jQuery){
+        jQuery(document).ready(function() {
+            if (jQuery(window).width() < 768) {
+                setTimeout(() => {
+                    var title = jQuery('.title.block-collapsible-nav-title strong').html();
+                    if(title == ''){
+                        jQuery('body.customer-account-edit .title.block-collapsible-nav-title strong').html('My Account');
+                    }
+                }, 1500);
+            }
+    });
+});
+</script>
+<div class="block <?= $block->escapeHtmlAttr($block->getBlockCss()) ?>">
+    <div class="title <?= $block->escapeHtmlAttr($block->getBlockCss()) ?>-title"
+         data-mage-init='{"toggleAdvanced": {"toggleContainers": "#<?= $block->escapeHtmlAttr($block->getBlockCss()) ?>", "selectorsToggleClass": "active"}}'>
+        <strong>
+            <?= $block->escapeHtml(__($block->getBlockTitle())) ?>
+        </strong>
+    </div>
+    <div class="content <?= $block->escapeHtmlAttr($block->getBlockCss()) ?>-content"
+         id="<?= $block->escapeHtmlAttr($block->getBlockCss()) ?>">
+        <?= $block->getChildHtml() ?>
+    </div>
+</div>

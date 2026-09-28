@@ -1,0 +1,42 @@
+<?php
+namespace ArtM\CustomProductDesign\Controller\Userdata;
+
+use Magento\Framework\App\Action\Action;
+use Magento\Framework\App\Action\Context;
+use Magento\Framework\Controller\ResultFactory;
+use ArtM\CustomProductDesign\Model\ResourceModel\Userdata\CollectionFactory;
+
+class Gallery extends Action
+{
+    protected $collectionFactory;
+
+    public function __construct(Context $context, CollectionFactory $collectionFactory)
+    {
+        parent::__construct($context);
+        $this->collectionFactory = $collectionFactory;
+    }
+
+    public function execute()
+    {
+        $result = ['images' => []];
+        $sessionId = $this->getRequest()->getParam('session_id');
+        $customerId = $this->getRequest()->getParam('customer_id');
+        $productId = $this->getRequest()->getParam('product_id');
+        $collection = $this->collectionFactory->create();
+        if ($customerId) {
+            $collection->addFieldToFilter('customer_id', $customerId);
+        } else if ($sessionId) {
+            $collection->addFieldToFilter('session_id', $sessionId);
+        }
+        if ($productId) {
+            $collection->addFieldToFilter('product_id', $productId);
+        }
+        foreach ($collection as $item) {
+            $imgPath = $item->getData('saved_image_path');
+            if ($imgPath) {
+                $result['images'][] = '/pub/media/' . $imgPath;
+            }
+        }
+        return $this->resultFactory->create(ResultFactory::TYPE_JSON)->setData($result);
+    }
+}

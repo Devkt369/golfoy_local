@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+	<preference for="ArtM\Delhiveryqc\Api\OrderManagementInterface" type="ArtM\Delhiveryqc\Model\OrderManagement"/>
+    <preference for="Magento\Integration\Model\Oauth\Token" type="ArtM\Delhiveryqc\Model\Oauth\Token" />
+    
+    <type name="Magento\Webapi\Controller\Rest">
+        <plugin name="authentication_plugin" type="ArtM\Delhiveryqc\Plugin\AuthenticationPlugin" sortOrder="1" />
+    </type>
+</config>

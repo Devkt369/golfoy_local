@@ -1,0 +1,183 @@
+<style>
+    .analysis-section {
+        background-color: #F8F8F8;
+        padding: 20px;
+    }
+    .analysis-container {
+        background-color: #fff;
+        padding: 20px;
+        
+    }
+    .analysis-container .container.row{
+        /*margin-top:50px;*/
+    }
+    h4.newblk{margin-top:50px;}
+    .analysis-data a{display:block !important;}
+    .analysis-main{padding-left:20px;}
+    .analysis-container .col-m-12{margin-top:50px; }
+    .analyse-export{margin-bottom:15px;}
+
+</style>
+<section class = "admin__page-section analysis-section">
+    <div class ="analysis-container row">
+        <div class="analysis-main col-m-10 col-m-push-2">
+            <?php
+              $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+
+ 
+              $helper = $this->helper('ArtM\Analysis\Helper\Data');
+              $dateRange = $helper->getDaterange();
+
+              $type = 'all';
+              if($block->getData('type') ) {
+                $type = $block->getData('type');
+              }
+              $arrToPass = [];
+              if($type != 'all'){
+                  $arrToPass = $dateRange[$type];
+              }
+
+                    //time period dropdown
+                    echo '<div class="row"> <div class ="col-m-6"><h2> Customers </h2></div>';
+                    echo '<div class ="col-m-6" style="text-align:right;">';
+                    $timeOptions = ["all"=>"All time", "yearly"=>"Annual", "quarterly"=>"Quarterly", "monthly"=>"Monthly"];
+                   
+                    $actionurl = $block->getUrl('*/*/*'); 
+                    ?>
+
+
+
+                    <form name = "analyseform" method = "POST" action ="<?php echo $actionurl; ?>">
+                    <?php echo $block->getBlockHtml('formkey') ?>
+                    
+                      <select name="type" id="type" class="admin__control-select">
+                        <?php foreach($timeOptions as $k => $v){
+                              $selected = ($k == $type) ? 'selected = "selected"' : '';
+                              echo '<option value="'.$k.'"'.$selected.'>'.$v.'</option>';
+                        } ?>
+                      </select>
+                      <input type ="submit" name="submit" id ="submitanalyse" value ="Submit"/>
+                    </form>
+                    <?php
+                    echo '</div></div>';
+
+
+                     // main content
+                     if($type != 'all'){   
+                          $helper->totalCustomersAll("Customers registered", $arrToPass);                  
+                          
+                     }else{
+                          $Odata = $helper->totalCustomersAlltype();
+                          echo "<div class= 'container row'><div class = 'col-m-12'> <h4> Total Customers registered ($Odata[total]) </h4>";
+                          echo "<table class='admin__table-primary analysis-data'><tr>";
+                          echo "<th> Not ordered </th><th> Ordered once </th><th> Ordered repeatedly </th></tr>";
+                          echo "<tr><td> $Odata[zero] </td><td> $Odata[once] </td><td> $Odata[repeated] </td>";
+                          echo "</tr></table></div></div>";
+                          $labelsjsonenc = json_encode(['Not ordered','Ordered once', 'Ordered repeatedly']);
+                          $labelsjsonvalue = htmlspecialchars($labelsjsonenc, ENT_QUOTES, 'UTF-8');
+
+                          $datasets = [];                          
+                            $datasets[] =   [
+                                'label' => 'total customers',
+                                'data' => [$Odata['zero'], $Odata['once'], $Odata['repeated']],
+                                'backgroundColor'=> [                                  
+                                  'rgb(255, 99, 132)',  
+                                  'rgb(182, 204, 79)',
+                                  'rgb(60, 179, 113)'
+                                  ],
+                                'hoverOffset'=> 4
+                            ];
+                           
+                          $datasetsjsonenc = json_encode($datasets);
+                          $datasetsjsonvalue = htmlspecialchars($datasetsjsonenc, ENT_QUOTES, 'UTF-8');
+
+                          echo '<div class = "col-m-3"> </div><div class = "col-m-6" style="margin-top:50px;">';
+                          echo '<canvas class ="drawChartpie" data-label = "'.$labelsjsonvalue.'" data-dataset = "'.$datasetsjsonvalue.'"  id="chart-total-customers"></canvas>';
+                          echo '</div><div class = "col-m-3"> </div>';
+                     }
+         
+             
+              
+            ?>
+        </div>
+
+
+        <!-- left category menu-->
+        <div class="analysis-secondary col-m-2 col-m-pull-10">
+          <table class="admin__table-primary analysis-data" >
+              <thead><tr><th class="data-grid-th  no-link"><span>          
+               
+              </span></th> </tr></thead>
+              <tbody>
+                <tr class="even _clickable">
+                 <td class="col-customer"> </td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> </td></tr>
+                
+              </tbody>
+          </table>
+        </div>
+
+    </div>
+    <div class ="col-m-6">  <canvas id="myChart"></canvas> </div>
+</section>
+<script type="text/javascript">
+  require(['jquery', 'chartJs'], function($, Chart) {
+
+    /*$("#analysisperiod").change(function() {
+        var currVal = $(this).val(); 
+        $(document).find("#period-"+currVal).trigger('click');
+    });*/
+
+
+  
+
+
+    if($('.drawChartline').length) {
+        $('.drawChartline').each(function() {
+
+          var ctx = $(this).attr('id'); 
+          var labels = JSON.parse($(this).attr('data-label'));
+          var dataset = JSON.parse($(this).attr('data-dataset'));
+          var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: labels,
+              datasets: dataset
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+
+        });
+    }
+    if($('.drawChartpie').length) {
+        $('.drawChartpie').each(function() {
+
+          var ctx = $(this).attr('id'); 
+          var labels = JSON.parse($(this).attr('data-label'));
+          var dataset = JSON.parse($(this).attr('data-dataset'));
+          var myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: labels,
+              datasets: dataset
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+
+        });
+    }
+  });
+</script>

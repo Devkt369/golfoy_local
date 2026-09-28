@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<page layout="1column" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="product.info.main">
+            <block class="Magento\Catalog\Block\Product\View"
+                   name="need_help"
+                   template="ArtM_BlogEsg::catalog/product/view/need_help.phtml"
+                   after="inclusive.all.taxes"/>
+        </referenceContainer>  
+        
+        <referenceBlock name="product.info.details">                
+            <block class="ArtM\BlogEsg\Block\Product\BuyingTips" 
+                    name="packaging-content" 
+                    template="ArtM_BlogEsg::catalog/product/view/tab/buying-tips.phtml" 
+                    group="detailed_info">
+                <arguments>
+                    <argument name="at_call" xsi:type="string">blogesg</argument>
+                    <argument name="at_code" xsi:type="string">blogesg</argument>
+                    <argument name="css_class" xsi:type="string">blogesg</argument>
+                    <argument name="at_label" xsi:type="string">blogesg</argument>
+                    <argument name="sort_order" xsi:type="string">500</argument>
+                    <argument name="title" translate="true" xsi:type="string">BUYING TIPS</argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+    </body>
+</page>

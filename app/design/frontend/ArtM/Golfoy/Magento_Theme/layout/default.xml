@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+      
+    <body>
+        <!-- Preconnect hints for third-party origins (FontAwesome CDN, Facebook Pixel) -->
+        <referenceContainer name="head.additional">
+            <block class="Magento\Framework\View\Element\Template" name="custom.preconnect" template="Magento_Theme::html/preconnect.phtml" before="-"/>
+        </referenceContainer>
+
+        <!-- Add custom brand menu block as child of top menu -->
+
+            <referenceContainer name="header.panel.wrapper" remove="true"/>
+            <referenceContainer name="sidebar.additional" remove="true" />
+            <referenceBlock name="catalog.compare.link" remove="true"/>
+            <referenceBlock name="related.product.addto.compare" remove="true"/>
+            <referenceBlock name="category.product.addto.compare" remove="true"/>
+            <referenceBlock name="view.addto.compare" remove="true" />
+            <referenceBlock name="advanced-search-link" remove="true"/>
+
+            <move element="header.panel.wrapper" destination="header-wrapper" before="-"/>
+            
+            <!-- Logo wrapper div -->
+            <referenceContainer name="header-wrapper">
+                <container name="logo.wrapper" htmlTag="div" htmlClass="logo-wrapper" before="-">
+                    <block class="Magento\Framework\View\Element\Template" name="logo.moved" template="Magento_Theme::html/logo_wrapper.phtml" />
+                </container>
+            </referenceContainer>
+            <move element="logo" destination="logo.wrapper" />
+            
+            <!-- Search wrapper div -->
+            <referenceContainer name="header-wrapper">
+                <container name="search.wrapper" htmlTag="div" htmlClass="search-wrapper" after="logo.wrapper">
+                </container>
+            </referenceContainer>
+            <move element="top.search" destination="search.wrapper"/>
+            
+            <!-- Header links wrapper div with login/signup -->
+            <referenceContainer name="header-wrapper">
+                <container name="headerlinks.wrapper" htmlTag="div" htmlClass="headerlinks-wrapper" after="search.wrapper">
+                    <block class="Magento\Framework\View\Element\Template" name="login.signup.text" template="Magento_Theme::html/login_signup.phtml" after="-"/>
+                </container>
+            </referenceContainer>
+            <!-- Remove default top.links to prevent duplicate account links -->
+            <referenceBlock name="top.links" remove="true"/>
+            
+            <!-- Minicart wrapper div -->
+            <referenceContainer name="header-wrapper">
+                <container name="minicart.wrapper" htmlTag="div" htmlClass="minicart-wrapper" after="headerlinks.wrapper">
+                </container>
+            </referenceContainer>
+            <move element="minicart" destination="minicart.wrapper"/>
+
+            <referenceBlock name="store.menu">
+                <block class="Magento\Framework\View\Element\Template" name="customer.account.sidebar.info" before="catalog.topnav" template="Magento_Theme::html/sidebar/profile.phtml" />
+                <block class="Magento\Framework\View\Element\Template" name="customer.account.sidebar.logout" after="-" template="Magento_Theme::html/sidebar/logout-button.phtml" />
+            </referenceBlock> 
+            
+            <!-- Add custom content after header -->
+            <!-- <referenceContainer name="page.wrapper">
+                <block class="Magento\Framework\View\Element\Template" name="custom.after.header" template="Magento_Theme::html/after_header.phtml" after="header.container" />
+            </referenceContainer> -->
+            
+            <!-- Whatsapp icon -->
+            <referenceContainer name="page.wrapper">
+                <block class="Magento\Framework\View\Element\Template" name="whatsapp.icon" template="Magento_Theme::html/whatsapp_icon.phtml" after="header.container" />
+            </referenceContainer>
+
+            <!-- Override default footer with custom footer -->
+            <referenceContainer name="footer">
+                <!-- Remove default footer content -->
+                <referenceBlock name="footer_links" remove="true"/>
+                <referenceBlock name="store_switcher" remove="true"/>
+                <referenceBlock name="form.subscribe" remove="true"/>
+                
+                <!-- Add custom footer content -->
+                <block class="Magento\Framework\View\Element\Template" name="custom.footer" template="Magento_Theme::html/custom_footer.phtml" />
+            </referenceContainer>
+      </body>
+</page>

@@ -1,0 +1,323 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// @codingStandardsIgnoreFile
+
+?>
+<?php /* @var $block \Magento\Catalog\Block\Product\View\Options\Type\Text */ ?>
+<?php
+$_option = $block->getOption();
+$optionprice = $_option->getPrice();
+$optionprice = number_format((float)$optionprice, 2, '.', '');
+
+$class = ($_option->getIsRequire()) ? ' required' : '';
+if (stripos($_option->getTitle(), 'print') !== false) {
+    //-------------------------->    
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $scopeConfig = $objectManager->create('Magento\Framework\App\Config\ScopeConfigInterface');
+    $_product = $block->getProduct();
+    $pi = $_product->getData('can_print'); 
+    $categories = $_product->getCategoryIds(); 
+    $asets = ''; 
+    $allattrids = [];
+    $asets = $scopeConfig->getValue("customprint/Attrconf/custom_printing", \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    $pattributesetid =  $_product->getAttributeSetId();
+    if($asets != ''){
+      $allattrids = explode(',', $asets);
+    }
+    if(in_array($pattributesetid, $allattrids)  && ($pi==1) ){
+     //print_r($categories);
+    /* if((in_array(4, $categories) || in_array(43, $categories) || in_array(116, $categories)) && ($pi==1) ){ */ 
+      
+    ?> 
+    
+    
+        <div class="printq" style="margin-top:20px;margin-bottom:20px;">
+            <div class="label_printon_it">
+                <label for="printcheck"> 
+                <input type="checkbox" id="printcheck" />            
+                    Print your Name or Logo on this product? 
+                    <span data-price-amount="<?php echo $optionprice; ?>><" data-price-type="" class="price-wrapper ">+₹ <?php echo $optionprice; ?>
+                    </span>
+                </label>
+            </div>
+    
+            <div id="imgtextprint" style="display:none;">
+                <div class="choose_buttons">
+                    <div class="choose_button ptextdiv active">
+                        <input type="radio"  name = 'textimage' id="textprint" class="hide" />
+                        <label for="textprint"> Text  </label>
+                    </div>
+                    <div class="choose_button pimgdiv">
+                        <input type="radio"  name = 'textimage' id="imgprint" class="hide" />
+                        <label for="imgprint"> Logo  </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <div id ="ptextdiv" style="display:none;">
+            <input type = "text" name= "print_text" id= "print_text"  maxlength="10">
+            <p class="gfnote note"> 
+                Max 10 Characters
+                <span class="character-counter"></span>
+            </p>
+        </div>
+    
+     <div id ="pimgdiv" style="display:none;">
+    
+    
+         <div id="drag-area" class="drag-area" style="border:2px dashed lightgray;">   
+             <p class="dragdrop" style="text-align:center;color:gray;">Drag &amp; Drop File</p>       
+             <input type = "file" name= "print_file" id= "print_file" >
+         </div>
+         <div class="upload_buttons">
+            <label for="print_file">Select Logo</label>
+            <a href="javascript:void(0);"id="uploadnow" style="display:none;float:right;" class="btn btn-sm btn-success">upload</a>
+         </div>
+         
+         <p class="alert alert-success">
+            Image Formats: JPG, PNG, GIF, TIF, BMP, PDF, EPS, or AI. Maximum File Size : 20MB
+         </p>
+    </div> 
+    
+    
+    
+    <?php } ?>
+    <script type="text/javascript">
+        require([ 'jquery', 'jquery/ui', 'Magento_Catalog/js/product/remaining-characters'], function($){ $(document).ready(function($) {  
+          var fdata = '';
+          $("#print_text").remainingCharacters({
+                maxLength: 10,
+                noteSelector: '.note',
+                counterSelector: '.note .character-counter'
+            });       
+            $(".input-text.product-custom-option.inputprinting").parents('.field').hide();
+            $("#ptextdiv, #imgtextprint, #pimgdiv").hide();
+            $("#product_addtocart_form").on("click", "#printcheck", function(){  
+            var pball = document.getElementById("printcheck").checked;
+            if(pball==true)
+            { 
+              $("#textprint").prop('checked', true);
+              $("#imgtextprint, #ptextdiv").show();
+            }
+            else{
+              fdata = '';
+              $("#ptextdiv, #imgtextprint, #pimgdiv,#uploadnow .resultimg").hide(); 
+              $("#product-options-wrapper").find('div.message').remove();  
+              $("#print_file").val('');  
+              $("#print_text").val('');  
+              $(".dragdrop").text("Drag & Drop File");  
+              $(".input-text.product-custom-option.inputprinting").val('').trigger('change');          
+            }
+          });
+            $("#product_addtocart_form").on("click", "#imgprint", function(){
+              fdata = '';  
+              $("#ptextdiv").hide();
+              $("#pimgdiv").show();
+              $("#print_text").val('');
+              $(".input-text.product-custom-option.inputprinting").val('').trigger('change');
+              $("#product-options-wrapper").find('div.message').remove();   
+          });
+          $("#product_addtocart_form").on("click", "#textprint", function(){ 
+              fdata = '';
+              $("#ptextdiv").show();
+              $("#pimgdiv,#uploadnow, .resultimg").hide();
+              $("#print_file").val('');
+              $(".dragdrop").text("Drag & Drop File");
+              $(".input-text.product-custom-option.inputprinting").val('').trigger('change');
+              $("#product-options-wrapper").find('div.message').remove();   
+          });
+          //---------------------------------
+          $("html").on("dragover", function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              $(".dragdrop").text("Drag here");
+          });
+    
+          $("html").on("drop", function(e) { e.preventDefault(); e.stopPropagation(); });
+    
+          // Drag enter
+          $('.drag-area').on('dragenter', function (e) {
+              e.stopPropagation();
+              e.preventDefault();
+              $(".dragdrop").text("Drop");
+          });
+    
+          // Drag over
+          $('.drag-area').on('dragover', function (e) {
+              e.stopPropagation();
+              e.preventDefault();
+              $(".dragdrop").text("Drop");
+          });
+    
+          // Drop
+          $('.drag-area').on('drop', function (e) {
+              e.stopPropagation();
+              e.preventDefault();
+              var file = e.originalEvent.dataTransfer.files;
+              $(".dragdrop").text(file[0].name);
+              var fd = new FormData();
+              fd.append('file', file[0]);
+              fdata = fd;
+             // $("#print_file").val('').trigger('change'); 
+              $("#uploadnow").show();      
+          });     
+          //-----------------------------------
+          $("#print_file").change(function(){
+            $("#product-options-wrapper").find('div.message').remove();   
+            $(".dragdrop").text("Drag & Drop File");
+            var opimgval = $(this).val();
+            if(opimgval != ''){ 
+              //$(".input-text.product-custom-option.inputprinting").val(opimgval).trigger('change'); 
+              $(".input-text.product-custom-option.inputprinting").val('').trigger('change'); 
+              var file_data = $('#print_file').prop('files')[0];  
+              var form_data = new FormData();                  
+              form_data.append('file', file_data);
+              fdata = form_data;
+              $("#uploadnow").show();       
+              }else{
+                $("#uploadnow").hide();
+              }
+          });
+          $("#print_text").blur(function(){
+              var textval = $(this).val();
+              //if(textval != ''){ 
+                if(textval.length > 10){
+                  textval = textval.substring(0, 10);}
+                $(".input-text.product-custom-option.inputprinting").val(textval).trigger('change');          
+             // }
+          });   
+          $("#uploadnow").click(function() { 
+            $("#product-options-wrapper").find('div.message').remove();   
+            $(".resultimg").remove();
+            var file_data = $('#print_file').prop('files')[0];   
+           if(fdata != null && fdata != ''){
+            $.ajax({
+                url: "/customprinting/index/ajaxupload",
+                type: "POST",
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: fdata,      
+                dataType: 'json',
+                showLoader: true,
+                success:function(res){
+                  if(res.path){
+                    $htmlstr = '';
+                    if(res.path.split(".").pop() != 'pdf'){
+                      $htmlstr = $htmlstr +  '<div class ="resultimg image" style="margin-top:0px;margin-left:0px;"><img src = "/media/'+res.path+'"></div>';
+                    }else{
+                        $htmlstr = $htmlstr +  '<div class ="resultimg image" style="margin-top:0px;margin-left:0px;">PDF</div>';
+                    }
+                    $htmlstr = $htmlstr +  '<div class="message message-success success"><p>Image uploaded.</p></div>';
+                   // $(".input-text.product-custom-option.inputprinting").val(res.path);
+                    $(".input-text.product-custom-option.inputprinting").val(res.path).trigger('change'); 
+                    $("#drag-area").append($htmlstr);
+                    $("#uploadnow").hide();
+                   
+                  }
+                  if(res.error){   
+                    var toappend = '<div class="message message-error error">';
+                    $.each(res.error,function(index, value){
+                      toappend = toappend + '<p>'+ value +'</p>';
+                    });
+                    toappend = toappend + "</div>";
+                    $("#product-options-wrapper").append(toappend);
+                  }
+                  
+                }
+            });  
+          }
+          }); 
+      });
+    });
+    
+    </script>
+    <?php
+    //--------------------------->
+}
+$customfieldclass = $inputclass = '';
+if (stripos($_option->getTitle(), 'print') !== false) {
+    $customfieldclass = 'printing hide ';
+    $inputclass = 'inputprinting ';
+}
+?>
+
+<div class="<?php echo $customfieldclass;?>field<?php if ($_option->getType() == \Magento\Catalog\Api\Data\ProductCustomOptionInterface::OPTION_TYPE_AREA) {
+    echo ' textarea';
+} ?><?= /* @escapeNotVerified */ $class ?>">
+    <label class="label gflabel" for="options_<?= /* @escapeNotVerified */ $_option->getId() ?>_text">
+        <span><?= $block->escapeHtml($_option->getTitle()) ?></span>
+        <?= /* @escapeNotVerified */ $block->getFormattedPrice() ?>
+    </label>
+
+    <div class="control">
+        <?php if ($_option->getType() == \Magento\Catalog\Api\Data\ProductCustomOptionInterface::OPTION_TYPE_FIELD): ?>
+            <?php $_textValidate = null;
+            if ($_option->getIsRequire()) {
+                $_textValidate['required'] = true;
+            }
+            if ($_option->getMaxCharacters()) {
+                $chrlimit = 1000;
+                if($inputclass == ''){$chrlimit = $_option->getMaxCharacters();}
+                $_textValidate['maxlength'] = $chrlimit;
+            }
+            $_textValidate['validate-no-utf8mb4-characters'] = true;
+            ?>
+            <input type="text"
+                   id="options_<?= /* @escapeNotVerified */ $_option->getId() ?>_text"
+                   class="<?php echo $inputclass;?>input-text product-custom-option"
+                   <?php if (!empty($_textValidate)) {?>
+                   data-validate="<?= $block->escapeHtml(json_encode($_textValidate)) ?>"
+                   <?php } ?>
+                   name="options[<?= /* @escapeNotVerified */ $_option->getId() ?>]"
+                   data-selector="options[<?= /* @escapeNotVerified */ $_option->getId() ?>]"
+                   value="<?= $block->escapeHtml($block->getDefaultValue()) ?>"/>
+        <?php elseif ($_option->getType() == \Magento\Catalog\Api\Data\ProductCustomOptionInterface::OPTION_TYPE_AREA): ?>
+            <?php $_textAreaValidate = null;
+            if ($_option->getIsRequire()) {
+                $_textAreaValidate['required'] = true;
+            }
+            if ($_option->getMaxCharacters()) {
+                $_textAreaValidate['maxlength'] = $_option->getMaxCharacters();
+            }
+            $_textAreaValidate['validate-no-utf8mb4-characters'] = true;
+            ?>
+            <textarea id="options_<?= /* @escapeNotVerified */ $_option->getId() ?>_text"
+                      class="product-custom-option"
+                    <?php if (!empty($_textAreaValidate)) {?>
+                        data-validate="<?= $block->escapeHtml(json_encode($_textAreaValidate)) ?>"
+                    <?php } ?>
+                      name="options[<?= /* @escapeNotVerified */ $_option->getId() ?>]"
+                      data-selector="options[<?= /* @escapeNotVerified */ $_option->getId() ?>]"
+                      rows="5"
+                      cols="25"><?= $block->escapeHtml($block->getDefaultValue()) ?></textarea>
+        <?php endif; ?>
+        <?php if ($_option->getMaxCharacters()): ?>
+            <p class="gfnote note note_<?= /* @escapeNotVerified */ $_option->getId() ?>">
+                <?= /* @escapeNotVerified */ __('Maximum number of characters: %1', $_option->getMaxCharacters()) ?>
+                <span class="character-counter no-display"></span>
+            </p>
+        <?php endif; ?>
+    </div>
+    <?php if ($_option->getMaxCharacters()): 
+        $chrlimit = 1000;
+        if($inputclass == ''){$chrlimit = $_option->getMaxCharacters();}
+        ?>
+        <script type="text/x-magento-init">
+        {
+            "[data-selector='options[<?= /* @escapeNotVerified */ $_option->getId() ?>]']": {
+                "Magento_Catalog/js/product/remaining-characters": {
+                    "maxLength":  "<?= $chrlimit ?>",
+                    "noteSelector": ".note_<?= /* @escapeNotVerified */ $_option->getId() ?>",
+                    "counterSelector": ".note_<?= /* @escapeNotVerified */ $_option->getId() ?> .character-counter"
+                }
+            }
+        }
+    </script>
+    <?php endif; ?>
+</div>

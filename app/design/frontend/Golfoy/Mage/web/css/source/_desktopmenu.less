@@ -1,0 +1,107 @@
+@media only screen and (min-width:767px){
+    .sign_in_banner_sidebar.container_signin {
+        display: none;
+    }
+    .sections.nav-sections{
+        width: 100%;
+        max-width: 100%;
+    }
+    .navigation .parent .level-top:after,
+    .navigation .parent .level-top.ui-state-active:after{
+        content: '' !important;
+    }
+    ul.level0 {
+        position: absolute !important;
+        z-index: 111;
+        border: 1px solid #e9e9e9;
+        background-color: white;
+    }
+    .navigation .level0 .submenu li {
+        width: 165px !important;
+    }
+    nav li.level1 a {
+        color: #575757 !important;
+        padding: 8px 10px;
+    }
+    nav li.level1 > a {
+        color: #575757;
+        padding-left: 18px !important;
+    }
+    li.level2 {
+        margin-bottom: 0px;
+        padding: 1px 0px;
+    }
+    ul.level1 {
+        margin-top: 7px;
+    }
+    .navigation .level0{
+        width: auto !important;
+        border-top: 0px solid black;
+        float: none !important;
+    }
+    .navigation > ul{
+        margin: 0px;
+    }
+    .logout_button_sidebar {
+        padding: 2px;
+    }
+    span.action.nav-toggle {
+        display: none !important;
+    }
+    .navigation .level0.active > a:not(.ui-state-active), .navigation .level0.has-active > a:not(.ui-state-active) {
+        border-color: transparent !important;
+    }
+}
+@media only screen and (min-width:767px) and (max-width:768px){
+    .sections.nav-sections {
+        display: inline-block;
+        left: 0;
+        height: auto;
+        padding-bottom: 0px;
+        position: static;
+        margin-top: -6px;
+    }
+    .section-item-content.nav-sections-item-content {
+        padding-bottom: 0px;
+    }
+    span.action.nav-toggle {
+        display: none !important;
+    }
+}
+@media only screen and (max-width:767px){
+    //open menu on click starts
+    /*.navigation .parent .level-top:after {
+        content: '+' !important;
+    }
+    .navigation .parent .level-top.ui-state-active:after {
+        color: #e60023 !important;
+    }
+
+    .navigation .parent .level-top.ui-state-active:after {
+        content: '-' !important;
+        right: 10px;
+    }
+
+    .navigation .level0.active>a:not(.ui-state-active), .navigation .level0.has-active>a:not(.ui-state-active){
+        border-color:@primary-color !important;
+    }
+    .navigation .parent .level-top.ui-state-active:after {
+        content: '-' !important;
+        right: 10px;
+    }*/
+    ul.level0, ul.level0.collapsed{
+        display: none !important;
+    }
+    ul.level0.expanded{
+        display: inline-block !important;
+    }
+    .navigation .parent .level-top.expanded:after {
+        content: '-' !important;
+        right: 10px;
+    }
+    .navigation .parent .level-top.collapsed:after, .navigation .parent .level-top:after {
+        content: '+' !important;
+        right: 10px;
+    }
+    //open menu on click ends
+}

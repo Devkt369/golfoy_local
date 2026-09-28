@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+
+<!--
+  ~ Copyright © 2018 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Magestore_WebposPerformanceAdminUi::performance" title="Webpos Performance" translate="title"
+             dependsOnConfig="webpos/performance/enabled"
+             module="Magestore_WebposPerformanceAdminUi" sortOrder="50" parent="Magestore_Webpos::posadmin" resource="Magestore_Webpos::pos"/>
+        <add id="Magestore_WebposPerformanceAdminUi::report_by_action" title="Action Ranking Performance" module="Magestore_WebposPerformanceAdminUi"
+             sortOrder="60" parent="Magestore_WebposPerformanceAdminUi::performance" resource="Magestore_WebposPerformanceAdminUi::report_by_action"
+             action="webposperformance/byAction/index/"/>
+        <add id="Magestore_WebposPerformanceAdminUi::report_by_pos" title="POS Ranking Performance" module="Magestore_WebposPerformanceAdminUi"
+             sortOrder="70" parent="Magestore_WebposPerformanceAdminUi::performance" resource="Magestore_WebposPerformanceAdminUi::report_by_pos"
+             action="webposperformance/byPos/index/"/>
+        <add id="Magestore_WebposPerformanceAdminUi::reports_overview" title="All performance logs" module="Magestore_WebposPerformanceAdminUi"
+             sortOrder="80" parent="Magestore_WebposPerformanceAdminUi::performance" resource="Magestore_WebposPerformanceAdminUi::reports"
+             action="webposperformance/index/overview/"/>
+        <add id="Magestore_WebposPerformanceAdminUi::settings" title="Settings" module="Magestore_WebposPerformanceAdminUi"
+             sortOrder="100" parent="Magestore_WebposPerformanceAdminUi::performance" resource="Magestore_WebposPerformanceAdminUi::config_performance"
+             action="adminhtml/system_config/edit/section/webposperformance"/>
+    </menu>
+</config>

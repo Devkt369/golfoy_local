@@ -1,0 +1,180 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="os_branchrequest" resource="default" engine="innodb" comment="Branch Request">
+        <column xsi:type="int" name="inventorytransfer_id" padding="11" unsigned="false" nullable="false"
+                identity="true"
+                comment="Branch Request Id"/>
+        <column xsi:type="varchar" name="branchrequest_code" length="32" nullable="false"
+                comment="Branch Request Code"/>
+        <column xsi:type="varchar" name="source_warehouse_code" nullable="false" length="255"
+                comment="Source Warehouse Code" default=""/>
+        <column xsi:type="varchar" name="des_warehouse_code" nullable="false" length="255"
+                comment="Destination Warehouse Code" default=""/>
+        <column xsi:type="varchar" name="notifer_emails" length="255" nullable="false" comment="Notifer Emails"/>
+        <column xsi:type="text" name="remarks" nullable="false" comment="Remarks"/>
+        <column xsi:type="decimal" name="qty_requested" precision="12" scale="4" unsigned="false" nullable="false"
+                default="0" comment="Qty Requested"/>
+        <column xsi:type="decimal" name="qty_delivered" precision="12" scale="4" unsigned="false" nullable="false"
+                default="0" comment="Qty Delivered"/>
+        <column xsi:type="decimal" name="qty_received" precision="12" scale="4" unsigned="false" nullable="false"
+                default="0" comment="Qty Received"/>
+        <column xsi:type="int" name="created_by_id" padding="11" unsigned="false" nullable="true"
+                comment="Created By Id"/>
+        <column xsi:type="varchar" name="created_by_name" length="255" nullable="true"
+                comment="Created By Name"/>
+        <column xsi:type="int" name="approved_by_id" padding="11" unsigned="false" nullable="true"
+                comment="Approved By Id"/>
+        <column xsi:type="varchar" name="approved_by_name" length="255" nullable="true"
+                comment="Approved By Name"/>
+        <column xsi:type="int" name="canceled_by_id" padding="11" unsigned="false" nullable="true"
+                comment="Canceled By Id"/>
+        <column xsi:type="varchar" name="canceled_by_name" length="255" nullable="true"
+                comment="Canceled By Name"/>
+        <column xsi:type="int" name="status" padding="2" unsigned="false" nullable="false" default="0"
+                comment="Status"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="inventorytransfer_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="BRANCH_REQUEST_CODE">
+            <column name="branchrequest_code"/>
+        </constraint>
+    </table>
+
+    <table name="os_branchrequest_product" resource="default" engine="innodb" comment="Branch Request Product">
+        <column xsi:type="int" name="entity_id" padding="11" unsigned="false" nullable="false" identity="true"
+                comment="Branch Request Product Id"/>
+        <column xsi:type="int" name="inventorytransfer_id" padding="11" unsigned="false" nullable="false"
+                comment="Branch Request Id"/>
+        <column xsi:type="int" name="product_id" padding="11" unsigned="false" nullable="false" comment="Product Id"/>
+        <column xsi:type="varchar" name="product_name" nullable="false" default="" comment="Product Name"/>
+        <column xsi:type="varchar" name="product_sku" nullable="false" default="" comment="Product Sku"/>
+        <column xsi:type="decimal" name="qty_requested" precision="12" scale="4" unsigned="false" nullable="false"
+                default="0" comment="Qty Requested"/>
+        <column xsi:type="decimal" name="qty_delivered" precision="12" scale="4" unsigned="false" nullable="false"
+                default="0" comment="Qty Delivered"/>
+        <column xsi:type="decimal" name="qty_received" precision="12" scale="4" unsigned="false" nullable="false"
+                default="0" comment="Qty Received"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="BRANCH_REQUEST_ID_BRANCH_REQUEST_PRODUCT_REQUEST_ID"
+                    table="os_branchrequest_product" column="inventorytransfer_id" referenceTable="os_branchrequest"
+                    referenceColumn="inventorytransfer_id" onDelete="CASCADE"/>
+    </table>
+
+    <table name="os_branchrequest_delivery" resource="default" engine="innodb" comment="Branch Request Delivery">
+        <column xsi:type="int" name="delivery_id" padding="11" unsigned="false" nullable="false" identity="true"
+                comment="Delivery Id"/>
+        <column xsi:type="int" name="inventorytransfer_id" padding="11" unsigned="false" nullable="false"
+                comment="Branch Request Id"/>
+        <column xsi:type="varchar" name="delivery_code" length="32" nullable="false" comment="Delivery Code"/>
+        <column xsi:type="timestamp" name="created_on" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Created On"/>
+        <column xsi:type="int" name="created_by_id" padding="11" unsigned="false" nullable="true"
+                comment="Created By Id"/>
+        <column xsi:type="varchar" name="created_by_name" length="255" nullable="true"
+                comment="Created By Name"/>
+        <column xsi:type="decimal" name="total_delivery_qty" scale="4" precision="12" unsigned="false"
+                nullable="true" comment="Total delivery Qty" default="0"/>
+        <column xsi:type="text" name="note" nullable="false" comment="Note"/>
+        <column xsi:type="text" name="remarks" nullable="false" comment="Remarks"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="delivery_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="DELIVERY_CODE">
+            <column name="delivery_code"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="BRANCH_REQUEST_ID_DELIVERY_ID"
+                    table="os_branchrequest_delivery" column="inventorytransfer_id"
+                    referenceTable="os_branchrequest" referenceColumn="inventorytransfer_id"
+                    onDelete="CASCADE"/>
+    </table>
+
+    <table name="os_branchrequest_delivery_product" resource="default" engine="innodb"
+           comment="Branch Request Delivery Product">
+        <column xsi:type="int" name="delivery_product_id" padding="11" unsigned="false" nullable="false"
+                identity="true" comment="Delivery Product Id"/>
+        <column xsi:type="int" name="delivery_id" padding="11" unsigned="false" nullable="false"
+                comment="Delivery Id"/>
+        <column xsi:type="int" name="product_id" padding="11" unsigned="false" nullable="false"
+                comment="Product Id"/>
+        <column xsi:type="varchar" name="product_name" nullable="false" default="" comment="Product Name"/>
+        <column xsi:type="varchar" name="product_sku" nullable="false" default="" comment="Product Sku"/>
+        <column xsi:type="decimal" name="product_price" scale="6" precision="20" unsigned="false" nullable="false"
+                default="0" comment="Product Price"/>
+        <column xsi:type="decimal" name="avail_qty" scale="4" default="0" comment="Qty"/>
+        <column xsi:type="decimal" name="qty" scale="4" default="0" comment="Qty"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="delivery_product_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="BRANCH_REQUEST_DELIVERY_ID_BRANCH_REQUEST_DELIVERY_PRODUCT_ID"
+                    table="os_branchrequest_delivery_product" column="delivery_id"
+                    referenceTable="os_branchrequest_delivery" referenceColumn="delivery_id"
+                    onDelete="CASCADE"/>
+    </table>
+
+    <table name="os_branchrequest_receive" resource="default" engine="innodb" comment="Branch Request Receive">
+        <column xsi:type="int" name="receive_id" padding="11" unsigned="false" nullable="false" identity="true"
+                comment="Receive Id"/>
+        <column xsi:type="int" name="inventorytransfer_id" padding="11" unsigned="false" nullable="false"
+                comment="Branch Request Id"/>
+        <column xsi:type="varchar" name="receive_code" length="32" nullable="false" comment="Receive Code"/>
+        <column xsi:type="timestamp" name="created_on" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Created On"/>
+        <column xsi:type="int" name="created_by_id" padding="11" unsigned="false" nullable="true"
+                comment="Created By Id"/>
+        <column xsi:type="varchar" name="created_by_name" length="255" nullable="true"
+                comment="Created By Name"/>
+        <column xsi:type="decimal" name="total_receive_qty" scale="4" precision="12" unsigned="false"
+                nullable="true" comment="Total Receive Qty" default="0"/>
+        <column xsi:type="text" name="note" nullable="false" comment="Note"/>
+        <column xsi:type="text" name="remarks" nullable="false" comment="Remarks"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="receive_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="RECEIVE_CODE">
+            <column name="receive_code"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="BRANCH_REQUEST_ID_RECEIVE_ID"
+                    table="os_branchrequest_receive" column="inventorytransfer_id"
+                    referenceTable="os_branchrequest" referenceColumn="inventorytransfer_id"
+                    onDelete="CASCADE"/>
+    </table>
+
+    <table name="os_branchrequest_receive_product" resource="default" engine="innodb"
+           comment="Branch Request Receive Product">
+        <column xsi:type="int" name="receive_product_id" padding="11" unsigned="false" nullable="false"
+                identity="true" comment="Receive Product Id"/>
+        <column xsi:type="int" name="receive_id" padding="11" unsigned="false" nullable="false"
+                comment="Receive Id"/>
+        <column xsi:type="int" name="product_id" padding="11" unsigned="false" nullable="false"
+                comment="Product Id"/>
+        <column xsi:type="varchar" name="product_name" nullable="false" default="" comment="Product Name"/>
+        <column xsi:type="varchar" name="product_sku" nullable="false" default="" comment="Product Sku"/>
+        <column xsi:type="decimal" name="product_price" scale="6" precision="20" unsigned="false" nullable="false"
+                default="0" comment="Product Price"/>
+        <column xsi:type="decimal" name="qty" scale="4" default="0" comment="Qty"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="receive_product_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="BRANCH_REQUEST_RECEIVE_ID_BRANCH_REQUEST_RECEIVE_PRODUCT_ID"
+                    table="os_branchrequest_receive_product" column="receive_id"
+                    referenceTable="os_branchrequest_receive" referenceColumn="receive_id"
+                    onDelete="CASCADE"/>
+    </table>
+
+    <table name="inventory_source_item" resource="default" engine="innodb">
+        <column xsi:type="text" name="racket" nullable="true" comment="Racket"/>
+    </table>
+</schema>

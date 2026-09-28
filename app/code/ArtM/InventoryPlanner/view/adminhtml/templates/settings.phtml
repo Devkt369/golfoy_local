@@ -1,0 +1,151 @@
+<?php
+/**
+ * @var \ArtM\InventoryPlanner\Block\Adminhtml\Settings $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$statusOptions = $block->getAllStatusOptions();
+$sourceOptions = $block->getAllSourceOptions();
+$syncStats = $block->getLastSyncStats();
+$allColumns = $block->getAllColumnOptions();
+$columnGroupsJson = $block->getColumnGroupsJson();
+?>
+<div class="artm-inventory-planner">
+    <div class="artm-page-header">
+        <h2><?= $escaper->escapeHtml(__('Inventory Planner Settings')) ?></h2>
+        <p><?= $escaper->escapeHtml(__('Choose which order statuses count towards the weekly sales sync, and resync on demand.')) ?></p>
+    </div>
+
+    <div class="artm-card">
+        <h3 class="artm-card-title"><?= $escaper->escapeHtml(__('Order Statuses &amp; Sources')) ?></h3>
+        <p class="artm-card-subtitle"><?= $escaper->escapeHtml(__('Only orders with one of these statuses count towards the sync. Sources are saved for reference only for now.')) ?></p>
+        <form method="post" action="<?= $escaper->escapeUrl($block->getSaveFormActionUrl()) ?>" class="artm-filter-form">
+            <input type="hidden" name="form_key" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>"/>
+            <div class="artm-filter-field">
+                <label for="artm_statuses">
+                    <?= $escaper->escapeHtml(__('Order Statuses To Sync')) ?>
+                    <span class="artm-multiselect-hint"><?= $escaper->escapeHtml(__('(Ctrl/Cmd+click to select multiple)')) ?></span>
+                </label>
+                <select id="artm_statuses" name="statuses[]" multiple="multiple" size="10">
+                    <?php foreach ($statusOptions as $code => $label): ?>
+                        <option value="<?= $escaper->escapeHtmlAttr($code) ?>" <?= $block->isStatusSelected((string) $code) ? 'selected="selected"' : '' ?>>
+                            <?= $escaper->escapeHtml($label) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="artm-filter-field">
+                <label for="artm_sources">
+                    <?= $escaper->escapeHtml(__('Sources')) ?>
+                    <span class="artm-multiselect-hint"><?= $escaper->escapeHtml(__('(Ctrl/Cmd+click to select multiple)')) ?></span>
+                </label>
+                <select id="artm_sources" name="sources[]" multiple="multiple" size="10">
+                    <?php foreach ($sourceOptions as $code => $label): ?>
+                        <option value="<?= $escaper->escapeHtmlAttr($code) ?>" <?= $block->isSourceSelected((string) $code) ? 'selected="selected"' : '' ?>>
+                            <?= $escaper->escapeHtml($label) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="artm-filter-field artm-filter-submit">
+                <button type="submit" class="action-default scalable"><?= $escaper->escapeHtml(__('Save Settings')) ?></button>
+            </div>
+        </form>
+    </div>
+
+    <div class="artm-card">
+        <h3 class="artm-card-title"><?= $escaper->escapeHtml(__('Sync Now')) ?></h3>
+        <p class="artm-card-subtitle"><?= $escaper->escapeHtml(__('Resumes from the last order already synced and picks up everything placed since.')) ?></p>
+        <form method="post" action="<?= $escaper->escapeUrl($block->getSyncNowFormActionUrl()) ?>" class="artm-filter-form">
+            <input type="hidden" name="form_key" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>"/>
+            <div class="artm-filter-field">
+                <span class="artm-field-note-label"><?= $escaper->escapeHtml(__('Last Synced')) ?>:</span>
+                <strong><?= $escaper->escapeHtml($block->getLastSyncedLabel()) ?></strong>
+                <?php if ($block->getLastSyncedOrderId() > 0): ?>
+                    <span class="artm-field-note-label">(<?= $escaper->escapeHtml(__('through order #%1', $block->getLastSyncedOrderId())) ?>)</span>
+                <?php endif; ?>
+            </div>
+            <div class="artm-filter-field artm-filter-submit">
+                <button type="submit" class="action-primary scalable"><?= $escaper->escapeHtml(__('Sync Now')) ?></button>
+            </div>
+        </form>
+
+        <?php if ($syncStats !== null): ?>
+            <div class="artm-sync-report">
+                <h4 class="artm-sync-report-title"><?= $escaper->escapeHtml(__('Last Sync Report')) ?></h4>
+                <?php if ($syncStats['from_order_id'] !== null): ?>
+                    <p class="artm-sync-report-range">
+                        <?= $escaper->escapeHtml(__('Current syncing started from')) ?>
+                        <strong>#<?= (int) $syncStats['from_order_id'] ?></strong> (<?= $escaper->escapeHtml((string) $syncStats['from_order_date']) ?>)
+                        <?= $escaper->escapeHtml(__('to')) ?>
+                        <strong>#<?= (int) $syncStats['to_order_id'] ?></strong> (<?= $escaper->escapeHtml((string) $syncStats['to_order_date']) ?>).
+                    </p>
+                <?php endif; ?>
+                <div class="artm-stat-grid">
+                    <div class="artm-stat-tile">
+                        <span class="artm-stat-label"><?= $escaper->escapeHtml(__('Last Order Id Synced')) ?></span>
+                        <span class="artm-stat-value">#<?= (int) $syncStats['last_order_id'] ?></span>
+                    </div>
+                    <div class="artm-stat-tile">
+                        <span class="artm-stat-label"><?= $escaper->escapeHtml(__('Total Scanned Orders')) ?></span>
+                        <span class="artm-stat-value"><?= (int) $syncStats['total_scanned_orders'] ?></span>
+                    </div>
+                    <div class="artm-stat-tile">
+                        <span class="artm-stat-label"><?= $escaper->escapeHtml(__('Total Synced Orders')) ?></span>
+                        <span class="artm-stat-value"><?= (int) $syncStats['total_synced_orders'] ?></span>
+                    </div>
+                    <div class="artm-stat-tile">
+                        <span class="artm-stat-label"><?= $escaper->escapeHtml(__('Total Item Ids')) ?></span>
+                        <span class="artm-stat-value"><?= (int) $syncStats['total_item_ids'] ?></span>
+                    </div>
+                    <div class="artm-stat-tile">
+                        <span class="artm-stat-label"><?= $escaper->escapeHtml(__('Total Unique SKUs')) ?></span>
+                        <span class="artm-stat-value"><?= (int) $syncStats['total_unique_skus'] ?></span>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <div class="artm-card">
+        <h3 class="artm-card-title"><?= $escaper->escapeHtml(__('Column Grouping')) ?></h3>
+        <p class="artm-card-subtitle"><?= $escaper->escapeHtml(__('Create groups and drag Dashboard columns into them. Ungrouped columns stay in Available Columns.')) ?></p>
+
+        <form method="post" action="<?= $escaper->escapeUrl($block->getSaveColumnsFormActionUrl()) ?>" id="artm_column_groups_form">
+            <input type="hidden" name="form_key" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>"/>
+            <input type="hidden" name="column_groups" id="artm_column_groups_input" value=""/>
+
+            <div class="artm-column-grouping">
+                <div class="artm-column-groups-panel">
+                    <div class="artm-column-groups-header">
+                        <input type="text" id="artm_new_group_name" class="input-text admin__control-text" placeholder="<?= $escaper->escapeHtmlAttr(__('New group name')) ?>"/>
+                        <button type="button" id="artm_add_group_btn" class="action-default scalable"><?= $escaper->escapeHtml(__('+ Add Group')) ?></button>
+                    </div>
+                    <div id="artm_groups_container" class="artm-column-groups-container"></div>
+                </div>
+                <div class="artm-column-available-panel">
+                    <h4><?= $escaper->escapeHtml(__('Available Columns')) ?></h4>
+                    <div class="artm-column-groups-header">
+                        <input type="text" id="artm_new_column_name" class="input-text admin__control-text" placeholder="<?= $escaper->escapeHtmlAttr(__('Add a custom column')) ?>"/>
+                        <button type="button" id="artm_add_column_btn" class="action-default scalable"><?= $escaper->escapeHtml(__('+ Add Column')) ?></button>
+                    </div>
+                    <ul id="artm_available_columns" class="artm-column-list" data-role="column-pool"></ul>
+                </div>
+            </div>
+
+            <div class="artm-filter-field artm-filter-submit">
+                <button type="submit" class="action-primary scalable"><?= $escaper->escapeHtml(__('Save Column Groups')) ?></button>
+            </div>
+        </form>
+
+        <script type="text/x-magento-init">
+            {
+                "#artm_column_groups_form": {
+                    "ArtM_InventoryPlanner/js/column-grouping": {
+                        "allColumns": <?= /* @noEscape */ json_encode($allColumns) ?>,
+                        "savedGroups": <?= /* @noEscape */ $columnGroupsJson ?>
+                    }
+                }
+            }
+        </script>
+    </div>
+</div>

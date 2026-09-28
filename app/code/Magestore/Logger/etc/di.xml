@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magestore\Logger\Model\Structure\Config\Data">
+        <arguments>
+            <argument name="reader" xsi:type="object">Magestore\Logger\Model\Structure\Config\Reader\Proxy</argument>
+        </arguments>
+    </type>
+    <type name="Magestore\Logger\Model\Structure\Config">
+        <arguments>
+            <argument name="dataStorage" xsi:type="object">Magestore\Logger\Model\Structure\Config\Data\Proxy</argument>
+        </arguments>
+    </type>
+    <preference for="Magestore\LoggerApi\Api\ValidateLogFormatInterface" type="Magestore\Logger\Model\ValidateLogFormat"/>
+    <preference for="Magestore\LoggerApi\Api\ReformatFieldByStructureOrderInterface" type="Magestore\Logger\Model\ReformatFieldByStructureOrder"/>
+    <preference for="Magestore\LoggerApi\Api\CheckCanLogConfigInterface" type="Magestore\Logger\Model\CheckCanLogConfig"/>
+    <preference for="Magestore\LoggerApi\Api\Data\ExceptionLogMessageInterface" type="Magestore\Logger\Model\Data\ExceptionLogMessage"/>
+    <preference for="Magestore\LoggerApi\Api\Data\DataChangeLogMessageInterface" type="Magestore\Logger\Model\Data\DataChangeLogMessage"/>
+    <preference for="Magestore\LoggerApi\Api\LogMessageRepositoryInterface" type="Magestore\Logger\Model\LogMessageRepository"/>
+    <preference for="Magestore\LoggerApi\Api\Data\IntegrationLogMessageInterface" type="Magestore\Logger\Model\Data\IntegrationLogMessage"/>
+
+    <preference for="Magestore\LoggerApi\Api\Data\ProcessLogMessageInterface" type="Magestore\Logger\Model\Data\ProcessLogMessage"/>
+
+    <preference for="Magestore\LoggerApi\Api\IsEnabledLogFlowInterface" type="Magestore\Logger\Model\IsEnabledLogFlow"/>
+    <preference for="Magestore\LoggerApi\Api\IsEnabledLogTypeInterface" type="Magestore\Logger\Model\IsEnabledLogType"/>
+
+    <type name="Magestore\Logger\Logger\MagestoreLogger">
+        <arguments>
+            <argument name="name" xsi:type="string">main</argument>
+        </arguments>
+    </type>
+
+    <!-- Declare file name of log file -->
+
+    <virtualType name="MagestoreExceptionFormatHandler" type="Magestore\Logger\Logger\Handle\BaseHandler">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/magestore/magestore_exception.log</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="MagestoreDataChangeFormatHandler" type="Magestore\Logger\Logger\Handle\BaseHandler">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/magestore/magestore_data_change.log</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="MagestoreProcessFormatHandler" type="Magestore\Logger\Logger\Handle\BaseHandler">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/magestore/magestore_process.log</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="MagestoreIntegrationFormatHandler" type="Magestore\Logger\Logger\Handle\BaseHandler">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/magestore/magestore_integration.log</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="MagestoreInvalidLogFormatHandler" type="Magestore\Logger\Logger\Handle\BaseHandler">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/magestore/magestore_invalid_log.log</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- End declare file name of log file -->
+
+    <!-- Start declare log processor handle -->
+    <virtualType name="MagestoreExceptionLogger" type="Magestore\Logger\Logger\MagestoreLogger">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="exception" xsi:type="object">MagestoreExceptionFormatHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="MagestoreDataChangeLogger" type="Magestore\Logger\Logger\MagestoreLogger">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="data_change" xsi:type="object">MagestoreDataChangeFormatHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="MagestoreProcessLogger" type="Magestore\Logger\Logger\MagestoreLogger">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="process" xsi:type="object">MagestoreProcessFormatHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="MagestoreIntegrationLogger" type="Magestore\Logger\Logger\MagestoreLogger">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="integration" xsi:type="object">MagestoreIntegrationFormatHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="MagestoreInvalidLogLogger" type="Magestore\Logger\Logger\MagestoreLogger">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="invalid_record" xsi:type="object">MagestoreInvalidLogFormatHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <!-- End declare log processor handle -->
+
+    <type name="Magestore\Logger\Model\Data\LogMessage">
+        <arguments>
+            <argument name="loggers" xsi:type="array">
+                <item name="exception" xsi:type="object">MagestoreExceptionLogger</item>
+                <item name="data_change" xsi:type="object">MagestoreDataChangeLogger</item>
+                <item name="process" xsi:type="object">MagestoreProcessLogger</item>
+                <item name="integration" xsi:type="object">MagestoreIntegrationLogger</item>
+                <item name="invalid_record" xsi:type="object">MagestoreInvalidLogLogger</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Register log flows -->
+    <type name="Magestore\Logger\Model\Source\LogFlows">
+        <arguments>
+            <argument name="flows" xsi:type="array">
+                <item name="place_order" xsi:type="string">place_order</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="disableTypeLoggerCommand" xsi:type="object">Magestore\Logger\Console\Command\LogType\DisableLogType</item>
+                <item name="enableTypeLoggerCommand" xsi:type="object">Magestore\Logger\Console\Command\LogType\EnableLogType</item>
+                <item name="disableFlowLoggerCommand" xsi:type="object">Magestore\Logger\Console\Command\LogFlow\DisableLogFlow</item>
+                <item name="enableFlowLoggerCommand" xsi:type="object">Magestore\Logger\Console\Command\LogFlow\EnableLogFlow</item>
+                <item name="getFlowLoggerStatus" xsi:type="object">Magestore\Logger\Console\Command\GetLogFlowStatusCommand</item>
+                <item name="getTypeLoggerStatus" xsi:type="object">Magestore\Logger\Console\Command\GetLogTypeStatusCommand</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

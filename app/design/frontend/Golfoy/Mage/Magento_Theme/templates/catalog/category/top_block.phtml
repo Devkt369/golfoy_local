@@ -1,0 +1,115 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$category = $objectManager->get('Magento\Framework\Registry')->registry('current_category'); //get current category
+$curr_cat_id = $category->getId();
+$category_name = $category->getName();
+$getSubcategoriesontop = $category->getSubcategoriesontop();
+$getSubcategoriesontopconf = $category->getSubcatontopconfig();
+$getStaticblockontop = $category->getStaticblockontop();
+$getCategoryheading = $category->getCategoryheading();
+$getAddbloglink = $category->getAddbloglink();
+if ($getAddbloglink != '') {
+    $data_blog = explode('|', $getAddbloglink);
+    $heading = $data_blog[0];
+    $url = $data_blog[1];
+}
+?>
+
+<?php
+if (trim((string) $getAddbloglink) != '') {
+
+?>
+    <div class="blog_link_html_category_page">
+        <div>
+            <div class="home-block-title" style="margin-bottom: 5px;padding: 5px 0;">
+                <span class="heading-underline">
+                    <h2 style="font-size: 14px;"> <?= $heading ?>
+                        <a target="_blank" href="<?= $url ?>">
+                            Read now &gt;&gt;
+                        </a>
+                    </h2>
+                    <hr>
+                </span>
+            </div>
+        </div>
+    </div>
+<?php
+}
+
+?>
+<div class="category_top_block">
+    <h1 class="category_name">
+        <?php
+        if ($getCategoryheading != '') {
+            echo $getCategoryheading;
+        } else {
+            echo $category_name;
+        }
+        ?>
+    </h1>
+</div>
+
+
+<?php
+if ($getStaticblockontop != '') {
+?>
+    <div class="categories_block_images outer_width_js">
+        <div class="categories_block_images_inside inner_width_js">
+            <?php
+            echo $this->getLayout()->createBlock(\Magento\Cms\Block\Block::class)->setBlockId($getStaticblockontop)->toHtml();
+            ?>
+        </div>
+    </div>
+<?php
+} else if ($getSubcategoriesontop == '1') {
+    if ($getSubcategoriesontopconf == '') {
+        $getSubcategoriesontopconf = '1';
+    }
+    if ($getSubcategoriesontopconf != '') {
+        echo '<div class="subcategories_of_category row outer_width_js" style="width:100%;"><div class="col-xs-12">';
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $customcache_model = $objectManager->create('\ArtM\Common\Model\Customcache');
+
+        $customcache = $customcache_model
+            ->getCollection()
+            ->addFieldToFilter('type', 'top_block')
+            ->addFieldToFilter('page_type', 'category_page')
+            ->addFieldToFilter('cat_id', $curr_cat_id);
+
+
+        if (count($customcache) > 0) {
+            $outHtml = '';
+            foreach ($customcache as $item) {
+                $outHtml =  $item->getContent();
+                break;
+            }
+            echo $outHtml;
+        } else {
+            echo '<input type = "hidden" id = "hidden-catid" name = "hidden-catid" value="' . $curr_cat_id . '"/>';
+            echo '<input type = "hidden" id = "hidden-subcatconf" name = "hidden-subcatconf" value="' . $getSubcategoriesontopconf . '"/>';
+
+            //-------------------------------------------------------
+            $block_img_text_html = '<div class="image_prd_of_cat animation_div"></div>
+            <div class="subcat_name_of_category animation_div"></div>';
+
+
+            echo '<div class="subcategory_top_category col-lg-1 col-md-2 col-sm-3 col-xs-4 blocks_inside_js">' . $block_img_text_html . '</div>';
+            echo '<div class="subcategory_top_category col-lg-1 col-md-2 col-sm-3 col-xs-4 blocks_inside_js">' . $block_img_text_html . '</div>';
+            echo '<div class="subcategory_top_category col-lg-1 col-md-2 col-sm-3 col-xs-4 blocks_inside_js">' . $block_img_text_html . '</div>';
+            echo '<div class="subcategory_top_category col-lg-1 col-md-2 col-sm-3 col-xs-4 hidden-sm hidden-xs blocks_inside_js">' . $block_img_text_html . '</div>';
+            echo '<div class="subcategory_top_category col-lg-1 col-md-2 col-sm-3 col-xs-4 hidden-sm hidden-xs blocks_inside_js">' . $block_img_text_html . '</div>';
+            echo '<div class="subcategory_top_category col-lg-1 col-md-2 col-sm-3 col-xs-4 hidden-xs blocks_inside_js">' . $block_img_text_html . '</div>';
+
+            echo '<div class="subcategory_top_category visible-lg col-lg-1 col-md-2 col-sm-3 col-xs-4 blocks_inside_js">' . $block_img_text_html . '</div>';
+            echo '<div class="subcategory_top_category visible-lg col-lg-1 col-md-2 col-sm-3 col-xs-4 blocks_inside_js">' . $block_img_text_html . '</div>';
+            echo '<div class="subcategory_top_category visible-lg col-lg-1 col-md-2 col-sm-3 col-xs-4 blocks_inside_js">' . $block_img_text_html . '</div>';
+            echo '<div class="subcategory_top_category visible-lg col-lg-1 col-md-2 col-sm-3 col-xs-4 blocks_inside_js">' . $block_img_text_html . '</div>';
+            echo '<div class="subcategory_top_category visible-lg col-lg-1 col-md-2 col-sm-3 col-xs-4 blocks_inside_js">' . $block_img_text_html . '</div>';
+            echo '<div class="subcategory_top_category visible-lg col-lg-1 col-md-2 col-sm-3 col-xs-4 blocks_inside_js">' . $block_img_text_html . '</div>';
+
+            //----------------------------------------------------------------------- 
+        }
+        echo '</div></div>';
+    }
+}
+?>

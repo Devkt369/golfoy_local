@@ -1,0 +1,39 @@
+<?php 
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $customerSession = $objectManager->create('Magento\Customer\Model\Session');
+    $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+    $base_url = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
+
+    if( !$customerSession->isLoggedIn() ) {
+?>
+        <div class="container_slides">
+            <div class="row container_slides_inside">
+                <div class="col-xs-12 heading_slide active">
+                    REDEEM GOLFOY POINTS
+                </div>
+                <div class="col-xs-12 content_slide">
+                    <div class="earn_points_message">
+                        You will earn <span id="redeempoint_earned_points"></span>for this order
+                    </div>
+                    <div class="earn_point_percentage">
+                        Upto 38% of basic amount of grand total can be redeemed
+                    </div>
+                    <div class="please_login_text">
+                        <p class="authorization-link signin_signout">
+                            <span>Please</span>
+                            <span>
+                                <a href="<?= $base_url ?>customer/account/login/">LOGIN </a>
+                            </span>
+                            <span>
+                                to use reward points
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+<?php 
+    }
+?>

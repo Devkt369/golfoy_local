@@ -1,0 +1,217 @@
+<?php
+/** @var \Magento\Backend\Block\Template $block */
+$matrixUrl = $block->getUrl('massproducts/ready/tabMatrix');
+$moveToDraftUrl = $block->getUrl('massproducts/ready/moveToDraft');
+?>
+
+<div id="artm-ready-products-tab-root">
+	<style>
+		#artm-ready-products-tab-root .artm-ready-toolbar {
+			display: flex;
+			gap: 8px;
+			align-items: center;
+			margin-bottom: 12px;
+			flex-wrap: wrap;
+		}
+		#artm-ready-products-tab-root .artm-ready-table-wrap {
+			overflow: auto;
+		}
+		#artm-ready-products-tab-root .artm-ready-table {
+			min-width: 1200px;
+		}
+		#artm-ready-products-tab-root .artm-ready-table tbody tr:nth-child(odd) td {
+			background: #f8fafc;
+		}
+		#artm-ready-products-tab-root .artm-ready-table tbody tr:nth-child(even) td {
+			background: #ffffff;
+		}
+		#artm-ready-products-tab-root .artm-ready-table th,
+		#artm-ready-products-tab-root .artm-ready-table td {
+			padding: 6px 8px;
+			vertical-align: top;
+		}
+		#artm-ready-products-tab-root .artm-ready-table tr.artm-row-block-start td {
+			border-top: 2px solid #000 !important;
+		}
+		#artm-ready-products-tab-root .artm-ready-table tr.artm-row-block-end td {
+			border-bottom: 2px solid #000 !important;
+		}
+		#artm-ready-products-tab-root .artm-ready-table tr.artm-row-child td.artm-col-sku {
+			padding-left: 20px !important;
+			box-shadow: inset 3px 0 0 #000;
+		}
+		#artm-ready-products-tab-root .artm-col-media,
+		#artm-ready-products-tab-root .artm-ready-table th.artm-col-media {
+			position: sticky;
+			left: 0;
+			z-index: 3;
+			min-width: 180px;
+			max-width: 180px;
+			border-right: 1px solid #d7dce1;
+			background: #ffffff;
+			color: #000;
+			text-align: center;
+		}
+		#artm-ready-products-tab-root .artm-col-actions,
+		#artm-ready-products-tab-root .artm-ready-table th.artm-col-actions {
+			position: sticky;
+			right: -10px;
+			z-index: 3;
+			min-width: 200px;
+			border-left: 1px solid #d7dce1;
+			background: #ffffff;
+			color: #000;
+			text-align: center;
+		}
+		#artm-ready-products-tab-root .artm-ready-table thead .artm-col-media,
+		#artm-ready-products-tab-root .artm-ready-table thead .artm-col-actions {
+			background: #eef2f7;
+			color: #000;
+			z-index: 4;
+		}
+		#artm-ready-products-tab-root .artm-ready-thumb-wrap {
+			display: flex;
+			flex-direction: column;
+			gap: 6px;
+			align-items: center;
+		}
+		#artm-ready-products-tab-root .artm-ready-thumb {
+			width: 150px;
+			height: 100px;
+			border: 1px solid #dbe2ea;
+			background: #f8fafc;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 4px;
+			overflow: hidden;
+		}
+		#artm-ready-products-tab-root .artm-ready-thumb img {
+			max-width: 150px;
+			max-height: 100px;
+			object-fit: contain;
+			display: block;
+		}
+		#artm-ready-products-tab-root .artm-ready-name {
+			font-size: 12px;
+			color: #334155;
+			text-align: center;
+			line-height: 1.3;
+			word-break: break-word;
+		}
+		#artm-ready-products-tab-root .artm-ready-status {
+			display: inline-block;
+			padding: 2px 6px;
+			border-radius: 999px;
+			font-size: 11px;
+			font-weight: 700;
+			background: #dcfce7;
+			color: #166534;
+		}
+		#artm-ready-products-tab-root .artm-ready-status.queued {
+			background: #fef9c3;
+			color: #b45309;
+		}
+		#artm-ready-products-tab-root .artm-ready-status.processing {
+			background: #e0e7ff;
+			color: #3730a3;
+		}
+		#artm-ready-products-tab-root .artm-ready-status.success {
+			background: #dcfce7;
+			color: #166534;
+		}
+		#artm-ready-products-tab-root .artm-ready-status.failed {
+			background: #fee2e2;
+			color: #dc2626;
+		}
+		#artm-ready-products-tab-root .artm-ready-links {
+			display: flex;
+			flex-direction: column;
+			gap: 3px;
+			align-items: stretch;
+		}
+		#artm-ready-products-tab-root .artm-ready-btn {
+			font-size: 11px;
+			padding: 5px 10px;
+			border: 1px solid;
+			border-radius: 3px;
+			cursor: pointer;
+			text-decoration: none;
+			display: inline-block;
+			text-align: center;
+			font-weight: 600;
+			margin: 2px 0;
+			width: 100%;
+			box-sizing: border-box;
+		}
+		#artm-ready-products-tab-root .artm-ready-btn.artm-draft-btn {
+			background: #e0e7ff;
+			border-color: #818cf8;
+			color: #1d4ed8;
+		}
+		#artm-ready-products-tab-root .artm-ready-btn.artm-draft-btn:hover {
+			background: #c7d2fe;
+		}
+		#artm-ready-products-tab-root .artm-ready-btn.artm-add-btn {
+			background: #dcfce7;
+			border-color: #86efac;
+			color: #15803d;
+		}
+		#artm-ready-products-tab-root .artm-ready-btn.artm-add-btn:hover {
+			background: #bbf7d0;
+		}
+		#artm-ready-products-tab-root .artm-ready-btn.artm-queue-btn {
+			background: #f3e8ff;
+			border-color: #d8b4fe;
+			color: #9333ea;
+		}
+		#artm-ready-products-tab-root .artm-ready-btn.artm-queue-btn:hover {
+			background: #ede9fe;
+		}
+		#artm-ready-products-tab-root .artm-ready-link.artm-draft-link {
+			color: #1d4ed8;
+			font-weight: 700;
+		}
+		#artm-ready-products-tab-root .artm-ready-link.artm-add-link {
+			color: #15803d;
+			font-weight: 700;
+		}
+		#artm-ready-products-tab-root .artm-ready-link.artm-queue-link {
+			color: #9333ea;
+			font-weight: 700;
+		}
+		div#artm-ready-products-tab-root th.artm-col-product-url,
+		div#artm-ready-products-tab-root td.artm-col-product-url,
+		div#artm-ready-products-tab-root td.artm-col-upload-right{
+			display: none;
+		}
+	</style>
+
+	<div class="message message-notice notice">
+		<div><?= $block->escapeHtml(__('Ready tab contains completed rows. Data is read-only here. Use Draft it to send rows back for editing.')) ?></div>
+	</div>
+
+	<div class="artm-ready-toolbar">
+		<label><input type="checkbox" id="artm-ready-select-all" /> <?= $block->escapeHtml(__('Select All')) ?></label>
+		<button type="button" class="action-secondary" id="artm-ready-mass-draft"><span><?= $block->escapeHtml(__('Mass Draft')) ?></span></button>
+		<button type="button" class="action-secondary" id="artm-ready-mass-add"><span><?= $block->escapeHtml(__('Mass Add Product')) ?></span></button>
+        <!-- Mass Add to Queue button removed -->
+	</div>
+
+	<div id="artm-ready-msg" class="message" style="display:none;"></div>
+	<div id="artm-ready-groups"></div>
+</div>
+
+<script>
+require(['ArtM_MassProducts/js/ready-attribute-set-tab'], function (initReadyAttributeSetTab) {
+	initReadyAttributeSetTab({
+		rootSelector: '#artm-ready-products-tab-root',
+		groupsSelector: '#artm-ready-groups',
+		msgSelector: '#artm-ready-msg',
+		matrixUrl: '<?= $block->escapeJs($matrixUrl) ?>',
+		moveToDraftUrl: '<?= $block->escapeJs($moveToDraftUrl) ?>',
+		moveToQueueUrl: '<?= $block->escapeJs($block->getUrl('massproducts/ready/moveToQueue')) ?>',
+		addProductUrl: '<?= $block->escapeJs($block->getUrl('massproducts/ready/addProduct')) ?>'
+	});
+});
+</script>

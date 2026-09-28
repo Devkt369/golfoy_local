@@ -1,0 +1,26 @@
+<?php /* @var \Magestore\WebposPerformanceAdminUi\Block\Adminhtml\PosRanking\PosList $block */ ?>
+<?php foreach ($block->getPosCollection() as $pos): ?>
+    <?php if (!$block->getRequest()->getParam('pageNumber')): ?>
+        <input type="hidden" value="1" id="currentPage" />
+        <input type="hidden" value="<?= /* @noEscape */ $block->getNumberPage(); ?>"
+                   id="maxPage" />
+    <?php endif; ?>
+    <li class="is-clickable bar-item" id="<?= /* @noEscape */
+    $pos->getPosId() ?>"
+        onclick="selectPos('<?= /* @noEscape */
+        $pos->getPosId() ?>')">
+        <div class="bar-item-info <?= /* @noEscape */
+        $pos->getAveragePeriod() > 2 ? 'slow' : 'normal' ?>">
+            <div class="bar-item-info-label">
+                        <span class="bar-item-info-label__text">
+                            <?= /* @noEscape */
+                            $pos->getPosName(); ?>
+                        </span>
+            </div>
+            <div class="bar-item-info__value">
+                <?= /* @noEscape */
+                $pos->getAveragePeriod(); ?>
+            </div>
+        </div>
+    </li>
+<?php endforeach; ?>

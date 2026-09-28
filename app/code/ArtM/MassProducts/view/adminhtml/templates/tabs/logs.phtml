@@ -1,0 +1,202 @@
+<?php
+/** @var \Magento\Backend\Block\Template $block */
+$listUrl = $block->getUrl('massproducts/logs/listing');
+$downloadUrl = $block->getUrl('massproducts/upload/download');
+?>
+<div id="artm-massproduct-logs-root">
+    <style>
+        #artm-massproduct-logs-root .artm-logs-toolbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+        #artm-massproduct-logs-root .artm-logs-table-wrap { overflow:auto; border:1px solid #e5e7eb; border-radius:6px; }
+        #artm-massproduct-logs-root .artm-logs-table { width:100%; min-width:980px; border-collapse:collapse; }
+        #artm-massproduct-logs-root .artm-logs-table th, #artm-massproduct-logs-root .artm-logs-table td { padding:8px; border-bottom:1px solid #edf2f7; vertical-align:top; font-size:12px; }
+        #artm-massproduct-logs-root .artm-logs-table thead th { background:#f8fafc; font-weight:700; }
+        #artm-massproduct-logs-root .artm-logs-empty { padding:14px; color:#6b7280; }
+        #artm-massproduct-logs-root .artm-log-details { white-space:pre-line; }
+    </style>
+
+    <div class="artm-logs-toolbar">
+        <input type="text" class="admin__control-text" data-role="logs-sku" placeholder="Filter by SKU" />
+        <input type="text" class="admin__control-text" data-role="logs-admin" placeholder="Filter by Admin" />
+        <select class="admin__control-select" data-role="logs-action">
+            <option value="">All Actions</option>
+            <option value="upload_sheet">upload_sheet</option>
+            <option value="sent_to_ready">sent_to_ready</option>
+            <option value="sent_to_draft">sent_to_draft</option>
+            <option value="product_added">product_added</option>
+            <option value="deleted">deleted</option>
+        </select>
+        <label style="display:inline-flex;align-items:center;gap:6px;">
+            <span>Show</span>
+            <select class="admin__control-select" data-role="logs-per-page">
+                <option value="50" selected="selected">50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="500">500</option>
+                <option value="1000">1000</option>
+            </select>
+        </label>
+        <button type="button" class="action-secondary" data-role="logs-refresh"><span>Refresh</span></button>
+        <div class="artm-skcfg-message" data-role="logs-message"></div>
+    </div>
+
+    <div class="artm-logs-table-wrap">
+        <table class="artm-logs-table">
+            <thead>
+                <tr>
+                    <th>Details</th>
+                    <th>Action</th>
+                    <th>SKU</th>
+                    <th>Admin</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody data-role="logs-body">
+                <tr><td colspan="5" class="artm-logs-empty">Loading logs...</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:8px;">
+        <div data-role="logs-pagination-summary" style="font-size:12px;color:#6b7280;"></div>
+        <div style="display:flex;gap:6px;align-items:center;">
+            <button type="button" class="action-secondary" data-role="logs-prev"><span>Prev</span></button>
+            <span data-role="logs-page-indicator" style="font-size:12px;color:#374151;"></span>
+            <button type="button" class="action-secondary" data-role="logs-next"><span>Next</span></button>
+        </div>
+    </div>
+</div>
+
+<script>
+require(['jquery'], function ($) {
+    'use strict';
+
+    var $root = $('#artm-massproduct-logs-root');
+    if (!$root.length || $root.data('artmLogsInit')) { return; }
+    $root.data('artmLogsInit', true);
+
+    var listUrl = '<?= $block->escapeJs($listUrl) ?>';
+    var downloadUrl = '<?= $block->escapeJs($downloadUrl) ?>';
+    var $sku = $root.find('[data-role="logs-sku"]');
+    var $admin = $root.find('[data-role="logs-admin"]');
+    var $action = $root.find('[data-role="logs-action"]');
+    var $perPage = $root.find('[data-role="logs-per-page"]');
+    var $body = $root.find('[data-role="logs-body"]');
+    var $msg = $root.find('[data-role="logs-message"]');
+    var $pageSummary = $root.find('[data-role="logs-pagination-summary"]');
+    var $pageIndicator = $root.find('[data-role="logs-page-indicator"]');
+    var currentPage = 1;
+    var totalPages = 1;
+    var totalRows = 0;
+
+    function esc(v) { return $('<div/>').text(String(v || '')).html(); }
+    function setMessage(text, isError) {
+        $msg.text(String(text || '')).css('color', isError ? '#b91c1c' : '#6b7280');
+    }
+
+    function fmt(dt) {
+        if (!dt) { return ''; }
+        var d = new Date(String(dt).replace(' ', 'T'));
+        if (isNaN(d.getTime())) { return String(dt); }
+        return d.toLocaleString('en-US', {
+            timeZone: 'Asia/Kolkata',
+            month: 'long', day: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+        }).replace(',', ' |');
+    }
+
+    function render(items) {
+        if (!Array.isArray(items) || !items.length) {
+            $body.html('<tr><td colspan="5" class="artm-logs-empty">No logs found.</td></tr>');
+            return;
+        }
+
+        var html = [];
+        $.each(items, function (_, item) {
+            var sheet = '';
+            if (item.upload_id && item.sheet_name) {
+                var href = downloadUrl + '?upload_id=' + encodeURIComponent(item.upload_id);
+                sheet = '<a href="' + esc(href) + '">' + esc(item.sheet_name) + '</a>';
+            } else {
+                sheet = esc(item.sheet_name || '');
+            }
+
+            var cleanDetails = String(item.details || item.comment || '-');
+            cleanDetails = cleanDetails.replace(/\s+at\s+[A-Za-z]+\s+\d{2},\s+\d{4}\s+\|\s+\d{2}:\d{2}:\d{2}(AM|PM)\s*$/i, '');
+
+            var detailsHtml = '';
+            if (sheet) {
+                detailsHtml += '<div>Sheet: ' + sheet + '</div>';
+            }
+            detailsHtml += '<div>' + esc(cleanDetails) + '</div>';
+
+            html.push('<tr>'
+                + '<td class="artm-log-details">' + detailsHtml + '</td>'
+                + '<td>' + esc(item.action_type || '-') + '</td>'
+                + '<td>' + esc(item.sku || '-') + '</td>'
+                + '<td>' + esc(item.admin_username || '-') + '</td>'
+                + '<td>' + esc(fmt(item.occurred_at || item.created_at)) + '</td>'
+                + '</tr>');
+        });
+        $body.html(html.join(''));
+    }
+
+    function renderPaginationMeta() {
+        $pageIndicator.text('Page ' + currentPage + ' of ' + totalPages);
+        var from = totalRows ? ((currentPage - 1) * parseInt($perPage.val(), 10) + 1) : 0;
+        var to = Math.min(currentPage * parseInt($perPage.val(), 10), totalRows);
+        $pageSummary.text('Showing ' + from + '-' + to + ' of ' + totalRows + ' logs');
+        $root.find('[data-role="logs-prev"]').prop('disabled', currentPage <= 1);
+        $root.find('[data-role="logs-next"]').prop('disabled', currentPage >= totalPages);
+    }
+
+    function loadLogs(page) {
+        if (page) {
+            currentPage = Math.max(1, parseInt(page, 10) || 1);
+        }
+        setMessage('Loading...', false);
+        $.ajax({
+            url: listUrl,
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                sku: String($sku.val() || '').trim(),
+                admin: String($admin.val() || '').trim(),
+                action: String($action.val() || '').trim(),
+                page: currentPage,
+                per_page: parseInt($perPage.val(), 10) || 50,
+                form_key: window.FORM_KEY || ''
+            }
+        }).done(function (resp) {
+            if (!resp || !resp.success) {
+                setMessage((resp && resp.message) || 'Unable to load logs.', true);
+                render([]);
+                totalRows = 0;
+                totalPages = 1;
+                renderPaginationMeta();
+                return;
+            }
+            setMessage('Loaded ' + (Array.isArray(resp.items) ? resp.items.length : 0) + ' logs.', false);
+            render(resp.items || []);
+            totalRows = parseInt(resp.total, 10) || 0;
+            totalPages = Math.max(1, parseInt(resp.total_pages, 10) || 1);
+            currentPage = Math.min(Math.max(1, parseInt(resp.page, 10) || currentPage), totalPages);
+            renderPaginationMeta();
+        }).fail(function () {
+            setMessage('Unable to load logs.', true);
+            render([]);
+            totalRows = 0;
+            totalPages = 1;
+            renderPaginationMeta();
+        });
+    }
+
+    $root.on('click', '[data-role="logs-refresh"]', function () { loadLogs(1); });
+    $root.on('click', '[data-role="logs-prev"]', function () { if (currentPage > 1) { loadLogs(currentPage - 1); } });
+    $root.on('click', '[data-role="logs-next"]', function () { if (currentPage < totalPages) { loadLogs(currentPage + 1); } });
+    $sku.on('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); loadLogs(1); } });
+    $admin.on('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); loadLogs(1); } });
+    $action.on('change', function () { loadLogs(1); });
+    $perPage.on('change', function () { loadLogs(1); });
+
+    loadLogs(1);
+});
+</script>

@@ -1,0 +1,666 @@
+<style>
+    .transaction_details_line b {
+        font-weight: 600;
+        font-size: 16px;
+        color: #e60023;
+    }
+    .transaction_details_line {
+        margin-top: 10px;
+    }
+    .box.box-transaction-number strong.box-title span {
+        font-size: 16px;
+    }
+    .form_content-transaction {
+        margin: 10px 0px;
+    }
+    .form_content-transaction input {
+
+    margin: 8px 0px;
+        max-width: 200px;
+    }
+    .return_images > a > img {
+        width: 100px;
+        box-shadow: 0px 0px 3px 0px #b1b1b1;
+        margin-right: 10px;
+        margin-top: 10px;
+    }input.return_submit.primary.tocart {
+        margin-top: 0px;
+    }
+    input.return_submit.primary.tocart {
+        text-transform: capitalize;
+        /* font-weight: 800 !important; */
+    }
+    .return_request_button > label {
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .return_request_button {
+        border: 1px solid #d9d9d9;
+        padding: 10px 20px;
+        display: inline-block;
+        margin-bottom: 10px;
+        border-radius: 5px;
+    }
+    .row.input_area {
+        margin-top: 0px !important;
+    }
+    .row.product_info_return label {
+        font-weight: 500;
+        color: grey;
+        font-size: 13px;
+        width: 100%;
+    }
+    form#cancelcustomform > label {
+        background-color: #f6f6f6;
+        width: 100%;
+        padding: 15px 10px;
+        color: #5e5e5e;
+        font-weight: 600;
+    }
+    .msgcstm {
+        padding: 0px;
+    }
+    input.return_submit.primary.tocart, input#return_consent {
+        margin-left: 15px;
+    }
+    label.return_consent {
+        padding: 0px 14px !important;
+    }
+    label.return_consent > input {
+        margin-left: 0px !important;
+    }
+    .error_return {
+        padding-left: 15px;
+        margin-bottom: 5px;
+    }
+    #cancelcustomform .review-img-cross{right:0; top:0;}
+    .productids {
+        display: none;
+    }
+    .show_all_prds:after {
+        font-family: 'icons-blank-theme';
+        content: '\e617';
+        font-size: 47px;
+        line-height: 0px;
+        margin-top: -5px !important;
+        position: absolute;
+    }
+    
+    .show_all_prds {
+        display: inline-block;
+        width: 42px;
+        cursor: pointer;
+    }
+    .product_info_return > div > label {
+        display: inline-block;
+        width: 100%;
+    }
+    .product_cta button, .product_cta a {
+        border-radius: 5px !important;
+        font-weight: 600;
+        box-sizing: border-box;
+        vertical-align: middle;
+        outline: 0 !important;
+        border: 0 !important;
+        display: block;
+        width: 100%;
+        height: auto;
+        margin: 10px 0px;
+        max-width: 200px;
+        margin: auto;
+        margin-bottom: 10px;
+        text-transform: capitalize;
+    }
+    .product_cta button.requested, .product_cta button.disable {
+        cursor: not-allowed;
+    }
+    .product_info.info_sec {
+        margin-left: 10px;
+        border-left: 1px solid #ededed;
+        padding-left: 10px;
+        width: calc(100% - 135px);
+        float: left;
+    }
+    .product_cta button.primary {
+        background: #e60023;
+        color: white;
+    }
+    .product_cta button.disable {
+        background: none;
+        color: #979797;
+        font-weight: 500;
+        font-size: 11px;
+        max-width: 200px;
+        height: auto;
+        color: black;
+    }
+    .product_cta button.requested {
+        background: none;
+        border: 1px solid #b5b5b5 !important;
+        font-weight: 400;
+        height: auto;
+        font-size: 12px;
+    }
+    .product_image.info_sec img{
+        max-width: 100%;
+        width: 90px;
+        height: 90px;
+    }
+    .product_image.info_sec {
+        max-width: 120px;
+        display: inline-block !important;
+        float: left;
+        text-align: center;
+        margin-right: 20px;
+        border: 1px solid #f3f3f3;
+        padding: 5px;
+        border-radius: 5px;
+    }
+    .product_info_price {
+        color: #e60023;
+        font-size: 14px;
+        font-weight: 700;
+        margin-top: 8px;
+    }
+    .product_info_prd_action_buttons > div {
+        display: inline-block;
+        border: 1px solid #c7c7c7;
+        border-radius: 5px;
+        padding: 4px 9px;
+        font-size: 11px;
+        height: auto;
+        line-height: 16px;
+        margin-right: 5px;
+        cursor: pointer;
+        margin-bottom: 5px;
+    }
+    .product_info_prd_action_buttons > a {
+        display: inline-block;
+        border: 1px solid #c7c7c7;
+        border-radius: 5px;
+        padding: 4px 9px;
+        font-size: 11px;
+        height: auto;
+        line-height: 16px;
+        margin-right: 5px;
+        cursor: pointer;
+        color: black;
+        text-decoration: none;
+        background-color: #F6F6F6;
+    }
+    .product_info_prd_action_buttons {
+        margin-top: 15px;
+    }
+    .product_cta a {
+        border: 0px solid black;
+        background-color: #ebebeb;
+        color: black;
+        text-decoration: none;
+        padding: 8px;
+        display: inline-block;
+        border-radius: 5px;
+        width: 100%;
+        text-align: center;
+        max-width: 202px;
+        margin: auto !important;
+    }
+    .product_info_brand {
+        font-weight: 600;
+        color: black;
+    }
+    .product_cta {
+        text-align: center;
+    }
+    .product_cta > button.primary:hover, .product_cta > button.secondary:hover, .product_cta > a:hover {
+        opacity: .7;
+    }
+    .product_cta button.primary {
+        background: #646464;
+        color: white;
+    }
+    .single_product_block.row > .product_cta {
+        width: 30%;
+        float: left;
+    }
+    .single_product_block.row > .product_info_all {
+        width: 70%;
+        float: left;
+    }
+    .request_type {
+        display: inline-block;
+        /* border: 1px solid black; */
+        padding: 1px 7px;
+        margin-left: 10px;
+        text-transform: capitalize;
+        border-radius: 5px;
+        font-size: 11px;
+        font-weight: 600;
+        background-color: #f14900;
+        color: white;
+        font-style: italic;
+    }
+    .updated_at_rr{
+        display: inline-block;
+        float: right;
+        font-size: 11px;
+        color: #878787;
+    }
+    .product_info_prd_actions {
+        margin-top: 10px;
+    }
+
+    .product_info_prd_actions h6 {
+        display: inline-block;
+        font-weight: 600;
+        font-size: 11px;
+        color: black;
+        margin: 0px;
+    }
+    .product_info_prd_actions {
+        /* text-transform: capitalize; */
+        font-size: 11px;
+    }
+    input.replace_button.return_replace_button.primary {
+        border-radius: 5px !important;
+        font-weight: 600;
+        box-sizing: border-box;
+        vertical-align: middle;
+        outline: 0 !important;
+        border: 0 !important;
+        display: block;
+        width: 100%;
+        height: auto;
+        margin: 10px 0px;
+        max-width: 200px;
+        margin: auto;
+        margin-bottom: 10px;
+        text-transform: capitalize;
+        padding: 7px;
+        background: #646464;
+        color: white;
+    }
+    .product_image.info_sec img {
+        max-width: 100%;
+        height: auto;
+        margin-top: 10px;
+    }
+    .product_info_prd_images img {
+        max-width: 59px;
+        margin: 0px 2px 2px;
+    }
+    .product_info_prd_images {
+        margin-top: 10px;
+    }
+    .return_content_multiple_prds h6, .return_content_multiple_prds h4 {
+        font-size: 15px;
+        display: inline-block;
+        margin: 0px;
+    }
+    .return_content_multiple_prds img {
+        max-width: 100px;
+    }
+    .product_info_prd_images img {
+        cursor: pointer;
+        box-shadow: 0px 0px 1px 1px #b5b5b5;
+    }
+    .product_info_prd_images a {
+        display: inline-block;
+        width: auto;
+        padding: 2px;
+        background-color: transparent;
+    }
+</style>
+<?php
+
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $storeManager = $objectManager->get('Magento\Store\Model\StoreManagerInterface');
+    $store = $storeManager->getStore();
+    $mediaUrl = $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+    $order_id = $this->getRequest()->getParam('order_id');
+    $connection = $objectManager->get('\Magento\Framework\App\ResourceConnection')->getConnection();
+
+
+    $AllReturnedRequests = $this->getAllReturnedRequests($order_id);
+    if( $AllReturnedRequests != false ){
+?>
+
+<section class="admin__page-section transaction-number">
+        <div class="admin__page-section-title">
+            <span class="title">Return and Replace Request Details</span>
+        </div>
+        <div class="admin__page-section-content">
+            <div class="box box-transaction-number">
+                <div class="box-content">
+                    <div class="form_content-transaction">
+                        <div class="box box-transaction-number">
+                            <strong class="box-title">
+<!--                                Return and Exchange Requests-->
+                            </strong>
+                            <div class="return_images">
+                                <?php 
+        
+                                        foreach( $AllReturnedRequests as $AllReturnedRequests_single ){
+                                            $prd_id = $AllReturnedRequests_single['product_ids'] ?? '';
+                                            $request_type = $AllReturnedRequests_single['return_cancel_status']  ?? '';
+                                            $return_reason  = $AllReturnedRequests_single['return_reason']  ?? '';
+                                            $refund_type  = $AllReturnedRequests_single['refund_type']  ?? '';
+                                            $current_status = $AllReturnedRequests_single['current_status']  ?? '';
+                                            $updated_at = $AllReturnedRequests_single['updated_at']  ?? '';
+                                            $refund_account_id = $AllReturnedRequests_single['refund_account_id']  ?? '';
+                                            
+                                            if($prd_id == ''){
+                                                $prd_id_arr = array();
+                                                // echo "There are no products to return or exchange in this order";
+                                            }else{
+                                                $prd_id_arr = explode(',' , $prd_id);
+                                            }
+                                            if( count($prd_id_arr) == 1 ){
+                                                foreach($prd_id_arr as $prd_id_single){
+                                ?>
+                                <div class="row product_info_return">
+                                    <div class="col-xs-12">
+
+                                <?php 
+                                    $rproduct= $objectManager->get('Magento\Catalog\Model\Product')->load($prd_id_single);
+                                ?>
+                                            <input type="checkbox" value="<?= $rproduct->getProductId() ?>" name="productids" class="productids"> 
+                                            <label for="input_<?php //echo $i; ?>_prd">
+                                                <?php
+                                                    $prd_name = $rproduct->getName();
+
+                                                    $price = $rproduct->getData('price');
+                                            
+                                                    $helperImport = $objectManager->get('\Magento\Catalog\Helper\Image');
+                                                    $imageUrl = $helperImport->init($rproduct, 'product_page_image_small')
+                                                                    ->setImageFile($rproduct->getSmallImage()) // image,small_image,thumbnail
+                                                                    ->resize(380)
+                                                                    ->getUrl();
+                                                ?>
+                                                <div class="col-xs-12">
+                                                    <!-- checkingh if returnable or not -->
+                                                    <label for="input__prd">
+                                                        <div class="single_product_block row">
+                                                            <div class="product_info_all col-sm-8 col-xs-12">
+                                                                <div class="product_image info_sec">
+                                                                    <img src="<?php echo $imageUrl; ?>" />
+                                                                </div>
+                                                                <div class="product_info info_sec">
+                                                                    <div class="product_info_brand">
+                                                                        <?php 
+                                                                            echo $brand_name = $rproduct->getResource()->getAttribute('brand')->getFrontend()->getValue($rproduct); 
+                                                                            echo "<div class='request_type'>".$request_type."</div>";
+                                                                        ?>
+                                                                            <div class="updated_at_rr">
+                                                                                <?php 
+                                                                                    echo $newDate = date("F d, Y  g:i:s", strtotime($updated_at));
+                                                                                ?>
+                                                                            </div>
+                                                                    </div>
+                                                                    <div class="product_info_name">
+                                                                        <?php echo str_replace($brand_name , '' , $prd_name); ?>
+                                                                    </div>
+                                                                    <div class="product_info_prd_actions">
+                                                                        <div>
+                                                                            <h6>Reason for <?php echo $request_type; ?>:</h6> <?php echo $return_reason; ?>
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6>Refund Type:</h6> <?php echo $refund_type; ?>
+                                                                            <?php 
+                                                                            
+                                                                            if ($refund_type == "refund_bank"){
+                                                                               
+                                                                                foreach ($AllReturnedRequests as $row) {
+                                                                                    if ($row['refund_type'] == 'refund_bank') {
+                                                                                         $refund_account_id = $row['refund_account_id'];
+                                                                                        break;
+                                                                                    }
+                                                                                }                                                                                
+                                                                                       
+                                                                                        $Account_details = $this->getAccountDetails($refund_account_id);
+                                                                                        echo "<br>Bank Account Number : ".$Account_details['0'];
+                                                                                        echo "<br>IFSC code : ".$Account_details['1'];
+                                                                                        echo "<br>Bank Name : ".$Account_details['2'];   
+                                                                            }elseif($refund_type == "refund_upi"){
+                                                                                foreach ($AllReturnedRequests as $row) {
+                                                                                    if ($row['refund_type'] == 'refund_upi') {
+                                                                                         $refund_account_id = $row['refund_account_id'];
+                                                                                        break;
+                                                                                    }
+                                                                                }                                                                                
+                                                                                       
+                                                                                $Account_details = $this->getAccountDetails($refund_account_id);
+                                                                                echo "<br><h6>UPI ID:</h6> ".$Account_details['0'];
+                                                                            }
+                                                                            
+                                                                            ?>
+
+
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="product_info_prd_images">
+                                                                        <?php
+                                                
+                                                                            $img_data = $this->getimages($order_id, $rproduct->getId() );
+//                                                                            print_r($img_data);
+                                                                            foreach($img_data as $key => $img_data_single){
+                                                                                $img_arr = explode(',', $img_data_single);
+                                                                                foreach($img_arr as $images){
+                                                                                    $explode_for_folder_name = explode('_' , $images);
+                                                                                    $folder_name = $explode_for_folder_name[0];
+
+                                                                                    $img_path = $mediaUrl."return_image/".$folder_name."/".$images;
+                                                                                    echo "<a href='".$img_path."' target='_blank' ><img src='".$img_path."'/></a>";
+                                                                                }
+                                                                            }
+                                                                        ?>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <?php
+                                                                if( $current_status != ''){
+                                                            ?>
+                                                            <div class="product_cta col-sm-4 col-xs-12">
+                                                                <button class="requested" prd_checkbox="input_1_prd" value="return">
+                                                                    <?php echo $current_status; ?>
+                                                                </button>
+                                                                <?php
+                                                                    
+                                                                    if( count($prd_id_arr) == 1 ){
+                                                                        $current_status = strtolower($current_status);
+                                                                        if (str_contains($current_status, 'approve')) { 
+//                                                                            echo "found";
+                                                                        }else{
+                                                                ?>    
+                                                                            <form name="crr_form" class="crr_form" action="<?= $this->getCrrRequestSaveAdminUrl(); ?>" method="post" enctype="multipart/form-data">
+                                                                                <?php echo $block->getBlockHtml('formkey') ?>
+                                                                                <input type="hidden" name="updated_request_type" value="<?php echo $request_type; ?> Approved" />
+                                                                                <input type="hidden" name="order_id" value="<?php echo $order_id; ?>" />
+                                                                                <input type="hidden" name="incremented_id" value="<?php echo $AllReturnedRequests['1']['incremented_id'] ?? ''; ?>" />
+                                                                                <input type="hidden" name="customer_name" value="<?php echo $AllReturnedRequests['1']['customer_name'] ?? ''; ?>" />
+                                                                                <input type="hidden" name="customer_phone" value="<?php echo $AllReturnedRequests['1']['customer_phone'] ?? ''; ?>" />
+                                                                                <input type="hidden" name="prd_id" value="<?php echo $prd_id_single; ?>" />
+                                                                                <input type="submit" value="Approve <?php echo $request_type; ?>" class="replace_button return_replace_button primary" />
+                                                                            </form>
+                                                                <?php
+                                                                            
+                                                                        }
+                                                                    }
+                                                                ?>
+                                                            </div>
+                                                            <?php
+                                                                }
+                                                            ?>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            </label>
+                                            <img src="<?= $rproduct->getProductThumbnail()?>">  
+                                    </div>
+                                </div>
+                                <?php
+                                                }
+                                            }else if($prd_id != ''){
+                                                $order_id = $this->getRequest()->getParam('order_id');
+                                                $img_data = $this->getimages($order_id, $prd_id='');
+                                    ?>
+                                                        <section class="admin__page-section transaction-number">
+                                                            <div class="admin__page-section-content">
+                                                                <div class="box box-transaction-number">
+                                                                    
+
+                                                                    <div class="box-content">
+                                                                        <div class="form_content-transaction">
+                                                                            <div class="box box-transaction-number">
+                                                                                <div class="return_content_multiple_prds">
+                                                                                    <?php
+                                                                                        echo "<div><h6>Request Type:</h6> ".$request_type."</div>";
+                                                                                        echo "<div><h6>Return Reason:</h6> ".$return_reason."</div>";
+                                                                                        echo "<div><h6>Refund Type:</h6> ".$refund_type."</div>";
+                                                                                        if ( $refund_type == 'refund_bank') {
+                                                                                            $Account_details = $this->getAccountDetails($refund_account_id);    
+                                                                                            echo "<div><h4>-----Bank Details-----</h4>"."</div>";
+                                                                                            echo "<div><h6>Bank Account Number : </h6>".$Account_details['0']."</div>";
+                                                                                            echo "<div><h6>IFSC code : </h6>".$Account_details['1']."</div>";
+                                                                                            echo "<div><h6>Bank Name : </h6>".$Account_details['2']."</div>"; 
+                                                                                        }
+
+                                                                        
+                                                                        
+                                                                        echo "<br>";
+
+                                                if($img_data != ''){
+                                                    if( count($img_data) != '' ){
+                                                                    foreach($img_data as $key => $img_data_single){
+                                                                        $prd_id = $key;
+                                                                        $img = $img_data_single;
+
+                                                                        $product = $objectManager->create('Magento\Catalog\Model\Product')->load($prd_id);  
+                                                                        $prd_name = $product->getName();
+
+                                                                        $order = $objectManager->get('\Magento\Sales\Api\OrderRepositoryInterface')->get($order_id);
+                                                                        $customerId = $order->getCustomerId();
+                                                                        $img_arr = explode(',', $img);
+                                                                                        foreach($img_arr as $images){
+                                                                                            $explode_for_folder_name = explode('_' , $images);
+                                                                                            $folder_name = $explode_for_folder_name[0];
+
+                                                                                            $img_path = $mediaUrl."return_image/".$folder_name."/".$images;
+                                                                                            echo "<a href='".$img_path."' target='_blank' ><img src='".$img_path."'/></a>";
+                                                                                        }
+                                                    }
+                                                }
+                                                                                    ?>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <?php
+                                                                    }
+                                                                    ?>
+                                                                </div>
+                                                            </div>
+                                                        </section>                 
+                                                    <?php
+                                                            }
+                                        }
+                                ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+<?php
+    }
+?>
+
+<?php
+/*
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $storeManager = $objectManager->get('Magento\Store\Model\StoreManagerInterface');
+    $store = $storeManager->getStore();
+    $mediaUrl = $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+    
+    $return = $objectManager->get('Magento\Store\Model\StoreManagerInterface');
+
+    $order_id = $this->getRequest()->getParam('order_id');
+
+//    $img = $this->getimages($order_id);
+    $img_data = $this->getimages($order_id);
+//    print_r($img_data);
+
+    if($img_data != ''){
+     
+    if( count($img_data) != '' ){
+
+
+
+?>
+
+    <section class="admin__page-section transaction-number">
+        <div class="admin__page-section-title">
+            <span class="title">Return and Replace Request Details</span>
+        </div>
+        <div class="admin__page-section-content">
+            <div class="box box-transaction-number">
+                <?php
+                foreach($img_data as $key => $img_data_single){
+                    $prd_id = $key;
+                    $img = $img_data_single;
+                    
+                    $product = $objectManager->create('Magento\Catalog\Model\Product')->load($prd_id);  
+                    $prd_name = $product->getName();
+                    
+                    $order = $objectManager->get('\Magento\Sales\Api\OrderRepositoryInterface')->get($order_id);
+                    $customerId = $order->getCustomerId();
+                    $img_arr = explode(',', $img);
+                    
+                    
+                ?>
+                
+                <div class="box-content">
+                    <div class="form_content-transaction">
+                        <div class="box box-transaction-number">
+                            <strong class="box-title"><span><?php echo "Images for ".$prd_name; ?></span></strong>
+                    <?php
+                    
+                        echo "prd_id".$prd_id;
+                        echo "order_id".$order_id;
+                    
+                    
+                    ?>
+                            
+                            
+                            <div class="return_images">
+                                <?php
+                    
+//                  
+                                    foreach($img_arr as $images){
+                                        $explode_for_folder_name = explode('_' , $images);
+                                        $folder_name = $explode_for_folder_name[0];
+
+                                        $img_path = $mediaUrl."return_image/".$folder_name."/".$images;
+                                        echo "<a href='".$img_path."' target='_blank' ><img src='".$img_path."'/></a>";
+                                    }
+                                ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php
+                }
+                ?>
+            </div>
+        </div>
+    </section>                 
+<?php
+        }
+    }
+    */
+?>
+
+
+
+

@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+
+    <table name="artm_recommendedsort_queue" resource="default" engine="innodb" comment="Artm Recommended Sort Queue Table">
+        <column xsi:type="int" name="id" padding="10" unsigned="false" nullable="false" identity="true" comment="ID"/>
+        <column name="product_id" xsi:type="int" nullable="false" comment="Product Id"/>
+        <column name="updated_at" xsi:type="timestamp" nullable="true" comment="Updated At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+
+     <table name="artm_recommendedsort_job" resource="default" engine="innodb" comment="Artm Recommended Sort Job Table">
+        <column xsi:type="int" name="id" padding="10" unsigned="false" nullable="false" identity="true" comment="ID"/>
+        <column name="filters" xsi:type="varchar" length="200" nullable="false" comment="Filters"/>
+        <column name="categories" xsi:type="varchar" length="200" nullable="false" comment="Categories"/>
+        <column name="started_at" xsi:type="datetime" nullable="false" comment="Started At"/>
+        <column name="completed_at" xsi:type="datetime" nullable="true" comment="Completed At"/>
+        <column name="status" xsi:type="varchar" length="50" nullable="false" comment="Status"/>
+        <column name="error_message" xsi:type="text" nullable="true" comment="Error Message"/>
+        <column name="output_log" xsi:type="text" nullable="true" comment="Output Log"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+
+    <table name="artm_sorting_jobs" resource="default" engine="innodb" comment="Artm Recommended Sorting Jobs Table">
+        <column xsi:type="int" name="id" padding="10" unsigned="false" nullable="false" identity="true" comment="ID"/>
+        <column name="filters" xsi:type="varchar" length="200" nullable="false" comment="Filters"/>
+        <column name="categories" xsi:type="varchar" length="200" nullable="false" comment="Categories"/>
+        <column name="started_at" xsi:type="datetime" nullable="true" comment="Started At"/>
+        <column name="completed_at" xsi:type="datetime" nullable="true" comment="Completed At"/>
+        <column name="status" xsi:type="varchar" length="50" nullable="false" comment="Status"/>
+        <column name="error_message" xsi:type="text" nullable="true" comment="Error Message"/>
+        <column name="output_log" xsi:type="text" nullable="true" comment="Output Log"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+
+    <table name="artm_sorting_category_products" resource="default" engine="innodb" comment="Artm Sorting Category Products Table">
+        <column xsi:type="int" name="id" padding="10" unsigned="false" nullable="false" identity="true" comment="ID"/>
+        <column name="category_id" xsi:type="int" nullable="false" comment="Category Id"/>
+        <column name="product_id" xsi:type="int" nullable="false" comment="Product Id"/>
+        <column name="points" xsi:type="int" nullable="false" comment="Points"/>
+        <column name="type_of_update" xsi:type="varchar" length="100" nullable="false" comment="Type of Update"/>
+        <column name="time" xsi:type="timestamp" nullable="true" comment="Time"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+
+</schema>

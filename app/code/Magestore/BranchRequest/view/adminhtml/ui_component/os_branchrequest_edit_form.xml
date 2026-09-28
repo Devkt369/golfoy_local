@@ -1,0 +1,1675 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2018 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">os_branchrequest_edit_form.os_branchrequest_edit_form_data_source
+            </item>
+            <item name="component" xsi:type="string">Magestore_BranchRequest/js/inventory-transfer/send</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Branch Request</item>
+        <item name="reverseMetadataMerge" xsi:type="boolean">true</item>
+    </argument>
+    <settings>
+        <buttons>
+            <button name="send" class="Magestore\BranchRequest\Block\Adminhtml\InventoryTransfer\Edit\Button\Send"/>
+            <button name="sendEmail"
+                    class="Magestore\BranchRequest\Block\Adminhtml\InventoryTransfer\Edit\Button\SendEmail"/>
+            <button name="approve"
+                    class="Magestore\BranchRequest\Block\Adminhtml\InventoryTransfer\Edit\Button\Approve"/>
+            <button name="update" class="Magestore\BranchRequest\Block\Adminhtml\InventoryTransfer\Edit\Button\Update"/>
+            <button name="cancel" class="Magestore\BranchRequest\Block\Adminhtml\InventoryTransfer\Edit\Button\Cancel"/>
+            <button name="back" class="Magestore\BranchRequest\Block\Adminhtml\InventoryTransfer\Edit\Button\Back"/>
+            <button name="delivery"
+                    class="Magestore\BranchRequest\Block\Adminhtml\InventoryTransfer\Edit\Button\Delivery"/>
+            <button name="receive"
+                    class="Magestore\BranchRequest\Block\Adminhtml\InventoryTransfer\Edit\Button\Receive"/>
+            <button name="mark-as-close"
+                                class="Magestore\BranchRequest\Block\Adminhtml\InventoryTransfer\Edit\Button\MarkAsClose"/>
+        </buttons>
+        <layout>
+            <navContainerName>left</navContainerName>
+            <type>tabs</type>
+        </layout>
+        <dataScope>data</dataScope>
+        <namespace>os_branchrequest_edit_form</namespace>
+        <deps>
+            <dep>os_branchrequest_edit_form.os_branchrequest_edit_form_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="os_branchrequest_edit_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magestore_BranchRequest/js/form/provider</item>
+            </item>
+        </argument>
+        <settings>
+            <submitUrl path="branchrequest/inventoryTransfer/update"/>
+        </settings>
+        <dataProvider class="Magestore\BranchRequest\Ui\DataProvider\InventoryTransfer\Edit\Form\InventoryTransfer"
+                      name="os_branchrequest_edit_form_data_source">
+            <settings>
+                <requestFieldName>id</requestFieldName>
+                <primaryFieldName>inventorytransfer_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <fieldset name="transfer_summary">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="label" xsi:type="string" translate="true">Branch Request Summary</item>
+                <item name="collapsible" xsi:type="boolean">false</item>
+            </item>
+        </argument>
+        <fieldset name="product_list">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Product List</item>
+                    <item name="collapsible" xsi:type="boolean">true</item>
+                    <item name="opened" xsi:type="boolean">true</item>
+                </item>
+            </argument>
+            <container name="modal_button" component="Magestore_BranchRequest/js/form/components/modal-button"
+                       class="Magestore\BranchRequest\Ui\Component\Container\ActionsContainer">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="formElement" xsi:type="string">container</item>
+                        <item name="componentType" xsi:type="string">container</item>
+                        <item name="template" xsi:type="string">Magestore_BranchRequest/form/components/button-list
+                        </item>
+                        <item name="label" xsi:type="boolean">false</item>
+                        <item name="content" xsi:type="string">Please add or import products to branch request stock
+                        </item>
+                    </item>
+                </argument>
+                <button name="scan_button" class="Magestore\BranchRequest\Ui\Component\Container\BarcodeContainer">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="formElement" xsi:type="string">container</item>
+                            <item name="componentType" xsi:type="string">container</item>
+                            <item name="component" xsi:type="string">
+                                Magestore_BranchRequest/js/element/scan-barcode-button
+                            </item>
+                            <item name="title" xsi:type="string">Scan Barcode</item>
+                        </item>
+                    </argument>
+                </button>
+                <button name="add_products_button">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="title" xsi:type="string" translate="true">Add Products</item>
+                            <item name="component" xsi:type="string">
+                                Magestore_BranchRequest/js/element/add-products-button
+                            </item>
+                            <item name="actions" xsi:type="array">
+                                <item name="0" xsi:type="array">
+                                    <item name="targetName" xsi:type="string">${ $.parentName}.product_stock_modal
+                                    </item>
+                                    <item name="actionName" xsi:type="string">openModal</item>
+                                </item>
+                            </item>
+                        </item>
+                    </argument>
+                </button>
+                <button name="import_button">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="formElement" xsi:type="string">container</item>
+                            <item name="componentType" xsi:type="string">container</item>
+                            <item name="component" xsi:type="string">Magestore_BranchRequest/js/element/import-button
+                            </item>
+                            <item name="title" xsi:type="string">Upload CSV file</item>
+                        </item>
+                    </argument>
+                </button>
+                <button name="edit_product_button">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="title" xsi:type="string" translate="true">Edit Product</item>
+                            <item name="component" xsi:type="string">
+                                Magestore_BranchRequest/js/element/edit-products-button
+                            </item>
+                            <item name="actions" xsi:type="array">
+                                <item name="0" xsi:type="array">
+                                    <item name="targetName" xsi:type="string">os_branchrequest_edit_form.areas</item>
+                                    <item name="actionName" xsi:type="string">save</item>
+                                    <item name="params" xsi:type="array">
+                                        <item name="0" xsi:type="boolean">true</item>
+                                        <item name="1" xsi:type="array">
+                                            <item name="action" xsi:type="string">edit_product</item>
+                                        </item>
+                                    </item>
+                                </item>
+                            </item>
+                        </item>
+                    </argument>
+                </button>
+                <button name="download_summary_button">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="title" xsi:type="string" translate="true">Download Summary</item>
+                            <item name="component" xsi:type="string">
+                                Magestore_BranchRequest/js/element/edit-products-button
+                            </item>
+                            <item name="actions" xsi:type="array">
+                                <item name="0" xsi:type="array">
+                                    <item name="targetName" xsi:type="string">os_branchrequest_edit_form.areas</item>
+                                    <item name="actionName" xsi:type="string">save</item>
+                                    <item name="params" xsi:type="array">
+                                        <item name="0" xsi:type="boolean">true</item>
+                                        <item name="1" xsi:type="array">
+                                            <item name="action" xsi:type="string">download_summary</item>
+                                        </item>
+                                    </item>
+                                </item>
+                            </item>
+                        </item>
+                    </argument>
+                </button>
+                <modal name="product_stock_modal">
+                    <settings>
+                        <options>
+                            <option name="title" xsi:type="string" translate="true">Add Products</option>
+                            <option name="buttons" xsi:type="array">
+                                <item name="0" xsi:type="array">
+                                    <item name="text" xsi:type="string">Cancel</item>
+                                    <item name="actions" xsi:type="array">
+                                        <item name="0" xsi:type="array">
+                                            <item name="targetName" xsi:type="string">${ $.name }</item>
+                                            <item name="actionName" xsi:type="string">actionCancel</item>
+                                        </item>
+                                    </item>
+                                </item>
+                                <item name="1" xsi:type="array">
+                                    <item name="text" xsi:type="string" translate="true">Add Selected Products</item>
+                                    <item name="class" xsi:type="string">action-primary</item>
+                                    <item name="actions" xsi:type="array">
+                                        <item name="0" xsi:type="array">
+                                            <item name="targetName" xsi:type="string">index =
+                                                os_branchrequest_warehouse_product_stock_listing
+                                            </item>
+                                            <item name="actionName" xsi:type="string">save</item>
+                                        </item>
+                                        <item name="1" xsi:type="array">
+                                            <item name="targetName" xsi:type="string">${ $.name }</item>
+                                            <item name="actionName" xsi:type="string">actionDone</item>
+                                        </item>
+                                    </item>
+                                </item>
+                            </option>
+                        </options>
+                    </settings>
+                    <insertListing name="os_branchrequest_warehouse_product_stock_listing"
+                                   provider="os_branchrequest_edit_form.os_branchrequest_edit_form_data_source"
+                                   component="Magestore_BranchRequest/js/send/insert-listing">
+                        <argument name="data" xsi:type="array">
+                            <item name="config" xsi:type="array">
+                                <item name="cssclass" xsi:type="string">noclass</item>
+                            </item>
+                        </argument>
+                        <settings>
+                            <autoRender>true</autoRender>
+                            <realTimeLink>true</realTimeLink>
+                            <dataLinks>
+                                <imports>false</imports>
+                                <exports>true</exports>
+                            </dataLinks>
+                            <behaviourType>simple</behaviourType>
+                            <dataScope>os_branchrequest_warehouse_product_stock_listing</dataScope>
+                            <ns>os_branchrequest_warehouse_product_stock_listing</ns>
+                            <externalProvider>
+                                os_branchrequest_warehouse_product_stock_listing.os_branchrequest_warehouse_product_stock_listing_data_source
+                            </externalProvider>
+                            <selectionsProvider>
+                                os_branchrequest_warehouse_product_stock_listing.os_branchrequest_warehouse_product_stock_listing.product_columns.ids
+                            </selectionsProvider>
+                            <imports>
+                                <link active="true" name="inventorytransfer_id">
+                                    ${ $.provider }:data.transfer_summary.general_information.inventorytransfer_id
+                                </link>
+                                <link active="true" name="source_warehouse_code">
+                                    ${ $.provider }:data.transfer_summary.general_information.source_warehouse_code
+                                </link>
+                            </imports>
+                            <exports>
+                                <link active="true" name="inventorytransfer_id">
+                                    ${ $.externalProvider }:params.inventorytransfer_id
+                                </link>
+                                <link active="true" name="source_warehouse_code">
+                                    ${ $.externalProvider }:params.source_warehouse_code
+                                </link>
+                            </exports>
+                            <externalFilterMode>true</externalFilterMode>
+                        </settings>
+                    </insertListing>
+                </modal>
+            </container>
+            <container name="product_barcode_scan_input"
+                       class="Magestore\BranchRequest\Ui\Component\Container\BarcodeContainer">
+                <field name="barcode_scan_input">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="formElement" xsi:type="string">container</item>
+                            <item name="componentType" xsi:type="string">field</item>
+                            <item name="component" xsi:type="string">
+                                Magestore_BranchRequest/js/form/element/scan-barcode
+                            </item>
+                            <item name="label" xsi:type="string" translate="true">Scan barcode</item>
+                            <item name="placeholder" xsi:type="string" translate="true">Scan/enter barcode</item>
+                            <item name="sortOrder" xsi:type="string">15</item>
+                            <item name="getBarcodeUrl" xsi:type="url"
+                                  path="branchrequest/inventoryTransfer/getProductJsonByBarcode"/>
+                            <item name="sourceElement" xsi:type="string">index =
+                                os_branchrequest_warehouse_product_stock_listing
+                            </item>
+                            <item name="destinationElement" xsi:type="string">
+                                os_branchrequest_edit_form.areas.transfer_summary.transfer_summary.product_list.product_dynamic_grid.product_list
+                            </item>
+                            <item name="selectionsProvider" xsi:type="string">
+                                os_branchrequest_warehouse_product_stock_listing.os_branchrequest_warehouse_product_stock_listing.product_columns.ids
+                            </item>
+                            <item name="qtyElement" xsi:type="string">
+                                os_branchrequest_edit_form.areas.transfer_summary.transfer_summary.product_list.product_dynamic_grid.product_list.%s.qty_requested
+                            </item>
+                            <item name="inputElementName" xsi:type="string">qty_requested</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <imports>
+                            <link name="sourceWarehouseCode">
+                                ${ $.provider }:data.transfer_summary.general_information.source_warehouse_code
+                            </link>
+                        </imports>
+                    </settings>
+                </field>
+            </container>
+            <container name="product_dynamic_grid">
+                <dynamicRows name="product_list" component="Magestore_BranchRequest/js/dynamic-rows/dynamic-rows-grid"
+                             template="ui/dynamic-rows/templates/grid">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="additionalClasses" xsi:type="string">admin__field-wide</item>
+                            <item name="renderDefaultRecord" xsi:type="boolean">false</item>
+                            <item name="itemTemplate" xsi:type="string">record</item>
+                            <item name="deleteButtonLabel" xsi:type="string" translate="true">Remove</item>
+                            <item name="dataProvider" xsi:type="string">
+                                data.transfer_summary.product_list.modal_button.product_stock_modal.os_branchrequest_warehouse_product_stock_listing
+                            </item>
+                            <item name="map" xsi:type="array">
+                                <item name="id" xsi:type="string">entity_id</item>
+                                <item name="image" xsi:type="string">thumbnail_src</item>
+                                <item name="sku" xsi:type="string">sku</item>
+                                <item name="name" xsi:type="string">name</item>
+                                <!--<item name="type" xsi:type="string">type</item>-->
+                                <item name="barcode" xsi:type="string">barcode_original_data</item>
+                                <item name="qty" xsi:type="string">quantity</item>
+                                <item name="qty_requested" xsi:type="string">qty_requested</item>
+                                <item name="qty_delivered" xsi:type="string">qty_delivered</item>
+                                <item name="qty_received" xsi:type="string">qty_received</item>
+                            </item>
+                            <item name="sortOrder" xsi:type="string">20</item>
+                            <item name="columnsHeader" xsi:type="boolean">false</item>
+                            <item name="columnsHeaderAfterRender" xsi:type="boolean">true</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <componentType>dynamicRows</componentType>
+                        <addButton>false</addButton>
+                        <dataScope>links</dataScope>
+                        <links>
+                            <link name="insertData">${ $.provider }:${ $.dataProvider }</link>
+                        </links>
+                    </settings>
+                    <container name="record" component="Magento_Ui/js/dynamic-rows/record">
+                        <argument name="data" xsi:type="array">
+                            <item name="config" xsi:type="array">
+                                <item name="isTemplate" xsi:type="boolean">true</item>
+                                <item name="is_collection" xsi:type="boolean">true</item>
+                                <item name="componentType" xsi:type="string">container</item>
+                                <item name="positionProvider" xsi:type="string">position</item>
+                                <item name="dataScope" xsi:type="string"/>
+                            </item>
+                        </argument>
+                        <field name="id" formElement="input">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="formElement" xsi:type="string">input</item>
+                                    <item name="sortOrder" xsi:type="number">0</item>
+                                    <item name="fit" xsi:type="boolean">true</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <componentType>field</componentType>
+                                <dataScope>id</dataScope>
+                                <dataType>text</dataType>
+                                <label translate="true">ID</label>
+                                <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                            </settings>
+                        </field>
+                        <field name="image" formElement="input">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="formElement" xsi:type="string">input</item>
+                                    <item name="sortOrder" xsi:type="number">10</item>
+                                    <item name="fit" xsi:type="boolean">false</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <componentType>field</componentType>
+                                <dataScope>image</dataScope>
+                                <dataType>media</dataType>
+                                <label translate="true">Thumbnail</label>
+                                <elementTmpl>Magestore_BranchRequest/dynamic-rows/cells/thumbnail</elementTmpl>
+                            </settings>
+                        </field>
+                        <field name="sku" formElement="input">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="formElement" xsi:type="string">input</item>
+                                    <item name="sortOrder" xsi:type="number">15</item>
+                                    <item name="fit" xsi:type="boolean">false</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <componentType>field</componentType>
+                                <dataScope>sku</dataScope>
+                                <dataType>text</dataType>
+                                <label translate="true">SKU</label>
+                                <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                            </settings>
+                        </field>
+                        <field name="name" formElement="input">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="formElement" xsi:type="string">input</item>
+                                    <item name="sortOrder" xsi:type="number">20</item>
+                                    <item name="fit" xsi:type="boolean">false</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <componentType>field</componentType>
+                                <dataScope>name</dataScope>
+                                <dataType>text</dataType>
+                                <label translate="true">Name</label>
+                                <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                            </settings>
+                        </field>
+                        <!--<field name="type" formElement="input">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="formElement" xsi:type="string">input</item>
+                                    <item name="sortOrder" xsi:type="number">25</item>
+                                    <item name="fit" xsi:type="boolean">false</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <componentType>field</componentType>
+                                <dataScope>type</dataScope>
+                                <dataType>text</dataType>
+                                <label translate="true">Type</label>
+                                <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                            </settings>
+                        </field>-->
+                        <field name="barcode" formElement="input">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="formElement" xsi:type="string">input</item>
+                                    <item name="sortOrder" xsi:type="number">30</item>
+                                    <item name="fit" xsi:type="boolean">true</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <componentType>field</componentType>
+                                <dataScope>barcode</dataScope>
+                                <dataType>text</dataType>
+                                <label translate="true">Barcode</label>
+                                <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                            </settings>
+                        </field>
+                        <field name="qty" formElement="input">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="formElement" xsi:type="string">input</item>
+                                    <item name="sortOrder" xsi:type="number">35</item>
+                                    <item name="fit" xsi:type="boolean">false</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <componentType>field</componentType>
+                                <dataScope>qty</dataScope>
+                                <dataType>text</dataType>
+                                <label translate="true">Qty in Sending Source</label>
+                                <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                            </settings>
+                        </field>
+                        <field name="qty_requested" formElement="input"
+                               component="Magestore_BranchRequest/js/form/element/qty-to-request">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="formElement" xsi:type="string">input</item>
+                                    <item name="sortOrder" xsi:type="number">40</item>
+                                    <item name="additionalClasses" xsi:type="string">admin__field-small</item>
+                                    <item name="fit" xsi:type="boolean">false</item>
+                                    <item name="imports" xsi:type="array">
+                                        <item name="visibleStatus" xsi:type="string">
+                                            ${$.provider}:data.transfer_summary.general_information.status
+                                        </item>
+                                    </item>
+                                    <item name="validation" xsi:type="array">
+                                        <item name="validate-number" xsi:type="boolean">true</item>
+                                        <item name="validate-not-negative-number" xsi:type="boolean">true</item>
+                                        <item name="required-entry" xsi:type="boolean">true</item>
+                                    </item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <componentType>field</componentType>
+                                <dataScope>qty_requested</dataScope>
+                                <dataType>number</dataType>
+                                <label translate="true">Qty Requested</label>
+                                <elementTmpl>ui/form/element/input</elementTmpl>
+                            </settings>
+                        </field>
+                        <field name="qty_delivered" formElement="input"
+                               component="Magestore_BranchRequest/js/form/element/qty_delivered">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="formElement" xsi:type="string">input</item>
+                                    <item name="sortOrder" xsi:type="number">45</item>
+                                    <item name="fit" xsi:type="boolean">false</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <componentType>field</componentType>
+                                <dataScope>qty_delivered</dataScope>
+                                <dataType>text</dataType>
+                                <label translate="true">Qty Delivered</label>
+                                <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                            </settings>
+                        </field>
+                        <field name="qty_received" formElement="input"
+                               component="Magestore_BranchRequest/js/form/element/qty_received">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="formElement" xsi:type="string">input</item>
+                                    <item name="sortOrder" xsi:type="number">50</item>
+                                    <item name="fit" xsi:type="boolean">true</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <componentType>field</componentType>
+                                <dataScope>qty_received</dataScope>
+                                <dataType>text</dataType>
+                                <label translate="true">Qty Received</label>
+                                <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                            </settings>
+                        </field>
+                        <actionDelete name="action_delete"
+                                      component="Magestore_BranchRequest/js/dynamic-rows/action-delete">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="sortOrder" xsi:type="number">99</item>
+                                    <item name="additionalClasses" xsi:type="string">data-grid-actions-cell</item>
+                                    <item name="fit" xsi:type="boolean">true</item>
+                                    <item name="prefixElementName" xsi:type="string">option_</item>
+                                    <item name="prefixName" xsi:type="string">optionvisual.delete</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <elementTmpl>Magento_Catalog/form/element/action-delete</elementTmpl>
+                                <dataType>text</dataType>
+                                <componentType>actionDelete</componentType>
+                                <label translate="true">Action</label>
+                            </settings>
+                        </actionDelete>
+                    </container>
+                </dynamicRows>
+            </container>
+        </fieldset>
+        <fieldset name="general_information">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">General Information</item>
+                    <item name="collapsible" xsi:type="boolean">true</item>
+                    <item name="opened" xsi:type="boolean">false</item>
+                </item>
+            </argument>
+            <field name="inventorytransfer_id" formElement="input">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">transfer_data</item>
+                        <item name="dataScope" xsi:type="string">inventorytransfer_id</item>
+                        <item name="label" xsi:type="string">ID</item>
+                    </item>
+                </argument>
+                <settings>
+                    <visible>false</visible>
+                </settings>
+            </field>
+            <field name="branchrequest_code" formElement="input">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">transfer_data</item>
+                        <item name="dataScope" xsi:type="string">branchrequest_code</item>
+                        <item name="label" xsi:type="string">Branch Request ID</item>
+                        <item name="component" xsi:type="string">Magestore_BranchRequest/js/form/element/html</item>
+                    </item>
+                </argument>
+                <settings>
+                    <required>true</required>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                    </validation>
+                    <visible>true</visible>
+                </settings>
+            </field>
+            <field name="source_warehouse_name" formElement="input">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">transfer_data</item>
+                        <item name="dataScope" xsi:type="string">source_warehouse_name</item>
+                        <item name="label" xsi:type="string">From</item>
+                        <item name="component" xsi:type="string">Magestore_BranchRequest/js/form/element/html</item>
+                    </item>
+                </argument>
+                <settings>
+                    <required>true</required>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                    </validation>
+                    <visible>true</visible>
+                    <dataType>text</dataType>
+                </settings>
+            </field>
+            <field name="des_warehouse_name" formElement="input">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">transfer_data</item>
+                        <item name="dataScope" xsi:type="string">des_warehouse_name</item>
+                        <item name="label" xsi:type="string">To</item>
+                        <item name="component" xsi:type="string">Magestore_BranchRequest/js/form/element/html</item>
+                    </item>
+                </argument>
+                <settings>
+                    <required>true</required>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                    </validation>
+                    <visible>true</visible>
+                </settings>
+            </field>
+            <field name="notifer_emails" formElement="input"
+                   class="Magestore\BranchRequest\Ui\Component\Field\ConfigurableDefaultValue">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">transfer_data</item>
+                        <item name="defaultValueConfigPath" xsi:type="string">
+                            inventory_movement/branch_requests/notifier_emails
+                        </item>
+                    </item>
+                </argument>
+                <settings>
+                    <validation>
+                        <rule name="validate-emails" xsi:type="boolean">true</rule>
+                    </validation>
+                    <dataType>text</dataType>
+                    <label translate="true">Notifer Emails</label>
+                    <dataScope>notifer_emails</dataScope>
+                </settings>
+            </field>
+            <field name="remarks" formElement="textarea">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">transfer_data</item>
+                    </item>
+                </argument>
+                <settings>
+                    <required>true</required>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                        <rule name="validate-no-html-tags" xsi:type="boolean">true</rule>
+                    </validation>
+                    <dataType>text</dataType>
+                    <label translate="true">Remarks</label>
+                    <dataScope>remarks</dataScope>
+                </settings>
+            </field>
+        </fieldset>
+        <modal name="delivery_modal">
+            <settings>
+                <options>
+                    <option name="title" xsi:type="string" translate="true">Delivery</option>
+                    <option name="buttons" xsi:type="array">
+                        <item name="0" xsi:type="array">
+                            <item name="text" xsi:type="string">Cancel</item>
+                            <item name="class" xsi:type="string">action-secondary</item>
+                            <item name="actions" xsi:type="array">
+                                <item name="0" xsi:type="array">
+                                    <item name="targetName" xsi:type="string">${ $.name }</item>
+                                    <item name="actionName" xsi:type="string">closeModal</item>
+                                </item>
+                            </item>
+                        </item>
+                        <item name="1" xsi:type="array">
+                            <item name="text" xsi:type="string" translate="true">Save delivery</item>
+                            <item name="class" xsi:type="string">action-primary</item>
+                            <item name="actions" xsi:type="array">
+                                <item name="0" xsi:type="array">
+                                    <item name="targetName" xsi:type="string">os_branchrequest_edit_form.areas</item>
+                                    <item name="actionName" xsi:type="string">save</item>
+                                    <item name="params" xsi:type="array">
+                                        <item name="0" xsi:type="boolean">true</item>
+                                        <item name="1" xsi:type="array">
+                                            <item name="action" xsi:type="string">delivery</item>
+                                        </item>
+                                    </item>
+                                </item>
+                            </item>
+                        </item>
+                    </option>
+                </options>
+            </settings>
+            <fieldset name="delivery_information">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Delivery Information</item>
+                        <item name="collapsible" xsi:type="boolean">true</item>
+                        <item name="opened" xsi:type="boolean">true</item>
+                    </item>
+                </argument>
+                <field name="note" formElement="input">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="source" xsi:type="string">transfer_data</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <dataType>text</dataType>
+                        <label translate="true">Ref. Brn.Req. No.</label>
+                        <dataScope>note</dataScope>
+                    </settings>
+                </field>
+                <field name="remarks" formElement="textarea">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="source" xsi:type="string">transfer_data</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <!--<required>true</required>
+                        <validation>
+                            <rule name="required-entry" xsi:type="boolean">true</rule>
+                            <rule name="validate-no-html-tags" xsi:type="boolean">true</rule>
+                        </validation>-->
+                        <dataType>text</dataType>
+                        <label translate="true">Remarks</label>
+                        <dataScope>remarks</dataScope>
+                    </settings>
+                </field>
+            </fieldset>
+            <fieldset name="delivery_product_list">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Product List</item>
+                        <item name="collapsible" xsi:type="boolean">false</item>
+                        <item name="opened" xsi:type="boolean">true</item>
+                    </item>
+                </argument>
+                <container name="delivery_modal_button">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="formElement" xsi:type="string">container</item>
+                            <item name="componentType" xsi:type="string">container</item>
+                            <item name="template" xsi:type="string">
+                                Magestore_BranchRequest/form/components/button-list
+                            </item>
+                            <item name="label" xsi:type="boolean">false</item>
+                        </item>
+                    </argument>
+                    <button name="scan_button" class="Magestore\BranchRequest\Ui\Component\Container\BarcodeContainer">
+                        <argument name="data" xsi:type="array">
+                            <item name="config" xsi:type="array">
+                                <item name="formElement" xsi:type="string">container</item>
+                                <item name="componentType" xsi:type="string">container</item>
+                                <item name="component" xsi:type="string">
+                                    Magestore_BranchRequest/js/receive/element/scan-barcode-button
+                                </item>
+                                <item name="title" xsi:type="string">Scan Barcode</item>
+                            </item>
+                        </argument>
+                    </button>
+                    <button name="delivery_add_products_button">
+                        <argument name="data" xsi:type="array">
+                            <item name="config" xsi:type="array">
+                                <item name="title" xsi:type="string" translate="true">Add Products</item>
+                                <item name="actions" xsi:type="array">
+                                    <item name="0" xsi:type="array">
+                                        <item name="targetName" xsi:type="string">
+                                            ${ $.parentName}.delivery_add_product_modal
+                                        </item>
+                                        <item name="actionName" xsi:type="string">openModal</item>
+                                    </item>
+                                </item>
+                            </item>
+                        </argument>
+                    </button>
+                    <modal name="delivery_add_product_modal">
+                        <settings>
+                            <options>
+                                <option name="title" xsi:type="string" translate="true">Add Products</option>
+                                <option name="buttons" xsi:type="array">
+                                    <item name="0" xsi:type="array">
+                                        <item name="text" xsi:type="string">Cancel</item>
+                                        <item name="class" xsi:type="string">action-secondary</item>
+                                        <item name="actions" xsi:type="array">
+                                            <item name="0" xsi:type="array">
+                                                <item name="targetName" xsi:type="string">${ $.name }</item>
+                                                <item name="actionName" xsi:type="string">actionCancel</item>
+                                            </item>
+                                        </item>
+                                    </item>
+                                    <item name="1" xsi:type="array">
+                                        <item name="text" xsi:type="string" translate="true">Add Selected Products
+                                        </item>
+                                        <item name="class" xsi:type="string">action-primary</item>
+                                        <item name="actions" xsi:type="array">
+                                            <item name="0" xsi:type="array">
+                                                <item name="targetName" xsi:type="string">index =
+                                                    os_branchrequest_product_to_delivery_listing
+                                                </item>
+                                                <item name="actionName" xsi:type="string">save</item>
+                                            </item>
+                                            <item name="1" xsi:type="array">
+                                                <item name="targetName" xsi:type="string">${ $.name }</item>
+                                                <item name="actionName" xsi:type="string">actionDone</item>
+                                            </item>
+                                        </item>
+                                    </item>
+                                </option>
+                            </options>
+                        </settings>
+                        <insertListing name="os_branchrequest_product_to_delivery_listing"
+                                       provider="os_branchrequest_edit_form.os_branchrequest_edit_form_data_source"
+                                       component="Magestore_BranchRequest/js/receive/form/components/insert-listing">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="cssclass" xsi:type="string">noclass</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <autoRender>true</autoRender>
+                                <realTimeLink>true</realTimeLink>
+                                <dataLinks>
+                                    <imports>false</imports>
+                                    <exports>true</exports>
+                                </dataLinks>
+                                <behaviourType>simple</behaviourType>
+                                <dataScope>os_branchrequest_product_to_delivery_listing</dataScope>
+                                <ns>os_branchrequest_product_to_delivery_listing</ns>
+                                <externalProvider>
+                                    os_branchrequest_product_to_delivery_listing.os_branchrequest_product_to_delivery_listing_data_source
+                                </externalProvider>
+                                <selectionsProvider>
+                                    os_branchrequest_product_to_delivery_listing.os_branchrequest_product_to_delivery_listing.product_columns.ids
+                                </selectionsProvider>
+                                <imports>
+                                    <link name="inventorytransfer_id">
+                                        ${ $.provider }:data.transfer_summary.general_information.inventorytransfer_id
+                                    </link>
+                                </imports>
+                                <exports>
+                                    <link name="inventorytransfer_id">
+                                        ${ $.externalProvider }:params.inventorytransfer_id
+                                    </link>
+                                </exports>
+                                <externalFilterMode>true</externalFilterMode>
+                            </settings>
+                        </insertListing>
+                    </modal>
+                </container>
+                <container name="product_barcode_scan_input"
+                           class="Magestore\BranchRequest\Ui\Component\Container\BarcodeContainer">
+                    <field name="barcode_scan_input">
+                        <argument name="data" xsi:type="array">
+                            <item name="config" xsi:type="array">
+                                <item name="formElement" xsi:type="string">container</item>
+                                <item name="componentType" xsi:type="string">field</item>
+                                <item name="component" xsi:type="string">
+                                    Magestore_BranchRequest/js/receive/form/element/scan-barcode
+                                </item>
+                                <item name="label" xsi:type="string" translate="true">Scan barcode</item>
+                                <item name="placeholder" xsi:type="string" translate="true">Scan/enter barcode</item>
+                                <item name="sortOrder" xsi:type="string">15</item>
+                                <item name="getBarcodeUrl" xsi:type="url"
+                                      path="branchrequest/inventoryTransfer_receive/getProductJsonByBarcode"/>
+                                <item name="sourceElement" xsi:type="string">index =
+                                    os_branchrequest_product_to_delivery_listing
+                                </item>
+                                <item name="destinationElement" xsi:type="string">
+                                    os_branchrequest_edit_form.areas.transfer_summary.transfer_summary.delivery_modal.delivery_product_list.delivery_product_dynamic_grid.product_list
+                                </item>
+                                <item name="selectionsProvider" xsi:type="string">
+                                    os_branchrequest_product_to_delivery_listing.os_branchrequest_product_to_delivery_listing.product_columns.ids
+                                </item>
+                                <item name="qtyElement" xsi:type="string">
+                                    os_branchrequest_edit_form.areas.transfer_summary.transfer_summary.delivery_modal.delivery_product_list.delivery_product_dynamic_grid.product_list.%s.qty_to_delivery
+                                </item>
+                                <item name="inputElementName" xsi:type="string">qty_to_delivery</item>
+                            </item>
+                        </argument>
+                        <settings>
+                            <imports>
+                                <link name="insertParams">${ $.provider }:data.transfer_summary.general_information
+                                </link>
+                            </imports>
+                        </settings>
+                    </field>
+                </container>
+                <container name="delivery_product_dynamic_grid">
+                    <dynamicRows name="product_list"
+                                 component="Magestore_BranchRequest/js/dynamic-rows/dynamic-rows-grid"
+                                 template="ui/dynamic-rows/templates/grid">
+                        <argument name="data" xsi:type="array">
+                            <item name="config" xsi:type="array">
+                                <item name="additionalClasses" xsi:type="string">admin__field-wide</item>
+                                <item name="renderDefaultRecord" xsi:type="boolean">false</item>
+                                <item name="itemTemplate" xsi:type="string">record</item>
+                                <item name="deleteButtonLabel" xsi:type="string" translate="true">Remove</item>
+                                <item name="dataProvider" xsi:type="string">
+                                    data.transfer_summary.delivery_modal.delivery_product_list.delivery_modal_button.delivery_add_product_modal.os_branchrequest_product_to_delivery_listing
+                                </item>
+                                <item name="map" xsi:type="array">
+                                    <item name="id" xsi:type="string">product_id</item>
+                                    <item name="sku" xsi:type="string">product_sku</item>
+                                    <item name="name" xsi:type="string">product_name</item>
+                                    <!--<item name="type" xsi:type="string">type</item>-->
+                                    <item name="image" xsi:type="string">image_url</item>
+                                    <item name="racket" xsi:type="string">racket</item>
+                                    <item name="barcode" xsi:type="string">barcode_original_data</item>
+                                    <item name="qty" xsi:type="string">quantity</item>
+                                    <item name="qty_requested" xsi:type="string">qty_requested</item>
+                                    <item name="qty_delivered" xsi:type="string">qty_delivered</item>
+                                    <item name="qty_to_delivery" xsi:type="string">qty_to_delivery</item>
+                                </item>
+                                <item name="columnsHeader" xsi:type="boolean">false</item>
+                                <item name="columnsHeaderAfterRender" xsi:type="boolean">true</item>
+                            </item>
+                        </argument>
+                        <settings>
+                            <componentType>dynamicRows</componentType>
+                            <addButton>false</addButton>
+                            <dataScope>links</dataScope>
+                            <links>
+                                <link name="insertData">${ $.provider }:${ $.dataProvider }</link>
+                            </links>
+                        </settings>
+                        <container name="record" component="Magento_Ui/js/dynamic-rows/record">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="isTemplate" xsi:type="boolean">true</item>
+                                    <item name="is_collection" xsi:type="boolean">true</item>
+                                    <item name="componentType" xsi:type="string">container</item>
+                                    <item name="positionProvider" xsi:type="string">position</item>
+                                    <item name="dataScope" xsi:type="string"/>
+                                </item>
+                            </argument>
+                            <field name="id" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="number">01</item>
+                                        <item name="fit" xsi:type="boolean">true</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>id</dataScope>
+                                    <dataType>text</dataType>
+                                    <label translate="true">ID</label>
+                                    <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                                </settings>
+                            </field>
+                            <field name="image" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="number">05</item>
+                                        <item name="fit" xsi:type="boolean">false</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>image</dataScope>
+                                    <dataType>media</dataType>
+                                    <label translate="true">Thumbnail</label>
+                                    <elementTmpl>Magestore_BranchRequest/dynamic-rows/cells/thumbnail</elementTmpl>
+                                </settings>
+                            </field>
+                            <field name="sku" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="number">10</item>
+                                        <item name="fit" xsi:type="boolean">false</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>sku</dataScope>
+                                    <dataType>text</dataType>
+                                    <label translate="true">SKU</label>
+                                    <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                                </settings>
+                            </field>
+                            <field name="name" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="number">15</item>
+                                        <item name="fit" xsi:type="boolean">false</item>
+                                        <item name="additionalClasses" xsi:type="string">admin__field-small</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>name</dataScope>
+                                    <dataType>text</dataType>
+                                    <label translate="true">Name</label>
+                                    <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                                </settings>
+                            </field>
+                            <!--<field name="type" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="number">20</item>
+                                        <item name="fit" xsi:type="boolean">false</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>type</dataScope>
+                                    <dataType>text</dataType>
+                                    <label translate="true">Type</label>
+                                    <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                                </settings>
+                            </field>-->
+                            <field name="racket" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="number">25</item>
+                                        <item name="fit" xsi:type="boolean">false</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>racket</dataScope>
+                                    <dataType>text</dataType>
+                                    <label translate="true">Racket #</label>
+                                    <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                                </settings>
+                            </field>
+                            <field name="barcode" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="number">30</item>
+                                        <item name="fit" xsi:type="boolean">true</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>barcode</dataScope>
+                                    <dataType>text</dataType>
+                                    <label translate="true">Barcode</label>
+                                    <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                                </settings>
+                            </field>
+                            <field name="qty_requested" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="number">35</item>
+                                        <item name="fit" xsi:type="boolean">true</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>qty_requested</dataScope>
+                                    <dataType>text</dataType>
+                                    <label translate="true">Qty Requested</label>
+                                    <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                                </settings>
+                            </field>
+                            <field name="qty_delivered" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="number">40</item>
+                                        <item name="fit" xsi:type="boolean">true</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>qty_delivered</dataScope>
+                                    <dataType>text</dataType>
+                                    <label translate="true">Qty Delivered</label>
+                                    <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                                </settings>
+                            </field>
+                            <field name="qty" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="number">45</item>
+                                        <item name="fit" xsi:type="boolean">true</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>qty</dataScope>
+                                    <dataType>text</dataType>
+                                    <label translate="true">Qty in Sending Source</label>
+                                    <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                                </settings>
+                            </field>
+                            <field name="qty_to_delivery" formElement="input"
+                                   component="Magestore_BranchRequest/js/form/element/qty-to-delivery">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="number">50</item>
+                                        <item name="additionalClasses" xsi:type="string">admin__field-small</item>
+                                        <item name="fit" xsi:type="boolean">false</item>
+                                        <item name="validation" xsi:type="array">
+                                            <item name="validate-number" xsi:type="boolean">true</item>
+                                            <item name="validate-not-negative-number" xsi:type="boolean">true</item>
+                                            <item name="required-entry" xsi:type="boolean">true</item>
+                                        </item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>qty_to_delivery</dataScope>
+                                    <dataType>number</dataType>
+                                    <label translate="true">Qty to Send</label>
+                                    <elementTmpl>ui/form/element/input</elementTmpl>
+                                </settings>
+                            </field>
+                            <actionDelete name="action_delete">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="sortOrder" xsi:type="string">99</item>
+                                        <item name="additionalClasses" xsi:type="string">data-grid-actions-cell</item>
+                                        <item name="fit" xsi:type="boolean">true</item>
+                                        <item name="prefixElementName" xsi:type="string">option_</item>
+                                        <item name="prefixName" xsi:type="string">optionvisual.delete</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <elementTmpl>Magento_Catalog/form/element/action-delete</elementTmpl>
+                                    <dataType>text</dataType>
+                                    <componentType>actionDelete</componentType>
+                                    <label translate="true">Action</label>
+                                </settings>
+                            </actionDelete>
+                        </container>
+                    </dynamicRows>
+                </container>
+            </fieldset>
+        </modal>
+        <modal name="receive_modal">
+            <settings>
+                <options>
+                    <option name="title" xsi:type="string" translate="true">Receiving</option>
+                    <option name="buttons" xsi:type="array">
+                        <item name="0" xsi:type="array">
+                            <item name="text" xsi:type="string">Cancel</item>
+                            <item name="class" xsi:type="string">action-secondary</item>
+                            <item name="actions" xsi:type="array">
+                                <item name="0" xsi:type="array">
+                                    <item name="targetName" xsi:type="string">${ $.name }</item>
+                                    <item name="actionName" xsi:type="string">closeModal</item>
+                                </item>
+                            </item>
+                        </item>
+                        <item name="1" xsi:type="array">
+                            <item name="text" xsi:type="string" translate="true">Save receive</item>
+                            <item name="class" xsi:type="string">action-primary</item>
+                            <item name="actions" xsi:type="array">
+                                <item name="0" xsi:type="array">
+                                    <item name="targetName" xsi:type="string">os_branchrequest_edit_form.areas</item>
+                                    <item name="actionName" xsi:type="string">save</item>
+                                    <item name="params" xsi:type="array">
+                                        <item name="0" xsi:type="boolean">true</item>
+                                        <item name="1" xsi:type="array">
+                                            <item name="action" xsi:type="string">receive</item>
+                                        </item>
+                                    </item>
+                                </item>
+                            </item>
+                        </item>
+                    </option>
+                </options>
+            </settings>
+            <fieldset name="receive_information">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Receive Information</item>
+                        <item name="collapsible" xsi:type="boolean">true</item>
+                        <item name="opened" xsi:type="boolean">true</item>
+                    </item>
+                </argument>
+                <field name="note" formElement="input">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="source" xsi:type="string">transfer_data</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <dataType>text</dataType>
+                        <label translate="true">Against Delivery Note</label>
+                        <dataScope>note</dataScope>
+                    </settings>
+                </field>
+                <field name="remarks" formElement="textarea">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="source" xsi:type="string">transfer_data</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <dataType>text</dataType>
+                        <label translate="true">Remarks</label>
+                        <dataScope>remarks</dataScope>
+                    </settings>
+                </field>
+            </fieldset>
+            <fieldset name="receive_product_list">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Product List</item>
+                        <item name="collapsible" xsi:type="boolean">false</item>
+                        <item name="opened" xsi:type="boolean">true</item>
+                    </item>
+                </argument>
+                <container name="receive_modal_button">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="formElement" xsi:type="string">container</item>
+                            <item name="componentType" xsi:type="string">container</item>
+                            <item name="template" xsi:type="string">
+                                Magestore_BranchRequest/form/components/button-list
+                            </item>
+                            <item name="label" xsi:type="boolean">false</item>
+                        </item>
+                    </argument>
+                    <button name="scan_button" class="Magestore\BranchRequest\Ui\Component\Container\BarcodeContainer">
+                        <argument name="data" xsi:type="array">
+                            <item name="config" xsi:type="array">
+                                <item name="formElement" xsi:type="string">container</item>
+                                <item name="componentType" xsi:type="string">container</item>
+                                <item name="component" xsi:type="string">
+                                    Magestore_BranchRequest/js/receive/element/scan-barcode-button
+                                </item>
+                                <item name="title" xsi:type="string">Scan Barcode</item>
+                            </item>
+                        </argument>
+                    </button>
+                    <button name="receive_add_products_button">
+                        <argument name="data" xsi:type="array">
+                            <item name="config" xsi:type="array">
+                                <item name="title" xsi:type="string" translate="true">Add Products</item>
+                                <item name="actions" xsi:type="array">
+                                    <item name="0" xsi:type="array">
+                                        <item name="targetName" xsi:type="string">
+                                            ${ $.parentName}.receive_add_product_modal
+                                        </item>
+                                        <item name="actionName" xsi:type="string">openModal</item>
+                                    </item>
+                                </item>
+                            </item>
+                        </argument>
+                    </button>
+                    <modal name="receive_add_product_modal">
+                        <settings>
+                            <options>
+                                <option name="title" xsi:type="string" translate="true">Add Products</option>
+                                <option name="buttons" xsi:type="array">
+                                    <item name="0" xsi:type="array">
+                                        <item name="text" xsi:type="string">Cancel</item>
+                                        <item name="class" xsi:type="string">action-secondary</item>
+                                        <item name="actions" xsi:type="array">
+                                            <item name="0" xsi:type="array">
+                                                <item name="targetName" xsi:type="string">${ $.name }</item>
+                                                <item name="actionName" xsi:type="string">actionCancel</item>
+                                            </item>
+                                        </item>
+                                    </item>
+                                    <item name="1" xsi:type="array">
+                                        <item name="text" xsi:type="string" translate="true">Add Selected Products
+                                        </item>
+                                        <item name="class" xsi:type="string">action-primary</item>
+                                        <item name="actions" xsi:type="array">
+                                            <item name="0" xsi:type="array">
+                                                <item name="targetName" xsi:type="string">index =
+                                                    os_branchrequest_product_to_receive_listing
+                                                </item>
+                                                <item name="actionName" xsi:type="string">save</item>
+                                            </item>
+                                            <item name="1" xsi:type="array">
+                                                <item name="targetName" xsi:type="string">${ $.name }</item>
+                                                <item name="actionName" xsi:type="string">actionDone</item>
+                                            </item>
+                                        </item>
+                                    </item>
+                                </option>
+                            </options>
+                        </settings>
+                        <insertListing name="os_branchrequest_product_to_receive_listing"
+                                       provider="os_branchrequest_edit_form.os_branchrequest_edit_form_data_source"
+                                       component="Magestore_BranchRequest/js/receive/form/components/insert-listing">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="cssclass" xsi:type="string">noclass</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <autoRender>true</autoRender>
+                                <realTimeLink>true</realTimeLink>
+                                <dataLinks>
+                                    <imports>false</imports>
+                                    <exports>true</exports>
+                                </dataLinks>
+                                <behaviourType>simple</behaviourType>
+                                <dataScope>os_branchrequest_product_to_receive_listing</dataScope>
+                                <ns>os_branchrequest_product_to_receive_listing</ns>
+                                <externalProvider>
+                                    os_branchrequest_product_to_receive_listing.os_branchrequest_product_to_receive_listing_data_source
+                                </externalProvider>
+                                <selectionsProvider>
+                                    os_branchrequest_product_to_receive_listing.os_branchrequest_product_to_receive_listing.product_columns.ids
+                                </selectionsProvider>
+                                <imports>
+                                    <link name="inventorytransfer_id">
+                                        ${ $.provider }:data.transfer_summary.general_information.inventorytransfer_id
+                                    </link>
+                                </imports>
+                                <exports>
+                                    <link name="inventorytransfer_id">
+                                        ${ $.externalProvider }:params.inventorytransfer_id
+                                    </link>
+                                </exports>
+                                <externalFilterMode>true</externalFilterMode>
+                            </settings>
+                        </insertListing>
+                    </modal>
+                </container>
+                <container name="product_barcode_scan_input"
+                           class="Magestore\BranchRequest\Ui\Component\Container\BarcodeContainer">
+                    <field name="barcode_scan_input">
+                        <argument name="data" xsi:type="array">
+                            <item name="config" xsi:type="array">
+                                <item name="formElement" xsi:type="string">container</item>
+                                <item name="componentType" xsi:type="string">field</item>
+                                <item name="component" xsi:type="string">
+                                    Magestore_BranchRequest/js/receive/form/element/scan-barcode
+                                </item>
+                                <item name="label" xsi:type="string" translate="true">Scan barcode</item>
+                                <item name="placeholder" xsi:type="string" translate="true">Scan/enter barcode</item>
+                                <item name="sortOrder" xsi:type="string">15</item>
+                                <item name="getBarcodeUrl" xsi:type="url"
+                                      path="branchrequest/inventoryTransfer_receive/getProductJsonByBarcode"/>
+                                <item name="sourceElement" xsi:type="string">index =
+                                    os_branchrequest_product_to_receive_listing
+                                </item>
+                                <item name="destinationElement" xsi:type="string">
+                                    os_branchrequest_edit_form.areas.transfer_summary.transfer_summary.receive_modal.receive_product_list.receive_product_dynamic_grid.product_list
+                                </item>
+                                <item name="selectionsProvider" xsi:type="string">
+                                    os_branchrequest_product_to_receive_listing.os_branchrequest_product_to_receive_listing.product_columns.ids
+                                </item>
+                                <item name="qtyElement" xsi:type="string">
+                                    os_branchrequest_edit_form.areas.transfer_summary.transfer_summary.receive_modal.receive_product_list.receive_product_dynamic_grid.product_list.%s.qty_to_receive
+                                </item>
+                                <item name="inputElementName" xsi:type="string">qty_to_receive</item>
+                            </item>
+                        </argument>
+                        <settings>
+                            <imports>
+                                <link name="insertParams">${ $.provider }:data.transfer_summary.general_information
+                                </link>
+                            </imports>
+                        </settings>
+                    </field>
+                </container>
+                <container name="receive_product_dynamic_grid">
+                    <dynamicRows name="product_list"
+                                 component="Magestore_BranchRequest/js/dynamic-rows/dynamic-rows-grid"
+                                 template="ui/dynamic-rows/templates/grid">
+                        <argument name="data" xsi:type="array">
+                            <item name="config" xsi:type="array">
+                                <item name="additionalClasses" xsi:type="string">admin__field-wide</item>
+                                <item name="renderDefaultRecord" xsi:type="boolean">false</item>
+                                <item name="itemTemplate" xsi:type="string">record</item>
+                                <item name="deleteButtonLabel" xsi:type="string" translate="true">Remove</item>
+                                <item name="dataProvider" xsi:type="string">
+                                    data.transfer_summary.receive_modal.receive_product_list.receive_modal_button.receive_add_product_modal.os_branchrequest_product_to_receive_listing
+                                </item>
+                                <item name="map" xsi:type="array">
+                                    <item name="id" xsi:type="string">product_id</item>
+                                    <item name="image" xsi:type="string">image_url</item>
+                                    <item name="sku" xsi:type="string">product_sku</item>
+                                    <item name="name" xsi:type="string">product_name</item>
+                                    <!--<item name="type" xsi:type="string">type</item>-->
+                                    <item name="racket" xsi:type="string">racket</item>
+                                    <item name="barcode" xsi:type="string">barcode_original_data</item>
+                                    <item name="available_qty_to_receive" xsi:type="string">available_qty_to_receive</item>
+                                    <item name="qty_to_receive" xsi:type="string">qty_to_receive</item>
+                                </item>
+                                <item name="sortOrder" xsi:type="string">20</item>
+                                <item name="columnsHeader" xsi:type="boolean">false</item>
+                                <item name="columnsHeaderAfterRender" xsi:type="boolean">true</item>
+                            </item>
+                        </argument>
+                        <settings>
+                            <componentType>dynamicRows</componentType>
+                            <addButton>false</addButton>
+                            <dataScope>links</dataScope>
+                            <links>
+                                <link name="insertData">${ $.provider }:${ $.dataProvider }</link>
+                            </links>
+                        </settings>
+                        <container name="record" component="Magento_Ui/js/dynamic-rows/record">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="isTemplate" xsi:type="boolean">true</item>
+                                    <item name="is_collection" xsi:type="boolean">true</item>
+                                    <item name="componentType" xsi:type="string">container</item>
+                                    <item name="positionProvider" xsi:type="string">position</item>
+                                    <item name="dataScope" xsi:type="string"/>
+                                </item>
+                            </argument>
+                            <field name="id" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="number">05</item>
+                                        <item name="fit" xsi:type="boolean">true</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>id</dataScope>
+                                    <dataType>text</dataType>
+                                    <label translate="true">ID</label>
+                                    <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                                </settings>
+                            </field>
+                            <field name="image" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="number">10</item>
+                                        <item name="fit" xsi:type="boolean">false</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>image</dataScope>
+                                    <dataType>media</dataType>
+                                    <label translate="true">Thumbnail</label>
+                                    <elementTmpl>Magestore_BranchRequest/dynamic-rows/cells/thumbnail</elementTmpl>
+                                </settings>
+                            </field>
+                            <field name="sku" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="string">15</item>
+                                        <item name="fit" xsi:type="boolean">false</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>sku</dataScope>
+                                    <dataType>text</dataType>
+                                    <label translate="true">SKU</label>
+                                    <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                                </settings>
+                            </field>
+                            <field name="name" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="string">20</item>
+                                        <item name="fit" xsi:type="boolean">false</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>name</dataScope>
+                                    <dataType>text</dataType>
+                                    <label translate="true">Name</label>
+                                    <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                                </settings>
+                            </field>
+                            <!--<field name="type" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="string">25</item>
+                                        <item name="fit" xsi:type="boolean">false</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>type</dataScope>
+                                    <dataType>text</dataType>
+                                    <label translate="true">Type</label>
+                                    <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                                </settings>
+                            </field>-->
+                            <field name="racket" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="number">30</item>
+                                        <item name="fit" xsi:type="boolean">false</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>racket</dataScope>
+                                    <dataType>text</dataType>
+                                    <label translate="true">Racket #</label>
+                                    <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                                </settings>
+                            </field>
+                            <field name="barcode" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="string">35</item>
+                                        <item name="fit" xsi:type="boolean">false</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>barcode</dataScope>
+                                    <dataType>text</dataType>
+                                    <label translate="true">Barcode</label>
+                                    <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                                </settings>
+                            </field>
+                            <field name="available_qty_to_receive" formElement="input">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="string">40</item>
+                                        <item name="fit" xsi:type="boolean">false</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>available_qty_to_receive</dataScope>
+                                    <dataType>text</dataType>
+                                    <label translate="true">Available Qty</label>
+                                    <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                                </settings>
+                            </field>
+                            <field name="qty_to_receive" formElement="input"
+                                   component="Magestore_BranchRequest/js/form/element/qty-to-receive">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="formElement" xsi:type="string">input</item>
+                                        <item name="sortOrder" xsi:type="string">45</item>
+                                        <item name="additionalClasses" xsi:type="string">admin__field-small</item>
+                                        <item name="fit" xsi:type="boolean">false</item>
+                                        <item name="validation" xsi:type="array">
+                                            <item name="validate-number" xsi:type="boolean">true</item>
+                                            <item name="validate-not-negative-number" xsi:type="boolean">true</item>
+                                            <item name="required-entry" xsi:type="boolean">true</item>
+                                        </item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <componentType>field</componentType>
+                                    <dataScope>qty_to_receive</dataScope>
+                                    <dataType>number</dataType>
+                                    <label translate="true">Qty to Receive</label>
+                                    <elementTmpl>ui/form/element/input</elementTmpl>
+                                </settings>
+                            </field>
+                            <actionDelete name="action_delete">
+                                <argument name="data" xsi:type="array">
+                                    <item name="config" xsi:type="array">
+                                        <item name="sortOrder" xsi:type="string">99</item>
+                                        <item name="additionalClasses" xsi:type="string">data-grid-actions-cell</item>
+                                        <item name="fit" xsi:type="boolean">true</item>
+                                        <item name="prefixElementName" xsi:type="string">option_</item>
+                                        <item name="prefixName" xsi:type="string">optionvisual.delete</item>
+                                    </item>
+                                </argument>
+                                <settings>
+                                    <elementTmpl>Magento_Catalog/form/element/action-delete</elementTmpl>
+                                    <dataType>text</dataType>
+                                    <componentType>actionDelete</componentType>
+                                    <label translate="true">Action</label>
+                                </settings>
+                            </actionDelete>
+                        </container>
+                    </dynamicRows>
+                </container>
+            </fieldset>
+        </modal>
+    </fieldset>
+    <fieldset name="delivery_history" class="Magestore\BranchRequest\Ui\Component\Form\Fieldset\DeliveryHistory">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="label" xsi:type="string" translate="true">Delivery History</item>
+                <item name="collapsible" xsi:type="boolean">false</item>
+            </item>
+        </argument>
+        <insertListing name="os_branchrequest_delivery_history">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="cssclass" xsi:type="string">noclass</item>
+                </item>
+            </argument>
+            <settings>
+                <autoRender>true</autoRender>
+                <ns>os_branchrequest_delivery_history</ns>
+                <externalProvider>os_branchrequest_delivery_history.os_branchrequest_delivery_history_data_source
+                </externalProvider>
+                <dataLinks>
+                    <imports>false</imports>
+                    <exports>true</exports>
+                </dataLinks>
+                <externalFilterMode>true</externalFilterMode>
+                <imports>
+                    <link name="inventorytransfer_id">
+                        ${ $.provider }:data.transfer_summary.general_information.inventorytransfer_id
+                    </link>
+                </imports>
+                <exports>
+                    <link name="inventorytransfer_id">${ $.externalProvider }:params.inventorytransfer_id</link>
+                </exports>
+            </settings>
+        </insertListing>
+    </fieldset>
+    <fieldset name="receiving_history" class="Magestore\BranchRequest\Ui\Component\Form\Fieldset\ReceiveHistory">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="label" xsi:type="string" translate="true">Receiving History</item>
+                <item name="collapsible" xsi:type="boolean">false</item>
+            </item>
+        </argument>
+        <insertListing name="os_branchrequest_receiving_history">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="cssclass" xsi:type="string">noclass</item>
+                </item>
+            </argument>
+            <settings>
+                <autoRender>true</autoRender>
+                <ns>os_branchrequest_receiving_history</ns>
+                <externalProvider>os_branchrequest_receiving_history.os_branchrequest_receiving_history_data_source
+                </externalProvider>
+                <dataLinks>
+                    <imports>false</imports>
+                    <exports>true</exports>
+                </dataLinks>
+                <externalFilterMode>true</externalFilterMode>
+                <imports>
+                    <link name="inventorytransfer_id">
+                        ${ $.provider }:data.transfer_summary.general_information.inventorytransfer_id
+                    </link>
+                </imports>
+                <exports>
+                    <link name="inventorytransfer_id">${ $.externalProvider }:params.inventorytransfer_id</link>
+                </exports>
+            </settings>
+        </insertListing>
+    </fieldset>
+    <fieldset name="shortfall" class="Magestore\BranchRequest\Ui\Component\Form\Fieldset\ShortFall">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="label" xsi:type="string" translate="true">Shortfall List</item>
+                <item name="collapsible" xsi:type="boolean">false</item>
+            </item>
+        </argument>
+        <insertListing name="shortfall_listing">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="cssclass" xsi:type="string">noclass</item>
+                </item>
+            </argument>
+            <settings>
+                <autoRender>true</autoRender>
+                <ns>os_branchrequest_shortfall</ns>
+                <externalProvider>os_branchrequest_shortfall.os_branchrequest_shortfall_data_source</externalProvider>
+                <dataLinks>
+                    <imports>false</imports>
+                    <exports>true</exports>
+                </dataLinks>
+                <externalFilterMode>true</externalFilterMode>
+                <imports>
+                    <link name="inventorytransfer_id">
+                        ${ $.provider }:data.transfer_summary.general_information.inventorytransfer_id
+                    </link>
+                </imports>
+                <exports>
+                    <link name="inventorytransfer_id">${ $.externalProvider }:params.inventorytransfer_id</link>
+                </exports>
+            </settings>
+        </insertListing>
+    </fieldset>
+</form>

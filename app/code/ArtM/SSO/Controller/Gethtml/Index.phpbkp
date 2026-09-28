@@ -1,0 +1,1516 @@
+<?php
+
+namespace ArtM\SSO\Controller\Gethtml;
+
+use Magento\Framework\App\Action\Action;
+use Magento\Framework\App\Action\Context;
+use Magento\Framework\View\Result\PageFactory;
+use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Customer\Model\Customer;
+use Magento\Customer\Model\Session;
+use ArtM\SSO\Helper\Data;
+use Magento\Store\Model\StoreManagerInterface;
+
+class Index extends Action
+{
+    protected $resultPageFactory;
+
+    /**
+     * @var Customer
+     */
+    protected $customerModel;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    protected $storeManager;
+    /**
+     * constructor.
+     * @param StoreManagerInterface $storeManager
+     */
+
+
+    /**
+     * @var Session
+     */
+    protected $customerSession;
+
+    public function __construct(
+        Context $context,
+        Data $data,
+        Customer $customerModel,
+        PageFactory $resultPageFactory,
+        Session $customerSession,
+        JsonFactory $jsonResultFactory,
+        StoreManagerInterface $storeManager
+    ) {
+        $this->_data = $data;
+        $this->resultPageFactory = $resultPageFactory;
+        $this->jsonResultFactory = $jsonResultFactory;
+        $this->customerModel = $customerModel;
+        $this->customerSession = $customerSession;
+        $this->storeManager = $storeManager;
+        parent::__construct($context);
+    }
+
+    public function execute()
+    {
+        $pagetype = ($this->getRequest()->getParam('pagetype') == '') ? ' ' : $this->getRequest()->getParam('pagetype');
+        $formData = ($this->getRequest()->getParam('formData') == '') ? ' ' : $this->getRequest()->getParam('formData');
+
+        //        $pagetype = $this->getRequest()->getParam('pagetype');
+        switch ($pagetype) {
+            case "signon":
+                $html_to_return = $this->signon();
+                break;
+            case "enter_email":
+                $html_to_return = $this->enter_email();
+                break;
+            case "enter_password":
+                $html_to_return = $this->enter_password($formData);
+                break;
+            case "validate_password":
+                $html_to_return = $this->validate_password($formData);
+                break;
+            case "enter_otp":
+                $html_to_return = $this->enter_otp($formData);
+                break;
+            case "enter_phone":
+                $html_to_return = $this->enter_phone();
+                break;
+            case "create_email":
+                $html_to_return = $this->create_email($formData);
+                break;
+            case "enter_number":
+                $html_to_return = $this->enter_number();
+                break;
+            case "add_phonenumber":
+                $html_to_return = $this->add_phonenumber();
+                break;
+            case "enter_golfoy":
+                $html_to_return = $this->enter_golfoy($formData);
+                break;
+            case "enter_otp_registration":
+                $html_to_return = $this->enter_otp_registration($formData);
+                break;
+            case "add_phonenumber_otp":
+                $html_to_return = $this->add_phonenumber_otp($formData);
+                break;
+            case "add_phonenumber_validation":
+                $html_to_return = $this->add_phonenumber_validation($formData);
+                break;
+            case "registration_otp_validation":
+                $html_to_return = $this->registration_otp_validation($formData);
+                break;
+            case "valid_otp":
+                $html_to_return = $this->valid_otp($formData);
+                break;
+            case "forgot_password":
+                $html_to_return = $this->forgot_password();
+                break;
+            case "forgot_password_otp":
+                $html_to_return = $this->forgot_password_otp($formData);
+                break;
+            case "forgot_password_validation":
+                $html_to_return = $this->forgot_password_validation($formData);
+                break;
+            case "set_new_password":
+                $html_to_return = $this->set_new_password($formData);
+                break;
+            default:
+                $html_to_return = '';
+        }
+
+        // Prepare JSON response
+        $result = $this->jsonResultFactory->create();
+
+        /* $result->setData([
+            'content' => $html_to_return,
+        ]);*/
+
+        $html_to_return = trim($html_to_return);
+
+        $result->setHeader('Content-Type', 'text/html');
+
+        $data = array(
+            'content' => $html_to_return,
+        );
+
+        return $result->setData($data);
+    }
+
+
+    public function signon()
+    {
+        $html = '<div class="sign-up-forms-details">
+                    <form name="login-number" id="login-number" action="#">
+                        <div class="sign-up-content">
+                            <div class="login-heading">
+                            <img src="https://golfoy.com/media/logo/stores/1/Golfoy.png" title="Golfoy.com: India Online Golf Shop" alt="Golfoy.com India Online Golf Shop" width="403" height="103">
+                                <p class="normal-login-popup">Please enter your mobile number to <br> Sign In / Sign Up</p>
+                            </div>
+                            <div class="input_form_div">
+                                <div class="form-group">
+                                    <div class="mobile-number-login__dateSlct">+91</div>
+                                    <input type="text" inputmode="numeric" 
+                                    oninput="javascript: if (this.value.length > 10) this.value = this.value.slice(0, 10);"
+                                        maxlength="10" class="mobile-number-login__form_control" name="mobileNumber"
+                                        placeholder="Enter Mobile Number" autocomplete="off" id="mobileNumber" value="">
+                                </div>
+                            </div>
+                            <h2 class="use-email" id="use_email">Sign in using E-mail</h2>
+                            <div class="terms-condition-content">
+                                <p>On Clicking Continue, I agree to <a href="https://golfoy.com/terms-and-conditions" class="acnhor_page">Terms of Service</a><a href="https://golfoy.com/privacy-policy-cookie-restriction-mode"
+                                class="acnhor_page"> & Privacy Policy </a>
+                                </p>
+                            </div>
+                            <div class="submit_form_button">
+                                <button class="sbmt_btn" type="">continue</button>
+                            </div>
+                            
+                        </div>
+                    </form>
+                </div>';
+        return $html;
+    }
+
+    public function enter_email()
+    {
+        $html = "<button class='revert-back' id='back-to-use_number'>Back</button>
+                <div class='sign-up-forms-details'>
+                    <div class='sign-up-content'>
+                        <div class='login-heading'>
+                        <img src='https://golfoy.com/media/logo/stores/1/Golfoy.png' title='Golfoy.com: India Online Golf Shop' alt='Golfoy.com India Online Golf Shop' width='403' height='103'>         
+                        </div>
+                        <div class='enter_email'> 
+                            <form action='' method='post'  id='enter_email'>
+                            <div class='form-group'>
+                                <input type='email' name='email' class='email-input' placeholder='Enter email' required>
+                                <lable for='email' class='email-label'>E-mail Address</lable>
+                            </div>
+                            <div class='form-group'>
+                                <input type='password' name='password' maxlength='20' class='password-input' placeholder='Password' required>
+                                <label for='password' class='password-label'>Password</label>
+                            </div>
+                                <span toggle='#password-field' class='fa fa-fw fa-eye-slash field_icon toggle-password'></span>
+
+                                <input type='hidden' name='pagetype' value='enter_password'>
+                                <div class='custom-button'>
+                                    <h2 class='forget-password' id='forget-password'>Forgot Password</h2>
+                                    <h2 class='use-number' id='use_number'>Use Mobile Number</h2>
+                                </div>
+                                <div class='terms-condition-content'>
+                                    <p>On Clicking Log In, I agree to <a href='https://golfoy.com/terms-and-conditions' class='acnhor_page'>Terms of Service </a>& <a href='https://golfoy.com/privacy-policy-cookie-restriction-mode'
+                                    class='acnhor_page'>Privacy Policy </a>
+                                </div>
+                                <button type='submit' class='button-submit'>Log In</button>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>";
+        return $html;
+    }
+
+    public function enter_password($formData)
+    {
+
+        setcookie('new-user-email', '', time() - 3600, '/');
+        // setcookie('new-user-email', $formData, time() + 300, '/');
+
+        $isEmailRegister = $this->_data->isEmailRegistered($formData);
+        if ($isEmailRegister == true) {
+            $passwordData = $_COOKIE['new-user-email-password'];
+            return $this->validate_password($passwordData);
+
+            // $html = "<div class='sign-up-forms-details'>
+            //             <div class='sign-up-content'>
+            //                 <div class='enter_password'>
+            //                     <form action='' method='post'  id='enter_password'>
+            //                         <input type='password' name='password' class='password-input' placeholder='Password' required>
+            //                         <input type='hidden' name='pagetype' value='enter_password'>
+            //                         <button type='submit' class='button-submit' id='validate-password'>Verify Password</button>
+            //                     </form>
+            //                 </div>
+            //             </div>    
+            //         </div>";
+            // return $html;
+        } else {
+
+            return $this->enter_number();
+        }
+    }
+
+    public function forgot_password()
+    {
+        $html = '<button class="revert-back" id="back-to-use_email">Back</button>
+                 <div class="sign-up-forms-details">
+                    <div class="login-heading">
+                    <img src="https://golfoy.com/media/logo/stores/1/Golfoy.png" title="Golfoy.com: India Online Golf Shop" alt="Golfoy.com India Online Golf Shop" width="403" height="103">         
+                        <p>Please enter your registered mobile number.</p>
+                    </div>
+                    <div class="mobile-number-login-create">
+                        <form action="" method="post" id="forgot-password">
+                            <div class="mobile-number-login">+91</div>
+                            <input type="text" inputmode="numeric" maxlength="10"  class="new-mobile-number" name="mobileNumber" placeholder="Enter Mobile Number" autocomplete="off" id="forgot-password-mobile" required>
+                            <input type="hidden" name="pagetype" value="forgot_password_otp" class="new-number-pagetype">
+                            <button type="submit" id="number_input">Send OTP</button>
+                        </form>    
+                    </div>
+                </div>';
+        return $html;
+    }
+
+    public function forgot_password_otp($formData)
+    {
+        if ($this->_data->isMobileNumberRegistered($formData)) {
+            $customerEmail = $this->_data->isMobileNumberRegistered($formData);
+
+            setcookie('forgot-password-user-email', $customerEmail['0']['email'], time() + 300, '/');
+
+            $check = $this->_data->sendOTP($formData);
+            if (strpos($check, 'success') !== false) {
+                // <input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' name='otp' class='otp-input' id='forgot-password-otpvalidation' placeholder='Enter OTP' inputmode='numeric' autocomplete='one-time-code' required>
+                $html = "<button class='revert-back' id='back-to-forgot_password'>Back</button>
+                        <div class='sign-up-forms-details'> 
+                            <div class='enter_otpsignonform'>
+                                <div class='login-heading'>
+                                    <h3>Almost There</h3>
+                                    <p>Hi " . $customerEmail['0']['email'] . "</p>
+                                    <p>Please enter the 6 digit OTP that we just sent on +91-" . $formData . "</p>
+                                </div>
+                                <div class='sign-up-content'>
+                                    <form action='' method='post' id='forgot_password_otp_form'>
+                                        <div class='input_field_box'>
+                                            <input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' class='otp_input_field'/>
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                        </div>
+                                        <input type='hidden' value='forgot_password_validation'>
+                                        <div id='resend_otp_forgot'>Resend OTP</div>
+                                        <button type='submit' class='button-submit' id='submitotp'>Verify OTP</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>";
+                return $html;
+            } elseif (strpos($check, 'invalid_phone_number') !== false) {
+                $html = '<button class="revert-back" id="back-to-use_email">Back</button>
+                            <div class="sign-up-forms-details">
+                                <div class="login-heading">
+                                <img src="https://golfoy.com/media/logo/stores/1/Golfoy.png" title="Golfoy.com: India Online Golf Shop" alt="Golfoy.com India Online Golf Shop" width="403" height="103">         
+
+                                <p>Please enter your registered mobile number.</p>
+                                    <p class="error">Enter valid mobile number.</p>
+                                </div>
+                                <div class="mobile-number-login-create">
+                                    <form action="" method="post" id="forgot-password">
+                                        <div class="mobile-number-login">+91</div>
+                                        <input type="text" inputmode="numeric" maxlength="10"  class="new-mobile-number" name="mobileNumber" placeholder="Enter Mobile Number" autocomplete="off" id="forgot-password-mobile" required>
+                                        <input type="hidden" name="pagetype" value="forgot_password_otp" class="new-number-pagetype">
+                                        <button type="submit" id="number_input">Send OTP</button>
+                                    </form>    
+                                </div>
+                            </div>';
+                return $html;
+            } else {
+                // <input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' name='otp' class='otp-input' id='otpvalidation' placeholder='Enter OTP' inputmode='numeric' autocomplete='one-time-code' required>
+                $html = "<button class='revert-back' id='back-to-forgot_password'>Back</button>
+                        <div class='sign-up-forms-details'> 
+                            <div class='enter_otpsignonform'>
+                                <div class='login-heading'>
+                                    <h3>Almost There</h3>
+                                    <p>Hi " . $customerEmail['0']['email'] . "</p>
+                                    <p>Please enter the 6 digit OTP that we just sent on +91-" . $formData . "</p>
+                                </div>
+                                <div class='sign-up-content'>
+                                    <form action='' method='post' id='forgot_password_otp_form'>
+                                        <div class='input_field_box'>
+                                            <input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' class='otp_input_field'/>
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                        </div>
+                                        <input type='hidden' value='forgot_password_validation'>
+                                        <div id='resend_otp_forgot'>Resend OTP</div>
+                                        <button type='submit' class='button-submit' id='submitotp'>Verify OTP</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>";
+                return $html;
+            }
+        } else {
+            $html = '<button class="revert-back" id="back-to-use_email">Back</button>
+                        <div class="sign-up-forms-details">
+                        <div class="login-heading">
+                        <img src="https://golfoy.com/media/logo/stores/1/Golfoy.png" title="Golfoy.com: India Online Golf Shop" alt="Golfoy.com India Online Golf Shop" width="403" height="103">         
+
+                        <p>Please enter your registered mobile number.</p>
+                        <p class="error">Mobile Number not register</p>
+                        </div>
+                        <div class="mobile-number-login-create">
+                            <form action="" method="post" id="forgot-password">
+                                <div class="mobile-number-login">+91</div>
+                                <input type="text" inputmode="numeric" maxlength="10"  class="new-mobile-number" name="mobileNumber" placeholder="Enter Mobile Number" autocomplete="off" id="forgot-password-mobile" required>
+                                <input type="hidden" name="pagetype" value="forgot_password_otp" class="new-number-pagetype">
+                                <button type="submit" id="number_input">Send OTP</button>
+                            </form>    
+                        </div>
+                    </div>';
+            return $html;
+        }
+    }
+
+    public function forgot_password_validation($formData)
+    {
+
+        if (isset($_COOKIE['forgot-password-mobilenumber'])) {
+            $forgotPassPhoneNumber = $_COOKIE['forgot-password-mobilenumber'];
+            $otpValidationResponse = $this->_data->validateOTP($formData, $forgotPassPhoneNumber);
+            if ($otpValidationResponse == 'true' || $otpValidationResponse == 'false') {
+                $html = '<button class="revert-back" id="back-to-use_email">Back</button>
+                    <div class="sign-up-form-detials">
+                            <div class="login-heading">
+                                <h3>Reset your password</h3>
+                            </div>
+                            <div class="forgot-password-form-content">
+                                <form action="" method="post"  id="forgot_password_enter">
+                                    <label for="newPassword">New Password</lable>
+                                    <input type="password" name="password" class="password-input1" placeholder="Password" required>
+                                    <span toggle="#password-field" class="fa fa-fw fa-eye-slash field_icon toggle-password"></span>
+                                    <label for="newPassword">Confirm Password</lable>
+                                    <input type="password" name="password" class="password-input2" placeholder="Confirm Password " required>
+                                    <input type="hidden" name="pagetype" value="set_new_password">
+                                    <button type="submit" class="button-submit" id="validate-password">Verify Password</button>
+                                </form>
+                            </div>
+                        </div>';
+                return $html;
+            } else {
+                $forgotUserEmail = $_COOKIE['forgot-password-user-email'];
+                // <input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' name='otp' class='otp-input' id='forgot-password-otpvalidation' placeholder='Enter OTP' inputmode='numeric' autocomplete='one-time-code' required>
+                $html = "<button class='revert-back' id='back-to-forgot_password'>Back</button>
+                        <div class='sign-up-forms-details'> 
+                            <div class='enter_otpsignonform'>
+                                <div class='login-heading'>
+                                    <h3>Almost There</h3>
+                                    <p>Hi " . $forgotUserEmail . "</p>
+                                    <p>Please enter the 6 digit OTP that we just sent on +91-" . $forgotPassPhoneNumber . "</p>
+                                    <p class='error'>OTP not valid</p>
+                                </div>
+                                <div class='sign-up-content'>
+                                    <form action='' method='post' id='forgot_password_otp_form'>
+                                        <div class='input_field_box'>
+                                            <input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' class='otp_input_field'/>
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                        </div>
+                                        <input type='hidden' value='forgot_password_validation'>
+                                        <div id='resend_otp_forgot'>Resend OTP</div>
+                                        <button type='submit' class='button-submit' id='submitotp'>Verify OTP</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>";
+                return $html;
+            }
+        } else {
+            $html = '<button class="revert-back" id="back-to-use_email">Back</button>
+                        <div class="sign-up-forms-details">
+                            <div class="login-heading">
+                            <img src="https://golfoy.com/media/logo/stores/1/Golfoy.png" title="Golfoy.com: India Online Golf Shop" alt="Golfoy.com India Online Golf Shop" width="403" height="103">         
+
+                            <p>Please enter your mobile number to <br> Sign In / Sign Up</p>
+                                <p class="error">Something went wrong. Please try again.</p>
+                            </div>
+                            <div class="mobile-number-login-create">
+                                <form action="" method="post" id="forgot-password">
+                                    <div class="mobile-number-login">+91</div>
+                                    <input type="text" inputmode="numeric" maxlength="10" oninput="javascript: if (this.value.length > 10) this.value = this.value.slice(0, 10);"  class="new-mobile-number" name="mobileNumber" placeholder="Enter Mobile Number" autocomplete="off" id="forgot-password-mobile" required>
+                                    <input type="hidden" name="pagetype" value="forgot_password_otp" class="new-number-pagetype">
+                                    <div id="resend_otp_forgot">Resend OTP</div>
+                                    <button type="submit" id="number_input">Send OTP</button>
+                                </form>    
+                            </div>
+                        </div>';
+            return $html;
+        }
+    }
+
+    public function set_new_password($formData)
+    {
+
+        if (isset($_COOKIE['forgot-password-mobilenumber'])) {
+            $forgotPassPhoneNumber = $_COOKIE['forgot-password-mobilenumber'];
+            $resetCustomerPassword = $this->_data->updateCustomerPasswordByMobileNumber($forgotPassPhoneNumber, $formData);
+            if ($resetCustomerPassword) {
+                $html = "<button class='revert-back' id='back-to-use_number'>Back</button>
+                            <div class='sign-up-forms-details'>
+                                <div class='sign-up-content'>
+                                    <div class='login-heading'>
+                                    <img src='https://golfoy.com/media/logo/stores/1/Golfoy.png' title='Golfoy.com: India Online Golf Shop' alt='Golfoy.com India Online Golf Shop' width='403' height='103'>         
+
+                                        <p>Your password has been changed.</p>              
+                                    </div>
+                                    <div class='enter_email'> 
+                                        <form action='' method='post'  id='enter_email'>
+                                        <div class='form-group'>
+                                            <input type='email' name='email' class='email-input' placeholder='Enter email' required>
+                                            <lable for='email' class='email-label'>E-mail Address</lable>
+                                        </div>
+                                        <div class='form-group'>
+                                            <input type='password' name='password' maxlength='20' class='password-input' placeholder='Password' required>
+                                            <label for='password' class='password-label'>Password</label>
+                                        </div>
+
+                                            <span toggle='#password-field' class='fa fa-fw fa-eye-slash field_icon toggle-password'></span>
+
+                                            <input type='hidden' name='pagetype' value='enter_password'>
+                                            <div class='custom-button'>
+                                                <h2 class='forget-password' id='forget-password'>Forgot Password</h2>
+                                                <h2 class='use-number' id='use_number'>Use Mobile Number</h2>
+                                            </div>
+                                            <div class='terms-condition-content'>
+                                            <div class='terms-condition-content'>
+                                            <p>On Clicking Log In, I agree to <a href='https://golfoy.com/terms-and-conditions' class='acnhor_page'>Terms of Service </a>& <a href='https://golfoy.com/privacy-policy-cookie-restriction-mode'
+                                            class='acnhor_page'>Privacy Policy </a>
+                                        </div>
+                                            </div>
+                                            <button type='submit' class='button-submit'>Log In</button>
+
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>";
+                return $html;
+            } else {
+                $html = "<button class='revert-back' id='back-to-use_number'>Back</button>
+                            <div class='sign-up-forms-details'>
+                                <div class='sign-up-content'>
+                                    <div class='login-heading'>
+                                    <img src='https://golfoy.com/media/logo/stores/1/Golfoy.png' title='Golfoy.com: India Online Golf Shop' alt='Golfoy.com India Online Golf Shop' width='403' height='103'>         
+                                        <p class='error'>Something went wrong. Please try again.</p>              
+                                    </div>
+                                    <div class='enter_email'> 
+                                        <form action='' method='post'  id='enter_email'>
+                                        <div class='form-group'>
+                                            <input type='email' name='email' class='email-input' placeholder='Enter email' required>
+                                            <lable for='email' class='email-label'>E-mail Address</lable>
+                                        </div>
+                                        <div class='form-group'>
+                                            <input type='password' name='password' maxlength='20' class='password-input' placeholder='Password' required>
+                                            <label for='password' class='password-label'>Password</label>
+                                        </div>
+
+                                            <span toggle='#password-field' class='fa fa-fw fa-eye-slash field_icon toggle-password'></span>
+
+                                            <input type='hidden' name='pagetype' value='enter_password'>
+                                            <div class='custom-button'>
+                                                <h2 class='forget-password' id='forget-password'>Forgot Password</h2>
+                                                <h2 class='use-number' id='use_number'>Use Mobile Number</h2>
+                                            </div>
+                                            <div class='terms-condition-content'>
+                                            <div class='terms-condition-content'>
+                                            <p>On Clicking Log In, I agree to <a href='https://golfoy.com/terms-and-conditions' class='acnhor_page'>Terms of Service </a>& <a href='https://golfoy.com/privacy-policy-cookie-restriction-mode'
+                                            class='acnhor_page'>Privacy Policy </a>
+                                        </div>
+                                            </div>
+                                            <button type='submit' class='button-submit'>Log In</button>
+
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>";
+                return $html;
+            }
+        }
+    }
+
+    public function enter_number()
+    {
+        if (isset($_COOKIE['new-user-email'])) {
+            $newEmail = $_COOKIE['new-user-email'];
+
+            $html = '<button class="revert-back" id="back-to-enter_email">Back</button><div class="sign-up-forms-details">
+                            <div class="mobile-number-login-create">
+                            <div class="login-heading">
+                                <h4>Create an account</h4>
+                                <p class="error"> Your are not register with this email ' . $newEmail . '</p>
+                            </div>
+                                <form action="" method="post" id="create-account-otp">
+                                <div class="form-group">
+                                    <input type="text" name="firstname" placeholder="Enter Name" class="first-name">
+                                    <lable for="firstname" class="first-name-label">First Name</lable>
+                                </div>
+                                <div class="form-group">
+                                    <div class="mobile-number-login">+91</div>
+                                    <input type="text" inputmode="numeric" maxlength="10" oninput="javascript: if (this.value.length > 10) this.value = this.value.slice(0, 10);"  class="new-mobile-number" name="mobileNumber" placeholder="Enter Mobile Number" autocomplete="off" id="create-mobileNumber" required>
+                                    <lable name="phonenumber" for="phonenumber" class="phone-no-label">Phone Number</lable>
+                                </div>
+
+                                    <input type="hidden" name="pagetype" value="enter_otp_registration" class="new-number-pagetype">
+                                    <button type="submit" id="number_input">Send OTP</button>
+                                </form>    
+                            </div>
+                        </div>';
+            return $html;
+        } else {
+            $html = "<button class='revert-back' id='back-to-use_number'>Back</button>
+                        <div class='sign-up-forms-details'>
+                            <div class='sign-up-content'>
+                                <div class='login-heading'>
+                                <img src='https://golfoy.com/media/logo/stores/1/Golfoy.png' title='Golfoy.com: India Online Golf Shop' alt='Golfoy.com India Online Golf Shop' width='403' height='103'>         
+                                <p class='error'>Something went wrong at the my side Please enter details again</p>              
+                                </div>
+                                <div class='enter_email'> 
+                                    <form action='' method='post'  id='enter_email'>
+                                    <div class='form-group'>
+                                        <input type='email' name='email' class='email-input' placeholder='Enter email' required>
+                                        <lable for='email' class='email-label'>E-mail Address</lable>
+                                    </div>
+                                    <div class='form-group'>
+                                        <input type='password' name='password' maxlength='20' class='password-input' placeholder='Password' required>
+                                        <label for='password' class='password-label'>Password</label>
+                                    </div>
+                                        <span toggle='#password-field' class='fa fa-fw fa-eye-slash field_icon toggle-password'></span>
+                                        <div class='custom-button'>
+                                            <h2 class='forget-password' id='forget-password'>Forgot Password</h2>
+                                            <h2 class='use-number' id='use_number'>Use Mobile Number</h2>
+                                        </div>
+                                        <input type='hidden' name='pagetype' value='enter_password'>
+                                        <div class='terms-condition-content'>
+                                        <div class='terms-condition-content'>
+                                        <p>On Clicking Log In, I agree to <a href='https://golfoy.com/terms-and-conditions' class='acnhor_page'>Terms of Service </a>& <a href='https://golfoy.com/privacy-policy-cookie-restriction-mode'
+                                        class='acnhor_page'>Privacy Policy </a>
+                                    </div>
+                                        </div>
+                                        <button type='submit' class='button-submit'>Log In</button>
+
+                                    </form>
+                                    <h2 class='use-number' id='use_number'>Use Mobile Number</h2>
+                                </div>
+                            </div>
+                        </div>";
+            return $html;
+        }
+    }
+
+
+    public function enter_otp_registration($formData)
+    {
+        if (isset($_COOKIE['new-user-email']) && isset($_COOKIE['new-user-email-password'])) {
+
+            if ($this->_data->isMobileNumberRegistered($formData) !== false) {
+                setcookie('userid', '', time() - 3600, '/');
+                setcookie('userid', $formData, time() + 300, '/');
+                $newEmail = $_COOKIE['new-user-email'];
+
+                $html = '<button class="revert-back" id="back-to-enter_email">Back</button><div class="sign-up-forms-details">
+                                <div class="mobile-number-login-create">
+                                <div class="login-heading">
+                                    <h4>Create an account</h4>
+                                    <p class="error"> Your are not register with this email ' . $newEmail . '</p>
+                                    <p class="error"> Phone number already registered. Please use a different phone number.</p>
+                                </div>
+                                    <form action="" method="post" id="create-account-otp">
+                                    <div class="form-group">
+                                        <input type="text" name="firstname" placeholder="Enter Name" class="first-name">
+                                        <lable for="firstname" class="first-name-label">First Name</lable>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="mobile-number-login">+91</div>
+                                        <input type="text" inputmode="numeric" maxlength="10" oninput="javascript: if (this.value.length > 10) this.value = this.value.slice(0, 10);" class="new-mobile-number" name="mobileNumber" placeholder="Enter Mobile Number" autocomplete="off" id="create-mobileNumber" required>
+                                        <lable name="phonenumber" for="phonenumber" class="phone-no-label">Phone Number</lable>
+                                    </div>
+    
+                                        <input type="hidden" name="pagetype" value="enter_otp_registration" class="new-number-pagetype">
+                                        <button type="submit" id="number_input">Send OTP</button>
+                                    </form>    
+                                </div>
+                            </div>';
+                return $html;
+            } else {
+                $check = $this->_data->sendOTP($formData);
+                // var_dump($check);die;
+                if (strpos($check, 'success') !== false || strpos($check, 'accepted') !== false) {
+                    setcookie('userid', '', time() - 3600, '/');
+                    setcookie('userid', $formData, time() + 300, '/');
+                    // <input type='text' name='otp' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' class='otp-input' id='otpvalidation' placeholder='Enter OTP' inputmode='numeric' autocomplete='one-time-code' required>
+                    $html = "<div class='enter_otpsignonform'>
+                                    <div class='login-heading'>
+                                        <h3>Almost There</h3>
+                                        <p>Please enter the 6 digit OTP that we just sent on +91- " . $formData . "</p>
+                                    </div>
+                                    <form action='' method='post' id='otp_validation_form'>
+                                        <div class='input_field_box'>
+                                            <input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' class='otp_input_field'/>
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                        </div>
+                                        <input type='hidden' name='pagetype' value='registration_otp_validation'>
+                                        <div class='edit-button'>
+                                        <div id='edit_number_create'>Edit Number</div>
+                                        <div id='resend_otp_create'>Resend OTP</div>
+                                        </div>
+                                        <button type='submit' class='button-submit' id='submit_otp'>Verify OTP</button>
+                                    </form>
+                                    
+                                </div>";
+                    return $html;
+                } elseif (strpos($check, 'invalid_phone_number') !== false) {
+                    $newEmail = $_COOKIE['new-user-email'];
+
+                    $html = '<button class="revert-back" id="back-to-enter_email">Back</button><div class="sign-up-forms-details">
+                                    <div class="mobile-number-login-create">
+                                    <div class="login-heading">
+                                        <h4>Create an account</h4>
+                                        <p class="error"> Your are not register with this email ' . $newEmail . '</p>
+                                        <p class="error"> Phone number not valid. Please use a valid phone number.</p>
+                                    </div>
+                                        <form action="" method="post" id="create-account-otp">
+                                        <div class="form-group">
+                                            <input type="text" name="firstname" placeholder="Enter Name" class="first-name">
+                                            <lable for="firstname" class="first-name-label">First Name</lable>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="mobile-number-login">+91</div>
+                                            <input type="text" inputmode="numeric" oninput="javascript: if (this.value.length > 10) this.value = this.value.slice(0, 10);" maxlength="10"  class="new-mobile-number" name="mobileNumber" placeholder="Enter Mobile Number" autocomplete="off" id="create-mobileNumber" required>
+                                            <lable name="phonenumber" for="phonenumber" class="phone-no-label">Phone Number</lable>
+                                        </div>
+        
+                                            <input type="hidden" name="pagetype" value="enter_otp_registration" class="new-number-pagetype">
+                                            <button type="submit" id="number_input">Send OTP</button>
+                                        </form>    
+                                    </div>
+                                </div>';
+                    return $html;
+                } else {
+                    $html = '<div class="sign-up-forms-details">
+                                <div class="login-heading">
+                                <img src="https://golfoy.com/media/logo/stores/1/Golfoy.png" title="Golfoy.com: India Online Golf Shop" alt="Golfoy.com India Online Golf Shop" width="403" height="103">         
+
+                                    <h4>Create an account</h4>
+                                    <p class="error">Phone number not valid</p>
+                                </div>
+                                <div class="mobile-number-login-create">
+                                    <form action="" method="post" id="create-account-otp">
+                                    <div class="form-group">
+                                    <input type="text" name="firstname" placeholder="Enter Name" class="first-name">
+                                    <lable for="firstname" class="first-name-label">First Name</lable>
+                                </div>
+                                        <div class="mobile-number-login">+91</div>
+                                        <input type="text" inputmode="numeric" maxlength="10"  class="new-mobile-number" name="mobileNumber" placeholder="Enter Mobile Number" autocomplete="off" id="create-mobileNumber" required>
+                                        <input type="hidden" name="pagetype" value="enter_otp_registration" class="new-number-pagetype">
+                                        <button type="submit" id="number_input">Send OTP</button>
+                                    </form>    
+                                </div>
+                            </div>';
+                    return $html;
+                }
+            }
+        } else {
+            $html = "<button class='revert-back' id='back-to-use_number'>Back</button>
+                    <div class='sign-up-forms-details'>
+                        <div class='sign-up-content'>
+                            <div class='login-heading'>
+                            <img src='https://golfoy.com/media/logo/stores/1/Golfoy.png' title='Golfoy.com: India Online Golf Shop' alt='Golfoy.com India Online Golf Shop' width='403' height='103'>         
+
+                                <p class='error'>Something went wrong at the my side Please enter details again</p>              
+                            </div>
+                            <div class='enter_email'> 
+                                <form action='' method='post'  id='enter_email'>
+                                <div class='form-group'>
+                                    <input type='email' name='email' class='email-input' placeholder='Enter email' required>
+                                    <lable for='email' class='email-label'>E-mail Address</lable>
+                                </div>
+                                <div class='form-group'>
+                                    <input type='password' name='password' maxlength='20' class='password-input' placeholder='Password' required>
+                                    <label for='password' class='password-label'>Password</label>
+                                </div>
+                                    <span toggle='#password-field' class='fa fa-fw fa-eye-slash field_icon toggle-password'></span>
+                                    <input type='hidden' name='pagetype' value='enter_password'>
+                                    <div class='custom-button'>
+                                        <h2 class='forget-password' id='forget-password'>Forgot Password</h2>
+                                        <h2 class='use-number' id='use_number'>Use Mobile Number</h2>
+                                    </div>
+                                    <div class='terms-condition-content'>
+                                    <div class='terms-condition-content'>
+                                    <p>On Clicking Log In, I agree to <a href='https://golfoy.com/terms-and-conditions' class='acnhor_page'>Terms of Service </a>& <a href='https://golfoy.com/privacy-policy-cookie-restriction-mode'
+                                    class='acnhor_page'>Privacy Policy </a>
+                                </div>
+                                    </div>
+                                    <button type='submit' class='button-submit'>Log In</button>
+
+                                </form>
+                                <h2 class='use-number' id='use_number'>Use Mobile Number</h2>
+                            </div>
+                        </div>
+                    </div>";
+            return $html;
+        }
+    }
+
+
+    public function registration_otp_validation($formData)
+    {
+        $postData = [];
+        if (isset($_COOKIE['userid']) && isset($_COOKIE['new-user-email']) && isset($_COOKIE['new-user-email-password'])) {
+            $userId = $_COOKIE['userid'];
+            $user_email = $_COOKIE['new-user-email'];
+            $userpassword = $_COOKIE['new-user-email-password'];
+            $userpassword = $_COOKIE['new-user-name'];
+            $errorMessage = $this->_data->validateOTP($formData, $userId);
+            //die($userId.'  '.$user_email.'  '.$errorMessage);
+            if ($errorMessage !== null) {
+
+                if ($errorMessage == 'true') {
+
+                    $postData['email'] = $user_email;
+                    $postData['phone'] = $userId;
+                    $postData['password'] = $userpassword;
+                    $postData['name'] = $userpassword;
+                    $currentWebsiteId = $this->storeManager->getStore()->getWebsiteId();
+                    $createCustomerStatus = $this->_data->createAccount($postData, $currentWebsiteId);
+
+                    if ($createCustomerStatus) {
+                        if ($this->customerLogin($userId)) {
+                            $html = "<div class='enter_phone'>valid</div>";
+                            return '<h2 class="signup-successful">SignUp Successful</h2><img class="success_image "rel="account_created" src="https://golfoy.com/media/sales/download.gif"><h3 class="signup-line">Your account is created successfully and You are logging in</h3>';
+                        }
+                    } else {
+                        $html = '<div class="sign-up-forms-details">
+                                    <form name="login-number" id="login-number" action="#">
+                                        <div class="sign-up-content">
+                                            <div class="login-heading">
+                                            <img src="https://golfoy.com/media/logo/stores/1/Golfoy.png" title="Golfoy.com: India Online Golf Shop" alt="Golfoy.com India Online Golf Shop" width="403" height="103">         
+                                                <p  class="normal-login-popup">Please enter your mobile number to <br> Sign In / Sign Up</p>
+                                                <p class="error"> Your number already register</p>
+                                            </div>
+                                            <div class="input_form_div">
+                                                <div class="form-group">
+                                                    <div class="mobile-number-login__dateSlct">+91</div><input type="text" inputmode="numeric"
+                                                    oninput="javascript: if (this.value.length > 10) this.value = this.value.slice(0, 10);"
+                                                        maxlength="10" class="mobile-number-login__form_control" name="mobileNumber"
+                                                        placeholder="Enter Mobile Number" autocomplete="off" id="mobileNumber" value="">
+                
+                                                </div>
+                                            </div>
+                                            <div class="terms-condition-content">
+                                            <p>On Clicking Continue, I agree to <a href="https://golfoy.com/terms-and-conditions" class="acnhor_page">Terms of Service </a>& <a href="https://golfoy.com/privacy-policy-cookie-restriction-mode"
+                                            class="acnhor_page">Privacy Policy </a>
+                                        </div>
+                                            </div>
+                                            <div class="submit_form_button">
+                                                <button class="sbmt_btn" type="">continue</button>
+                                            </div>
+                                            
+                                            <h2 class="use-email" id="use_email">Sign in using E-mail</h2>
+                                        </div>
+                                    </form>
+                                </div>';
+                        return $html;
+                    }
+                } elseif ($errorMessage == 'OTP_NOT_VALIDE' || $errorMessage == 'OTP_EXPIRED') {
+                    // <input type='text' name='otp' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' class='otp-input' id='otpvalidation' placeholder='Enter OTP' inputmode='numeric' autocomplete='one-time-code' required>
+                    $html = "<div class='enter_otpsignonform'>
+                                    <div class='login-heading'>
+                                        <h3>Almost There</h3>
+                                        <p>Please enter the 6 digit OTP that we just sent on +91- " . $userId . "</p>
+                                        <p class='error'>OTP not valid</p>
+                                    </div>
+                                    <form action='' method='post' id='otp_validation_form'>
+                                        <div class='input_field_box'>
+                                            <input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' class='otp_input_field'/>
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                        </div>
+                                        <input type='hidden' name='pagetype' value='registration_otp_validation'>
+                                        <div class='edit-button'>
+                                        <div id='edit_number_create'>Edit Number</div>
+                                        <div id='resend_otp_create'>Resend OTP</div>
+                                        </div>
+                                        <button type='submit' class='button-submit' id='submit_otp'>Verify OTP</button>
+                                    </form>
+                                    
+                                </div>";
+                    return $html;
+                } elseif ($errorMessage == 'false') {
+                    return $this->enter_golfoy($user_email);
+                } else {
+                    $dummyData = '';
+                    return $this->create_email($dummyData);
+                }
+            }
+        } else {
+            $html = "<button class='revert-back' id='back-to-use_number'>Back</button>
+                    <div class='sign-up-forms-details'>
+                        <div class='sign-up-content'>
+                            <div class='login-heading'>
+                            <img src='https://golfoy.com/media/logo/stores/1/Golfoy.png' title='Golfoy.com: India Online Golf Shop' alt='Golfoy.com India Online Golf Shop' width='403' height='103'>         
+
+                                <p class='error'>Something went wrong at the my side Please enter details again</p>              
+                            </div>
+                            <div class='enter_email'> 
+                                <form action='' method='post'  id='enter_email'>
+                                <div class='form-group'>
+                                    <input type='email' name='email' class='email-input' placeholder='Enter email' required>
+                                    <lable for='email' class='email-label'>E-mail Address</lable>
+                                </div>
+                                <div class='form-group'>
+                                    <input type='password' name='password' maxlength='20' class='password-input' placeholder='Password' required>
+                                    <label for='password' class='password-label'>Password</label>
+                                </div>
+                                    <span toggle='#password-field' class='fa fa-fw fa-eye-slash field_icon toggle-password'></span>
+                                    <input type='hidden' name='pagetype' value='enter_password'>
+                                    <div class='terms-condition-content'>
+                                    <p>On Clicking Log In, I agree to <a href='https://golfoy.com/terms-and-conditions' class='acnhor_page'>Terms of Service </a>& <a href='https://golfoy.com/privacy-policy-cookie-restriction-mode'
+                                    class='acnhor_page'>Privacy Policy </a>
+                                </div>
+                                    <button type='submit' class='button-submit'>Log In</button>
+
+                                </form>
+                                <h2 class='use-number' id='use_number'>Use Mobile Number</h2>
+                            </div>
+                        </div>
+                    </div>";
+            return $html;
+        }
+    }
+
+    public function validate_password($formData)
+    {
+        $validationPasswordHtml = "Your are Logging";
+        if (isset($_COOKIE['new-user-email'])) {
+            $userEmail = $_COOKIE['new-user-email'];
+            $validationUserByEmail =  $this->_data->customerLoginByEmail($userEmail, $formData);
+            if ($validationUserByEmail) {
+
+                if (!$this->_data->isPhoneNumberAvailable($userEmail)) {
+                    setcookie('new-user-email', '', time() - 3600, '/');
+                    setcookie('new-user-email-password', '', time() - 3600, '/');
+                    $this->customerSession->setCustomerAsLoggedIn($validationUserByEmail);
+                    return '<h2 class="login-successful">Login Successful</h2><img class="success_image" src="https://golfoy.com/media/sales/download.gif"><h3 class="signup-line">You are successfully logged in</h3>';
+                } else {
+                    return $this->add_phonenumber();
+                }
+            } else {
+
+                $html = "<button class='revert-back' id='back-to-use_number'>Back</button>
+                        <div class='sign-up-content'>
+                            <div class='login-heading'>
+                            <img src='https://golfoy.com/media/logo/stores/1/Golfoy.png' title='Golfoy.com: India Online Golf Shop' alt='Golfoy.com India Online Golf Shop' width='403' height='103'>         
+
+                                <p class='error' >Username and Password not valid</p>
+                            </div>
+                            <div class='enter_email'>
+                                <form action='' method='post'  id='enter_email'>
+                                <div class='form-group'>
+                                    <input type='email' name='email' class='email-input' placeholder='Enter email' required>
+                                    <lable for='email' class='email-label'>E-mail Address</lable>
+                                </div>
+                                <div class='form-group'>
+                                    <input type='password' name='password' maxlength='20' class='password-input' placeholder='Password' required>
+                                    <label for='password' class='password-label'>Password</label>
+                                </div>
+                                    <span toggle='#password-field' class='fa fa-fw fa-eye-slash field_icon toggle-password'></span>
+                                    <div class='custom-button'>
+                                        <h2 class='forget-password' id='forget-password'>Forgot Password</h2>
+                                        <h2 class='use-number' id='use_number'>Use Mobile Number</h2>
+                                    </div>
+                                    <input type='hidden' name='pagetype' value='enter_password'>
+                                    <div class='terms-condition-content'>
+                                    <p>On Clicking Log In, I agree to <a href='https://golfoy.com/terms-and-conditions' class='acnhor_page'>Terms of Service </a>& <a href='https://golfoy.com/privacy-policy-cookie-restriction-mode'
+                                    class='acnhor_page'>Privacy Policy </a>
+                                </div>
+                                    <button type='submit' class='button-submit'>Log In</button>
+                                </form>
+                            </div>
+                        </div>";
+                return $html;
+            }
+        } else {
+            // return $this->enter_email();
+            $html = "<button class='revert-back' id='back-to-use_number'>Back</button>
+                    <div class='sign-up-content'>
+                        <div class='login-heading'>
+                        <img src='https://golfoy.com/media/logo/stores/1/Golfoy.png' title='Golfoy.com: India Online Golf Shop' alt='Golfoy.com India Online Golf Shop' width='403' height='103'>         
+
+                            <p class='error'>Oops!! something wrong at out end</p>
+                        </div>
+                        <div class='enter_email'>
+                            <form action='' method='post'  id='enter_email'>
+                            <div class='form-group'>
+                                <input type='email' name='email' class='email-input' placeholder='Enter email' required>
+                                <lable for='email' class='email-label'>E-mail Address</lable>
+                            </div>
+                            <div class='form-group'>
+                                <input type='password' name='password' maxlength='20' class='password-input' placeholder='Password' required>
+                                <label for='password' class='password-label'>Password</label>
+                            </div>
+                                <span toggle='#password-field' class='fa fa-fw fa-eye-slash field_icon toggle-password'></span>
+                                <input type='hidden' name='pagetype' value='enter_password'>
+                                <div class='terms-condition-content'>
+                                <p>On Clicking Log In, I agree to <a href='https://golfoy.com/terms-and-conditions' class='acnhor_page'>Terms of Service </a>& <a href='https://golfoy.com/privacy-policy-cookie-restriction-mode'
+                                class='acnhor_page'>Privacy Policy </a>
+                            </div>
+                                <button type='submit' class='button-submit'>Log In</button>
+                            </form>
+                            <h2 class='use-number' id='use_number'>Use Mobile Number</h2>
+                        </div>
+                    </div>";
+            return $html;
+        }
+    }
+
+    public function add_phonenumber()
+    {
+        $html = '<button class="revert-back" id="back-to-use_email">Back</button>
+                 <div class="sign-up-forms-details">
+                    <div class="login-heading">
+                    <img src="https://golfoy.com/media/logo/stores/1/Golfoy.png" title="Golfoy.com: India Online Golf Shop" alt="Golfoy.com India Online Golf Shop" width="403" height="103">         
+                    <p>Please enter your mobile number to <br> Sign In / Sign Up</p>
+                    </div>
+                    <div class="mobile-number-login-create">
+                        <form action="" method="post" id="add-phonenumber">
+                            <div class="mobile-number-login">+91</div>
+                            <input type="text" inputmode="numeric" maxlength="10"  class="new-mobile-number" name="mobileNumber" placeholder="Enter Mobile Number" autocomplete="off" id="add-mobilenumber" required>
+                            <input type="hidden" name="pagetype" value="add_phonenumber_otp" class="new-number-pagetype">
+                            <button type="submit" id="number_input">Send OTP</button>
+                        </form>    
+                    </div>
+                </div>';
+        return $html;
+    }
+
+    public function add_phonenumber_otp($formData)
+    {
+        if ($this->_data->isMobileNumberRegistered($formData)) {
+            $html = '<button class="revert-back" id="back-to-use_email">Back</button>
+                    <div class="sign-up-forms-details">
+                    <div class="login-heading">
+                    <img src="https://golfoy.com/media/logo/stores/1/Golfoy.png" title="Golfoy.com: India Online Golf Shop" alt="Golfoy.com India Online Golf Shop" width="403" height="103">         
+                        <p class="error">This number already exist</p>
+                    </div>
+                    <div class="mobile-number-login-create">
+                        <form action="" method="post" id="add-phonenumber">
+                            <div class="mobile-number-login">+91</div>
+                            <input type="text" inputmode="numeric" maxlength="10"  class="new-mobile-number" name="mobileNumber" placeholder="Enter Mobile Number" autocomplete="off" id="add-mobilenumber" required>
+                            <input type="hidden" name="pagetype" value="add_phonenumber_validation" class="new-number-pagetype">
+                            <button type="submit" id="number_input">Send OTP</button>
+                        </form>    
+                    </div>
+                </div>';
+            return $html;
+        } else {
+            $check = $this->_data->sendOTP($formData);
+
+            // <input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' name='otp' class='otp-input' id='otpvalidation' placeholder='Enter OTP' inputmode='numeric' autocomplete='one-time-code' required>
+            if (strpos($check, 'enter_email') !== false) {
+                $html = "<div class='sign-up-forms-details'> 
+                            <div class='enter_otpsignonform'>
+                                <div class='login-heading'>
+                                    <h3>Almost There</h3>
+                                    <p>Please enter the 6 digit OTP that we just sent on +91-" . $formData . "</p>
+                                </div>
+                                <div class='sign-up-content'>
+                                    <form action='' method='post' id='add_phonenumber_otp_form'>
+                                        <div class='input_field_box'>
+                                            <input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' class='otp_input_field'/>
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                        </div>
+                                        <div class='add-phonenumber-edit-button'>
+                                        <h2 id='add-phonenumber-edit'>Edit Number</h2>
+                                        <h2 id='add-phonenumber-resend_otp'>Resend OTP</h2>
+                                       </div>
+                                        <button type='submit' class='button-submit' id='submitotp'>Verify OTP</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>";
+                return $html;
+            } elseif (strpos($check, 'invalid_phone_number') !== false) {
+                $html = '<div class="sign-up-forms-details">
+                        <div class="login-heading">
+                        <img src="https://golfoy.com/media/logo/stores/1/Golfoy.png" title="Golfoy.com: India Online Golf Shop" alt="Golfoy.com India Online Golf Shop" width="403" height="103">         
+
+                            <p class="error">Enter Valid Phone Number</p>
+                        </div>
+                        <div class="mobile-number-login-create">
+                            <form action="" method="post" id="add-phonenumber">
+                                <div class="mobile-number-login">+91</div>
+                                <input type="text" inputmode="numeric" maxlength="10"  class="new-mobile-number" name="mobileNumber" placeholder="Enter Mobile Number" autocomplete="off" id="add-mobilenumber" required>
+                                <input type="hidden" name="pagetype" value="enter_otp_registration" class="new-number-pagetype">
+                                <button type="submit" id="number_input">Send OTP</button>
+                            </form>    
+                        </div>
+                    </div>';
+                return $html;
+            } else {
+                // <input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' name='otp' class='otp-input' id='otpvalidation' placeholder='Enter OTP' inputmode='numeric' autocomplete='one-time-code' required>
+                $html = "<div class='sign-up-forms-details'> 
+                            <div class='enter_otpsignonform'>
+                                <div class='login-heading'>
+                                    <h3>Almost There</h3>
+                                    <p>Please enter the 6 digit OTP that we just sent on +91- " . $formData . "</p>
+                                </div>
+                                <div class='sign-up-content'>
+                                    <form action='' method='post' id='add_phonenumber_otp_form'>
+                                        <div class='input_field_box'>
+                                            <input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' class='otp_input_field'/>
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                        </div>
+                                        <input type='hidden' name='pagetype' value='add_phonenumber_validation' class='new-number-pagetype'>
+                                        <div class='add-phonenumber-edit-button'>
+                                        <h2 id='add-phonenumber-edit'>Edit Number</h2>
+                                        <h2 id='add-phonenumber-resend_otp'>Resend OTP</h2>
+                                        </div>
+                                        <button type='submit' class='button-submit' id='submitotp'>Verify OTP</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>";
+                return $html;
+            }
+        }
+    }
+
+    public function add_phonenumber_validation($formData)
+    {
+        if (isset($_COOKIE['add-mobilenumber']) && isset($_COOKIE['new-user-email'])) {
+            $userEmail = $_COOKIE['new-user-email'];
+            $phoneNumber = $_COOKIE['add-mobilenumber'];
+            $otpValidationResponse = $this->_data->validateOTP($formData, $phoneNumber);
+            var_dump($otpValidationResponse);
+            die;
+            if ($otpValidationResponse !== 'true') {
+                $savedCustomerMobileNumber = $this->_data->addCustomerPhoneNumber($phoneNumber, $userEmail);
+                if ($savedCustomerMobileNumber) {
+                    $this->customerSession->setCustomerAsLoggedIn($savedCustomerMobileNumber);
+                    return '<h2 class="login-successful">Login Successful</h2><img class="success_image" src="https://golfoy.com/media/sales/download.gif"><h3 class="signup-line">You are successfully logged in</h3>';
+                } else {
+                    $html = '<div class="sign-up-forms-details">
+                                <div class="login-heading">
+                                <img src="https://golfoy.com/media/logo/stores/1/Golfoy.png" title="Golfoy.com: India Online Golf Shop" alt="Golfoy.com India Online Golf Shop" width="403" height="103">         
+
+                                    <p class="error">Oops! Something went wrong at our side. Please try again.!!!</p>
+                                </div>
+                                <div class="mobile-number-login-create">
+                                    <form action="" method="post" id="add-phonenumber">
+                                        <div class="mobile-number-login">+91</div>
+                                        <input type="text" inputmode="numeric" maxlength="10"  class="new-mobile-number" name="mobileNumber" placeholder="Enter Mobile Number" autocomplete="off" id="add-mobilenumber" required>
+                                        <input type="hidden" name="pagetype" value="enter_otp_registration" class="new-number-pagetype">
+                                        <button type="submit" id="number_input">Send OTP</button>
+                                    </form>    
+                                </div>
+                            </div>';
+                    return $html;
+                }
+            } else {
+                // <input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' name='otp' class='otp-input' id='otpvalidation' placeholder='Enter OTP' inputmode='numeric' autocomplete='one-time-code' required>
+                $html = "<div class='sign-up-forms-details'> 
+                            <div class='enter_otpsignonform'>
+                                <div class='login-heading'>
+                                    <h3>Almost There</h3>
+                                    <p>Please enter the 6 digit OTP that we just sent on +91- " . $phoneNumber . "</p>
+                                    <p class='error'>OTP Not Valid</p>
+                                </div>
+                                <div class='sign-up-content'>
+                                    <form action='' method='post' id='add_phonenumber_otp_form'>
+                                        <div class='input_field_box'>
+                                            <input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' class='otp_input_field'/>
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                        </div>
+                                        
+                                        <input type='hidden' name='pagetype' value='add_phonenumber_validation' class='new-number-pagetype'>
+                                        <div class='add-phonenumber-edit-button'>
+                                         <h2 id='add-phonenumber-edit'>Edit Number</h2>
+                                         <h2 id='add-phonenumber-resend_otp'>Resend OTP</h2>
+                                        </div>
+                                        <button type='submit' class='button-submit' id='submitotp'>Verify OTP</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>";
+                return $html;
+            }
+        } else {
+            $html = '<div class="sign-up-forms-details">
+                        <div class="login-heading">
+                        <img src="https://golfoy.com/media/logo/stores/1/Golfoy.png" title="Golfoy.com: India Online Golf Shop" alt="Golfoy.com India Online Golf Shop" width="403" height="103">         
+
+                            <p class="error">Oops! Something went wrong at our side. Please try again.</p>
+                        </div>
+                        <div class="mobile-number-login-create">
+                            <form action="" method="post" id="add-phonenumber">
+                                <div class="mobile-number-login">+91</div>
+                                <input type="text" inputmode="numeric" maxlength="10"  class="new-mobile-number" name="mobileNumber" placeholder="Enter Mobile Number" autocomplete="off" id="add-mobilenumber" required>
+                                <input type="hidden" name="pagetype" value="enter_otp_registration" class="new-number-pagetype">
+                                <button type="submit" id="number_input">Send OTP</button>
+                            </form>    
+                        </div>
+                    </div>';
+            return $html;
+        }
+    }
+
+    public function enter_otp($formData)
+    {
+
+        $check = $this->_data->sendOTP($formData);
+        setcookie('userid', '', time() - 3600, '/');
+        setcookie('userid', $formData, time() + 300, '/');
+
+        if (strpos($check, 'accepted') !== false) {
+
+            // $customer = $this->_data->isMobileNumberRegistered($formData);
+            //<input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' name='otp' class='otp-input' id='otpvalidation' placeholder='Enter OTP' inputmode='numeric' autocomplete='one-time-code' >
+
+            $html = "<div class='sign-up-forms-details'> 
+                        <div class='enter_otpsignonform'>
+                            <div class='login-heading'>
+                                <h3>Almost There</h3>
+                                
+                                <p>Please enter the 6 digit OTP that we just sent on +91- " . $formData . "</p>
+                            </div>
+                            <div class='sign-up-content'>
+                                <form action='' method='post' id='otp_form'>
+                                    <div class='input_field_box'>
+                                        <input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' class='otp_input_field'/>
+                                        <input type='number' class='hide' />
+                                        <input type='number' class='hide' />
+                                        <input type='number' class='hide' />
+                                        <input type='number' class='hide' />
+                                        <input type='number' class='hide' />
+                                    </div>
+                                    <div class='edit-button'>
+                                    <h2 id='edit_number'>Edit Number</h2>
+                                    <h2 id='resend_otp'>Resend OTP</h2>
+                                    </div>
+                                    
+                                    <button type='submit' class='button-submit' id='submitotp'>Verify OTP</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>";
+            return $html;
+        } elseif (strpos($check, 'invalid_phone_number') !== false) {
+            $html = '<div class="sign-up-forms-details">
+                        <form name="login-number" id="login-number" action="#">
+                            <div class="sign-up-content">
+                                <div class="login-heading">
+                                <img src="https://golfoy.com/media/logo/stores/1/Golfoy.png" title="Golfoy.com: India Online Golf Shop" alt="Golfoy.com India Online Golf Shop" width="403" height="103">         
+                                    <p class="normal-login-popup">Please enter your mobile number to <br> Sign In / Sign Up</p>
+                                    <p class="error">Please enter Valid mobile number</p>
+                                </div>
+                                <div class="input_form_div">
+                                    <div class="form-group">
+                                        <div class="mobile-number-login__dateSlct">+91</div>
+                                        <input type="text" inputmode="numeric"
+                                        oninput="javascript: if (this.value.length > 10) this.value = this.value.slice(0, 10);"
+                                        maxlength="10" class="mobile-number-login__form_control" name="mobileNumber"
+                                        placeholder="Enter Mobile Number" autocomplete="off" id="mobileNumber" value="">
+
+                                    </div>
+                                </div>
+                                <h2 class="use-email" id="use_email">Sign in using E-mail</h2>
+                                <div class="terms-condition-content">
+                                    <p>On Clicking Continue, I agree to <a href="https://golfoy.com/terms-and-conditions" class="acnhor_page">Terms of Service </a>& <a href="https://golfoy.com/privacy-policy-cookie-restriction-mode"
+                                    class="acnhor_page">Privacy Policy </a>
+                                </div>
+
+                                <div class="submit_form_button">
+                                    <button class="sbmt_btn" type="">continue</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>';
+            return $html;
+        } else {
+            setcookie('userid', '', time() - 3600, '/');
+            setcookie('userid', $formData, time() + 300, '/');
+
+            // <input type='text' name='otp' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' class='otp-input' id='otpvalidation' placeholder='Enter OTP' inputmode='numeric' autocomplete='one-time-code' required>
+            $html = "<div class='sign-up-forms-details'> 
+                        <div class='enter_otpsignonform'>
+                            <div class='login-heading'>
+                                <h3>Almost There</h3>
+                                <p>Please enter the 6 digit OTP that we just sent on +91- " . $formData . "</p>
+                            </div>
+                            <div class='sign-up-content'>
+                                <form action='' method='post' id='otp_form'>
+                                    <div class='input_field_box'>
+                                        <input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' class='otp_input_field'/>
+                                        <input type='number' class='hide' />
+                                        <input type='number' class='hide' />
+                                        <input type='number' class='hide' />
+                                        <input type='number' class='hide' />
+                                        <input type='number' class='hide' />
+                                    </div>
+                                    <div class='edit-button'>
+                                    <div class='timer' id='timer'></div>
+                                    <h2 id='edit_number'>Edit Number</h2>
+                                    <h2 id='resend_otp'>Resend OTP</h2>
+                                   </div>
+                                   
+                                    <div class='submit_form_otp_button'>
+                                        <button type='submit' class='button-submit' id='submitotp'>Verify OTP</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>";
+            return $html;
+        }
+    }
+
+    public function valid_otp($formData)
+    {
+        if (isset($_COOKIE['userid'])) {
+            $userId = $_COOKIE['userid'];
+        } else {
+            return $this->signon();
+        }
+
+        $errorMessage = $this->_data->validateOTP($formData, $userId);
+        if ($errorMessage !== null) {
+
+            if ($errorMessage == 'true' || $errorMessage == 'false') {
+                //isMobileNumberRegistered
+                if ($this->_data->isMobileNumberRegistered($userId)) {
+                    if ($this->customerLogin($userId)) {
+                        $html = "<div class='enter_phone'>valid</div>";
+                        return '<h2 class="login-successful">Login Successful</h2><img class="success_image" src="https://golfoy.com/media/sales/download.gif"><h3 class="signup-line">You are successfully logged in</h3>';
+                    }
+                } else {
+                    if (isset($_COOKIE['new-user-email-password']) && isset($_COOKIE['new-user-email'])) {
+
+                        return $this->enter_golfoy($_COOKIE['new-user-email']);
+                    } else {
+                        $dummyData = '';
+                        return $this->create_email($dummyData);
+                    }
+                }
+
+                // Perform further operations with $position
+            } elseif ($errorMessage == 'OTP_NOT_VALIDE' || $errorMessage == 'OTP_EXPIRED') {
+                // <input type='text' name='otp' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' class='otp-input' id='otpvalidation' placeholder='Enter OTP' inputmode='numeric' autocomplete='one-time-code' required>
+                $html = "<div class='sign-up-forms-details'> 
+                            <div class='enter_otpsignonform'>
+                                <div class='login-heading'>
+                                    <h3>Almost There</h3>
+                                    <p>Please enter the 6 digit OTP that we just sent on +91- " . $userId . "</p>
+                                    <p class='error'>OTP not valid</p>
+                                </div>
+                                <div class='sign-up-content'>
+                                    <form action='' method='post' id='otp_form'>
+                                        <div class='input_field_box'>
+                                            <input type='number' oninput='javascript: if (this.value.length > 6) this.value = this.value.slice(0, 6);' class='otp_input_field'/>
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                            <input type='number' class='hide' />
+                                        </div>
+                                        <div class='edit-button'>
+                                        <h2 id='edit_number'>Edit Number</h2>
+                                        <h2 id='resend_otp'>Resend OTP</h2>
+                                        </div>
+                                        <button type='submit' class='button-submit' id='submitotp'>Verify OTP</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>";
+                return $html;
+            } else {
+                $dummyData = '';
+                return $this->create_email($dummyData);
+            }
+        } else {
+            $html = "<div class='enter_otpsignonform'>OTP not valid
+                               
+                        <form action='' method='post' id='otp_form'>
+                            <input type='text' name='otp' class='otp-input' placeholder='Enter OTP' inputmode='numeric' autocomplete='one-time-code' required>
+                            <div class='edit-button'>
+                            <div id='edit_number'>Edit Number</div>
+                            <div id='resend_otp'>Resend OTP</div>
+                            </div>
+                            <button type='submit' class='button-submit' id='submitotp'>Verify OTP</button>
+                        </form>
+                        
+                    </div>";
+            return $html;
+        }
+    }
+    public function create_email($formData)
+    {
+        setcookie('new-user-email', '', time() - 3600, '/');
+
+        // if (!filter_var($formData, FILTER_VALIDATE_EMAIL)){
+        //     return $this->signon();
+        // }else{
+        // }
+        setcookie('new-user-email', $formData, time() + 300, '/');
+
+        if (isset($_COOKIE['userid'])) {
+            $currentTimeStamp = time();
+            $html = "<button class='revert-back' id='back-to-use_number'>Back</button>
+                    <div class='enter_email'>                    
+                        <form action='' method='post'  id='create_email'>
+                        <div class='login-heading'>
+                            <h3>Almost There</h3>
+                            <p>Your are not register with this phone number " . $_COOKIE['userid'] . "</p>
+                        </div>
+                        <div class='form-group'>
+                            <input type='text' name='firstname' placeholder='Enter Name' class='first-name'>
+                            <lable for='firstname' class='first-name-label'>First Name</lable>
+                        </div>
+                            <div class='form-group'>
+                                <input type='email' name='email' class='email-input' id='notregisteredemail' placeholder='Enter email'>
+                                <label for='email' class='email-label'>Email Address</label>
+                            </div>
+                            <input type='hidden' name='password' value=" . $currentTimeStamp . " id='notregisteredemailpassword' class='password-input' placeholder='Password' required>
+                            <span toggle='#password-field' class='fa fa-fw fa-eye-slash field_icon toggle-password'></span>
+                            <input type='hidden' name='pagetype' value='enter_golfoy'>
+                                                                
+                            <div class='terms-condition-content'>
+                                    <p>On Clicking Log In, I agree to <a href='https://golfoy.com/terms-and-conditions' class='acnhor_page'>Terms of Service </a>& <a href='https://golfoy.com/privacy-policy-cookie-restriction-mode'
+                                    class='acnhor_page'>Privacy Policy </a>
+                                </div>
+                            <button type='submit' class='button-submit' class='log_in'>Log In</button>
+                        </form>        
+                    </div>";
+            return $html;
+        } else {
+            return $this->signon();
+        }
+    }
+    public function enter_golfoy($username)
+    {
+        //setcookie('new-user-email', $username, time() + 300, '/');
+
+        if ($this->_data->isMobileNumberRegisteredOnThisEmail($username, $_COOKIE['userid']) == 'set_phone_number') {
+            if ($this->customerLogin($_COOKIE['userid'])) {
+                $html = "<div class='enter_phone'>valid</div>";
+                return '<h2 class="login-successful">Login Successful</h2><img class="success_image" src="https://golfoy.com/media/sales/download.gif"><h3 class="signup-line">You are successfully logged in</h3>';
+            }
+        } elseif ($this->_data->isMobileNumberRegisteredOnThisEmail($username, $_COOKIE['userid']) == false) {
+            // return $this->create_email($username);
+            $currentTimeStamp = time();
+            $html = "<button class='revert-back' id='back-to-use_number'>Back</button>
+                    <div class='enter_email'>                    
+                        <form action='' method='post'  id='create_email'>
+                        <div class='login-heading'>
+                            <h3>Almost There</h3>
+                            <p>Your are not register with this phone number " . $_COOKIE['userid'] . "</p>
+                            <p class='error hide'>This email already registered.</p>
+                        </div>
+                        <div class='form-group'>
+                            <input type='text' name='firstname' placeholder='Enter Name' class='first-name'>
+                            <lable for='firstname' class='first-name-label'>First Name</lable>
+                        </div>
+                        <div class='form-group'>
+                            <input type='email' name='email' class='email-input' id='notregisteredemail' placeholder='Enter email'>
+                            <lable for='email' class='email-label'>E-Mail Address</lable>
+                        </div>
+                            
+                            <input type='hidden' name='password' value=" . $currentTimeStamp . "  id='notregisteredemailpassword' class='password-input' placeholder='Password' required>
+                            <span toggle='#password-field' class='fa fa-fw fa-eye-slash field_icon toggle-password'></span>
+                            <input type='hidden' name='pagetype' value='enter_golfoy'>
+                                                                
+                            <div class='terms-condition-content'>
+                            <p>On Clicking Log In, I agree to <a href='https://golfoy.com/terms-and-conditions' class='acnhor_page'>Terms of Service </a>& <a href='https://golfoy.com/privacy-policy-cookie-restriction-mode'
+                            class='acnhor_page'>Privacy Policy </a>
+                        </div>
+                            <button type='submit' class='button-submit' class='log_in'>Log In</button>
+                        </form>        
+                    </div>";
+            return $html;
+        } else {
+            //$new_user_email = $_COOKIE['new-user-email'];
+            if (isset($_COOKIE['new-user-email'])) {
+                $new_user_email = $_COOKIE['new-user-email'];
+                $userNumber = $_COOKIE['userid'];
+            } else {
+                return "Something went Wrong please try again !!";
+            }
+            $userpassword = $_COOKIE['new-user-email-password'];
+            $userName = $_COOKIE['new-user-name'];
+            $postData['email'] = $new_user_email;
+            $postData['phone'] = $userNumber;
+            $postData['name'] = $userName;
+            $passwordModification = substr($userName, 0, 2) . '-' . $userpassword . '-' . substr($userNumber, -4);
+            $postData['password'] = $passwordModification;
+            $currentWebsiteId = $this->storeManager->getStore()->getWebsiteId();
+
+
+            $createCustomerStatus = $this->_data->createAccount($postData, $currentWebsiteId);
+            if ($createCustomerStatus) {
+
+                if ($this->customerLogin($userNumber)) {
+                    $html = "<div class='account-created-successfully'>
+                                <h3>Account has created</h3>
+                            </div>";
+                    $html = "<div class='enter_phone'>valid</div>";
+
+                    return '<h2 class="signup-successful">SignUp Successful</h2><img class="success_image" rel="account_created" src="https://golfoy.com/media/sales/download.gif"><h3 class="signup-line">Your account is created successfully and You are logging in</h3>';
+
+                    //return $html;
+                }
+            } else {
+                $html = "<div class='account-created-successfully'>
+                            <h3Something went Wrong please try again !!</h3>
+                        </div>";
+
+                return $html;
+            }
+        }
+    }
+
+
+    public function enter_phone()
+    {
+        $html = "<div class='enter_phone'>enter_phone html here</div>";
+        return $html;
+    }
+
+    public function customerLogin($number)
+    {
+        $customer = $this->customerModel->getCollection()->addAttributeToFilter('phone_number', $number);
+
+        foreach ($customer as $customers) {
+            $email = $customers->getEmail();
+        }
+
+        $customer = $this->customerModel->setWebsiteId(1)->loadByEmail($email);
+        $this->customerSession->setCustomerAsLoggedIn($customer);
+
+        return true;
+    }
+}

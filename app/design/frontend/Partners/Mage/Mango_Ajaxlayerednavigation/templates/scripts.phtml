@@ -1,0 +1,25 @@
+<?php
+/**
+ * Copyright © 2016 MangoExtensions. All rights reserved.
+ * */
+?>
+
+<script type="text/javascript">
+    /* grid mode or list mode , different settings ... */
+    var _ajaxlayerednavigation_url_handler = "<?= $block->getUrlHandlerPlugin(); ?>";
+    require([
+        'jquery',
+        'Mango_Ajaxlayerednavigation/ajaxlist',
+        'domReady!'], function ($) {
+
+        _ajaxlist_settings = <?= $block->getWidgetOptionsJson(); ?>;
+        _ajaxlist_settings.product_list_element = "#ajaxlist-reload-product_list";
+        _ajaxlist_settings.layered_navigation_element = "#ajaxlist-reload-layered-navigation";
+        _ajaxlist_settings.horizontal_layered_navigation_element = "#horizontal-layered-navigation-container";
+        _ajaxlist_settings.paginationLinks = ".toolbar-products ul.pages-items li a.page, .toolbar-products ul.pages-items li a.action";
+        _ajaxlist_settings.layeredNavigationLinks = "#ajaxlist-reload-layered-navigation .filter-items-list a, #ajaxlist-reload-layered-navigation #layered-navigation-state a, a#layered-navigation-filter-clear, #category-filters a.category-filter-link";
+
+        $(document).ajaxLayeredNavigation(_ajaxlist_settings);
+    });
+
+</script>

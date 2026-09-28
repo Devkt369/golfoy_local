@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2016 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">
+                os_branchrequest_delivery_history.os_branchrequest_delivery_history_data_source
+            </item>
+            <item name="deps" xsi:type="string">
+                os_branchrequest_delivery_history.os_branchrequest_delivery_history_data_source
+            </item>
+        </item>
+        <item name="spinner" xsi:type="string">os_branchrequest_delivery_history_columns</item>
+
+    </argument>
+    <dataSource name="transferstock_delivery_history_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">
+                Magestore\BranchRequest\Ui\DataProvider\InventoryTransfer\Form\DeliveryHistory
+            </argument>
+            <argument name="name" xsi:type="string">os_branchrequest_delivery_history_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">delivery_id</argument>
+            <argument name="requestFieldName" xsi:type="string">delivery_id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+                    <item name="update_url" xsi:type="url" path="mui/index/render"/>
+                    <item name="storageConfig" xsi:type="array">
+                        <item name="indexField" xsi:type="string">delivery_id</item>
+                    </item>
+                </item>
+            </argument>
+        </argument>
+    </dataSource>
+
+    <container name="listing_top">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="template" xsi:type="string">ui/grid/toolbar</item>
+                <item name="sticky" xsi:type="boolean">false</item>
+            </item>
+        </argument>
+        <paging name="listing_paging"/>
+    </container>
+
+    <columns name="os_branchrequest_delivery_history_columns">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="storageConfig" xsi:type="array">
+                    <item name="provider" xsi:type="string">
+                        os_branchrequest_delivery_history.os_branchrequest_delivery_history.listing_top.bookmarks
+                    </item>
+                    <item name="namespace" xsi:type="string">current</item>
+                </item>
+            </item>
+        </argument>
+        <column name="delivery_code">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Delivery Note ID</item>
+                </item>
+            </argument>
+        </column>
+        <column name="created_on">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="sorting" xsi:type="string">desc</item>
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/columns/date</item>
+                    <item name="dataType" xsi:type="string">date</item>
+                    <item name="dateFormat" xsi:type="string">MM/dd/yyyy</item>
+                    <item name="label" xsi:type="string" translate="true">Created At</item>
+                </item>
+            </argument>
+        </column>
+        <column name="created_by_name">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">textRange</item>
+                    <item name="sorting" xsi:type="string">asc</item>
+                    <item name="label" xsi:type="string" translate="true">Created By</item>
+                </item>
+            </argument>
+        </column>
+        <column name="note">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="sorting" xsi:type="string">asc</item>
+                    <item name="label" xsi:type="string" translate="true">Ref. Brn.Req. No.</item>
+                </item>
+            </argument>
+        </column>
+        <column name="remarks">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">text</item>
+                    <item name="sorting" xsi:type="string">asc</item>
+                    <item name="label" xsi:type="string" translate="true">Remarks</item>
+                </item>
+            </argument>
+        </column>
+        <column name="total_delivery_qty" class="Magestore\BranchRequest\Ui\Component\Listing\Columns\Qty">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Qty Delivered</item>
+                </item>
+            </argument>
+        </column>
+
+        <actionsColumn name="actions"
+                       class="Magestore\BranchRequest\Ui\Component\Listing\Columns\InventoryTransfer\Columns\DeliveryActions">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="draggable" xsi:type="boolean">false</item>
+                    <item name="indexField" xsi:type="string">receive_id</item>
+                    <item name="align" xsi:type="string">left</item>
+                    <item name="label" xsi:type="string" translate="true">Action</item>
+                    <item name="filterable" xsi:type="boolean">false</item>
+                    <item name="sortable" xsi:type="boolean">false</item>
+                </item>
+            </argument>
+        </actionsColumn>
+
+    </columns>
+</listing>

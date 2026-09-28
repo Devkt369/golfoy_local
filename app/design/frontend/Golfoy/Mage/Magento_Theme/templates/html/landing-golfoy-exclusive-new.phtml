@@ -1,0 +1,472 @@
+<style>
+    .golfoy-exclusive-container .golfoy-exclusive-new-container {
+        position: relative;
+        padding: 0px 10px 35px 10px;
+        border-radius: 5px;
+        overflow: hidden;
+        z-index: 1;
+        background: whitesmoke;
+    }
+
+    .full-width-block div#full_block {
+        padding: 80px 0px 0px 0px !important;
+
+    }
+
+    .full-width-block img {
+        border-radius: 20px;
+
+    }
+
+    .row.golfoy-exclusive-container .col-sm-12 {
+        padding: 0px;
+    }
+
+    .golfoy-exclusive-container a.shop-nows.initial-caps {
+        text-transform: unset;
+    }
+
+    .golfoy-exclusive-new-container strong.golfoy-cls {
+        color: black;
+        font-family: "headpro";
+        font-size: 30px;
+    }
+
+    .golfoy-exclusive-container .exclusive-new-item img {
+        box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.08) 0px 0px 0px 1px;
+        border-radius: 10px;
+    }
+
+    .golfoy-exclusive-container .ryt-arrow {
+        color: black;
+        font-weight: 600;
+        padding: 0;
+        margin-left: 5px;
+        background-color: transparent;
+        font-size: 12px;
+    }
+
+    .row.golfoy-exclusive-container .col-sm-9 {
+        padding-left: 30px;
+    }
+
+    .row.golfoy-exclusive-container button.explore-btn.action.primary a {
+        color: white;
+        text-decoration: none;
+    }
+
+    .cms-index-index main#maincontent .row.golfoy-exclusive-container {
+        display: flex;
+        border-radius: 5px;
+        align-items: center;
+        background-color: whitesmoke;
+        padding: 0px !important;
+        justify-content: center;
+    }
+
+    .golfoy-exclusive-container .col-sm-8 {
+        padding: 0px;
+    }
+
+    .golfoy-exclusive-container button.explore-btn.action.primary {
+        margin-top: 25px;
+        font-weight: 500;
+    }
+
+    .golfoy-exclusive-container p {
+        font-size: 12px;
+        color: #161616;
+    }
+
+    .golfoy-exclusive-container .golfoy-exclusive-new-container a.shop-nows {
+        color: black;
+        font-size: 12px;
+        font-weight: 500;
+        margin-top: 5px;
+    }
+
+    .row.golfoy-exclusive-container .col-sm-3 {
+        padding: 0px;
+    }
+
+    .exclusive-product-grids-block a {
+        text-decoration: none;
+        width: 100%;
+    }
+
+    .golfoy-exclusive-container h4 {
+        font-size: 14px;
+        font-weight: 700;
+        margin: 20px 0 2px;
+        text-transform: uppercase;
+        color: black;
+    }
+
+    .golfoy-exclusive-container .slider-new-title {
+        text-transform: uppercase;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .golfoy-exclusive-container .golfoy-exclusive-new-scroll-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        align-items: center;
+        scroll-behavior: smooth;
+        white-space: nowrap;
+        max-width: 100%;
+        padding-left: 0px;
+    }
+
+    .golfoy-exclusive-container .exclusive-product-grids-block {
+        margin-right: 0px;
+
+        height: auto;
+
+        width: 100%;
+
+        display: flex;
+
+        flex-direction: column;
+
+        align-items: center;
+
+        text-align: center;
+    }
+
+    .golfoy-exclusive-container .exclusive-product-grids-block:last-child {
+        margin-right: 0 !important;
+    }
+
+    .golfoy-exclusive-container .exclusive-new-item {
+        width: 100%;
+        height: auto;
+        background-size: cover;
+        background-position: center;
+    }
+
+    .golfoy-exclusive-container .exclusive-new-scroll-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: #fff;
+        border: none;
+        width: 37px;
+        height: 35px;
+        z-index: 10;
+        /* Make sure it’s clickable */
+        cursor: pointer;
+        border-radius: 50% !important;
+        font-size: 15px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .golfoy-exclusive-container .slider-new-prev-btn {
+        left: 10px;
+        z-index: 9999;
+        display: none;
+        opacity: 50%;
+        top: 50%;
+    }
+
+    .golfoy-exclusive-container .slider-new-next-btn {
+        right: 10px;
+        top: 50%;
+        opacity: 50%;
+        display: none;
+    }
+
+    .golfoy-exclusive-container strong.golfoy-cls {
+        font-size: 26px;
+        /* padding-top: 28px; */
+        line-height: 43px;
+    }
+
+    .golfoy-exclusive-container span.latest-cls {
+        font-size: 16px;
+    }
+
+    .full-width-block div#full_block img.mobile {
+        display: none;
+    }
+
+    .golfoy-exclusive-new-container div#full_block {
+        padding: 40px 0px !important;
+    }
+
+    .web-padding .col-sm-12 {
+        padding: 0px 0px;
+    }
+
+    /* button hide in payment page */
+
+    @media only screen and (max-width: 1024px) {
+        .golfoy-exclusive-container .exclusive-product-grids-block {
+            flex: 0 0 calc(25% - 10px);
+        }
+    }
+
+    @media only screen and (max-width: 768px) {
+        .full-width-block .hidden-xs-web {
+            display: block !important;
+        }
+
+        .full-width-block div#full_block {
+            padding: 40px 0px 0px 0px !important;
+        }
+
+        .full-width-block .col-xs-12 {
+            padding: 0px !important;
+        }
+
+        .full-width-block div#full_block img.mobile {
+            display: block;
+        }
+
+        div#exclusive-new-scroll-container {
+
+            padding: 0px 0px;
+
+        }
+
+        .full-width-block div#full_block img.web {
+            display: none;
+        }
+
+        .row.golfoy-exclusive-container .col-sm-12 {
+            width: 100% !important;
+        }
+
+        .golfoy-exclusive-container .golfoy-exclusive-new-scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .golfoy-exclusive-container .slider-new-next-btn {
+            right: 0px;
+            top: 35%;
+        }
+
+        .golfoy-exclusive-container .exclusive-new-scroll-btn {
+            top: 53%;
+        }
+
+        .selection-guide-container .selection-new-scroll-container {
+            overflow-x: scroll;
+        }
+
+        .selection-guide-container .selection-new-scroll-container::-webkit-scrollbar {
+            height: 1px;
+        }
+
+        .golfoy-exclusive-container .golfoy-exclusive-new-scroll-container,
+        .selection-guide-container .selection-new-scroll-container {
+            justify-content: unset;
+        }
+
+        .golfoy-exclusive-container .slider-new-prev-btn {
+            display: block;
+        }
+
+        button.exclusive-new-scroll-btn.slider-new-next-btn {
+            display: block;
+        }
+
+        .cms-index-index main#maincontent .row.golfoy-exclusive-container {
+            padding: 0px 30px 0px 30px !important;
+        }
+
+        .golfoy-exclusive-container .golfoy-exclusive-new-scroll-container {
+            gap: 0px;
+        }
+
+        .golfoy-exclusive-container .exclusive-product-grids-block {
+            margin-right: 5px;
+        }
+
+        .golfoy-exclusive-container .exclusive-new-item {
+            width: 165px;
+            height: 210px;
+        }
+    }
+
+    @media only screen and (max-width: 480px) {
+        .golfoy-exclusive-container h4 {
+            margin: 10px 0 2px;
+            font-size: 1.2rem;
+        }
+
+        .cms-index-index main#maincontent .row.golfoy-exclusive-container {
+            margin: 0px;
+        }
+
+        .golfoy-exclusive-container .slider-new-title {
+            margin-bottom: 20px;
+        }
+
+        .golfoy-exclusive-new-container strong.golfoy-cls {
+            font-size: 20px;
+        }
+
+        .golfoy-exclusive-container .golfoy-exclusive-new-container a.shop-nows {
+            font-size: 1rem;
+            margin-top: 2px;
+        }
+
+        .golfoy-exclusive-container .golfoy-exclusive-new-container {
+            padding: 0px 5px 25px 5px;
+        }
+
+        .golfoy-exclusive-container .exclusive-new-scroll-btn {
+            width: 34px;
+            height: 31px;
+            font-size: 12px;
+        }
+
+        .row.golfoy-exclusive-container .col-sm-12 {
+            padding: 0px;
+        }
+
+        .golfoy-exclusive-container h2 {
+            text-align: center;
+        }
+
+        .row.golfoy-exclusive-container .col-sm-9 {
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+
+        .golfoy-exclusive-container p {
+            text-align: center;
+        }
+
+        .golfoy-exclusive-container button.explore-btn.action.primary {
+            display: block;
+            text-align: center;
+            margin: 25px auto;
+        }
+
+        .cms-index-index main#maincontent .row.golfoy-exclusive-container {
+            display: revert-layer;
+            position: relative;
+            align-items: center;
+            overflow: hidden;
+            background-color: whitesmoke;
+            padding: 0px 0px !important;
+        }
+
+        .golfoy-exclusive-container .exclusive-new-item {
+            width: 135px;
+            height: 180px;
+        }
+
+        .golfoy-exclusive-container .slider-new-prev-btn {
+            left: 0px;
+        }
+
+        .golfoy-exclusive-container .slider-new-next-btn {
+            right: 0px;
+        }
+
+        .golfoy-exclusive-container .golfoy-exclusive-new-scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .golfoy-exclusive-container .golfoy-exclusive-new-scroll-container {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            padding: 0px 0px;
+            overflow-x: auto;
+        }
+    }
+</style>
+
+<div class="row golfoy-exclusive-container m-top m-bottom">
+
+    <div class="col-sm-12">
+
+        <div class="golfoy-exclusive-new-container">
+            <div class="row heading_golfoy_block_bg">
+
+                <div class="heading_golfoy center underline">
+
+                    <h2>Exclusively on Golfoy</h2>
+
+                    <hr style="display: block !important; width: 100px !important; border-bottom: 2px solid #000 !important; padding-top: 0px !important; clear: both !important; border-top: 0 !important;">
+
+                </div>
+            </div>
+            <button class="exclusive-new-scroll-btn slider-new-prev-btn" onclick="exclusiveSliderNewScrollLeft()">
+                &#10094;
+            </button>
+            <div class="golfoy-exclusive-new-scroll-container" id="exclusive-new-scroll-container">
+                <div class="exclusive-product-grids-block">
+                    <a class="react-comp" href="https://golfoy.com/all-golf-brands-india/rapsodo.html">
+                        <div class="exclusive-new-item"><img src="https://golfoy.com/media/wysiwyg/2025/landing_page/html/RAPSODO.jpg" alt="rapsodo"></div>
+                        <h4>RAPSODO</h4>
+                        <a href="https://golfoy.com/all-golf-brands-india/rapsodo.html" class="shop-nows small-caps react-comp">Shop Now <button class="ryt-arrow">&#10095;</button></a>
+                    </a>
+
+                </div>
+                <div class="exclusive-product-grids-block">
+                    <a class="react-comp" href="https://golfoy.com/all-golf-brands-india/shot-scope.html">
+                        <div class="exclusive-new-item"><img src="https://golfoy.com/media/wysiwyg/2025/landing_page/html/pro-lx.jpg" alt="short scope"></div>
+                        <h4>SHOT SCOPE</h4>
+                        <a href="https://golfoy.com/all-golf-brands-india/shot-scope.html" class="shop-nows small-caps react-comp">Shop Now <button class="ryt-arrow">&#10095;</button></a>
+                    </a>
+
+                </div>
+                <div class="exclusive-product-grids-block">
+                    <a class="react-comp" href="https://golfoy.com/all-golf-brands-india/buy-viper-golf-gloves-and-accesorries.html">
+                        <div class="exclusive-new-item"><img src="https://golfoy.com/media/wysiwyg/2025/landing_page/html/vipergolf.jpg" alt="vipergolf"></div>
+                        <h4>VIPER GOLF</h4>
+                        <a href="https://golfoy.com/all-golf-brands-india/buy-viper-golf-gloves-and-accesorries.html" class="shop-nows small-caps react-comp">Shop Now <button class="ryt-arrow">&#10095;</button></a>
+                    </a>
+
+                </div>
+                <div class="exclusive-product-grids-block">
+                    <a class="react-comp" href="https://golfoy.com/all-golf-brands-india/voice-caddie-store.html">
+                        <div class="exclusive-new-item"><img src="https://golfoy.com/media/wysiwyg/2025/landing_page/html/Group 4.jpg" alt="VOICE CADDIE"></div>
+                        <h4>VOICE CADDIE</h4>
+                        <a href="https://golfoy.com/all-golf-brands-india/voice-caddie-store.html" class="shop-nows small-caps react-comp">Shop Now <button class="ryt-arrow">&#10095;</button></a>
+                    </a>
+
+                </div>
+            </div>
+            <button class="exclusive-new-scroll-btn slider-new-next-btn" onclick="exclusiveSliderNewScrollRight()">
+                &#10095;
+            </button>
+        </div>
+
+    </div>
+
+</div>
+<div class="full-width-block">
+
+    <div id="full_block" class="hidden-xs-web">
+
+        <div class="row full_block_web web-padding">
+
+            <div class="col-sm-12"><a href="https://golfoy.com/egift-card.html"><img class="web" src="https://golfoy.com/media/wysiwyg/2025/landing_page/Golfoy-E-Gift-Card-web.jpg" alt="E-Gift-Card" loading="lazy"> </a></div>
+
+            <div class="col-xs-12"><a href="https://golfoy.com/egift-card.html"><img class="mobile" src="https://golfoy.com/media/wysiwyg/2025/landing_page/E-Gift-Card-image.jpg" alt="E-Gift-Card" loading="lazy"> </a></div>
+
+        </div>
+
+    </div>
+
+</div>
+<script>
+    function exclusiveSliderNewScrollLeft() {
+        const container = document.getElementById("exclusive-new-scroll-container");
+        container.scrollLeft -= 220; // adjust based on item width + margin
+    }
+
+    function exclusiveSliderNewScrollRight() {
+        const container = document.getElementById("exclusive-new-scroll-container");
+        container.scrollLeft += 220; // adjust based on item width + margin
+    }
+</script>

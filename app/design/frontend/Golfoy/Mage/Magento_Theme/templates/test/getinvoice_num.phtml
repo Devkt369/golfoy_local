@@ -1,0 +1,39 @@
+<?php
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance(); 
+$invoiceIds="1000063234,1000064863,1000064864,1000064865,1000064866,1000064867,1000064868,1000064869,1000064870,1000064871,1000064872,1000064873,1000064874,1000064875,1000064876,1000064877,1000064878,1000064884,1000064885,1000064898,1000064899,1000064902,1000064909,1000064973,1000064974,1000064975,1000064977,1000064979,1000064982,1000064990,1000064991,1000064992,1000064993,1000064995,1000064996,1000064997,1000064998,1000064999,1000065012,1000065016,1000065093,1000065094,1000065096,1000065205,1000065214,1000065216,1000065390,1000065509,1000065541,1000065803,1000065805,1000065833";
+
+$invoiceIds_arr = explode(',' , $invoiceIds);
+echo "<table border='1'><tr><th>Invoice number</th><th>Invoice date</th><th>Invoice amount</th></tr>";
+    foreach($invoiceIds_arr as $invoiceid){
+        $invoice = $objectManager->create('Magento\Sales\Model\Order\Invoice')->loadByIncrementId($invoiceid);
+//        echo "<br> loading $invoiceid";
+        if ($invoice->getId()) {
+            // ... other invoice data
+            echo "<tr>";
+            echo "<td>".$invoice->getIncrementId()."</td>";
+            echo "<td>".$invoice->getCreatedAt()."</td>";
+            echo "<td>".$invoice->getGrandTotal()."</td>";
+            echo "</tr>";
+        } else {
+            echo "<tr><td>Invoice not found.</td></tr>";
+        }
+    }
+echo "</table>";
+
+/*
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+
+echo "<table><tr><th>Invoice number</th><th>Invoice date</th><th>Invoice amount</th></tr>";
+        $invoice = $objectManager->create('Magento\Sales\Model\Order\Invoice')->loadByIncrementId(1000065199);
+//        echo "<br> loading $invoiceid";
+            echo "<tr>";
+            echo "<td>".$invoice->getIncrementId()."</td>";
+            echo "<td>".$invoice->getCreatedAt()."</td>";
+            echo "<td>".$invoice->getGrandTotal()."</td>";
+            echo "</tr>";
+        
+echo "</table>";*/
+
+
+?>

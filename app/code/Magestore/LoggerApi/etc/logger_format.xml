@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magestore_LoggerApi:etc/logger_format.xsd">
+    <type name="data_change">
+        <field name="log_time" type="string" required="true" sortOrder="10" />
+        <field name="log_message" type="string" required="true" sortOrder="20" />
+        <field name="app" type="string" required="true" sortOrder="30" />
+        <field name="log_flow" type="string" required="true" sortOrder="40" />
+        <field name="business_flow" type="string" required="true" sortOrder="50" />
+        <field name="data_type" type="string" required="true" sortOrder="60" />
+        <field name="data_before" type="array" required="false" sortOrder="70" />
+        <field name="data_after" type="array" required="false" sortOrder="80" />
+        <field name="user_type" type="string" required="false" sortOrder="90" />
+        <field name="user_email" type="string" required="false" sortOrder="100" />
+        <field name="user_name" type="string" required="false" sortOrder="110" />
+        <field name="additional_info" type="array" required="false" sortOrder="120" />
+        <field name="log_type" type="string" required="true" sortOrder="130" />
+        <field name="source" type="string" required="true" sortOrder="140" />
+    </type>
+
+    <type name="process">
+        <field name="log_time" type="string" required="true" sortOrder="10" />
+        <field name="log_message" type="string" required="true" sortOrder="20" />
+        <field name="app" type="string" required="true" sortOrder="30" />
+        <field name="log_flow" type="string" required="true" sortOrder="40" />
+        <field name="business_flow" type="string" required="true" sortOrder="50" />
+        <field name="process_type" type="string" required="true" sortOrder="60" />
+        <field name="process_name" type="string" required="true" sortOrder="70" />
+        <field name="process_input" type="array" required="false" sortOrder="80" />
+        <field name="user_type" type="string" required="false" sortOrder="90" />
+        <field name="user_email" type="string" required="false" sortOrder="100" />
+        <field name="user_name" type="string" required="false" sortOrder="110" />
+        <field name="debug_print_backtrace" type="string" required="false" sortOrder="120" />
+        <field name="additional_info" type="array" required="false" sortOrder="130" />
+        <field name="log_type" type="string" required="true" sortOrder="140" />
+        <field name="source" type="string" required="true" sortOrder="150" />
+    </type>
+
+    <type name="integration">
+        <field name="log_time" type="string" required="true" sortOrder="10" />
+        <field name="log_message" type="string" required="true" sortOrder="20" />
+        <field name="app" type="string" required="true" sortOrder="30" />
+        <field name="log_flow" type="string" required="true" sortOrder="40" />
+        <field name="business_flow" type="string" required="true" sortOrder="50" />
+        <field name="title" type="string" required="true" sortOrder="60" />
+        <field name="data_integration" type="array" required="false" sortOrder="70" />
+        <field name="data_system" type="array" required="false" sortOrder="80" />
+        <field name="user_type" type="string" required="false" sortOrder="90" />
+        <field name="user_email" type="string" required="false" sortOrder="100" />
+        <field name="user_name" type="string" required="false" sortOrder="110" />
+        <field name="data_type" type="string" required="true" sortOrder="120" />
+        <field name="additional_info" type="array" required="false" sortOrder="130" />
+        <field name="log_type" type="string" required="true" sortOrder="140" />
+        <field name="source" type="string" required="true" sortOrder="150" />
+    </type>
+
+    <type name="exception">
+        <field name="log_time" type="string" required="true" sortOrder="10" />
+        <field name="log_message" type="string" required="true" sortOrder="20" />
+        <field name="app" type="string" required="true" sortOrder="30" />
+        <field name="log_flow" type="string" required="true" sortOrder="40" />
+        <field name="business_flow" type="string" required="true" sortOrder="50" />
+        <field name="exception_level" type="string" required="true" sortOrder="60" />
+        <field name="exception_message" type="string" required="true" sortOrder="70" />
+        <field name="stack_trace" type="string" required="true" sortOrder="80" />
+        <field name="exception_code" type="integer" required="false" sortOrder="90" />
+        <field name="file" type="string" required="false" sortOrder="100" />
+        <field name="line" type="integer" required="false" sortOrder="110" />
+        <field name="user_type" type="string" required="false" sortOrder="120" />
+        <field name="user_email" type="string" required="false" sortOrder="130" />
+        <field name="user_name" type="string" required="false" sortOrder="140" />
+        <field name="additional_info" type="array" required="false" sortOrder="150" />
+        <field name="log_type" type="string" required="true" sortOrder="160" />
+        <field name="source" type="string" required="true" sortOrder="170" />
+    </type>
+</config>

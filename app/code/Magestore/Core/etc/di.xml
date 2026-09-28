@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Magestore\Core\Api\SaveSourceItemsInterface"
+                type="Magestore\Core\Model\SaveSourceItems"/>
+    <preference for="Magestore\Core\Api\GetSourcesCodeByStockIdInterface"
+                type="Magestore\Core\Model\GetSourcesCodeByStockId"/>
+    <preference for="Magestore\Core\Api\GetStockIdsBySourceCodesInterface"
+                type="Magestore\Core\Model\GetStockIdsBySourceCodes"/>
+    <preference for="Magestore\Core\Api\SourceManagementInterface"
+                type="Magestore\Core\Model\SourceManagement"/>
+    <preference for="Magestore\Core\Model\Connector\Http\ClientInterface" type="Magestore\Core\Model\Connector\Http\Client\Curl" />
+    <preference for="Magestore\Core\Model\Connector\Http\ConverterInterface" type="Magestore\Core\Model\Connector\Http\JsonConverter" />
+
+    <preference for="Magestore\Core\Api\Data\CurrentUserInterface" type="Magestore\Core\Model\CurrentUser" />
+    <preference for="Magestore\Core\Api\GetCurrentUserInterface" type="Magestore\Core\Model\DataProvider\GetCurrentUser" />
+
+    <!-- Fix bug index for Magento 2.4.4 -->
+    <type name="Magento\InventoryIndexer\Indexer\Stock\ReservationsIndexTable">
+        <plugin name="magestore_core_fix_bug_index_stock"
+                type="Magestore\Core\Plugin\InventoryIndexer\Indexer\Stock\ReservationsIndexTablePlugin" />
+    </type>
+    <!-- End: Fix bug index for Magento 2.4.4 -->
+</config>

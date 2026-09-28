@@ -1,0 +1,30 @@
+<?php
+$data = $block->getData('data');
+$pid = $data['pid'];
+$attrdata = $data['attrdata'];
+$arraydata = $data['arraydata'];
+$output ='';
+if($attrdata != '' && $arraydata != ''){
+    $result = $block->getSizerollfromDb($pid);
+    if(!empty($result)){
+        if($result['available_size_roll_value'] !=''){
+            $outputresult = str_replace('to','<span style="font-size: 10px;text-transform: lowercase;">to</span>',$result['available_size_roll_value']);
+            $output =  '<div class="sizerolldiv_label">Sizes:&nbsp;<span class="sizerolldiv">'.$outputresult.'</span></div>'; 
+        }
+    }
+   /* $sizes = $block->getSizes($pid,$attrdata);
+    //$complete_array = ["xs","s","m","L","xl","xxl","xxxl","4xl","5xl","6xl","7xl","8xl","9xl", "10xl"];
+    $complete_array = explode(",",$arraydata);
+    $complete_array = array_map('strtolower', $complete_array);
+    $complete_array = array_map('trim', $complete_array);
+
+    if(!empty($sizes)){
+        $sizes = array_map('strtolower', array_unique($sizes));
+        $result = $block->check_roll($complete_array , $sizes);
+        $output = str_replace('to','<span style="font-size: 10px;text-transform: lowercase;">to</span>',$result['text_value']);
+        echo '<div class="sizerolldiv_label">Sizes:&nbsp;<span class="sizerolldiv">'.$output.'</span></div>';        
+    }*/
+}
+echo $output;
+
+?>

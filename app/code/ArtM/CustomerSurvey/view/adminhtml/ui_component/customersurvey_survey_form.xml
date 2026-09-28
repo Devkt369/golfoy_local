@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">customersurvey_survey_form.customersurvey_survey_form_data_source</item>
+            <item name="deps" xsi:type="string">customersurvey_survey_form.customersurvey_survey_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Survey Journey Information</item>
+        <item name="config" xsi:type="array">
+            <item name="dataScope" xsi:type="string">data</item>
+            <item name="namespace" xsi:type="string">customersurvey_survey_form</item>
+        </item>
+        <item name="spinner" xsi:type="string">survey_basic</item>
+        <item name="buttons" xsi:type="array">
+            <item name="back" xsi:type="string">ArtM\CustomerSurvey\Block\Adminhtml\Survey\Edit\Button\Back</item>
+            <item name="delete" xsi:type="string">ArtM\CustomerSurvey\Block\Adminhtml\Survey\Edit\Button\Delete</item>
+            <item name="save" xsi:type="string">ArtM\CustomerSurvey\Block\Adminhtml\Survey\Edit\Button\Save</item>
+            <item name="save_and_continue" xsi:type="string">ArtM\CustomerSurvey\Block\Adminhtml\Survey\Edit\Button\SaveAndContinue</item>
+        </item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+    </argument>
+
+    <dataSource name="customersurvey_survey_form_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">ArtM\CustomerSurvey\Model\Survey\DataProvider</argument>
+            <argument name="name" xsi:type="string">customersurvey_survey_form_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">survey_id</argument>
+            <argument name="requestFieldName" xsi:type="string">survey_id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="submit_url" xsi:type="url" path="customersurvey/survey/save"/>
+                </item>
+            </argument>
+        </argument>
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+    </dataSource>
+
+    <fieldset name="survey_basic">
+        <settings>
+            <label translate="true">Basic Information</label>
+            <collapsible>false</collapsible>
+        </settings>
+
+        <field name="survey_id" formElement="input" sortOrder="5">
+            <settings>
+                <visible>false</visible>
+                <dataType>text</dataType>
+                <dataScope>survey_id</dataScope>
+            </settings>
+        </field>
+
+        <field name="name" formElement="input" sortOrder="10">
+            <settings>
+                <label translate="true">Name</label>
+                <dataType>text</dataType>
+                <dataScope>name</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+
+        <field name="description" formElement="textarea" sortOrder="20">
+            <settings>
+                <label translate="true">Description</label>
+                <dataType>text</dataType>
+                <dataScope>description</dataScope>
+            </settings>
+        </field>
+
+        <field name="status" formElement="select" sortOrder="30">
+            <settings>
+                <label translate="true">Status</label>
+                <dataType>text</dataType>
+                <dataScope>status</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="ArtM\CustomerSurvey\Model\Source\SurveyStatus"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="store_ids" formElement="multiselect" sortOrder="35">
+            <settings>
+                <label translate="true">Store Views</label>
+                <dataType>text</dataType>
+                <dataScope>store_ids</dataScope>
+                <notice translate="true">Leave empty to allow all store views.</notice>
+            </settings>
+            <formElements>
+                <multiselect>
+                    <settings>
+                        <options class="Magento\Store\Ui\Component\Listing\Column\Store\Options"/>
+                    </settings>
+                </multiselect>
+            </formElements>
+        </field>
+
+        <field name="customer_group_ids" formElement="multiselect" sortOrder="37">
+            <settings>
+                <label translate="true">Customer Groups</label>
+                <dataType>text</dataType>
+                <dataScope>customer_group_ids</dataScope>
+                <notice translate="true">Leave empty to allow all customer groups.</notice>
+            </settings>
+            <formElements>
+                <multiselect>
+                    <settings>
+                        <options class="ArtM\CustomerSurvey\Model\Source\CustomerGroups"/>
+                    </settings>
+                </multiselect>
+            </formElements>
+        </field>
+
+        <field name="priority" formElement="input" sortOrder="40">
+            <settings>
+                <label translate="true">Priority</label>
+                <dataType>number</dataType>
+                <dataScope>priority</dataScope>
+            </settings>
+        </field>
+
+        <field name="sort_order" formElement="input" sortOrder="50">
+            <settings>
+                <label translate="true">Sort Order</label>
+                <dataType>number</dataType>
+                <dataScope>sort_order</dataScope>
+            </settings>
+        </field>
+
+        <field name="start_date" formElement="date" sortOrder="60">
+            <settings>
+                <label translate="true">Start Date</label>
+                <dataType>date</dataType>
+                <dataScope>start_date</dataScope>
+            </settings>
+        </field>
+
+        <field name="end_date" formElement="date" sortOrder="70">
+            <settings>
+                <label translate="true">End Date</label>
+                <dataType>date</dataType>
+                <dataScope>end_date</dataScope>
+            </settings>
+        </field>
+    </fieldset>
+
+    <fieldset name="survey_questions">
+        <settings>
+            <label translate="true">Questions</label>
+            <collapsible>true</collapsible>
+        </settings>
+
+        <field name="question_ids" formElement="multiselect" sortOrder="10">
+            <settings>
+                <label translate="true">Select Questions</label>
+                <dataType>text</dataType>
+                <dataScope>question_ids</dataScope>
+            </settings>
+            <formElements>
+                <multiselect>
+                    <settings>
+                        <options class="ArtM\CustomerSurvey\Model\Source\QuestionOptions"/>
+                    </settings>
+                </multiselect>
+            </formElements>
+        </field>
+
+        <field name="question_mappings" formElement="textarea" sortOrder="20">
+            <settings>
+                <label translate="true">Question Mappings (question_id:order per line)</label>
+                <dataType>text</dataType>
+                <dataScope>question_order_map</dataScope>
+                <notice translate="true">Select questions below and optionally set exact ordering here, e.g. 12:1</notice>
+            </settings>
+        </field>
+    </fieldset>
+
+    <fieldset name="survey_locations">
+        <settings>
+            <label translate="true">Locations</label>
+            <collapsible>true</collapsible>
+        </settings>
+
+        <field name="location_ids" formElement="multiselect" sortOrder="10">
+            <settings>
+                <label translate="true">Select Locations</label>
+                <dataType>text</dataType>
+                <dataScope>location_ids</dataScope>
+                <notice translate="true">Selected location screenshots are shown below for quick verification.</notice>
+            </settings>
+            <formElements>
+                <multiselect>
+                    <settings>
+                        <options class="ArtM\CustomerSurvey\Model\Source\LocationOptions"/>
+                    </settings>
+                </multiselect>
+            </formElements>
+        </field>
+
+        <container name="location_images_container" sortOrder="20">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">ArtM_CustomerSurvey/js/location-images-preview</item>
+                    <item name="template" xsi:type="string">ArtM_CustomerSurvey/location-images-preview</item>
+                </item>
+            </argument>
+        </container>
+    </fieldset>
+
+    <fieldset name="survey_display_settings">
+        <settings>
+            <label translate="true">Display Settings</label>
+            <collapsible>true</collapsible>
+        </settings>
+
+        <field name="display_type" formElement="select" sortOrder="10">
+            <settings>
+                <label translate="true">Display Type</label>
+                <dataType>text</dataType>
+                <dataScope>display_type</dataScope>
+                <switcherConfig>
+                    <enabled>true</enabled>
+                    <rules>
+                        <rule name="0">
+                            <value>inline</value>
+                            <actions>
+                                <action name="0">
+                                    <target>customersurvey_survey_form.customersurvey_survey_form.survey_display_settings.popup_triggers</target>
+                                    <callback>hide</callback>
+                                </action>
+                                <action name="1">
+                                    <target>customersurvey_survey_form.customersurvey_survey_form.survey_display_settings.popup_delay_seconds</target>
+                                    <callback>hide</callback>
+                                </action>
+                                <action name="2">
+                                    <target>customersurvey_survey_form.customersurvey_survey_form.survey_display_settings.popup_page_views</target>
+                                    <callback>hide</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                        <rule name="1">
+                            <value>popup</value>
+                            <actions>
+                                <action name="0">
+                                    <target>customersurvey_survey_form.customersurvey_survey_form.survey_display_settings.popup_triggers</target>
+                                    <callback>show</callback>
+                                </action>
+                                <action name="1">
+                                    <target>customersurvey_survey_form.customersurvey_survey_form.survey_display_settings.popup_delay_seconds</target>
+                                    <callback>hide</callback>
+                                </action>
+                                <action name="2">
+                                    <target>customersurvey_survey_form.customersurvey_survey_form.survey_display_settings.popup_page_views</target>
+                                    <callback>hide</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                    </rules>
+                </switcherConfig>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="ArtM\CustomerSurvey\Model\Source\SurveyDisplayType"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="popup_triggers" formElement="multiselect" sortOrder="40">
+            <settings>
+                <label translate="true">Popup Triggers</label>
+                <dataType>text</dataType>
+                <dataScope>popup_triggers</dataScope>
+                <switcherConfig>
+                    <enabled>true</enabled>
+                    <rules>
+                        <rule name="0">
+                            <value>after_seconds</value>
+                            <actions>
+                                <action name="0">
+                                    <target>customersurvey_survey_form.customersurvey_survey_form.survey_display_settings.popup_delay_seconds</target>
+                                    <callback>show</callback>
+                                </action>
+                                <action name="1">
+                                    <target>customersurvey_survey_form.customersurvey_survey_form.survey_display_settings.popup_page_views</target>
+                                    <callback>hide</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                        <rule name="1">
+                            <value>after_page_views</value>
+                            <actions>
+                                <action name="0">
+                                    <target>customersurvey_survey_form.customersurvey_survey_form.survey_display_settings.popup_delay_seconds</target>
+                                    <callback>hide</callback>
+                                </action>
+                                <action name="1">
+                                    <target>customersurvey_survey_form.customersurvey_survey_form.survey_display_settings.popup_page_views</target>
+                                    <callback>show</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                        <rule name="2">
+                            <value>page_load</value>
+                            <actions>
+                                <action name="0">
+                                    <target>customersurvey_survey_form.customersurvey_survey_form.survey_display_settings.popup_delay_seconds</target>
+                                    <callback>hide</callback>
+                                </action>
+                                <action name="1">
+                                    <target>customersurvey_survey_form.customersurvey_survey_form.survey_display_settings.popup_page_views</target>
+                                    <callback>hide</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                    </rules>
+                </switcherConfig>
+            </settings>
+            <formElements>
+                <multiselect>
+                    <settings>
+                        <options class="ArtM\CustomerSurvey\Model\Source\SurveyPopupTrigger"/>
+                    </settings>
+                </multiselect>
+            </formElements>
+        </field>
+
+        <field name="popup_delay_seconds" formElement="input" sortOrder="50">
+            <settings>
+                <label translate="true">Popup Delay (seconds)</label>
+                <dataType>number</dataType>
+                <dataScope>popup_delay_seconds</dataScope>
+            </settings>
+        </field>
+
+        <field name="popup_page_views" formElement="input" sortOrder="60">
+            <settings>
+                <label translate="true">Popup After Page Views</label>
+                <dataType>number</dataType>
+                <dataScope>popup_page_views</dataScope>
+            </settings>
+        </field>
+    </fieldset>
+
+    <fieldset name="survey_frequency_settings">
+        <settings>
+            <label translate="true">Frequency &amp; Limits</label>
+            <collapsible>true</collapsible>
+        </settings>
+
+        <field name="frequency_if_not_answered" formElement="select" sortOrder="10">
+            <settings>
+                <label translate="true">If Not Answered</label>
+                <dataType>text</dataType>
+                <dataScope>frequency_if_not_answered</dataScope>
+                <switcherConfig>
+                    <enabled>true</enabled>
+                    <rules>
+                        <rule name="0">
+                            <value>after_days</value>
+                            <actions>
+                                <action name="0">
+                                    <target>customersurvey_survey_form.customersurvey_survey_form.survey_frequency_settings.frequency_if_not_answered_days</target>
+                                    <callback>show</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                        <rule name="1">
+                            <value>every_visit</value>
+                            <actions>
+                                <action name="0">
+                                    <target>customersurvey_survey_form.customersurvey_survey_form.survey_frequency_settings.frequency_if_not_answered_days</target>
+                                    <callback>hide</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                        <rule name="2">
+                            <value>once_never</value>
+                            <actions>
+                                <action name="0">
+                                    <target>customersurvey_survey_form.customersurvey_survey_form.survey_frequency_settings.frequency_if_not_answered_days</target>
+                                    <callback>hide</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                    </rules>
+                </switcherConfig>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="ArtM\CustomerSurvey\Model\Source\SurveyNotAnsweredFrequency"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="frequency_if_not_answered_days" formElement="input" sortOrder="20">
+            <settings>
+                <label translate="true">Not Answered: Show Again After X Days</label>
+                <dataType>number</dataType>
+                <dataScope>frequency_if_not_answered_days</dataScope>
+            </settings>
+        </field>
+
+        <field name="frequency_if_answered" formElement="select" sortOrder="30">
+            <settings>
+                <label translate="true">If Answered</label>
+                <dataType>text</dataType>
+                <dataScope>frequency_if_answered</dataScope>
+                <switcherConfig>
+                    <enabled>true</enabled>
+                    <rules>
+                        <rule name="0">
+                            <value>after_days</value>
+                            <actions>
+                                <action name="0">
+                                    <target>customersurvey_survey_form.customersurvey_survey_form.survey_frequency_settings.frequency_if_answered_days</target>
+                                    <callback>show</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                        <rule name="1">
+                            <value>never</value>
+                            <actions>
+                                <action name="0">
+                                    <target>customersurvey_survey_form.customersurvey_survey_form.survey_frequency_settings.frequency_if_answered_days</target>
+                                    <callback>hide</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                    </rules>
+                </switcherConfig>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="ArtM\CustomerSurvey\Model\Source\SurveyAnsweredFrequency"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="frequency_if_answered_days" formElement="input" sortOrder="40">
+            <settings>
+                <label translate="true">Answered: Show Again After X Days</label>
+                <dataType>number</dataType>
+                <dataScope>frequency_if_answered_days</dataScope>
+            </settings>
+        </field>
+
+        <field name="max_impressions" formElement="input" sortOrder="50">
+            <settings>
+                <label translate="true">Maximum Impressions</label>
+                <dataType>number</dataType>
+                <dataScope>max_impressions</dataScope>
+            </settings>
+        </field>
+
+        <field name="limit_daily" formElement="input" sortOrder="60">
+            <settings>
+                <label translate="true">Daily Limit</label>
+                <dataType>number</dataType>
+                <dataScope>limit_daily</dataScope>
+            </settings>
+        </field>
+
+        <field name="limit_weekly" formElement="input" sortOrder="70">
+            <settings>
+                <label translate="true">Weekly Limit</label>
+                <dataType>number</dataType>
+                <dataScope>limit_weekly</dataScope>
+            </settings>
+        </field>
+
+        <field name="limit_monthly" formElement="input" sortOrder="80">
+            <settings>
+                <label translate="true">Monthly Limit</label>
+                <dataType>number</dataType>
+                <dataScope>limit_monthly</dataScope>
+            </settings>
+        </field>
+
+        <field name="max_response_count" formElement="input" sortOrder="90">
+            <settings>
+                <label translate="true">Maximum Response Count</label>
+                <dataType>number</dataType>
+                <dataScope>max_response_count</dataScope>
+            </settings>
+        </field>
+    </fieldset>
+</form>

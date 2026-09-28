@@ -1,0 +1,99 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$categoryFactory = $objectManager->get(\Magento\Catalog\Model\CategoryFactory::class);
+$categoryRepository = $objectManager->get(\Magento\Catalog\Model\CategoryRepository::class);
+$categoryId = 307;
+$category = $categoryRepository->get($categoryId);
+$childCategoryIds = $category->getChildren();
+
+$categoryArray = [];
+$categoryUrl = [];
+$imageBaseUrl = 'https://golfoy.com/pub/media/wysiwyg/2024/brands/';
+
+foreach (explode(',', $childCategoryIds) as $childId) {
+    $subCategory = $categoryFactory->create()->load($childId);
+    $catName = str_replace('store', '', strtolower(trim($subCategory->getName())));
+    $catURL = $subCategory->getUrl();
+    $imageName = str_replace(' ', '', ucfirst($catName)) . '.svg';
+    $imageUrl = $imageBaseUrl . $imageName;
+
+    $categoryUrl[$catName] = [
+        'url' => $catURL,
+        'image' => $imageUrl
+    ];
+    $categoryArray[] = $catName;
+}
+
+$newArray = [];
+foreach ($categoryArray as $key => $value) {
+    $initial = $value[0];
+    if (empty($newArray[$initial])) {
+        $newArray[$initial][] = $initial;
+    }
+    $newArray[$initial][] = $value;
+}
+
+ksort($newArray);
+
+$html = '';
+$alphabets = '';
+foreach ($newArray as $singleAlpha) {
+    $i = 0;
+    $html .= "<div class='single_alpha_brands'>";
+    foreach ($singleAlpha as $alphabet) {
+        if ($i == 0) {
+            $singleAlphabetHtml = '';
+            $singleAlphabetHtml .= "<div class='alpha_heading first' id='alpha_" . strtolower($alphabet) . "'>";
+            $singleAlphabetHtml .= strtoupper($alphabet);
+            $singleAlphabetHtml .= "</div>";
+            $alphabets .= "<a href='#alpha_" . strtolower($alphabet) . "'><div class='alpha_heading first'>" . strtoupper($alphabet) . "</div></a>";
+            $html .= $singleAlphabetHtml;
+        } else {
+            $html .= "<div class='alpha_heading'><a href='" . $categoryUrl[$alphabet]['url'] . "'>";
+            $html .= "<img src='" . $categoryUrl[$alphabet]['image'] . "' alt='" . ucfirst($alphabet) . "' />"; // Display category image instead of name
+            $html .= "</a></div>";
+        }
+        $i++;
+    }
+    $html .= "</div>";
+}
+
+echo "<div class='alphabets'>";
+echo $alphabets;
+echo "</div>";
+echo "<div class='brands_html'>";
+echo $html;
+?>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const alphabetLinks = document.querySelectorAll('.alphabets a');
+        const headerOffset = document.querySelector('.fixed-header') ? document.querySelector('.fixed-header').offsetHeight : 0;
+        const additionalOffset = 0;
+        const marginAfterScroll = 20;
+
+        function isMobileDevice() {
+            return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+        }
+
+        alphabetLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset - additionalOffset + marginAfterScroll;
+
+                    const scrollOffset = isMobileDevice() ? offsetPosition - 125 : offsetPosition - 300;
+
+                    window.scrollTo({
+                        top: scrollOffset,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    });
+</script>
+
+<?php echo "</div>"; ?>

@@ -1,0 +1,3329 @@
+<style>
+    .taylormade-qi4d a {
+        text-decoration: none;
+    }
+
+    #at-a-glance .swiper-button-prev:after {
+        font-family: 'icons-blank-theme';
+        content: '\e617';
+        font-size: 60px;
+    }
+
+    #at-a-glance .swiper-button-next:after {
+        content: '\e608';
+        font-size: 60px;
+        font-family: 'icons-blank-theme';
+    }
+
+    .cms-taylormade-qi4d main#maincontent {
+        max-width: 100% !important;
+    }
+
+    .main-content-block {
+        background: black;
+    }
+
+    h2.tw-mb-12.text-center {
+        font-size: 32px;
+        line-height: 40px;
+        font-weight: 700;
+        margin-bottom: 5rem;
+        color: white;
+    }
+
+    .tw-pb-6.tw-bg-white-100 {
+        margin-top: 10rem;
+        margin-bottom: 5rem;
+    }
+
+    /* video css */
+    .qi4d-header {
+        background-color: #000000;
+        position: relative;
+    }
+
+    video.qi4d-header-video {
+        width: 100%;
+        position: relative;
+    }
+
+    .qi4d-header-btns {
+        position: absolute;
+        top: 100%;
+        display: flex;
+        top: 80%;
+        flex-direction: row;
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .qi4d-header-btns .btn {
+        padding: 22px 32px;
+        cursor: pointer;
+        background: white;
+        border-radius: 40px;
+        margin: 4px 10px;
+        text-transform: uppercase;
+        font-size: 1rem;
+        letter-spacing: 2px;
+        line-height: 1.0625rem;
+        font-weight: 700;
+        transition: all 200ms ease-out;
+        text-decoration: none;
+        text-align: center;
+        color: #212529;
+    }
+
+    .qi4d-info-btn-container.compare-btns {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 7rem 0px 0px 0px;
+    }
+
+    .qi4d-info-btn-container.compare-btns a {
+        border-radius: 40px;
+        padding: 18px 38px;
+        margin: 4px 10px;
+        width: auto;
+        background: white;
+        text-decoration: none;
+        color: #212529;
+        font-weight: 700;
+        font-size: 1.2rem;
+        letter-spacing: 2px;
+        line-height: 1.0625rem;
+    }
+
+    .qi4d-info-btn-container a.btn.empty {
+        background: black;
+        border: 1px solid white;
+        color: white;
+    }
+
+    .qi4d-below-header {
+        background-color: #000000;
+    }
+
+    .qi4d-below-content-block {
+        max-width: 650px;
+        margin: 8rem auto 5rem auto;
+        background-color: #000000;
+        text-align: center;
+        color: white;
+    }
+
+    img.tw-w-full.tw-mb-12.reax-logo {
+        width: 100%;
+        max-width: 600px;
+        margin-bottom: 30px;
+    }
+
+    .qi4d-below-header h1 {
+        color: #FFF;
+        font-weight: 700;
+        margin: 0px;
+    }
+
+    .qi4d-below-header h3 {
+        text-transform: unset;
+        font-size: 13px;
+        margin: 0px;
+        letter-spacing: 0.07em;
+        line-height: 34px;
+        padding: 3rem 0px;
+    }
+
+    /* ================= AT A GLANCE SLIDER ================= */
+
+    #at-a-glance {
+        background: #000;
+        margin: 5rem auto;
+        overflow: hidden;
+        padding: 0px 40px;
+    }
+
+    /* Title */
+    #at-a-glance h1 {
+        color: #fff;
+        top: 0;
+        left: 0;
+        z-index: 10;
+        font-size: 32px;
+        font-weight: 700
+    }
+
+    /* ===== MAIN SLIDER CONTAINER ===== */
+    #at-a-glance .swiper-container321 {
+        height: 520px;
+        max-width: 1600px;
+        margin: 0 auto;
+        position: relative;
+        overflow: visible;
+        user-select: none;
+        touch-action: pan-y;
+    }
+
+    /* ===== WRAPPER ===== */
+    #at-a-glance .swiper-wrapper {
+        display: flex;
+        height: 100%;
+        transition: transform 0.5s ease;
+        will-change: transform;
+    }
+
+    /* ===== SLIDE ===== */
+    #at-a-glance .swiper-slide {
+        min-width: 70%;
+        height: 100%;
+        position: relative;
+        flex-shrink: 0;
+        margin-right: 30px;
+    }
+
+    /* ===== IMAGE / VIDEO AS BACKGROUND ===== */
+    #at-a-glance .swiper-slide img,
+    #at-a-glance .swiper-slide video {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 30px;
+        border: 2px solid #F37021;
+        object-fit: cover;
+        pointer-events: none;
+    }
+
+    /* ===== DARK GRADIENT OVERLAY ===== */
+    #at-a-glance .swiper-slide::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to right,
+                rgba(0, 0, 0, 0.65),
+                rgba(0, 0, 0, 0.2),
+                transparent);
+        z-index: 1;
+    }
+
+    /* ===== TEXT ===== */
+    #at-a-glance .slide-text {
+        position: absolute;
+        bottom: 6%;
+        z-index: 2;
+        color: #fff;
+        max-width: 100%;
+        width: 100%;
+        padding: 0px 50px;
+    }
+
+    #at-a-glance .slide-text h3 {
+        font-size: 17px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    /* Desktop hides paragraph like reference */
+    @media (min-width: 1200px) {
+        #at-a-glance .slide-text p {
+            display: none;
+        }
+    }
+
+    /* ===== PLUS BUTTON ===== */
+    #at-a-glance .slide-text button {
+        position: absolute;
+        right: 50px;
+        bottom: 0;
+        height: 53px;
+        width: 53px;
+        border-radius: 50% !important;
+        border: none;
+        background: #fff;
+        font-size: 42px;
+        cursor: pointer;
+        font-weight: 400;
+        color: black;
+        padding: 3px;
+    }
+
+    /* ===== NAV ARROWS ===== */
+    #at-a-glance .swiper-button-prev,
+    #at-a-glance .swiper-button-next {
+        position: absolute;
+        top: -138px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #fff;
+        color: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+    }
+
+    #at-a-glance .swiper-button-prev {
+        right: 70px;
+    }
+
+    #at-a-glance .swiper-button-next {
+        right: 20px;
+    }
+
+    .swiper-button-disabled {
+        opacity: 0.4;
+        pointer-events: none;
+    }
+
+    /* ===== PAGINATION (MOBILE) ===== */
+    .swiper-pagination321 {
+        position: absolute;
+        display: none;
+        right: 20px;
+        z-index: 10;
+    }
+
+    .swiper-pagination-bullet {
+        width: 16px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.4);
+        border-radius: 8px;
+        display: inline-block;
+        margin-left: 6px;
+        cursor: pointer;
+    }
+
+    .swiper-pagination-bullet-active {
+        width: 32px;
+        background: #fff;
+    }
+
+    /* ================= MODAL ================= */
+
+    .modal-wrapper {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
+        opacity: 0;
+        visibility: hidden;
+        transition: 0.3s ease;
+        z-index: 9999;
+    }
+
+    .modal-wrapper.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal {
+        width: 60%;
+        margin: 5% auto;
+    }
+
+    /* ===== Sticky nav only inside section ===== */
+    #qi4d-nav-container ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    #qi4d-nav-container {
+        width: 100%;
+        background: #000;
+        /* orange line like reference */
+        z-index: 50;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    #qi4d-nav-container.qi4d-nav-sticky {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: #000;
+        border-top: 2px solid #ff6a00;
+        z-index: 1000;
+        animation: slideDown 0.3s ease;
+        overflow: hidden;
+    }
+
+    #qi4d-nav {
+        margin: 0 auto;
+    }
+
+    #qi4d-nav .info-selectors-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 50px;
+        border-bottom: 1px solid;
+    }
+
+    .info-text.tw-text-white.opp-direction {
+        flex-direction: unset;
+        gap: 50px;
+    }
+
+    #qi4d-nav .info-selectors-container a {
+        position: relative;
+        font-size: 14px;
+        letter-spacing: 1.5px;
+        font-weight: 600;
+        color: #ffffff;
+        text-decoration: none;
+        cursor: pointer;
+        padding-bottom: 6px;
+        transition: color 0.25s ease;
+    }
+
+    #qi4d-nav .info-selectors-container a:hover {
+        color: #ff6a00;
+    }
+
+    #qi4d-nav .info-selectors-container a.selected {
+        color: #ff6a00;
+    }
+
+    #qi4d-nav .info-selectors-container a.selected::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -6px;
+        width: 100%;
+        height: 2px;
+        background: #ff6a00;
+    }
+
+    @keyframes slideDown {
+        from {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    #qi4d-video {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 2rem 0 !important;
+    }
+
+    #qi4d-video iframe {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 7;
+    }
+
+    .qi4d-nav {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        padding: 16px 0;
+        background: #0b0f12;
+        position: relative;
+        z-index: 10;
+    }
+
+    .qi4d-nav a {
+        color: #9aa3aa;
+        font-size: 12px;
+        letter-spacing: 2px;
+        text-decoration: none;
+        padding-bottom: 6px;
+    }
+
+    .qi4d-nav a.selected {
+        color: #fff;
+        border-bottom: 2px solid #fff;
+    }
+
+    .d-none {
+        display: none !important;
+    }
+
+    /* ===============================
+   SHOP QI4D SECTION
+================================ */
+    .qi4d-tiles {
+        background: #000;
+        padding: 100px 0px;
+    }
+
+    .qi4d-product-navs h2 {
+        color: #fff;
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 35px;
+    }
+
+    .qi4d-product-navs ul {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 0 0 0px;
+    }
+
+    .taylormade-qi4d .slider_html.container-fluid {
+        padding: 0px;
+    }
+
+    .qi4d-product-navs li {
+        margin-right: 24px;
+    }
+
+    .qi4d-product-navs a {
+        color: #bfbfbf;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        cursor: pointer;
+        position: relative;
+        padding-bottom: 6px;
+    }
+
+    /* active tab */
+    .qi4d-product-navs a.is-active-product {
+        color: #ff6a00;
+    }
+
+    .qi4d-product-navs a.is-active-product::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 2px;
+        background: #ff6a00;
+    }
+
+    .qi4d-tiles-container {
+        max-width: 1400px;
+    }
+
+    .qi4d-tiles-container .tw-flex {
+        display: flex;
+    }
+
+    .product-tile {
+        flex: 1;
+        text-align: left;
+    }
+
+    .taylormade-qi4d .tw-flex .product_content_product_slider span.product-image-wrapper {
+        mix-blend-mode: unset;
+    }
+
+    .taylormade-qi4d .tw-flex span.old-price span,
+    .taylormade-qi4d .tw-flex .product_slider_container .yousave_price_label,
+    .taylormade-qi4d .tw-flex .product_slider_container span.yousave_price>span:first-child,
+    .taylormade-qi4d .product_slider_container .custom_code.configurable_prd span.price {
+        color: white !important;
+    }
+
+    .taylormade-qi4d .tw-flex .container {
+        width: 100%;
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+
+    .product-tile img {
+        width: 100%;
+        height: 300px;
+        object-fit: contain;
+        background: #fff;
+        padding: 24px;
+    }
+
+    .product-tile h4 {
+        font-size: 13px;
+        font-weight: 600;
+        margin: 8px 0 4px;
+    }
+
+    .product-tile p {
+        font-size: 12px;
+    }
+
+    /* remove link underline */
+    .product-tile a {
+        text-decoration: none;
+        color: #fff;
+    }
+
+    .d-none {
+        display: none !important;
+    }
+
+    /* ===============================
+   SHARED QI4D STICKY NAV
+================================ */
+    .qi4d-compare-nav {
+        position: sticky;
+        top: 0;
+        display: none !important;
+        z-index: 50;
+        background: #000;
+        padding: 12px 0;
+    }
+
+    .qi4d-compare-nav ul {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .qi4d-compare-nav a {
+        color: #bfbfbf;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .qi4d-compare-nav a.selected {
+        color: #ff6a00;
+    }
+
+    .qi4d-compare-nav a.selected::after {
+        content: "";
+        position: absolute;
+        bottom: -6px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: #ff6a00;
+    }
+
+    /* Table css */
+    /* ===== SECTION BACKGROUND ===== */
+    .qi4d-compare {
+        padding: 90px 0;
+        color: #fff;
+        font-family: "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* TITLE */
+    .compare-title {
+        text-align: center;
+        font-size: 26px;
+        letter-spacing: 4px;
+        margin-bottom: 70px;
+        font-weight: 700;
+    }
+
+    .compare-title img {
+        height: 26px;
+        vertical-align: middle;
+        margin: 0 8px;
+    }
+
+    .compare-cards {
+        display: grid;
+        border-radius: 22px;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0px;
+        width: 92%;
+        margin: 0 auto;
+    }
+
+    .compare-card {
+        overflow: hidden;
+    }
+
+    .card-row img {
+        width: 100%;
+    }
+
+    .card-image {
+        height: auto;
+        padding: 30px 0px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .compare-card:nth-child(odd) {
+        background: #1C2126;
+    }
+
+    .compare-card:nth-child(even) {
+        background: linear-gradient(0deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.25) 100%), #1C2126;
+    }
+
+    .card-image img {
+        max-height: 200px;
+        transition: transform 0.4s ease;
+    }
+
+    .compare-card:hover .card-image img {
+        transform: scale(1.05);
+    }
+
+    .card-row {
+        padding: 18px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+
+    .card-row:nth-child(even) {
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .card-row span {
+        font-size: 12px;
+        letter-spacing: 1.4px;
+        color: #9aa3aa;
+    }
+
+    .card-row strong {
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .card-footer {
+        padding: 50px;
+        text-align: center;
+    }
+
+    .build-btn {
+        display: inline-block;
+        padding: 14px 35px;
+        border-radius: 999px;
+        background: #fff;
+        color: #212529 !important;
+        font-size: 13px;
+        letter-spacing: 1.5px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .build-btn:hover {
+        transform: translateY(-2px);
+        background: #e5e5e5;
+    }
+
+    /* ===============================
+   QI4D TOGGLE INFO SECTION
+================================ */
+    .qi4d-toggle-info {
+        background: #000;
+        padding: 60px 10px;
+    }
+
+    .qi4d-toggle-info .tw-flex {
+        display: flex;
+        align-items: center;
+        max-width: 100%;
+        gap: 60px;
+        flex-wrap: nowrap;
+    }
+
+    .qi4d-toggle-info .tw-flex>div {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .qi4d-toggle-info .info-section {
+        flex: 1;
+        color: #fff;
+    }
+
+    .qi4d-toggle-info h2 {
+        font-size: 26px;
+        font-weight: 700;
+        color: #ff6a00;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        letter-spacing: 2px;
+    }
+
+    .qi4d-toggle-info p {
+        font-size: 13px;
+        line-height: 1.6;
+        margin-top: 20px !important;
+        margin-bottom: 24px;
+        color: #ffffff;
+    }
+
+    .info-text {
+        display: flex;
+        align-items: center;
+        gap: 50px;
+        flex-direction: row-reverse;
+    }
+
+    .qi4d-toggle-info .info-selectors-container {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 24px;
+        list-style: none;
+        padding: 0;
+    }
+
+    .qi4d-toggle-info .info-selectors-container a {
+        color: #bfbfbf;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        cursor: pointer;
+        position: relative;
+        padding-bottom: 6px;
+        text-decoration: none;
+        letter-spacing: 1px;
+        transition: color 0.3s ease;
+    }
+
+    .compare-cards .compare-card:first-child {
+        border-top-left-radius: 16px;
+        border-bottom-left-radius: 16px;
+    }
+
+    /* LAST card → right side radius */
+    .compare-cards .compare-card:last-child {
+        border-top-right-radius: 16px;
+        border-bottom-right-radius: 16px;
+    }
+
+    .qi4d-toggle-info .info-selectors-container a:hover {
+        color: #ff6a00;
+    }
+
+    .qi4d-toggle-info .info-selectors-container a.selected {
+        color: #ff6a00;
+    }
+
+    .qi4d-toggle-info .info-selectors-container a.selected::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -6px;
+        width: 100%;
+        height: 2px;
+        background: #ff6a00;
+    }
+
+    .qi4d-toggle-info .qi4d-info-btn-container {
+        display: flex;
+        gap: 16px;
+        flex-direction: row;
+    }
+
+    .qi4d-toggle-info .btn {
+        padding: 13px 25px;
+        border-radius: 40px;
+        font-size: 12px;
+        letter-spacing: 2px;
+        font-weight: 700;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid #fff;
+        background: transparent;
+        color: #fff;
+        display: inline-block;
+    }
+
+    .qi4d-toggle-info .btn.filled {
+        background: #fff;
+        color: #000;
+        border-color: #fff;
+    }
+
+    .qi4d-toggle-info .btn:hover {
+        background: #ff6a00;
+        border-color: #ff6a00;
+        color: #000;
+    }
+
+    .qi4d-toggle-info .btn.filled:hover {
+        background: #ff6a00;
+        border-color: #ff6a00;
+    }
+
+    .qi4d-toggle-info img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+
+    .qi4d-toggle-info .image-column {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .qi4d-toggle-info .image-column img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+
+    /* ===== REAX SECTION - ALTERNATE LAYOUT (LEFT IMAGE, RIGHT CONTENT) ===== */
+    .reax-shaft-info.tw-flex {
+        display: flex;
+        align-items: center;
+        max-width: 100%;
+        margin: 0 auto;
+        gap: 60px;
+        background: #000;
+    }
+
+    .reax-shaft-info img {
+        width: 100%;
+    }
+
+    .reax-shaft-info .info-section {
+        flex: 1;
+        color: #fff;
+    }
+
+    .reax-shaft-info h2 {
+        font-size: 42px;
+        font-weight: 700;
+        color: #ff6a00;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        letter-spacing: 2px;
+    }
+
+    .reax-shaft-info h3 {
+        font-size: 42px;
+        font-weight: 700;
+        color: #ff6a00;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        letter-spacing: 2px;
+    }
+
+    .reax-shaft-info p {
+        font-size: 13px;
+        line-height: 1.6;
+        margin-bottom: 24px;
+        color: #ffffff;
+    }
+
+    /* ===== CLUB HEAD ROTATION SECTION - NORMAL LAYOUT (LEFT CONTENT, RIGHT IMAGE) ===== */
+    .club-head-rotation-info.tw-flex {
+        display: flex;
+        align-items: center;
+        max-width: 100%;
+        margin: 0 auto;
+        gap: 60px;
+        background: #000;
+    }
+
+    .club-head-rotation-info .info-section {
+        flex: 1;
+        color: #fff;
+    }
+
+    .club-head-rotation-info h2 {
+        font-size: 42px;
+        font-weight: 700;
+        color: #ff6a00;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        letter-spacing: 2px;
+    }
+
+    .club-head-rotation-info h3 {
+        font-size: 26px;
+        font-weight: 700;
+        color: white;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        letter-spacing: 2px;
+    }
+
+    .club-head-rotation-info p {
+        font-size: 13px;
+        line-height: 1.6;
+        margin-bottom: 24px;
+        color: #ffffff;
+    }
+
+    .club-head-rotation-info video {
+        width: 100%;
+        height: auto;
+    }
+
+    div#bottom-section {
+        padding: 0px 60px;
+    }
+
+    .legal-disclaimer p {
+        font-size: 14px;
+        color: #fff !important;
+        padding-bottom: 40px;
+    }
+
+    .taylormade-qi4d .product_slider_container ol.products.list.items.product-items {
+        margin-left: 5px;
+    }
+
+    .taylormade-qi4d .product_slider_container ol.products.list.items.product-items>li:first-child {
+        padding-left: 5px !important;
+    }
+
+    .taylormade-qi4d .brand_name,
+    .taylormade-qi4d .product-item-details strong.product-item-name>a {
+        color: white !important;
+    }
+
+    .info-content {
+        max-width: 615px;
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    main#maincontent .taylormade-qi4d .slider_html_here.container-fluid.shoe.container.data_landing_page.titleist-offer {
+        padding: 0px !important;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .taylormade-qi4d .product_slider_container .slider_arrows>div {
+        margin-top: 145px;
+    }
+
+    /* Responsive */
+    @media only screen and (min-width: 1439px) and (max-width: 1920px) {
+        ul.info-selectors-container li {
+            margin-bottom: 8px !important;
+        }
+
+        .qi4d-toggle-info p {
+
+            margin-top: 15px !important;
+        }
+
+        #at-a-glance .swiper-container321 {
+            height: 670px;
+        }
+
+        #qi4d-nav .info-selectors-container a {
+            font-size: 18px;
+        }
+
+        #at-a-glance .swiper-button-prev,
+        #at-a-glance .swiper-button-next {
+            top: -137px;
+        }
+
+        .info-content {
+            padding-left: 9rem;
+            padding-right: 9rem;
+            max-width: 890px;
+        }
+
+        #at-a-glance .swiper-container321 {
+            max-width: 100%;
+        }
+
+        #at-a-glance {
+            padding: 0px;
+        }
+
+        .qi4d-header-btns .btn {
+            padding: 27px;
+            font-size: 1.5rem;
+        }
+
+        .qi4d-below-header h1,
+        .compare-title {
+            font-size: 42px;
+        }
+
+        .qi4d-below-header h3 {
+            font-size: 17px;
+            padding: 5rem 0px;
+        }
+
+        .button-container.swiper,
+        #at-a-glance h1 {
+            padding: 0px 30px;
+        }
+
+        .compare-title img {
+            height: 36px;
+        }
+
+        .qi4d-toggle-info h2 {
+            font-size: 25px;
+        }
+
+        .card-row span,
+        .qi4d-product-navs h2 {
+            font-size: 21px;
+        }
+
+        .qi4d-toggle-info p,
+        .qi4d-product-navs a {
+            font-size: 17px;
+        }
+
+        .card-row strong,
+        .build-btn {
+            font-size: 19px;
+        }
+
+        .qi4d-toggle-info .btn {
+            font-size: 15px;
+            margin: 10px 0px;
+        }
+
+        .compare-cards {
+            width: 100%;
+            padding: 0px 40px;
+        }
+
+        .card-row {
+            padding: 26px 30px;
+        }
+
+        .qi4d-info-btn-container.compare-btns a {
+            padding: 33px 70px;
+            font-size: 2.4rem;
+            margin: 50px 10px;
+        }
+
+        h2.tw-mb-12.text-center {
+            font-size: 36px;
+        }
+
+        #qi4d-video iframe {
+            aspect-ratio: 16 / 10;
+        }
+
+        div#bottom-section {
+            padding: 0px 70px;
+        }
+
+        .qi4d-product-navs h2 {
+            margin-bottom: 57px;
+        }
+
+        .qi4d-tiles-container {
+            max-width: 100%;
+        }
+    }
+
+    @media (max-width: 1024px) {
+        .qi4d-toggle-info .tw-flex {
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .qi4d-toggle-info h2 {
+            font-size: 32px;
+        }
+
+        .reax-shaft-info {
+            flex-direction: column;
+        }
+
+        .reax-shaft-info h3 {
+            font-size: 32px;
+        }
+
+        .club-head-rotation-info {
+            flex-direction: column;
+        }
+
+        .club-head-rotation-info h3 {
+            font-size: 32px;
+        }
+
+        #at-a-glance .swiper-container321 {
+            height: 400px;
+        }
+
+        .qi4d-tiles-container .tw-flex {
+            flex-wrap: wrap;
+        }
+
+        .product-tile {
+            flex: 0 0 50%;
+        }
+
+        div#bottom-section {
+            padding: 0px 20px;
+        }
+
+        .qi4d-tiles {
+            padding: 40px 20px;
+        }
+    }
+
+    @media (max-width: 768px) {
+
+        ul.info-selectors-container li {
+            margin-bottom: 5px;
+        }
+
+        #at-a-glance .swiper-slide img,
+        #at-a-glance .swiper-slide video {
+            object-fit: fill;
+        }
+
+        .qi4d-compare {
+            padding: 50px 0;
+        }
+
+        section.qi4d-toggle-info .info-text video.qi4d-header-video {
+            padding: 0px 15px;
+        }
+
+        #at-a-glance .swiper-slide {
+            min-width: 100%;
+        }
+
+        .at-a-glance-images-blocks video.qi4d-header-video {
+            padding: 0px 0px;
+        }
+
+        .info-content.reax-block {
+            padding: 0px;
+        }
+
+        .qi4d-info-btn-container.compare-btns {
+            flex-wrap: wrap;
+            margin: 5rem 0px 0px 0px;
+        }
+
+        .taylormade-qi4d .product_slider_container .slider_arrows>div {
+            margin-top: 110px;
+        }
+
+        .tw-pb-6.tw-bg-white-100 {
+            margin-top: 4rem;
+            margin-bottom: 20rem;
+        }
+
+        .qi4d-info-btn-container.compare-btns a {
+            padding: 17px 0px;
+            width: 600px;
+            margin: 0px 20px;
+        }
+
+        .swiper-pagination321 {
+            display: block;
+        }
+
+        .info-text {
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        #at-a-glance .slide-text button {
+            display: none;
+        }
+
+        .cms-taylormade-qi4d main#maincontent {
+            padding: 0px !important;
+        }
+
+        .qi4d-toggle-info {
+            padding: 40px 20px;
+        }
+
+        .qi4d-toggle-info h2 {
+            font-size: 24px;
+        }
+
+        .qi4d-toggle-info p {
+            font-size: 12px;
+        }
+
+        .qi4d-toggle-info .info-selectors-container {
+            flex-direction: column;
+        }
+
+        .qi4d-toggle-info .qi4d-info-btn-container {
+            flex-direction: column;
+        }
+
+        .qi4d-toggle-info .btn {
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Header responsiveness */
+        h2.tw-mb-12.text-center {
+            font-size: 24px;
+            line-height: 32px;
+            margin-bottom: 2rem;
+        }
+
+        .qi4d-header-btns {
+            top: 100% !important;
+            flex-direction: column;
+            gap: 5px;
+            padding: 0px 15px;
+        }
+
+        .qi4d-header-btns .btn {
+            padding: 16px 24px;
+            font-size: 0.875rem;
+            margin: 4px 0;
+        }
+
+        .qi4d-below-content-block {
+            margin: 13rem auto 5rem auto;
+            padding: 0 15px;
+        }
+
+        .qi4d-below-header h1 {
+            font-size: 24px;
+        }
+
+        .qi4d-below-header h3 {
+            font-size: 13px;
+            padding: 0.8rem 0px;
+            margin-top: 22px;
+            line-height: 28px;
+        }
+
+        /* Slider responsiveness */
+        #at-a-glance {
+            padding: 0px 30px;
+            margin: 6rem auto 8rem auto;
+        }
+
+        #at-a-glance h1 {
+            font-size: 20px;
+        }
+
+        #at-a-glance .swiper-container321 {
+            height: 300px;
+        }
+
+        #at-a-glance .slide-text {
+            left: 3%;
+            bottom: -65%;
+            max-width: 100%;
+            padding: 0px;
+        }
+
+        #at-a-glance .slide-text h3 {
+            font-size: 16px;
+        }
+
+        #at-a-glance .swiper-button-prev,
+        #at-a-glance .swiper-button-next {
+            display: none;
+        }
+
+        #at-a-glance .swiper-button-prev {
+            right: 50px;
+        }
+
+        .slide-text p {
+            font-size: 11px;
+        }
+
+        /* Nav responsiveness */
+        #qi4d-nav .info-selectors-container {
+            gap: 20px;
+            flex-wrap: wrap;
+            padding: 0px 0;
+        }
+
+        #qi4d-nav .info-selectors-container a {
+            font-size: 12px;
+            padding-bottom: 4px;
+        }
+
+        /* Tabs responsiveness */
+        .qi4d-nav {
+            gap: 20px;
+            padding: 12px 10px;
+        }
+
+        .qi4d-nav a {
+            font-size: 10px;
+        }
+
+        /* Compare cards responsiveness */
+        .compare-cards {
+            width: 100%;
+            grid-template-columns: repeat(4, 1fr);
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 45px;
+            padding-left: 20px;
+            scroll-padding-left: 20px;
+        }
+
+        .compare-cards::-webkit-scrollbar {
+            height: 3px;
+            border-radius: 22px !important;
+        }
+
+        .compare-cards::-webkit-scrollbar-thumb:hover {
+            background-color: #404040;
+        }
+
+        .compare-cards::-webkit-scrollbar-thumb {
+            background-color: #404040;
+            border-radius: 8px;
+        }
+
+        .compare-cards::-webkit-scrollbar-track {
+            background: black;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .compare-card {
+            min-width: 200px;
+            border-radius: 0px;
+        }
+
+        .compare-title {
+            font-size: 24px;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+        }
+
+        .compare-title img {
+            height: 31px;
+        }
+
+        .card-image {
+            height: 200px;
+        }
+
+        .card-row {
+            padding: 12px 15px;
+        }
+
+        .card-row span {
+            font-size: 12px;
+        }
+
+        .card-row strong {
+            font-size: 15px;
+        }
+
+        /* Toggle info responsiveness */
+        .qi4d-toggle-info {
+            padding: 30px 15px;
+        }
+
+        .qi4d-toggle-info .tw-flex {
+            gap: 10px;
+            margin: 30px 0;
+            padding: 0px 0px;
+        }
+
+        .qi4d-info-btn-container {
+            padding: 0px !important;
+        }
+
+        .qi4d-toggle-info h2,
+        .reax-shaft-info h2,
+        .club-head-rotation-info h2 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        .reax-shaft-info h3,
+        .club-head-rotation-info h3 {
+            font-size: 20px;
+        }
+
+        .qi4d-toggle-info p {
+            font-size: 13px;
+            margin-bottom: 16px;
+            margin-top: 10px !important;
+        }
+
+        .qi4d-toggle-info .info-selectors-container {
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .qi4d-toggle-info .info-selectors-container a {
+            font-size: 11px;
+        }
+
+        .qi4d-toggle-info .btn {
+            padding: 12px 20px;
+            font-size: 11px;
+        }
+
+        /* Tiles responsiveness */
+        .qi4d-product-navs h2 {
+            font-size: 22px;
+        }
+
+        .qi4d-product-navs ul {
+            margin-bottom: 0px;
+            gap: 20px;
+        }
+
+        .qi4d-product-navs li {
+            margin-right: 0;
+            margin-bottom: 8px;
+        }
+
+        .qi4d-product-navs a {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .qi4d-tiles-container .tw-flex {
+            flex-wrap: wrap;
+        }
+
+        .qi4d-tiles {
+            padding: 40px 0px;
+        }
+
+        .product-tile {
+            flex: 0 0 100%;
+            text-align: left;
+        }
+
+        .product-tile img {
+            height: 250px;
+        }
+
+        .product-tile h4 {
+            font-size: 12px;
+        }
+
+        .product-tile p {
+            font-size: 11px;
+        }
+
+        /* Video responsiveness */
+        #qi4d-video {
+            padding: 1rem 0 !important;
+        }
+
+        #qi4d-video h2 {
+            font-size: 20px;
+            margin-bottom: 5rem;
+        }
+
+        #qi4d-video iframe {
+            aspect-ratio: 16 / 12;
+        }
+
+        /* Reax section responsiveness */
+        .reax-shaft-info {
+            gap: 30px;
+        }
+
+        .reax-shaft-info p {
+            font-size: 12px;
+            margin-bottom: 16px;
+        }
+
+        /* Club head rotation responsiveness */
+        .club-head-rotation-info {
+            gap: 30px;
+            margin-top: 1.5rem;
+        }
+
+        .club-head-rotation-info p {
+            font-size: 12px;
+            margin-bottom: 16px;
+        }
+
+        /* Legal disclaimer */
+        .legal-disclaimer {
+            padding: 1.5rem 0;
+        }
+
+        .legal-disclaimer p {
+            font-size: 12px;
+            padding: 0 15px;
+        }
+
+        img.tw-w-full.tw-mb-12.reax-logo {
+            max-width: 100%;
+            margin-bottom: 20px;
+        }
+
+    }
+
+    /* Tablet Landscape (768px - 1024px) */
+    @media (min-width: 768px) and (max-width: 1024px) {
+        #at-a-glance .swiper-container321 {
+            height: 450px;
+        }
+
+        .qi4d-product-navs ul {
+            flex-direction: row;
+        }
+
+        .qi4d-product-navs li {
+            margin-right: 12px;
+        }
+
+        .product-tile {
+            flex: 0 0 50%;
+        }
+    }
+
+    /* Mobile Portrait (480px - 768px) */
+    @media (min-width: 480px) and (max-width: 768px) {
+        #at-a-glance .swiper-container321 {
+            height: 320px;
+        }
+
+        .product-tile {
+            flex: 0 0 100%;
+        }
+    }
+
+    /* Mobile Extra Small (Below 480px) */
+    @media (max-width: 480px) {
+        h2.tw-mb-12.text-center {
+            font-size: 18px;
+            line-height: 24px;
+            margin-bottom: 1rem;
+        }
+
+        #qi4d-nav-container {
+            padding: 15px 0px !important;
+        }
+
+        .qi4d-header-btns {
+            top: 100% !important;
+        }
+
+        .qi4d-header-btns .btn {
+            padding: 13px 16px;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+
+        .qi4d-below-header h1 {
+            font-size: 20px;
+        }
+
+        .qi4d-below-header h3 {
+            font-size: 12px;
+            line-height: 20px;
+            padding: 0.8rem 0px;
+        }
+
+        #at-a-glance .swiper-container321 {
+            height: 250px;
+        }
+
+        #at-a-glance .slide-text h3 {
+            font-size: 14px;
+        }
+
+        .compare-title {
+            font-size: 24px;
+            margin-bottom: 50px;
+        }
+
+        .compare-title img {
+            height: 31px;
+        }
+
+        .card-image {
+            height: 150px;
+        }
+
+        .card-image img {
+            max-height: 120px;
+        }
+
+        .card-footer {
+            padding: 16px;
+        }
+
+        .build-btn {
+            padding: 13px 40px;
+            font-size: 14px;
+        }
+
+        .qi4d-toggle-info h2 {
+            font-size: 18px;
+        }
+
+        .reax-shaft-info h3,
+        .club-head-rotation-info h3 {
+            font-size: 18px;
+        }
+
+        .qi4d-toggle-info .btn,
+        .qi4d-toggle-info .btn.filled {
+            padding: 10px 16px;
+            font-size: 10px;
+        }
+
+        .product-tile img {
+            height: 200px;
+        }
+
+        .product-tile h4 {
+            font-size: 11px;
+            margin: 6px 0 2px;
+        }
+
+        .product-tile p {
+            font-size: 10px;
+        }
+
+        img.tw-w-full.tw-mb-12.reax-logo {
+            max-width: 70%;
+        }
+    }
+
+    @media (max-width:360px) {
+        .compare-title {
+            font-size: 20px;
+        }
+
+        .compare-title img {
+            height: 27px;
+        }
+    }
+</style>
+
+<div class="main-content-block taylormade-qi4d">
+    <div class="content-asset">
+        <div class="content-asset">
+            <!-- dwMarker="content" dwContentID="532d3a7cbab6a1d7cebeb9e484" -->
+
+            <section class="qi4d-header">
+                <video class="qi4d-header-video" autoplay="" muted="" playsinline="" loop="">
+                    <!-- For large screens -->
+                    <source
+                        src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4dfampage_Topbanner_Desktop_1.mp4"
+                        type="video/mp4" media="(min-width: 1200px)" />
+
+                    <!-- For mobile -->
+                    <source
+                        src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4d-Header-Mob.mp4"
+                        type="video/mp4" />
+
+                    Your browser does not support the video tag.
+                </video>
+                <div class="qi4d-header-btns">
+                    <a href="https://golfoy.com/clubs/by-brand/taylormade/by-type/qi4d-family.html" class="btn">SHOP ALL PRODUCTS</a>
+                </div>
+            </section>
+
+            <section class="qi4d-below-header tw-mb-24 tw-mt-20">
+                <div class="qi4d-below-content-block">
+                    <h1>THINK FAST</h1>
+                    <h3 class="tw-mt-10 tw-px-4 tw-mx-auto">
+                        Qi4D IS OUR FASTEST, MOST FITTABLE FAMILY OF DRIVERS. THROUGH
+                        AERODYNAMIC SHAPING, REENGINEERED FACE CONSTRUCTION, INDUSTRY-LEADING
+                        ADJUSTABILITY, AND REVOLUTIONARY SHAFT FITTING, GOLFERS OF ALL LEVELS
+                        WILL FIND THEIR NEW FAST.
+                    </h3>
+                </div>
+            </section>
+            <!-- at a glance -->
+            <section id="at-a-glance" class="at-a-glance tw-py-24 tw-mb-0 tw-pb-0 xl:tw-pt-44 xl:tw-mb-32 tw-px-8">
+                <h1 class="xl:tw-pl-4 tw-absolute">AT A GLANCE</h1>
+                <div class="tw-pb-6 tw-bg-white-100 at-a-glance-images-blocks">
+                    <div
+                        class="button-container swiper swiper-0 button-container-initialized button-container-horizontal button-container-pointer-events button-container-free-mode tw-text-center swiper-initialized swiper-horizontal swiper-pointer-events swiper-free-mode swiper-backface-hidden">
+                        <div
+                            class="swiper-container321 swiper-videos swiper-initialized swiper-horizontal swiper-backface-hidden">
+                            <div class="swiper-wrapper swiper-wrapper" id="swiper-wrapper-c0ff49623497a9e8"
+                                aria-live="polite">
+                                <div class="swiper-slide swiper-slide-active swiper-slide-wide" role="group"
+                                    aria-label="1 / 3">
+                                    <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/AGlance_FindFast.jpg"
+                                        alt="" class="tw-w-full" />
+                                    <div class="slide-text">
+                                        <h3 class="tw-text-lg xl:tw-text-2xl">
+                                            OUR FASTEST, MOST FITTABLE DRIVERS
+                                        </h3>
+                                        <p>
+                                            Qi4D is our fastest, most fittable family of drivers.
+                                            Through aerodynamic shaping, reengineered face
+                                            construction, industry-leading adjustability, and
+                                            revolutionary shaft fitting technology that’s the result
+                                            of over 11 million analyzed shots, we’re able to optimize
+                                            Qi4D drivers to your unique, individual swing.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="swiper-slide swiper-slide-next swiper-slide-wide" role="group"
+                                    aria-label="2 / 3">
+                                    <video class="qi4d-header-video" autoplay="" muted="" loop="" playsinline="">
+                                        <source
+                                            src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4d-Techcomps.mp4"
+                                            type="video/mp4" />
+                                    </video>
+                                    <div class="slide-text">
+                                        <h3 class="tw-text-lg xl:tw-text-2xl">
+                                            OPTIMIZED ADJUSTABILITY
+                                        </h3>
+                                        <p>
+                                            The Qi4D family of drivers include adjustability like
+                                            never before. From the two TAS weights in the Qi4D LS and
+                                            Qi4D Max, to the Quad Weighting in the Qi4D, golfers will
+                                            be able to further dial in ball flight and spin to fit
+                                            their ideal shot.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="swiper-slide swiper-slide-wide" role="group" aria-label="3 / 3">
+                                    <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/AGlance_Tour.jpg"
+                                        alt="" class="tw-w-full" />
+                                    <div class="slide-text">
+                                        <h3 class="tw-text-lg xl:tw-text-2xl">TOUR VALIDATION</h3>
+                                        <p>
+                                            Building speed takes time, and so does the testing process
+                                            for the world’s most intimidating focus group – Team
+                                            TaylorMade athletes around the world. They thought fast,
+                                            and we delivered with the Qi4D driver family.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-button-prev btn-prev-0 swiper-button-disabled" tabindex="-1"
+                                role="button" aria-label="Previous slide"
+                                aria-controls="swiper-wrapper-c0ff49623497a9e8" aria-disabled="true"></div>
+                            <div class="swiper-button-next btn-next-0" tabindex="0" role="button"
+                                aria-label="Next slide" aria-controls="swiper-wrapper-c0ff49623497a9e8"
+                                aria-disabled="false"></div>
+
+                            <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
+                        </div>
+                        <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
+                    </div>
+                </div>
+                <div class="modal-wrapper">
+                    <div class="modal">
+                        <div class="content">
+                            <div class="swiper-container-1 swiper-initialized swiper-horizontal swiper-backface-hidden">
+                                <div class="swiper-wrapper" id="swiper-wrapper-8d3741a7ebef8346" aria-live="polite">
+                                    <div class="swiper-slide swiper-slide-active swiper-slide-modal" role="group"
+                                        aria-label="1 / 3">
+                                        <div class="head">
+                                            <a class="btn-close trigger" href="#"></a>
+                                        </div>
+                                        <p class="tw-font-bold">
+                                            OUR FASTEST, MOST FITTABLE DRIVERS
+                                        </p>
+                                        <p>
+                                            Qi4D is our fastest, most fittable family of drivers.
+                                            Through aerodynamic shaping, reengineered face
+                                            construction, industry-leading adjustability, and
+                                            revolutionary shaft fitting technology that’s the result
+                                            of over 11 million analyzed shots, we’re able to optimize
+                                            Qi4D drivers to your unique, individual swing.
+                                        </p>
+                                        <img src="https://www.taylormadegolf.com/on/demandware.static/-/Sites-TMaG-Library/en_US/v1768235667280/TaylorMade/plp/2025/qi4d/Qi4DFamPage_AtAGlance_FindFast_2000x1124.jpg"
+                                            alt="" class="tw-w-full" />
+                                    </div>
+                                    <div class="swiper-slide swiper-slide-next swiper-slide-modal" role="group"
+                                        aria-label="2 / 3">
+                                        <div class="head">
+                                            <a class="btn-close trigger" href="#"></a>
+                                        </div>
+                                        <p class="tw-font-bold">OPTIMIZED ADJUSTABILITY</p>
+                                        <p>
+                                            The Qi4D family of drivers include adjustability like
+                                            never before. From the two TAS weights in the Qi4D LS and
+                                            Qi4D Max, to the Quad Weighting in the Qi4D, golfers will
+                                            be able to further dial in ball flight and spin to fit
+                                            their ideal shot.
+                                        </p>
+                                        <video class="qi4d-header-video" autoplay="" muted="" loop="" playsinline="">
+                                            <source
+                                                src="https://ecmprdassetssac001.blob.core.windows.net/assets/static/2026/qi4d/Qi4DFamPage_AtAGlance_Adjustable_VIDEOCOMPRESSED.mp4"
+                                                type="video/mp4" />
+                                        </video>
+                                    </div>
+                                    <div class="swiper-slide swiper-slide-modal" role="group" aria-label="3 / 3">
+                                        <div class="head">
+                                            <a class="btn-close trigger" href="#"></a>
+                                        </div>
+                                        <p class="tw-font-bold">TOUR VALIDATION</p>
+                                        <p>
+                                            Building speed takes time, and so does the testing process
+                                            for the world’s most intimidating focus group – Team
+                                            TaylorMade athletes around the world. They thought fast,
+                                            and we delivered with the Qi4D driver family.
+                                        </p>
+                                        <img src="https://www.taylormadegolf.com/on/demandware.static/-/Sites-TMaG-Library/en_US/v1768235667280/TaylorMade/plp/2025/qi4d/Qi4DFamPage_AtAGlance_Tour_2000x1124.jpg"
+                                            alt="" class="tw-w-full" />
+                                    </div>
+                                </div>
+                                <div class="swiper-button-prev swiper-button-disabled" tabindex="-1" role="button"
+                                    aria-label="Previous slide" aria-controls="swiper-wrapper-8d3741a7ebef8346"
+                                    aria-disabled="true"></div>
+                                <div class="swiper-button-next" tabindex="0" role="button" aria-label="Next slide"
+                                    aria-controls="swiper-wrapper-8d3741a7ebef8346" aria-disabled="false"></div>
+                                <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="swiper-pagination321 swiper-pagination-clickable swiper-pagination-bullets swiper-pagination-horizontal">
+                    <span class="swiper-pagination-bullet swiper-pagination-bullet-active" tabindex="0"
+                        role="button" aria-label="Go to slide 1" aria-current="true"></span>
+                    <span class="swiper-pagination-bullet" tabindex="0" role="button"
+                        aria-label="Go to slide 2"></span>
+                    <span class="swiper-pagination-bullet" tabindex="0" role="button"
+                        aria-label="Go to slide 3"></span>
+                </div>
+            </section>
+
+            <!-- at a glance end-->
+
+            <section id="qi4d-nav-container" class="qi4d-nav-container">
+                <div id="qi4d-nav" class="" style="top: 159px;">
+                    <ul class="info-selectors-container">
+                        <li>
+                            <a class="qi4d-drivers-info-select selected" data-club="driver">DRIVERS</a>
+                        </li>
+                        <li>
+                            <a class="qi4d-fairways-info-select" data-club="fairway">FAIRWAYS</a>
+                        </li>
+                        <li>
+                            <a class="qi4d-hybrids-info-select " data-club="hybrid">HYBRIDS</a>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="qi4d-toggle-info">
+                <div class="tw-flex qi4d-drivers-info">
+                    <div class="tw-px-8 info-section">
+                        <ul class="info-selectors-container d-none">
+                            <li>
+                                <a class="qi4d-drivers-info-select selected" data-club="driver">DRIVERS</a>
+                            </li>
+                            <li>
+                                <a class="qi4d-fairways-info-select" data-club="fairway">FAIRWAYS</a>
+                            </li>
+                            <li>
+                                <a class="qi4d-hybrids-info-select" data-club="hybrid">HYBRIDS</a>
+                            </li>
+                        </ul>
+                        <div class="info-text">
+                            <div class="d-block d-lg-none info-images">
+                                <img class="tw-w-full tw-mb-12" alt=""
+                                    src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Driver_.jpg">
+                            </div>
+                            <div class="info-content">
+                                <h2>Find Your New Fast</h2>
+                                <p>Qi4D drivers utilize refined shaping, multimaterial construction, a faster face with
+                                    a
+                                    new and
+                                    improved roll radius, and four moveable Trajectory Adjustment System (TAS) weights
+                                    to
+                                    provide you
+                                    with the perfect blend of speed and forgiveness off the tee.</p>
+                                <div class="qi4d-info-btn-container tw-flex tw-flex-col md:tw-flex-row tw-w-full">
+                                    <a href="https://golfoy.com/clubs/by-brand/taylormade/by-type/qi4d-family/by-type/qi4d-drivers.html#2193" class="btn filled mb-2 mb-lg-0">SHOP DRIVERS</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-none d-lg-block image-column">
+                        <img class="tw-w-full" alt=""
+                            src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Driver_.jpg">
+                    </div>
+                </div>
+
+                <div class="tw-flex qi4d-fairways-info d-none">
+                    <div class="tw-px-8 info-section">
+                        <ul class="info-selectors-container d-none">
+                            <li>
+                                <a class="qi4d-drivers-info-select selected" data-club="driver">DRIVERS</a>
+                            </li>
+                            <li>
+                                <a class="qi4d-fairways-info-select" data-club="fairway">FAIRWAYS</a>
+                            </li>
+                            <li>
+                                <a class="qi4d-hybrids-info-select" data-club="hybrid">HYBRIDS</a>
+                            </li>
+                        </ul>
+                        <div class="info-text">
+                            <div class="info-images d-block d-lg-none">
+                                <img class="tw-w-full tw-mb-12" alt=""
+                                    src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Fairway.jpg">
+                            </div>
+                            <div class="info-content">
+                                <h2>Performance is in the Details</h2>
+                                <p>From faces designed for maximum speed and forgiveness, to Tour-proven technologies,
+                                    refined designs,
+                                    and unmatched adjustability, Qi4D fairway woods give you another level of
+                                    performance at
+                                    the top end
+                                    of your bag, regardless of your ability.</p>
+                                <div class="qi4d-info-btn-container tw-flex tw-flex-col lg:tw-flex-row">
+                                    <a href="https://golfoy.com/clubs/by-brand/taylormade/by-type/qi4d-family/by-type/qi4d-fairway-woods.html#2194" class="btn filled mb-2 mb-lg-0">SHOP FAIRWAYS</a>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-none d-lg-block image-column">
+                        <img class="tw-w-full" alt=""
+                            src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Fairway.jpg">
+                    </div>
+                </div>
+
+                <div class="tw-flex qi4d-hybrids-info d-none">
+                    <div class="tw-px-8 info-section">
+                        <ul class="info-selectors-container d-none">
+                            <li>
+                                <a class="qi4d-drivers-info-select selected" data-club="driver">DRIVERS</a>
+                            </li>
+                            <li>
+                                <a class="qi4d-fairways-info-select" data-club="fairway">FAIRWAYS</a>
+                            </li>
+                            <li>
+                                <a class="qi4d-hybrids-info-select" data-club="hybrid">HYBRIDS</a>
+                            </li>
+                        </ul>
+                        <div class="info-text">
+                            <div class="info-image d-block d-lg-none">
+                                <img class="tw-w-full tw-mb-12" alt=""
+                                    src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Hybrid_irons.jpg">
+                            </div>
+                            <div class="info-content">
+                                <h2>The Ultimate Long Iron Replacement</h2>
+                                <p>Utilizing multimaterial construction, strategic CG optimization and more
+                                    adjustability
+                                    than ever,
+                                    Qi4D hybrids take your long game to the next level.</p>
+                                <div class="qi4d-info-btn-container tw-flex tw-flex-col lg:tw-flex-row">
+                                    <a href="https://golfoy.com/clubs/by-brand/taylormade/by-type/qi4d-family/by-type/qi4d-hybrids.html#2195" class="btn filled mb-2 mb-lg-0">SHOP HYBRIDS</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-none d-lg-block image-column">
+                        <img class="tw-w-full" alt=""
+                            src="https://www.taylormadegolf.com/on/demandware.static/-/Sites-TMaG-Library/en_US/v1768280689291/TaylorMade/plp/2025/qi4d/Qi4DFamPage_MainCategories_Hybrid_1200x900.jpg">
+                    </div>
+                </div>
+
+                <div class="tw-flex reax-shaft-info">
+                    <div class="col-12 col-lg-6 d-none d-lg-block">
+                        <img class="tw-w-full" alt=""
+                            src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_REAXShafts.jpg">
+                    </div>
+                    <div class="col-12 col-lg-6 tw-px-8 info-section">
+                        <div class="info-text tw-text-white opp-direction">
+                            <div class="d-block d-lg-none info-images">
+                                <img class="tw-w-full tw-mb-12" alt=""
+                                    src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_REAXShafts.jpg">
+                            </div>
+                            <div class="info-content reax-block">
+                                <div class="text-content-image">
+                                    <img class="tw-w-full tw-mb-12 reax-logo" alt=""
+                                        src="https://golfoy.com/media/wysiwyg/2026/taylormade/reax.png">
+                                </div>
+                                <p>Through capturing more than 11 million shots over the last 20 years, we’ve developed
+                                    technology that
+                                    allows fitters and everyday golfers just like you to identify their closure rate
+                                    through
+                                    impact and
+                                    play a shaft that matches your unique swing profile.</p>
+                                <p>REAX™ shafts are the result of TaylorMade engineers utilizing Mitsubishi Chemical’s
+                                    industry-leading
+                                    materials expertise and production processes to produce world-class shafts for a
+                                    vast
+                                    array of swing
+                                    types.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tw-flex club-head-rotation-info tw-mt-10">
+                    <div class="tw-px-8 info-section">
+                        <div class="info-text tw-text-white tw-m-auto">
+                            <div class="d-block d-lg-none info-images">
+                                <video class="qi4d-header-video" autoplay="" muted="" loop="" playsinline="">
+                                    <source
+                                        src="https://golfoy.com/media/wysiwyg/2026/taylormade/tech_golf.mp4"
+                                        type="video/mp4">
+                                </video>
+                            </div>
+                            <div class="info-content club-rotate">
+                                <h3>Club Head Rotation</h3>
+                                <p>In order for fitters and golfers alike to find the ideal head and REAX shaft
+                                    combination,
+                                    the
+                                    TaylorMade R&amp;D team spent countless hours studying how golfers deliver the
+                                    clubface
+                                    at impact –
+                                    their rate of rotation. What they found was that players generally fall into one of
+                                    three rotation
+                                    rate categories: high, mid and low.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-none d-lg-block image-column">
+                        <video class="qi4d-header-video" autoplay="" muted="" loop="" playsinline="">
+                            <source
+                                src="https://ecmprdassetssac001.blob.core.windows.net/assets/static/2026/qi4d/Qi4DFamPage_AtAGlance_Rotation_VIDEOCOMPRESSED.mp4"
+                                type="video/mp4">
+                        </video>
+                    </div>
+                </div>
+            </section>
+
+            <section class="qi4d-compare">
+
+                <h1 class="compare-title">
+                    THE
+                    <img src="https://www.taylormadegolf.com/on/demandware.static/-/Sites-TMaG-Library/en_US/v1768235667280/TaylorMade/plp/2025/qi4d/Qi4D.svg"
+                        alt="Qi4D">
+                    LINE UP
+                </h1>
+
+                <div class="compare-cards drivers-compare-table">
+
+                    <!-- Qi4D LS -->
+                    <div class="compare-card">
+                        <div class="card-image">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_LS.png"
+                                alt="Qi4D LS">
+                        </div>
+                        <div class="card-row">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Driver_LS.png" alt="">
+                        </div>
+                        <div class="card-row">
+                            <span>BALL SPEED</span>
+                            <strong>Fastest</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>SPIN</span>
+                            <strong>Ultra-Low</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>LAUNCH</span>
+                            <strong>Low</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>ADJUSTABILITY</span>
+                            <strong>2 TAS Weights</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HEAD SHAPE &amp; SIZE</span>
+                            <strong>Compact / 460cc</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>SHAFT OPTIONS</span>
+                            <strong>High (Red), Mid (Blue), Low (White)</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HAND &amp; LOFT</span>
+                            <strong>
+                                RH 8°, 9°, 10.5°<br>
+                                LH 9°, 10.5°
+                            </strong>
+                        </div>
+
+                        <div class="card-footer">
+                            <a href="https://golfoy.com/taylormade-qi4d-ls-driver.html" class="build-btn">Shop Now </a>
+                        </div>
+                    </div>
+
+                    <!-- Qi4D Core -->
+                    <div class="compare-card">
+                        <div class="card-image">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Core.png"
+                                alt="Qi4D Core">
+                        </div>
+                        <div class="card-row">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4DF_Driver_Core.png" alt="">
+                        </div>
+                        <div class="card-row">
+                            <span>BALL SPEED</span>
+                            <strong>Fastest</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>SPIN</span>
+                            <strong>Mid</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>LAUNCH</span>
+                            <strong>Mid</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>ADJUSTABILITY</span>
+                            <strong>Quad Weighting</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HEAD SHAPE &amp; SIZE</span>
+                            <strong>Modern / 460cc</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>SHAFT OPTIONS</span>
+                            <strong>High (Red), Mid (Blue), Low (White)</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HAND &amp; LOFT</span>
+                            <strong>
+                                RH 8°, 9°, 10.5°, 12°<br>
+                                LH 9°, 10.5°, 12°
+                            </strong>
+                        </div>
+
+                        <div class="card-footer">
+                            <a href="https://golfoy.com/taylormade-qi4d-driver.html" class="build-btn">Shop Now </a>
+                        </div>
+                    </div>
+
+                    <!-- Qi4D Max -->
+                    <div class="compare-card">
+                        <div class="card-image">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Max.png"
+                                alt="Qi4D Max">
+                        </div>
+                        <div class="card-row">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Driver_Max.png" alt="">
+                        </div>
+                        <div class="card-row">
+                            <span>BALL SPEED</span>
+                            <strong>Fast</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>SPIN</span>
+                            <strong>Mid</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>LAUNCH</span>
+                            <strong>Mid-High</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>ADJUSTABILITY</span>
+                            <strong>2 TAS Weights</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HEAD SHAPE &amp; SIZE</span>
+                            <strong>Max / 460cc</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>SHAFT OPTIONS</span>
+                            <strong>High (Red), Mid (Blue), Low (White)</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HAND &amp; LOFT</span>
+                            <strong>
+                                RH 9°, 10.5°, 12°<br>
+                                LH 8°, 9°, 10.5°, 12°
+                            </strong>
+                        </div>
+
+                        <div class="card-footer">
+                            <a href="https://golfoy.com/taylormade-qi4d-max-driver.html" class="build-btn">Shop Now </a>
+                        </div>
+                    </div>
+
+                    <!-- Qi4D Max Lite -->
+                    <div class="compare-card">
+                        <div class="card-image">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Max_Lite.png"
+                                alt="Qi4D Max Lite">
+                        </div>
+                        <div class="card-row">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Driver_MaxLite.png" alt="">
+                        </div>
+                        <div class="card-row">
+                            <span>BALL SPEED</span>
+                            <strong>Fast</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>SPIN</span>
+                            <strong>Mid</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>LAUNCH</span>
+                            <strong>High</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>ADJUSTABILITY</span>
+                            <strong>1 TAS Weight</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HEAD SHAPE &amp; SIZE</span>
+                            <strong>Max / 460cc</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>SHAFT OPTIONS</span>
+                            <strong>High (Red), Mid (Blue), Low (White)</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HAND &amp; LOFT</span>
+                            <strong>
+                                RH 10.5°, 12°<br>
+                                LH 10.5°, 12°
+                            </strong>
+                        </div>
+
+                        <!-- <div class="card-footer">
+                            <a href="#" class="build-btn">Shop Now </a>
+                        </div> -->
+                    </div>
+
+                </div>
+
+                <!-- Qi4D Fairway Tour -->
+                <div class="compare-cards fairways-compare-table d-none">
+                    <div class="compare-card">
+                        <div class="card-image">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Tour.png"
+                                alt="Qi4D Fairway Tour">
+                        </div>
+                        <div class="card-row">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Fairway_Tour.png" alt="">
+                        </div>
+                        <div class="card-row">
+                            <span>FORGIVENESS</span>
+                            <strong>High</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>SPIN</span>
+                            <strong>Mid / Adjustable</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>LAUNCH</span>
+                            <strong>Mid-Low / Adjustable</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HEAD SIZE</span>
+                            <strong>175cc</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>ADJUSTABLE LOFT SLEEVE</span>
+                            <strong>3, 5, 7</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HAND &amp; LOFT</span>
+                            <strong>
+                                RH – 3, 5, 7<br>
+                                LH – 3, 5
+                            </strong>
+                        </div>
+
+                        <!-- <div class="card-footer">
+                            <a href="#" class="build-btn">Shop Now </a>
+                        </div> -->
+                    </div>
+
+                    <!-- Qi4D Fairway Core -->
+                    <div class="compare-card">
+                        <div class="card-image">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Core.png"
+                                alt="Qi4D Fairway Core">
+                        </div>
+                        <div class="card-row">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Fairway_Core.png" alt="">
+                        </div>
+                        <div class="card-row">
+                            <span>FORGIVENESS</span>
+                            <strong>Higher</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>SPIN</span>
+                            <strong>Mid</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>LAUNCH</span>
+                            <strong>Mid / Adjustable*</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HEAD SIZE</span>
+                            <strong>185cc</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>ADJUSTABLE LOFT SLEEVE</span>
+                            <strong>3, 3HL, 5, 7, 9</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HAND &amp; LOFT</span>
+                            <strong>
+                                RH – 3, 3HL, 5, 7, 9<br>
+                                LH – 3, 5, 7
+                            </strong>
+                        </div>
+
+                        <div class="card-footer">
+                            <a href="https://golfoy.com/taylormade-qi4d-fairway-wood.html" class="build-btn">Shop Now </a>
+                        </div>
+                    </div>
+
+                    <!-- Qi4D Fairway Max -->
+                    <div class="compare-card">
+                        <div class="card-image">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Max.png"
+                                alt="Qi4D Fairway Max">
+                        </div>
+                        <div class="card-row">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Fairway_Max.png" alt="">
+                        </div>
+                        <div class="card-row">
+                            <span>FORGIVENESS</span>
+                            <strong>Highest</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>SPIN</span>
+                            <strong>Mid-High</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>LAUNCH</span>
+                            <strong>High / Adjustable*</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HEAD SIZE</span>
+                            <strong>200cc</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>ADJUSTABLE LOFT SLEEVE</span>
+                            <strong>3, 5</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HAND &amp; LOFT</span>
+                            <strong>
+                                RH – 3, 5, 7, 9<br>
+                                LH – 3, 5, 7
+                            </strong>
+                        </div>
+
+                        <div class="card-footer">
+                            <a href="https://golfoy.com/taylormade-qi4d-max-fairway-wood.html" class="build-btn">Shop Now </a>
+                        </div>
+                    </div>
+
+                    <!-- Qi4D Fairway Max Lite -->
+                    <div class="compare-card">
+                        <div class="card-image">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Max_Lite.png"
+                                alt="Qi4D Fairway Max Lite">
+                        </div>
+                        <div class="card-row">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Fairway_MaxLite.png" alt="">
+                        </div>
+                        <div class="card-row">
+                            <span>FORGIVENESS</span>
+                            <strong>Higher</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>SPIN</span>
+                            <strong>Mid-High</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>LAUNCH</span>
+                            <strong>High / Adjustable*</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HEAD SIZE</span>
+                            <strong>200cc</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>ADJUSTABLE LOFT SLEEVE</span>
+                            <strong>3, 5</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HAND &amp; LOFT</span>
+                            <strong>
+                                RH – 3, 5, 7, 9<br>
+                                LH – 3, 5, 7
+                            </strong>
+                        </div>
+
+                        <div class="card-footer">
+                            <a href="https://golfoy.com/taylormade-qi4d-max-lite-fairway-wood.html" class="build-btn">Shop Now </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- hybrid -->
+                <div class="compare-cards hybrids-compare-table d-none">
+
+                    <!-- Qi4D Hybrid Core -->
+                    <div class="compare-card">
+                        <div class="card-image">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Core.png"
+                                alt="Qi4D Hybrid Core">
+                        </div>
+                        <div class="card-row">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D.png" alt="">
+                        </div>
+                        <div class="card-row">
+                            <span>FORGIVENESS</span>
+                            <strong>High</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>SPIN</span>
+                            <strong>Mid</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>LAUNCH</span>
+                            <strong>Mid / Adjustable*</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>LOFT SLEEVE</span>
+                            <strong>2, 3, 4, 5</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HAND &amp; LOFT</span>
+                            <strong>
+                                RH – 2, 3, 4, 5<br>
+                                LH – 3, 4, 5
+                            </strong>
+                        </div>
+
+                        <div class="card-footer">
+                            <a href="https://golfoy.com/taylormade-qi4d-rescue.html" class="build-btn">Shop Now </a>
+                        </div>
+                    </div>
+
+                    <!-- Qi4D Hybrid Max -->
+                    <div class="compare-card">
+                        <div class="card-image">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Max.png"
+                                alt="Qi4D Hybrid Max">
+                        </div>
+                        <div class="card-row">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Hybrid_Max.png" alt="">
+                        </div>
+                        <div class="card-row">
+                            <span>FORGIVENESS</span>
+                            <strong>Highest</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>SPIN</span>
+                            <strong>Mid-High</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>LAUNCH</span>
+                            <strong>High</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>LOFT SLEEVE</span>
+                            <strong>No</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HAND &amp; LOFT</span>
+                            <strong>
+                                RH – 3, 4, 5, 6, 7<br>
+                                LH – 3, 4, 5
+                            </strong>
+                        </div>
+
+                        <div class="card-footer">
+                            <a href="https://golfoy.com/taylormade-qi4d-max-rescue.html" class="build-btn">Shop Now </a>
+                        </div>
+                    </div>
+
+                    <!-- Qi4D Hybrid Max Lite -->
+                    <div class="compare-card">
+                        <div class="card-image">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_Max_Lite.png"
+                                alt="Qi4D Hybrid Max Lite">
+                        </div>
+                        <div class="card-row">
+                            <img src="https://golfoy.com/media/wysiwyg/2026/taylormade/Qi4D_MaxLite.png" alt="">
+                        </div>
+
+                        <div class="card-row">
+                            <span>FORGIVENESS</span>
+                            <strong>Higher</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>SPIN</span>
+                            <strong>Mid-High</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>LAUNCH</span>
+                            <strong>High</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>LOFT SLEEVE</span>
+                            <strong>No</strong>
+                        </div>
+
+                        <div class="card-row">
+                            <span>HAND &amp; LOFT</span>
+                            <strong>
+                                RH – 4, 5, 6, 7<br>
+                                LH – 4, 5
+                            </strong>
+                        </div>
+
+                        <!-- <div class="card-footer">
+                            <a href="https://golfoy.com/taylormade-qi4d-max-lite-rescue.html" class="build-btn">Shop Now </a>
+                        </div> -->
+                    </div>
+
+                </div>
+
+                <!-- <div class="qi4d-info-btn-container compare-btns">
+                    <a href="#" class="btn filled">SHOP DRIVERS</a>
+                </div> -->
+            </section>
+
+
+        </div>
+    </div>
+
+    <div class="content-asset">
+        <div class="content-asset">
+            <!-- dwMarker="content" dwContentID="96ea42e93a26759a4637d687c2" -->
+            <div id="bottom-section">
+                <section id="qi4d-video"
+                    class="drivers-clubhouse tw-text-left xl:tw-text-center tw-w-11/12 tw-mx-auto tw-pt-32">
+                    <h2 class="tw-mb-12 text-center">FIRST LOOK AT Qi4D</h2>
+                    <iframe src="https://www.youtube.com/embed/Qjluyho8Hd8?si=YA-XpQM9Zej1vVwW&amp;enablejsapi=1"
+                        title="Grant Horvat &amp; Tommy Fleetwood Try the New Qi4D Driver!" frameborder="0" allow="
+              accelerometer;
+              autoplay;
+              clipboard-write;
+              encrypted-media;
+              gyroscope;
+              picture-in-picture;
+              web-share;
+            " referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="" id="widget4"
+                        data-gtm-yt-inspected-108="true"></iframe>
+                </section>
+
+                <section class="qi4d-tiles px-lg-5">
+                    <div class="qi4d-product-navs tw-mt-32 tw-px-5">
+                        <h2 class="tw-mb-12">SHOP Qi4D</h2>
+                        <ul class="tw-mb-12">
+                            <li>
+                                <a class="show-qi4d-driver-products tw-mr-4 is-active-product">
+                                    Drivers
+                                </a>
+                            </li>
+                            <li>
+                                <a class="show-qi4d-fairway-products tw-mx-4">Fairways</a>
+                            </li>
+                            <li>
+                                <a class="show-qi4d-hybrid-products tw-mx-4">Hybrids</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="qi4d-tiles-container">
+                        <div class="qi4d-drivers-products tw-flex">
+                            <?php
+                            echo $this->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
+                                ->setTemplate('Magento_Theme::html/product_slider.phtml')
+                                ->setData('cat_id', '2193')
+                                ->setData('heading', '')
+                                ->setData('num_prds', 12)
+                                ->setData('cssclass', 'shoe container data_landing_page titleist-offer')
+                                ->toHtml();
+                            ?>
+                        </div>
+                        <div class="qi4d-fairways-products d-none tw-flex">
+                            <?php
+                            echo $this->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
+                                ->setTemplate('Magento_Theme::html/product_slider.phtml')
+                                ->setData('cat_id', '2194')
+                                ->setData('heading', '')
+                                ->setData('num_prds', 12)
+                                ->setData('cssclass', 'shoe container data_landing_page titleist-offer')
+                                ->toHtml();
+                            ?>
+                        </div>
+                        <div class="qi4d-hybrids-products d-none tw-flex">
+                            <?php
+                            echo $this->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
+                                ->setTemplate('Magento_Theme::html/product_slider.phtml')
+                                ->setData('cat_id', '2195')
+                                ->setData('heading', '')
+                                ->setData('num_prds', 12)
+                                ->setData('cssclass', 'shoe container data_landing_page titleist-offer')
+                                ->toHtml();
+                            ?>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="legal-disclaimer tw-py-24">
+                    <p class="px-3 px-lg-5 text-white">
+                        *Launch adjustable via 2° loft sleeve only
+                    </p>
+                </section>
+            </div>
+        </div>
+        <!-- End content-asset -->
+    </div>
+</div>
+
+
+
+<script>
+    // Magento2 compatible jQuery
+    require(['jquery'], function($) {
+        'use strict';
+
+        $(document).ready(function() {
+
+            // ======================================
+            // GENERIC SLIDER FACTORY (JQUERY)
+            // ======================================
+            var initSlider = function($container, $prevBtn, $nextBtn, $bullets) {
+                if (!$container.length) return null;
+
+                var $wrapper = $container.find(".swiper-wrapper");
+                if (!$wrapper.length) return null;
+
+                var total = $wrapper.children().length;
+                var index = 0;
+                var slidePercent = $(window).width() < 768 ? 100 : 70;
+                var startX = 0;
+                var getMaxIndex = function() {
+                    return total - 1;
+                };
+                var currentX = 0;
+                var isDragging = false;
+
+                var getSlideWidth = function() {
+                    var slide = $wrapper.children().first();
+                    return slide.outerWidth(true); // true = include margin
+                };
+
+                var getTranslateX = function() {
+                    if ($(window).width() < 768) {
+                        return index * getSlideWidth();
+                    }
+                    return index * slidePercent;
+                };
+
+                var update = function() {
+                    slidePercent = $(window).width() < 768 ? 100 : 70;
+
+                    index = Math.min(index, getMaxIndex());
+
+                    if ($(window).width() < 768) {
+                        $wrapper.css(
+                            'transform',
+                            'translateX(-' + getTranslateX() + 'px)'
+                        );
+                    } else {
+                        $wrapper.css(
+                            'transform',
+                            'translateX(-' + (index * slidePercent) + '%)'
+                        );
+                    }
+
+
+                    if ($bullets && $bullets.length) {
+                        $bullets.each(function(i) {
+                            if (i === index) {
+                                $(this).addClass("swiper-pagination-bullet-active");
+                            } else {
+                                $(this).removeClass("swiper-pagination-bullet-active");
+                            }
+                        });
+                    }
+
+                    if ($prevBtn && $prevBtn.length) {
+                        if (index === 0) {
+                            $prevBtn.addClass("swiper-button-disabled");
+                        } else {
+                            $prevBtn.removeClass("swiper-button-disabled");
+                        }
+                    }
+
+                    if ($nextBtn && $nextBtn.length) {
+                        if (index === total - 1) {
+                            $nextBtn.addClass("swiper-button-disabled");
+                        } else {
+                            $nextBtn.removeClass("swiper-button-disabled");
+                        }
+                    }
+                };
+
+                // Button Handlers
+                if ($prevBtn && $prevBtn.length) {
+                    $prevBtn.on('click', function(e) {
+                        e.preventDefault();
+                        if (index > 0) {
+                            index--;
+                            update();
+                        }
+                    });
+                }
+
+                if ($nextBtn && $nextBtn.length) {
+                    $nextBtn.on('click', function(e) {
+                        e.preventDefault();
+                        if (index < total - 1) {
+                            index++;
+                            update();
+                        }
+                    });
+                }
+
+                if ($bullets && $bullets.length) {
+                    $bullets.on('click', function(e) {
+                        e.preventDefault();
+                        index = $(this).index();
+                        update();
+                    });
+                }
+
+                // Touch / Drag
+                var startDrag = function(x) {
+                    isDragging = true;
+                    startX = x;
+                    $wrapper.css('transition', 'none');
+                };
+
+                var onDrag = function(x) {
+                    if (!isDragging) return;
+                    currentX = x - startX;
+                    if ($(window).width() < 768) {
+                        $wrapper.css(
+                            'transform',
+                            'translateX(-' + (getTranslateX() - currentX) + 'px)'
+                        );
+                    } else {
+                        $wrapper.css(
+                            'transform',
+                            'translateX(calc(-' + (index * slidePercent) + '% + ' + currentX + 'px))'
+                        );
+                    }
+
+                };
+
+                var endDrag = function() {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    $wrapper.css('transition', 'transform 0.5s ease');
+
+                    var threshold = $(window).width() < 768 ? 40 : 60;
+
+                    if (currentX < -threshold && index < total - 1) index++;
+                    if (currentX > threshold && index > 0) index--;
+
+                    currentX = 0;
+                    slidePercent = $(window).width() < 768 ? 100 : 70;
+
+                    update();
+                };
+
+                $container.on('touchstart', function(e) {
+                    if (e.touches && e.touches[0]) {
+                        startDrag(e.touches[0].clientX);
+                    }
+                });
+
+                $container.on('touchmove', function(e) {
+                    if (e.touches && e.touches[0]) {
+                        onDrag(e.touches[0].clientX);
+                    }
+                });
+
+                $container.on('touchend', endDrag);
+                $container.on('mousedown', function(e) {
+                    startDrag(e.clientX);
+                });
+
+                $container.on('mousemove', function(e) {
+                    onDrag(e.clientX);
+                });
+
+                $container.on('mouseup', endDrag);
+                $container.on('mouseleave', endDrag);
+
+                update();
+
+                return {
+                    goTo: function(i) {
+                        index = i;
+                        update();
+                    }
+                };
+            };
+
+            // ======================================
+            // MAIN SLIDER
+            // ======================================
+            var mainSlider = null;
+
+            $(document).on('mouseenter', '.swiper-container321', function() {
+                if (!mainSlider) {
+                    mainSlider = initSlider(
+                        $('.swiper-container321'),
+                        $('.btn-prev-0'),
+                        $('.btn-next-0'),
+                        $('.swiper-pagination321 .swiper-pagination-bullet')
+                    );
+                }
+            });
+
+            if ($(window).width() < 768) {
+                $(document).on('touchstart', '.swiper-container321', function() {
+                    if (!mainSlider) {
+                        mainSlider = initSlider(
+                            $('.swiper-container321'),
+                            $('.btn-prev-0'),
+                            $('.btn-next-0'),
+                            $('.swiper-pagination321 .swiper-pagination-bullet')
+                        );
+                    }
+                });
+                $(document).on('click', 'span.swiper-pagination-bullet', function() {
+                    if (!mainSlider) {
+                        mainSlider = initSlider(
+                            $('.swiper-container321'),
+                            $('.btn-prev-0'),
+                            $('.btn-next-0'),
+                            $('.swiper-pagination321 .swiper-pagination-bullet')
+                        );
+                    }
+                });
+            }
+
+            // ======================================
+            // MODAL SLIDER
+            // ======================================
+            var modalSlider = initSlider(
+                $('.swiper-container-1'),
+                $('.modal .swiper-button-prev'),
+                $('.modal .swiper-button-next'),
+                null
+            );
+
+            // ======================================
+            // MODAL OPEN / CLOSE
+            // ======================================
+            var $modal = $('.modal-wrapper');
+
+            $(document).on('click', '.open-modal', function(e) {
+                e.preventDefault();
+                if ($modal.length && modalSlider) {
+                    $modal.addClass('active');
+                    var modalIndex = Number($(this).data('index'));
+                    modalSlider.goTo(modalIndex);
+                }
+            });
+
+            $(document).on('click', '.btn-close', function(e) {
+                e.preventDefault();
+                if ($modal.length) {
+                    $modal.removeClass('active');
+                }
+            });
+
+            // ======================================
+            // CLUB TYPE NAVIGATION
+            // ======================================
+            var $navContainer = $("#qi4d-nav-container");
+            var $nav = $("#qi4d-nav");
+            var $toggleSection = $(".qi4d-toggle-info");
+            var $compareSection = $(".qi4d-compare");
+
+            if ($nav.length) {
+                var infoSections = {
+                    driver: $(".qi4d-drivers-info"),
+                    fairway: $(".qi4d-fairways-info"),
+                    hybrid: $(".qi4d-hybrids-info")
+                };
+
+                var tableSections = {
+                    driver: $(".drivers-compare-table"),
+                    fairway: $(".fairways-compare-table"),
+                    hybrid: $(".hybrids-compare-table")
+                };
+
+                // Initialize: Hide all sections, show hybrid by default
+                $.each(infoSections, function(key, $el) {
+                    if ($el.length) {
+                        $el.addClass("d-none");
+                    }
+                });
+
+                $.each(tableSections, function(key, $el) {
+                    if ($el.length) {
+                        $el.addClass("d-none");
+                    }
+                });
+
+                if (infoSections.hybrid.length) {
+                    infoSections.hybrid.removeClass("d-none");
+                }
+                if (tableSections.hybrid.length) {
+                    tableSections.hybrid.removeClass("d-none");
+                }
+
+                // Set initial selected state
+                $nav.find("a[data-club]").removeClass("selected");
+                $nav.find('[data-club="hybrid"]').addClass("selected");
+
+                // Handle club type tab clicks
+                $(document).on('click', 'a[data-club]', function(e) {
+                    var $this = $(this);
+                    if (!$this.closest("#qi4d-nav").length) return;
+
+                    e.preventDefault();
+                    var club = $this.data('club');
+
+                    // Update nav selection
+                    $nav.find("a[data-club]").removeClass("selected");
+                    $this.addClass("selected");
+
+                    // Hide all sections
+                    $.each(infoSections, function(key, $el) {
+                        if ($el.length) {
+                            $el.addClass("d-none");
+                        }
+                    });
+
+                    $.each(tableSections, function(key, $el) {
+                        if ($el.length) {
+                            $el.addClass("d-none");
+                        }
+                    });
+
+                    // Show selected section
+                    if (infoSections[club] && infoSections[club].length) {
+                        infoSections[club].removeClass("d-none");
+                    }
+                    if (tableSections[club] && tableSections[club].length) {
+                        tableSections[club].removeClass("d-none");
+                    }
+                });
+            }
+
+            // ======================================
+            // PRODUCT TILES CATEGORY SWITCHER
+            // ======================================
+            $(document).on('click', '.qi4d-product-navs a.show-qi4d-driver-products', function(e) {
+                e.preventDefault();
+                $('.qi4d-product-navs a').removeClass('is-active-product');
+                $(this).addClass('is-active-product');
+                $(".show-qi4d-hybrid-products").removeClass("selected");
+                $(".qi4d-drivers-products.tw-flex").removeClass("d-none");
+                $(".qi4d-fairways-products.tw-flex").addClass("d-none");
+                $(".qi4d-hybrids-products.tw-flex").addClass("d-none");
+            });
+
+            $(document).on('click', '.qi4d-product-navs a.show-qi4d-fairway-products', function(e) {
+                e.preventDefault();
+                $('.qi4d-product-navs a').removeClass('is-active-product');
+                $(this).addClass('is-active-product');
+                $(".show-qi4d-hybrid-products").removeClass("selected");
+                $(".qi4d-drivers-products.tw-flex").addClass("d-none");
+                $(".qi4d-fairways-products.tw-flex").removeClass("d-none");
+                $(".qi4d-hybrids-products.tw-flex").addClass("d-none");
+            });
+
+            $(document).on('click', '.qi4d-product-navs a.show-qi4d-hybrid-products', function(e) {
+                e.preventDefault();
+                $('.qi4d-product-navs a').removeClass('is-active-product');
+                $(this).addClass('is-active-product');
+                $(".show-qi4d-fairway-products").removeClass("selected");
+                $(".qi4d-drivers-products.tw-flex").addClass("d-none");
+                $(".qi4d-fairways-products.tw-flex").addClass("d-none");
+                $(".qi4d-hybrids-products.tw-flex").removeClass("d-none");
+            });
+            $(document).on('click', '.qi4d-drivers-info-select', function(e) {
+                e.preventDefault();
+                // console.log("Driver Products");
+                $('.qi4d-product-navs a').removeClass('selected');
+                $('.qi4d-fairways-info-select').removeClass('selected');
+                $('.qi4d-hybrids-info-select').removeClass('selected');
+                $(this).addClass('selected');
+                $(".compare-cards.drivers-compare-table").removeClass('d-none');
+                $(".tw-flex.qi4d-drivers-info").removeClass('d-none');
+                $(".tw-flex.qi4d-fairways-info").addClass('d-none');
+                $(".tw-flex.qi4d-hybrids-info").addClass('d-none');
+                $(".compare-cards.fairways-compare-table").addClass('d-none');
+                $(".compare-cards.hybrids-compare-table").addClass('d-none');
+            });
+
+            $(document).on('click', '.qi4d-fairways-info-select', function(e) {
+                e.preventDefault();
+                // console.log("Fairway Products");
+                $('.qi4d-product-navs a').removeClass('selected');
+                $('.qi4d-drivers-info-select').removeClass('selected');
+                $('.qi4d-hybrids-info-select').removeClass('selected');
+                $(this).addClass('selected');
+                $(".compare-cards.drivers-compare-table").addClass('d-none');
+                $(".compare-cards.fairways-compare-table").removeClass('d-none');
+                $(".tw-flex.qi4d-drivers-info").addClass('d-none');
+                $(".tw-flex.qi4d-fairways-info").removeClass('d-none');
+                $(".tw-flex.qi4d-hybrids-info").addClass('d-none');
+                $(".compare-cards.hybrids-compare-table").addClass('d-none');
+            });
+
+            $(document).on('click', '.qi4d-hybrids-info-select', function(e) {
+                e.preventDefault();
+                // console.log("Hybrid Products");
+                $('.qi4d-product-navs a').removeClass('selected');
+                $('.qi4d-drivers-info-select').removeClass('selected');
+                $('.qi4d-fairways-info-select').removeClass('selected');
+                $(this).addClass('selected');
+                $(".compare-cards.drivers-compare-table").addClass('d-none');
+                $(".compare-cards.fairways-compare-table").addClass('d-none');
+                $(".compare-cards.hybrids-compare-table").removeClass('d-none');
+                $(".tw-flex.qi4d-drivers-info").addClass('d-none');
+                $(".tw-flex.qi4d-fairways-info").addClass('d-none');
+                $(".tw-flex.qi4d-hybrids-info").removeClass('d-none');
+            });
+
+            // ======================================
+            // STICKY NAVIGATION
+            // ======================================
+            let originalOffsetTop = 0;
+
+            function updateOffset() {
+                const $navContainer = jQuery('#qi4d-nav-container');
+                if ($navContainer.length) {
+                    originalOffsetTop = $navContainer.offset().top;
+                }
+            }
+
+            jQuery(window).on('load resize', updateOffset);
+            updateOffset();
+
+            if ($(window).width() > 768) {
+                let isNavFixed = false;
+                let ticking = false;
+
+                function isElementAboveViewport($el, offset = 0) {
+                    if (!$el.length) return false;
+
+                    const elementBottom = $el.offset().top + $el.outerHeight();
+                    const viewportTop = jQuery(window).scrollTop() + offset;
+
+                    return elementBottom < viewportTop;
+                }
+
+                jQuery(window).on('scroll', function() {
+
+                    if (ticking) return;
+                    ticking = true;
+
+                    window.requestAnimationFrame(function() {
+
+                        const $window = jQuery(window);
+                        const scrollTop = $window.scrollTop();
+                        const $video = jQuery('section.qi4d-compare');
+                        const $nav = jQuery('#qi4d-nav-container');
+                        const $placeholder = jQuery('#qi4d-nav-placeholder');
+
+                        // ✅ SAME LOGIC FOR ALL DEVICES
+                        const headerHeight = jQuery('header.page-header.fixed').outerHeight() || 0;
+                        const navHeight = jQuery('.sections.nav-sections.fixed').outerHeight() || 0;
+
+                        const totalFixedHeight = headerHeight + navHeight;
+
+                        const videoAboveViewport = isElementAboveViewport($video, totalFixedHeight);
+
+                        const shouldFix =
+                            scrollTop >= originalOffsetTop - totalFixedHeight &&
+                            !videoAboveViewport;
+
+                        if (shouldFix && !isNavFixed) {
+                            isNavFixed = true;
+
+                            $placeholder.height($nav.outerHeight());
+
+                            $nav.css({
+                                position: 'fixed',
+                                top: totalFixedHeight + 'px',
+                                left: 0,
+                                right: 0,
+                                width: '100%',
+                                padding: '15px',
+                                zIndex: 90
+                            });
+
+                        } else if (!shouldFix && isNavFixed) {
+                            isNavFixed = false;
+
+                            $placeholder.height(0);
+
+                            $nav.css({
+                                position: '',
+                                top: '',
+                                left: '',
+                                right: '',
+                                width: '',
+                                padding: '',
+                                zIndex: ''
+                            });
+                        }
+
+                        ticking = false;
+                    });
+                });
+            } else {
+                let isNavFixed = false;
+                let ticking = false;
+
+                function isElementAboveViewport($el) {
+                    if (!$el.length) return false;
+
+                    const elementBottom = $el.offset().top + $el.outerHeight();
+                    const viewportTop = jQuery(window).scrollTop();
+
+                    return elementBottom < viewportTop;
+                }
+
+                jQuery(window).on('scroll', function() {
+
+                    if (ticking) return;
+                    ticking = true;
+
+                    window.requestAnimationFrame(function() {
+
+                        const $window = jQuery(window);
+                        const scrollTop = $window.scrollTop();
+                        const $video = jQuery('section.qi4d-compare');
+                        const $nav = jQuery('#qi4d-nav-container');
+                        const $placeholder = jQuery('#qi4d-nav-placeholder');
+
+                        const isMobile = $window.width() < 768;
+                        const isLargeScreen = $window.width() >= 1600;
+                        const largeScreenOffset = isLargeScreen ? 80 : 0;
+
+                        const headerHeight = jQuery('header.page-header.fixed').outerHeight() || 0;
+                        const navHeight = !isMobile && jQuery('.sections.nav-sections.fixed').length ?
+                            jQuery('.sections.nav-sections.fixed').outerHeight() :
+                            0;
+
+                        const totalFixedHeight = headerHeight + navHeight;
+
+                        const videoAboveViewport = isElementAboveViewport($video);
+                        console.log(videoAboveViewport);
+                        const shouldFix =
+                            scrollTop >= originalOffsetTop - totalFixedHeight - largeScreenOffset &&
+                            !videoAboveViewport;
+
+                        setTimeout(() => {
+                            if (shouldFix && !isNavFixed) {
+                                isNavFixed = true;
+
+                                // 🔒 lock layout height
+                                $placeholder.height($nav.outerHeight());
+
+                                $nav.css({
+                                    position: 'fixed',
+                                    top: totalFixedHeight + 'px',
+                                    left: 0,
+                                    right: 0,
+                                    width: '100%',
+                                    padding: '15px',
+                                    zIndex: 90
+                                });
+
+                            } else if (!shouldFix && isNavFixed) {
+                                isNavFixed = false;
+
+                                // 🔓 unlock layout
+                                $placeholder.height(0);
+
+                                $nav.css({
+                                    position: '',
+                                    top: '',
+                                    left: '',
+                                    right: '',
+                                    width: '',
+                                    padding: '',
+                                    zIndex: ''
+                                });
+                            }
+
+                        }, 300);
+
+                        ticking = false;
+                    });
+                });
+
+
+            }
+
+
+        });
+    });
+</script>

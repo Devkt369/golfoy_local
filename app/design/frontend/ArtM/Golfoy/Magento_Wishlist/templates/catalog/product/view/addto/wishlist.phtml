@@ -1,0 +1,52 @@
+<?php if ($block->isWishListAllowed()) : ?>
+<a href="#"
+   class="action towishlist wishlist-heart"
+   data-product-id="<?= $block->getProduct()->getId() ?>"
+   data-post='<?= $block->getWishlistParams() ?>'
+   title="<?= $block->escapeHtmlAttr(__('Add to Wish List')) ?>">
+
+   <span class="wishlist-heart-empty"></span>
+</a>
+<?php endif; ?>
+<script>
+require(['jquery','Magento_Customer/js/customer-data'], function ($, customerData) {
+
+    function updateWishlistIcons() {
+
+        var wishlist = customerData.get('wishlist')();
+
+        if (!wishlist || !wishlist.items) {
+            return;
+        }
+
+        $('.wishlist-heart').each(function () {
+
+            var $el = $(this);
+            var productId = $el.data('product-id');
+
+            wishlist.items.forEach(function(item){
+
+                if (item.product_id == productId) {
+
+                    $el.find('span')
+                       .removeClass('wishlist-heart-empty')
+                       .addClass('wishlist-heart-filled');
+
+                    // ✅ SET REMOVE PARAMS
+                    $el.attr('data-post', item.delete_item_params);
+
+                }
+
+            });
+
+        });
+    }
+
+    updateWishlistIcons();
+
+    customerData.get('wishlist').subscribe(function () {
+        updateWishlistIcons();
+    });
+
+});
+</script>

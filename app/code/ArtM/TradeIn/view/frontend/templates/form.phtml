@@ -1,0 +1,1052 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+$baseUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
+$ad_id = time() . "_" . rand(10000, 100000);
+
+$helper = $objectManager->get('ArtM\TradeIn\Helper\Data');
+$commonhelper = $objectManager->get('ArtM\Common\Helper\Data');
+?>
+
+<?php
+
+$header_html = '<div class="page_title_container">
+        <div class="page_title_box">
+            <div class="page_title_box_inside">
+                <div class="content_section">
+                    <div class="top_headeing">
+                        Trade-In your old Golf Equipment
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="trade_work">
+                    <div class="trade_work_title form_title">
+                        <h1>how it works</h1>
+                    </div>
+                </div>
+                <div class="trade_work_icons">
+                    <div class="col-12 outer_width_js" style="width:100%;">
+                        <div class="row trade_img_sec inner_width_js">
+                            <div class="col-md-3 col-sm-3 trade_img_block blocks_inside_js">
+                            <img src="' . $baseUrl . 'media/wysiwyg/2023_homepage/trade_in/Form.svg" alt="form" loading="lazy">
+                                <div class="border_line">
+
+                                </div>
+                                <p class="num_list">1. fill trade-in form & submit</p>
+                                <p class="p_list_two">Add club details in the Trade-In form and submit.</p>
+                            </div>
+                            <div class="col-md-3 col-sm-3 trade_img_block blocks_inside_js">
+                            <img src="' . $baseUrl . 'media/wysiwyg/2023_homepage/trade_in/Pack_Clubs_2.svg" alt="pack_clubs" loading="lazy">
+                                <div class="border_line">
+                                    
+                                </div>
+                                <p class="num_list">2. pack the clubs</p>
+                                <p class="p_list_two">Pack the clubs as best as possible </p>
+                            </div>
+                            <div class="col-md-3 col-sm-3 trade_img_block blocks_inside_js">
+                            <img src="' . $baseUrl . 'media/wysiwyg/2023_homepage/trade_in/Pick_Up.svg" alt="pick up" loading="lazy">
+                                <div class="border_line">
+
+                                </div>
+                                <p class="num_list"> 3. Ship Your Clubs</p>
+                                <p class="p_list_two">Send your clubs directly to us using your preferred courier for processing.</p>
+                            </div>
+                            <div class="col-md-3 col-sm-3 trade_img_block blocks_inside_js">
+                            <img src="' . $baseUrl . 'media/wysiwyg/2023_homepage/trade_in/Discount.svg" alt="Discount.svg" loading="lazy">
+                                <div class="border_line">
+
+                                </div>
+                                <p class="num_list">4. great trade value</p>
+                                <p class="p_list_two">Once we inspect the club, we will offer you the best value of your club.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>';
+
+if ($helper->getLoginCustomerId() != null) {
+
+    $customerSession = $objectManager->get(\Magento\Customer\Model\Session::class);
+
+    if ($customerSession->isLoggedIn()) {
+        $customer = $customerSession->getCustomer();
+
+        $customerId = $customer->getId();
+        $customerName = $customer->getName();
+        $customerEmail = $customer->getEmail();
+
+        $cust_data = $customer->getData();
+        if (array_key_exists("phone_number", $cust_data)) {
+            $phoneNumber = $cust_data['phone_number'];
+        } else {
+            $phoneNumber = '';
+        }
+
+        if (trim($phoneNumber) == '') {
+            // Get default billing address
+            $defaultBillingAddress = $customer->getDefaultBillingAddress();
+            $billingPhoneNumber = '';
+            if ($defaultBillingAddress) {
+                $phoneNumber = $defaultBillingAddress->getTelephone();
+            }
+        }
+        if (trim($phoneNumber) == '') {
+            // Get default shipping address
+            $defaultShippingAddress = $customer->getDefaultShippingAddress();
+            $shippingPhoneNumber = '';
+            if ($defaultShippingAddress) {
+                $phoneNumber = $defaultShippingAddress->getTelephone();
+            }
+        }
+    }
+
+
+?>
+
+    <form action="<?= $block->getUrl('tradein/index/submit/') ?>" method="post" enctype="multipart/form-data" id="tradein-form">
+
+        <div class="container-fluid">
+            <div class="tradeprogram">
+                <div class="tradeprogram_sections">
+                    <?= $header_html ?>
+                    <!-- first-field--end -->
+                    <!-- category_section -->
+                    <div class="selection_of_products">
+
+                    </div>
+                    <div class="cat_section">
+                        <!-- step--1 -->
+                        <div class="category_field">
+                            <div class="category_title form_title">
+                                <h4>select category</h4>
+                            </div>
+                            <?php
+                            $categories = $commonhelper->getConfig('tradein/tradein/categories_number');
+                            $categories_arr = explode(',', $categories);
+
+                            ?>
+                            <div class="cat_choose_list list_to_use">
+                                <?php
+                                foreach ($categories_arr as $cat) {
+                                ?>
+                                    <div class="cat_driver round_btn">
+                                        <div class="value_button btn_driver" value="<?= $cat ?>"><?= $cat ?></div>
+                                    </div>
+                                <?php
+                                }
+                                ?>
+                            </div>
+                            <input type="hidden" name="equipment" value="" class="required" />
+                        </div>
+                        <!-- step--1--end -->
+                        <!-- step-2 -->
+                        <div class="pro_brand_field">
+                            <div class="pro_brand_title form_title">
+                                <h4>brand name</h4>
+                            </div>
+                            <div class="pro_brand_input">
+                                <input class="required" type="text" name="brand" maxlength="100" placeholder="Enter product brand name">
+                            </div>
+                        </div>
+                        <!-- step-2-end -->
+                        <!-- step--3 -->
+                        <div class="pro_model_field">
+                            <div class="pro_model_title form_title">
+                                <h4>model name</h4>
+                            </div>
+                            <div class="pro_model_input">
+                                <input class="required" type="text" name="prd_model" maxlength="100" placeholder="Enter product model name">
+                            </div>
+                        </div>
+                        <!-- step--3--end -->
+                        <!-- step---4 -->
+                        <div class="pro_spec_field">
+                            <div class="pro_spec_title form_title">
+                                <h4>specification</h4>
+                            </div>
+                            <div class="pro_spec_input">
+                                <input class="required" type="text" name="prd_specification" maxlength="200" placeholder="Enter product specification details">
+                            </div>
+                        </div>
+                        <!-- step--4--end -->
+                        <!-- step-5 -->
+                        <div class="condition_field">
+                            <div class="condition_title form_title">
+                                <h4>select condition
+                                    <span class="tooltip-wrapper">
+                                        <span class="tooltip-icon">i</span>
+                                        <div class="tooltip-content">
+                                            <ul>
+                                                <li><strong>Excellent:</strong> Like new with minimal signs of use. No noticeable wear or damage.</li>
+                                                <li><strong>Very Good:</strong> Light signs of use, but no major blemishes. Still performs like new.</li>
+                                                <li><strong>Good:</strong> Moderate wear, but fully functional. Shows visible signs of use, but no major defects.</li>
+                                                <li><strong>Value:</strong> Heavily used with noticeable wear. Functional but may have scratches, dents, or discoloration.</li>
+                                            </ul>
+                                        </div>
+                                    </span>
+                                </h4>
+                            </div>
+                            <div class="condition_btn list_to_use">
+                                <div class="button_avg round_btn">
+                                    <div class="value_button btn_avg" value="excellent"
+                                        data-tooltip="Like new with minimal signs of use. No noticeable wear or damage.">
+                                        excellent
+                                    </div>
+                                </div>
+                                <div class="button_below_avg round_btn">
+                                    <div class="value_button btn_bel_avg" value="very good"
+                                        data-tooltip="Light signs of use, but no major blemishes. Still performs like new.">
+                                        very good
+                                    </div>
+                                </div>
+                                <div class="button_damaged round_btn">
+                                    <div class="value_button btn_dmg" value="good"
+                                        data-tooltip="Moderate wear, but fully functional. Shows visible signs of use, but no major defects.">
+                                        good
+                                    </div>
+                                </div>
+                                <div class="button_damaged round_btn">
+                                    <div class="value_button btn_dmg" value="value"
+                                        data-tooltip="Heavily used with noticeable wear. Functional but may have scratches, dents, or discoloration.">
+                                        value
+                                    </div>
+                                </div>
+                            </div>
+
+                            <input class="required" type="hidden" name="condition" value="" />
+                        </div>
+                        <!-- step--5--end -->
+
+                        <!-- step--6 -->
+                        <div class="purchase-form">
+                            <div class="condition_title form_title">
+                                <h4>purchase Date</h4>
+                            </div>
+                            <!-- <label for="purchase_date">Purchase Date</label> -->
+                            <!-- <input type="date" id="purchase_date" name="purchase_date" placeholder="DD/MM/YYYY" class="input-field" /> -->
+
+                            <input class="input-field" name="purchase_date" id="purchase_date" placeholder="DD-MM-YYYY" type="text">
+
+
+                            <div class="condition_title form_title">
+                                <h4>Invoice Available</h4>
+                            </div>
+                            <!-- <label>Invoice Available</label> -->
+                            <div class="button_group" id="invoice_available_group">
+                                <div class="round_btn">
+                                    <div class="value_button" data-value="yes" data-tooltip="Upload the invoice if available.">Yes</div>
+                                </div>
+                                <div class="round_btn">
+                                    <div class="value_button" data-value="no" data-tooltip="Select this if invoice is not available.">No</div>
+                                </div>
+                            </div>
+
+                            <div id="invoice_upload_wrapper" class="hidden">
+                                <label for="invoice_upload">Upload Invoice</label>
+                                <input type="file" name="invoice_upload" id="invoice_upload" accept="image/*,.pdf" class="upload-field" />
+                                <input type="hidden" name="invoice_upload" id="invoice_upload_hidden" />
+                                <div id="upload_status" class="upload-status" style="display: none;">
+                                    <div class="uploaded-preview">
+                                        <button type="button" id="remove_uploaded_file" class="remove-btn" title="Remove file">×</button>
+                                        <img id="uploaded_invoice_preview" src="" alt="Uploaded Invoice" />
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <!-- Purchased From -->
+                            <div class="condition_title form_title">
+                                <h4>Purchased From</h4>
+                            </div>
+                            <!-- <label>Purchased From</label> -->
+                            <div class="button_group" id="purchased_from_group">
+                                <div class="round_btn">
+                                    <div class="value_button" data-value="golfoy" data-tooltip="Purchased from Golfoy.">Golfoy</div>
+                                </div>
+                                <div class="round_btn">
+                                    <div class="value_button" data-value="other" data-tooltip="Purchased from another seller.">Other</div>
+                                </div>
+                                <input type="hidden" value="other" name="purchased_from">
+                            </div>
+
+                            <div id="golfoy_order_id" class="hidden">
+                                <label for="order_id">Order ID</label>
+                                <input type="text" id="order_id" name="order_id" maxlength="20" class="input-field" placeholder="Enter the Order ID" />
+                            </div>
+
+                            <div id="other_seller_name" class="hidden">
+                                <label for="seller_name">Seller Name</label>
+                                <input type="text" id="seller_name" name="seller_name" maxlength="50" class="input-field" placeholder="Enter the Seller Name" />
+                            </div>
+                        </div>
+
+
+                        <!-- step--9-- -->
+                        <div class="add_photo_field">
+                            <div class="add_pic_title form_title">
+                                <h4>Upload Photos</h4>
+                            </div>
+                            <div class="pic_upload_block">
+
+                                <input type="file" style="display:none !important;" name="review_media[]" id="review_media" accept=".png, .jpg, .jpeg" multiple="multiple" />
+                                <input type="hidden" class="required" name="images" />
+                                <div id="review-drag-area" class="review-drag-area">
+                                    <p class="review-dragdrop" style="text-align:center;color:gray;">+ Add Images</p>
+                                </div>
+
+                                <div for="media_field" generated="true" class="mage-error" id="media_field-error" style="display: none;">
+                                    <?php /* @escapeNotVerified */ echo __('You can Upload maximum 10 images.') ?>
+                                </div>
+                            </div>
+                            <p class="upload_pic_content"><strong>Photo Upload Guidelines</strong>
+                            <ul>
+                                <li>Minimum 3 Photos Required</li>
+                                <li>Maximum Photo Size: 20MB</li>
+                                <li>Image Format: JPG,PNG,JPEG</li>
+                            </ul>
+                            </p>
+                            <p class="upload_pic_content"><strong>Note: </strong>Upload clear images of the club face, crown (woods), sole, shaft, grip, and any damages (if any)</p>
+
+                            <!--//-------------------drag drop image upload---------->
+                            <!--//-------------------------------------------------->
+                        </div>
+                        <!-- step--6--end -->
+                        <input class="required" value="<?= $customerId ?>" type="hidden" name="cust_id" placeholder="ENTER Email">
+                        <input class="required" value="<?= $customerEmail ?>" type="hidden" name="email" placeholder="ENTER Email">
+                        <input class="required" value="<?= $customerName ?>" type="hidden" name="name" placeholder="ENTER NAME">
+                        <?php
+                        if (trim($phoneNumber) == '') {
+                        ?>
+                            <div class="pro_spec_field">
+                                <div class="pro_spec_title form_title">
+                                    <h4>Phone</h4>
+                                </div>
+                                <div class="pro_spec_input">
+                                    <input class="required" type="text" name="phone" placeholder="ENTER Phone">
+                                </div>
+                            </div>
+                        <?php
+                        } else {
+                        ?>
+                            <input class="required" value="<?= $phoneNumber ?>" type="hidden" name="phone" placeholder="ENTER Phone">
+                        <?php
+                        }
+                        ?>
+
+                        <!-- step-7-- -->
+                        <div class="last_btn_field">
+                            <div class="trade_btn_section round_btn">
+                                <div class="trade_btn trade_another">trade another club</div>
+                            </div>
+                            <div class="submit_section round_btn">
+                                <button class="submit_btn">submit</button>
+                            </div>
+                            <input type="hidden" value="<?= $ad_id ?>" name="ad_id" />
+                            <input type="reset" class="hide reset_form_tradein" />
+                            <div class="message_form"></div>
+                        </div>
+                        <!-- stepp-7--end -->
+                    </div>
+                    <!-- --------------------------------------FAQ SECTION------------------------------------------------------------------------ -->
+                    <div class="faq_Section">
+                        <div class="faq_blocks">
+                            <div class="faq_title form_title">
+                                <h2>frequently asked questions</h2>
+                            </div>
+                            <div class="faq_list">
+                                <div class="accordion">How many clubs can I trade-in at one time?</div>
+                                <div class="panel">
+                                    <p>There is no limit to the number of clubs you can trade-in.</p>
+                                </div>
+
+                                <div class="accordion">How do I get paid?</div>
+                                <div class="panel">
+                                    <p>You can be paid with a Golfoy Points that will credited into your wallet within the 72 hours of Inspection.</p>
+                                </div>
+
+                                <div class="accordion">What is your condition scale?</div>
+                                <div class="panel">
+                                    <p>There are three distinct condition categories set up through the trade-in program. A club in the New category has never been hit.The Average category covers the majority of used clubs that have light-to-normal wear and tear. Below Average would depict advanced wear on the club(s), including but not limited to visible paint chips, scratching to the face, or sky marks.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </form>
+<?php
+} else {
+?>
+    <!--        <div class=''>Please login to fill this form</div>-->
+    <div class="authorization-link signin_signout tradeinform_login_link">
+        <li class="link authorization-link" data-label="or">
+            <a href="#social-login-popup" class="social-login-btn" data-effect="mfp-move-from-top">Please <b>Login</b> or <b>Register</b> to Trade your products.</a>
+        </li>
+    </div>
+    <div class="disabled html">
+        <?= $header_html ?>
+    </div>
+<?php
+}
+?>
+
+<div class="thank_you_message_tradein hide">
+    <div class="thank_you_message_tradein_block">
+
+        <div class="row"><!-- text_section -->
+            <div class="col-md-12 card_feedback_row">
+                <h1 class="heading_success">
+                    Your Trade has been submitted!<br>
+                    <img class="success_image tradein_success_image" src="https://cdn.golfoy.com/media/sales/download.gif">
+                </h1>
+                <p class="order_number" style="margin-bottom:0px;">
+                    Your Trade id is:
+                    <a href="<?= $baseUrl ?>tradein/account/tradein/" class="order-number"><strong><?= $ad_id ?></strong></a>.
+                </p>
+                <p class="recive_text">
+                    Our representative will be in touch with you shortly.
+                    <br>
+                    You will receive a confirmation E-mail with details of your trade.
+                </p>
+                <!-- <div class="shipping-instruction">
+                    <h3 class="shipping-instruction-heading">Send your club to</h3>
+                    <span>KTS Ventures, Plot No. 5, Industrial Area Phase I, Chandigarh, 160102</span>
+                </div> -->
+                <div class="continue_button">
+                    <button type="button" class="btn btn-warning bt-lg" title="Trade another product" onclick="window.location='<?= $baseUrl ?>tradein'">
+                        <span><span>Trade another product</span></span>
+                    </button>
+                </div>
+                <hr>
+            </div>
+            <!-- input section -->
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Generic button group handler
+        function setupButtonGroup(groupId, callback) {
+            const group = document.getElementById(groupId);
+            const buttons = group.querySelectorAll('.value_button');
+
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    buttons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    callback(button.getAttribute('data-value'));
+                });
+            });
+        }
+
+        // Invoice Availability
+        setupButtonGroup('invoice_available_group', function(value) {
+            const wrapper = document.getElementById('invoice_upload_wrapper');
+            wrapper.classList.toggle('hidden', value !== 'yes');
+            if (value !== 'yes') {
+                document.getElementById('remove_uploaded_file').click();
+            }
+        });
+
+        // Purchased From
+        setupButtonGroup('purchased_from_group', function(value) {
+            const golfoyInput = document.getElementById('golfoy_order_id');
+            const otherInput = document.getElementById('other_seller_name');
+            golfoyInput.classList.add('hidden');
+            otherInput.classList.add('hidden');
+            golfoyInput.querySelector('input').value = '';
+            otherInput.querySelector('input').value = '';
+            document.querySelector('input[name="purchased_from"]').value = value;
+            if (value === 'golfoy') {
+                golfoyInput.classList.remove('hidden');
+            } else if (value === 'other') {
+                otherInput.classList.remove('hidden');
+            }
+        });
+    });
+
+    var acc = document.getElementsByClassName("accordion");
+    var i;
+
+    for (i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+            } else {
+                panel.style.display = "block";
+            }
+        });
+    }
+</script>
+<style>
+    div#invoice_upload_wrapper label {
+        pointer-events: none;
+    }
+
+    .error-message {
+        color: #e60023;
+        font-weight: 500;
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .tooltip-wrapper {
+        display: inline-block;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .tooltip-icon {
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        text-align: center;
+        font-size: 12px;
+        line-height: 18px;
+        display: inline-block;
+    }
+
+    span.tooltip-icon {
+        text-transform: math-auto;
+        font-size: 16px;
+        background: #666;
+        color: #fff;
+        border-radius: 20px;
+    }
+
+    .tradeprogram .faq_list {
+        padding: 45px 60px;
+    }
+
+    .tooltip-content {
+        display: none;
+        position: absolute;
+        top: 25px;
+        left: -100px;
+        background-color: #f7f7f7;
+        color: black;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+        width: 600px;
+        z-index: 10;
+        white-space: normal;
+        border: 1px solid #d7d7d7;
+        text-transform: math-auto;
+    }
+
+
+    .tooltip-wrapper:hover .tooltip-content {
+        display: block;
+    }
+
+    .tooltip-content ul {
+        padding-left: 18px;
+        margin: 0;
+    }
+
+    .tooltip-content li {
+        margin-bottom: 6px;
+    }
+
+    .add_photo_field ul {
+        font-size: 12px !important;
+    }
+
+    .purchase-form {
+        max-width: 400px;
+    }
+
+    input#purchase_date {
+        font-size: 14px;
+    }
+
+    .submit_section.round_btn button.submit_btn {
+        max-width: 200px !important;
+        line-height: 2.2rem;
+        font-weight: 600 !important;
+        text-transform: uppercase;
+        font-size: 13px !important;
+        font-family: 'spartan';
+        padding: 6px 30px !important;
+    }
+
+    .trade_another {
+        line-height: 2.2rem;
+        font-weight: 600 !important;
+        text-transform: uppercase;
+        font-size: 13px !important;
+    }
+
+    .accordion::before {
+        margin-right: 20px;
+        font-size: 20px;
+    }
+
+    .thank_you_message_tradein .continue_button {
+        border-top: 0px;
+
+    }
+
+    .thank_you_message_tradein .col-md-12.card_feedback_row hr {
+        display: none;
+    }
+
+    .accordion {
+        padding: 20px 20px 16px 20px;
+    }
+
+    div#invoice_upload_wrapper input#invoice_upload {
+        padding: unset !important;
+    }
+
+    button#remove_uploaded_file {
+        float: right;
+        background: transparent;
+        font-size: 20px;
+        padding: unset !important;
+    }
+
+    div#upload_status {
+        max-width: 100px;
+    }
+
+    input#invoice_upload {
+        border: 1px solid black;
+    }
+
+    input[type=file]::file-selector-button {
+        margin-right: 20px;
+        border: none;
+        background: #818181ff;
+        padding: 10px 20px;
+        /* border-radius: 10px; */
+        color: #fff;
+        cursor: pointer;
+        transition: background .2s ease-in-out;
+    }
+
+    input#invoice_upload {
+        border-radius: 50px !important;
+        width: 100%;
+    }
+
+    input#seller_name,
+    input#order_id,
+    input#purchase_date {
+        border-radius: 50px !important;
+        padding: 20px 25px !important;
+        border: 1px solid black !important;
+    }
+
+    .purchase-form .condition_title.form_title {
+        padding-top: 20px;
+    }
+
+    .round_btn {
+        display: inline-block;
+    }
+
+    .purchase-form label {
+        display: block;
+        margin-top: 15px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 8px 10px;
+        font-size: 14px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    h3.shipping-instruction-heading {
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .card-meta {
+        text-transform: capitalize;
+    }
+
+    .custom-tooltip {
+        position: absolute;
+        background-color: #222;
+        color: #fff;
+        padding: 6px 6px;
+        border-radius: 4px;
+        font-size: 11px;
+        pointer-events: none;
+        z-index: 1000;
+        display: none;
+    }
+
+    input#purchase_date {
+        background: transparent;
+    }
+
+    button#remove_uploaded_file {
+        float: right;
+    }
+
+    .cat_section {
+        width: 100%;
+        margin: auto;
+        box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+        padding: 30px 60px;
+        margin-top: 40px;
+    }
+
+    .tradeprogram .round_btn>.value_button,
+    .pro_brand_input>input,
+    .pro_model_input>input,
+    .pro_spec_input>input,
+    input#purchase_date,
+    input#invoice_upload,
+    input#order_id,
+    input#seller_name {
+        border: 1px solid #ababab !important;
+        color: #3e3e3e;
+        max-width: 1010px;
+    }
+
+    .list_to_use>div,
+    .round_btn {
+        margin: 0px 10px 10px 0px;
+    }
+
+    .pro_model_input {
+        margin-top: 10px;
+    }
+
+    .category_title h4,
+    .purchase-form label {
+        margin-bottom: 15px;
+    }
+
+    .tradeprogram .round_btn>.value_button.active {
+        border: 1px solid #ababab00 !important;
+        background-color: #e1e1e1d4;
+    }
+
+    #review-drag-area {
+        width: 145px;
+        min-height: 40px;
+    }
+
+    p.review-dragdrop {
+        font-size: 14px;
+        margin: 0px;
+        cursor: pointer;
+        padding: 10px;
+        background-color: #e1e1e1d4;
+        border-radius: 10px;
+        color: #505050 !important;
+        font-weight: 700;
+    }
+
+    .page_title_box {
+        background-color: white;
+    }
+
+    .page_title_box_inside>.content_section {
+        width: 100% !important;
+    }
+
+    .top_headeing {
+        font-size: 19px;
+        text-transform: uppercase;
+        border-bottom: 1px solid;
+        padding-top: 5px;
+    }
+
+    .trade_work_title h1 {
+        text-transform: uppercase;
+        font-weight: 700;
+        font-size: 16px;
+        padding: 28px 0;
+        text-align: center;
+        color: #333333;
+    }
+
+    .review-resultimg {
+        margin-left: 20px;
+        float: right;
+    }
+
+    .pic_upload_block {
+        display: inline-block;
+    }
+
+    .uploaded-file-name {
+        margin-top: 10px;
+        font-size: 12px;
+    }
+
+    @media screen and (max-width: 767px) {
+        .col-md-3.col-sm-3.trade_img_block img {
+            max-width: 40px;
+        }
+
+        .tooltip-content {
+            width: 325px;
+            font-size: 9px;
+        }
+
+        .cat_section {
+            margin-top: 20px;
+        }
+
+        .category_field {
+            padding-top: 0px;
+        }
+
+        .trade_work_icons {
+            margin-top: 30px;
+        }
+
+        #review-drag-area {
+            width: 130px;
+        }
+
+        p.review-dragdrop {
+            font-size: 12px;
+        }
+
+        .tooltip-icon {
+            width: 14px;
+            height: 14px;
+            line-height: 15px;
+        }
+
+        span.tooltip-icon {
+            font-size: 11px;
+        }
+
+        .top_headeing {
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .page_title_box {
+            margin-top: 20px;
+        }
+
+        .accordion {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .tradeprogram .faq_list {
+            padding: 10px 10px 30px 10px !important;
+        }
+
+        .tradeprogram .panel {
+            padding: 15px 25px !important;
+        }
+
+        .tradeprogram .panel p {
+            font-size: 11px;
+        }
+
+        .cat_section {
+            padding: 30px 20px !important;
+        }
+
+        .round_btn>.value_button {
+            font-size: 11px;
+        }
+
+        .category_title h4,
+        .pro_brand_title h4,
+        .pro_model_title h4,
+        .pro_spec_title h4,
+        .condition_title h4,
+        .add_pic_title h4 {
+            font-size: 13px;
+        }
+
+        .trade_another,
+        .submit_section.round_btn button.submit_btn {
+            font-size: 11px !important;
+        }
+
+        .trade_img_sec>div.trade_img_block {
+            width: 95px;
+            padding: 0px 5px;
+        }
+
+        form#tradein-form {
+            padding: 0px;
+        }
+
+        p.num_list {
+            font-size: 10px;
+        }
+
+        p.p_list_two {
+            font-size: 9px;
+        }
+
+        body.tradein-index-index main#maincontent {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+    }
+
+
+    @media only screen and (max-width: 767px) {
+        .row.trade_img_sec.inner_width_js {
+            display: flex;
+        }
+
+        .row.trade_img_sec {
+            width: 100%;
+        }
+
+        .trade_img_sec>div.trade_img_block {
+            width: 180px;
+        }
+    }
+
+    @media only screen and (max-width:360px) {
+
+        .trade_another,
+        .submit_section.round_btn button.submit_btn {
+            font-size: 10px;
+        }
+
+        .trade_another {
+            padding: 7px 9px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const socialLoginBtn = document.querySelector("a.social-login-btn");
+        const signonPopup = document.getElementById("signon_button");
+
+        if (socialLoginBtn && signonPopup) {
+            socialLoginBtn.addEventListener("click", function(e) {
+                e.preventDefault();
+                signonPopup.style.display = "block";
+            });
+        }
+    });
+</script>
+
+<script>
+    require([
+        'jquery',
+        'jquery/ui',
+        "mage/calendar"
+    ], function(jQuery, calendar) {
+        jQuery(document).ready(function() {
+
+            jQuery('#purchase_date').calendar({
+                changeMonth: true,
+                changeYear: true,
+                showButtonPanel: true,
+                currentText: 'Go Today',
+                closeText: 'Close',
+                showWeek: true,
+                dateFormat: 'dd-mm-yy',
+            });
+
+
+            jQuery('#invoice_upload').on('change', function() {
+                var fileInput = this;
+                if (fileInput.files.length === 0) {
+                    return; // no file selected
+                }
+
+                var formData = new FormData();
+                formData.append('invoice_upload', fileInput.files[0]);
+
+
+                var allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+                var file = fileInput.files[0];
+                var fileName = file.name;
+                var fileExtension = fileName.split('.').pop().toLowerCase();
+
+                if (!allowedExtensions.includes(fileExtension)) {
+                    jQuery("div#upload_status").after("<div class='error-message'>Invalid file type. Allowed types are: PDF, JPG, JPEG, PNG</div>");
+                    fileInput.value = '';
+                    return;
+                }
+
+                jQuery.ajax({
+                    url: '<?= $block->getUrl("tradein/index/upload") ?>', // adjust URL accordingly
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    showLoader: true,
+                    success: function(response) {
+                        console.log('Upload successful:', response);
+                        if (response.success) {
+                            jQuery('#invoice_upload_hidden').val(response.url);
+                            jQuery('#uploaded_invoice_preview')
+                                .attr('src', response.file.toLowerCase().endsWith('.pdf') ? 'https://golfoy.com/media/customprint/pdf.svg' : response.url)
+                                .attr('rel', response.url);
+                            jQuery('.uploaded-preview').append("<div class='uploaded-file-name'>" + fileName + "</div>");
+                            jQuery('#upload_status').show();
+                            jQuery('img#uploaded_invoice_preview').show();
+                            jQuery('button#remove_uploaded_file').show();
+                            jQuery('#invoice_upload').hide();
+                        } else {
+                            jQuery("div#upload_status").after("<div class='error-message'>Upload failed: " + response.message + "</div>");
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Upload failed:', error);
+                    }
+                });
+            });
+
+            jQuery('#remove_uploaded_file').on('click', function() {
+                const fileUrl = jQuery('#invoice_upload_hidden').val();
+                const fileName = fileUrl.split('/').pop();
+                jQuery('.uploaded-file-name').remove();
+                jQuery.ajax({
+                    url: '/tradein/index/delete',
+                    type: 'POST',
+                    data: {
+                        filename: fileName
+                    },
+                    dataType: 'json',
+                    showLoader: true,
+                    success: function(response) {
+                        // jQuery('#upload_status').text('');
+                        jQuery('#invoice_upload_hidden').val('');
+                        jQuery('#uploaded_invoice_preview').attr('src', '').hide();
+                        jQuery('#invoice_upload').val('').show();
+                        jQuery('#remove_uploaded_file').hide();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Delete error:', error);
+                    }
+                });
+            });
+
+            jQuery('.authorization-link.signin_signout.tradeinform_login_link a.social-login-btn').on('click', function(e) {
+                e.preventDefault();
+                jQuery('.hidden-sm.hidden-xs.authorization-link.signin_signout.sso').click();
+            });
+        });
+    });
+</script>

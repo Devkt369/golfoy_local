@@ -1,0 +1,47 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var \Magento\Wishlist\Block\Customer\Wishlist\Item\Column\Image $block */
+
+/** @var \Magento\Wishlist\Model\Item $item */
+$item = $block->getItem();
+$product = $item->getProduct();
+$climg = $printimg = $pcimg = '';
+$offer_status = $product->getAttributeText('offer_status'); 
+$pi = $product->getAttributeText('can_print'); 
+$player_chocie = $product->getAttributeText('playerschoice'); 
+$bestseller = $product->getData('bestseller');
+$newarrivals = $product->getData('newarrivals'); 
+echo '<div class="tags"><div class="tagouter" style="float:left;">'; 
+    if($player_chocie){
+        echo '<div class="tag tag-pc"> <i class="fa fa-trophy" aria-hidden="true"></i> Pro\'s Choice';
+        echo '</div>';
+    }
+    if($bestseller == 1){
+        echo '<div class="tag tag-bs"><i class="fa fa-star" aria-hidden="true"></i>
+        Best Seller';
+        echo '</div>';
+    }
+    if($newarrivals == 1){
+        echo '<div class="tag newarrivals">
+        New Arrival';
+        echo '</div>';
+    }
+    if($offer_status == 'Yes'){
+        echo '<span class="tag tag-cl" style="float:left;"> Sale';
+        echo '</span>';
+    }
+echo "</div>";
+    if($pi == 'Yes'){
+        echo '<div class="tag tag-print" style="float:right;"> <i class="fa fa-pencil-square-o" aria-hidden="true"></i>        
+        Custom Print';
+        echo '</div>';
+    }          
+echo '</div>';
+?>
+<a class="product-item-photo" tabindex="-1" href="<?= $block->escapeUrl($block->getProductUrl($item)) ?>" title="<?= $block->escapeHtmlAttr($product->getName()) ?>">
+    <?= $block->getImage($block->getProductForThumbnail($item), 'wishlist_thumbnail')->toHtml() ?>
+</a>

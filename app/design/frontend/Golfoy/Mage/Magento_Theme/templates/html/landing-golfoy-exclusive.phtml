@@ -1,0 +1,217 @@
+<style>
+    .slider-new-container {
+        position: relative;
+        padding: 35px 50px;
+        background-color: black;
+        overflow: hidden;
+        border-radius: 5px;
+        margin: 0px 13px;
+    }
+
+
+    .slider-new-container h4 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 20px 0 5px;
+        text-transform: uppercase;
+        color: white;
+    }
+
+    .slider-new-container a.shop-nows {
+        text-decoration: none;
+        color: white;
+        margin-top: 5px;
+        font-size: 1.3rem;
+        text-transform: uppercase;
+    }
+
+    .slider-new-title {
+        font-size: 18px;
+        text-transform: uppercase;
+        margin-bottom: 40px;
+        color: white;
+        text-align: center;
+    }
+
+    .slider-new-scroll-containers {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: hidden;
+        gap: 20px;
+        scroll-behavior: smooth;
+        white-space: nowrap;
+        padding-bottom: 10px;
+        max-width: 100%;
+    }
+
+    .product-grids-block {
+        flex: 0 0 calc(25% - 20px);
+        /* 4 items per row */
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .slider-new-item {
+        width: 210px;
+        height: 270px;
+        background-size: cover;
+        background-position: center;
+        border-radius: 5px;
+    }
+
+    .slider-new-scroll-btn {
+        display: none;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: #fff;
+        border: none;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        border-radius: 50% !important;
+        font-size: 17px;
+        box-shadow: 0 4px 6px -3px #9a9a9a;
+    }
+
+    .slider-new-prev-btn {
+        left: 20px;
+    }
+
+    .slider-new-next-btn {
+        right: 20px;
+    }
+
+    strong.golfoy-cls {
+        font-size: 26px;
+        /* padding-top: 28px; */
+        line-height: 43px;
+    }
+
+    span.latest-cls {
+        font-size: 16px;
+    }
+
+    @media only screen and (max-width: 1024px) {
+        .product-grids-block {
+            flex: 0 0 calc(25% - 10px);
+        }
+    }
+
+    @media only screen and (max-width: 768px) {
+        .product-grids-block {
+            flex: 0 0 calc(50% - 10px);
+        }
+
+        .slider-new-item {
+            width: 160px;
+            height: 210px;
+        }
+    }
+
+    @media only screen and (max-width: 480px) {
+        .slider-new-container {
+            padding: 35px 20px;
+        }
+
+        .slider-new-scroll-btn {
+            display: block !important;
+            z-index: 10;
+        }
+
+
+        .slider-new-item {
+            width: 160px;
+            height: 210px;
+        }
+
+        .slider-new-scroll-containers {
+            gap: 10px;
+        }
+
+        .slider-new-prev-btn {
+            left: 10px;
+        }
+
+        .slider-new-next-btn {
+            right: 10px;
+        }
+
+        .slider-new-scroll-containers::-webkit-scrollbar {
+            display: none;
+        }
+
+        .slider-new-scroll-containers {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+        }
+    }
+
+    a.shop-nows.small-caps {
+        text-transform: capitalize;
+    }
+
+    a.shop-nows.initial-caps {
+        text-transform: unset;
+    }
+</style>
+
+<div class="slider-new-container">
+    <div class="slider-new-title"><strong class="golfoy-cls">Exclusively on Golfoy
+        </strong></div>
+    <button class="slider-new-scroll-btn slider-new-prev-btn" onclick="sliderNewScrollLeft()">
+        &#10094;
+    </button>
+    <div class="slider-new-scroll-containers" id="slider-new-scrollContainers">
+        <div class="product-grids-block">
+            <a href="https://golfoy.com/all-golf-brands-india/rapsodo.html">
+                <div class="slider-new-item " style="background-image: url('https://golfoy.com/media/wysiwyg/2025/landing_page/html/Rapsodo-4.jpg');"></div>
+            </a>
+
+        </div>
+        <div class="product-grids-block">
+            <a href="https://golfoy.com/all-golf-brands-india/shot-scope.html">
+                <div class="slider-new-item" style="background-image: url('https://golfoy.com/media/wysiwyg/2025/landing_page/html/shot-scope-4.jpg');"></div>
+            </a>
+
+        </div>
+        <div class="product-grids-block">
+            <a href="https://golfoy.com/all-golf-brands-india/buy-viper-golf-gloves-and-accesorries.html">
+                <div class="slider-new-item" style="background-image: url('https://golfoy.com/media/wysiwyg/2025/landing_page/html/viper-golf.jpg');"></div>
+            </a>
+
+        </div>
+        <div class="product-grids-block">
+            <a href="https://golfoy.com/all-golf-brands-india/voice-caddie-store.html">
+                <div class="slider-new-item" style="background-image: url('https://golfoy.com/media/wysiwyg/2025/landing_page/html/voice-caddie-4.jpg');"></div>
+            </a>
+
+        </div>
+    </div>
+    <button class="slider-new-scroll-btn slider-new-next-btn" onclick="sliderNewScrollRight()">
+        &#10095;
+    </button>
+</div>
+<script>
+    function sliderNewScrollLeft() {
+        let container = document.getElementById('slider-new-scrollContainers');
+        let scrollAmount = container.offsetWidth / 1.2; // Adjust for mobile scrolling
+        container.scrollBy({
+            left: -scrollAmount,
+            behavior: 'smooth'
+        });
+    }
+
+    function sliderNewScrollRight() {
+        let container = document.getElementById('slider-new-scrollContainers');
+        let scrollAmount = container.offsetWidth / 1.2; // Adjust for mobile scrolling
+        container.scrollBy({
+            left: scrollAmount,
+            behavior: 'smooth'
+        });
+    }
+</script>

@@ -1,0 +1,7 @@
+type Mutation {
+    submitLog (input: [String!]!): LogOutput @resolver(class: "\\Magestore\\LoggerGraphQl\\Model\\Resolver\\SubmitLog") @doc(description:"Submit data log from app to magento graqhql")
+}
+
+type LogOutput {
+    status: Int!
+}

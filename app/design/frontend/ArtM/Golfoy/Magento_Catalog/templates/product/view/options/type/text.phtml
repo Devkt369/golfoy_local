@@ -1,0 +1,194 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// @codingStandardsIgnoreFile
+?>
+
+
+
+<!-------style for text-logo customprint html ------------->
+<style>
+     #product-options-wrapper .fieldset{margin:0px;}
+     div#drag-area, .upload_buttons{max-width:120px;}
+     p.dragdrop{font-size:35px;margin:0px;cursor:pointer;padding:35px;}
+     input#print_file{margin-top:0px;height:1px;}
+     .img-cross{position: absolute;right: 0; cursor:pointer;top: 0;border-radius: 31px;width: 25px;
+     height: 25px;background: #fff;border: 1px solid gray;text-align: center;padding-top: 2px;}
+    .addaphoto{color:#646464;margin-bottom:4px;font-weight:bold;}
+    .resultimg.image{position:relative;margin-top:0px !important;margin-left:0px !important;width:100% !important;}
+    span.character-counter { display: none !important; }
+</style>
+<!-------------------------------------------------------->
+
+
+
+<?php
+$_option = $block->getOption();
+$class = ($_option->getIsRequire()) ? ' required' : '';
+
+//-----------------------if print in label get required php functions--------------------
+if(stripos($_option->getTitle(), 'print') !== false) {  
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+   // $scopeConfig = $objectManager->create('Magento\Framework\App\Config\ScopeConfigInterface');
+    $_product = $block->getProduct();
+    $pi = $_product->getData('can_print'); 
+    /*$categories = $_product->getCategoryIds(); 
+    $asets = ''; 
+    $allattrids = [];
+    $asets = $scopeConfig->getValue("customprint/Attrconf/custom_printing", \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    $printType = $scopeConfig->getValue("customprint/Attrconf/text_logo", \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    $pattributesetid =  $_product->getAttributeSetId();
+    if($asets != ''){
+      $allattrids = explode(',', $asets);
+    }*/
+    $attributeSet = $objectManager->create('Magento\Eav\Api\AttributeSetRepositoryInterface');
+    $custprintHelper = $this->helper('\ArtM\CustomPrinting\Helper\Data');
+    $_product = $block->getProduct();
+    $attributeSetRepository = $attributeSet->get($_product->getAttributeSetId());
+    $attribute_set_name = $attributeSetRepository->getAttributeSetName();
+    $custprint_data = $custprintHelper->getrow( strtolower($attribute_set_name) );
+    if(isset($custprint_data[0])){
+        $printType = $custprint_data[0]['printtype'];
+        $textlabel = $custprint_data[0]['textlabel'];
+        $logolabel = $custprint_data[0]['logolabel'];
+    }
+}
+//-----------------------------------------------------------------------------------------
+
+
+
+//----------------------------display text and logo html------------------------
+if(stripos($_option->getTitle(), 'print') !== false){
+if(isset($custprint_data[0])  && ($pi==1)){
+    if($_option->getMaxCharacters() == 0){
+        $maxChar = 10;
+    }else{
+        $maxChar = $_option->getMaxCharacters();
+    }
+?> 
+
+            
+   <?php if(($printType == 'text' || $printType == 'both') && (stripos($_option->getTitle(), 'text') !== false)) { ?>
+    <div class= "text option_price_hidden hide">  <?= $block->getFormattedPrice() ?> </div>
+        <div class= "printfielddiv" id ="ptextdiv" style="display:none;">
+            <input type = "text" name= "print_text" id= "print_text"  maxlength="<?php echo $maxChar ?>" placeholder="Enter Text">
+            <p class="gfnote note"> 
+                Max <?php echo $maxChar ?> Characters
+                <span class="character-counter"></span>
+            </p>
+        </div>
+    <?php } ?>
+
+    <?php if(($printType == 'logo' || $printType == 'both') && (stripos($_option->getTitle(), 'logo') !== false)){ ?>
+        <div class= "logo option_price_hidden hide">  <?= $block->getFormattedPrice() ?> </div>
+        <div class= "printfielddiv" id ="pimgdiv" style="display:none;">    
+            <div class="addaphoto"> Add a photo </div>
+            <div id="drag-area" class="drag-area" style="border:3px dashed lightgray;border-radius:10px;">   
+                <p class="dragdrop" style="text-align:center;color:gray;">+ </p>       
+                <input type = "file" name= "print_file" id= "print_file" >
+            </div>
+        
+            
+            <p class="alert alert-success" style="margin-bottom:0px;">
+            Image Formats: JPG, PNG, PDF, EPS, or AI. Maximum File Size : 20MB
+            </p>
+            <div id="pre-defined-img-select"></div>
+        </div>     
+    <?php }
+} }
+//--------------------------------------------------------------------
+
+
+
+
+
+//------------------------------------------input field html-------------------------
+$customfieldclass = $inputclass = '';
+if (stripos($_option->getTitle(), 'print') !== false) {
+    $customfieldclass = 'printing hide ';
+    if(stripos($_option->getTitle(), 'text') !== false) {
+       $inputclass = 'inputprinting text ';
+    }
+    if(stripos($_option->getTitle(), 'logo') !== false) {
+        $inputclass = 'inputprinting logo ';
+     }
+}
+?>
+
+<div class="<?php echo $customfieldclass;?>field<?php if ($_option->getType() == \Magento\Catalog\Api\Data\ProductCustomOptionInterface::OPTION_TYPE_AREA) {
+    echo ' textarea';
+} ?><?= /* @escapeNotVerified */ $class ?>">
+    <label class="label gflabel" for="options_<?= /* @escapeNotVerified */ $_option->getId() ?>_text">
+        <span><?= $block->escapeHtml($_option->getTitle()) ?></span>
+        <?= /* @escapeNotVerified */ $block->getFormattedPrice() ?>
+    </label>
+
+    <div class="control">
+        <?php if ($_option->getType() == \Magento\Catalog\Api\Data\ProductCustomOptionInterface::OPTION_TYPE_FIELD): ?>
+            <?php $_textValidate = null;
+            if ($_option->getIsRequire()) {
+                $_textValidate['required'] = true;
+            }
+            if ($_option->getMaxCharacters()) {
+                $chrlimit = 1000;
+                if($inputclass == ''){$chrlimit = $_option->getMaxCharacters();}
+                $_textValidate['maxlength'] = $chrlimit;
+            }
+            $_textValidate['validate-no-utf8mb4-characters'] = true;
+            ?>
+            <input type="text"
+                   id="options_<?= /* @escapeNotVerified */ $_option->getId() ?>_text"
+                   class="<?php echo $inputclass;?>input-text product-custom-option"
+                   <?php if (!empty($_textValidate)) {?>
+                   data-validate="<?= $block->escapeHtml(json_encode($_textValidate)) ?>"
+                   <?php } ?>
+                   name="options[<?= /* @escapeNotVerified */ $_option->getId() ?>]"
+                   data-selector="options[<?= /* @escapeNotVerified */ $_option->getId() ?>]"
+                   value="<?= $block->escapeHtml($block->getDefaultValue()) ?>"/>
+        <?php elseif ($_option->getType() == \Magento\Catalog\Api\Data\ProductCustomOptionInterface::OPTION_TYPE_AREA): ?>
+            <?php $_textAreaValidate = null;
+            if ($_option->getIsRequire()) {
+                $_textAreaValidate['required'] = true;
+            }
+            if ($_option->getMaxCharacters()) {
+                $_textAreaValidate['maxlength'] = $_option->getMaxCharacters();
+            }
+            $_textAreaValidate['validate-no-utf8mb4-characters'] = true;
+            ?>
+            <textarea id="options_<?= /* @escapeNotVerified */ $_option->getId() ?>_text"
+                      class="product-custom-option"
+                    <?php if (!empty($_textAreaValidate)) {?>
+                        data-validate="<?= $block->escapeHtml(json_encode($_textAreaValidate)) ?>"
+                    <?php } ?>
+                      name="options[<?= /* @escapeNotVerified */ $_option->getId() ?>]"
+                      data-selector="options[<?= /* @escapeNotVerified */ $_option->getId() ?>]"
+                      rows="5"
+                      cols="25"><?= $block->escapeHtml($block->getDefaultValue()) ?></textarea>
+        <?php endif; ?>
+        <?php if ($_option->getMaxCharacters()): ?>
+            <p class="gfnote note note_<?= /* @escapeNotVerified */ $_option->getId() ?>">
+                <?= /* @escapeNotVerified */ __('Maximum number of characters: %1', $_option->getMaxCharacters()) ?>
+                <span class="character-counter no-display"></span>
+            </p>
+        <?php endif; ?>
+    </div>
+    <?php if ($_option->getMaxCharacters()): 
+        $chrlimit = 1000;
+        if($inputclass == ''){$chrlimit = $_option->getMaxCharacters();}
+        ?>
+        <script type="text/x-magento-init">
+        {
+            "[data-selector='options[<?= /* @escapeNotVerified */ $_option->getId() ?>]']": {
+                "Magento_Catalog/js/product/remaining-characters": {
+                    "maxLength":  "<?= $chrlimit ?>",
+                    "noteSelector": ".note_<?= /* @escapeNotVerified */ $_option->getId() ?>",
+                    "counterSelector": ".note_<?= /* @escapeNotVerified */ $_option->getId() ?> .character-counter"
+                }
+            }
+        }
+    </script>
+    <?php endif; ?>
+</div>

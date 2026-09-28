@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Sales\Api\OrderRepositoryInterface">
+        <plugin name="order_extension_attribute"
+                type="ArtM\MsiPriority\Plugin\OrderRepositoryPlugin" />
+    </type>
+    <type name="Magento\Sales\Api\OrderRepositoryInterface">
+        <plugin name="orders_item_stock" type="ArtM\MsiPriority\Plugin\Api\OrderGet"/>
+    </type>
+    <type name="Magento\Sales\Model\Service\ShipmentService">
+        <plugin name="custom_shipby_plugin" type="ArtM\MsiPriority\Plugin\ShipmentServicePlugin" />
+    </type>
+        <preference for="Magento\InventorySourceDeductionApi\Model\SourceDeductionService" 
+            type="ArtM\MsiPriority\Model\SourceDeductionService" />
+        <preference for="Magento\InventorySourceDeductionApi\Model\SourceDeductionRequest"
+            type="ArtM\MsiPriority\Model\SourceDeductionRequest" />
+        <preference for="Magento\InventoryShipping\Model\SourceDeductionRequestFromShipmentFactory"
+            type="ArtM\MsiPriority\Model\SourceDeductionRequestFromShipmentFactory" />
+
+        <virtualType name="ArtM\MsiPriority\Virtual\SourceDeductionRequestFromShipmentFactory"
+                    type="ArtM\MsiPriority\Model\SourceDeductionRequestFromShipmentFactory" />
+
+        <type name="Magento\InventoryShipping\Observer\SourceDeductionProcessor">
+            <arguments>
+                <argument name="sourceDeductionRequestFromShipmentFactory"
+                        xsi:type="object">ArtM\MsiPriority\Virtual\SourceDeductionRequestFromShipmentFactory</argument>
+            </arguments>
+        </type>
+
+    <type name="ArtM\MsiPriority\Ui\DataProvider\PosOrder\ListingDataProvider">
+        <plugin name="dev_grid_attributes" type="ArtM\MsiPriority\Plugin\AddAttributesToUiDataProvider" />
+    </type>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="pos_order_grid_listing_data_source" xsi:type="string">PosOrderGridCategoryCollection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="PosOrderGridCategoryCollection" type="ArtM\MsiPriority\Ui\DataProvider\PosOrder\Listing\Collection">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">sales_order</argument>
+            <argument name="resourceModel" xsi:type="string">ArtM\MsiPriority\Model\ResourceModel\PosOrder</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="VinRequestGridDataSource" type="ArtM\MsiPriority\Model\ResourceModel\VinRequest\Grid\Collection">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">vin_inventory_requests</argument>
+            <argument name="resourceModel" xsi:type="string">ArtM\MsiPriority\Model\ResourceModel\VinRequest</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="vin_request_grid_listing_data_source" xsi:type="string">VinRequestGridDataSource</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <virtualType name="VinArchiveOrdersGridDataSource" type="ArtM\MsiPriority\Model\ResourceModel\ArchiveOrders\Grid\Collection">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">vin_inventory_archived_order</argument>
+            <argument name="resourceModel" xsi:type="string">ArtM\MsiPriority\Model\ResourceModel\ArchiveOrders</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="vin_archive_order_grid_listing_data_source" xsi:type="string">VinArchiveOrdersGridDataSource</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="ArtM\MsiPriority\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">MsiPriority</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="order" xsi:type="object">ArtM\MsiPriority\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

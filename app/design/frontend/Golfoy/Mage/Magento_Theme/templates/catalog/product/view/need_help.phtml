@@ -1,0 +1,67 @@
+<style>
+    .buying_tips {
+        background-color: #f2f2f2 !important;
+        color: #e60023 !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        display: block !important;
+
+    }
+
+    .no-cos-emi-line {
+        display: inline-block;
+    }
+</style>
+<?php
+if ($product = $block->getProduct()) {
+    $productName = $product->getName();
+    $productUrl = $product->getProductUrl();
+    $brandname = $product->getResource()->getAttribute('brand')->getFrontend()->getValue($product);
+    $gtin = $product->getResource()->getAttribute('gtin')->getFrontend()->getValue($product);
+
+
+    $imagewidth = 200;
+    $imageheight = 200;
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $imageHelper  = $objectManager->get('\Magento\Catalog\Helper\Image');
+    $image_url = $imageHelper->init($product, 'product_page_image_small')->setImageFile($product->getFile())->resize($imagewidth, $imageheight)->getUrl();
+
+
+    $blogdata_object = $objectManager->create('\ArtM\BlogEsg\Helper\Data');
+
+
+    $attributeSet = $objectManager->create('Magento\Eav\Api\AttributeSetRepositoryInterface');
+    $attributeSetRepository = $attributeSet->get($product->getAttributeSetId());
+    $attribute_set_name = $attributeSetRepository->getAttributeSetName();
+
+    $blogdata_data = $blogdata_object->getrow(strtolower($attribute_set_name));
+    if ($blogdata_data) {
+        $attributesetname = $blogdata_data[0]['attributesetname'];
+        $bloglink = $blogdata_data[0]['bloglink'];
+        $uppertext = $blogdata_data[0]['uppertext'];
+        $bottomtext = $blogdata_data[0]['bottomtext'];
+    } else {
+        $attributesetname = '';
+        $bloglink = '';
+        $uppertext = '';
+        $bottomtext = '';
+    }
+    $limitedstock = $product->getData('limitedstock');
+    $lshtml = '';
+    if ($limitedstock == 1) {
+        $lshtml = '<div class= "limitedstock-text">Limited Stock</div>';
+    }
+?>
+
+    <?php
+
+    if ($uppertext != '') {
+    ?>
+        <div class="buying_tips buying_tips_product_page">
+            <!--<span class="img_bt"><img src=" "/></span>-->
+            <span class="text_bt"><?php echo $uppertext; ?></span>
+        </div>
+<?php
+    }
+}
+?>

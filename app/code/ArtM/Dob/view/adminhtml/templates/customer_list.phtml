@@ -1,0 +1,396 @@
+<style>
+    .main_heading {
+        text-align: center !important;
+    }
+
+    .customer_dob_list {
+        width: 100%;
+    }
+
+    p.main_heading {
+        font-weight: 900;
+        padding: 10px;
+        background: whitesmoke;
+        text-transform: uppercase;
+    }
+
+    .customer_dob_details {
+        border: 1px solid #afacacb8;
+        text-align: center;
+        margin: 10px;
+        display: flex;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        display: flex;
+        align-items: center;
+    }
+
+    .dob_container {
+        height: 100%;
+    }
+
+    .dob_details {
+        margin-left: 20px;
+        text-align: left;
+    }
+
+    .initials {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        height: 75px;
+        width: 75px;
+        background-color: grey;
+        color: #fff;
+        font-size: 30px;
+        flex-shrink: 0;
+    }
+
+    .today_list,
+    .recent_list,
+    .coming_list {
+        max-height: 700px;
+        overflow: auto;
+        border: 1px solid #e9e9e9;
+    }
+
+    .dob_container>.row>div {
+        padding: 10px;
+    }
+
+    .dob_details_id {
+        background-color: #b1b1b1;
+        border-radius: 5px;
+        padding: 3px 8px;
+        color: white;
+        font-weight: 600;
+        width: auto;
+        max-width: 100px;
+        text-align: center;
+    }
+
+    .dob_details_name {
+        text-transform: capitalize;
+        font-weight: 700;
+        margin-top: 9px;
+    }
+
+    .dob_details_email {
+        font-size: 12px;
+        margin-bottom: 10px;
+    }
+
+    .dob_details_age {
+        border-left: 2px solid #bbbbbb;
+        margin-left: 10px;
+        padding-left: 10px;
+    }
+
+    .dob_details_dob,
+    .dob_details_age {
+        display: inline-block;
+        font-size: 13px;
+        font-family: monospace;
+    }
+
+    .dob_details_email {
+        font-size: 12px;
+        margin-bottom: 5px;
+    }
+
+    a.dob_details_id {
+        text-decoration: none;
+    }
+
+    a:hover.dob_details_id {
+        color: white;
+        background-color: #b1b1b180;
+    }
+</style>
+
+
+<?php
+//here initial code
+
+
+//end
+function date_compare($element1, $element2)
+{
+    $datetime1 = strtotime($element1[3]);
+    $datetime2 = strtotime($element2[3]);
+
+    $monthDay1 = date('md', $datetime1);
+    $monthDay2 = date('md', $datetime2);
+
+    if ($monthDay1 == $monthDay2) {
+        return 0;
+    }
+
+    return ($monthDay1 < $monthDay2) ? -1 : 1;
+}
+
+$recent = array();
+$birthday = array();
+$upcoming = array();
+
+$allData = array();
+$backdays =  date('Y-m-d', strtotime("-20 days"));
+$nextdate = date('Y-m-d', strtotime("+20 days"));
+
+// echo $backdays.'-'.$nextdate;
+
+$currentDate = date('Y-m-d');
+// echo 'Next 20 days '.$nextdate;
+// echo 'Current  days '.$currentDate;
+//echo 'Back20  days '.$backdays;
+
+//$today = new DateTime('now');
+// echo  $today->format('Y-m-d H:i:s');
+$allCustomers = $block->getCustomerData();
+
+//echo "allCustomers: ".$allCustomers->count();
+foreach ($allCustomers as $customer) {
+
+    $date = $customer->getDob();
+    $id = $customer->getId();
+
+    $customerUrl = $block->getUrl('customer/index/edit', ['id' => $customer->getId()]);
+    // echo "Customer URL: $customerUrl";
+
+
+    // echo $date.'<br>';
+    //  echo $id.'<br>';
+    $todaymnt = date('m', strtotime(date('Y-m-d')));
+    $usrmnt = date('m', strtotime($date));
+
+    /* ------Month and Day---- */
+    // $todaymd = date('m-d',strtotime(date('Y-m-d')));
+    // $usrmd = date('m-d',strtotime($date));
+
+    /* -------Month and Day----- */
+
+    $cday = date('d', strtotime(date('Y-m-d')));
+    $usrday = date('d', strtotime($date));
+
+    //User's Age Calculate
+    $from = new DateTime($date);
+    $to   = new DateTime('today');
+    $age = $from->diff($to)->y;
+
+    $dob = $customer->getDob();
+    $dateTime = new DateTime($dob);
+    $formattedDate = $dateTime->format('F j, Y');
+    $allData[] = [$customer->getId(), $customer->getName(), $customer->getEmail(), $formattedDate, $age];
+    //echo $age;
+
+    /* ---------------------Current date birthday------------------------ */
+
+    if ($usrday == $cday && $usrmnt == $todaymnt) {
+        $dob = $customer->getDob();
+        $dateTime = new DateTime($dob);
+        $formattedDate = $dateTime->format('F j, Y');
+        $birthday[] = [$customer->getId(), $customer->getName(), $customer->getEmail(), $formattedDate, $age];
+    }
+    /* ---------------------Current date birthday------------------------ */
+    /* ---------------------Upcoming Birthdays------------------------ */
+
+    $today = new DateTime();
+    $currnDt =  $today->format('Y-m-d'); //07-07-23
+
+    $next_twenty = new DateTime('now');
+    $fresh_twnty = $next_twenty->modify('+10 days');
+    $newDate =  $fresh_twnty->format('Y-m-d');
+
+    $year = date('Y');
+    $myMonthDay = date('m-d', strtotime($date));
+
+    $usrDate = $year . '-' . $myMonthDay;
+
+    //echo $newDate.'----'.$currnDt;
+
+    if ($usrDate > $currnDt && $usrDate <= $newDate) {
+        $dob = $customer->getDob();
+        $dateTime = new DateTime($dob);
+        $formattedDate = $dateTime->format('F j, Y');
+        $upcoming[] = [$customer->getId(), $customer->getName(), $customer->getEmail(), $formattedDate, $age];
+    }
+
+    /* -----------------------------Upcoming Birthdays--------------------------- */
+
+    /* ---------------------------Recent Birthdays------------------------ */
+    $old_twenty = new DateTime('now');
+    $oldnew_twnty = $old_twenty->modify('-5 days');
+    $newoldDate =  $oldnew_twnty->format('Y-m-d');
+
+    if ($usrDate < $currnDt && $usrDate >= $newoldDate) {
+        $dob = $customer->getDob();
+        $dateTime = new DateTime($dob);
+        $formattedDate = $dateTime->format('F j, Y');
+        $recent[] = [$customer->getId(), $customer->getName(), $customer->getEmail(), $formattedDate, $age];
+    }
+
+    /* -------------------------Recent Birthdays------------------------ */
+}
+/* -------------------------------Recent Birthday's------------------------- */
+// initial code
+function getInitials($fullName)
+{
+    $words = explode(' ', $fullName);
+    $initials = '';
+
+    foreach ($words as $word) {
+        $initials .= strtoupper(substr($word, 0, 1));
+    }
+
+    return $initials;
+}
+//end
+
+echo '
+<div class ="dob_container">
+<div class="row"> 
+    <div class="col-sm-4 col-md-4 col-l-4">
+        <div class="recent_section">
+            <div class="customer_dob_list">
+                <p class="main_heading">Recent Birthday</p>
+                <div class="recent_list">';
+
+if (isset($recent) && !empty($recent)) {
+    usort($recent, 'date_compare');
+
+    foreach ($recent as $key => $oldbdy) {
+
+        echo '<div class="customer_dob_details">';
+        if (isset($oldbdy[1])) { // Assuming the name is at index 1
+            $initials = getInitials($oldbdy[1]);
+
+            echo '<div class="initials">' . $initials . '</div>';
+            echo '<div class="' . $key . ' dob_details">';
+            $customerId = $oldbdy[0]; // Corrected variable name
+            $rscustomerUrl = $block->getUrl('customer/index/edit', ['id' => $customerId]);
+            echo '<a href="' . $rscustomerUrl . '" class="' . $key . ' dob_details_id">' . $customerId . '</a>';
+            echo '<div class="' . $key . ' dob_details_name">' . $oldbdy[1] . '</div>';
+            echo '<div class="' . $key . ' dob_details_email">' . $oldbdy[2] . '</div>';
+            echo '<div class="' . $key . ' dob_details_dob">' . $oldbdy[3] . '</div>';
+            echo '<div class="' . $key . ' dob_details_age">' . $oldbdy[4] . ' years old</div>';
+
+            echo '</div>';
+        } else {
+            echo '<div style="text-align:center"> No recent birthday list available !</div>';
+        }
+        echo '</div>';
+    }
+}
+
+echo '
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today\'s Birthdays -->
+    <div class="col-sm-4 col-md-4 col-l-4">
+        <div class="today_section">
+            <div class="customer_dob_list">
+                <p class="main_heading">Today\'s Birthday</p>
+                <div class="today_list">';
+
+if (isset($birthday) && !empty($birthday)) {
+    foreach ($birthday as $key => $todayBirthday) {
+        echo '<div class="customer_dob_details">';
+
+        if (isset($todayBirthday[1])) { // Assuming the name is at index 1
+            $initials = getInitials($todayBirthday[1]);
+
+            echo '<div class="initials">' . $initials . '</div>';
+            echo '<div class="' . $key . ' dob_details">'; // Applying unique class based on $key
+            $customerId = $todayBirthday[0]; // Corrected variable name
+            $rscustomerUrl = $block->getUrl('customer/index/edit', ['id' => $customerId]);
+            echo '<a href="' . $rscustomerUrl . '" class="' . $key . ' dob_details_id">' . $customerId . '</a>';
+            echo '<div class="' . $key . ' dob_details_name">' . $todayBirthday[1] . '</div>';
+            echo '<div class="' . $key . ' dob_details_email">' . $todayBirthday[2] . '</div>';
+            echo '<div class="' . $key . ' dob_details_dob">' . $todayBirthday[3] . '</div>';
+            echo '<div class="' . $key . ' dob_details_age">' . $todayBirthday[4] . ' years old</div>';
+
+            echo '</div>';
+        }
+
+        echo '</div>';
+    }
+} else {
+    echo '<div style="text-align:center"> No user has a birthday today!</div>';
+}
+
+
+echo '
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Birthdays -->
+    <div class="col-sm-4 col-md-4 col-l-4">
+        <div class="coming_soon_section">
+            <div class="customer_dob_list">
+                <p class="main_heading">Coming Soon</p>
+                <div class="coming_list">';
+
+if (isset($upcoming) && !empty($upcoming)) {
+    usort($upcoming, 'date_compare');
+
+    foreach ($upcoming as $key => $comingBdy) {
+        echo '<div class="customer_dob_details">';
+
+        if (isset($comingBdy[1])) { // Assuming the name is at index 1
+            $initials = getInitials($comingBdy[1]);
+
+            echo '<div class="initials">' . $initials . '</div>';
+            echo '<div class="' . $key . ' dob_details">'; // Applying unique class based on $key
+            $customerId = $comingBdy[0];
+            $rscustomerUrl = $block->getUrl('customer/index/edit', ['id' => $customerId]);
+            echo '<a href="' . $rscustomerUrl . '" class="' . $key . ' dob_details_id">' . $customerId . '</a>';
+            echo '<div class="' . $key . ' dob_details_name">' . $comingBdy[1] . '</div>';
+            echo '<div class="' . $key . ' dob_details_email">' . $comingBdy[2] . '</div>';
+            echo '<div class="' . $key . ' dob_details_dob">' . $comingBdy[3] . '</div>';
+            echo '<div class="' . $key . ' dob_details_age">' . $comingBdy[4] . ' years old</div>';
+
+            echo '</div>';
+        } else {
+            foreach ($comingBdy as $value) {
+                echo '<div class="' . $key . ' dob_details">' . $value . '</div>'; // Applying unique class based on $key
+            }
+        }
+
+        echo '</div> ';
+    }
+} else {
+    echo '<div style="text-align:center"> No upcoming birthday data available!</div>';
+}
+
+
+echo '
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+ </div>
+</div>';
+
+$total = 0;
+foreach ($allCustomers as $customer) {
+    $date = $customer->getDob();
+    $dateTime = new DateTime($date);
+    $currentMonth = date('m');
+    if ($dateTime->format('m') == $currentMonth) {
+         echo $customer->getId();
+         echo '<br>';
+         $total++;
+     }
+ }
+ echo  "<h5>Total Customers with Birthdays in this month: ".$total."</h5>";
+
+ ?>

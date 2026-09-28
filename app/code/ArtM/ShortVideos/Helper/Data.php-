@@ -1,0 +1,99 @@
+<?php
+/**
+ * ArtM ShortVideos Helper
+ *
+ * @category  ArtM
+ * @package   ArtM_ShortVideos
+ * @author    ArtM
+ * @copyright Copyright (c) 2025 ArtM
+ */
+
+namespace ArtM\ShortVideos\Helper;
+
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Framework\App\Helper\Context;
+use Magento\Framework\View\LayoutInterface;
+
+class Data extends AbstractHelper
+{
+    /**
+     * @var LayoutInterface
+     */
+    protected $layout;
+
+    /**
+     * @param Context $context
+     * @param LayoutInterface $layout
+     */
+    public function __construct(
+        Context $context,
+        LayoutInterface $layout
+    ) {
+        $this->layout = $layout;
+        parent::__construct($context);
+    }
+
+    /**
+     * Process shortcode and return HTML
+     *
+     * @param string $content
+     * @return string
+     */
+    public function processShortcode($content)
+    {
+        // Pattern to match [artm_videos ...] shortcode
+        $pattern = '/\[artm_videos([^\]]*)\]/';
+        
+        return preg_replace_callback($pattern, function($matches) {
+            $attributes = $this->parseShortcodeAttributes($matches[1]);
+            return $this->renderVideoSlider($attributes);
+        }, $content);
+    }
+
+    /**
+     * Parse shortcode attributes
+     *
+     * @param string $text
+     * @return array
+     */
+    protected function parseShortcodeAttributes($text)
+    {
+        $attributes = [];
+        $pattern = '/(\w+)\s*=\s*"([^"]*)"/';
+        
+        if (preg_match_all($pattern, $text, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $attributes[$match[1]] = $match[2];
+            }
+        }
+        
+        return $attributes;
+    }
+
+    /**
+     * Render video slider HTML
+     *
+     * @param array $attributes
+     * @return string
+     */
+    protected function renderVideoSlider($attributes)
+    {
+        try {
+            $block = $this->layout->createBlock(
+                \ArtM\ShortVideos\Block\Videos::class,
+                'videos_' . uniqid(),
+                ['data' => $attributes]
+            );
+            
+            if ($block) {
+                $templateFile = 'ArtM_ShortVideos::videos/slider.phtml';
+                $block->setTemplate($templateFile);
+                return $block->toHtml();
+            }
+        } catch (\Exception $e) {
+            return '<!-- ArtM_ShortVideos Error: ' . $e->getMessage() . ' -->';
+        }
+        
+        return '';
+    }
+}

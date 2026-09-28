@@ -1,0 +1,521 @@
+<?php
+
+/** @var \ArtM\Review\Block\OrderItemReview $block */
+/** @var \Magento\Sales\Model\Order\Item $orderItem */
+$orderItem = $block->getOrderItem();
+
+if ($orderItem):
+    $templateData = $block->getReviewTemplateData($orderItem);
+    $prd_id_arr   = $templateData['prd_id_arr'];
+    $products     = $templateData['products'];
+    $customer_id  = $templateData['customer_id'];
+    $order_id     = $templateData['order_id'];
+    $starImgUrl   = $templateData['starImgUrl'];
+
+    // 1. Unified structure tracking variables
+    $isItemReviewed = false;
+    $savedRatingScore = null; // Stays null for Scenario A, gets integer values for Scenario B
+
+    if (method_exists($block, 'getAlreadyReviewedProductIds')) {
+        // Safe check block check configuration wrapper context
+        $alreadyReviewedIds = $block->getAlreadyReviewedProductIds($order_id);
+    } else {
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $reviewRow = $objectManager->create(\ArtM\Review\Model\Getreviewedorder::class)
+            ->getCollection()
+            ->addFieldToFilter('order_id', $order_id)
+            ->getFirstItem();
+
+        if ($reviewRow && $reviewRow->getId()) {
+            $orderItemReviewField = $reviewRow->getOrderItemReview();
+
+            // Check Scenario B first: Does it contain data with colon pairs?
+            if (!empty($orderItemReviewField) && strpos($orderItemReviewField, ':') !== false) {
+                foreach (explode(',', $orderItemReviewField) as $pair) {
+                    if (strpos($pair, ':') !== false) {
+                        list($reviewedProductId, $savedStarRating) = explode(':', $pair);
+
+                        // Look for a match against the current product loop item
+                        if (trim($reviewedProductId) == trim($prd_id_arr[0])) {
+                            $isItemReviewed = true;
+                            $savedRatingScore = (int)trim($savedStarRating);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Check Scenario A fallback: Check legacy simple string table entries values
+            if (!$isItemReviewed && $reviewRow->getReviewGiven() == "Yes") {
+                $legacyProductIds = explode(',', $reviewRow->getProductIds());
+                if (in_array((string)$prd_id_arr[0], $legacyProductIds)) {
+                    $isItemReviewed = true;
+                }
+            }
+        }
+    }
+?>
+    <div class="submit_button">
+        <form class="review_popup_form" name="review_popup_form" id="review_popup_form_<?= $orderItem->getId() ?>">
+            <input type="hidden" id="number_of_products" name="number_of_products" value="<?= count($prd_id_arr) ?>" />
+            <input type="hidden" id="customer_id" name="customer_id" value="<?= $customer_id ?>" />
+            <input type="hidden" id="order_id" name="order_id" value="<?= $order_id ?>" />
+
+            <?php
+            $i = 1;
+            foreach ($prd_id_arr as $item) {
+                $prd = $products[(string)$item] ?? null;
+                if (!$prd) {
+                    $i++;
+                    continue;
+                }
+
+                $imageUrl = $prd['image'];
+                $prd_name = $prd['name'];
+
+                // Condition Check: Has this specific product ID been reviewed?
+                // $isItemReviewed = in_array((string)$item, $alreadyReviewedIds);
+            ?>
+                <div class="item_review_popup row">
+                    <?php if ($isItemReviewed): ?>
+                        <div class="product_name structural-reviewed-row" style="padding: 10px 0;">
+                            <div class="col-sm-9 col-xs-7 name_review_popup">
+                                <div class="already-reviewed-badge" style=" font-weight: 600; font-size: 12px; margin-top: 5px;">
+                                    <span><?= __('Rate & Review') ?></span>
+
+                                    <?php if ($savedRatingScore !== null): ?>
+                                        <span class="dynamic-rendered-stars" style="letter-spacing: 3px; margin-left: 8px; font-size: 16px;">
+                                            <?php
+                                            for ($starCounter = 1; $starCounter <= 5; $starCounter++) {
+                                                if ($starCounter <= $savedRatingScore) {
+                                                    echo '<span class="rating_smiley_svg_done">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="star-icon">
+                                                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                                                </svg>
+                                                        </span>'; // Filled Gold Star
+                                                } else {
+                                                    echo '<span class="rating_smiley_svg_blank">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="star-icon">
+                                                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                                                </svg>
+                                                        </span>'; // Filled Gold Star
+                                                }
+                                            }
+                                            ?>
+                                        </span>
+                                    <?php else: ?>
+                                        <?php for ($s = 1; $s <= 5; $s++): ?>
+                                            <span class="rating_smiley_svg_done">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="star-icon">
+                                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                                </svg>
+                                            </span>
+                                        <?php endfor; ?>
+                                    <?php endif; ?>
+
+                                </div>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <input class="hide star_rating_input required_field_custom_form" id="stars_<?= $orderItem->getId() ?>" name="stars_<?= $i ?>" type="hidden" />
+                        <input class="hide product_id_rating_input required_field_custom_form" name="prd_id_<?= $i ?>" type="hidden" value="<?= $item ?>" />
+                        <input class="hide comment_rating_input" id="comment_input_<?= $orderItem->getId() ?>" name="description<?= $i ?>" type="hidden" />
+
+                        <div class="product_name">
+                            <div class="col-sm-9 col-xs-7 name_review_popup">
+                                <div class="rating_image_review_popup">
+                                    <div class="title-rate-review">Rate & Review: </div>
+                                    <div class="rating_image_block row" style="margin:10px 0;">
+                                        <?php for ($s = 1; $s <= 5; $s++): ?>
+                                            <div class='col-xs-2'>
+                                                <span class='rating_smiley_svg' rating_value='<?= $s ?>' data-itemid='<?= $orderItem->getId() ?>' style='cursor:pointer;'>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="star-icon">
+                                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                        <?php endfor; ?>
+                                    </div>
+                                </div>
+
+                                <div class="field review-field-media" id="<?= $item ?>-review-field-media">
+                                    <label class="label">
+                                        <div class="upload-box-label">
+                                            <span style="font-size: 12px; color: #666;">Upload photos of product</span>
+                                        </div>
+                                    </label>
+                                    <div class="control">
+                                        <input type="file" style="display:none !important;" id="<?= $item ?>_review_media" name="review_media[]" class="review_media" accept=".png,.jpg,.jpeg" multiple="multiple" />
+                                    </div>
+                                    <div class="review-drag-area" rel="<?= $item ?>" style="border:3px dashed lightgray; border-radius:10px; margin-right:10px; width: 50px;">
+                                        <p class="review-dragdrop" rel="<?= $item ?>" style="text-align:center;color:gray; font-size:20px; margin:5px 0;">+</p>
+                                    </div>
+                                </div>
+
+                                <div class="write_comment_block" style="margin-top:10px;">
+                                    <div class="write_comment_textarea" style="display: block;">
+                                        <textarea class="custom_comment" data-itemid="<?= $orderItem->getId() ?>" style="border-radius:5px !important; width:100%;" maxlength="500" placeholder="You can write about the quality, experience..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php
+                $i++;
+            }
+            ?>
+
+            <?php if (!$isItemReviewed): ?>
+                <div class="submit_review_popup_form_block" style="margin-top: 15px;">
+                    <div class="submit_review_popup_form_button">
+                        <button type="button" class="action submit primary execute-review-submit" data-itemid="<?= $orderItem->getId() ?>">
+                            <span><?= __('Submit Review') ?></span>
+                        </button>
+                    </div>
+                    <div class="submit_review_popup_form_status_text" id="status_<?= $orderItem->getId() ?>" style="margin-top:5px; font-weight:bold;"></div>
+                </div>
+            <?php endif; ?>
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        require(['jquery'], function($) {
+            var itemId = '<?= $orderItem->getId() ?>';
+            var form = $('#review_popup_form_' + itemId);
+
+            // 1. HOVER SELECTION TRAIL EFFECTS
+            form.find('.rating_smiley_svg').on('mouseenter', function() {
+                var currentRow = $(this).closest('.rating_image_block');
+                var hoveredValue = parseInt($(this).attr('rating_value'));
+                currentRow.find('.rating_smiley_svg').removeClass('is-hovered');
+                currentRow.find('.rating_smiley_svg').each(function() {
+                    if (parseInt($(this).attr('rating_value')) <= hoveredValue) {
+                        $(this).addClass('is-hovered');
+                    }
+                });
+            });
+
+            form.find('.rating_image_block').on('mouseleave', function() {
+                $(this).find('.rating_smiley_svg').removeClass('is-hovered');
+            });
+
+            // 2. CLICK SELECTION SYSTEM WITH DYNAMIC REVEAL
+            form.find('.rating_smiley_svg').on('click', function() {
+                var currentRow = $(this).closest('.rating_image_block');
+                var clickedValue = parseInt($(this).attr('rating_value'));
+
+                // Update your hidden input field for Magento payload mapping
+                $('#stars_' + itemId).val(clickedValue);
+
+                // Remove old active selections in this block row
+                currentRow.find('.rating_smiley_svg').removeClass('active');
+
+                // Permanently illuminate all stars up to the clicked value
+                currentRow.find('.rating_smiley_svg').each(function() {
+                    var starValue = parseInt($(this).attr('rating_value'));
+                    if (starValue <= clickedValue) {
+                        $(this).addClass('active');
+                    }
+                });
+
+                // ── REVEAL TOGGLE LOGIC FOR CONTENT & SUBMIT FOOTER ──
+                var productContainer = $(this).closest('.name_review_popup');
+                var mediaField = productContainer.find('.review-field-media');
+                var commentField = productContainer.find('.write_comment_block');
+
+                // Find the submit button region relative to the current active form instance container
+                var activeForm = $(this).closest('.review_popup_form');
+                var submitButtonBlock = activeForm.find('.submit_review_popup_form_block');
+
+                if (clickedValue > 0) {
+                    // Smoothly display and slide down all review inputs
+                    mediaField.slideDown(250).css('opacity', '1');
+                    commentField.slideDown(250).css('opacity', '1');
+
+                    // Also reveal the submit review action row block container
+                    submitButtonBlock.slideDown(250).css('opacity', '1');
+                } else {
+                    // Fallback hide rules if rating is broken or cleared
+                    mediaField.slideUp(200).css('opacity', '0');
+                    commentField.slideUp(200).css('opacity', '0');
+                    submitButtonBlock.slideUp(200).css('opacity', '0');
+                }
+            });
+
+            // 3. COMMENT VALUE ASSIGNMENT
+            form.find('.custom_comment').on('input', function() {
+                $('#comment_input_' + itemId).val($(this).val());
+            });
+
+            // 4. AJAX SUBMIT TO ORDERITEMINDEX ENDPOINT
+            // 4. AJAX SUBMIT TO ORDERITEMINDEX ENDPOINT
+            form.find('.execute-review-submit').on('click', function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+                var statusBox = $('#status_' + itemId);
+                var starVal = $('#stars_' + itemId).val();
+                var prdId = form.find('.product_id_rating_input').val();
+                var commentVal = $('#comment_input_' + itemId).val() || 'No feedback provided';
+                if (starVal < 1) {
+                    alert("Please rate the product.");
+                    return;
+                }
+                // ── NEW LOGIC: Collect all uploaded image paths inside this specific form row ──
+                var uploadedImagesArr = [];
+                form.find('input[name="review_media_files[]"]').each(function() {
+                    var pathValue = $(this).val();
+                    if (pathValue) {
+                        // Trim forward slashes if your controller expects pure filenames, 
+                        // or leave it as is if it matches your legacy format behavior.
+                        uploadedImagesArr.push(pathValue);
+                    }
+                });
+
+                // If no images are uploaded, fall back to your controller's '|empty|' string flag
+                var imageVal = (uploadedImagesArr.length > 0) ? uploadedImagesArr.join(',') : '|empty|';
+
+                // Matches pattern expected by Controller explode sequences: star<><>prodId<><>comment<><>images
+                var structuralPayload = starVal + '<><>' + prdId + '<><>' + commentVal + '<><>' + imageVal;
+
+                statusBox.text('Submitting...').css('color', '#333');
+
+                $.ajax({
+                    url: '/reviewpopup/submit/orderitemindex/',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        number_of_products: form.find('#number_of_products').val(),
+                        customer_id: form.find('#customer_id').val(),
+                        order_id: form.find('#order_id').val(),
+                        submitted_data: structuralPayload,
+                        single_item_id: prdId
+                    },
+                    success: function(response) {
+                        if (response.html === 'review_submitted') {
+                            statusBox.text('Review submitted successfully!').css('color', 'green');
+                            form.find('input, textarea, button').attr('disabled', 'disabled');
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1000);
+                        } else {
+                            statusBox.text('Error submitting review.').css('color', 'red');
+                        }
+                    },
+                    error: function() {
+                        statusBox.text('Server Error. Please try again.').css('color', 'red');
+                    }
+                });
+            });
+        });
+    </script>
+<?php endif; ?>
+
+<style>
+    .review-drag-area{
+        float: left;
+    }
+    .review-field-media,
+    .write_comment_block,
+    .submit_review_popup_form_block {
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .rating_smiley_svg_done svg {
+        width: 18px;
+        height: 18px;
+        transition: all 0.2s ease-in-out;
+        stroke-width: 1;
+        fill: #ffbc0b !important;
+        stroke: #ffbc0b;
+    }
+
+    .rating_smiley_svg_blank svg {
+        width: 18px;
+        height: 18px;
+        transition: all 0.2s ease-in-out;
+        stroke-width: 1;
+    }
+
+    .rating_smiley_svg svg {
+        width: 18px;
+        height: 18px;
+        transition: all 0.2s ease-in-out;
+        stroke-width: 1;
+        stroke: #454545;
+    }
+
+    .title-rate-review {
+        font-size: 10px !important;
+    }
+
+    .rating_smiley_svg.active svg,
+    .rating_smiley_svg.is-hovered svg {
+        fill: #ffbc0b !important;
+        stroke: transparent !important;
+    }
+
+    .rating_smiley_svg:hover svg {
+        stroke: transparent !important;
+        transform: scale(1.1);
+    }
+
+    @media only screen and (max-width:768px) {
+        .rating_smiley_svg svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .rating_image_block>div {
+            width: 17% !important;
+        }
+    }
+</style>
+
+
+
+<script type="text/javascript">
+    require(['jquery'], function($) {
+
+        // 1. Block default browser window behavior for dragging files onto the page
+        $("html").on("dragover dragenter drop", function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        });
+
+        // 2. Drag Enter Visual indicator tracking
+        $(".review_popup_form").on("dragenter", ".review-drag-area", function(e) {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+            $(this).css('border-color', '#ffbc0b');
+        });
+
+        // 3. Drag Over context verification
+        $(".review_popup_form").on("dragover", ".review-drag-area", function(e) {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+        });
+
+        // 4. Handle Drag Drop Action
+        $(".review_popup_form").on("drop", ".review-drag-area", function(e) {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+
+            var currentForm = $(this).closest('.review_popup_form');
+            var dragArea = $(this);
+            dragArea.css('border-color', 'lightgray');
+
+            var file = e.originalEvent.dataTransfer.files;
+            var ins = file.length;
+            var ln = currentForm.find(".review-resultimg").length;
+
+            var tc = parseInt(ln) + parseInt(ins);
+
+            if (tc > 10) {
+                currentForm.find(".media_field-error").show();
+            } else {
+                currentForm.find(".media_field-error").hide();
+                for (var x = 0; x < ins; x++) {
+                    var fdata = new FormData();
+                    fdata.append("files[]", file[x]);
+                    uploadlogofunc(fdata, currentForm, dragArea);
+                }
+            }
+
+            // CRITICAL FIX: Flush the drag data cache to reset the tracking engine state
+            if (e.originalEvent.dataTransfer) {
+                e.originalEvent.dataTransfer.clearData();
+            }
+        });
+
+        // 5. Consolidated Upload core processing function
+        function uploadlogofunc(fdata, currentForm, dragArea) {
+            if (fdata != null && fdata != '') {
+                $.ajax({
+                    url: "/reviewpopup/index/ajaxupload",
+                    type: "POST",
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    data: fdata,
+                    dataType: 'json',
+                    showLoader: true,
+                    success: function(res) {
+                        if (res.path) {
+                            var htmlstr = '<div class="review-resultimg" style="display:inline-block; margin-right:10px; position:relative;">';
+                            htmlstr += '<img src="/media/review_images' + res.path + '" style="width:60px; height:60px; border:1px solid #ccc; border-radius:5px;">';
+                            htmlstr += '<div class="review-img-cross" rel="' + res.path + '" style="position:absolute; top:-5px; right:-5px; background:red; color:white; border-radius:50%; width:16px; height:16px; text-align:center; font-size:11px; cursor:pointer; line-height:15px;">&#10006;</div>';
+                            htmlstr += '<input type="hidden" name="review_media_files[]" value="' + res.path + '">';
+                            htmlstr += '</div>';
+
+                            $(htmlstr).insertBefore(dragArea);
+                        }
+                    }
+                });
+            }
+        }
+
+        // 6. Click action on the drag-drop container box triggers hidden file input
+        $(".review_popup_form").on("click", ".review-drag-area", function(e) {
+            e.stopImmediatePropagation();
+            $(this).closest('.review-field-media').find('.review_media').trigger('click');
+        });
+
+        // 7. Click action to delete/remove an uploaded preview asset image item row
+        $(".review_popup_form").on("click", ".review-img-cross", function(e) {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            var currentForm = $(this).closest('.review_popup_form');
+            var el = $(this).parent(".review-resultimg");
+            var rel = $(this).attr('rel');
+            var path = 'review_images' + rel;
+
+            $.ajax({
+                url: "/reviewpopup/index/deleteajaxupload",
+                type: "POST",
+                data: {
+                    path: path
+                },
+                dataType: 'json',
+                showLoader: true,
+                success: function(res) {
+                    el.remove();
+                    currentForm.find(".media_field-error").hide();
+                }
+            });
+        });
+
+        // 8. Handle Standard File Input Selection Changes
+        $(document).on('change', '.review_media', function() {
+            var fileInputInstance = $(this);
+            var currentForm = fileInputInstance.closest('.review_popup_form');
+            var dragArea = currentForm.find('.review-drag-area');
+            var files = fileInputInstance[0].files;
+            var ins = files.length;
+
+            var ln = currentForm.find(".review-resultimg").length;
+            var tc = parseInt(ln) + parseInt(ins);
+
+            if (tc > 10) {
+                fileInputInstance.val('');
+                currentForm.find(".media_field-error").show();
+            } else {
+                currentForm.find(".media_field-error").hide();
+                for (var x = 0; x < ins; x++) {
+                    var fdata = new FormData();
+                    fdata.append("files[]", files[x]);
+                    uploadlogofunc(fdata, currentForm, dragArea);
+                }
+
+                // CRITICAL FIX: Reset the element value to empty string "" 
+                // This forces the 'change' event to fire even if you select the exact same file 5 times in a row!
+                fileInputInstance.val('');
+            }
+        });
+
+    });
+</script>

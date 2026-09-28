@@ -1,0 +1,44 @@
+<!-- Override for Mango_Ajaxlayerednavigation layer/state.phtml. Fill in your custom content here. -->
+<?php
+
+/**
+ * Category layered navigation state
+ *
+ * @var $block \Magento\LayeredNavigation\Block\Navigation\State
+ */
+?>
+<?php $_filters = $block->getActiveFilters() ?>
+<?php if (!empty($_filters)) : ?>
+    <div class="filter-current" id="layered-navigation-state">
+        <strong class="block-subtitle filter-current-subtitle" role="heading" aria-level="2" data-role="title" data-count="<?= count($_filters); ?>"><?= /* @escapeNotVerified */ __('Filtered') ?></strong>
+        <ol class="items filter-ol-list">
+            <?php $cur_filter = ""; ?>
+            <?php foreach ($_filters as $_filter) : ?>
+                <?php
+                if ($cur_filter != $_filter->getFilter()->getRequestVar()) :
+                    $clearLinkUrl = $_filter->getClearLinkUrl();
+                ?>
+                <br>
+                    <li class="item-label <?= $_filter->getFilter()->getRequestVar(); ?>-status-label">
+                        <span class="filter-label"><?= strtolower($block->escapeHtml(__($_filter->getName())) ); ?></span>
+                        <a href="<?= $clearLinkUrl ?>" title="<?= __('Remove This Item') ?>" class="btn-remove"><?= __('Remove This Item') ?></a>
+                    </li>
+                <?php
+                    $cur_filter = $_filter->getFilter()->getRequestVar();
+                endif;
+                ?>
+                <li class="item">
+                    <?php
+                    $currentFilterName = $block->escapeHtml(__($_filter->getName())) . " " . $block->stripTags($_filter->getLabel());
+                    ?>
+                    <a class="action remove filter-state-<?= $_filter->getFilter()->getRequestVar(); ?>" href="<?= /* @escapeNotVerified */ $_filter->getUrl() ?>" title="<?= /* @escapeNotVerified */ $block->escapeHtml(__('Remove')) . " " . $currentFilterName; ?>" data-filter-value="<?= ((is_array($_filter->getValue()) ? join(",", $_filter->getValue()) : $_filter->getValue())); ?>">
+
+                        <span><?= /* @escapeNotVerified */ __('Remove This Item') ?></span>
+                    </a>
+                    <?= /* @escapeNotVerified */ strtolower($block->stripTags($_filter->getLabel()) ) ?>
+
+                </li>
+            <?php endforeach; ?>
+        </ol>
+    </div>
+<?php endif; ?>

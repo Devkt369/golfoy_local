@@ -1,0 +1,212 @@
+<?php
+
+/** @var \ArtM\Review\Block\OrderItemReview $block */
+/** @var \Magento\Sales\Model\Order\Item $orderItem */
+$orderItem = $block->getOrderItem();
+
+if ($orderItem):
+    $templateData = $block->getReviewTemplateData($orderItem);
+    $prd_id_arr  = $templateData['prd_id_arr'];
+    $products    = $templateData['products'];
+    $customer_id = $templateData['customer_id'];
+    $order_id    = $templateData['order_id'];
+    $starImgUrl  = $templateData['starImgUrl'];
+    // print_r($templateData);die;
+?>
+    <div class="submit_button">
+        <form class="review_popup_form" name="review_popup_form" id="review_popup_form_<?= $orderItem->getId() ?>">
+            <input type="hidden" id="number_of_products" name="number_of_products" value="<?= count($prd_id_arr) ?>" />
+            <input type="hidden" id="customer_id" name="customer_id" value="<?= $customer_id ?>" />
+            <input type="hidden" id="order_id" name="order_id" value="<?= $order_id ?>" />
+
+            <?php
+            $i = 1;
+            foreach ($prd_id_arr as $item) {
+                $prd = $products[(string)$item] ?? null;
+                if (!$prd) {
+                    $i++;
+                    continue;
+                }
+
+                $imageUrl = $prd['image'];
+                $prd_name = $prd['name'];
+            ?>
+                <div class="item_review_popup row">
+                    <input class="hide star_rating_input required_field_custom_form" id="stars_<?= $orderItem->getId() ?>" name="stars_<?= $i ?>" type="hidden" />
+                    <input class="hide product_id_rating_input required_field_custom_form" name="prd_id_<?= $i ?>" type="hidden" value="<?= $item ?>" />
+                    <input class="hide comment_rating_input" id="comment_input_<?= $orderItem->getId() ?>" name="description<?= $i ?>" type="hidden"></input>
+
+                    <div class="product_name">
+                        <div class="col-sm-9 col-xs-7 name_review_popup">
+                            <div class="rating_image_review_popup">
+                                <div class="rating_image_block row" style="margin:10px 0;">
+                                    <?php for ($s = 1; $s <= 5; $s++): ?>
+                                        <?php
+                                        echo "<div class='col-xs-2'>";
+                                        echo "<span class='rating_smiley_svg' rating_value='" . $s . "' data-itemid='" . $orderItem->getId() . "' style='cursor:pointer;'>";
+                                        echo '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="star-icon"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
+                                        echo "</span>";
+                                        echo "</div>";
+                                        ?>
+                                    <?php endfor; ?>
+                                </div>
+                            </div>
+
+                            <div class="field review-field-media" id="<?= $item ?>-review-field-media">
+                                <label class="label">
+                                    <div class="upload-box-label">
+                                        <span>Upload photos of product</span>
+                                    </div>
+                                </label>
+                                <div class="control">
+                                    <input type="file" style="display:none !important;" id="<?= $item ?>_review_media" name="review_media[]" class="review_media" accept=".png,.jpg,.jpeg" multiple="multiple" />
+                                </div>
+                                <div class="review-drag-area" rel="<?= $item ?>" style="border:3px dashed lightgray; border-radius:10px; margin-right:10px;">
+                                    <p class="review-dragdrop" rel="<?= $item ?>" style="text-align:center;color:gray; font-size:20px; margin:5px 0;">+</p>
+                                </div>
+                            </div>
+
+                            <div class="write_comment_block" style="margin-top:10px;">
+                                <div class="write_comment_textarea" style="display: block;">
+                                    <textarea class="custom_comment" data-itemid="<?= $orderItem->getId() ?>" style="border-radius:5px !important; width:100%;" maxlength="500" placeholder="You can write about the quality, experience..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php
+                $i++;
+            }
+            ?>
+
+            <!-- <div class="review_line">
+                <p style="font-size:11px; color:#777;">By submitting review you give us your consent to publish and process personal information.</p>
+            </div> -->
+            <div class="submit_review_popup_form_block">
+                <div class="submit_review_popup_form_button">
+                    <button type="button" class="action submit primary execute-review-submit" data-itemid="<?= $orderItem->getId() ?>">
+                        <span><?= __('Submit Review') ?></span>
+                    </button>
+                </div>
+                <div class="submit_review_popup_form_status_text" id="status_<?= $orderItem->getId() ?>" style="margin-top:5px; font-weight:bold;"></div>
+            </div>
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        require(['jquery'], function($) {
+
+            $('.rating_smiley_svg').on('click', function() {
+                var currentRow = $(this).closest('.rating_image_block');
+                var clickedValue = parseInt($(this).attr('rating_value'));
+                var itemId = $(this).data('itemid');
+
+                // Update your hidden input field for Magento payload mapping
+                $('#stars_' + itemId).val(clickedValue);
+
+                // Remove old active selections in this block row
+                currentRow.find('.rating_smiley_svg').removeClass('active');
+
+                // Permanently illuminate all stars up to the clicked value
+                currentRow.find('.rating_smiley_svg').each(function() {
+                    var starValue = parseInt($(this).attr('rating_value'));
+                    if (starValue <= clickedValue) {
+                        $(this).addClass('active');
+                    }
+                });
+            });
+            // Interactive Star Rating Logic
+            // $('.rating_smiley_svg').on('click', function() {
+            //     var val = $(this).attr('rating_value');
+            //     var itemId = $(this).data('itemid');
+            //     $('#stars_' + itemId).val(val);
+
+            //     // Clear active status on all stars in this specific row
+            //     $(this).closest('.rating_image_block').find('.rating_smiley_svg').removeClass('active');
+
+            //     // Add active class to clicked star and all stars before it
+            //     $(this).prevAll().addBack().addClass('active');
+            // });
+
+
+
+            // Mirroring descriptive textarea to hidden inputs inside the submission sequence
+            $('.custom_comment').on('input', function() {
+                var itemId = $(this).data('itemid');
+                $('#comment_input_' + itemId).val($(this).val());
+            });
+
+            // AJAX Form submit matching Controller parsing mechanics
+            $('.execute-review-submit').on('click', function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+                var itemId = $(this).data('itemid');
+                var form = $('#review_popup_form_' + itemId);
+                var statusBox = $('#status_' + itemId);
+
+                // Formatting submitted_data to string pattern expected by Controller: star<><>prodId<><>comment<><>images
+                var starVal = $('#stars_' + itemId).val() || '5';
+                var prdId = form.find('.product_id_rating_input').val();
+                var commentVal = $('#comment_input_' + itemId).val() || 'No feedback provided';
+                var imageVal = '|empty|'; // Map your custom component image loops here if active
+
+                var structuralPayload = starVal + '<><>' + prdId + '<><>' + commentVal + '<><>' + imageVal;
+
+               
+
+                statusBox.text('Submitting...').css('color', '#333');
+                // setTimeout(() => {
+                //     statusBox.text('Review submitted successfully!').css('color', 'green');
+                // }, 2000);
+
+                $.ajax({
+                    url: '/reviewpopup/submit/orderitemindex/',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        number_of_products: form.find('#number_of_products').val(),
+                        customer_id: form.find('#customer_id').val(),
+                        order_id: form.find('#order_id').val(),
+                        submitted_data: structuralPayload,
+                        order_item_review: 'order_item_review',
+                        single_item_id: 'single_item_id',
+                    },
+                    success: function(response) {
+                        if (response.html === 'review_submitted') {
+                            statusBox.text('Review submitted successfully!').css('color', 'green');
+                            form.find('input, textarea, button').attr('disabled', 'disabled');
+                        } else {
+                            statusBox.text('Error submitting review.').css('color', 'red');
+                        }
+                    },
+                    error: function() {
+                        statusBox.text('Server Error. Please try again.').css('color', 'red');
+                    }
+                });
+            });
+        });
+    </script>
+<?php endif; ?>
+
+<style>
+    /* Base styling for the SVG stars */
+    .rating_smiley_svg svg {
+        width: 24px;
+        height: 24px;
+        transition: all 0.2s ease-in-out;
+    }
+
+    /* Class to apply via JavaScript when a star is selected/active */
+    .rating_smiley_svg.active svg {
+        fill: #ffbc0b;
+        /* Beautiful Gold Fill */
+        stroke: #e0a100;
+        /* Darker Gold Border */
+    }
+
+    /* Optional: Slight hover animation to make it feel responsive */
+    .rating_smiley_svg:hover svg {
+        transform: scale(1.1);
+    }
+</style>

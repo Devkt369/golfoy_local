@@ -1,0 +1,1755 @@
+<?php
+/**
+ * ArtM ShortVideos Admin Index Template
+ *
+ * @category  ArtM
+ * @package   ArtM_ShortVideos
+ * @author    ArtM
+ * @copyright Copyright (c) 2025 ArtM
+ * @var $block \Magento\Backend\Block\Template
+ */
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$request = $objectManager->get('Magento\Framework\App\RequestInterface');
+
+// Get filter parameters
+$filterTitle = $request->getParam('filter_title', '');
+$filterType = $request->getParam('filter_type', '');
+$filterCategory = $request->getParam('filter_category', '');
+$filterStatus = $request->getParam('filter_status', '');
+
+// Get pagination parameters
+$currentPage = (int)$request->getParam('page', 1);
+$perPage = (int)$request->getParam('per_page', 10);
+if (!in_array($perPage, [10, 25, 50, 100])) {
+    $perPage = 10;
+}
+
+// Build collection with filters
+$videoCollection = $objectManager->create('ArtM\ShortVideos\Model\ResourceModel\Video\Collection');
+
+if ($filterTitle) {
+    $videoCollection->addFieldToFilter('title', ['like' => '%' . $filterTitle . '%']);
+}
+if ($filterType) {
+    $videoCollection->addFieldToFilter('video_type', $filterType);
+}
+if ($filterCategory) {
+    $videoCollection->addFieldToFilter('category', ['like' => '%' . $filterCategory . '%']);
+}
+if ($filterStatus !== '') {
+    $videoCollection->addFieldToFilter('status', $filterStatus);
+}
+
+$videoCollection->setOrder('sort_order', 'ASC');
+
+// Get total count before pagination
+$totalVideos = $videoCollection->getSize();
+$totalPages = ceil($totalVideos / $perPage);
+
+// Apply pagination
+$videoCollection->setPageSize($perPage);
+$videoCollection->setCurPage($currentPage);
+
+$videos = $videoCollection->getItems();
+
+// Get all categories for filter dropdown
+$allCategories = $objectManager->create('ArtM\ShortVideos\Model\ResourceModel\Video\Collection')->getAllCategories();
+
+// Get all videos for shortcode popup
+$allVideosCollection = $objectManager->create('ArtM\ShortVideos\Model\ResourceModel\Video\Collection');
+$allVideosCollection->addFieldToFilter('status', 1); // Only enabled videos
+$allVideosCollection->setOrder('title', 'ASC');
+$allVideos = $allVideosCollection->getItems();
+?>
+
+<div class="admin__page-section">
+    <?= $block->getBlockHtml('formkey') ?>
+    <div class="admin__page-section-title">
+        <h2><?= __('Short Videos Management') ?> (<?= $totalVideos ?> <?= __('total') ?>)</h2>
+        <div class="page-actions">
+            <button class="action-primary" type="button" onclick="window.location.href='<?= $block->getUrl('shortvideos/video/new') ?>'">
+                <span><?= __('Add New Video') ?></span>
+            </button>
+            <button class="action-secondary shortcode-btn" type="button" onclick="openShortcodePopup()">
+                <span>📋 <?= __('Add Shortcode') ?></span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Filters Section -->
+    <div class="admin__page-section-filters">
+        <form id="filterForm" method="get" action="">
+            <input type="hidden" name="page" value="1" />
+            <div class="filter-row">
+                <div class="filter-item">
+                    <label><?= __('Title') ?>:</label>
+                    <input type="text" name="filter_title" value="<?= $block->escapeHtml($filterTitle) ?>" placeholder="<?= __('Search by title') ?>"/>
+                </div>
+                <div class="filter-item">
+                    <label><?= __('Type') ?>:</label>
+                    <select name="filter_type">
+                        <option value=""><?= __('All Types') ?></option>
+                        <option value="instagram" <?= $filterType === 'instagram' ? 'selected' : '' ?>><?= __('Instagram Reel') ?></option>
+                        <option value="youtube" <?= $filterType === 'youtube' ? 'selected' : '' ?>><?= __('YouTube Short') ?></option>
+                        <option value="upload" <?= $filterType === 'upload' ? 'selected' : '' ?>><?= __('Uploaded') ?></option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label><?= __('Category') ?>:</label>
+                    <select name="filter_category">
+                        <option value=""><?= __('All Categories') ?></option>
+                        <?php foreach ($allCategories as $cat): ?>
+                            <option value="<?= $block->escapeHtml($cat) ?>" <?= $filterCategory === $cat ? 'selected' : '' ?>>
+                                <?= $block->escapeHtml($cat) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label><?= __('Status') ?>:</label>
+                    <select name="filter_status">
+                        <option value=""><?= __('All Status') ?></option>
+                        <option value="1" <?= $filterStatus === '1' ? 'selected' : '' ?>><?= __('Enabled') ?></option>
+                        <option value="0" <?= $filterStatus === '0' ? 'selected' : '' ?>><?= __('Disabled') ?></option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <button type="submit" class="action-secondary"><?= __('Apply Filters') ?></button>
+                    <button type="button" class="action-secondary" onclick="resetFilters()"><?= __('Reset') ?></button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bulk Actions & Per Page -->
+    <div class="admin__page-section-toolbar">
+        <div class="bulk-actions">
+            <input type="checkbox" id="selectAll" onclick="toggleAllCheckboxes(this)"/>
+            <label for="selectAll"><?= __('Select All') ?></label>
+            <select id="bulkAction" onchange="handleBulkAction()">
+                <option value=""><?= __('Bulk Actions') ?></option>
+                <option value="delete"><?= __('Delete Selected') ?></option>
+                <option value="enable"><?= __('Enable Selected') ?></option>
+                <option value="disable"><?= __('Disable Selected') ?></option>
+            </select>
+        </div>
+        <div class="per-page-selector">
+            <label><?= __('Show') ?>:</label>
+            <select onchange="changePerPage(this.value)">
+                <option value="10" <?= $perPage === 10 ? 'selected' : '' ?>>10</option>
+                <option value="25" <?= $perPage === 25 ? 'selected' : '' ?>>25</option>
+                <option value="50" <?= $perPage === 50 ? 'selected' : '' ?>>50</option>
+                <option value="100" <?= $perPage === 100 ? 'selected' : '' ?>>100</option>
+            </select>
+            <label><?= __('per page') ?></label>
+        </div>
+    </div>
+    
+    <div class="admin__page-section-content">
+        <?php if (count($videos) > 0): ?>
+            <div class="admin-grid">
+                <table class="data-grid">
+                    <thead>
+                        <tr>
+                            <th width="40"><input type="checkbox" id="selectAllHeader" onclick="toggleAllCheckboxes(this)"/></th>
+                            <th><?= __('ID') ?></th>
+                            <th><?= __('Title') ?></th>
+                            <th><?= __('Type') ?></th>
+                            <th><?= __('Category') ?></th>
+                            <th><?= __('Link') ?></th>
+                            <th><?= __('Status') ?></th>
+                            <th><?= __('Sort Order') ?></th>
+                            <th><?= __('Created') ?></th>
+                            <th><?= __('Actions') ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($videos as $video): ?>
+                            <tr>
+                                <td><input type="checkbox" class="video-checkbox" value="<?= $video->getId() ?>"/></td>
+                                <td><?= $video->getId() ?></td>
+                                <td>
+                                    <strong><?= $block->escapeHtml($video->getTitle()) ?></strong>
+                                    <?php if ($video->getDescription()): ?>
+                                        <br/><small><?= $block->escapeHtml(substr($video->getDescription(), 0, 50)) ?>...</small>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php
+                                    $typeLabels = [
+                                        'instagram' => __('Instagram Reel'),
+                                        'youtube' => __('YouTube Short'),
+                                        'upload' => __('Uploaded Video')
+                                    ];
+                                    echo $typeLabels[$video->getVideoType()] ?? $video->getVideoType();
+                                    ?>
+                                </td>
+                                <td><?= $block->escapeHtml($video->getCategory() ?: '-') ?></td>
+                                <td>
+                                    <?php if ($video->getLinkUrl()): ?>
+                                        <?php if ($video->getIsProductLink()): ?>
+                                            <span class="link-badge product-link" title="Product ID: <?= $video->getProductId() ?>">
+                                                <?= __('Product') ?> #<?= $video->getProductId() ?>
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="link-badge custom-link" title="<?= $block->escapeHtml($video->getLinkUrl()) ?>">
+                                                <?= __('Custom Link') ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-<?= $video->getStatus() ?>">
+                                        <?= $video->getStatus() ? __('Enabled') : __('Disabled') ?>
+                                    </span>
+                                </td>
+                                <td><?= $video->getSortOrder() ?></td>
+                                <td><?= date('Y-m-d', strtotime($video->getCreatedAt())) ?></td>
+                                <td class="actions">
+                                    <a href="<?= $block->getUrl('shortvideos/video/edit', ['id' => $video->getId()]) ?>" 
+                                       class="action-link"
+                                       title="<?= __('Edit') ?>">
+                                        <?= __('Edit') ?>
+                                    </a>
+                                    <?php if ($video->getVideoUrl()): ?>
+                                        <span class="separator">|</span>
+                                        <a href="<?= $block->escapeHtml($video->getVideoUrl()) ?>" 
+                                           target="_blank"
+                                           class="action-link"
+                                           title="<?= __('View Video') ?>">
+                                            <?= __('View') ?>
+                                        </a>
+                                    <?php endif; ?>
+                                    <span class="separator">|</span>
+                                    <a href="javascript:void(0);" 
+                                       onclick="deleteVideo(<?= $video->getId() ?>)"
+                                       class="action-link delete"
+                                       title="<?= __('Delete') ?>">
+                                        <?= __('Delete') ?>
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <?php if ($totalPages > 1): ?>
+                <div class="pagination-wrapper">
+                    <div class="pagination-info">
+                        <?= __('Showing %1 to %2 of %3 videos', 
+                            (($currentPage - 1) * $perPage) + 1, 
+                            min($currentPage * $perPage, $totalVideos), 
+                            $totalVideos) ?>
+                    </div>
+                    <div class="pagination">
+                        <?php if ($currentPage > 1): ?>
+                            <a href="<?= $block->getUrl('*/*/*', ['_current' => true, 'page' => 1]) ?>" class="page-link">&laquo; <?= __('First') ?></a>
+                            <a href="<?= $block->getUrl('*/*/*', ['_current' => true, 'page' => $currentPage - 1]) ?>" class="page-link">&lsaquo; <?= __('Prev') ?></a>
+                        <?php endif; ?>
+                        
+                        <?php
+                        $startPage = max(1, $currentPage - 2);
+                        $endPage = min($totalPages, $currentPage + 2);
+                        
+                        for ($i = $startPage; $i <= $endPage; $i++):
+                        ?>
+                            <a href="<?= $block->getUrl('*/*/*', ['_current' => true, 'page' => $i]) ?>" 
+                               class="page-link <?= $i === $currentPage ? 'active' : '' ?>">
+                                <?= $i ?>
+                            </a>
+                        <?php endfor; ?>
+                        
+                        <?php if ($currentPage < $totalPages): ?>
+                            <a href="<?= $block->getUrl('*/*/*', ['_current' => true, 'page' => $currentPage + 1]) ?>" class="page-link"><?= __('Next') ?> &rsaquo;</a>
+                            <a href="<?= $block->getUrl('*/*/*', ['_current' => true, 'page' => $totalPages]) ?>" class="page-link"><?= __('Last') ?> &raquo;</a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+        <?php else: ?>
+            <div class="message message-notice">
+                <p><?= __('No videos found. Click "Add New Video" to get started.') ?></p>
+            </div>
+        <?php endif; ?>
+
+        <div class="admin__page-section-item" style="margin-top: 30px;">
+            <h3><?= __('Shortcode Usage:') ?></h3>
+            <div class="shortcode-examples">
+                <p><strong><?= __('Display all videos:') ?></strong></p>
+                <code class="shortcode">[artm_videos]</code>
+                
+                <p style="margin-top: 15px;"><strong><?= __('Display videos by category:') ?></strong></p>
+                <code class="shortcode">[artm_videos category="Sports"]</code>
+                
+                <p style="margin-top: 15px;"><strong><?= __('Display specific video by ID:') ?></strong></p>
+                <code class="shortcode">[artm_videos id="1"]</code>
+                
+                <p style="margin-top: 15px;"><strong><?= __('Limit number of videos:') ?></strong></p>
+                <code class="shortcode">[artm_videos limit="5"]</code>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin__page-section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .page-actions {
+        margin-left: auto;
+    }
+
+    /* Filters Section */
+    .admin__page-section-filters {
+        background: #f9f9f9;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        border: 1px solid #e3e3e3;
+    }
+
+    .filter-row {
+        display: flex;
+        gap: 15px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .filter-item {
+        display: flex;
+        flex-direction: column;
+        min-width: 150px;
+    }
+
+    .filter-item label {
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #666;
+    }
+
+    .filter-item input,
+    .filter-item select {
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        font-size: 13px;
+    }
+
+    .filter-item button {
+        padding: 8px 15px;
+        margin-right: 5px;
+    }
+
+    /* Toolbar Section */
+    .admin__page-section-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #fff;
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        border: 1px solid #e3e3e3;
+        border-radius: 5px;
+    }
+
+    .bulk-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .bulk-actions select {
+        padding: 6px 10px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+    }
+
+    .per-page-selector {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .per-page-selector label {
+        font-size: 13px;
+        color: #666;
+    }
+
+    .per-page-selector select {
+        padding: 6px 10px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+    }
+    
+    .admin-grid {
+        overflow-x: auto;
+    }
+    
+    .data-grid {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .data-grid th {
+        background: #f5f5f5;
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        border-bottom: 2px solid #ddd;
+        white-space: nowrap;
+    }
+    
+    .data-grid td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        vertical-align: middle;
+    }
+    
+    .data-grid tbody tr:hover {
+        background: #f9f9f9;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .status-badge.status-1 {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-badge.status-0 {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .link-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: help;
+    }
+
+    .link-badge.product-link {
+        background: #cfe2ff;
+        color: #084298;
+    }
+
+    .link-badge.custom-link {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .actions {
+        white-space: nowrap;
+    }
+    
+    .action-link {
+        color: #1979c3;
+        text-decoration: none;
+        font-size: 13px;
+    }
+    
+    .action-link:hover {
+        text-decoration: underline;
+    }
+    
+    .action-link.delete {
+        color: #e02b27;
+    }
+    
+    .separator {
+        color: #ccc;
+        margin: 0 5px;
+    }
+
+    /* Pagination */
+    .pagination-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding: 15px;
+        background: #f9f9f9;
+        border-radius: 5px;
+    }
+
+    .pagination-info {
+        font-size: 13px;
+        color: #666;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 5px;
+    }
+
+    .page-link {
+        padding: 6px 12px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        color: #1979c3;
+        text-decoration: none;
+        font-size: 13px;
+        transition: all 0.2s;
+    }
+
+    .page-link:hover {
+        background: #1979c3;
+        color: white;
+        border-color: #1979c3;
+    }
+
+    .page-link.active {
+        background: #1979c3;
+        color: white;
+        border-color: #1979c3;
+        font-weight: 600;
+    }
+    
+    .admin__page-section-item {
+        background: #f5f5f5;
+        padding: 20px;
+        margin: 10px 0;
+        border-radius: 5px;
+    }
+    
+    .admin__page-section-item h3 {
+        margin-top: 0;
+        color: #333;
+    }
+    
+    .shortcode-examples p {
+        margin: 5px 0;
+        color: #666;
+    }
+    
+    .shortcode {
+        display: inline-block;
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 8px 15px;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+</style>
+
+<script>
+    function deleteVideo(videoId) {
+        if (confirm('<?= __('Are you sure you want to delete this video?') ?>')) {
+            window.location.href = '<?= $block->getUrl('shortvideos/video/delete') ?>?id=' + videoId;
+        }
+    }
+
+    function toggleAllCheckboxes(source) {
+        const isChecked = source.checked;
+        const checkboxes = document.querySelectorAll('.video-checkbox');
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = isChecked;
+        });
+        
+        // Sync both "select all" checkboxes
+        const selectAll = document.getElementById('selectAll');
+        const selectAllHeader = document.getElementById('selectAllHeader');
+        
+        if (selectAll) {
+            selectAll.checked = isChecked;
+        }
+        if (selectAllHeader) {
+            selectAllHeader.checked = isChecked;
+        }
+    }
+
+    function getSelectedVideoIds() {
+        const checkboxes = document.querySelectorAll('.video-checkbox:checked');
+        return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    function handleBulkAction() {
+        const action = document.getElementById('bulkAction').value;
+        const selectedIds = getSelectedVideoIds();
+
+        if (!action) {
+            return;
+        }
+
+        if (selectedIds.length === 0) {
+            alert('<?= __('Please select at least one video.') ?>');
+            document.getElementById('bulkAction').value = '';
+            return;
+        }
+
+        let confirmMessage = '';
+        let url = '';
+
+        switch(action) {
+            case 'delete':
+                confirmMessage = '<?= __('Are you sure you want to delete %1 selected video(s)?') ?>'.replace('%1', selectedIds.length);
+                url = '<?= $block->getUrl('shortvideos/video/bulkdelete') ?>';
+                break;
+            case 'enable':
+                confirmMessage = '<?= __('Are you sure you want to enable %1 selected video(s)?') ?>'.replace('%1', selectedIds.length);
+                url = '<?= $block->getUrl('shortvideos/video/bulkstatus') ?>';
+                break;
+            case 'disable':
+                confirmMessage = '<?= __('Are you sure you want to disable %1 selected video(s)?') ?>'.replace('%1', selectedIds.length);
+                url = '<?= $block->getUrl('shortvideos/video/bulkstatus') ?>';
+                break;
+        }
+
+        if (confirm(confirmMessage)) {
+            // Get form key from existing page
+            let formKeyValue = '';
+            const formKeyInput = document.querySelector('input[name="form_key"]');
+            if (formKeyInput) {
+                formKeyValue = formKeyInput.value;
+            } else {
+                // Try to get from cookie
+                const match = document.cookie.match(/form_key=([^;]+)/);
+                if (match) {
+                    formKeyValue = match[1];
+                }
+            }
+
+            // Create form and submit
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = url;
+
+            // Add form key
+            if (formKeyValue) {
+                const formKey = document.createElement('input');
+                formKey.type = 'hidden';
+                formKey.name = 'form_key';
+                formKey.value = formKeyValue;
+                form.appendChild(formKey);
+            }
+
+            // Add video IDs
+            selectedIds.forEach(id => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'video_ids[]';
+                input.value = id;
+                form.appendChild(input);
+            });
+
+            // Add status for enable/disable
+            if (action === 'enable' || action === 'disable') {
+                const statusInput = document.createElement('input');
+                statusInput.type = 'hidden';
+                statusInput.name = 'status';
+                statusInput.value = action === 'enable' ? '1' : '0';
+                form.appendChild(statusInput);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+        } else {
+            document.getElementById('bulkAction').value = '';
+        }
+    }
+
+    function changePerPage(perPage) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('per_page', perPage);
+        url.searchParams.set('page', '1');
+        window.location.href = url.toString();
+    }
+
+    function resetFilters() {
+        const url = new URL(window.location.href);
+        const perPage = url.searchParams.get('per_page') || '10';
+        window.location.href = '<?= $block->getUrl('shortvideos/index/index') ?>?per_page=' + perPage;
+    }
+
+    // Auto-update "select all" when individual checkboxes change
+    document.addEventListener('DOMContentLoaded', function() {
+        const videoCheckboxes = document.querySelectorAll('.video-checkbox');
+        const selectAll = document.getElementById('selectAll');
+        const selectAllHeader = document.getElementById('selectAllHeader');
+        
+        videoCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                // Check if all checkboxes are checked
+                const allChecked = Array.from(videoCheckboxes).every(cb => cb.checked);
+                const noneChecked = Array.from(videoCheckboxes).every(cb => !cb.checked);
+                
+                // Update both select all checkboxes
+                if (selectAll) {
+                    selectAll.checked = allChecked;
+                    selectAll.indeterminate = !allChecked && !noneChecked;
+                }
+                if (selectAllHeader) {
+                    selectAllHeader.checked = allChecked;
+                    selectAllHeader.indeterminate = !allChecked && !noneChecked;
+                }
+            });
+        });
+        
+        // Initialize PHP code display with proper escaping
+        const phpCodeElement = document.getElementById('generatedPhpCode');
+        if (phpCodeElement) {
+            const defaultCode = phpCodeElement.getAttribute('data-code');
+            if (defaultCode) {
+                phpCodeElement.innerHTML = defaultCode.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
+        }
+    });
+
+    // Shortcode Generator Functions
+    let selectedCategories = [];
+    let selectedVideos = [];
+
+    function openShortcodePopup() {
+        document.getElementById('shortcodePopup').style.display = 'flex';
+        selectedCategories = [];
+        selectedVideos = [];
+        
+        // Reset all swatches first
+        document.querySelectorAll('.swatch-item').forEach(item => item.classList.remove('selected'));
+        
+        // Check if any videos are checked in the main grid
+        const checkedVideos = document.querySelectorAll('.video-checkbox:checked');
+        
+        if (checkedVideos.length > 0) {
+            // Get the video IDs from checked rows
+            const preselectedVideoIds = [];
+            checkedVideos.forEach(checkbox => {
+                const videoId = checkbox.value;
+                if (videoId) {
+                    preselectedVideoIds.push(videoId);
+                }
+            });
+            
+            if (preselectedVideoIds.length > 0) {
+                // Switch to "Specific Videos" radio option
+                document.querySelector('input[name="display_type"][value="videos"]').checked = true;
+                toggleDisplayType();
+                
+                // Select the corresponding video swatches
+                preselectedVideoIds.forEach(videoId => {
+                    const swatch = document.querySelector(`.video-swatch[data-value="${videoId}"]`);
+                    if (swatch) {
+                        swatch.classList.add('selected');
+                        selectedVideos.push(videoId);
+                    }
+                });
+            }
+        } else {
+            // Default to categories view if no videos selected
+            document.querySelector('input[name="display_type"][value="categories"]').checked = true;
+            toggleDisplayType();
+        }
+        
+        updateShortcode();
+    }
+
+    function closeShortcodePopup() {
+        document.getElementById('shortcodePopup').style.display = 'none';
+    }
+
+    function toggleDisplayType() {
+        const displayType = document.querySelector('input[name="display_type"]:checked').value;
+        const categoryPanel = document.getElementById('categorySelection');
+        const videoPanel = document.getElementById('videoSelection');
+
+        if (displayType === 'categories') {
+            categoryPanel.style.display = 'block';
+            videoPanel.style.display = 'none';
+            selectedVideos = [];
+            // Reset video swatches
+            document.querySelectorAll('#videoSelection .swatch-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+        } else {
+            categoryPanel.style.display = 'none';
+            videoPanel.style.display = 'block';
+            selectedCategories = [];
+            // Reset category swatches
+            document.querySelectorAll('#categorySelection .swatch-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+        }
+        updateShortcode();
+    }
+
+    function toggleSwatch(element, type) {
+        const value = element.getAttribute('data-value');
+        
+        if (type === 'category') {
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                selectedCategories = selectedCategories.filter(cat => cat !== value);
+            } else {
+                element.classList.add('selected');
+                selectedCategories.push(value);
+            }
+        } else if (type === 'video') {
+            if (element.classList.contains('selected')) {
+                element.classList.remove('selected');
+                selectedVideos = selectedVideos.filter(vid => vid !== value);
+            } else {
+                element.classList.add('selected');
+                selectedVideos.push(value);
+            }
+        }
+        
+        updateShortcode();
+    }
+
+    function updateShortcode() {
+        const displayType = document.querySelector('input[name="display_type"]:checked').value;
+        const limit = document.getElementById('shortcode_limit').value.trim() || '10';
+        const title = document.getElementById('shortcode_title').value.trim();
+        const showDesc = document.getElementById('shortcode_show_desc').checked ? '1' : '0';
+        const productPage = document.getElementById('shortcode_product_page').checked ? '1' : '0';
+        const sortBy = document.getElementById('shortcode_sort').value;
+        const sliderTitleOnly = document.getElementById('shortcode_slider_title_only').checked ? '1' : '0';
+
+        let shortcode = '[artm_videos';
+        
+        // Add limit (always present)
+        shortcode += ' limit="' + limit + '"';
+        
+        // Add display type specific parameters
+        if (displayType === 'categories' && selectedCategories.length > 0) {
+            shortcode += ' categories="' + selectedCategories.join(',') + '"';
+        } else if (displayType === 'videos' && selectedVideos.length > 0) {
+            shortcode += ' videos="' + selectedVideos.join(',') + '"';
+        }
+        
+        // Add title if provided
+        if (title) {
+            shortcode += ' title="' + title + '"';
+        }
+        
+        // Add sort if not default
+        if (sortBy !== 'sort_order') {
+            shortcode += ' sort="' + sortBy + '"';
+        }
+        
+        // Add show description if checked
+        if (showDesc === '1') {
+            shortcode += ' show_description="1"';
+        }
+        
+        // Add slider_title_only if checked
+        if (sliderTitleOnly === '1') {
+            shortcode += ' slider_title_only="1"';
+        }
+        
+        // Add product page if checked
+        if (productPage === '1') {
+            shortcode += ' product_page="1"';
+        }
+        
+        shortcode += ']';
+        
+        document.getElementById('generatedShortcode').textContent = shortcode;
+        
+        // Generate PHP code - use template literals to avoid escaping issues
+        const phpCode = `<?= $this->helper('ArtM\\ShortVideos\\Helper\\Data')->processShortcode('${shortcode}') ?>`;
+        // Use innerHTML with HTML entities for proper display
+        document.getElementById('generatedPhpCode').innerHTML = phpCode.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        // Store the actual code for copying
+        document.getElementById('generatedPhpCode').setAttribute('data-code', phpCode);
+    }
+
+    function filterVideos(searchTerm) {
+        searchTerm = searchTerm.toLowerCase().trim();
+        const videoSwatches = document.querySelectorAll('#videoSwatchContainer .video-swatch');
+        let visibleCount = 0;
+
+        videoSwatches.forEach(function(swatch) {
+            const searchData = swatch.getAttribute('data-search');
+            if (searchData.includes(searchTerm)) {
+                swatch.style.display = 'flex';
+                visibleCount++;
+            } else {
+                swatch.style.display = 'none';
+            }
+        });
+
+        // Show "no results" message if nothing found
+        const container = document.getElementById('videoSwatchContainer');
+        let noResultsMsg = container.querySelector('.no-results-msg');
+        
+        if (visibleCount === 0 && searchTerm !== '') {
+            if (!noResultsMsg) {
+                noResultsMsg = document.createElement('p');
+                noResultsMsg.className = 'no-results-msg no-items';
+                noResultsMsg.textContent = '<?= __('No videos found matching your search') ?>';
+                container.appendChild(noResultsMsg);
+            }
+            noResultsMsg.style.display = 'block';
+        } else {
+            if (noResultsMsg) {
+                noResultsMsg.style.display = 'none';
+            }
+        }
+    }
+
+    function copyShortcode() {
+        const shortcode = document.getElementById('generatedShortcode').textContent;
+        navigator.clipboard.writeText(shortcode).then(function() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✅ Copied!';
+            btn.style.background = '#27ae60';
+            setTimeout(function() {
+                btn.innerHTML = originalText;
+                btn.style.background = '';
+            }, 2000);
+        });
+    }
+
+    function copyPhpCode() {
+        const codeElement = document.getElementById('generatedPhpCode');
+        let phpCode = codeElement.getAttribute('data-code') || codeElement.textContent;
+        
+        // Decode HTML entities for proper copying
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = phpCode;
+        phpCode = textarea.value;
+        
+        navigator.clipboard.writeText(phpCode).then(function() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✅ Copied!';
+            btn.style.background = '#27ae60';
+            setTimeout(function() {
+                btn.innerHTML = originalText;
+                btn.style.background = '';
+            }, 2000);
+        });
+    }
+
+    // Close popup when clicking outside
+    window.onclick = function(event) {
+        const popup = document.getElementById('shortcodePopup');
+        if (event.target === popup) {
+            closeShortcodePopup();
+        }
+    }
+</script>
+
+<!-- Shortcode Generator Popup -->
+<div id="shortcodePopup" class="shortcode-popup-overlay">
+    <div class="shortcode-popup-content">
+        <div class="shortcode-popup-header">
+            <h3>📋 <?= __('Generate Shortcode') ?></h3>
+            <button class="popup-close-btn" onclick="closeShortcodePopup()">×</button>
+        </div>
+        
+        <div class="shortcode-popup-body">
+            <!-- Shortcode Options -->
+            <div class="shortcode-options">
+                
+                <!-- Section Title -->
+                <div class="shortcode-field">
+                    <label for="shortcode_title">
+                        <span class="field-icon">📝</span>
+                        <?= __('Section Title') ?>
+                        <span class="field-hint"><?= __('(will appear as heading on frontend)') ?></span>
+                    </label>
+                    <input type="text" 
+                           id="shortcode_title" 
+                           placeholder="<?= __('e.g., Featured Videos, Latest Clips') ?>"
+                           oninput="updateShortcode()"/>
+                </div>
+
+                <div class="shortcode-divider"></div>
+
+                <!-- Display Type Selection -->
+                <div class="shortcode-field">
+                    <label class="field-label-main">
+                        <span class="field-icon">🎯</span>
+                        <?= __('Display Videos By') ?>
+                    </label>
+                    <div class="display-type-options">
+                        <label class="radio-option">
+                            <input type="radio" 
+                                   name="display_type" 
+                                   value="categories" 
+                                   checked 
+                                   onchange="toggleDisplayType()"/>
+                            <span class="radio-label">
+                                <span class="radio-icon">🏷️</span>
+                                <?= __('Categories') ?>
+                            </span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" 
+                                   name="display_type" 
+                                   value="videos" 
+                                   onchange="toggleDisplayType()"/>
+                            <span class="radio-label">
+                                <span class="radio-icon">🎬</span>
+                                <?= __('Specific Videos') ?>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Category Selection (shown by default) -->
+                <div id="categorySelection" class="selection-panel">
+                    <label class="field-label-main">
+                        <span class="field-icon">🏷️</span>
+                        <?= __('Select Categories') ?>
+                        <span class="field-hint"><?= __('(click to select/deselect)') ?></span>
+                    </label>
+                    <div class="swatch-container">
+                        <?php if (empty($allCategories)): ?>
+                            <p class="no-items"><?= __('No categories available') ?></p>
+                        <?php else: ?>
+                            <?php foreach ($allCategories as $category): ?>
+                                <div class="swatch-item" 
+                                     data-value="<?= $block->escapeHtmlAttr($category) ?>"
+                                     onclick="toggleSwatch(this, 'category')">
+                                    <span class="swatch-icon">🏷️</span>
+                                    <span class="swatch-text"><?= $block->escapeHtml($category) ?></span>
+                                    <span class="swatch-check">✓</span>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Video Selection (hidden by default) -->
+                <div id="videoSelection" class="selection-panel" style="display: none;">
+                    <label class="field-label-main">
+                        <span class="field-icon">🎬</span>
+                        <?= __('Select Videos') ?>
+                        <span class="field-hint"><?= __('(click to select/deselect)') ?></span>
+                    </label>
+                    
+                    <!-- Search Box -->
+                    <div class="search-box">
+                        <input type="text" 
+                               id="videoSearch" 
+                               class="search-input"
+                               placeholder="<?= __('Search by ID or Title...') ?>"
+                               oninput="filterVideos(this.value)"/>
+                        <span class="search-icon">🔍</span>
+                    </div>
+
+                    <div class="swatch-container" id="videoSwatchContainer">
+                        <?php if (empty($allVideos)): ?>
+                            <p class="no-items"><?= __('No videos available') ?></p>
+                        <?php else: ?>
+                            <?php foreach ($allVideos as $video): ?>
+                                <div class="swatch-item video-swatch" 
+                                     data-value="<?= $video->getVideoId() ?>"
+                                     data-search="<?= $block->escapeHtmlAttr(strtolower($video->getVideoId() . ' ' . $video->getTitle())) ?>"
+                                     onclick="toggleSwatch(this, 'video')">
+                                    <span class="swatch-icon">
+                                        <?php if ($video->getVideoType() === 'instagram'): ?>
+                                            📷
+                                        <?php elseif ($video->getVideoType() === 'youtube'): ?>
+                                            ▶️
+                                        <?php else: ?>
+                                            🎥
+                                        <?php endif; ?>
+                                    </span>
+                                    <span class="swatch-content">
+                                        <span class="swatch-text"><?= $block->escapeHtml($video->getTitle()) ?></span>
+                                        <span class="swatch-id">ID: <?= $video->getVideoId() ?></span>
+                                    </span>
+                                    <span class="swatch-check">✓</span>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="shortcode-divider"></div>
+
+                <!-- Limit -->
+                <div class="shortcode-field">
+                    <label for="shortcode_limit">
+                        <span class="field-icon">�</span>
+                        <?= __('Number of Videos to Display') ?>
+                        <span class="field-hint"><?= __('(min: 1, max: 25, default: 10)') ?></span>
+                    </label>
+                    <input type="number" 
+                           id="shortcode_limit" 
+                           value="10"
+                           min="1"
+                           max="25"
+                           oninput="updateShortcode()"/>
+                </div>
+
+                <!-- Sort Order -->
+                <div class="shortcode-field">
+                    <label for="shortcode_sort">
+                        <span class="field-icon">📊</span>
+                        <?= __('Sort Videos By') ?>
+                    </label>
+                    <select id="shortcode_sort" onchange="updateShortcode()">
+                        <option value="sort_order"><?= __('Sort Order (Default)') ?></option>
+                        <option value="newest"><?= __('Newest First') ?></option>
+                        <option value="oldest"><?= __('Oldest First') ?></option>
+                    </select>
+                </div>
+
+                <div class="shortcode-divider"></div>
+
+                <!-- Checkboxes -->
+                <div class="shortcode-field-checkbox">
+                    <label>
+                        <input type="checkbox" 
+                               id="shortcode_show_desc" 
+                               onchange="updateShortcode()"/>
+                        <span class="checkbox-label">
+                            <span class="field-icon">💬</span>
+                            <?= __('Show Product Name & Price Under Video') ?>
+                        </span>
+                    </label>
+                    <p class="checkbox-hint"><?= __('Display product information below each video when enabled') ?></p>
+                </div>
+
+                <div class="shortcode-field-checkbox">
+                    <label>
+                        <input type="checkbox"
+                               id="shortcode_slider_title_only"
+                               onchange="updateShortcode()"/>
+                        <span class="checkbox-label">
+                            <span class="field-icon">📝</span>
+                            <?= __('Show only title and description on slider (not popup)') ?>
+                        </span>
+                    </label>
+                    <p class="checkbox-hint"><?= __('When enabled, the slider will show only the video title and description, even if a product is linked. Popup will still show full product details.') ?></p>
+                </div>
+
+                <div class="shortcode-field-checkbox">
+                    <label>
+                        <input type="checkbox" 
+                               id="shortcode_product_page" 
+                               onchange="updateShortcode()"/>
+                        <span class="checkbox-label">
+                            <span class="field-icon">🎬</span>
+                            <?= __('Enable Video Popup on Product Pages') ?>
+                        </span>
+                    </label>
+                    <p class="checkbox-hint"><?= __('Show floating video popup when product page is opened via video link') ?></p>
+                </div>
+            </div>
+
+            <div class="shortcode-divider"></div>
+
+            <!-- Generated Shortcode Display -->
+            <div class="shortcode-display-section">
+                <label class="shortcode-label"><?= __('Your Shortcode:') ?></label>
+                <div class="shortcode-output">
+                    <code id="generatedShortcode">[artm_videos limit="10"]</code>
+                </div>
+                <button type="button" class="copy-shortcode-btn" onclick="copyShortcode()">
+                    📋 <?= __('Copy to Clipboard') ?>
+                </button>
+                <p class="usage-hint">
+                    <?= __('Use in CMS Pages/Blocks or paste the PHP code below in PHTML files') ?>
+                </p>
+            </div>
+
+            <div class="shortcode-divider"></div>
+
+            <!-- PHP Code for PHTML Files -->
+            <div class="shortcode-display-section">
+                <label class="shortcode-label">
+                    💻 <?= __('For PHTML Files:') ?>
+                </label>
+                <div class="shortcode-output php-code">
+                    <code id="generatedPhpCode"></code>
+                </div>
+                <button type="button" class="copy-shortcode-btn" onclick="copyPhpCode()">
+                    📋 <?= __('Copy PHP Code') ?>
+                </button>
+                <p class="usage-hint">
+                    <?= __('Use this code directly in .phtml template files') ?>
+                </p>
+            </div>
+            <script>
+                // Initialize PHP code display immediately
+                (function() {
+                    const defaultPhpCode = <?= json_encode("<?= \$this->helper('ArtM\\ShortVideos\\Helper\\Data')->processShortcode('[artm_videos limit=\"10\"]') ?>") ?>;
+                    const phpCodeElement = document.getElementById('generatedPhpCode');
+                    if (phpCodeElement) {
+                        phpCodeElement.textContent = defaultPhpCode;
+                        phpCodeElement.setAttribute('data-code', defaultPhpCode);
+                    }
+                })();
+            </script>
+        </div>
+
+        <div class="shortcode-popup-footer">
+            <button type="button" class="action-secondary" onclick="closeShortcodePopup()">
+                <?= __('Close') ?>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .page-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .shortcode-btn {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* Popup Overlay */
+    .shortcode-popup-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+    /* Popup Content */
+    .shortcode-popup-content {
+        background: white;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 700px;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        animation: popupSlideIn 0.3s ease-out;
+    }
+
+    @keyframes popupSlideIn {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* Popup Header */
+    .shortcode-popup-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 25px 30px;
+        border-bottom: 2px solid #e0e0e0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px 12px 0 0;
+    }
+
+    .shortcode-popup-header h3 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .popup-close-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        font-size: 32px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+        line-height: 1;
+    }
+
+    .popup-close-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+    }
+
+    /* Popup Body */
+    .shortcode-popup-body {
+        padding: 30px;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    /* Shortcode Display Section */
+    .shortcode-display-section {
+        margin-bottom: 30px;
+    }
+
+    .shortcode-label {
+        display: block;
+        font-weight: 600;
+        font-size: 16px;
+        color: #2c3e50;
+        margin-bottom: 12px;
+    }
+
+    .shortcode-output {
+        background: #f8f9fa;
+        border: 2px dashed #667eea;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .shortcode-output code {
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .copy-shortcode-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        width: 100%;
+    }
+
+    .copy-shortcode-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .usage-hint {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #7f8c8d;
+        font-style: italic;
+    }
+
+    .shortcode-output.php-code {
+        background: #2c3e50;
+        border-color: #34495e;
+    }
+
+    .shortcode-output.php-code code {
+        color: #ecf0f1;
+        font-weight: 500;
+    }
+
+    /* Divider */
+    .shortcode-divider {
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #e0e0e0, transparent);
+        margin: 25px 0;
+    }
+
+    /* Shortcode Options */
+    .shortcode-options h4 {
+        color: #2c3e50;
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0 0 20px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .shortcode-field {
+        margin-bottom: 20px;
+    }
+
+    .shortcode-field label {
+        display: block;
+        font-weight: 600;
+        font-size: 14px;
+        color: #34495e;
+        margin-bottom: 8px;
+    }
+
+    .field-icon {
+        font-size: 16px;
+        margin-right: 5px;
+    }
+
+    .field-hint {
+        font-weight: 400;
+        font-size: 12px;
+        color: #7f8c8d;
+        font-style: italic;
+    }
+
+    .shortcode-field input[type="text"],
+    .shortcode-field input[type="number"],
+    .shortcode-field select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s;
+        background: #fafafa;
+    }
+
+    .shortcode-field input:focus,
+    .shortcode-field select:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .shortcode-field-checkbox {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .shortcode-field-checkbox label {
+        display: flex;
+        align-items: flex-start;
+        cursor: pointer;
+        gap: 12px;
+    }
+
+    .shortcode-field-checkbox input[type="checkbox"] {
+        margin-top: 3px;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .checkbox-label {
+        font-weight: 600;
+        font-size: 14px;
+        color: #34495e;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .checkbox-hint {
+        font-size: 12px;
+        color: #7f8c8d;
+        margin: 8px 0 0 30px;
+        line-height: 1.5;
+    }
+
+    /* Popup Footer */
+    .shortcode-popup-footer {
+        padding: 20px 30px;
+        border-top: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: flex-end;
+        background: #f8f9fa;
+        border-radius: 0 0 12px 12px;
+    }
+
+    .shortcode-popup-footer button {
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    /* Display Type Radio Options */
+    .display-type-options {
+        display: flex;
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .radio-option {
+        flex: 1;
+        padding: 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #fafafa;
+    }
+
+    .radio-option:hover {
+        border-color: #667eea;
+        background: #f0f3ff;
+    }
+
+    .radio-option input[type="radio"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .radio-option input[type="radio"]:checked + .radio-label {
+        color: #667eea;
+        font-weight: 700;
+    }
+
+    .radio-option:has(input[type="radio"]:checked) {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #f0f3ff 0%, #e8ecff 100%);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+    }
+
+    .radio-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        color: #34495e;
+    }
+
+    .radio-icon {
+        font-size: 18px;
+    }
+
+    /* Selection Panels */
+    .selection-panel {
+        margin-top: 15px;
+    }
+
+    .field-label-main {
+        display: block;
+        font-weight: 600;
+        font-size: 15px;
+        color: #2c3e50;
+        margin-bottom: 12px;
+    }
+
+    /* Swatch Container */
+    .swatch-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+        max-height: 300px;
+        overflow-y: auto;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .swatch-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .swatch-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .swatch-container::-webkit-scrollbar-thumb {
+        background: #667eea;
+        border-radius: 4px;
+    }
+
+    .swatch-container::-webkit-scrollbar-thumb:hover {
+        background: #5568d3;
+    }
+
+    /* Swatch Items */
+    .swatch-item {
+        position: relative;
+        padding: 12px 15px;
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        overflow: hidden;
+    }
+
+    .swatch-item:hover {
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+
+    .swatch-item.selected {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .swatch-icon {
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    .swatch-text {
+        flex: 1;
+        font-weight: 600;
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .swatch-check {
+        position: absolute;
+        right: 8px;
+        top: 8px;
+        width: 20px;
+        height: 20px;
+        background: white;
+        color: #667eea;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 12px;
+        opacity: 0;
+        transform: scale(0);
+        transition: all 0.3s;
+    }
+
+    .swatch-item.selected .swatch-check {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .swatch-item.selected .swatch-icon,
+    .swatch-item.selected .swatch-text {
+        color: white;
+    }
+
+    .no-items {
+        text-align: center;
+        color: #7f8c8d;
+        font-style: italic;
+        padding: 30px;
+    }
+
+    /* Video Swatch specific styling */
+    .video-swatch {
+        min-height: 50px;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .swatch-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        overflow: hidden;
+    }
+
+    .swatch-id {
+        font-size: 11px;
+        font-weight: 500;
+        color: #7f8c8d;
+        opacity: 0.9;
+    }
+
+    .swatch-item.selected .swatch-id {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Search Box */
+    .search-box {
+        position: relative;
+        margin-bottom: 15px;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 12px 45px 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s;
+        background: white;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .search-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 18px;
+        pointer-events: none;
+        color: #7f8c8d;
+    }
+
+    .no-results-msg {
+        grid-column: 1 / -1;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .shortcode-popup-content {
+            width: 95%;
+            max-height: 95vh;
+        }
+
+        .shortcode-popup-header,
+        .shortcode-popup-body,
+        .shortcode-popup-footer {
+            padding: 20px;
+        }
+
+        .swatch-container {
+            grid-template-columns: 1fr;
+        }
+
+        .display-type-options {
+            flex-direction: column;
+        }
+    }
+</style>

@@ -1,0 +1,230 @@
+<?php
+/**
+ * @author Amasty Team
+ * @copyright Copyright (c) Amasty (https://www.amasty.com)
+ * @package Free Gift Base for Magento 2
+ */
+
+use Amasty\Promo\Block\Items;
+use Magento\Bundle\Ui\DataProvider\Product\Listing\Collector\BundlePrice;
+use Magento\Catalog\Model\Product\Visibility;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\Downloadable\Model\Product\Type;
+use Magento\Framework\App\ActionInterface;
+use Magento\Framework\Escaper;
+
+/**
+ * @var Items $block
+ * @var Escaper $escaper
+ */
+
+$products = $block->getItems();
+$imageHelper = $block->getImageHelper();
+$selectionMethod = $block->getSelectionMethod();
+$giftsCounter = $block->getGiftsCounter();
+$isShowPrice = $block->getShowPriceInPopup();
+?>
+<?php if ($products): ?>
+    <div class="ampromo-carousel-product" data-ampromo-js="popup-products">
+        <div class="ampromo-gallery ampromo-slick" data-count="<?= $escaper->escapeHtmlAttr(count($products)) ?>" data-role="ampromo-gallery" >
+            <?php foreach ($products as $product): ?>
+                <?php
+                $product = $block->getProductById($product->getId());
+                $isVisible = $product->getVisibility() != Visibility::VISIBILITY_NOT_VISIBLE;
+                $optionsBlock = $block->getChildBlock($product->getTypeId() . '_prototype');
+                if ($optionsBlock) {
+                    $optionsBlock->setProduct($product);
+                }
+                ?>
+                <div class="ampromo-item-wrapper"
+                     data-mage-init='{"Amasty_Promo/js/price-updater": {
+                        "productId": <?= (int)$product->getId() ?>,
+                        "priceConfig": <?= /* @noEscape */ $block->getJsonConfig($product); ?>
+                     }}'
+                     aria-labelledby="ampromo-item-title-<?= (int)$product->getId() ?>"
+                >
+                    <div class="ampromo-item"
+                         data-product-id="<?= (int)$product->getId() ?>"
+                         data-product-sku="<?= $escaper->escapeHtml($product->getSku()) ?>"
+                         data-role="ampromo-item">
+                        <form method="POST"
+                              action="<?= $escaper->escapeUrl($block->getFormActionUrl()) ?>"
+                              data-role="ampromo-items-form"
+                              data-ampromo-js="form-item"
+                              class="ampromo-items-form"
+                              id="ampromo_items_form-<?= (int)$product->getId() ?>"
+                              <?php if ($product->getTypeId() === Type::TYPE_DOWNLOADABLE && $optionsBlock): ?>
+                                data-mage-init='{"Magento_Downloadable/downloadable": {
+                                    "linkElement": "input:checkbox[value]",
+                                    "allElements": "#links_all",
+                                    "priceHolderSelector": ".price-box-<?= (int)$product->getId() ?>",
+                                    "config": <?= /* @noEscape */ $optionsBlock->getJsonConfig() ?>
+                                 }}'
+                              <?php endif; ?>
+                              <?php if ($product->getTypeId() === BundlePrice::PRODUCT_TYPE && $optionsBlock): ?>
+                                data-mage-init='{"Amasty_Promo/js/type/bundle": {
+                                    "priceBundle": {
+                                        "optionConfig": <?= /* @noEscape */ $optionsBlock->getJsonConfig() ?>,
+                                        "controlContainer": ".field.option",
+                                        "priceBoxSelector": ".price-base-price.tax"
+                                    }
+                                }}'
+                              <?php endif; ?>
+                              <?php if ($product->getTypeId() === Configurable::TYPE_CODE && $optionsBlock): ?>
+                                data-mage-init='{"Amasty_Promo/js/type/configurable": {
+                                    "priceHolderSelector": ".price-box-<?= (int)$product->getId() ?>",
+                                    "spConfig": <?= /* @noEscape */ $optionsBlock->unsetData('allow_products')->getJsonConfig() ?>,
+                                    "gallerySwitchStrategy": "<?= $block->getVar('gallery_switch_strategy', 'Magento_ConfigurableProduct') ?: 'replace' ?>"
+                                 }}'
+                            <?php endif; ?>
+                        >
+                            <input type="hidden"
+                                   name="<?= $escaper->escapeHtml(ActionInterface::PARAM_NAME_URL_ENCODED) ?>"
+                                   value="<?= $escaper->escapeHtml($block->getCurrentBase64Url()) ?>">
+                            <input type="hidden"
+                                   name="isPromoItems"
+                                   value="true">
+                            <?php if ($selectionMethod): ?>
+                                <div class="ampromo-product-select" data-role="ampromo-product-select">
+                                    <input data-ampromo-js="checkbox"
+                                           type="checkbox"
+                                           aria-label="<?= $escaper->escapeHtmlAttr(__('Select product')) ?>"/>
+                                </div>
+                            <?php endif; ?>
+                            <div class="ampromo-item-title">
+                                <?php if ($isVisible): ?>
+                                    <span id="ampromo-item-title-<?= (int)$product->getId() ?>"
+                                          class="ampromo-title"
+                                    >
+                                        <a title="<?= $escaper->escapeHtml($product->getName()) ?>"
+                                           href="<?= $escaper->escapeUrl($product->getProductUrl()) ?>">
+                                            <?= $escaper->escapeHtml($product->getName()) ?> </a>
+                                    </span>
+                                <?php else: ?>
+                                    <span id="ampromo-item-title-<?= (int)$product->getId() ?>"
+                                          class="ampromo-title"
+                                    >
+                                        <?= $escaper->escapeHtml($product->getName()) ?>
+                                    </span>
+                                <?php endif ?>
+                            </div>
+                            <?php $imageHelper->init($product, 'cart_page_product_thumbnail')
+                                ->keepFrame(false)
+                                ->constrainOnly(true)
+                                ->resize(160, 160);
+                            ?>
+                            <img src="<?= $escaper->escapeUrl($imageHelper->getUrl()) ?>"
+                                 width="160"
+                                 height="160"
+                                 class="ampromo-item-image"
+                                 alt="<?= $escaper->escapeHtml($block->stripTags($product->getName(), null, true)) ?>"/>
+                            <input type="hidden" value="<?= (int)$product->getId() ?>" name="product_id"/>
+                            <div class="ampromo-options" id="ampromo-options">
+                                <fieldset class="fieldset" aria-label="<?= $escaper->escapeHtml(__('Product Options %1', (int)$product->getId())) ?>">
+                                    <?php if ($optionsBlock): ?>
+                                        <?= $optionsBlock->toHtml() ?>
+                                        <?php if ($product->getTypeId() === 'giftcard'): ?>
+                                            <?= /* @noEscape */ $block->getGiftCardPrice($product) ?>
+                                        <?php endif; ?>
+                                    <?php endif ?>
+                                    <?= $block->getOptionsHtml($product) ?>
+                                </fieldset>
+                            </div>
+                            <div class="product-info-price">
+                                <div class="price-base-price price-box-<?= (int)$product->getId() ?>"
+                                     data-product-id="<?= (int)$product->getId() ?>"
+                                    <?php if (!$isShowPrice): ?>
+                                        hidden
+                                    <?php endif; ?>
+                                     data-role="priceBox">
+                                    <span class="price-container price-base-price tax weee">
+                                        <span id="product-price-<?= (int)$product->getId() ?>"
+                                              data-price-amount="<?= $escaper->escapeHtml(
+                                                  $block->getProductPrice($product)
+                                              ) ?>"
+                                              data-price-type="basePrice"
+                                              data-price-description="<?= $escaper->escapeHtmlAttr(__('Original Price')) ?>"
+                                              class="price-wrapper">
+                                            <span class="price"></span>
+                                        </span>
+                                    </span>
+                                    <span id="product-price-<?= (int)$product->getId() ?>"
+                                          data-price-amount="<?= $escaper->escapeHtml(
+                                              $block->getProductPrice($product)
+                                          ) ?>"
+                                          data-price-type="finalPrice"
+                                          hidden >
+                                    </span>
+                                </div>
+                                <div class="price-new-price price-box-<?= (int)$product->getId() ?>"
+                                     data-product-id="<?= (int)$product->getId() ?>"
+                                     data-role="priceBox">
+                                    <span class="price-new-price tax weee">
+                                        <span id="product-price-<?= (int)$product->getId() ?>"
+                                              data-price-amount="<?= $escaper->escapeHtml(
+                                                  $block->getProductPrice($product)
+                                              ) ?>"
+                                              data-price-description="<?= $escaper->escapeHtmlAttr(__('New Price')) ?>"
+                                              data-price-type="newPrice"
+                                              class="price-wrapper">
+                                            <span class="price"></span>
+                                        </span>
+                                    </span>
+                                    <span id="product-price-<?= (int)$product->getId() ?>"
+                                          data-price-amount="<?= $escaper->escapeHtml(
+                                              $block->getProductPrice($product)
+                                          ) ?>"
+                                          data-price-type="finalPrice"
+                                          hidden >
+                                    </span>
+                                </div>
+                            </div>
+                            <?php if ($selectionMethod): ?>
+                                <div class="ampromo-item-qty-input">
+                                    <input class="ampromo-qty"
+                                           type="number"
+                                           name="ampromo_qty_select_<?= (int)$product->getId() ?>"
+                                           id="ampromo_qty_select_<?= (int)$product->getId() ?>"
+                                           min="0"
+                                           value="0"
+                                           data-rule="0"
+                                           data-rule-type="0"
+                                           disabled="disabled"
+                                           data-validate="{required:true}"
+                                           title="QTY Select"
+                                           data-am-js="ampromo-qty-input"/>
+                                    <?php if ($giftsCounter): ?>
+                                        <span class="ampromo-item-qty-left">
+                                    <span data-ampromo-js="qty-left-text">1</span><?= $escaper->escapeHtml(__(' left')) ?>
+                                </span>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
+                            <?php if (!$selectionMethod): ?>
+                                <div class="ampromo-item-buttons" data-role="ampromo-item-buttons">
+                                    <button class="action tocart primary"
+                                            type="submit"
+                                            title="<?= $escaper->escapeHtml($block->getAddButtonName()) ?>"
+                                            aria-describedby="ampromo-item-title-<?= (int)$product->getId() ?>"
+                                    >
+                                        <?= $escaper->escapeHtml($block->getAddButtonName()) ?>
+                                    </button>
+                                </div>
+                            <?php endif; ?>
+                        </form>
+                    </div>
+                </div>
+            <?php endforeach ?>
+        </div>
+        <?php if ($selectionMethod): ?>
+            <div class="ampromo-item-buttons" data-role="ampromo-item-buttons">
+                <button class="action tocart primary ampromo-button"
+                        type="button"
+                        data-am-js="ampromo-add-button"
+                        title="<?= $escaper->escapeHtml($block->getAddButtonName()) ?>">
+                    <?= $escaper->escapeHtml($block->getAddButtonName()) ?>
+                </button>
+            </div>
+        <?php endif; ?>
+    </div>
+<?php endif; ?>

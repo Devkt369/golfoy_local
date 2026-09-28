@@ -1,0 +1,62 @@
+<?php
+
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var \Magento\Catalog\Block\Product\View\Details $block */
+?>
+<?php if ($detailedInfoGroup = $block->getGroupSortedChildNames('detailed_info', 'getChildHtml')) : ?>
+    <div class="product info detailed">
+        <?php $layout = $block->getLayout(); ?>
+        <div class="product data items col-md-12" data-mage-init='{"tabs":{"openedState":"active"}}'>
+            <?php $i = 0;
+            $disp = '';
+            foreach ($detailedInfoGroup as $name) : ?>
+                <?php if ($i > 0) {
+                    $disp = 'display:none;';
+                }
+                $html = $layout->renderElement($name);
+                if (!trim($html)) {
+                    continue;
+                }
+                $alias = $layout->getElementAlias($name);
+                $label = $block->getChildData($alias, 'title');
+                ?>
+                <div class="data item title" data-role="collapsible" id="tab-label-<?= $block->escapeHtmlAttr($alias) ?>">
+                    <a class="data switch" tabindex="-1" data-toggle="trigger" href="#<?= $block->escapeUrl($alias) ?>" id="tab-label-<?= $block->escapeHtmlAttr($alias) ?>-title">
+                        <?= /* @noEscape */ $label ?>
+                    </a>
+                </div>
+                <div class="data item content" style="<?php echo $disp; ?>" aria-labelledby="tab-label-<?= $block->escapeHtmlAttr($alias) ?>-title" id="<?= $block->escapeHtmlAttr($alias) ?>" data-role="content">
+                    <?= /* @noEscape */ $html ?>
+                </div>
+            <?php
+                $i++;
+            endforeach; ?>
+        </div>
+        
+    </div>
+
+<?php endif; ?>
+<script type="text/javascript">
+    require(['jquery'], function(jQuery) {
+        jQuery(document).ready(function() {
+            setTimeout(function() {
+                // Trigger click on the "Review" tab to load its content
+//                app.get('[data-role=collapsible][data-title=Review]').collapsible('toggle');
+                var page_scroll_top = jQuery(window).scrollTop();
+
+                jQuery("div#tab-label-reviews").click();
+                jQuery("div#tab-label-reviews a").click();
+                
+                jQuery('html, body').animate({ 
+                    scrollTop: page_scroll_top
+                }, 1);
+
+                console.log('did it');
+            }, 8000); // Adjust the delay (in milliseconds) as needed
+        });
+    });
+</script>

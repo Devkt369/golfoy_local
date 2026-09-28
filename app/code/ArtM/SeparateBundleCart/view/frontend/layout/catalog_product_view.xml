@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <!-- Only load on product pages that have bundle products -->
+        <referenceContainer name="before.body.end">
+            <block class="Magento\Framework\View\Element\Template" 
+                   name="artm.bundle.hijack.init" 
+                   template="ArtM_SeparateBundleCart::hijack-init.phtml"
+                   ifconfig="catalog/frontend/show_swatches_in_product_list"/>
+        </referenceContainer>
+    </body>
+</page>

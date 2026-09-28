@@ -1,0 +1,161 @@
+<?php
+/** @var \Magento\Backend\Block\Template $block */
+$loaderUrl = $block->getUrl('massproducts/index/tab');
+$tabCountsUrl = $block->getUrl('massproducts/stats/tabCounts');
+$activeChild = (string)$block->getRequest()->getParam('child_tab', 'upload');
+$allowed = ['upload', 'reorder_products', 'draft', 'ready', 'failed', 'success', 'single_sku'];
+if (!in_array($activeChild, $allowed, true)) {
+    $activeChild = 'upload';
+}
+
+$labels = [
+    'upload'           => __('Upload'),
+    'reorder_products' => __('Re-Sort Products'),
+    'draft'            => __('Draft Products'),
+    'ready'            => __('Ready'),
+    'failed'           => __('Failed'),
+    'success'          => __('Success'),
+    'single_sku'       => __('SKU Editor'),
+];
+
+$tabGroups = [
+    'Import'     => ['upload', 'reorder_products'],
+    'Uploads'    => ['draft', 'ready'],
+    'Completed'  => ['failed', 'success'],
+    'SKU Editor' => ['single_sku'],
+];
+
+?>
+<div id="artm-products-upload-parent-root">
+    <style>
+        #artm-products-upload-parent-root .artm-tab-groups {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        #artm-products-upload-parent-root .artm-tab-group {
+            border: 1px solid #d8e2ec;
+            border-radius: 8px;
+            background: #fff;
+            padding: 10px;
+        }
+        #artm-products-upload-parent-root .artm-tab-group-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            margin-bottom: 8px;
+        }
+        #artm-products-upload-parent-root .artm-tab-group-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        #artm-products-upload-parent-content .artm-table-fullscreen table thead {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            background: #eef2f7;
+        }
+    </style>
+    <div class="artm-tab-groups">
+        <?php foreach ($tabGroups as $groupTitle => $codes): ?>
+        <div class="artm-tab-group">
+            <div class="artm-tab-group-title"><?= $block->escapeHtml(__($groupTitle)) ?></div>
+            <div class="artm-tab-group-buttons">
+                <?php foreach ($codes as $code): ?>
+                <button type="button" class="<?= $activeChild === $code ? 'action-primary' : 'action-secondary' ?> artm-parent-child-tab" data-tab="<?= $block->escapeHtmlAttr($code) ?>">
+                    <span class="artm-parent-tab-label" data-label="<?= $block->escapeHtmlAttr((string)$labels[$code]) ?>"><?= $block->escapeHtml($labels[$code]) ?></span>
+                </button>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <div id="artm-products-upload-parent-content"></div>
+</div>
+<script>
+require(['jquery'], function ($) {
+    'use strict';
+
+    var $root = $('#artm-products-upload-parent-root');
+    var $content = $('#artm-products-upload-parent-content');
+    var loaderUrl = '<?= $block->escapeJs($loaderUrl) ?>';
+    var tabCountsUrl = '<?= $block->escapeJs($tabCountsUrl) ?>';
+    var activeChild = '<?= $block->escapeJs($activeChild) ?>';
+
+    function setActive(tab) {
+        $root.find('.artm-parent-child-tab').removeClass('action-primary').addClass('action-secondary');
+        $root.find('.artm-parent-child-tab[data-tab="' + tab + '"]').removeClass('action-secondary').addClass('action-primary');
+    }
+
+    function loadChild(tab) {
+        if (!tab) {
+            return;
+        }
+
+        setActive(tab);
+        $content.html('<div style="padding:8px;">Loading...</div>');
+
+        $.ajax({
+            url: loaderUrl,
+            type: 'GET',
+            dataType: 'html',
+            data: { tab: tab }
+        }).done(function (html) {
+            $content.html(html);
+            loadTabCounts();
+        }).fail(function () {
+            $content.html('<div class="message message-error error"><div>Unable to load section.</div></div>');
+            loadTabCounts();
+        });
+    }
+
+    function updateTabCounts(counts) {
+        counts = counts || {};
+        $root.find('.artm-parent-child-tab').each(function () {
+            var $btn = $(this);
+            var code = String($btn.data('tab') || '');
+            var $label = $btn.find('.artm-parent-tab-label');
+            var baseLabel = String($label.data('label') || $label.text() || '');
+
+            if (code === 'draft' || code === 'ready' || code === 'failed' || code === 'success') {
+                var value = parseInt(counts[code], 10);
+                if (isNaN(value) || value < 0) {
+                    value = 0;
+                }
+                $label.text(baseLabel + ' (' + value + ')');
+                return;
+            }
+
+            $label.text(baseLabel);
+        });
+    }
+
+    function loadTabCounts() {
+        $.ajax({
+            url: tabCountsUrl,
+            type: 'GET',
+            dataType: 'json'
+        }).done(function (resp) {
+            if (!resp || !resp.success) {
+                return;
+            }
+            updateTabCounts(resp.counts || {});
+        });
+    }
+
+    $(document).off('artm:massproducts:refreshTabCounts').on('artm:massproducts:refreshTabCounts', function () {
+        loadTabCounts();
+    });
+
+    $root.find('.artm-parent-child-tab').off('click').on('click', function () {
+        loadChild(String($(this).data('tab') || ''));
+    });
+
+    loadTabCounts();
+    loadChild(activeChild);
+});
+</script>

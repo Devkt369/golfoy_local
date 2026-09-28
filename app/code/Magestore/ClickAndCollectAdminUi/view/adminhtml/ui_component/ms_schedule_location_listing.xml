@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">ms_schedule_location_listing.ms_schedule_location_listing_data_source</item>
+            <item name="deps" xsi:type="string">ms_schedule_location_listing.ms_schedule_location_listing_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <spinner>ms_schedule_location_columns</spinner>
+        <deps>
+            <dep>ms_schedule_location_listing.ms_schedule_location_listing_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="ms_schedule_location_listing_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">id</param>
+            </storageConfig>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <dataProvider class="Magestore\ClickAndCollectAdminUi\Ui\Component\Listing\DataProvider" name="ms_schedule_location_listing_data_source">
+            <settings>
+                <requestFieldName>schedule_id</requestFieldName>
+                <primaryFieldName>schedule_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <columns name="ms_schedule_location_columns">
+        <selectionsColumn name="ids" sortOrder="10">
+            <settings>
+                <indexField>id</indexField>
+                <visible>false</visible>
+            </settings>
+        </selectionsColumn>
+        <column name="id" sortOrder="20">
+            <settings>
+                <label translate="true">ID</label>
+                <filter>false</filter>
+                <sorting>false</sorting>
+                <visible>false</visible>
+            </settings>
+        </column>
+        <column name="row_name" sortOrder="10">
+            <settings>
+                <label translate="true">          </label>
+                <filter>false</filter>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+        <column name="monday" sortOrder="20">
+            <settings>
+                <label translate="true">Monday</label>
+                <filter>false</filter>
+                <sortable>false</sortable>
+            </settings>
+        </column>
+        <column name="tuesday" sortOrder="30">
+            <settings>
+                <filter>false</filter>
+                <sortable>false</sortable>
+                <label translate="true">Tuesday</label>
+            </settings>
+        </column>
+        <column name="wednesday" sortOrder="40">
+            <settings>
+                <filter>false</filter>
+                <sortable>false</sortable>
+                <label translate="true">Wednesday</label>
+            </settings>
+        </column>
+        <column name="thursday" sortOrder="50">
+            <settings>
+                <filter>false</filter>
+                <sortable>false</sortable>
+                <label translate="true">Thursday</label>
+            </settings>
+        </column>
+        <column name="friday" sortOrder="60">
+            <settings>
+                <filter>false</filter>
+                <sortable>false</sortable>
+                <label translate="true">Friday</label>
+            </settings>
+        </column>
+        <column name="saturday" sortOrder="70">
+            <settings>
+                <filter>false</filter>
+                <sortable>false</sortable>
+                <label translate="true">Saturday</label>
+            </settings>
+        </column>
+        <column name="sunday" sortOrder="80">
+            <settings>
+                <filter>false</filter>
+                <sortable>false</sortable>
+                <label translate="true">Sunday</label>
+            </settings>
+        </column>
+    </columns>
+</listing>

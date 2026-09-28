@@ -1,0 +1,9 @@
+indexing...
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$indexerFactory = $objectManager->get("\Magento\Indexer\Model\IndexerFactory");
+$id = 'catalog_category_product';
+$indexer = $indexerFactory->create()->load($id);
+$indexer->reindexAll();
+?>
+Done.

@@ -1,0 +1,901 @@
+<?php
+/* custom for catalog price rule */
+/*$parentBlock = $this->getParentBlock();
+$readConnection = $parentBlock->getReadConnection();
+$action = $parentBlock->getAction();
+$action_amount = $parentBlock->getActionAmount();
+$max_discount_enable = $parentBlock->getMaxDiscountEnable();
+$max_discount_amount = $parentBlock->getMaxDiscountAmount();
+*/
+$product = Mage::registry('product');
+$product_id = $product->getId();
+
+
+$readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
+
+$CatalogPriceRule = Mage::helper('promotiongroup')->getCatalogPriceRule($product_id);
+if(!empty($CatalogPriceRule))
+{
+	$action = $CatalogPriceRule['action'];
+	$action_amount = $CatalogPriceRule['action_amount'];
+	$max_discount_enable = $CatalogPriceRule['max_discount_enable'];
+	$max_discount_amount = $CatalogPriceRule['max_discount_amount'];
+}
+
+if($max_discount_enable == 1)
+{
+	$quote = Mage::getSingleton('checkout/cart')->getQuote();
+	if(!empty($quote))
+	{
+		$quote_promotion = $readConnection->fetchRow("Select * from  catalog_promotion_group_detail where quote_id =  '".$quote->getId()."'");
+		if(!empty($quote_promotion))
+		{
+			$gain_discount = $quote_promotion['discount'];
+			$max_discount_amount = $max_discount_amount - $gain_discount;
+		}
+	}
+}
+$current_currency_code = Mage::app()->getStore()->getCurrentCurrencyCode();
+$base_currency_code = Mage::app()->getStore()->getBaseCurrencyCode();
+$max_discount_amount = (Mage::helper('mozio')->convert_currency($max_discount_amount, $base_currency_code, $current_currency_code));
+
+
+// rounding methods
+$roundingMethod = Mage::helper('tourproducttype')->getRoundingMethod();
+?>
+
+<?php
+    $check = array();
+    
+    $optionTitle = Mage::getModel('tourproducttype/ticket')->getCollection()->addFieldToFilter('priduct_id',$product_id)->setOrder('sort', 'ASC')->getData();
+    $final_array = array();
+	
+	//$product = Mage::getModel('catalog/product')->load($product_id);
+	$isTourPrivate = $product->getIsTourPrivate();
+	
+    if(!empty($optionTitle)):
+
+?>
+<dl class="last col-md-12" id="tourproducttypeoptions" style="display:none">  
+
+    <dd class="last">
+        <div class="input-box">
+            <select onchange="setchildoptions()" title="" class="form-control required-entry product-custom-option" id="select_5" name="tour_options_select">
+                <option value="">-- Choose An Option --</option>
+
+                <?php foreach($optionTitle as $data): ?>
+                <?php
+                    $arr = Mage::helper('core')->jsonDecode($data['dats']);
+                    $package_name = $arr['title'];
+                    $ticket_option_id = $arr['id'];
+                    $ticket_option_name = $arr['name'];
+
+					/* custom code for convert retail_price_inr to current currency */
+					$baseCurrencyCode = Mage::app()->getStore()->getBaseCurrencyCode(); 
+					$currentCurrencyCode = Mage::app()->getStore()->getCurrentCurrencyCode();
+					
+					$arr['weekend_price_inr'] = Mage::helper('mozio')->convert_currency($arr['weekend_price_inr'], "INR", $currentCurrencyCode); 
+					
+					$arr['retail_price_inr'] = Mage::helper('mozio')->convert_currency($arr['retail_price_inr'], "INR", $currentCurrencyCode); 
+					
+
+				
+					/* custom code for convert retail_price_inr to current currency */
+
+					// custom for scale
+					$ticket_option_minimum_people_chargeable = '';
+					if(array_key_exists('minimum_people_chargeable',$arr))
+					{
+						$ticket_option_minimum_people_chargeable = $arr['minimum_people_chargeable'];
+					}
+					
+                    $option_array = array(
+                    						"weekend_price_inr" =>$weekend_price_inr = $arr['weekend_price_inr'],
+                                            "ticket_option_id" => $ticket_option_id = $arr['retail_price_inr'], 
+                                            "ticket_option_name" => $ticket_option_name = str_replace("'", '', str_replace(' ', '_', $arr['name'])),
+                                            "ticket_option_name_text" => $ticket_option_name = str_replace("'", '',  $arr['name'] ),
+											"ticket_min_age" => $ticket_option_min_age = $arr['min_age'],
+											"ticket_max_age" => $ticket_option_max_age = $arr['max_age'],
+											"stand_alone" => $ticket_option_stand_alone = $arr['stand_alone'],
+											"addon" => $ticket_option_addon = $arr['addon'],
+											"scale_min_participant" => $ticket_option_scale_min_participant = $arr['scale_min_participant'], // custom : for scale
+											"scale_max_participant" => $ticket_option_scale_max_participant = $arr['scale_max_participant'],  // custom : for scale
+											"minimum_people_chargeable" => $ticket_option_minimum_people_chargeable
+                                            );
+                    $temp = array($package_name => array($option_array));
+                    $key_already_exist = false;
+                    
+                    foreach($final_array as $key => $value)
+                    {
+                        if($key === $package_name)
+                        {
+                            $key_already_exist = true;
+                            array_push($value, $option_array);
+                            $final_array[$key] = $value;
+                        }
+
+                    }
+
+                    
+                    if(!$key_already_exist)
+                    {
+                        $final_array = array_merge($final_array, $temp);
+                    }
+                    
+                    
+                    
+                    $check[] = $arr['title'];
+                    if(in_array( $arr['title'] ,$check ) ):
+                    $my_array_values = array_count_values($check);
+                    if($my_array_values[$arr['title']] == 1):
+                ?>
+                        
+                    <?php endif;?> 
+                    <?php endif;?> 
+                <?php endforeach;?>
+                
+
+            </select>                                 
+
+        </div>
+    </dd>
+</dl>
+
+
+
+<div id="option_selected_title" class="form-group col-md-12 row <?php echo "bookForDate_".$bookForDate."_".$weekDay; ?>" style="display:none" >
+    
+</div>
+
+<?php 
+    $currency_code = Mage::app()->getStore()->getCurrentCurrencyCode();
+    $symbol = Mage::app()->getLocale()->currency( $currency_code )->getSymbol(); 
+?>
+
+<script type="text/javascript">
+
+function Buy2Get1Free(sku, ticketOption, unitPrice, qty)
+{
+	
+	/*var ajaxUrl = '<?php echo $this->getUrl('customizesalesrule/index/buy2Get1Free', array('_secure' => true)) ?>';
+	
+	new Ajax.Request(ajaxUrl, {
+		method:'GET',
+		parameters: {'sku':sku, 'ticketOption':ticketOption, 'unitPrice':unitPrice, 'qty':qty},
+		onSuccess: function(response) 
+		{
+			//response_data = JSON.parse(response.responseText);
+			return JSON.parse(response.responseText);
+			
+		}
+	});*/
+	
+	//var output = [];
+	var obj = {};
+	if(qty <= 2)
+	{
+		obj['success'] = 0;
+		//output.push(obj);
+		return JSON.stringify(obj);
+	}
+	var setPromo = 0;
+	<?php		
+			$priceRule = $readConnection->fetchRow("Select * from salesrule where actions_serialized like '%".$product->getSku()."%' and simple_action = 'buy_2_get_1' and is_active = 1");
+			
+			if(!empty($priceRule) && $priceRule['application_method'] == 'catalog')
+			{
+				$actions = unserialize($priceRule['actions_serialized']);
+				$conditions = $actions['conditions'];
+				foreach($conditions as $condition)
+				{
+					if(isset($condition['aggregator']) && !empty($condition['aggregator']))
+					{
+						foreach($condition['conditions'] as $cond)
+						{
+							?>
+							var attr = '<?php echo $cond['attribute']; ?>';
+							var operator = '<?php echo $cond['operator']; ?>';
+							var value = '<?php echo $cond['value']; ?>';
+							if((attr == 'ticket_option') && (operator == '==')  && (value == jQuery.trim(ticketOption)))
+							{
+								setPromo = 1;
+							}
+							<?php
+						}
+					}
+				}
+			}
+	?>
+			
+			if(setPromo == 1)
+			{
+				var price;
+				price = unitPrice * parseInt(qty - parseInt(qty/3));
+				obj['success'] = 1;
+				obj['price'] = roundOff(price);
+				//output.push(obj);
+				return JSON.stringify(obj);
+			}
+			else
+			{
+				obj['success'] = 0;
+				//output.push(obj);
+				return JSON.stringify(obj);
+			}
+}
+
+
+var symbol = "<?php echo $symbol ?>";
+var isTourPrivate = '<?php echo $isTourPrivate; ?>';
+var count = symbol.length;
+var final_array = <?php echo json_encode($final_array); ?>;
+
+    var title = ''; 
+    var x= 1;
+    jQuery(document).ready(function(){
+        
+        jQuery.each(final_array, function (key, value) 
+        {
+            jQuery('#select_5').append(jQuery('<option>', { 
+                value: key,
+                text : key
+            }));
+        });
+   jQuery("#book_for_date").change(function(){
+   		jQuery(".product-custom-option").val("");
+   });
+
+        jQuery("#select_5").change(function(){
+            jQuery("#option_selected_title").html("");
+			jQuery(".price-box .price").html('<sup>'+symbol+'</sup>' + " 0");
+			jQuery('.price-box .old-price').hide();
+			
+            jQuery.each(final_array, function (key, value) 
+            {
+                title = jQuery('#select_5 option:selected').text();
+                if(key == title)
+                {
+                    jQuery("#option_selected_title").html("");
+                    for(innerkey in value) {
+                        if(value.hasOwnProperty(innerkey)) 
+                        {
+                            var value1 = value[innerkey];
+							/* custom code for add age limit with options */
+							var min_age = value1.ticket_min_age;
+							var max_age = value1.ticket_max_age;
+							
+							if(min_age == '')
+							{
+								min_age = 0;
+							}
+							if(max_age == '')
+							{
+								max_age = '+ yrs';
+							}
+							else
+							{
+								max_age = '-'+max_age+' yrs';
+							}
+							
+							stand_alone = '';
+							if(value1.stand_alone == 1){stand_alone = 'stand_alone=true';}
+							
+							// custom : for scale
+							var scale_min_participant = value1.scale_min_participant;
+							var scale_max_participant = value1.scale_max_participant;
+							var group_qty = value1.minimum_people_chargeable;
+							var x = '';
+                            var empty_var = '';
+							//console.log("sssssssss");
+							//console.log(jQuery("#book_for_date").val());
+							var date = jQuery("#book_for_date").val()
+							x = new Date(date.split('-')[2],date.split('-')[1] - 1,date.split('-')[0]);
+							/*console.log(date.split('-')[2]);
+							console.log(date.split('-')[1]);
+							console.log(date.split('-')[0]);
+							console.log(x.getDay());*/
+                            
+							if((x.getDay() == 0 || x.getDay() == 6) && (value1.weekend_price_inr)) {
+							/* custom code for add age limit with options */
+								var html = "<div class='col-md-12 col-sm-6'>" + value1.ticket_option_name_text +' ('+min_age+max_age+')' + "<div class='numbers-row'><input type='text' value='0' id="+"'" + value1.ticket_option_name  + "'" +" class='qty2 form-control' name="+"'" + value1.ticket_option_name  + "'" +" pricing_category_id='" + value1.weekend_price_inr + "' "+stand_alone+" min='"+scale_min_participant+"' max='"+scale_max_participant+"' group_qty='"+group_qty+"'  onkeypress='return ValidateNumericValue(event)' onkeyup='return UpdatePriceOnKeyUp(event);'><div onclick='changePricePos("+'"'+value1.weekend_price_inr+','+value1.ticket_option_name +'"'+")' class='inc button_inc'>+</div><div onclick='changePriceNeg("+'"'+value1.weekend_price_inr+','+value1.ticket_option_name +'"'+")' class='dec button_inc'>-</div></div></div>";
+                        	}else{
+                        		 var html = "<div class='col-md-12 col-sm-6'>" + value1.ticket_option_name_text +' ('+min_age+max_age+')' + "<div class='numbers-row'><input type='text' value='0' id="+"'" + value1.ticket_option_name  + "'" +" class='qty2 form-control' name="+"'" + value1.ticket_option_name  + "'" +" pricing_category_id='" + value1.ticket_option_id + "' "+stand_alone+" min='"+scale_min_participant+"' max='"+scale_max_participant+"' group_qty='"+group_qty+"'  onkeypress='return ValidateNumericValue(event)' onkeyup='return UpdatePriceOnKeyUp(event);'><div onclick='changePricePos("+'"'+value1.ticket_option_id+','+value1.ticket_option_name +'"'+")' class='inc button_inc'>+</div><div onclick='changePriceNeg("+'"'+value1.ticket_option_id+','+value1.ticket_option_name +'"'+")' class='dec button_inc'>-</div></div></div>";
+                        	}
+                            x++;
+                            jQuery("#option_selected_title").append(html); 
+                        }
+						jQuery("#option_selected_title").css("display", "block"); 
+                    }
+                }
+                 
+            });
+			
+			// custom same name ticket 
+				//add clone all tickets
+				jQuery('#ticketClone').remove();
+				var ticketClone = '<div id="ticketClone" style="display:none;">';
+				var existTicket = [];
+				
+				jQuery('.qty2').each(function()
+				{  
+					var $this = jQuery(this).clone().wrap('<div/>').parent().html();
+					ticketClone += $this;
+					// remove from if name are same
+						if(jQuery.inArray(jQuery(this).attr('name'),existTicket) == -1)
+						{
+							// not in array
+							existTicket.push(jQuery(this).attr('name'));
+						}
+						else
+						{
+							// in array
+							jQuery(this).parents('.col-md-6').remove();
+						}
+				});
+				ticketClone += '</div>';
+				jQuery(ticketClone).insertAfter('#product_addtocart_form');
+				
+				var minQty
+				var maxQty;
+				var name;
+				if(jQuery('#option_selected_title .col-md-12').length != jQuery('#ticketClone .qty2').length)
+				{
+					jQuery('#option_selected_title .col-md-12').each(function()
+					{
+						minQty = 0;
+						maxQty = 0;
+						var $this = jQuery(this).find('.numbers-row input');
+						name = $this.attr('name');
+						jQuery('#ticketClone .qty2').each(function()
+						{
+							if(jQuery(this).attr('name') == name )
+							{
+								if(minQty == 0 || minQty > jQuery(this).attr('min')) minQty = jQuery(this).attr('min');
+								if(maxQty < jQuery(this).attr('max')) maxQty = jQuery(this).attr('max');
+							}
+						});
+						
+						$this.attr('min',minQty);
+						$this.attr('max',maxQty);
+						
+					});
+				}
+			/* */
+			
+        });
+    });
+</script>
+
+<script type="text/javascript">
+jQuery(document).ready(function(){
+    // This button will increment the value
+    jQuery('.qtyplus').click(function(e){
+        // Stop acting like a button
+        e.preventDefault(); 
+        // Get the field name
+        fieldName = jQuery(this).attr('field');
+        // Get its current value
+        var currentVal = parseInt(jQuery('input[name='+fieldName+']').val());
+        // If is not undefined
+        if (!isNaN(currentVal)) {
+            // Increment
+            jQuery('input[name='+fieldName+']').val(currentVal + 1);
+        } else {
+            // Otherwise put a 0 there
+            jQuery('input[name='+fieldName+']').val(0);
+        }
+    });
+    // This button will decrement the value till 0
+    jQuery(".qtyminus").click(function(e) {
+        // Stop acting like a button
+        e.preventDefault();
+        // Get the field name
+        fieldName = jQuery(this).attr('field');
+        // Get its current value
+        var currentVal = parseInt(jQuery('input[name='+fieldName+']').val());
+        // If it isn't undefined or its greater than 0
+        if (!isNaN(currentVal) && currentVal > 0) {
+            // Decrement one
+            jQuery('input[name='+fieldName+']').val(currentVal - 1);
+        } else {
+            // Otherwise put a 0 there
+            jQuery('input[name='+fieldName+']').val(0);
+        }
+    });
+});
+
+    jQuery(document).ready(function(){
+    // This button will increment the value
+    jQuery('.qtyplus1').click(function(e){
+        // Stop acting like a button
+        e.preventDefault();
+        // Get the field name
+        fieldName = jQuery(this).attr('field');
+        // Get its current value
+        var currentVal = parseInt(jQuery('input[name='+fieldName+']').val());
+        // If is not undefined
+        if (!isNaN(currentVal)) {
+            // Increment
+            jQuery('input[name='+fieldName+']').val(currentVal + 1);
+        } else {
+            // Otherwise put a 0 there
+            jQuery('input[name='+fieldName+']').val(0);
+        }
+    });
+    // This button will decrement the value till 0
+    jQuery(".qtyminus1").click(function(e) {
+        // Stop acting like a button
+        e.preventDefault();
+        // Get the field name
+        fieldName = jQuery(this).attr('field');
+        // Get its current value
+        var currentVal = parseInt(jQuery('input[name='+fieldName+']').val());
+        // If it isn't undefined or its greater than 0
+        if (!isNaN(currentVal) && currentVal > 0) {
+            // Decrement one
+            jQuery('input[name='+fieldName+']').val(currentVal - 1);
+        } else {
+            // Otherwise put a 0 there
+            jQuery('input[name='+fieldName+']').val(0);
+        }
+    });
+});
+
+var ch = 1;
+function changePricePos(price)
+{
+	var unitPrice = price.split(',')[0];
+    if(ch == 1)
+    {
+        jQuery('.price-box .price')[0].innerHTML = '<sup>'+symbol+'</sup>'+0;  
+        ch = 2;
+    }
+    
+    var nam = price.substring(price.indexOf(',')+1);
+    var qty = document.getElementById(nam).value;
+	
+	// custom : for scale
+	var scalemax = document.getElementById(nam).getAttribute('max');
+	if(scalemax.length == 0)
+	{
+		scalemax = 10;
+	}
+	var scalemin = document.getElementById(nam).getAttribute('min');
+	if(scalemin.length != 0 && qty < scalemin)
+	{
+		qty = scalemin-1;
+	}
+	
+    if(parseInt(qty) < parseInt(scalemax))
+    {        
+        document.getElementById(nam).value = parseInt(qty) + 1;
+		
+		/* catalog promo */
+		/*var fin = allSelectedOptionValue();
+        jQuery('.price')[0].innerHTML = symbol+fin; */
+		
+		
+		
+		
+			var fin = allSelectedOptionValue();
+			
+		if(parseInt(fin) == 0)
+		{
+			jQuery('.price-box .old-price').hide();
+		}
+		else
+		{
+			jQuery('.price-box .old-price').show();
+		}
+		var special_price = get_promo_price();
+        jQuery('.price-box .price')[0].innerHTML = '<sup>'+symbol+'</sup>'+fin; 
+		
+		var action = '<?php echo $action; ?>';
+		var product_id = '<?php echo $product_id; ?>';
+		if(special_price != 0 && parseFloat(special_price) != parseFloat(fin))
+		{
+			jQuery('.price-box').html('<span class="special-price" id="product-price-'+product_id+'"><span class="price" id="product-price-'+product_id+'"><sup>'+symbol+'</sup>'+special_price+'</span></span><span class="old-price" id="product-price-'+product_id+'"><span class="price" id="product-price-'+product_id+'">'+'<sup>'+symbol+'</sup>'+fin+' </span></span>');
+		}
+		else if(action == '')
+		{
+			// update html
+			jQuery('.price-box').html('<span class="regular-price" id="product-price-'+product_id+'"><span class="price">'+'<sup>'+symbol+'</sup>'+fin+'</span></span>');
+		}
+		else if(parseFloat(special_price) == parseFloat(fin))
+		{
+			// update html
+			jQuery('.price-box').html('<span class="regular-price" id="product-price-'+product_id+'"><span class="price">'+'<sup>'+symbol+'</sup>'+fin+'</span></span>');
+		}
+		else if(jQuery('.price-box .special-price')[0] != undefined)
+		{
+			jQuery('.price-box .special-price .price')[0].innerHTML = '<sup>'+symbol+'</sup>'+special_price;
+			jQuery('.price-box .old-price .price')[0].innerHTML = '<sup>'+symbol+'</sup>'+fin; 
+			fin = special_price;
+		}
+		
+		
+		/*else if(jQuery('.special-price')[0] != undefined)
+		{
+			jQuery('.special-price .price')[0].innerHTML = '<sup>'+symbol+'</sup>'+fin; 
+		}*/
+		jQuery('input[name="tour_price"]').remove();
+		var priceHtml= "<input type='hidden' name='tour_price' value='"+fin+"'/>";
+		jQuery(priceHtml).insertAfter(jQuery(".price-box"));
+    }
+    
+}
+
+function changePriceNeg(price)
+{
+    var nam = price.substring(price.indexOf(',')+1);
+    var qty = document.getElementById(nam).value;
+	
+	// custom : for scale
+	/*var scalemin = document.getElementById(nam).getAttribute('min');
+	if(scalemin.length == 0)
+	{
+		scalemin = 1;
+	}*/
+	
+    //if(parseInt(qty) > parseInt(scalemin))
+	if(parseInt(qty) > 0)
+    {
+        if(document.getElementById(nam).getAttribute('min') == qty)
+		{
+			document.getElementById(nam).value = 0;
+		}
+		else
+		{
+        	document.getElementById(nam).value = parseInt(qty) - 1;
+		}
+		
+		/* catalog promo */
+		/*var fin = allSelectedOptionValue();
+        jQuery('.price')[0].innerHTML = symbol+fin;*/
+		var fin = allSelectedOptionValue();
+		if(parseInt(fin) == 0)
+		{
+			jQuery('.price-box .old-price').hide();
+		}
+		else
+		{
+			jQuery('.price-box .old-price').show();
+		}
+		var special_price = get_promo_price();
+        jQuery('.price-box .price')[0].innerHTML = '<sup>'+symbol+'</sup>'+fin;
+		
+		var action = '<?php echo $action; ?>';
+		var product_id = '<?php echo $product_id; ?>';
+		if(special_price != 0 && parseFloat(special_price) != parseFloat(fin))
+		{
+			jQuery('.price-box').html('<span class="special-price" id="product-price-'+product_id+'"><span class="price" id="product-price-'+product_id+'"><sup>'+symbol+'</sup>'+special_price+'</span></span><span class="old-price" id="product-price-'+product_id+'"><span class="price" id="product-price-'+product_id+'">'+'<sup>'+symbol+'</sup>'+fin+' </span></span>');
+		}
+		else if(action == '')
+		{
+			// update html
+			jQuery('.price-box').html('<span class="regular-price" id="product-price-'+product_id+'"><span class="price">'+'<sup>'+symbol+'</sup>'+fin+'</span></span>');
+		}
+		else if(parseFloat(special_price) == parseFloat(fin))
+		{
+			// update html
+			jQuery('.price-box').html('<span class="regular-price" id="product-price-'+product_id+'"><span class="price">'+'<sup>'+symbol+'</sup>'+fin+'</span></span>');
+		}
+		else if(jQuery('.price-box .special-price')[0] != undefined )
+		{
+			jQuery('.price-box .special-price .price')[0].innerHTML = '<sup>'+symbol+'</sup>'+special_price; 
+			jQuery('.price-box .old-price .price')[0].innerHTML = '<sup>'+symbol+'</sup>'+fin; 
+			fin = special_price;
+		}
+		
+		/*else if(jQuery('.special-price')[0] != undefined)
+		{
+			jQuery('.special-price .price')[0].innerHTML = '<sup>'+symbol+'</sup>'+fin; 
+		}*/
+		jQuery('input[name="tour_price"]').remove();
+		var priceHtml= "<input type='hidden' name='tour_price' value='"+fin+"'/>";
+		jQuery(priceHtml).insertAfter(jQuery(".price-box"));
+    }
+}
+
+/* custom function for get all option price multiple to qty */
+function allSelectedOptionValue(ticketOption)
+{
+	
+	var price = 0;
+	var total_qty = 0;
+	var group_qty;
+	var amount;
+	// custom 
+	if(jQuery('#option_selected_title .col-md-12').length == jQuery('#ticketClone .qty2').length)
+	{
+		
+		jQuery('#option_selected_title .col-md-12').each(function()
+		{
+			var $this = jQuery(this).find('.numbers-row input');
+			var qty = parseInt($this.val());
+			amount = $this.attr('pricing_category_id');
+			group_qty = parseInt($this.attr('group_qty'));
+			
+			
+				if(isTourPrivate == 364 && !isNaN(group_qty) && group_qty != 1)
+				{
+					total_qty = total_qty + qty;
+				}
+				else
+				{
+					price = price + (qty * amount);
+				}
+			
+		});
+		if(isTourPrivate == 364 && !isNaN(group_qty) && group_qty != 1)
+		{
+			if(total_qty != 0)
+			{
+				if(total_qty <= group_qty)
+				{
+					price = (group_qty * amount);
+				}
+				else
+				{
+					price = (group_qty * Math.ceil(total_qty/group_qty) * amount);
+				}
+			}
+		}
+	}
+	else
+	{
+			// if multiple ticket with same name
+			jQuery('#option_selected_title .col-md-12').each(function()
+			{
+				var $this = jQuery(this).find('.numbers-row input');
+				var qty = parseInt($this.val());
+				name = $this.attr('name');
+				group_qty = parseInt($this.attr('group_qty'));
+				jQuery('#ticketClone .qty2').each(function()
+				{
+					if(jQuery(this).attr('name') == name && jQuery(this).attr('min') <= qty && jQuery(this).attr('max') >= qty )
+					{
+						amount = jQuery(this).attr('pricing_category_id');
+					}
+				});
+				
+				price = price + parseFloat(amount);
+				
+			});
+			
+	}
+	if(isNaN(price)) price = 0;
+	
+	// round off
+	price = roundOff(price);
+	
+	//return Math.ceil(price);
+	//return (price.toFixed(2));
+	return price;
+}
+/* custom function for get all option price multiple to qty */
+
+/* custom : on change qty */
+var is_valid;
+var old_value;
+function ValidateNumericValue(event)
+{
+	old_value = jQuery(event.element()).val();
+	var iKeyCode = (event.which) ? event.which : event.keyCode;
+	if (iKeyCode != 46 && iKeyCode > 31 && (iKeyCode < 48 || iKeyCode > 57))
+	{
+		is_valid = false;
+		return false;
+	}
+	else
+	{
+		is_valid = true;
+	}
+}
+	
+function UpdatePriceOnKeyUp(event)
+{
+	if(is_valid == true)
+	{
+		var quantity_element = jQuery(event.element());
+		var max_participants = quantity_element.attr('max');
+		var min_participants = quantity_element.attr('min');
+		var quantity = quantity_element.val();
+		var action = '<?php echo $action; ?>';
+		var product_id = '<?php echo $product_id; ?>';
+		
+		if(!isNaN(parseFloat(quantity)))
+		{
+			if(parseFloat(quantity) > parseFloat(max_participants))
+			{
+				jQuery(event.element()).val(old_value);
+				var max_popup = new jQuery.popup({
+					title : '',
+					content : '<h3 id="pop_msg">Can not add more than ' + max_participants + ' participants.</h3><small></small>', 
+					html: true,
+					autoclose   : false,
+					closeOverlay: true,
+					closeEsc: true,
+					buttons     : true
+				});
+				return false;
+			}
+			else if(parseInt(quantity) != 0 && parseFloat(quantity) < parseFloat(min_participants))
+			{
+				jQuery(event.element()).val(old_value);
+				var max_popup = new jQuery.popup({
+					title : '',
+					content : '<h3 id="pop_msg">Can not add less than ' + min_participants + ' participants.</h3><small></small>', 
+					html: true,
+					autoclose   : false,
+					closeOverlay: true,
+					closeEsc: true,
+					buttons     : true
+				});
+				return false;
+			}
+			else
+			{
+				/* catalog promo */
+				/*var fin = allSelectedOptionValue();
+				jQuery('.price')[0].innerHTML = symbol+fin;*/
+				var fin = allSelectedOptionValue();
+				if(parseInt(fin) == 0)
+				{
+					jQuery('.price-box .old-price').hide();
+				}
+				else
+				{
+					jQuery('.price-box .old-price').show();
+				}
+				var special_price = get_promo_price();
+				jQuery('.price-box .price')[0].innerHTML = '<sup>'+symbol+'</sup>'+fin;
+				
+				if(special_price != 0 && parseFloat(special_price) != parseFloat(fin))
+				{
+					jQuery('.price-box').html('<span class="special-price" id="product-price-'+product_id+'"><span class="price" id="product-price-'+product_id+'"><sup>'+symbol+'</sup>'+special_price+'</span></span><span class="old-price" id="product-price-'+product_id+'"><span class="price" id="product-price-'+product_id+'">'+'<sup>'+symbol+'</sup>'+fin+' </span></span>');
+				}
+				else if(action == '')
+				{
+					// update html
+					jQuery('.price-box .price-box').html('<span class="regular-price" id="product-price-'+product_id+'"><span class="price">'+'<sup>'+symbol+'</sup>'+fin+'</span></span>');
+				}
+				else if(parseFloat(special_price) == parseFloat(fin))
+				{
+					// update html
+					jQuery('.price-box .price-box').html('<span class="regular-price" id="product-price-'+product_id+'"><span class="price">'+'<sup>'+symbol+'</sup>'+fin+'</span></span>');
+				}
+				else if(jQuery('.price-box .special-price')[0] != undefined)
+				{
+					jQuery('.price-box .special-price .price')[0].innerHTML = '<sup>'+symbol+'</sup>'+special_price; 
+					jQuery('.price-box .old-price .price')[0].innerHTML = '<sup>'+symbol+'</sup>'+fin; 
+					fin = special_price;
+				}
+				
+				/*else if(jQuery('.special-price')[0] != undefined)
+				{
+					jQuery('.special-price .price')[0].innerHTML = '<sup>'+symbol+'</sup>'+fin; 
+				}*/
+				jQuery('input[name="tour_price"]').remove();
+				var priceHtml= "<input type='hidden' name='tour_price' value='"+fin+"'/>";
+				jQuery(priceHtml).insertAfter(jQuery(".price-box"));
+			}
+		}
+		else
+		{
+			if(action == '')
+			{
+				// update html
+				jQuery('.price-box').html('<span class="regular-price" id="product-price-'+product_id+'"><span class="price">'+'<sup>'+symbol+'</sup>'+'0</span></span>');
+			}
+			else
+			{ 
+				jQuery('.price-box .price')[0].innerHTML = '<sup>'+symbol+'</sup>'+' 0';
+				if(jQuery('.price-box .special-price')[0] != undefined)
+					jQuery('.price-box .special-price .price')[0].innerHTML = '<sup>'+symbol+'</sup>'+' 0';
+					
+				jQuery('input[name="tour_price"]').remove();
+				var priceHtml= "<input type='hidden' name='tour_price' value='0'/>";
+				jQuery(priceHtml).insertAfter(jQuery(".price-box"));
+				//jQuery(".price-box .price").html(symbol + " 0");
+			}
+		}
+	}
+}
+/* custom : on change qty  */
+
+
+function setchildoptions()
+{
+   jQuery('.price-box .price')[0].innerHTML = '<sup>'+symbol+'</sup>'+0; 
+}
+  
+/* custom : to apply catalog price rule dynamically depend on tour price */
+function get_promo_price()
+{
+	
+	var promo_price = 0;
+	var price = 0;
+	var total_qty = 0;
+	var group_qty;
+	var amount;
+	var isBuy2get1free = 0;
+	jQuery('#option_selected_title .col-md-12').each(function()
+	{
+		var $this = jQuery(this).find('.numbers-row input');
+		var qty = parseInt($this.val());
+		amount = $this.attr('pricing_category_id');
+		group_qty = parseInt($this.attr('group_qty'));
+		var tour_options_select = jQuery('select[name="tour_options_select"]').val();
+		var Buy2Get1 = JSON.parse(Buy2Get1Free('<?php echo $product->getSku()?>', tour_options_select, amount, parseInt(qty)));
+		if(Buy2Get1.success == 1)
+		{
+			isBuy2get1free = 1;
+			price = price + Buy2Get1.price;
+		}
+		else
+		{
+			if(isTourPrivate == 364 && !isNaN(group_qty) && group_qty != 1)
+			{
+				
+				total_qty = total_qty + qty;
+			}
+			else
+			{
+				price = price + (qty * amount);
+			}
+		}
+	});
+	if(isBuy2get1free == 1)
+		return price;
+		
+	if(isTourPrivate == 364 && !isNaN(group_qty) && group_qty != 1)
+	{
+		if(total_qty != 0)
+		{
+			if(total_qty <= group_qty)
+			{
+				price = price + (group_qty * amount);
+			}
+			else
+			{
+				price = price + (group_qty * Math.ceil(total_qty/group_qty) * amount);
+			}
+		}
+	}
+	
+	if(parseInt(price) == 0)
+	{
+		return 0;
+	}
+	
+	// calculate promo_price
+	var action = '<?php echo $action; ?>';
+	var action_amount = '<?php echo $action_amount; ?>';
+	var max_discount_amount = '<?php echo $max_discount_amount; ?>';
+	var max_discount_enable = '<?php echo $max_discount_enable; ?>';
+	
+	if(action == '') return 0;
+	
+	if(action == 'by_percent')
+	{
+		promo_price = (price * action_amount)/100;
+	}
+	else
+	{
+		promo_price = action_amount;
+	}
+	if(max_discount_enable == 1 && (parseFloat(promo_price) > parseFloat(max_discount_amount))) promo_price = parseFloat(max_discount_amount);
+	
+	var special_amount = (price - promo_price);
+	
+	// round off
+	special_amount = roundOff(special_amount);
+	
+	if(special_amount < 0) special_amount = 0;
+	return parseFloat(special_amount).toFixed(2);
+}
+
+</script> 
+
+<?php endif; ?>

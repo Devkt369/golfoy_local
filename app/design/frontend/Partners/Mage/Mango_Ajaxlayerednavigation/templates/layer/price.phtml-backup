@@ -1,0 +1,31 @@
+<?php
+/**
+ * Template for filter items block
+ *
+ * @var $block \Magento\LayeredNavigation\Block\Navigation\FilterRenderer
+ */
+?>
+<div class="price-filter-container">
+    <div class="ajax-layered-navigation-slider">
+        <div id="price-slider-container"></div>
+    </div>
+    <div class="price-slider-values">
+        <span class="filter-currency"><?= $filter->getCurrencySymbol(); ?></span>
+        <input type="text" <?= ( $hide_input ) ? ' disabled="disabled" ' : ""; ?> 
+               name="price_minimum" 
+               id="price_minimum" 
+               value="<?= $min_price; ?>"/>
+        <span class="price-filter-separator">&nbsp;-&nbsp;</span><span class="filter-currency"><?= $filter->getCurrencySymbol(); ?></span>
+        <input type="text" <?= ( $hide_input ) ? ' disabled="disabled" ' : ""; ?> 
+               name="price_maximum" 
+               id="price_maximum" 
+               value="<?= $max_price; ?>"/> <?php if (!$hide_input):
+                    ?><button class="action primary" id="price-filter-button"><img 
+                    src="<?= $block->getViewFileUrl("Mango_Ajaxlayerednavigation::images/search.png"); ?>" 
+                    alt="<?= __("Search"); ?>" title="<?= __("Search"); ?>"/></button><?php
+endif; ?>
+    </div>
+</div>
+<script type="text/javascript">
+    var _priceslider_settings = <?= $json_config; ?>;
+</script>

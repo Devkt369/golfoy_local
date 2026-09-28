@@ -1,0 +1,1048 @@
+<?php
+
+/**
+ * ArtM ShortVideos Frontend Slider Template (Simplified for React)
+ *
+ * @category  ArtM
+ * @package   ArtM_ShortVideos
+ * @author    ArtM
+ * @copyright Copyright (c) 2025 ArtM
+ * @var $block \ArtM\ShortVideos\Block\Videos
+ */
+
+try {
+    $videos = $block->getVideos();
+    $sliderId = $block->getSliderId();
+    $title = $block->getSectionTitle();
+    $showDescription = $block->shouldShowDescription();
+    $productPageEnabled = $block->isProductPageEnabled();
+
+    if ($videos->getSize() == 0) {
+        echo '<!-- No videos found -->';
+        return;
+    }
+} catch (\Exception $e) {
+    echo '<!-- Error loading videos: ' . $e->getMessage() . ' -->';
+    return;
+}
+?>
+
+<div class="artm-video-slider-wrapper" id="<?= $sliderId ?>-wrapper" data-slider-id="<?= $sliderId ?>">
+    <?php if ($title): ?>
+        <div class="slider-new-title">
+            <h2 class="center_heading"><?= $block->escapeHtml($title) ?></h2>
+        </div>
+    <?php endif; ?>
+
+    <div class="artm-slider-container">
+        <button class="artm-slider-arrow artm-slider-left" onclick="artmSlideLeft('<?= $sliderId ?>')">‹</button>
+
+        <div class="artm-video-slider" id="<?= $sliderId ?>">
+            <?php foreach ($videos as $video): ?>
+                <?php
+                try {
+                    $linkUrl = method_exists($block, 'getVideoLinkUrl') ? $block->getVideoLinkUrl($video) : null;
+                    $product = null;
+                    if ($video->getIsProductLink() && $video->getProductId() && method_exists($block, 'getProduct')) {
+                        $product = $block->getProduct($video->getProductId());
+                    }
+                } catch (\Exception $e) {
+                    $linkUrl = null;
+                    $product = null;
+                }
+                // Prepare video data for JS
+                $videoData = [
+                    'id' => $video->getVideoId(),
+                    'type' => $video->getVideoType(),
+                    'url' => $block->getVideoEmbedUrl($video),
+                    'title' => $video->getTitle(),
+                    'description' => $video->getDescription(),
+                    'link' => $linkUrl,
+                    'product' => $product ? [
+                        'name' => $product->getName(),
+                        'price' => method_exists($block, 'formatPrice') ? $block->formatPrice($product->getFinalPrice()) : '',
+                        'regular_price' => method_exists($block, 'formatPrice') ? $block->formatPrice($product->getPrice()) : '',
+                    ] : null
+                ];
+                $videoDataJson = htmlspecialchars(json_encode($videoData), ENT_QUOTES, 'UTF-8');
+                ?>
+                <?php if ($block->isDirectLink() && $linkUrl): ?>
+                    <a href="<?= $block->escapeUrl($linkUrl) ?>" class="artm-video-link-wrapper" <?= $video->getLinkUrl() && !$video->getIsProductLink() ? 'target="_blank"' : '' ?>>
+                        <div class="artm-video-card">
+                            <div class="artm-video-embed">
+                                <?php if ($video->getVideoType() === 'upload'): ?>
+                                    <video autoplay muted loop playsinline>
+                                        <source src="<?= $block->escapeUrl($video->getVideoUrl()) ?>" type="video/mp4">
+                                    </video>
+                                <?php elseif ($video->getVideoType() === 'youtube'): ?>
+                                    <?php
+                                    $embedUrl = $block->getVideoEmbedUrl($video);
+                                    preg_match('/embed\/([^\/\?]+)/', $embedUrl, $matches);
+                                    $videoId = $matches[1] ?? '';
+                                    ?>
+                                    <div class="youtube-wrapper">
+                                        <iframe width="280" height="498" src="<?= $embedUrl ?>?autoplay=1&mute=1&loop=1&playlist=<?= $videoId ?>&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&fs=0&disablekb=1&cc_load_policy=0&autohide=1" frameborder="0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="pointer-events: none;"></iframe>
+                                        <div class="hover-blocker"></div>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="instagram-wrapper">
+                                        <iframe width="280" height="498" src="<?= $block->getVideoEmbedUrl($video) ?>" frameborder="0" scrolling="no" allowtransparency="true" allowfullscreen allow="autoplay" style="background: white; box-shadow: none; display: block; margin: 0px; padding: 0px; border: none;"></iframe>
+                                        <div class="instagram-overlay"></div>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <?php if ($showDescription): ?>
+                                <div class="artm-video-info">
+                                    <?php
+                                    $showProductDetails = (string)$video->getData('show_product_details');
+                                    if ($product && ($showProductDetails === '' || $showProductDetails === '1')): ?>
+                                        <h3><?= $block->escapeHtml($product->getName()) ?></h3>
+                                        <p class="artm-product-price">
+                                            <?php
+                                            try {
+                                                $finalPrice = $product->getFinalPrice();
+                                                $regularPrice = $product->getPrice();
+                                                if ($finalPrice < $regularPrice): ?>
+                                                    <span class="old-price"><?= method_exists($block, 'formatPrice') ? $block->formatPrice($regularPrice) : '$' . number_format($regularPrice, 2) ?></span>
+                                                    <span class="special-price"><?= method_exists($block, 'formatPrice') ? $block->formatPrice($finalPrice) : '$' . number_format($finalPrice, 2) ?></span>
+                                                <?php else: ?>
+                                                    <span class="price"><?= method_exists($block, 'formatPrice') ? $block->formatPrice($finalPrice) : '$' . number_format($finalPrice, 2) ?></span>
+                                            <?php endif;
+                                            } catch (\Exception $e) {
+                                                echo '<span class="price">Price not available</span>';
+                                            }
+                                            ?>
+                                        </p>
+                                    <?php elseif ($product && $showProductDetails === '0'): ?>
+                                        <h3><?= $block->escapeHtml($video->getTitle()) ?></h3>
+                                        <?php if ($video->getDescription()): ?>
+                                            <p><?= $block->escapeHtml($video->getDescription()) ?></p>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <h3><?= $block->escapeHtml($video->getTitle()) ?></h3>
+                                        <?php if ($video->getDescription()): ?>
+                                            <p><?= $block->escapeHtml($video->getDescription()) ?></p>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </a>
+                <?php else: ?>
+                    <div class="artm-video-link-wrapper" tabindex="0" role="button" onclick="artmOpenCustomPopup(this)" data-videodata='<?= $videoDataJson ?>'>
+                        <div class="artm-video-card">
+                            <div class="artm-video-embed">
+                                <?php if ($video->getVideoType() === 'upload'): ?>
+                                    <video autoplay muted loop playsinline>
+                                        <source src="<?= $block->escapeUrl($video->getVideoUrl()) ?>" type="video/mp4">
+                                    </video>
+                                <?php elseif ($video->getVideoType() === 'youtube'): ?>
+                                    <?php
+                                    $embedUrl = $block->getVideoEmbedUrl($video);
+                                    preg_match('/embed\/([^\/\?]+)/', $embedUrl, $matches);
+                                    $videoId = $matches[1] ?? '';
+                                    ?>
+                                    <div class="youtube-wrapper">
+                                        <iframe width="280" height="498" src="<?= $embedUrl ?>?autoplay=1&mute=1&loop=1&playlist=<?= $videoId ?>&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&fs=0&disablekb=1&cc_load_policy=0&autohide=1" frameborder="0" title="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="pointer-events: none;"></iframe>
+                                        <div class="hover-blocker"></div>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="instagram-wrapper">
+                                        <iframe width="280" height="498" src="<?= $block->getVideoEmbedUrl($video) ?>" frameborder="0" scrolling="no" allowtransparency="true" allowfullscreen allow="autoplay" style="background: white; box-shadow: none; display: block; margin: 0px; padding: 0px; border: none;"></iframe>
+                                        <div class="instagram-overlay"></div>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <?php if ($showDescription): ?>
+                                <div class="artm-video-info">
+                                    <?php
+                                    $showProductDetails = (string)$video->getData('show_product_details');
+                                    if ($product && ($showProductDetails === '' || $showProductDetails === '1')): ?>
+                                        <h3><?= $block->escapeHtml($product->getName()) ?></h3>
+                                        <p class="artm-product-price">
+                                            <?php
+                                            try {
+                                                $finalPrice = $product->getFinalPrice();
+                                                $regularPrice = $product->getPrice();
+                                                if ($finalPrice < $regularPrice): ?>
+                                                    <span class="old-price"><?= method_exists($block, 'formatPrice') ? $block->formatPrice($regularPrice) : '$' . number_format($regularPrice, 2) ?></span>
+                                                    <span class="special-price"><?= method_exists($block, 'formatPrice') ? $block->formatPrice($finalPrice) : '$' . number_format($finalPrice, 2) ?></span>
+                                                <?php else: ?>
+                                                    <span class="price"><?= method_exists($block, 'formatPrice') ? $block->formatPrice($finalPrice) : '$' . number_format($finalPrice, 2) ?></span>
+                                            <?php endif;
+                                            } catch (\Exception $e) {
+                                                echo '<span class="price">Price not available</span>';
+                                            }
+                                            ?>
+                                        </p>
+                                    <?php elseif ($product && $showProductDetails === '0'): ?>
+                                        <h3><?= $block->escapeHtml($video->getTitle()) ?></h3>
+                                        <?php if ($video->getDescription()): ?>
+                                            <p><?= $block->escapeHtml($video->getDescription()) ?></p>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        <h3><?= $block->escapeHtml($video->getTitle()) ?></h3>
+                                        <?php if ($video->getDescription()): ?>
+                                            <p><?= $block->escapeHtml($video->getDescription()) ?></p>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+            <!-- Custom Fullscreen Popup for Slider (not product page) -->
+            <div class="artm-popup-fullscreen">
+                <div id="artm-slider-popup" class="artm-video-fullscreen" style="display: none;" tabindex="-1">
+                    <button class="artm-video-fullscreen-close" onclick="artmCloseSliderPopup(event)">
+                        ×
+                    </button>
+                    <div class="artm-video-fullscreen-player" id="artm-slider-popup-player">
+                        <!-- Video and details will be injected here -->
+                    </div>
+                </div>
+            </div>
+            <script>
+                // Custom popup logic for slider
+                function artmOpenCustomPopup(el) {
+                    var data = el.getAttribute('data-videodata');
+                    if (!data) return;
+                    var video = JSON.parse(data);
+                    var popup = document.getElementById('artm-slider-popup');
+                    var player = document.getElementById('artm-slider-popup-player');
+                    if (!popup || !player) return;
+                    // Build video embed
+                    var html = '';
+                    if (video.type === 'upload') {
+                        html += '<div class="video-players-block"><video class="video-players" autoplay muted loop playsinline controls><source src="' + video.url + '" type="video/mp4"></video></div>';
+                    } else if (video.type === 'youtube') {
+                        html += '<iframe class="youtube-video" width="100%" height="400" src="' + video.url + '?autoplay=1&mute=1&loop=1&playlist=" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+                    } else if (video.type === 'instagram') {
+                        html += '<iframe class="instagram-video" width="100%" height="400" src="' + video.url + '" frameborder="0" scrolling="no" allowtransparency="true" allowfullscreen allow="autoplay"></iframe>';
+                    }
+                    // Add details below
+                    html += '<div class="artm-popup-details">';
+                    if (video.product) {
+                        // Product: link name/desc, add View Product button with video param
+                        html += '<a href="' + video.link + '" target="_blank" class="video-link-tag">';
+                        html += '<h3 class="video-product-name">' + video.product.name + '</h3>';
+                        html += '</a>';
+                        if (video.product.price && video.product.regular_price && video.product.price !== video.product.regular_price) {
+                            html += '<div class="video-regular-price-tag"><span class="video-reg-price">' + video.product.regular_price + '</span><span class="video-pro-price">' + video.product.price + '</span></div>';
+                        } else if (video.product.price) {
+                            html += '<div class="video-product-price">' + video.product.price + '</div>';
+                        }
+                        // Add ?video=video_id param to product link
+                        var productUrl = video.link;
+                        if (productUrl.indexOf('?') === -1) {
+                            productUrl += '?video=' + encodeURIComponent(video.id);
+                        } else {
+                            productUrl += '&video=' + encodeURIComponent(video.id);
+                        }
+                        html += '<div><a href="' + productUrl + '" target="_blank" class="artm-popup-redirect-btn">View Product</a></div>';
+                    } else {
+                        // Not product: link title/desc
+                        html += '<a href="' + video.link + '" target="_blank" style="text-decoration:none;color:inherit;">';
+                        html += '<h3 class="video-title">' + (video.title || '') + '</h3>';
+                        if (video.description) {
+                            html += '<div class="video-desc">' + video.description + '</div>';
+                        }
+                        html += '</a>';
+                    }
+                    html += '</div>';
+                    player.innerHTML = html;
+                    // Show popup
+                    popup.style.display = 'flex';
+                    // Focus for accessibility
+                    popup.focus();
+                }
+
+                function artmCloseSliderPopup(e) {
+                    var popup = document.getElementById('artm-slider-popup');
+                    if (popup) popup.style.display = 'none';
+                }
+            </script>
+        </div>
+
+        <button class="artm-slider-arrow artm-slider-right" onclick="artmSlideRight('<?= $sliderId ?>')">›</button>
+    </div>
+</div>
+
+
+<script>
+    // Global slider functions - works with React
+    function artmSlideLeft(sliderId) {
+        const slider = document.getElementById(sliderId);
+        if (!slider) return;
+
+        const scrollAmount = slider.clientWidth * 0.8;
+        slider.scrollLeft = Math.max(0, slider.scrollLeft - scrollAmount);
+    }
+
+    function artmSlideRight(sliderId) {
+        const slider = document.getElementById(sliderId);
+        if (!slider) return;
+
+        const scrollAmount = slider.clientWidth * 0.8;
+        const maxScroll = slider.scrollWidth - slider.clientWidth;
+        slider.scrollLeft = Math.min(maxScroll, slider.scrollLeft + scrollAmount);
+
+        // Hide arrow on mobile after click
+        if (window.innerWidth <= 768) {
+            const wrapper = slider.closest('.artm-slider-container');
+            const rightArrow = wrapper.querySelector('.artm-slider-right');
+            if (rightArrow) {
+                rightArrow.classList.add('hidden');
+            }
+        }
+    }
+
+    // Initialize slider when loaded
+    (function() {
+        const sliderId = '<?= $sliderId ?>';
+
+        function initSlider() {
+            const slider = document.getElementById(sliderId);
+            if (!slider || slider.dataset.artmInit) return;
+
+            slider.dataset.artmInit = 'true';
+
+            // Hide arrow on mobile after swipe/scroll
+            if (window.innerWidth <= 768) {
+                slider.addEventListener('scroll', function() {
+                    const wrapper = slider.closest('.artm-slider-container');
+                    const rightArrow = wrapper.querySelector('.artm-slider-right');
+                    if (rightArrow && slider.scrollLeft > 0) {
+                        rightArrow.classList.add('hidden');
+                    }
+                }, {
+                    once: true
+                });
+
+                // Also hide on touch move
+                slider.addEventListener('touchmove', function() {
+                    const wrapper = slider.closest('.artm-slider-container');
+                    const rightArrow = wrapper.querySelector('.artm-slider-right');
+                    if (rightArrow) {
+                        setTimeout(function() {
+                            if (slider.scrollLeft > 0) {
+                                rightArrow.classList.add('hidden');
+                            }
+                        }, 100);
+                    }
+                }, {
+                    once: true
+                });
+            }
+
+            console.log('ArtM Video Slider initialized:', sliderId);
+        }
+
+        // Try to initialize immediately
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSlider);
+        } else {
+            initSlider();
+        }
+
+        // Watch for React content changes
+        if (window.MutationObserver) {
+            const observer = new MutationObserver(function() {
+                initSlider();
+            });
+
+            if (document.body) {
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
+            }
+        }
+    })();
+</script>
+
+<!-- Video Popup for Product Page -->
+<div id="artm-video-popup" class="artm-video-popup" style="display: none;">
+    <div class="artm-video-popup-content">
+        <button class="artm-video-popup-close" onclick="artmCloseVideoPopup()">×</button>
+        <div class="artm-video-popup-player" id="artm-video-popup-player" onclick="artmExpandVideoPopup()">
+            <!-- Video will be injected here -->
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Video Overlay -->
+<div id="artm-video-fullscreen" class="artm-video-fullscreen" style="display: none;" onclick="artmCloseFullscreen()">
+    <button class="artm-video-fullscreen-close">×</button>
+    <div class="artm-video-fullscreen-player" id="artm-video-fullscreen-player">
+        <!-- Video will be injected here -->
+    </div>
+</div>
+
+
+<script>
+    // Video Popup Functions
+    window.artmVideoData = null;
+
+    function artmShowVideoPopup(videoData) {
+        window.artmVideoData = videoData;
+        const popup = document.getElementById('artm-video-popup');
+        const player = document.getElementById('artm-video-popup-player');
+
+        if (!popup || !player) return;
+
+        // Clear previous content
+        player.innerHTML = '';
+
+        // Create video element based on type
+        if (videoData.type === 'upload') {
+            player.innerHTML = `<video autoplay muted loop playsinline>
+            <source src="${videoData.url}" type="video/mp4">
+        </video>`;
+        } else if (videoData.type === 'youtube') {
+            const videoId = videoData.url.match(/embed\/([^\/\?]+)/)?.[1] || '';
+            player.innerHTML = `<iframe width="200" height="356" src="${videoData.url}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&showinfo=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        } else if (videoData.type === 'instagram') {
+            player.innerHTML = `<iframe width="200" height="356" src="${videoData.url}" frameborder="0" scrolling="no" allowtransparency="true" allowfullscreen allow="autoplay"></iframe>`;
+        }
+
+        popup.style.display = 'block';
+    }
+
+    function artmCloseVideoPopup() {
+        const popup = document.getElementById('artm-video-popup');
+        if (popup) {
+            popup.style.display = 'none';
+        }
+    }
+
+    function artmExpandVideoPopup() {
+        if (!window.artmVideoData) return;
+
+        artmCloseVideoPopup();
+
+        const fullscreen = document.getElementById('artm-video-fullscreen');
+        const player = document.getElementById('artm-video-fullscreen-player');
+
+        if (!fullscreen || !player) return;
+
+        // Clear previous content
+        player.innerHTML = '';
+
+        const videoData = window.artmVideoData;
+
+        // Create fullscreen video element
+        if (videoData.type === 'upload') {
+            player.innerHTML = `<video autoplay muted loop playsinline controls>
+            <source src="${videoData.url}" type="video/mp4">
+        </video>`;
+        } else if (videoData.type === 'youtube') {
+            const videoId = videoData.url.match(/embed\/([^\/\?]+)/)?.[1] || '';
+            player.innerHTML = `<iframe width="500" height="888" src="${videoData.url}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=1&modestbranding=1&rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        } else if (videoData.type === 'instagram') {
+            player.innerHTML = `<iframe width="500" height="888" src="${videoData.url}" frameborder="0" scrolling="no" allowtransparency="true" allowfullscreen allow="autoplay"></iframe>`;
+        }
+
+        fullscreen.style.display = 'flex';
+    }
+
+    function artmCloseFullscreen(event) {
+        // Only close if clicking the overlay, not the video itself
+        if (event && event.target.closest('.artm-video-fullscreen-player')) {
+            return;
+        }
+
+        const fullscreen = document.getElementById('artm-video-fullscreen');
+        if (fullscreen) {
+            fullscreen.style.display = 'none';
+        }
+    }
+
+    // Check URL for video parameter on product page
+    (function() {
+        function checkVideoParameter() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoId = urlParams.get('video');
+
+            if (!videoId) return;
+
+            // Fetch video data from server
+            fetch(`<?= $block->getUrl('shortvideos/video/get') ?>?video_id=${videoId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.video) {
+                        artmShowVideoPopup({
+                            type: data.video.video_type,
+                            url: data.video.video_url
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading video:', error);
+                });
+        }
+
+        // Check on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkVideoParameter);
+        } else {
+            checkVideoParameter();
+        }
+    })();
+</script>
+
+<!-- stysheet -->
+<style>
+    .artm-video-slider-wrapper {
+        margin: 40px auto;
+        max-width: 1400px;
+        padding: 0 20px;
+    }
+
+    a.artm-popup-redirect-btn {
+        background: #e60023 !important;
+        color: white;
+        text-decoration: none;
+        padding: 11px 15px;
+        border-radius: 5px;
+        font-size: 11px;
+        text-transform: uppercase;
+        font-weight: 600;
+         margin-top: 30px !important;
+    }
+
+    .artm-slider-title {
+        text-align: center;
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 30px;
+        color: #2c3e50;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .artm-slider-container {
+        position: relative;
+        margin-top: 50px;
+    }
+
+    span.video-reg-price {
+        text-decoration: line-through;
+        color: #b2b2b2 !important;
+        font-weight: 600 !important;
+        font-size: 17px;
+    }
+
+    span.video-pro-price {
+        margin-left: 5px;
+        color: #e60023;
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .artm-video-slider {
+        overflow-x: scroll;
+        overflow-y: hidden;
+        scroll-behavior: smooth;
+        white-space: nowrap;
+        display: flex;
+        gap: 15px;
+        padding: 10px 0;
+        scrollbar-width: none;
+        /* Firefox */
+        -ms-overflow-style: none;
+        /* IE/Edge */
+    }
+
+    .artm-video-slider::-webkit-scrollbar {
+        display: none;
+        /* Chrome/Safari */
+    }
+
+    .artm-video-card {
+        display: flex;
+        flex-direction: column;
+        width: 200px;
+        min-width: 200px;
+        height: 450px;
+        background: white;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        vertical-align: top;
+    }
+
+    .artm-video-card:hover {
+        transform: translateY(-8px);
+    }
+
+    .artm-video-embed {
+        position: relative;
+        width: 200px;
+        height: 356px;
+        flex-shrink: 0;
+        background: transparent;
+        overflow: hidden;
+    }
+
+    .artm-video-embed video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .youtube-wrapper,
+    .instagram-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .youtube-wrapper iframe,
+    .instagram-wrapper iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .hover-blocker,
+    .instagram-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: transparent;
+        z-index: 10;
+        pointer-events: auto;
+    }
+
+    .artm-video-link-wrapper {
+        display: inline-block;
+        text-decoration: none;
+        color: inherit;
+        width: 200px;
+        min-width: 200px;
+        height: 450px;
+    }
+
+    .artm-video-link-wrapper .artm-video-card {
+        cursor: pointer;
+    }
+
+    .artm-video-link-wrapper:hover .artm-video-card {
+        transform: translateY(-8px);
+    }
+
+    .artm-video-info {
+        padding: 12px 15px 12px 0px !important;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 94px;
+    }
+
+    .artm-video-info h3 {
+        font-size: 11px;
+        font-weight: 600 !important;
+        color: #2c3e50;
+        margin: 0 0 6px 0;
+        white-space: normal;
+        line-height: 1.3;
+        max-height: none;
+        overflow: visible;
+    }
+
+    .artm-video-info p {
+        font-size: 11px;
+        color: #7f8c8d;
+        line-height: 1.4;
+        margin: 0;
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .artm-product-price {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 4px;
+        flex-wrap: wrap;
+    }
+
+    .artm-product-price .old-price {
+        font-size: 11px;
+        color: #95a5a6;
+        text-decoration: line-through;
+    }
+
+    .artm-product-price .special-price {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        color: #e60023;
+    }
+
+    .artm-product-price .price {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        color: #e60023;
+    }
+
+    .artm-slider-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        font-size: 28px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    video.video-players {
+        /* max-width: 239px; */
+        margin: auto;
+        background: #0000004d;
+        display: block;
+    }
+
+    .artm-slider-container:hover .artm-slider-arrow {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .artm-slider-arrow.artm-slider-left {
+        left: 10px;
+    }
+
+    .artm-slider-arrow.artm-slider-right {
+        right: 10px;
+    }
+
+    .artm-slider-arrow:hover {
+        background: rgba(0, 0, 0, 0.9);
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .artm-slider-arrow.hidden {
+        display: none !important;
+    }
+
+    @media (max-width: 768px) {
+        .artm-slider-arrow {
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .artm-slider-arrow.artm-slider-left {
+            display: none;
+        }
+
+        .artm-slider-arrow.artm-slider-right {
+            right: 5px;
+        }
+
+        .artm-slider-title {
+            font-size: 24px;
+        }
+
+        .artm-video-link-wrapper {
+            min-width: auto !important;
+        }
+
+        .artm-video-slider {
+            gap: 5px;
+            max-height: 400px;
+        }
+
+        .artm-video-slider-wrapper {
+            padding: 0px !important;
+        }
+
+        .artm-video-embed video {
+            height: 100%;
+            width: auto;
+        }
+
+        .artm-video-card {
+            width: auto;
+            min-width: 160px;
+            height: auto;
+            max-height: 380px;
+            overflow: hidden;
+        }
+
+        .artm-video-embed {
+            position: relative;
+            width: 100%;
+            height: 280px;
+        }
+
+        .artm-slider-container video,
+        .artm-slider-container iframe {
+            border-radius: 5px;
+        }
+
+        .artm-video-info {
+            max-height: 100px;
+        }
+    }
+
+    a.artm-video-link-wrapper:hover {
+        text-decoration: none !important;
+    }
+
+    /* Video Popup - Bottom Right Corner */
+    .artm-video-popup {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 9999;
+        animation: slideInRight 0.4s ease-out;
+    }
+
+    @keyframes slideInRight {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .artm-video-popup-content {
+        position: relative;
+        width: 200px;
+        height: 356px;
+        background: #000;
+        overflow: hidden;
+    }
+
+    h3.video-title {
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 17px;
+        text-wrap: auto;
+        margin-bottom: 5px;
+    }
+
+    .video-desc {
+        font-size: 12px;
+        text-wrap: auto;
+    }
+
+    .artm-video-popup-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 30px;
+        height: 30px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        font-size: 24px;
+        line-height: 1;
+        cursor: pointer;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+
+    .artm-video-popup-close:hover {
+        background: rgba(255, 0, 0, 0.8);
+        transform: rotate(90deg);
+    }
+
+    .artm-video-popup-player {
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .artm-video-popup-player video,
+    .artm-video-popup-player iframe {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    h3.video-product-name {
+        font-size: 16px;
+        color: black;
+        line-height: 22px;
+        margin-bottom: 20px;
+        text-wrap: auto;
+    }
+
+    .artm-popup-details {
+        margin: auto;
+        background: white;
+        float: right;
+        width: 100%;
+        padding: 40px 20px;
+    }
+
+    a.video-link-tag {
+        font-size: 12px !important;
+        text-decoration: none;
+    }
+
+    /* Fullscreen Video Overlay */
+    .artm-video-fullscreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(5px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    .artm-video-fullscreen-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        background: transparent;
+        color: white;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        font-size: 28px;
+        cursor: pointer;
+        z-index: 10001;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        font-weight: 400;
+        /* font-family: 'icons-blank-theme'; */
+    }
+
+    .artm-video-embed {
+        border-radius: 5px;
+    }
+
+    .artm-video-fullscreen-close:hover {
+        transform: scale(1.1);
+        background: transparent;
+        color: white;
+    }
+
+    .artm-video-fullscreen-player {
+        width: 100%;
+        display: flex;
+        max-width: 400px;
+        background: transparent;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .artm-video-fullscreen-player video,
+    .artm-video-fullscreen-player iframe {
+        width: 100%;
+        object-fit: contain;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .artm-video-fullscreen-close {
+            right: 5px;
+            top: 65px;
+        }
+
+        h3.video-title {
+            margin-top: 0px;
+        }
+
+        .artm-video-popup {
+            bottom: 10px;
+            right: 10px;
+        }
+
+        .artm-video-popup-content {
+            width: 150px;
+            height: 267px;
+        }
+
+        .artm-video-fullscreen-player {
+            width: 95%;
+            height: 90vh;
+        }
+    }
+
+    .artm-video-fullscreen {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 99999;
+    }
+
+    .artm-video-fullscreen-player {
+        width: 100%;
+        max-width: 50%;
+        border-radius: 10px;
+        padding: 0px;
+    }
+
+    .artm-video-fullscreen-player iframe,
+    .artm-video-fullscreen-player video {
+        width: 100%;
+        background: #00000012;
+    }
+
+
+    @media(max-width:768px) {
+        .artm-video-fullscreen-player {
+            max-width: 90%;
+            padding: 12px;
+        }
+    }
+</style>

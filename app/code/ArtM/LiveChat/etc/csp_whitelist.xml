@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
+    <policies>
+        <policy id="script-src">
+            <values>
+                <value id="artm_livechat_script" type="host">http://localhost:3001</value>
+                <value id="artm_livechat_lan_script" type="host">http://192.168.1.80:3001</value>
+            </values>
+        </policy>
+        <policy id="connect-src">
+            <values>
+                <value id="artm_livechat_http" type="host">http://localhost:3001</value>
+                <value id="artm_livechat_ws" type="host">ws://localhost:3001</value>
+                <value id="artm_livechat_lan_http" type="host">http://192.168.1.80:3001</value>
+                <value id="artm_livechat_lan_ws" type="host">ws://192.168.1.80:3001</value>
+            </values>
+        </policy>
+    </policies>
+</csp_whitelist>

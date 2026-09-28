@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="ArtM\MassProducts\Api\ProductLoadInterface" type="ArtM\MassProducts\Model\Api\ProductLoad"/>
+    <preference for="ArtM\MassProducts\Api\ProductSaveInterface" type="ArtM\MassProducts\Model\Api\ProductSave"/>
+
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="artm_massproducts_draft_listing_data_source" xsi:type="string">ArtM\MassProducts\Model\ResourceModel\Draft\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <preference for="ArtM\MassProducts\Api\ProductImageManagementInterface"
+            type="ArtM\MassProducts\Model\ProductImageManagement"/>
+
+    <preference for="ArtM\MassProducts\Api\Data\ProductImageResponseInterface"
+                type="ArtM\MassProducts\Model\Data\ProductImageResponse"/>
+                
+</config>

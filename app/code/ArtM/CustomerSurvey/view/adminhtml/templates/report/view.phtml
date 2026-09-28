@@ -1,0 +1,548 @@
+<?php
+/** @var \ArtM\CustomerSurvey\Block\Adminhtml\Report\View $block */
+$detail = $block->getDetailData();
+$survey = $detail['survey'] ?? [];
+$totals = $detail['totals'] ?? ['impressions' => 0, 'opens' => 0, 'responses' => 0];
+$answerDistribution = $detail['answer_distribution'] ?? [];
+$locationAnalytics = $detail['location_performance'] ?? [];
+$deviceAnalytics = $detail['device_analytics'] ?? [];
+$customerTypeAnalytics = $detail['customer_type_analytics'] ?? [];
+$dateTrend = $detail['date_trend'] ?? [];
+$questionAnswerSplit = $detail['question_answer_split'] ?? [];
+$responseUsers = $detail['response_users'] ?? ['items' => [], 'total' => 0, 'page' => 1, 'page_size' => 20];
+
+$opens = (int)($totals['opens'] ?? 0);
+$responses = (int)($totals['responses'] ?? 0);
+$impressions = (int)($totals['impressions'] ?? 0);
+$base = $impressions;
+$completionRate = $base > 0 ? ($responses * 100) / $base : 0;
+
+$answerGrouped = [];
+$answerChartData = [];
+foreach ($answerDistribution as $row) {
+    $questionId = (int)($row['question_id'] ?? 0);
+    $q = (string)($row['question_title'] ?? '');
+    if ($q === '') {
+        $q = 'Question';
+    }
+    $groupKey = ($questionId > 0 ? $questionId : md5($q)) . '::' . $q;
+    if (!isset($answerGrouped[$groupKey])) {
+        $chartDomId = 'customersurvey-answer-pie-' . ($questionId > 0 ? (string)$questionId : substr(md5($groupKey), 0, 12));
+        $answerGrouped[$groupKey] = [
+            'question_id' => $questionId,
+            'question_title' => $q,
+            'chart_dom_id' => $chartDomId,
+            'rows' => [],
+        ];
+        $answerChartData[$groupKey] = [
+            'question_id' => $questionId,
+            'question_title' => $q,
+            'chart_dom_id' => $chartDomId,
+            'labels' => [],
+            'values' => [],
+        ];
+    }
+    $optionLabel = (string)($row['option_title'] ?? 'Text');
+    $answerGrouped[$groupKey]['rows'][] = [
+        'option' => (string)($row['option_title'] ?? 'Text'),
+        'type' => (string)($row['answer_type'] ?? ''),
+        'count' => (int)($row['answer_count'] ?? 0),
+    ];
+    $answerChartData[$groupKey]['labels'][] = $optionLabel;
+    $answerChartData[$groupKey]['values'][] = (int)($row['answer_count'] ?? 0);
+}
+
+$responseItems = $responseUsers['items'] ?? [];
+$responseTotal = (int)($responseUsers['total'] ?? 0);
+$responsePage = (int)($responseUsers['page'] ?? 1);
+$responsePageSize = (int)($responseUsers['page_size'] ?? 20);
+$responsePages = max(1, (int)ceil($responseTotal / max(1, $responsePageSize)));
+$showAnswers = (int)$block->getRequest()->getParam('show_answers', 0) === 1;
+?>
+<div class="customersurvey-report-view-wrap">
+    <style>
+        .customersurvey-report-view-wrap { background: linear-gradient(125deg, #fbfcfd, #eef3f9); border: 1px solid #d9e2ec; border-radius: 12px; padding: 18px; }
+        .customersurvey-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; flex-wrap: wrap; }
+        .customersurvey-meta { color: #48617b; font-size: 13px; }
+        .customersurvey-btn { background: #12446b; color: #fff; border: 0; border-radius: 6px; padding: 7px 11px; text-decoration: none; display:inline-block; }
+        .customersurvey-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-bottom: 14px; }
+        .customersurvey-kpi { background: #fff; border: 1px solid #dbe4ef; border-radius: 10px; padding: 10px; }
+        .customersurvey-kpi h4 { margin: 0 0 6px; font-size: 12px; text-transform: uppercase; color: #4f6071; }
+        .customersurvey-kpi strong { font-size: 20px; color: #0f2f4a; }
+        .customersurvey-charts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+        .customersurvey-chart { background: #fff; border: 1px solid #dbe4ef; border-radius: 10px; padding: 10px; }
+        .customersurvey-chart canvas { width: 100%; height: 280px; }
+        .customersurvey-pie-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+        .customersurvey-pie-card { background:#fff; border:1px solid #dbe4ef; border-radius:10px; padding:10px; }
+        .customersurvey-pie-title { margin:0 0 8px; font-size:13px; color:#23425e; }
+        .customersurvey-pie-card canvas { width:100%; height:220px; }
+        .customersurvey-block { background: #fff; border: 1px solid #dbe4ef; border-radius: 10px; padding: 10px; margin-bottom: 12px; }
+        .customersurvey-grid { width: 100%; border-collapse: collapse; }
+        .customersurvey-grid th, .customersurvey-grid td { border-bottom: 1px solid #e2e8f0; padding: 8px; text-align: left; font-size: 13px; vertical-align: top; }
+        .customersurvey-grid th { background: #f4f7fb; }
+        .customersurvey-toggle { display:flex; align-items:center; gap:8px; margin: 0 0 8px; }
+        .customersurvey-pagination { display:flex; justify-content:space-between; align-items:center; margin-top:10px; gap:8px; flex-wrap:wrap; }
+        .customersurvey-page-links { display:flex; gap:8px; align-items:center; }
+        .customersurvey-answer-table { width:100%; border-collapse:collapse; background:#f9fbff; border:1px solid #e2ebf5; }
+        .customersurvey-answer-table th, .customersurvey-answer-table td { border:1px solid #e2ebf5; padding:6px; font-size:12px; }
+        .customersurvey-answer-table th { background:#edf4fb; }
+        .customersurvey-inline-pie { width: 420px; min-width: 380px; }
+        .customersurvey-inline-pie canvas { width: 100%; height: 240px; }
+        .customersurvey-device-btn { border:1px solid #b7c7da; background:#f5f9ff; color:#103a62; border-radius:4px; padding:4px 8px; cursor:pointer; }
+        .customersurvey-modal { position: fixed; inset: 0; background: rgba(15, 23, 42, .45); display:none; align-items:center; justify-content:center; z-index: 10020; }
+        .customersurvey-modal.is-open { display:flex; }
+        .customersurvey-modal-panel { width: min(560px, 92vw); background:#fff; border-radius:10px; border:1px solid #d6e1ed; box-shadow: 0 16px 40px rgba(2,8,23,.25); }
+        .customersurvey-modal-head { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-bottom:1px solid #e4ecf5; }
+        .customersurvey-modal-body { padding:12px; }
+        .customersurvey-modal-close { border:0; background:#e7eef7; width:28px; height:28px; border-radius:50%; cursor:pointer; }
+        @media (max-width: 900px) { .customersurvey-charts { grid-template-columns: 1fr; } }
+    </style>
+
+    <div class="customersurvey-top">
+        <div>
+            <h2><?= $block->escapeHtml((string)($survey['name'] ?? 'Survey')) ?></h2>
+            <div class="customersurvey-meta">
+                Date: <?= $block->escapeHtml($block->getFromDate()) ?> to <?= $block->escapeHtml($block->getToDate()) ?>
+                | Status: <?= $block->escapeHtml((string)($survey['status'] ?? '')) ?>
+            </div>
+        </div>
+        <a class="customersurvey-btn" href="<?= $block->escapeUrl($block->getUrl('customersurvey/report/index', [
+            'survey_id' => (int)$block->getSelectedSurveyId(),
+            'from_date' => $block->getFromDate(),
+            'to_date' => $block->getToDate(),
+        ])) ?>">Back to Reports</a>
+    </div>
+
+    <div class="customersurvey-kpis">
+        <div class="customersurvey-kpi"><h4>Impressions</h4><strong><?= (int)($totals['impressions'] ?? 0) ?></strong></div>
+        <div class="customersurvey-kpi"><h4>Opens</h4><strong><?= (int)($totals['opens'] ?? 0) ?></strong></div>
+        <div class="customersurvey-kpi"><h4>Responses</h4><strong><?= (int)($totals['responses'] ?? 0) ?></strong></div>
+        <div class="customersurvey-kpi"><h4>Completion Rate</h4><strong><?= number_format($completionRate, 2) ?>%</strong></div>
+    </div>
+
+    <div class="customersurvey-charts">
+        <div class="customersurvey-chart" style="grid-column:1 / -1;"><h3>Daily Trend: Impressions / Opens / Responses</h3><canvas id="customersurvey-detail-trend"></canvas></div>
+    </div>
+
+    <div class="customersurvey-block">
+        <h3>Question Wise Answered vs Not Answered</h3>
+        <div class="customersurvey-pie-grid">
+            <?php if (empty($questionAnswerSplit)): ?>
+                <div>No question split data available.</div>
+            <?php else: ?>
+                <?php foreach ($questionAnswerSplit as $qs): ?>
+                    <div class="customersurvey-pie-card">
+                        <h4 class="customersurvey-pie-title"><?= $block->escapeHtml((string)($qs['question_title'] ?? 'Question')) ?></h4>
+                        <canvas id="customersurvey-question-pie-<?= (int)($qs['question_id'] ?? 0) ?>"></canvas>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <div class="customersurvey-block">
+        <h3>Answer Distribution</h3>
+        <table class="customersurvey-grid">
+            <thead>
+                <tr><th>Question</th><th>Option</th><th>Type</th><th>Count</th><th>Pie Chart</th></tr>
+            </thead>
+            <tbody>
+                <?php if (empty($answerGrouped)): ?>
+                    <tr><td colspan="5">No answer distribution found for selected range.</td></tr>
+                <?php else: ?>
+                    <?php foreach ($answerGrouped as $groupKey => $group): ?>
+                        <?php $questionTitle = (string)($group['question_title'] ?? 'Question'); ?>
+                        <?php $questionId = (int)($group['question_id'] ?? 0); ?>
+                        <?php $chartDomId = (string)($group['chart_dom_id'] ?? ''); ?>
+                        <?php $rows = $group['rows'] ?? []; ?>
+                        <?php $rowspan = max(1, count($rows)); ?>
+                        <?php foreach ($rows as $idx => $row): ?>
+                            <tr>
+                                <?php if ($idx === 0): ?>
+                                    <td rowspan="<?= (int)$rowspan ?>"><?= $block->escapeHtml($questionTitle) ?></td>
+                                <?php endif; ?>
+                                <td><?= $block->escapeHtml((string)$row['option']) ?></td>
+                                <td><?= $block->escapeHtml((string)$row['type']) ?></td>
+                                <td><?= (int)$row['count'] ?></td>
+                                <?php if ($idx === 0): ?>
+                                    <td rowspan="<?= (int)$rowspan ?>" class="customersurvey-inline-pie">
+                                        <canvas id="<?= $block->escapeHtmlAttr($chartDomId) ?>"></canvas>
+                                    </td>
+                                <?php endif; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="customersurvey-block">
+        <h3>User Wise Responses</h3>
+
+        <form method="get" action="<?= $block->escapeUrl($block->getUrl('customersurvey/report/view')) ?>" class="customersurvey-toggle">
+            <input type="hidden" name="survey_id" value="<?= (int)$block->getSelectedSurveyId() ?>"/>
+            <input type="hidden" name="from_date" value="<?= $block->escapeHtmlAttr($block->getFromDate()) ?>"/>
+            <input type="hidden" name="to_date" value="<?= $block->escapeHtmlAttr($block->getToDate()) ?>"/>
+            <input type="hidden" name="response_page" value="1"/>
+            <label>
+                <input type="checkbox" name="show_answers" value="1" <?= $showAnswers ? 'checked' : '' ?> onchange="this.form.submit()"/>
+                Show Answers
+            </label>
+            <label>
+                Per Page
+                <select name="response_limit" onchange="this.form.submit()">
+                    <?php foreach ([10, 20, 50, 100] as $limit): ?>
+                        <option value="<?= (int)$limit ?>" <?= ((int)$responsePageSize === (int)$limit) ? 'selected' : '' ?>><?= (int)$limit ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
+        </form>
+
+        <table class="customersurvey-grid">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Customer</th>
+                    <th>Device Details</th>
+                    <th>Created At</th>
+                    <th>Answered Questions</th>
+                    <th>Answers</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($responseItems)): ?>
+                    <tr><td colspan="6">No responses found for selected range.</td></tr>
+                <?php else: ?>
+                    <?php foreach ($responseItems as $item): ?>
+                        <?php
+                            $customerId = (int)($item['customer_id'] ?? 0);
+                            $firstName = trim((string)($item['customer_firstname'] ?? ''));
+                            $lastName = trim((string)($item['customer_lastname'] ?? ''));
+                            $email = trim((string)($item['customer_email'] ?? ''));
+                            $guestIdentifier = trim((string)($item['guest_identifier'] ?? ''));
+                            $userLabel = $customerId > 0 ? ('Customer #' . $customerId) : ($guestIdentifier !== '' ? $guestIdentifier : 'Guest');
+                            $customerName = trim($firstName . ' ' . $lastName);
+                            $devicePayload = [
+                                'ip_address' => (string)($item['ip_address'] ?? ''),
+                                'device' => (string)($item['device'] ?? ''),
+                                'browser' => (string)($item['browser'] ?? ''),
+                            ];
+                        ?>
+                        <tr>
+                            <td><?= $block->escapeHtml($userLabel) ?></td>
+                            <td>
+                                <?php if ($customerId > 0): ?>
+                                    <?php if ($customerName !== ''): ?>
+                                        <div><?= $block->escapeHtml($customerName) ?></div>
+                                    <?php endif; ?>
+                                    <?php if ($email !== ''): ?>
+                                        <div><?= $block->escapeHtml($email) ?></div>
+                                    <?php endif; ?>
+                                    <a class="customersurvey-btn" href="<?= $block->escapeUrl($block->getUrl('customer/index/edit', ['id' => $customerId])) ?>" target="_blank">Open Customer</a>
+                                <?php else: ?>
+                                    -
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <button type="button"
+                                        class="customersurvey-device-btn js-device-details"
+                                        data-details='<?= $block->escapeHtmlAttr((string)json_encode($devicePayload)) ?>'>
+                                    View
+                                </button>
+                            </td>
+                            <td><?= $block->escapeHtml((string)($item['created_at'] ?? '')) ?></td>
+                            <td><?= (int)($item['answered_questions'] ?? 0) ?></td>
+                            <td>
+                                <?php if ($showAnswers): ?>
+                                    <table class="customersurvey-answer-table">
+                                        <thead><tr><th>Question</th><th>Options / Answer</th></tr></thead>
+                                        <tbody>
+                                        <?php $answers = $item['answers'] ?? []; ?>
+                                        <?php if (empty($answers)): ?>
+                                            <tr><td colspan="2">No answers stored.</td></tr>
+                                        <?php else: ?>
+                                            <?php foreach ($answers as $answer): ?>
+                                                <?php $answerValues = $answer['answers'] ?? []; ?>
+                                                <?php if (!is_array($answerValues) || empty($answerValues)) { $answerValues = ['-']; } ?>
+                                                <?php $rowspan = max(1, count($answerValues)); ?>
+                                                <?php foreach ($answerValues as $idxAns => $answerValue): ?>
+                                                    <tr>
+                                                        <?php if ($idxAns === 0): ?>
+                                                            <td rowspan="<?= (int)$rowspan ?>"><?= $block->escapeHtml((string)($answer['question_title'] ?? '')) ?></td>
+                                                        <?php endif; ?>
+                                                        <td><?= $block->escapeHtml((string)$answerValue) ?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                <?php else: ?>
+                                    -
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+
+        <div class="customersurvey-pagination">
+            <div>Total: <?= (int)$responseTotal ?> | Page <?= (int)$responsePage ?> of <?= (int)$responsePages ?></div>
+            <div class="customersurvey-page-links">
+                <?php if ($responsePage > 1): ?>
+                    <a class="customersurvey-btn" href="<?= $block->escapeUrl($block->getUrl('customersurvey/report/view', [
+                        'survey_id' => (int)$block->getSelectedSurveyId(),
+                        'from_date' => $block->getFromDate(),
+                        'to_date' => $block->getToDate(),
+                        'show_answers' => $showAnswers ? 1 : 0,
+                        'response_limit' => $responsePageSize,
+                        'response_page' => $responsePage - 1,
+                    ])) ?>">Previous</a>
+                <?php endif; ?>
+                <?php if ($responsePage < $responsePages): ?>
+                    <a class="customersurvey-btn" href="<?= $block->escapeUrl($block->getUrl('customersurvey/report/view', [
+                        'survey_id' => (int)$block->getSelectedSurveyId(),
+                        'from_date' => $block->getFromDate(),
+                        'to_date' => $block->getToDate(),
+                        'show_answers' => $showAnswers ? 1 : 0,
+                        'response_limit' => $responsePageSize,
+                        'response_page' => $responsePage + 1,
+                    ])) ?>">Next</a>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="customersurvey-device-modal" class="customersurvey-modal" aria-hidden="true">
+    <div class="customersurvey-modal-panel">
+        <div class="customersurvey-modal-head">
+            <strong>Device Details</strong>
+            <button type="button" class="customersurvey-modal-close" id="customersurvey-device-close">x</button>
+        </div>
+        <div class="customersurvey-modal-body" id="customersurvey-device-body"></div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var dateTrend = <?= /* @noEscape */ json_encode($dateTrend) ?> || [];
+    var answers = <?= /* @noEscape */ json_encode($answerDistribution) ?> || [];
+    var questionSplit = <?= /* @noEscape */ json_encode($questionAnswerSplit) ?> || [];
+    var answerCharts = <?= /* @noEscape */ json_encode(array_values($answerChartData)) ?> || [];
+    var piePalette = ['#1668a8', '#2d9a5f', '#f0a202', '#d95d39', '#7b61ff', '#27a0b5', '#d64f7f', '#8a6d3b'];
+
+    function prepCanvas(canvas) {
+        if (!canvas) { return null; }
+        var ratio = window.devicePixelRatio || 1;
+        var width = canvas.clientWidth || 500;
+        var height = 280;
+        canvas.width = Math.floor(width * ratio);
+        canvas.height = Math.floor(height * ratio);
+        var ctx = canvas.getContext('2d');
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        ctx.clearRect(0, 0, width, height);
+        return { ctx: ctx, width: width, height: height };
+    }
+
+    function drawNoData(canvas) {
+        var c = prepCanvas(canvas);
+        if (!c) { return; }
+        c.ctx.fillStyle = '#6b7f96';
+        c.ctx.font = '13px Arial';
+        c.ctx.fillText('No data available', 14, 26);
+    }
+
+    function drawLineChart(canvas, labels, lines) {
+        if (!labels.length || !lines.length) { drawNoData(canvas); return; }
+        var c = prepCanvas(canvas);
+        if (!c) { return; }
+        var ctx = c.ctx;
+        var w = c.width;
+        var h = c.height;
+        var left = 52, right = 14, top = 22, bottom = 56;
+        var plotW = w - left - right;
+        var plotH = h - top - bottom;
+
+        var allValues = [];
+        lines.forEach(function (line) {
+            (line.values || []).forEach(function (v) { allValues.push(Number(v || 0)); });
+        });
+        var maxVal = Math.max.apply(null, allValues.concat([1]));
+
+        ctx.strokeStyle = '#c8d6e5';
+        ctx.beginPath();
+        ctx.moveTo(left, top);
+        ctx.lineTo(left, h - bottom);
+        ctx.lineTo(w - right, h - bottom);
+        ctx.stroke();
+
+        var ticks = 5;
+        ctx.fillStyle = '#566b82';
+        ctx.font = '11px Arial';
+        for (var t = 0; t <= ticks; t++) {
+            var v = Math.round((maxVal / ticks) * t);
+            var yTick = h - bottom - ((v / maxVal) * (plotH - 6));
+            ctx.fillText(String(v), 8, yTick + 4);
+            ctx.strokeStyle = '#edf3f9';
+            ctx.beginPath();
+            ctx.moveTo(left, yTick);
+            ctx.lineTo(w - right, yTick);
+            ctx.stroke();
+        }
+
+        ctx.fillStyle = '#3f556d';
+        ctx.fillText('Count', 8, top - 6);
+        ctx.fillText('Date', Math.max(left, (w / 2) - 12), h - 12);
+
+        var xStep = labels.length > 1 ? (plotW / (labels.length - 1)) : 0;
+        var labelEvery = Math.max(1, Math.ceil(labels.length / 8));
+        for (var lx = 0; lx < labels.length; lx += labelEvery) {
+            var xPos = left + (xStep * lx);
+            var labelText = String(labels[lx] || '');
+            ctx.fillStyle = '#566b82';
+            ctx.font = '10px Arial';
+            ctx.fillText(labelText, xPos - 22, h - bottom + 16);
+        }
+
+        lines.forEach(function (line) {
+            var vals = line.values || [];
+            ctx.strokeStyle = line.color || '#1668a8';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            vals.forEach(function (v, i) {
+                var x = left + (plotW * (vals.length === 1 ? 0 : (i / (vals.length - 1))));
+                var y = h - bottom - ((Number(v || 0) / maxVal) * (plotH - 6));
+                if (i === 0) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }
+            });
+            ctx.stroke();
+
+            ctx.fillStyle = line.color || '#1668a8';
+            vals.forEach(function (v, i) {
+                var px = left + (plotW * (vals.length === 1 ? 0 : (i / (vals.length - 1))));
+                var py = h - bottom - ((Number(v || 0) / maxVal) * (plotH - 6));
+                ctx.beginPath();
+                ctx.arc(px, py, 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        });
+    }
+
+    function drawPieChart(canvas, labels, values, colors) {
+        if (!labels.length) { drawNoData(canvas); return; }
+        var c = prepCanvas(canvas);
+        if (!c) { return; }
+        var ctx = c.ctx;
+        var w = c.width;
+        var h = c.height;
+        var total = values.reduce(function (sum, v) { return sum + Number(v || 0); }, 0);
+        if (total <= 0) { drawNoData(canvas); return; }
+
+        var cx = Math.min(115, w * 0.26);
+        var cy = h * 0.5;
+        var radius = Math.min(78, h * 0.28);
+        var start = -Math.PI / 2;
+
+        for (var i = 0; i < values.length; i++) {
+            var part = Number(values[i] || 0);
+            var sweep = (part / total) * Math.PI * 2;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.fillStyle = colors[i % colors.length];
+            ctx.arc(cx, cy, radius, start, start + sweep, false);
+            ctx.closePath();
+            ctx.fill();
+            start += sweep;
+        }
+
+        var lx = Math.max(cx + radius + 18, w * 0.47);
+        var ly = Math.max(18, cy - radius);
+        labels.forEach(function (label, idx) {
+            ctx.fillStyle = colors[idx % colors.length];
+            ctx.fillRect(lx, ly + (idx * 18), 10, 10);
+            ctx.fillStyle = '#334a62';
+            ctx.font = '12px Arial';
+            ctx.fillText(String(label), lx + 14, ly + 9 + (idx * 18));
+        });
+    }
+
+    drawLineChart(
+        document.getElementById('customersurvey-detail-trend'),
+        dateTrend.map(function (x) { return x.date; }),
+        [
+            { values: dateTrend.map(function (x) { return Number(x.impressions || 0); }), color: '#98b8d8' },
+            { values: dateTrend.map(function (x) { return Number(x.opens || 0); }), color: '#2d9a5f' },
+            { values: dateTrend.map(function (x) { return Number(x.responses || 0); }), color: '#1668a8' }
+        ]
+    );
+
+    questionSplit.forEach(function (q) {
+        var canvas = document.getElementById('customersurvey-question-pie-' + String(q.question_id));
+        if (!canvas) {
+            return;
+        }
+        drawPieChart(
+            canvas,
+            ['Answered', 'Not Answered'],
+            [Number(q.answered || 0), Number(q.not_answered || 0)],
+            ['#2d9a5f', '#d8e3ef']
+        );
+    });
+
+    answerCharts.forEach(function (chart) {
+        var rawLabels = Array.isArray(chart.labels) ? chart.labels : [];
+        var values = Array.isArray(chart.values) ? chart.values.map(function (v) { return Number(v || 0); }) : [];
+        var total = values.reduce(function (sum, value) { return sum + value; }, 0);
+        var chartId = String(chart.chart_dom_id || '');
+        var canvas = document.getElementById(chartId);
+        if (!canvas) {
+            return;
+        }
+
+        var labels = rawLabels.map(function (label, idx) {
+            var value = values[idx] || 0;
+            var pct = total > 0 ? ((value * 100) / total) : 0;
+            return String(label) + ' (' + pct.toFixed(1) + '%)';
+        });
+
+        drawPieChart(canvas, labels, values, piePalette);
+    });
+
+    var modal = document.getElementById('customersurvey-device-modal');
+    var modalBody = document.getElementById('customersurvey-device-body');
+    var closeBtn = document.getElementById('customersurvey-device-close');
+
+    document.querySelectorAll('.js-device-details').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var details = {};
+            try {
+                details = JSON.parse(btn.getAttribute('data-details') || '{}');
+            } catch (e) {
+                details = {};
+            }
+            modalBody.innerHTML = '' +
+                '<table class="customersurvey-grid">' +
+                '<tr><th>IP Address</th><td>' + String(details.ip_address || '-') + '</td></tr>' +
+                '<tr><th>Device</th><td>' + String(details.device || '-') + '</td></tr>' +
+                '<tr><th>Browser</th><td>' + String(details.browser || '-') + '</td></tr>' +
+                '</table>';
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+        });
+    });
+
+    function closeModal() {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+})();
+</script>

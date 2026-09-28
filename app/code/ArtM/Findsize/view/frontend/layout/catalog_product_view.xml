@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<page layout="1column" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="ArtM_Findsize::css/find_size.css" />
+        <script src="ArtM_Findsize::js/find_size.js"/>
+    </head> 
+    <referenceContainer name="product.info.options.wrapper">
+
+        <container name="find.size.container"
+                htmlTag="div"
+                htmlClass="find-size-container"
+                before="product.info.options.swatches">
+
+            <block class="ArtM\Findsize\Block\Findsize\Textlink"
+                name="find_size"
+                template="ArtM_Findsize::link.phtml"/>
+
+        </container>
+
+    </referenceContainer>
+</page>

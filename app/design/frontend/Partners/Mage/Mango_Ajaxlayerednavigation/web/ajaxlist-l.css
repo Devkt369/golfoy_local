@@ -1,0 +1,166 @@
+/**
+ * Copyright © 2016 MangoExtensions. All rights reserved.
+ * */
+
+#ajaxlist-reload-product_list,
+#ajaxlist-reload-layered-navigation{
+    position: relative;
+}
+.products-list-loader{
+    position: absolute;
+}
+
+.horizontal-layered-navigation-block .products-list-loader div{
+    background: none !important;
+}
+
+#layered-filter-block.collapsible-filters .filter-options-item .filter-options-title,
+#horizontal-layered-navigation-container .filter-options-item .filter-options-title{
+    border-bottom: solid 1px #ccc;
+}
+
+
+/*hide when page is loaded*/
+.sidebar .block-content.filter-content > #horizontal-layered-navigation-container{
+    display:none;
+}
+
+
+
+/* horizontal layered navigation blocks */
+
+#horizontal-layered-navigation-container{
+    display:block;
+    padding-bottom:15px;
+    padding-top:15px;
+    
+    /*width:100%;
+    clear:both;
+    z-index:100;
+    position:relative;
+    padding-bottom:15px;
+    padding-top:15px;*/
+}
+
+#horizontal-layered-navigation-container div.horizontal-filter {
+    /* properties here */
+    display:inline-block;
+    position:relative;
+}
+
+/* > 7 filters */
+#horizontal-layered-navigation-container div.horizontal-filter:nth-last-child(n+7),
+#horizontal-layered-navigation-container div.horizontal-filter:nth-last-child(n+7) ~ div.horizontal-filter {
+    width:12%;
+}
+/* = 7 filters */
+#horizontal-layered-navigation-container div.horizontal-filter:nth-last-child(-n+7):first-child,
+#horizontal-layered-navigation-container div.horizontal-filter:nth-last-child(-n+7):first-child ~ div.horizontal-filter {
+    width:13.5%;
+}
+/* = 6 filters */
+#horizontal-layered-navigation-container div.horizontal-filter:nth-last-child(-n+6):first-child,
+#horizontal-layered-navigation-container div.horizontal-filter:nth-last-child(-n+6):first-child ~ div.horizontal-filter {
+    width:14%;
+}
+/* = 5 filters */
+#horizontal-layered-navigation-container div.horizontal-filter:nth-last-child(-n+5):first-child,
+#horizontal-layered-navigation-container div.horizontal-filter:nth-last-child(-n+5):first-child ~ div.horizontal-filter {
+    width:18%;
+}
+/* <= 4 filters */
+#horizontal-layered-navigation-container div.horizontal-filter:nth-last-child(-n+4):first-child,
+#horizontal-layered-navigation-container div.horizontal-filter:nth-last-child(-n+4):first-child ~ div.horizontal-filter {
+    width:20%;
+}
+
+#horizontal-layered-navigation-container div.horizontal-filter{
+    padding-bottom:0px;
+    border-bottom:none;
+}
+
+#horizontal-layered-navigation-container div.horizontal-filter:before,
+#horizontal-layered-navigation-container div.horizontal-filter:after{
+    content:none;
+}
+
+/*state on horizontal layered navigation*/
+
+.horizontal-layered-navigation-block #layered-filter-block{
+    margin-bottom: 0px;
+}
+
+.horizontal-layered-navigation-block #layered-navigation-state{
+    display:inline;
+    line-height: 30px;
+}
+
+.horizontal-layered-navigation-block #layered-navigation-state  .filter-current-subtitle{
+    display: inline;
+    padding: 0;
+}
+
+.horizontal-layered-navigation-block #layered-navigation-state ol.items{
+    display: inline;
+}
+.horizontal-layered-navigation-block #layered-navigation-state li{
+    display: inline-block;
+    clear:none;
+    padding:0px;
+    margin:0px;
+}
+.horizontal-layered-navigation-block #layered-navigation-state li.item-label{
+    padding-left:10px;
+    
+}
+.horizontal-layered-navigation-block #layered-navigation-state li.item{
+    padding-left:12px;
+    margin-left:5px;
+}
+
+.horizontal-layered-navigation-block #layered-navigation-state li:first-of-type{
+    padding-left:0px;
+}
+.horizontal-layered-navigation-block #layered-navigation-state li a.action.remove{
+
+}
+
+.horizontal-layered-navigation-block #layered-navigation-state li a.action.remove:before{
+    content:none;
+}
+
+.horizontal-layered-navigation-block .block-content.filter-content .filter-actions{
+    display:inline;
+    margin:0px 0px 0px 20px;
+    border-bottom:none;
+}
+
+
+.horizontal-layered-navigation-block .filter-subtitle {
+    display: none;
+}
+
+
+#horizontal-layered-navigation-container div.horizontal-filter .filter-options-title{
+    border: solid 1px #dddddd;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+
+#horizontal-layered-navigation-container div.horizontal-filter .filter-options-content{
+    position:absolute !important;
+    width:140%;
+    border: solid 1px #dddddd;
+}
+
+/* one column layout */
+.page-layout-1column #ajaxlist-reload-product_list .toolbar-products{
+    position:relative !important;
+}
+
+
+.ui-tooltip.ajaxlist-tooltip{
+    max-width:500px;
+}

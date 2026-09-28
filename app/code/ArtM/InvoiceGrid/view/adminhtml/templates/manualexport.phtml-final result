@@ -1,0 +1,53 @@
+<style>
+    .export-section {
+        background-color: #F8F8F8;
+        padding: 20px;
+    }
+    .export-container {
+        background-color: #fff;
+        padding: 20px;
+        
+    }
+</style>
+<?php
+
+ /*   $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $chelper = $objectManager->get('ArtM\InvoiceGrid\Helper\Data');
+    $chelper->createCsv();
+exit;*/
+?>
+
+
+
+
+
+<section class = "admin__page-section export-section">
+    <div class ="export-container">
+        <?php 
+        if($block->getData('csvFile') ) {
+            $filenamestr = $block->getData('csvFile');
+            $filename   = explode(", ", $filenamestr);
+            $url0 = $block->getUrl('invoicegrid/export/fcsv',['id' => $filename[0]]);
+            $url1 = $block->getUrl('invoicegrid/export/fcsv',['id' => $filename[1]]);
+            echo '<center><a href= "'.$url0.'">'.$filename[0].'</a>, <a href= "'.$url1.'">'.$filename[1].'</a></center>'; 
+        }
+        ?>
+    <form method="post" action="<?php echo $block->getUrl('invoicegrid/export/manual'); ?>">
+    <?php echo $block->getBlockHtml('formkey') ?>
+    <div class="admin__field">
+        <label class="admin__field-label" for="test_date">Select Date</label>
+        <div class="admin__field-control">
+            <input type="date" id="invoice_date" name="invoice_date" class="admin__control-date" required>
+        </div>
+    </div>
+    <div class="actions-toolbar" style="margin-top:20px;">
+        <div class="primary">
+            <button type="submit" class="action-default">
+                <span> Export </span>
+            </button>
+        </div>
+    </div>
+</form>
+
+    </div>
+</section>

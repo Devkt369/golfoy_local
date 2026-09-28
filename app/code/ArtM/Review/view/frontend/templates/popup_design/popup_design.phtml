@@ -1,0 +1,1471 @@
+<?php
+
+/** @var \ArtM\Review\Block\Popupdesign $block */
+
+$order_data  = $block->getData('order_data');
+$customer_id = $block->getData('customer_id');
+
+if (!$order_data || !$customer_id) {
+    return;
+}
+
+$order_id                = $order_data['order_id'];
+$order_id_date           = $order_data['order_id_date'];
+$date                    = date_create($order_id_date);
+$order_id_date_formatted = date_format($date, "M dS");
+$prd_id_arr              = array_filter(array_map('trim', explode(',', $order_data['prd_ids'])));
+$products                = $block->getProductsByIds($prd_id_arr);
+$baseUrl                 = $block->getStoreBaseUrl();
+$starImgUrl              = $block->getViewFileUrl('images/rating/rating_star.png');
+
+if(empty($products)) {
+     return;
+}
+?>
+
+<input type="hidden" name="base_url" id="base_url" value="<?= $baseUrl ?>" />
+
+<button type="button"
+    class="btn btn-info btn-lg hide"
+    data-toggle="modal"
+    data-target="#popupreviewmodel"
+    id="open_review_popup">
+    Open Modal
+</button>
+
+<div class="modal fade" id="popupreviewmodel" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close"
+                    data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"
+                    style="font-size:1.3rem;font-weight:600;">
+                    Review your order #<?= $order_id ?>
+                    from <?= $order_id_date_formatted ?>
+                </h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="submit_button">
+                    <form class="review_popup_form"
+                        name="review_popup_form"
+                        id="review_popup_form">
+
+                        <input type="text"
+                            class="hide required_field_custom_form"
+                            id="number_of_products"
+                            name="number_of_products"
+                            value="<?= count($prd_id_arr) ?>" />
+                        <input type="text"
+                            class="hide required_field_custom_form"
+                            id="customer_id"
+                            name="customer_id"
+                            value="<?= $customer_id ?>" />
+                        <input type="text"
+                            class="hide required_field_custom_form"
+                            id="order_id"
+                            name="order_id"
+                            value="<?= $order_id ?>" />
+
+                        <?php
+                        $i = 1;
+                        foreach ($prd_id_arr as $item) {
+
+                            $prd = $products[(string)$item] ?? null;
+                            if (!$prd) {
+                                $i++;
+                                continue;
+                            }
+
+                            $imageUrl = $prd['image'];
+                            $prd_name = $prd['name'];
+
+                            echo "<div class='item_review_popup row'>";
+                            echo "<input class='hide star_rating_input required_field_custom_form' name='stars_" . $i . "' type='text'/>";
+                            echo "<input class='hide product_id_rating_input required_field_custom_form' name='prd_id_" . $i . "' type='text' value='" . $item . "'/>";
+                            echo "<textarea class='hide comment_rating_input' name='description" . $i . "'></textarea>";
+                            echo "<div class='product_name'>";
+                            echo "<div class='col-sm-3 col-xs-5 img_review_popup'>";
+                            echo "<img src='" . $imageUrl . "'/>";
+                            echo "</div>";
+                            echo "<div class='col-sm-9 col-xs-7 name_review_popup'>";
+                            echo "<p>" . $prd_name . "</p>";
+                            echo "<div class='rating_image_review_popup'>";
+                            echo "<div class='rating_image_block row' style='margin:10px 0;'>";
+                            for ($s = 1; $s <= 5; $s++) {
+                                echo "<div class='col-xs-2'>";
+                                echo "<img class='rating_smiley' rating_value='" . $s . "' src='" . $starImgUrl . "'/>";
+                                echo "</div>";
+                            }
+                            echo "</div>";
+                            echo "</div>";
+                        ?>
+                            <div class="field review-field-media"
+                                id="<?= $item ?>-review-field-media">
+                                <label class="label">
+                                    <div class="upload-box-label">
+                                        <span>
+                                            Upload photos of product
+                                            <span class="reviewpopuptooltip"
+                                                rel="<?= $item ?>">i</span>
+                                            <p class="tooltipclass"
+                                                id="tooltipuploadtext<?= $item ?>"
+                                                style="display:none;">
+                                                Your images can help other customers
+                                                make a better decision
+                                            </p>
+                                        </span>
+                                    </div>
+                                </label>
+                                <div class="control">
+                                    <input type="file"
+                                        style="display:none !important;"
+                                        id="<?= $item ?>_review_media"
+                                        name="review_media[]"
+                                        class="review_media"
+                                        accept=".png,.jpg,.jpeg"
+                                        multiple="multiple" />
+                                </div>
+                                <div class="review-drag-area"
+                                    rel="<?= $item ?>"
+                                    style="border:3px dashed lightgray;
+                                            border-radius:10px;
+                                            margin-right:10px;">
+                                    <p class="review-dragdrop"
+                                        rel="<?= $item ?>"
+                                        style="text-align:center;color:gray;">+</p>
+                                </div>
+                                <div class="mage-error media_field-error"
+                                    style="display:none;">
+                                    <?= __('You can Upload maximum 10 images.') ?>
+                                </div>
+                            </div>
+                        <?php
+                            echo '<div class="write_comment_block">
+                                    <div class="write_comment_button">
+                                        <div class="write_comment_text">Write a comment</div>
+                                    </div>
+                                    <div class="write_comment_textarea">
+                                        <textarea class="custom_comment" style="border-radius:5px !important;" oninput="if(this.value.length>500)this.value=this.value.slice(0,500);" placeholder="You can write about the quality, experience, color, comfort etc."></textarea>
+                                    </div>
+                                </div>';
+
+                            echo "</div>"; // name_review_popup
+                            echo "</div>"; // product_name
+                            echo "</div>"; // item_review_popup
+                            echo "<hr>";
+                            $i++;
+                        }
+                        ?>
+
+                        <div class="review_line">
+                            <p>By submitting review you give us your consent to publish
+                                and process personal information in accordance with
+                                Terms Of Use and Privacy Policy</p>
+                        </div>
+                        <div class="submit_review_popup_form_block">
+                            <div class="submit_review_popup_form_button">
+                                <input type="submit" value="Submit Review" />
+                            </div>
+                            <div class="submit_review_popup_form_status_text"></div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default"
+                    data-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+<!-- star rating css -->
+<style>
+    #popupreviewmodel {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        height: 100dvh !important;
+        overflow-y: auto;
+        padding-right: 0 !important;
+    }
+
+    #popupreviewmodel.in,
+    #popupreviewmodel.show,
+    #popupreviewmodel[style*="display: block"],
+    #popupreviewmodel[style*="display:block"] {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #popupreviewmodel .modal-dialog {
+        width: 760px;
+        max-width: 94vw;
+        margin: 24px auto;
+    }
+
+    #popupreviewmodel.fade .modal-dialog,
+    #popupreviewmodel.in .modal-dialog,
+    #popupreviewmodel.show .modal-dialog,
+    #popupreviewmodel[style*="display: block"] .modal-dialog,
+    #popupreviewmodel[style*="display:block"] .modal-dialog {
+        position: fixed;
+        top: 45%;
+        left: 50%;
+        margin: 0 !important;
+        transform: translate(-50%, -50%) !important;
+        -webkit-transform: translate(-50%, -50%) !important;
+    }
+
+    #popupreviewmodel .img_review_popup img {
+        padding-right: 0px !important;
+    }
+
+    #popupreviewmodel .hide,
+    #popupreviewmodel .review_line,
+    #popupreviewmodel .modal-body hr {
+        display: none;
+    }
+
+    #popupreviewmodel .modal-content {
+        border-radius: 10px;
+        border: 1px solid #dcdcdc;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        max-height: calc(80dvh - 48px);
+        overflow-y: auto;
+    }
+
+    #popupreviewmodel .modal-header {
+        position: relative;
+        border-bottom: 1px solid #e6e6e6;
+        padding: 18px 70px 16px 24px;
+        background-color: white;
+    }
+
+    #popupreviewmodel .modal-header .close {
+        position: absolute;
+        top: 20px;
+        right: 18px;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        font-size: 24px;
+        line-height: 0.8;
+        font-weight: 500;
+        color: #b9b9b9;
+        opacity: 1 !important;
+        text-shadow: none;
+    }
+
+    #popupreviewmodel .modal-body {
+        padding: 18px 24px 10px;
+        background: #fff;
+    }
+
+    #popupreviewmodel .item_review_popup {
+        margin: 0;
+        padding: 10px 0 16px;
+        border-bottom: 1px solid #ececec;
+    }
+
+    #popupreviewmodel .product_name {
+        display: flex;
+        align-items: flex-start;
+        gap: 30px;
+    }
+
+    #popupreviewmodel .img_review_popup {
+        width: 130px;
+        min-width: 130px;
+        max-width: 130px;
+        padding: 0;
+    }
+
+    #popupreviewmodel .img_review_popup img {
+        width: 130px;
+        height: 130px;
+        object-fit: cover;
+        border: 1px solid #efefef;
+        border-radius: 2px;
+        display: block;
+    }
+
+    #popupreviewmodel .name_review_popup {
+        width: calc(100% - 148px);
+        padding: 0;
+    }
+
+    #popupreviewmodel .rating_image_block {
+        margin: 4px 0 10px !important;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    #popupreviewmodel .rating_image_block .col-xs-2,
+    #popupreviewmodel .rating_image_block .col-xs-1 {
+        width: auto;
+        margin: 0 !important;
+        padding: 0;
+    }
+
+    #popupreviewmodel .rating_smiley {
+        filter: grayscale(100%);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    #popupreviewmodel .rating_smiley:hover {
+        opacity: 0.6;
+    }
+
+    #popupreviewmodel .rating_smiley.active {
+        opacity: 1;
+        filter: grayscale(0%) !important;
+        filter: none !important;
+    }
+
+    #popupreviewmodel .rating_smiley.active::after {
+        content: '';
+        position: absolute;
+        background: rgba(217, 13, 47, 0.3);
+        border-radius: 50%;
+    }
+
+    #popupreviewmodel .upload-box-label .tooltipclass {
+        top: 20px;
+        font-size: 10px;
+    }
+
+    #popupreviewmodel .review-resultimg {
+        height: auto;
+        float: left;
+        border-radius: 5px;
+    }
+
+    .write_comment_block {
+        width: 100%;
+        float: left;
+    }
+
+    #popupreviewmodel .write_comment_textarea {
+        margin-top: 10px;
+        display: none;
+    }
+
+    #popupreviewmodel .custom_comment {
+        width: 100%;
+        min-height: 92px;
+        border: 1px solid #d9d9d9;
+        padding: 10px 12px;
+        font-size: 14px;
+        color: #333;
+        resize: vertical;
+    }
+
+    #popupreviewmodel .review-field-media {
+        margin: 12px 0 8px;
+    }
+
+    #popupreviewmodel .upload-box-label {
+        margin-bottom: 8px;
+        position: relative;
+    }
+
+    #popupreviewmodel .upload-box-label>span {
+        color: #666;
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    #popupreviewmodel .review-dragdrop {
+        margin: 0;
+        font-size: 34px;
+        line-height: 1;
+        color: #a7a7a7 !important;
+    }
+
+    #popupreviewmodel hr {
+        margin: 16px 0 10px;
+        border-top: 1px solid #ececec;
+    }
+
+    #popupreviewmodel .review_line p {
+        margin: 0;
+        color: #8f8f8f;
+        font-size: 12px;
+        line-height: 1.45;
+    }
+
+    #popupreviewmodel .submit_review_popup_form_block {
+        text-align: center;
+        padding: 40px 0 10px;
+    }
+
+    #popupreviewmodel .submit_review_popup_form_button input[type="submit"]:hover,
+    #popupreviewmodel .submit_review_popup_form_button input[type="submit"]:focus {
+        background: #c50c2a;
+    }
+
+    #popupreviewmodel .modal-footer {
+        display: none;
+    }
+
+
+    #popupreviewmodel .submit_review_popup_form_button input[type="submit"] {
+        min-width: 140px;
+        height: 40px;
+        border: none;
+        border-radius: 10px;
+        background: #d90d2f;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1;
+        padding: 0 22px;
+        box-shadow: none;
+        text-transform: none;
+        font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+
+    #popupreviewmodel .write_comment_text {
+        color: #cb3a50;
+        font-size: 10px;
+        padding: 10px 20px 10px;
+        line-height: 1;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 700;
+    }
+
+    #popupreviewmodel .name_review_popup>p {
+        margin: 2px 0 10px;
+        color: #2f2f2f;
+        font-size: 14px;
+        line-height: 1.25;
+        font-weight: 600;
+    }
+
+    #popupreviewmodel .modal-title {
+        margin: 0;
+        padding-right: 0;
+        color: #2d2d2d;
+        font-size: 16px !important;
+        line-height: 1.2;
+        letter-spacing: 0.1px;
+        font-weight: 500 !important;
+        text-align: left;
+    }
+
+    #popupreviewmodel .rating_image_block>div {
+        max-width: 18px;
+        padding: 0px !important;
+    }
+
+    #popupreviewmodel .review-drag-area {
+        width: 90px;
+        height: 90px;
+        border: 2px dashed #d4d4d4 !important;
+        border-radius: 2px !important;
+        margin-right: 20px !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fafafa;
+        float: left;
+    }
+
+    @media only screen and (min-width: 1439px) and (max-width: 1920px) {
+        #popupreviewmodel .submit_review_popup_form_button input[type="submit"] {
+            min-width: 165px;
+            font-size: 15px;
+        }
+
+        #popupreviewmodel .write_comment_text {
+            font-size: 11px;
+        }
+
+        #popupreviewmodel .review-drag-area {
+            width: 110px;
+            height: 110px;
+        }
+    }
+
+    @media (max-width: 1300px) {
+        #popupreviewmodel .modal-dialog {
+            width: 620px;
+            max-width: 92vw;
+        }
+
+        #popupreviewmodel .modal-title {
+            font-size: 16px !important;
+        }
+
+        #popupreviewmodel .name_review_popup>p {
+            font-size: 14px;
+        }
+
+        #popupreviewmodel .img_review_popup,
+        #popupreviewmodel .img_review_popup img,
+        #popupreviewmodel .review-drag-area {
+            width: 90px;
+            min-width: 90px;
+            max-width: 90px;
+            height: 90px;
+        }
+
+        #popupreviewmodel .name_review_popup {
+            width: calc(100% - 138px);
+        }
+
+        #popupreviewmodel .write_comment_text {
+            font-size: 10px;
+            padding: 10px 20px 10px;
+        }
+    }
+
+    @media (max-width: 768px) {
+
+        #popupreviewmodel.in,
+        #popupreviewmodel.show {
+            padding: 16px;
+        }
+
+        #popupreviewmodel.fade .modal-dialog,
+        #popupreviewmodel.in .modal-dialog,
+        #popupreviewmodel.show .modal-dialog,
+        #popupreviewmodel[style*="display: block"] .modal-dialog,
+        #popupreviewmodel[style*="display:block"] .modal-dialog {
+            position: fixed;
+            top: 45%;
+            left: 50%;
+            margin: 0 !important;
+            transform: translate(-50%, -50%) !important;
+            -webkit-transform: translate(-50%, -50%) !important;
+        }
+
+        #popupreviewmodel .modal-dialog {
+            width: calc(100vw - 32px);
+            max-width: 520px;
+            margin: 0;
+        }
+
+        #popupreviewmodel .modal-content {
+            max-height: calc(100dvh - 32px);
+            overflow-y: auto;
+        }
+
+        #popupreviewmodel .modal-header,
+        #popupreviewmodel .modal-body {
+            padding-left: 14px;
+            padding-right: 14px;
+        }
+
+        #popupreviewmodel .modal-header {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            padding-right: 42px;
+        }
+
+        #popupreviewmodel .modal-title {
+            font-size: 13px !important;
+            line-height: 1.25;
+        }
+
+        #popupreviewmodel .modal-header .close {
+            top: 15px;
+            right: 10px;
+            font-size: 19px;
+        }
+
+        #popupreviewmodel .product_name {
+            gap: 12px;
+        }
+
+        #popupreviewmodel .img_review_popup,
+        #popupreviewmodel .img_review_popup img,
+        #popupreviewmodel .review-drag-area {
+            width: 90px;
+            min-width: 90px;
+            max-width: 90px;
+            height: 90px;
+        }
+
+        #popupreviewmodel .name_review_popup {
+            width: calc(100% - 102px);
+        }
+
+        #popupreviewmodel .name_review_popup>p {
+            font-size: 12px;
+            line-height: 1.3;
+        }
+
+        #popupreviewmodel .rating_image_block {
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        #popupreviewmodel .rating_image_block .col-xs-1 {
+            display: none;
+        }
+
+        #popupreviewmodel .write_comment_text {
+            font-size: 11px;
+        }
+
+        #popupreviewmodel .submit_review_popup_form_button input[type="submit"] {
+            height: 43px;
+            font-size: 16px;
+        }
+    }
+
+    @media (max-width: 576px) {
+
+        #popupreviewmodel.in,
+        #popupreviewmodel.show {
+            padding: 12px;
+        }
+
+        #popupreviewmodel .modal-dialog {
+            width: calc(100vw - 24px);
+            max-width: none;
+            margin: 0;
+        }
+
+        #popupreviewmodel .modal-content {
+            border-radius: 8px;
+            max-height: calc(100dvh - 24px);
+        }
+
+        #popupreviewmodel .modal-header,
+        #popupreviewmodel .modal-body {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        #popupreviewmodel .modal-title {
+            font-size: 13x !important;
+            line-height: 1.25;
+        }
+
+        #popupreviewmodel .modal-header .close {
+            top: 13px;
+            right: 10px;
+            font-size: 21px;
+        }
+
+        #popupreviewmodel .product_name {
+            gap: 10px;
+        }
+
+        #popupreviewmodel .img_review_popup,
+        #popupreviewmodel .img_review_popup img,
+        #popupreviewmodel .review-drag-area {
+            width: 88px;
+            min-width: 88px;
+            max-width: 88px;
+            height: 88px;
+        }
+
+        #popupreviewmodel .name_review_popup {
+            width: calc(100% - 98px);
+        }
+
+        #popupreviewmodel .name_review_popup>p {
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        #popupreviewmodel .submit_review_popup_form_block {
+            padding-top: 40px;
+        }
+
+        #popupreviewmodel .submit_review_popup_form_button input[type="submit"] {
+            height: 40px;
+            font-size: 16px;
+        }
+    }
+
+    @media (max-width: 420px) {
+        #popupreviewmodel .modal-title {
+            font-size: 11px !important;
+        }
+
+        #popupreviewmodel .img_review_popup,
+        #popupreviewmodel .img_review_popup img,
+        #popupreviewmodel .review-drag-area {
+            width: 80px;
+            min-width: 80px;
+            max-width: 80px;
+            height: 80px;
+        }
+
+        #popupreviewmodel .name_review_popup {
+            width: calc(100% - 90px);
+        }
+
+        #popupreviewmodel .name_review_popup>p {
+            font-size: 10px;
+        }
+
+        #popupreviewmodel .submit_review_popup_form_button input[type="submit"] {
+            height: 37px;
+            font-size: 14px;
+        }
+
+        #popupreviewmodel .upload-box-label>span {
+            font-size: 9px;
+        }
+
+        #popupreviewmodel .upload-box-label .tooltipclass {
+            font-size: 8px;
+        }
+
+        #popupreviewmodel .write_comment_text {
+            padding: 10px 25px 10px;
+        }
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var ratingSmileys = document.querySelectorAll('#popupreviewmodel .rating_smiley');
+
+        ratingSmileys.forEach(function(star) {
+            star.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var ratingId = this.getAttribute('data-rating-id');
+                var clickedValue = parseInt(this.getAttribute('rating_value'));
+                var allStars = document.querySelectorAll('#popupreviewmodel .rating_smiley[data-rating-id="' + ratingId + '"]');
+
+                // Find current rating (highest active star)
+                var currentRating = 0;
+                allStars.forEach(function(s) {
+                    if (s.classList.contains('active')) {
+                        var val = parseInt(s.getAttribute('rating_value'));
+                        if (val > currentRating) currentRating = val;
+                    }
+                });
+
+                // Find the hidden input within the same product block
+                var itemBlock = star.closest('.item_review_popup');
+                var starInput = itemBlock ? itemBlock.querySelector('.star_rating_input') : null;
+
+                if (clickedValue === currentRating) {
+                    // Same star clicked again — reset all
+                    allStars.forEach(function(s) {
+                        s.classList.remove('active');
+                    });
+                    if (starInput) starInput.value = '';
+                } else {
+                    // Fill all stars up to and including the clicked star
+                    allStars.forEach(function(s) {
+                        var val = parseInt(s.getAttribute('rating_value'));
+                        if (val <= clickedValue) {
+                            s.classList.add('active');
+                        } else {
+                            s.classList.remove('active');
+                        }
+                    });
+                    if (starInput) starInput.value = clickedValue;
+                }
+            });
+        });
+    });
+</script>
+<style>
+    .review-drag-area {
+        width: 80px;
+        min-height: 85px;
+        display: inline-block;
+    }
+
+    .review-resultimg {
+        width: 115px;
+        display: inline-block;
+        position: relative;
+        margin-right: 8px;
+    }
+
+    p.review-dragdrop {
+        font-size: 35px;
+        margin: 0px;
+        cursor: pointer;
+        padding: 15px 15px;
+    }
+
+    .review-img-cross {
+        position: absolute;
+        right: 0;
+        cursor: pointer;
+        top: 0;
+        border-radius: 31px;
+        width: 15px;
+        height: 15px;
+        text-align: center;
+        background-color: white;
+        font-size: 10px;
+        padding: 1px;
+
+    }
+
+    .review-drag-area,
+    .review-resultimg {
+        margin-top: 10px;
+    }
+
+    .review-resultimg.image {
+        position: relative;
+        margin-top: 0px !important;
+        margin-left: 0px !important;
+        width: 100% !important;
+    }
+
+    /* .upload-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+      } */
+    .upload-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        border: 1px dashed #00000057;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-left: 20px;
+    }
+
+    /* .upload-box:hover {
+        border-color: gray;
+    } */
+
+    .upload-box-label {
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        text-align: left;
+    }
+
+    .upload-box-icon {
+        font-size: 30px;
+        color: grey;
+    }
+
+    #upload_photo img {
+        display: block;
+        margin: 0 auto;
+        width: 50%;
+        border: 2px solid black;
+        border-radius: 5px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    .review_line {
+        font-size: 10px;
+        /* text-align: justify; */
+        color: #d90a0a;
+        padding-bottom: 10px;
+        font-weight: 400;
+    }
+
+    /* .rating_image_block>div:hover>img  {  
+        filter: grayscale(0%);
+        cursor: pointer;
+        } */
+
+    .review_line p {
+        font-weight: 600;
+        color: #bbbaba !important;
+        /* opacity: 1; */
+        text-transform: initial;
+    }
+
+    div#upload_container {
+        margin: 10px 0px 15px 0px;
+    }
+
+    /* 
+    .tooltipclass{
+        color: #8a8484 !important;
+        font-weight: 500;  
+    } */
+
+
+    .reviewpopuptooltip {
+        background-color: grey;
+        color: white;
+        font-weight: bold;
+        border-width: 2px 6px;
+        border-style: solid;
+        border-radius: 9px;
+        border-color: grey;
+    }
+
+
+
+
+    .item_review_popup.row {
+        margin-bottom: -21px !important;
+    }
+
+    /* .tooltip {
+        position: relative;
+        display: inline-block;
+        opacity: 1 !important;
+        cursor: pointer;
+    } */
+
+    .tooltipclass {
+        width: 300px;
+        background-color: #f6f6f6;
+        color: #646464;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 3px;
+        position: absolute;
+        z-index: 1;
+        top: 110px;
+        left: 0;
+        font-size: 12px;
+        border: 1px solid #e1e1e1;
+    }
+
+    #popupreviewmodel .modal-content {
+        padding: 0;
+    }
+
+
+    /* 
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+    } */
+    .submit_review_popup_form_block .submit_review_popup_form_button {
+        margin-bottom: 0px !important;
+    }
+
+    div#modal_body_review {
+        padding: 10px 20px !important;
+    }
+
+    .rating_image_block>div {
+        max-width: 25px;
+        padding: 0px !important;
+    }
+
+    .upload-box-label {
+        margin-top: 10px;
+    }
+
+    form#review_popup_form span.tooltiptext {
+        font-weight: 500;
+    }
+
+    .review-resultimg {
+        height: 88px;
+        float: left;
+        border-radius: 5px;
+        width: 78px;
+    }
+
+    .review-resultimg img {
+        height: 100%;
+        width: 100%;
+    }
+
+    .write_comment_block {
+        margin-top: 20px !important;
+    }
+
+    textarea.custom_comment,
+    textarea.custom_comment:focus {
+        border: 1px solid lightgrey;
+        box-shadow: none;
+    }
+
+    @media only screen and (max-width:506px) {
+        form#review_popup_form span.tooltiptext {
+            margin-left: -40px !important;
+            max-width: 200px;
+        }
+
+        div#popupreviewmodel .modal-body {
+            padding-left: 0px;
+            padding-right: 5px;
+            padding-top: 5px;
+        }
+
+        .name_review_popup {
+            width: 66%;
+            padding-right: 0px;
+        }
+
+        .img_review_popup {
+            padding: 0px;
+            max-width: 32%;
+        }
+
+        .tooltipclass {
+            width: 225px;
+            top: 140px;
+        }
+    }
+
+    #open_review_popup {
+        display: none !important;
+    }
+
+    /* cross button css */
+    aside.modal-popup.modal-slide.my-custom-class button.action-close {
+        color: black !important;
+    }
+
+    aside.modal-popup.modal-slide.my-custom-class .action-close:before {
+        color: black !important;
+    }
+
+    .review-popup-open div#popupreviewmodel .modal-dialog {
+        z-index: 99999999999 !important;
+    }
+
+    .review-popup-open .page-header,
+    .review-popup-open .sections.nav-sections,
+    .review-popup-open .golfoy-new-container .golfoy-new-new-container,
+    .review-popup-open .golfoy-exclusive-container .golfoy-exclusive-new-container,
+    .page-products.review-popup-open .columns {
+        z-index: 0 !important;
+    }
+</style>
+
+
+
+
+
+
+<script>
+    require(['jquery'], function(jQuery) {
+        jQuery(document).ready(function() {
+
+            jQuery('div#popupreviewmodel button.close').on('click', function() {
+                jQuery('div#popupreviewmodel').modal('hide');
+            });
+
+            //set cookie for closing sign up popup starts
+            function setreviewpopupCookie(cname, cvalue, exdays) {
+                //        alert('setting up cookie');
+                var d = new Date();
+                d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+                var expires = "expires=" + d.toGMTString();
+                document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+            }
+
+            function getreviewpopupCookie(cname) {
+                //        alert('getting cookie');
+                var name = cname + "=";
+                var decodedCookie = decodeURIComponent(document.cookie);
+                var ca = decodedCookie.split(';');
+                for (var i = 0; i < ca.length; i++) {
+                    var c = ca[i];
+                    while (c.charAt(0) == ' ') {
+                        c = c.substring(1);
+                    }
+                    if (c.indexOf(name) == 0) {
+                        return c.substring(name.length, c.length);
+                    }
+                }
+                return "";
+            }
+            //alert('here');
+            //if popup button exists, then click it
+            setTimeout(function() {
+                //            alert('settime');
+                if (jQuery("#open_review_popup").length) {
+
+                    if (jQuery("#customer_id").length) {
+                        var customer_id = jQuery('#customer_id').val();
+                    } else {
+                        var customer_id = '';
+                    }
+                    var reviewpopupclose = getreviewpopupCookie("reviewpopupclose" + customer_id);
+                    if (reviewpopupclose != "show_no") {
+                        jQuery("#open_review_popup").click();
+                        //setreviewpopupCookie("reviewpopupclose"+customer_id, 'show_no', 1);
+                    } else {
+                        //                    alert('do not click');
+                    }
+
+                }
+            }, 1000);
+
+
+
+            jQuery('.write_comment_text').click(function() {
+                jQuery(this).parent('.write_comment_button').siblings('.write_comment_textarea').slideDown();
+                jQuery(this).hide();
+            });
+
+            //change there
+            jQuery('.rating_smiley').click(function() {
+                var rating_value = jQuery(this).attr('rating_value');
+                //            jQuery(this).parent('div').siblings('div').children('.rating_smiley').removeClass('selected');
+
+                jQuery(this).parent('div').siblings('div').each(function() {
+                    jQuery(this).children('.rating_smiley').removeClass('selected');
+                    jQuery(this).children('.rating_smiley').removeClass('clicked');
+                    if (parseInt(jQuery(this).children('.rating_smiley').attr('rating_value')) < parseInt(rating_value)) {
+                        jQuery(this).children('.rating_smiley').addClass('selected clicked');
+                    }
+                });
+                //change there
+                jQuery(this).addClass('selected clicked');
+                jQuery(this).parent('div').parent('div.rating_image_block').parent('div.rating_image_review_popup').parent('div.name_review_popup').parent('.product_name').siblings('.star_rating_input').val(rating_value);
+
+
+                //jQuery(this).parents('div.name_review_popup').siblings('.star_rating_input').val(rating_value);
+
+            });
+            /******************************************* */
+
+
+
+            jQuery('.rating_smiley').hover(function() {
+                var rating_value = jQuery(this).attr('rating_value');
+                jQuery(this).addClass('selected');
+                jQuery(this).parent('div').siblings('div').each(function() {
+                    // jQuery(this).children('.rating_smiley').removeClass('selected');
+                    if (parseInt(jQuery(this).children('.rating_smiley').attr('rating_value')) < parseInt(rating_value)) {
+                        jQuery(this).children('.rating_smiley').addClass('selected');
+                    }
+                })
+            }, function() {
+                //jQuery('.rating_smiley:not(.clicked)').removeClass('selected');
+                var rating_value = jQuery(this).attr('rating_value');
+                if (!jQuery(this).hasClass('clicked')) {
+                    jQuery(this).removeClass('selected');
+                }
+                jQuery(this).parent('div').siblings('div').each(function() {
+                    // jQuery(this).children('.rating_smiley').removeClass('selected');
+                    if (parseInt(jQuery(this).children('.rating_smiley').attr('rating_value')) < parseInt(rating_value)) {
+                        if (!jQuery(this).children('.rating_smiley').hasClass('clicked')) {
+                            jQuery(this).children('.rating_smiley').removeClass('selected');
+                        }
+                    }
+                })
+            });
+
+            /****************************************************** */
+
+            function validate_and_fill_value_review_form() {
+
+                var flag = 1;
+
+                jQuery('.item_review_popup').each(function() {
+                    if (jQuery(this).find('.custom_comment').val().trim() != '') {
+                        jQuery(this).find('.comment_rating_input').val(jQuery(this).find('.custom_comment').val());
+                    }
+                });
+
+                //check if required value is empty
+                jQuery('.required_field_custom_form').each(function() {
+                    if (jQuery(this).val().trim() == '') {
+                        flag = 0;
+                    }
+                });
+
+
+                if (flag == 1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+
+
+            jQuery("#review_images").submit(function() {
+                if (jQuery('#review_images').valid()) {
+
+                    var formData = new FormData(this);
+                    var file_obj = document.getElementById("filepath");
+                    formData.append('filepath', file_obj.files[0]);
+
+                    var url = "<?php echo $block->getBaseUrl() . 'userform/index/ajaxsave/' ?>";
+                    jQuery.ajax({
+                        url: url,
+                        type: "POST",
+                        dataType: "JSON",
+                        contentType: false,
+                        enctype: 'multipart/form-data',
+                        processData: false,
+                        //data: {fname:event_fname,lname:event_lname,address:event_address,city:event_city,mobilenumber:event_mobilenumber,filename:event_filename},
+                        data: formData,
+                        showLoader: true,
+                        cache: false,
+                        success: function(response) {
+                            //console.log(response.output);
+                            //jQuery('.page.messages').html(response);
+                            if (response == "1") {
+                                //alert("Saved!");
+                                jQuery(".page.messages").html('<div role="alert" class="messages"><div class="message-success success message" data-ui-id="message-success"><div >You saved the data.</div></div></div>');
+                                jQuery('#fname').val('');
+                                jQuery('#lname').val('');
+                                jQuery('#address').val('');
+                                jQuery('#city').val('');
+                                jQuery('#mobilenumber').val('');
+                            } else {
+                                //alert("Not Saved!");
+                                jQuery(".page.messages").html('<div role="alert" class="messages"><div class="alert danger alert-danger" data-ui-id="message-danger"><div >Data could not saved ! .</div></div></div>');
+                            }
+                            jQuery(".page.messages").delay(200).fadeIn().delay(4000).fadeOut();
+                        }
+                    });
+                    return false;
+                }
+
+            });
+
+
+
+            jQuery('#review_popup_form').submit(function(e) {
+                //return;
+                e.preventDefault();
+                var validation_success = validate_and_fill_value_review_form();
+                //            alert("validation_success" + validation_success);
+
+                if (validation_success == true) {
+                    jQuery('.submit_review_popup_form_button').html('Submitted');
+                    var number_of_products = jQuery('#number_of_products').val();
+                    var customer_id = jQuery('#customer_id').val();
+                    var order_id = jQuery('#order_id').val();
+                    var submitted_data = '';
+                    var error_message = '';
+
+                    jQuery('.item_review_popup').each(function() {
+                        var star_rating_input = jQuery(this).children('.star_rating_input').val();
+                        var product_id_rating_input = jQuery(this).children('.product_id_rating_input').val();
+                        var comment_rating_input = jQuery(this).children('.comment_rating_input').val();
+                        if (comment_rating_input == '') {
+                            comment_rating_input = '|empty|';
+                        }
+                        var commaSeparatedValues = '|empty|';
+                        if (jQuery(this).find('input[name="review_media_files[]"]').length) {
+                            var mediaInputs = jQuery(this).find('input[name="review_media_files[]"]');
+                            var mediaValues = [];
+                            mediaInputs.each(function() {
+                                mediaValues.push(jQuery(this).val());
+                            });
+                            commaSeparatedValues = mediaValues.join(',');
+                        }
+
+                        var single_prd_data = star_rating_input + "<><>" + product_id_rating_input + "<><>" + comment_rating_input + "<><>" + commaSeparatedValues;
+                        if (submitted_data == '') {
+                            submitted_data = single_prd_data;
+                        } else {
+                            submitted_data = submitted_data + "<><><>" + single_prd_data;
+                        }
+                    });
+
+
+
+                    if (error_message == '') {
+                        //no error, now send sms
+                        var url = jQuery('#base_url').val() + "reviewpopup/submit/index";
+
+                        jQuery.ajax({
+                            url: url,
+                            type: "POST",
+                            data: {
+                                number_of_products: number_of_products,
+                                customer_id: customer_id,
+                                submitted_data: submitted_data,
+                                order_id: order_id
+                            },
+                            success: function(response) {
+                                jQuery('.submit_review_popup_form_button').html('Submitted');
+                                jQuery('.submit_review_popup_form_status_text').html('<div class="success">Thank you for submitting review</div>');
+                                jQuery('#popupreviewmodel').hide();
+                                var data = {
+                                    reason: 'submitted',
+                                    timestamp: new Date().getTime()
+                                };
+                                localStorage.setItem('artm_review_popup_closed', JSON.stringify(data));
+                            },
+                            error: function(jqXHR, textStatus, errorThrown) {
+                                jQuery('.submit_review_popup_form_button').html('Error');
+                                console.log(textStatus, errorThrown);
+                            }
+                        });
+                    }
+                } else {
+                    alert('Please choose rating');
+                }
+
+            });
+            //---------------------------------------
+            jQuery("html").on("dragover", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+            });
+
+            jQuery("html").on("drop", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            // Drag enter        
+            jQuery("#popupreviewmodel").on("dragenter", ".review-drag-area", function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+            });
+
+            // Drag over         
+            jQuery("#popupreviewmodel").on("dragover", ".review-drag-area", function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+            });
+
+            // Drop         
+            jQuery("#popupreviewmodel").on("drop", ".review-drag-area", function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                var parentdivid = jQuery(this).parents(".review-field-media").attr('id');
+                var file = e.originalEvent.dataTransfer.files;
+                var ins = file.length;
+                var ln = jQuery("#" + parentdivid).find(".review-resultimg").length;
+                var tc = 0;
+                if (ln) {
+                    tc = parseInt(ln) + parseInt(tc);
+                }
+                if (ins) {
+                    tc = parseInt(ins) + parseInt(tc);
+                }
+                if (tc > 10) {
+                    jQuery("#" + parentdivid).find(".media_field-error").show();
+                } else {
+                    jQuery("#" + parentdivid).find(".media_field-error").hide();
+                    for (var x = 0; x < ins; x++) {
+                        var fdata = new FormData();
+                        fdata.append("files[]", file[x]);
+                        uploadlogofunc(fdata, parentdivid);
+                    }
+                }
+            });
+
+            function uploadlogofunc(fdata, parentdivid) {
+                if (fdata != null && fdata != '') {
+                    jQuery.ajax({
+                        url: "/reviewimages/index/ajaxupload",
+                        type: "POST",
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        data: fdata,
+                        dataType: 'json',
+                        showLoader: true,
+                        success: function(res) {
+                            if (res.path) {
+                                $htmlstr = '<div class ="review-resultimg" ><img src = "/media/review_images' + res.path + '"><div class="review-img-cross" rel = "' + res.path + '">&#10006;</div>';
+                                $htmlstr = $htmlstr + '<input type="hidden" name = "review_media_files[]" value ="' + res.path + '"></div>';
+                                //jQuery($htmlstr).insertBefore(".review-drag-area"); 
+                                var dragarea = jQuery("#" + parentdivid).find(".review-drag-area");
+                                jQuery($htmlstr).insertAfter(dragarea);
+
+                            }
+                        }
+                    });
+                }
+            }
+            jQuery("#popupreviewmodel").on("click", ".review-dragdrop", function() {
+                // jQuery("#review_media").trigger('click');
+                var rel = jQuery(this).attr('rel');
+                jQuery("#" + rel + "_review_media").trigger('click');
+            });
+            jQuery("#popupreviewmodel").on("click", ".review-img-cross", function() {
+                var parentdivid = jQuery(this).parents(".review-field-media").attr('id');
+                var el = jQuery(this).parent(".review-resultimg");
+                var rel = jQuery(this).attr('rel');
+                var path = 'review_images' + rel;
+                jQuery.ajax({
+                    url: "/reviewimages/index/deleteajaxupload",
+                    type: "POST",
+                    data: 'path=' + path,
+                    dataType: 'json',
+                    showLoader: true,
+                    success: function(res) {
+                        el.remove();
+                        jQuery("#" + parentdivid).find(".media_field-error").hide();
+                    }
+                });
+            })
+            jQuery(document).on('change', '.review_media', function() {
+                var currentid = jQuery(this).attr("id");
+                var parentdivid = jQuery(this).parents(".review-field-media").attr('id');
+                var files = jQuery(this)[0].files;
+                var ins = files.length;
+                var tc = 0;
+                var ln = jQuery("#" + parentdivid).find(".review-resultimg").length;
+                if (ln) {
+                    tc = parseInt(ln) + parseInt(tc);
+                }
+                if (ins) {
+                    tc = parseInt(ins) + parseInt(tc);
+                }
+                if (tc > 10) {
+                    jQuery(this).val('');
+                    jQuery("#" + parentdivid).find(".media_field-error").show();
+                } else {
+                    for (var x = 0; x < ins; x++) {
+                        var fdata = new FormData();
+                        fdata.append("files[]", document.getElementById(currentid).files[x]);
+                        uploadlogofunc(fdata, parentdivid);
+                    }
+                    jQuery("#" + parentdivid).find(".media_field-error").hide();
+                }
+            });
+            //------------------------------------
+        });
+    });
+</script>
+<script>
+    require(['jquery'], function($) {
+        function toggleBodyClass() {
+            if ($('#popupreviewmodel').css('display') === 'block') {
+                $('body').addClass('review-popup-open');
+            } else {
+                $('body').removeClass('review-popup-open');
+            }
+        }
+
+        // Run on page load
+        toggleBodyClass();
+
+        // Watch for changes (important for modal open/close)
+        const observer = new MutationObserver(toggleBodyClass);
+
+        observer.observe(document.getElementById('popupreviewmodel'), {
+            attributes: true,
+            attributeFilter: ['style', 'class']
+        });
+    });
+</script>

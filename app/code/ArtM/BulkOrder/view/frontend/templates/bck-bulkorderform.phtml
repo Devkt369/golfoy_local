@@ -1,0 +1,798 @@
+<script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+<style>
+    /* * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+    } */
+
+    /* body {
+        min-height: 100vh;
+        width: 100%;
+        background: #c8e8e9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    } */
+    body {
+        font-family: 'spartan' !important;
+
+    }
+    p{
+        font-weight: 500;
+    }
+    .contact_form{
+        background: #f2f2f252;
+    }
+    hr{
+        border-top: 1px solid #e0dedea6;
+    }
+    .container.contact_form_container {
+        width: 100%;
+        background: #fff;
+        border-radius: 6px;
+        padding: 20px 60px 20px 40px;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .container .content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .container .content .left-side {
+        width: 25%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-top: 15px;
+        position: relative;
+    }
+
+    .content .left-side::before {
+        content: '';
+        position: absolute;
+        height: 70%;
+        width: 2px;
+        right: -15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #afafb6;
+    }
+
+    .content .left-side .details {
+        margin: 10px;
+        text-align: center;
+    }
+
+    .content .left-side .details i {
+        font-size: 30px;
+        color: #e60023;
+        margin-bottom: 10px;
+    }
+
+    .content .left-side .details .topic {
+        font-size: 18px;
+        font-weight: 500;
+    }
+
+    .content .left-side .details .text-one,
+    .content .left-side .details .text-two {
+        font-size: 14px;
+        color: #afafb6;
+    }
+
+    .container .content .right-side {
+        width: 100%;
+        /* margin-left: 75px; */
+    }
+
+    .content .right-side .topic-text h1 {
+        font-weight: 600;
+        font-size: 21px;
+        line-height: inherit;
+        color: #333333;
+        border: 0;
+        margin-bottom: 0px;
+
+    }
+
+    .right-side .input-box {
+        height: 50px;
+        width: 100%;
+        margin: 12px 0;
+    }
+
+    .right-side .input-box input,
+    .right-side .input-box textarea {
+        height: 100%;
+        width: 100%;
+        border: none;
+        outline: none;
+        font-size: 16px;
+        background: #F0F1F8;
+        border-radius: 6px;
+        padding: 0 15px;
+        resize: none;
+    }
+
+    .right-side .message-box {
+        min-height: 110px;
+    }
+
+    .right-side .input-box textarea {
+        padding-top: 6px;
+    }
+
+    .right-side .button {
+        display: inline-block;
+        margin-top: 12px;
+    }
+
+    .right-side .button input[type="button"] {
+        color: #fff;
+        font-size: 18px;
+        outline: none;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        background: #e60023;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+.col-md-2.col-xs-4.col-sm-4.bulk_img{
+    text-align: center !important;
+}
+h3.list_text{
+    text-align: center !important;
+}
+
+    .button input[type="button"]:hover {
+        background: #f7062abd;
+    }
+
+    @media (max-width: 950px) {
+        .container.contact_form_container {
+            width: 100%;
+            padding: 30px 40px 40px 35px;
+        }
+
+        .container .content .right-side {
+            width: 75%;
+            margin-left: 55px;
+        }
+    }
+
+    @media (max-width: 820px) {
+        .container.contact_form_container {
+            margin: 40px 0;
+            height: 100%;
+        }
+
+        .container .content {
+            flex-direction: column-reverse;
+        }
+
+        .container .content .left-side {
+            width: 100%;
+            flex-direction: row;
+            margin-top: 40px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .container .content .left-side::before {
+            display: none;
+        }
+
+        .container .content .right-side {
+            width: 100%;
+            margin-left: 0;
+        }
+    }
+
+    form#contact-form {
+        max-width: 700px !important;
+        padding: 20px 5px;      
+    }
+
+    main#maincontent {
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
+    button.action.submit.primary {
+        margin-top: 20px;
+    }
+
+    .right-side .input-box input {
+        background: #fff;
+        border: 1px solid #c2c2c2;
+        border-radius: 4px;
+        padding: 6px 15px;
+    }
+
+    .control.name_form input[type=text] {
+        border-radius: 3px;
+    }
+
+    .form_space {
+        margin-bottom: 20px;
+    }
+
+    .input-box.message-box.form_space {
+        margin-top: 40px;
+    }
+
+    .field.name.required.form_space {
+        margin-top: 20px;
+    }
+
+    i.fa.fa-send.send_icon {
+        margin-left: 10px;
+        transition: .5s ease;
+
+    }
+
+    i.fa.fa-send.send_icon.opened {
+        -webkit-transform: translate(100%, -100%);
+        -ms-transform: translate(100%, -100%);
+        transform: translate(100%, -100%);
+    }
+
+    .control.text_form textarea {
+        background: #fff;
+        border: 1px solid #c2c2c2;
+    }
+
+    button.action.submit.primary.co_button {
+            text-transform: uppercase;
+            color: #fff;
+           padding: 8px 20px !important;
+           font-size: 14px !important;
+            transition: .5s;
+        
+    }
+
+    /* button:hover.action.submit.primary.co_button {
+        background: white !important;
+        color: red;
+        border: 2px solid red;
+    } */
+
+    @media screen and (max-width:768px) {
+        button {
+            max-width: 215px !important;
+        }
+        .bulk_list{
+            text-align: center;
+        }
+        .bulk_list img {
+         max-width: 40% !important;
+        }
+            h3.list_text{
+                font-size: 17px;
+        }
+    }
+
+    @media screen and (max-width:480px) {
+        .rc-anchor-normal .rc-anchor-pt {
+            padding-right: 89px !important;
+        }
+
+        .rc-anchor-normal-footer {
+            width: 41px !important;
+        }
+
+        .rc-anchor-normal .rc-anchor-content {
+            width: 172px !important;
+        }
+
+        .rc-anchor-normal .rc-anchor-checkbox-label {
+            width: 90px !important;
+        }
+
+        .rc-anchor-normal {
+            width: 276px !important;
+        }
+
+        .rc-anchor-logo-portrait {
+            margin: 10px 0 0 0px !important;
+        }
+
+        main#maincontent {
+            margin-top: 90px !important;
+        }
+        .container.contact_form_container{
+            padding: 5px 0px 0px 0px !important;
+        }
+        .field.name.required.form_space {
+                margin-top: 0px;
+            }
+            .bulk_ban-img.ban_2 img{
+                padding-top: 10px;
+            }
+            p.form_par {
+            padding-top: 5px !important;
+}
+.bulk_img {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+    }
+
+    /* additional css (nigam) */
+
+
+
+    .custom_captcha input,
+    .custom_captcha {
+        font-size: 16px;
+    }
+
+    .custom_captcha {
+        border: 1px solid #cfcdcd;
+        display: inline-block;
+        font-weight: 600;
+        margin: 0px;
+        border-radius: 5px;
+        background-color: #f4f1f1 !important;
+    }
+
+    input.cc_result_input {
+        max-width: 70px;
+        height: 40px;
+        text-align: center;
+    }
+
+    span.numbers_to_operate {
+        background-color: #f4f1f1 !important;
+        display: inline-block;
+        float: left;
+        padding: 11px 15px 10px 15px;
+    }
+
+    input.cc_result_input:focus {
+        box-shadow: none;
+    }
+
+    span.cc_equal_sign {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    input.cc_result_input {
+        max-width: 70px;
+        height: 30px;
+        text-align: center;
+        /* border-color: #6c0d0d; */
+        text-shadow: none;
+        outline: 0px;
+        border: 1px solid #dbdbdb;
+        margin-top: 8px;
+        margin-right: 5px;
+    }
+
+    .right-side .input-box input {
+        height: 65% !important;
+    }
+
+    .phone.details.phone_det,
+    .email.details.email_det {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    i.fa.fa-phone,
+    i.fa.fa-envelope-o {
+        padding-right: 5px;
+    }
+
+    .column:not(.sidebar-main) form .actions-toolbar,
+    .column:not(.sidebar-additional) form .actions-toolbar {
+        margin-left: 0 !important;
+    }
+
+    .actions-toolbar.bulk_form_button {
+        padding-bottom: 10px;
+    }
+    @media only screen and (max-width:480px) {
+        .container.contact_form_container {
+            margin: 19px 0;
+            padding: 30px 0px 30px 0px;
+        }
+
+        i.fa.fa-phone {
+            font-size: 18px !important;
+        }
+
+        i.fa.fa-envelope-o {
+            font-size: 18px !important;
+        }
+
+        form#contact-form {
+            padding: 1px 20px;
+        }
+
+        .content .right-side .topic-text {
+            font-size: 19px;
+        }
+        .bulk_list{
+            text-align: center;
+        }
+        .container .content{
+            padding: 10px !important;
+        }
+        .bulk_list img{
+            max-width: 40px !important;
+            height: auto;
+        }
+        h3.list_text{
+            font-size: 11px !important;
+        }
+        .copyright{
+            width: 100%;
+        }
+        .row.bulk_images_list>div {
+            margin-bottom: 10px;
+        }
+        .bulk_ban-img.ban_1{
+            max-width: 130px !important;
+        }
+        span.text_2 {
+            font-size: 12px;
+        }
+        span.text_1 {
+            font-weight: 400;
+            font-size: 18px;
+        }
+        .bulk_ban-text h2 {
+            line-height: 1 !important;
+        }
+        .phone.details.phone_det{
+            padding-bottom: 10px;
+        }
+        h3.list_text {
+    font-size: 10px !important;
+}
+.bulk_img:nth-last-child(-n+2) {
+    padding-right: 55px !important; 
+  }
+  .bulk_img:nth-child(5) { 
+    padding-left: 55px !important; 
+  }
+  .actions-toolbar>.primary:last-child{
+    text-align: left !important;
+  }
+  .actions-toolbar>.primary .action{
+    width: 35% !important;
+  }
+    }
+
+    i.fa.fa-phone {
+        font-size: 24px;
+        color: red;
+    }
+
+    i.fa.fa-envelope-o {
+        font-size: 24px;
+        color: red;
+    }
+
+    p.form_par {
+        font-size: 12px;
+        color: grey;
+    }
+    .bulk_information p{
+        color: grey;
+        font-size: 12px;
+    }
+
+    h3.captacha_header {
+        margin-bottom: 1rem !important;
+        color: #000 !important;
+        font-weight: bold;
+        font-size: 15px;
+        padding-top: 15px;
+    }
+
+    .bulk_success img {
+        display: block;
+        margin: auto;
+    }
+
+    p.form_par {
+        padding-top: 10px;
+    }
+    main#maincontent .container{
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+    h3.list_text {
+    font-size: 11px;
+    font-weight: 600;
+}
+.bulk_list img{
+    max-width: 45px;
+}
+.bulk_list {
+    margin: 25px 0px;
+}
+/* .col-md-2.col-sm-4.bulk_img:not(:last-child) {
+    border-right: 2px solid #9a98984a;
+} */
+@media only screen and (max-width:989px) and (min-width:770px){
+    .bulk_list{
+        text-align: center !important;
+    }
+}
+.container .content{
+padding: 10px 45px;
+}
+.bulk_success img {
+    width: 100%;
+    max-width: 200px;
+}
+.bulk_success_img{
+    text-align: center;
+    padding: 20px 0px;
+}
+.bulk_information h2 {
+    font-weight: 600;
+    font-size: 15px;
+    line-height: inherit;
+    color: #333333;
+    border: 0;
+}
+.text-one.in_line{
+    font-weight: 600;
+    font-size: 13px;
+
+}
+.col-md-2.col-xs-4.col-sm-4.bulk_img{
+    padding-left: 0px;
+    padding-right: 0px;
+}
+.bulk_img {
+        text-align: center;
+    }
+    @media only screen and(max-width:768px){
+        .row.bulk_images_list .col-xs-6 {
+            margin-top: 30px;
+        }
+    }
+    .bulk_banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.bulk_ban-img.ban_1 {
+    width: 100%;
+    max-width: 200px;
+}
+.bulk_ban-text strong{
+    padding-top: 5px;
+}
+.bulk_ban-text h2 {
+    line-height: 1.5;
+    font-size: 23px;
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+}
+span.text_1 {
+    font-weight: 400;}
+
+</style>
+
+<?php
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+    $baseUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
+//    echo $baseUrl;
+$data = $block->getData('formdata');
+if (!empty($data)) {
+    $block->insertData();
+    echo "<div class='bulk_success'><img src='https://staging-golfoy.hyperx.cloud/media/sales/download.gif'><div class='bulk_success_img'> <b>Your query has been submitted.</b></div></div>";         
+} else {
+
+
+
+?>
+    <div class="contact_form">
+        <form class="form_contact" action="<?= $block->escapeUrl($block->getFormAction()) ?>" id="contact-form" method="post" data-hasrequired="<?= $block->escapeHtmlAttr(__('* Required Fields')) ?>" data-mage-init='{"validation":{}}'>
+            <div class="container contact_form_container">
+                <div class="content">
+                    <!-- <div class="left-side">
+                    <div class="phone details">
+                        <i class="fa fa-phone" style="font-size:25px"></i>
+                        <div class="topic">Phone</div>
+                        <div class="text-one">+919915065500</div>
+                    </div>
+                    <div class="email details">
+                        <i class="fa fa-envelope-o" style="font-size:25px"></i>
+                        <div class="topic">Email</div>
+                        <div class="text-one">contact@golfoy.com</div>
+                    </div>
+
+                </div> -->
+                    <div class="right-side">
+                        <div class="bulk_banner">
+                        <div class="bulk_ban-text"><h2><span class="text_1">Request</span><br><strong><span class="text_2">Bulk Purchase Here</span></strong></br></h2></div>
+                        <div class="bulk_ban-img ban_1"><img src="<?php echo $baseUrl ?>media/wysiwyg/2023_homepage/bulkpage/boxes.jpg" alt="query_page_banner_top_2" loading="lazy"></div>
+                        </div>
+                        <div class="bulk_ban-img ban_2"><img src="<?php echo $baseUrl ?>media/wysiwyg/2023_homepage/bulkpage/query_page_2.jpg" alt="query_page_banner_2" loading="lazy"></div>
+                        <div class="bulk_padd_form">
+                        <p class="form_par"><?= $block->escapeHtml(__('Looking for customized golf gear for your team, tournament or corporate gifts?')) ?></p>
+                            <hr class="hr_line">
+                        <div class="field name required form_space">
+                                <label class="label" for="name"><span><?= $block->escapeHtml(__('Name*')) ?></span></label>
+                                <div class="control name_form">
+                                    <input name="name" id="name" title="<?= $block->escapeHtmlAttr(__('Name*')) ?>" data-validate="{required:true}" value="<?= $block->escapeHtmlAttr($this->helper('Magento\Contact\Helper\Data')->getPostValue('name') ?: $this->helper('Magento\Contact\Helper\Data')->getUserName()) ?>" class="input-text" type="text" data-validate="{required:true}" />
+                                </div>
+                            </div>
+
+                            <div class="field email required form_space">
+                                <label class="label" for="email"><span><?= $block->escapeHtml(__('Email')) ?></span></label>
+                                <div class="control email_form">
+                                    <input name="email" id="email" title="<?= $block->escapeHtmlAttr(__('Email')) ?>" value="<?= $block->escapeHtmlAttr($this->helper('Magento\Contact\Helper\Data')->getPostValue('email') ?: $this->helper('Magento\Contact\Helper\Data')->getUserEmail()) ?>" class="input-text" type="email" data-validate="{'validate-email':true}" />
+                                </div>
+                            </div>
+
+                            <div class="input-box form_space">
+                                <label class="label" for="telephone"><span><?= $block->escapeHtml(__('Phone*')) ?></span></label>
+                                <div class="control phone_form">
+                                    <input name="telephone" id="telephone" oninput="javascript: if (this.value.length > 10) this.value = this.value.slice(0, 10);" maxlength="10" title="<?= $block->escapeHtmlAttr(__('Phone*')) ?>" data-validate="{required:true}" value="<?= $block->escapeHtmlAttr($this->helper('Magento\Contact\Helper\Data')->getPostValue('telephone')) ?>" class="input-text" type="number" inputmode="numeric" />
+                                </div>
+                                </div>
+
+
+
+                            <div class="input-box message-box form_space">
+                                <label class="label" for="comment"><span><?= $block->escapeHtml(__('Order Details*')) ?></span></label>
+                                <div class="control text_form">
+                                    <textarea name="comment" id="comment" oninput="javascript: if (this.value.length > 1000) this.value = this.value.slice(0, 1000);" maxlength="250" title="<?= $block->escapeHtmlAttr(__('Order Details*')) ?>" class="input-text" cols="5" rows="3" data-validate="{required:true}"><?= $block->escapeHtml($this->helper('Magento\Contact\Helper\Data')->getPostValue('comment')) ?></textarea>
+                                </div>
+                            </div>
+
+
+                            <p class="captacha_header"><strong>Captcha</strong></p>
+                            <!-- Captcha HTML code -->
+                            <div class="custom_captcha">
+                                <!-- Generate random numbers for the Captcha -->
+                                <span class="numbers_to_operate">
+                                    <span class="cc_number_1"><?php echo rand(10, 50); ?></span>
+                                    <span class="cc_arthmetic_sign">+</span>
+                                    <span class="cc_number_2"><?php echo rand(10, 20); ?></span>
+                                </span>
+                                <span class="cc_equal_sign">=</span>
+                                <!-- Input field for user to enter the result of the Captcha -->
+                                <span class="cc_result">
+                                    <input type="number" class="cc_result_input" />
+                                </span>
+                            </div>
+
+                            <div class="actions-toolbar bulk_form_button">
+                                <div class="primary">
+                                    <input type="hidden" name="hideit" id="hideit" value="" />
+                                    <button type="submit" title="<?= $block->escapeHtmlAttr(__('Submit')) ?>" class="action submit primary co_button ">
+                                        <span><?= $block->escapeHtml(__('Submit')) ?></span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <hr class="hr_line">
+
+                            <!-- extra information -->
+                            <div class="bulk_information">
+                                <p><h2>Why Bulk Order with us?</h2></p>
+                                <p>Here's why you should choose us for your next bulk order</p>
+                                <div class="bulk_list">
+                                    <div class="row bulk_images_list">
+                                    <div class="col-md-1"></div>
+                                    <div class="col-md-2 col-xs-4  bulk_img"><img src="<?php echo $baseUrl ?>media/wysiwyg/2023_homepage/bulkpage/customize_new.svg" alt="customization" loading="lazy"><h3 class="list_text">Customization</h3></div>   
+                                    <div class="col-md-2 col-xs-4 bulk_img"><img src="<?php echo $baseUrl ?>media/wysiwyg/2023_homepage/bulkpage/best_pri_new.svg" alt="wide range.svg" loading="lazy"><h3 class="list_text">Best Price</h3></div> 
+                                    <div class="col-md-2 col-xs-4  bulk_img"><img src="<?php echo $baseUrl ?>media/wysiwyg/2023_homepage/bulkpage/wide_range_new.svg" alt="wide range" loading="lazy"><h3 class="list_text">Wide Range</h3></div>
+                                    <div class="col-md-2 col-xs-6  bulk_img"><img src="<?php echo $baseUrl ?>media/wysiwyg/2023_homepage/bulkpage/free_delivery.svg" alt="free delivery" loading="lazy"><h3 class="list_text">Free Delivery</h3></div>
+                                    <div class="col-md-2 col-xs-6  bulk_img"><img src="<?php echo $baseUrl ?>media/wysiwyg/2023_homepage/bulkpage/quality_assured_fin.svg" alt="quality assured" loading="lazy"><h3 class="list_text">Quality Assured</h3></div>
+                                    <div class="col-md-1"></div>  
+                                </div>
+                                </div>
+                                <p>We ensure timely & quality delivery for every order placed with us.</p> 
+                            </div>
+<hr class="hr_line">
+                            <div class="side">
+                                <div class="row">
+                                    <div class="col-md-6 col-sm-12">
+                                        <div class="phone details phone_det">
+                                            <i class="fa fa-phone"></i>
+                                            <div class="topic in_line"></div>
+                                            <div class="text-one in_line">+919915065500</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-sm-12">
+                                        <div class="email details email_det">
+                                            <i class="fa fa-envelope-o"></i>
+                                            <div class="topic  in_line"></div>
+                                            <div class="text-one  in_line">contact@golfoy.com</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+
+
+
+                    </div>
+        </form>
+    </div>
+
+<?php
+ }
+?>
+<script type="text/javascript">
+    require(['jquery', 'bootstrap'], function(jQuery) {
+        // Wait for the page to load
+        jQuery(document).ready(function() {
+            // Handle form submission
+            jQuery('#contact-form').submit(function(e) {
+                // Get the value entered by the user
+                var entered_passcode = jQuery('.cc_result_input').val();
+                // Get the two numbers used in the Captcha
+                var cc_number_1 = jQuery('.cc_number_1').text();
+                var cc_number_2 = jQuery('.cc_number_2').text();
+                // Check if the user entered a number
+                if (isNaN(entered_passcode)) {
+                    e.preventDefault();
+                    alert("Please enter the result of the Captcha!");
+                    return;
+                }
+                // Calculate the expected result of the Captcha
+                var cc_expected_result = parseInt(cc_number_1) + parseInt(cc_number_2);
+                // Check if the user entered the correct result
+                if (cc_expected_result != entered_passcode) {
+                    e.preventDefault();
+                    alert("Captcha error!");
+                }
+            });
+        });
+
+        isDislayInviteMessage();
+
+        jQuery('#send-by').on('change', function() {
+            isDislayInviteMessage();
+        });
+
+        jQuery('.url_and_code .mp-input').hover(function() {
+            jQuery(this).siblings('.copy').text('<?= $block->escapeHtml(__('copy')) ?>');
+        });
+
+        jQuery('.url_and_code .copy').click(function() {
+            jQuery(this).siblings('.mp-input').select();
+            document.execCommand("copy");
+            jQuery(this).text('<?= $block->escapeHtml(__('copied')) ?>');
+        });
+
+        function isDislayInviteMessage() {
+            if (jQuery('#send-by').val() === 'store') {
+                jQuery('.invite-message').hide();
+            } else {
+                jQuery('.invite-message').show();
+            }
+        }
+        
+     
+            var phoneInput =jQuery('#telephone');
+
+            phoneInput.on('input', function(event) {
+                jQuery(this).val(function(_, value) {
+                return value.replace(/\D/g, '');
+                });
+            });
+
+    });
+</script>

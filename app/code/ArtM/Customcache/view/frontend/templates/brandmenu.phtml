@@ -1,0 +1,10 @@
+<?php
+$menuData = $block->getMenuCacheData();
+$menuPartnersData = $block->getPartnersMenuCacheData();
+?>
+<script>
+    localStorage.removeItem('menu_cache');
+    localStorage.setItem("menu_cache", `<?php echo $menuData; ?>`);
+    localStorage.removeItem('menu_cache_partners');
+    localStorage.setItem("menu_cache_partners", `<?php echo $menuPartnersData; ?>`);
+</script>

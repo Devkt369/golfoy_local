@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magestore\InventoryMovementApi\Model\ActionTypes">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="shipment_created" xsi:type="string">shipment_created</item>
+                <item name="invoice_created" xsi:type="string">invoice_created</item>
+                <item name="refund_created" xsi:type="string">refund_created</item>
+                <item name="source_item_changed" xsi:type="string">source_item_changed</item>
+                <item name="manually_change" xsi:type="string">manually_change</item>
+                <item name="product_deleted" xsi:type="string">product_deleted</item>
+                <item name="source_unassign" xsi:type="string">source_unassign</item>
+                <item name="magento_transfer" xsi:type="string">magento_transfer</item>
+                <item name="source_item_deleted" xsi:type="string">source_item_deleted</item>
+                <item name="import" xsi:type="string">import</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magestore\InventoryMovementApi\Model\OrderTypes">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="magento_order" xsi:type="array">
+                    <item name="label" xsi:type="string">Magento Order</item>
+                    <item name="viewUrlPath" xsi:type="string">sales/order/view</item>
+                    <item name="urlEntityParamName" xsi:type="string">order_id</item>
+                </item>
+                <item name="pos_unsynced_order" xsi:type="array">
+                    <item name="label" xsi:type="string">POS Unsynced Order</item>
+                    <item name="viewUrlPath" xsi:type="string">webposadmin/unconverted/view</item>
+                    <item name="urlEntityParamName" xsi:type="string">id</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magestore\InventoryMovementApi\Model\UserTypes">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="admin" xsi:type="string">Admin</item>
+                <item name="customer" xsi:type="string">Customer</item>
+                <item name="pos_staff" xsi:type="string">POS Staff</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magestore\InventoryMovementApi\Model\MetadataObjectTypes">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="shipment" xsi:type="array">
+                    <item name="viewUrlPath" xsi:type="string">sales/shipment/view</item>
+                    <item name="urlEntityParamName" xsi:type="string">shipment_id</item>
+                </item>
+                <item name="invoice" xsi:type="array">
+                    <item name="viewUrlPath" xsi:type="string">sales/invoice/view</item>
+                    <item name="urlEntityParamName" xsi:type="string">invoice_id</item>
+                </item>
+                <item name="refund" xsi:type="array">
+                    <item name="viewUrlPath" xsi:type="string">sales/creditmemo/view</item>
+                    <item name="urlEntityParamName" xsi:type="string">creditmemo_id</item>
+                </item>
+                <item name="order" xsi:type="array">
+                    <item name="viewUrlPath" xsi:type="string">sales/order/view</item>
+                    <item name="urlEntityParamName" xsi:type="string">order_id</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+</config>

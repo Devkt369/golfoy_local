@@ -1,0 +1,142 @@
+<?php
+
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+?>
+<?php /** @var $block \Magento\Sales\Block\Order\Info */ ?>
+<?php $_order = $block->getOrder() ?>
+<?php
+$storeManager = \Magento\Framework\App\ObjectManager::getInstance()
+    ->get(\Magento\Store\Model\StoreManagerInterface::class);
+$iconBaseUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'wysiwyg/order/';
+
+/* Update only these file names when you upload your icons */
+$shippingAddressIcon = 'location.svg';
+$billingAddressIcon = 'delivery-car.svg';
+$paymentMethodIcon = 'credit-card.svg';
+?>
+<div class="block block-order-details-view">
+    <div class="block-title">
+        <strong><?= $block->escapeHtml(__('Order Information')) ?></strong>
+    </div>
+    <div class="block-content">
+        <?php if (!$_order->getIsVirtual()) : ?>
+            <div class="box box-order-shipping-address">
+                <strong class="box-title">
+                    <span class="info-title-with-icon">
+                        <div class="info-title-icon-wrap">
+                            <img class="info-title-icon" src="<?= $block->escapeUrl($iconBaseUrl . $shippingAddressIcon) ?>" alt="" width="18" height="18">
+                        </div>
+                        <?= $block->escapeHtml(__('Shipping Address')) ?>
+                    </span>
+                </strong>
+                <div class="box-content">
+                    <address><?= /* @noEscape */ $block->getFormattedAddress($_order->getShippingAddress()) ?></address>
+                </div>
+            </div>
+
+            <div class="box box-order-shipping-method">
+                <strong class="box-title">
+                    <span><?= $block->escapeHtml(__('Shipping Method')) ?></span>
+                </strong>
+                <div class="box-content">
+                    <?php if ($_order->getShippingDescription()) : ?>
+                        <?= $block->escapeHtml($_order->getShippingDescription()) ?>
+                    <?php else : ?>
+                        <?= $block->escapeHtml(__('No shipping information available')) ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <div class="box box-order-billing-address">
+            <strong class="box-title">
+                <span class="info-title-with-icon">
+                    <div class="info-title-icon-wrap">
+                        <img class="info-title-icon" src="<?= $block->escapeUrl($iconBaseUrl . $billingAddressIcon) ?>" alt="" width="18" height="18">
+                    </div>
+                    <?= $block->escapeHtml(__('Billing Address')) ?>
+                </span>
+            </strong>
+            <div class="box-content">
+                <address><?= /* @noEscape */ $block->getFormattedAddress($_order->getBillingAddress()) ?></address>
+            </div>
+        </div>
+        <div class="box box-order-billing-method">
+            <strong class="box-title">
+                <span class="info-title-with-icon">
+                    <div class="info-title-icon-wrap">
+                        <img class="info-title-icon" src="<?= $block->escapeUrl($iconBaseUrl . $paymentMethodIcon) ?>" alt="" width="18" height="18">
+                    </div>
+                    <?= $block->escapeHtml(__('Payment Method')) ?>
+                </span>
+            </strong>
+            <div class="box-content">
+                <?php
+                $paymentMethod = $_order->getPayment()->getMethod();
+
+                if ($paymentMethod === 'cashondelivery') {
+                    echo '<strong>Cash on Delivery</strong>';
+                } elseif ($paymentMethod === 'razorpay') {
+                    echo '<strong>Prepaid Order</strong>';
+                } elseif ($paymentMethod === 'free') {
+                    echo '<strong>Prepaid Order</strong>';
+                } else {
+                    echo '<strong>' . $block->escapeHtml(ucwords(str_replace('_', ' ', $paymentMethod))) . '</strong>';
+                }
+                ?>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="actions-toolbar-bottom">
+    <div class="secondary">
+        <a href="<?= $block->getUrl('sales/order/history') ?>" class="action back">
+            <span>Back to My Orders</span>
+        </a>
+    </div>
+</div>
+
+<style>
+    .block-order-details-view .box-title .info-title-with-icon {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        vertical-align: middle;
+    }
+
+    .block-order-details-view .box-title .info-title-icon {
+        display: block;
+        flex-shrink: 0;
+    }
+
+    .block-order-details-view .box-title .info-title-icon-wrap {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .block-content .info-title-icon-wrap,
+    .block-content .info-title-icon-wrap img {
+        margin-bottom: 0px !important;
+        padding-bottom: 0px !important;
+    }
+
+    .block-content .info-title-icon-wrap img {
+        width: 20px;
+        height: 20px;
+        padding: 0px !important;
+    }
+
+    body.account strong.box-title * {
+        padding: 0px !important;
+    }
+
+    .block-order-details-view .box-title .info-title-with-icon,
+    body.account strong.box-title * {
+        margin-bottom: 0px !important;
+    }
+</style>

@@ -1,0 +1,183 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="artm_product_slider_group" resource="default" engine="innodb" comment="ArtM Product Slider Groups">
+        <column xsi:type="int" name="group_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Group ID"/>
+        <column xsi:type="varchar" name="name" nullable="false" length="255" comment="Group Name"/>
+        <column xsi:type="varchar" name="identifier" nullable="false" length="255" comment="Identifier"/>
+        <column xsi:type="text" name="description" nullable="true" comment="Description"/>
+        <column xsi:type="int" name="sort_order" nullable="false" default="0" comment="Sort Order"/>
+        <column xsi:type="text" name="tabs_json" nullable="true" comment="Tabs JSON"/>
+        <column xsi:type="smallint" name="status" nullable="false" default="1" comment="Status"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="false" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="group_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_PRODUCT_SLIDER_GROUP_IDENTIFIER_UNQ">
+            <column name="identifier"/>
+        </constraint>
+        <index referenceId="ARTM_PRODUCT_SLIDER_GROUP_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+    </table>
+
+    <table name="artm_product_slider" resource="default" engine="innodb" comment="ArtM Product Sliders">
+        <column xsi:type="int" name="slider_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Slider ID"/>
+        <column xsi:type="int" name="group_id" padding="10" unsigned="true" nullable="true" comment="Group ID"/>
+        <column xsi:type="varchar" name="title" nullable="false" length="255" comment="Title"/>
+        <column xsi:type="varchar" name="identifier" nullable="false" length="255" comment="Identifier"/>
+        <column xsi:type="text" name="store_view_ids" nullable="true" comment="Store View IDs"/>
+        <column xsi:type="text" name="customer_group_ids" nullable="true" comment="Customer Group IDs"/>
+        <column xsi:type="datetime" name="from_date" nullable="true" comment="From Date"/>
+        <column xsi:type="datetime" name="to_date" nullable="true" comment="To Date"/>
+        <column xsi:type="smallint" name="status" nullable="false" default="1" comment="Status"/>
+        <column xsi:type="varchar" name="heading" nullable="true" length="255" comment="Heading"/>
+        <column xsi:type="varchar" name="sub_heading" nullable="true" length="255" comment="Sub Heading"/>
+        <column xsi:type="text" name="content_description" nullable="true" comment="Description"/>
+        <column xsi:type="varchar" name="button_text" nullable="true" length="255" comment="Button Text"/>
+        <column xsi:type="varchar" name="button_link" nullable="true" length="512" comment="Button Link"/>
+        <column xsi:type="varchar" name="button_link_type" nullable="false" length="16" default="manual" comment="Button Link Type"/>
+        <column xsi:type="smallint" name="show_desktop" nullable="false" default="1" comment="Show Desktop"/>
+        <column xsi:type="smallint" name="show_tablet" nullable="false" default="1" comment="Show Tablet"/>
+        <column xsi:type="smallint" name="show_mobile" nullable="false" default="1" comment="Show Mobile"/>
+        <column xsi:type="varchar" name="source_type" nullable="false" length="32" default="category" comment="Product Source Type"/>
+        <column xsi:type="text" name="source_value" nullable="true" comment="Product Source Value"/>
+        <column xsi:type="text" name="category_ids" nullable="true" comment="Category IDs"/>
+        <column xsi:type="smallint" name="allow_multiple_categories" nullable="false" default="1" comment="Allow Multiple Categories"/>
+        <column xsi:type="smallint" name="include_child_categories" nullable="false" default="1" comment="Include Child Categories"/>
+        <column xsi:type="text" name="exclude_product_ids" nullable="true" comment="Exclude Product IDs"/>
+        <column xsi:type="text" name="source_product_ids" nullable="true" comment="Source Product IDs"/>
+        <column xsi:type="text" name="mixed_category_ids" nullable="true" comment="Mixed Category IDs"/>
+        <column xsi:type="text" name="mixed_product_ids" nullable="true" comment="Mixed Product IDs"/>
+        <column xsi:type="text" name="mixed_excluded_product_ids" nullable="true" comment="Mixed Excluded Product IDs"/>
+        <column xsi:type="varchar" name="mixed_priority" nullable="false" length="64" default="category_then_manual" comment="Mixed Priority"/>
+        <column xsi:type="int" name="max_products_desktop" nullable="false" default="12" comment="Max Products Desktop"/>
+        <column xsi:type="int" name="max_products_tablet" nullable="false" default="8" comment="Max Products Tablet"/>
+        <column xsi:type="int" name="max_products_mobile" nullable="false" default="4" comment="Max Products Mobile"/>
+        <column xsi:type="varchar" name="sort_by" nullable="false" length="64" default="entity_id" comment="Sort By"/>
+        <column xsi:type="varchar" name="sort_direction" nullable="false" length="4" default="DESC" comment="Sort Direction"/>
+        <column xsi:type="varchar" name="sorting_type" nullable="false" length="32" default="newest" comment="Sorting Type"/>
+        <column xsi:type="text" name="manual_sort_product_ids" nullable="true" comment="Manual Sort Product IDs"/>
+        <column xsi:type="varchar" name="custom_sort_attribute" nullable="true" length="128" comment="Custom Sort Attribute"/>
+        <column xsi:type="int" name="product_limit" nullable="false" default="12" comment="Product Limit"/>
+        <column xsi:type="varchar" name="slides_to_show" nullable="false" length="64" default="4" comment="Slides To Show"/>
+        <column xsi:type="varchar" name="display_type" nullable="false" length="16" default="slider" comment="Display Type"/>
+        <column xsi:type="int" name="desktop_items" nullable="false" default="4" comment="Desktop Items"/>
+        <column xsi:type="int" name="tablet_items" nullable="false" default="2" comment="Tablet Items"/>
+        <column xsi:type="int" name="mobile_items" nullable="false" default="1" comment="Mobile Items"/>
+        <column xsi:type="int" name="space_between" nullable="false" default="16" comment="Space Between"/>
+        <column xsi:type="smallint" name="show_arrows" nullable="false" default="1" comment="Show Arrows"/>
+        <column xsi:type="smallint" name="show_dots" nullable="false" default="1" comment="Show Dots"/>
+        <column xsi:type="smallint" name="infinite_loop" nullable="false" default="1" comment="Infinite Loop"/>
+        <column xsi:type="smallint" name="autoplay" nullable="false" default="0" comment="Autoplay"/>
+        <column xsi:type="int" name="autoplay_delay" nullable="false" default="3000" comment="Autoplay Delay"/>
+        <column xsi:type="smallint" name="swipe" nullable="false" default="1" comment="Swipe"/>
+        <column xsi:type="smallint" name="mouse_drag" nullable="false" default="1" comment="Mouse Drag"/>
+        <column xsi:type="smallint" name="touch_support" nullable="false" default="1" comment="Touch Support"/>
+        <column xsi:type="smallint" name="lazy_load" nullable="false" default="1" comment="Lazy Load"/>
+        <column xsi:type="int" name="animation_speed" nullable="false" default="300" comment="Animation Speed"/>
+        <column xsi:type="int" name="grid_desktop_columns" nullable="false" default="4" comment="Grid Desktop Columns"/>
+        <column xsi:type="int" name="grid_tablet_columns" nullable="false" default="2" comment="Grid Tablet Columns"/>
+        <column xsi:type="int" name="grid_mobile_columns" nullable="false" default="1" comment="Grid Mobile Columns"/>
+        <column xsi:type="text" name="card_components" nullable="true" comment="Card Components"/>
+        <column xsi:type="text" name="custom_attributes" nullable="true" comment="Custom Attributes"/>
+        <column xsi:type="smallint" name="hover_image_enabled" nullable="false" default="0" comment="Hover Image Enabled"/>
+        <column xsi:type="varchar" name="image_role" nullable="false" length="32" default="small_image" comment="Image Role"/>
+        <column xsi:type="int" name="autoplay_speed" nullable="false" default="3000" comment="Autoplay Speed"/>
+        <column xsi:type="smallint" name="show_name" nullable="false" default="1" comment="Show Name"/>
+        <column xsi:type="smallint" name="show_price" nullable="false" default="1" comment="Show Price"/>
+        <column xsi:type="smallint" name="show_add_to_cart" nullable="false" default="1" comment="Show Add To Cart"/>
+        <column xsi:type="smallint" name="remove_brand_from_name" nullable="false" default="0" comment="Remove Brand Name From Product Name"/>
+        <column xsi:type="text" name="preview_notes" nullable="true" comment="Preview Notes"/>
+        <column xsi:type="int" name="sort_order" nullable="false" default="0" comment="Sort Order"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="false" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="slider_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_PRODUCT_SLIDER_IDENTIFIER_UNQ">
+            <column name="identifier"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_PRODUCT_SLIDER_GROUP_ID_ARTM_PRODUCT_SLIDER_GROUP_GROUP_ID"
+                    table="artm_product_slider"
+                    column="group_id"
+                    referenceTable="artm_product_slider_group"
+                    referenceColumn="group_id"
+                    onDelete="SET NULL"/>
+        <index referenceId="ARTM_PRODUCT_SLIDER_GROUP_ID" indexType="btree">
+            <column name="group_id"/>
+        </index>
+        <index referenceId="ARTM_PRODUCT_SLIDER_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+    </table>
+
+    <table name="artm_product_slider_products" resource="default" engine="innodb" comment="ArtM Product Slider Products">
+        <column xsi:type="int" name="item_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Item ID"/>
+        <column xsi:type="int" name="slider_id" padding="10" unsigned="true" nullable="false" comment="Slider ID"/>
+        <column xsi:type="int" name="product_id" padding="10" unsigned="true" nullable="false" comment="Product ID"/>
+        <column xsi:type="int" name="position" nullable="false" default="0" comment="Position"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="item_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_SLIDER_PRODUCTS_SLIDER_PRODUCT_UNQ">
+            <column name="slider_id"/>
+            <column name="product_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_SLIDER_PRODUCTS_SLIDER_ID_ARTM_PRODUCT_SLIDER_SLIDER_ID"
+                    table="artm_product_slider_products"
+                    column="slider_id"
+                    referenceTable="artm_product_slider"
+                    referenceColumn="slider_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_SLIDER_PRODUCTS_PRODUCT_ID_CATALOG_PRODUCT_ENTITY_ENTITY_ID"
+                    table="artm_product_slider_products"
+                    column="product_id"
+                    referenceTable="catalog_product_entity"
+                    referenceColumn="entity_id"
+                    onDelete="CASCADE"/>
+        <index referenceId="ARTM_SLIDER_PRODUCTS_PRODUCT_ID" indexType="btree">
+            <column name="product_id"/>
+        </index>
+    </table>
+
+    <table name="artm_product_slider_group_items" resource="default" engine="innodb" comment="ArtM Product Slider Group Items">
+        <column xsi:type="int" name="item_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Item ID"/>
+        <column xsi:type="int" name="group_id" padding="10" unsigned="true" nullable="false" comment="Group ID"/>
+        <column xsi:type="int" name="slider_id" padding="10" unsigned="true" nullable="false" comment="Slider ID"/>
+        <column xsi:type="varchar" name="tab_title" nullable="false" length="255" comment="Tab Title"/>
+        <column xsi:type="int" name="position" nullable="false" default="0" comment="Position"/>
+        <column xsi:type="smallint" name="status" nullable="false" default="1" comment="Status"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="item_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_SLIDER_GROUP_ITEMS_GROUP_ID_ARTM_PRODUCT_SLIDER_GROUP_GROUP_ID"
+                    table="artm_product_slider_group_items"
+                    column="group_id"
+                    referenceTable="artm_product_slider_group"
+                    referenceColumn="group_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_SLIDER_GROUP_ITEMS_SLIDER_ID_ARTM_PRODUCT_SLIDER_SLIDER_ID"
+                    table="artm_product_slider_group_items"
+                    column="slider_id"
+                    referenceTable="artm_product_slider"
+                    referenceColumn="slider_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="unique" referenceId="ARTM_SLIDER_GROUP_ITEMS_GROUP_SLIDER_UNQ">
+            <column name="group_id"/>
+            <column name="slider_id"/>
+        </constraint>
+        <index referenceId="ARTM_SLIDER_GROUP_ITEMS_SLIDER_ID" indexType="btree">
+            <column name="slider_id"/>
+        </index>
+        <index referenceId="ARTM_SLIDER_GROUP_ITEMS_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+    </table>
+</schema>

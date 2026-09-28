@@ -1,0 +1,105 @@
+<div class="col-xs-12 header-left" style="padding: 30px 0px 20px 0px !important;">
+    <div class="heading_golfoy_left">
+        <h2 style="padding: 0px 5px !important;">Apparel Collection</h2>
+    </div>
+</div>
+
+<div id="block_winterwear" class="background-container">
+    <div class="row full_block_web">
+
+        <a href="https://golfoy.com/golf-apparels/apparel-category/golf-winter-wear.html"><img class="background-image" src="https://golfoy.com/media/wysiwyg/2024/landing/full_width/Winter-Hot-Styles-Mobile-new.jpg" alt="Winterwear" loading="lazy" /></a>
+    </div>
+
+    <div class="slider-container">
+        <button class="slider-btn prev-btn" onclick="scrollLeftFun(this)">❮</button>
+        <div class="product-grid">
+            <div class="product-card">
+                <a href="https://golfoy.com/golf-apparels/apparel-category/golf-t-shirts.html">
+                    <img src="https://golfoy.com/media/wysiwyg/2024/landing/four_width/Polo-T-shirts-4-Block-Mobile-2.jpg" alt="jl" loading="lazy">
+                </a>
+                <div class="product_info"><a href="https://golfoy.com/golf-apparels/apparel-category/golf-t-shirts.html"><span> Shop Now ></span></a></div>
+            </div>
+
+            <div class="product-card">
+                <a href="https://golfoy.com/golf-apparels/apparel-category/trousers.html?cus=custom&amp;product_list_order=discount">
+                    <img src="https://golfoy.com/media/wysiwyg/2024/landing/four_width/Trousers-4-Block-Mobile-2.jpg" alt="gfore" loading="lazy">
+                </a>
+                <div class="product_info"><a href="https://golfoy.com/golf-apparels/apparel-category/trousers.html?cus=custom&amp;product_list_order=discount"><span> Shop Now ></span></a></div>
+            </div>
+
+            <div class="product-card">
+                <a href="https://golfoy.com/golf-apparels/apparel-category/headwear.html?brand=3736%2C3779%2C4550%2C128%2C8%2C7%2C421&amp;cus=custom">
+                    <img src="https://golfoy.com/media/wysiwyg/2024/landing/four_width/Headwear-4-Block-Mobile-2.jpg" alt="ping" loading="lazy">
+                </a>
+                <div class="product_info"><a href="https://golfoy.com/golf-apparels/apparel-category/headwear.html?brand=3736%2C3779%2C4550%2C128%2C8%2C7%2C421&amp;cus=custom"><span> Shop Now ></span></a></div>
+            </div>
+
+            <div class="product-card">
+                <a href="https://golfoy.com/golf-apparels/apparel-category/golf-eyewear.html">
+                    <img src="https://golfoy.com/media/wysiwyg/2024/landing/four_width/Eyewear-4-Block-Mobile-2.jpg" alt="adidas" loading="lazy">
+                </a>
+                <div class="product_info"><a href="https://golfoy.com/golf-apparels/apparel-category/golf-eyewear.html"><span> Shop Now ></span></a></div>
+            </div>
+        </div>
+        <button class="slider-btn next-btn" onclick="scrollRight(this)">❯</button>
+    </div>
+</div>
+
+<script>
+    const productGrid = document.querySelector('.product-grid');
+    const cardWidth = document.querySelector('.product-card').offsetWidth + 20;
+
+    function scrollLeftFun(button) {
+        const productGrid = button.nextElementSibling;
+        const cardWidth = productGrid.querySelector('.product-card').offsetWidth + 20;
+
+        productGrid.scrollBy({
+            left: -cardWidth * 3,
+            behavior: 'smooth',
+        });
+    }
+
+    function scrollRight(button) {
+        const productGrid = button.previousElementSibling;
+        const cardWidth = productGrid.querySelector('.product-card').offsetWidth + 20;
+
+        productGrid.scrollBy({
+            left: cardWidth * 3,
+            behavior: 'smooth',
+        });
+    }
+</script>
+<style>
+    @media only screen and (max-width:768px) {
+        #block_winterwear .background-image {
+            height: auto;
+        }
+
+        .slider-container {
+            top: -9%;
+        }
+
+        #block_winterwear {
+            margin-bottom: 60px;
+        }
+    }
+
+    @media only screen and (max-width:480px) {
+        .slider-container {
+            top: -19%;
+        }
+
+        #block_winterwear {
+            margin-bottom: 20px;
+        }
+    }
+
+    @media only screen and (max-width:360px) {
+        .slider-container {
+            top: -23%;
+        }
+        #block_winterwear {
+            margin-bottom: 0px;
+        }
+    }
+</style>

@@ -1,0 +1,55 @@
+<?php
+/**
+ * @var \ArtM\ViPromotion\Block\Banner $block
+ */
+?>
+<?php if ($block->shouldShowBanner()): ?>
+<div class="vipromotion-banner" id="vipromotion-banner">
+    <?= $block->getBannerContent() ?>
+</div>
+<style>
+    .vipromotion_account_banner.visible-xs {
+        display: none;
+    }
+
+    @media screen and (max-width: 768px) {
+        .vipromotion_account_banner.visible-xs {
+            display: block;
+        }
+        .vipromotion_account_banner.hidden-xs {
+            display: none;
+        }
+    }
+
+    .vipromotion-banner {
+        margin-bottom: 20px;
+        animation: fadeInDown 0.8s ease-out;
+    }
+    
+    .vipromotion-banner img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+    }
+    
+    .vipromotion-banner ul {
+        margin: 10px 0;
+        padding-left: 20px;
+    }
+    
+    .vipromotion-banner li {
+        margin-bottom: 5px;
+    }
+    
+    @keyframes fadeInDown {
+        0% {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+<?php endif; ?>

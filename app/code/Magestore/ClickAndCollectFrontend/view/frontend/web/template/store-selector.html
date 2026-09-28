@@ -1,0 +1,79 @@
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<div id="store-selector" data-bind="blockLoader: $parent.isLoading" css="'store-selected': $parent.selectedLocation">
+    <each if="!quoteIsVirtual()" args="getRegion('customer-email')" render="" ></each>
+    <div class="step-title" data-role="title">
+        <translate args="'Store'"></translate>
+    </div>
+    <div id="checkout-step-store-selector" class="step-content" data-role="content">
+        <render args="selectedLocationTemplate"></render>
+        <each args="getRegion('after-selected-location')" render=""></each>
+        <form class="form-continue" submit="setPickupInformation" id="pick-up-time-form" >
+            <div class="actions-toolbar">
+                <div class="secondary">
+                    <button type="button" class="button action" click="openPopup">
+                        <span if="selectedLocation">
+                            <translate args="'Choose another store'"></translate>
+                        </span>
+                        <span ifnot="selectedLocation">
+                            <translate args="'Select Store'"></translate>
+                        </span>
+                    </button>
+                </div>
+            </div>
+            <p translate args="'Please select Pickup Date/Time to go next step!'"></p>
+            <div class="pick-date-time" if="selectedLocation">
+                <fieldset class="fieldset" if="isDisplayPickTimeForm()">
+                    <div class="field pickup-date">
+                        <label class="label" for="datepicker">
+                            <span><!-- ko i18n: 'Pickup Date'--><!-- /ko --></span>
+                        </label>
+                        <div class="control">
+                            <input type="text" name="datepicker" id="datepicker" ko-value="selectedDate"
+                                   class="input-text datepicker"
+                                   readonly="readonly" afterRender="initDatePicker" />
+                        </div>
+                    </div>
+                    <div if="selectedDate" class="field pickup-time">
+                        <label class="label" for="pick-up-time">
+                            <span><!-- ko i18n: 'Pickup Time'--><!-- /ko --></span>
+                        </label>
+                        <div class="control">
+                            <select data-bind="
+                                attr:{title:$t('Pickup Time')},
+                                value: pickupTime,
+                                options: pickupTimeOptions,
+                                 optionsValue: 'value',
+                                 optionsText: 'label',
+                                 optionsCaption: $t('-- Please Pickup Time --'),
+                                "
+                                    id="pick-up-time" class="pick-up-time"
+                                    name="pick_up_time">
+                            </select>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="actions-toolbar">
+                <div class="primary">
+                    <button data-role="opc-continue"
+                            type="submit"
+                            class="button action continue primary"
+                            css="disabled: !selectedLocation"
+                            enable="selectedLocation"
+                            disabled
+                    >
+                        <span>
+                            <translate args="'Next'"></translate>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="click-and-collect-store-selector-popup" render="storeSelectorPopupTemplate"></div>

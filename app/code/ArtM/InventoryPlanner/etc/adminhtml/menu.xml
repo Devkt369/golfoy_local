@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <!-- Attaches under the ArtM top-level menu already declared by ArtM_BlogEsg - do not redeclare it here. -->
+        <add id="ArtM_InventoryPlanner::inventory_planner" title="Inventory Planner" module="ArtM_InventoryPlanner" sortOrder="10" parent="ArtM_BlogEsg::BlogEsgmenu" resource="ArtM_InventoryPlanner::inventory_planner"/>
+        <add id="ArtM_InventoryPlanner::sync_data" title="Sync Data" module="ArtM_InventoryPlanner" sortOrder="10" parent="ArtM_InventoryPlanner::inventory_planner" action="artm_inventoryplanner/sync/index" resource="ArtM_InventoryPlanner::sync_data"/>
+        <add id="ArtM_InventoryPlanner::settings" title="Settings" module="ArtM_InventoryPlanner" sortOrder="20" parent="ArtM_InventoryPlanner::inventory_planner" action="artm_inventoryplanner/settings/index" resource="ArtM_InventoryPlanner::settings"/>
+        <add id="ArtM_InventoryPlanner::dashboard" title="Dashboard" module="ArtM_InventoryPlanner" sortOrder="30" parent="ArtM_InventoryPlanner::inventory_planner" action="artm_inventoryplanner/dashboard/index" resource="ArtM_InventoryPlanner::dashboard"/>
+    </menu>
+</config>

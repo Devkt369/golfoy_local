@@ -1,0 +1,11 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="wizzy_before_product_skip_check">
+        <observer name="wizzy_before_product_skip_check_observer"
+            instance="Wizzy\Events\Observer\ProductUrls" />
+    </event>
+    <event name="wizzy_after_products_mapped">
+        <observer name="wizzy_after_products_mapped_observer"
+            instance="Wizzy\Events\Observer\ProductAttributes" />
+    </event>
+</config>

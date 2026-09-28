@@ -1,0 +1,1069 @@
+<?php
+
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var  $block \Magento\Sales\Block\Order\Item\Renderer\DefaultRenderer */
+$_item = $block->getItem();
+?>
+<script>
+    // require([
+    //     'jquery',
+    //     'Magento_Ui/js/modal/modal'
+    // ], function ($, modal) {
+    //     'use strict';
+
+    //     window.openCustomizationPopup = function(url) {
+    //         if (!window.customizationPopup) {
+    //             var options = {
+    //                 type: 'popup',
+    //                 responsive: true,
+    //                 innerScroll: true,
+    //                 title: $.mage.__('Customization Details'),
+    //                 modalClass: 'customization-popup-modal',
+    //                 buttons: [{
+    //                     text: $.mage.__('Close'),
+    //                     class: 'action secondary',
+    //                     click: function () {
+    //                         this.closeModal();
+    //                     }
+    //                 }]
+    //             };
+
+    //             window.customizationPopup = $('<div/>').modal(options);
+    //         }
+
+    //         $.get(url, function(response) {
+    //             window.customizationPopup.html(response).trigger('contentUpdated');
+    //             window.customizationPopup.modal('openModal');
+    //         });
+    //     };
+    // });
+    require(['jquery'], function($) {
+        window.openCustomizationPopup = function(url) {
+            $.get(url, function(response) {
+                $('#customization-popup-content').html(response);
+                $('#customization-popup').fadeIn();
+            });
+        };
+        $('#customization-popup-close').on('click', function() {
+            $('#customization-popup').fadeOut();
+            $('#customization-popup-content').html('');
+        });
+        // Optional: close when clicking outside modal
+        $('#customization-popup').on('click', function(e) {
+            if (e.target === this) {
+                $('#customization-popup').fadeOut();
+                $('#customization-popup-content').html('');
+            }
+        });
+    });
+</script>
+
+<?php /** @var  $block \Magento\Sales\Block\Order\Item\Renderer\DefaultRenderer */ ?>
+<?php $_item = $block->getItem() ?>
+<?php $_order = $block->getItem()->getOrderItem()->getOrder() ?>
+<?php $sku = $block->getSku();
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+//$productModel = $objectManager->get('\Magento\Catalog\Model\Product');
+//$product = $productModel->loadByAttribute('sku', $sku);
+$chelper = $objectManager->get('ArtM\Common\Helper\Data');
+
+try {
+    $productModel = $objectManager->create('\Magento\Catalog\Model\ProductRepository');
+    $product = $productModel->get($sku);
+    $hsncode = $product->getHsnCode();
+    $optionText =  $hsncode;
+    $attr = $product->getResource()->getAttribute('hsn_code');
+    if ($attr->usesSource()) {
+        $optionText = $attr->getSource()->getOptionText($hsncode);
+    }
+} catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
+    $optionText = '';
+    $product = null;
+}
+?>
+<tr id="order-item-row-<?= (int) $_item->getId() ?>">
+    <td class="col name" data-th="<?= $block->escapeHtml(__('Product')) ?>">
+        <div class="product-details">
+            <span><img src="/media/catalog/product<?= $product ? $product->getSmallImage() : "placeholder/default/golfoy-watermark_2.png" ?>" width="120px"></span>
+            <div style="display: flex; flex-direction: column;">
+                <strong class="product name product-item-name" style="text-transform:capitalize;"><?= $block->escapeHtml($_item->getName()) ?></strong>
+                <?php if ($_options = $block->getItemOptions()): ?>
+                    <dl class="item-options">
+                        <?php foreach ($_options as $_option): ?>
+                            <dt><?= $block->escapeHtml($_option['label']) ?></dt>
+                            <?php if (!$block->getPrintStatus()): ?>
+                                <?php $_formatedOptionValue = $block->getFormatedOptionValue($_option) ?>
+                                <dd<?= (isset($_formatedOptionValue['full_view']) ? ' class="tooltip wrapper"' : '') ?>>
+                                    <!--  custom print/image  -->
+                                    <?php $formatedval = $_formatedOptionValue['value'] ;
+                                                        if(strpos($formatedval, 'customprint/') !== false){
+                                                        $toshow = $chelper->optionImage($formatedval); 
+                                                        echo $toshow;
+                                                    }else{?>
+                                                        <?= $block->escapeHtml($_formatedOptionValue['value'], ['a']) ?>
+                                                        <?php }  ?>
+
+                                    <!--  custom print/image  -->
+                                    <?php if (isset($_formatedOptionValue['full_view'])): ?>
+                                        <div class="tooltip content">
+                                            <dl class="item options">
+                                                <dt><?= $block->escapeHtml($_option['label']) ?></dt>
+                                                <dd><?= $block->escapeHtml($_formatedOptionValue['full_view']) ?></dd>
+                                            </dl>
+                                        </div>
+                                    <?php endif; ?>
+                                </dd>
+                            <?php else: ?>
+                                <dd> <?php if(strpos($_option['value'], 'customprint/') !== false){
+                                        $toshow = $chelper->optionImagetext($_option['value']); 
+                                        echo "<dd> $toshow </dd>";
+                                    }else{ ?>
+                                    <?= $block->escapeHtml($_option['print_value'] ?? $_option['value']) ?>                    
+                            </dd>
+                            <?php }endif; ?>
+                        <?php endforeach; ?>
+
+                    </dl>
+                <?php endif; ?>
+                <?php $addInfoBlock = $block->getProductAdditionalInformationBlock(); ?>
+                <?php if ($addInfoBlock): ?>
+                    <?= $addInfoBlock->setItem($_item->getOrderItem())->toHtml() ?>
+                <?php endif; ?>
+                <?= $block->escapeHtml($_item->getDescription()) ?>
+            </div>
+        </div>
+        <div class="mobile-order-card">
+            <div class="mobile-product-top">
+
+                <div class="mobile-product-image">
+                    <img src="/media/catalog/product<?= $product ? $product->getSmallImage() : "placeholder/default/golfoy-watermark_2.png" ?>" alt="">
+                </div>
+
+                <div class="product-details-mobile">
+
+                    <div class="mobile-product-info">
+                        <h3><?= $block->escapeHtml($_item->getName()) ?></h3>
+
+                        <?php if ($_options = $block->getItemOptions()): ?>
+                            <?php foreach ($_options as $_option): ?>
+                                <div class="mobile-option">
+                                    <span><?= $block->escapeHtml($_option['label']) ?></span> :
+                                    <strong><?= $block->escapeHtml($_option['value']) ?></strong>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="mobile-meta-row">
+
+                        <div class="mobile-meta-item">
+                            <span>SKU</span>
+                            <strong><?= $block->prepareSku($block->getSku()) ?></strong>
+                        </div>
+
+                        <div class="mobile-meta-item">
+                            <span>HSN Code</span>
+                            <strong><?= $optionText; ?></strong>
+                        </div>
+
+                    </div>
+
+                    <div class="mobile-price-row">
+
+                        <div class="mobile-price-item price">
+                            <span>Price</span>
+                            <?= $block->getItemPriceHtml() ?>
+                        </div>
+
+                        <div class="mobile-price-item qty">
+                            <span>Qty Invoiced</span>
+                            <span class="qty-item"><?= (float)$_item->getQty() ?></span>
+                        </div>
+
+                        <div class="mobile-price-item subtotal">
+                            <span>Subtotal</span>
+                            <?= $block->getItemRowTotalHtml() ?>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+    </td>
+    <td class="col sku" data-th="<?= $block->escapeHtml(__('SKU')) ?>" style="word-wrap: break-word;">
+        <?= /* @noEscape */ $block->prepareSku($block->getSku()) ?>
+    </td>
+    <td class="col hsn" data-th="<?= $block->escapeHtml(__('HSN Code')) ?>">
+        <span class="qty summary"><?php echo $optionText; ?></span>
+    </td>
+    <td class="col price" data-th="<?= $block->escapeHtml(__('Price')) ?>">
+        <?= $block->getItemPriceHtml() ?>
+    </td>
+    <td class="col qty" data-th="<?= $block->escapeHtml(__('Qty Invoiced')) ?>">
+        <span class="qty summary"><?= (float) $_item->getQty() ?></span>
+    </td>
+
+    <td class="col subtotal" data-th="<?= $block->escapeHtml(__('Subtotal')) ?>">
+        <?= $block->getItemRowTotalHtml() ?>
+    </td>
+</tr>
+
+<div id="customization-popup" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:99999;overflow: scroll;">
+    <div style="background:#fff;margin:40px auto;padding:20px;width:90vw;max-width:600px;border-radius:8px;position:relative;">
+        <span id="customization-popup-close" style="position:absolute;top:10px;right:10px;cursor:pointer;font-size:22px;">&times;</span>
+        <div id="customization-popup-content"></div>
+    </div>
+</div>
+
+
+<style>
+    .customization-details {
+        padding: 20px;
+    }
+
+    .customization-details h2 {
+        margin-bottom: 20px;
+        font-size: 24px;
+    }
+
+    .customization-area {
+        margin-bottom: 30px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 20px;
+    }
+
+    .customization-area:last-child {
+        border-bottom: none;
+    }
+
+    .customization-area h3 {
+        margin-bottom: 15px;
+        font-size: 18px;
+    }
+
+    .customization-image {
+        margin: 15px 0;
+    }
+
+    .customization-image img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .customization-text {
+        margin-top: 10px;
+    }
+
+    .modal-popup .modal-title {
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 10px;
+    }
+
+    .modal-popup .modal-content {
+        padding: 20px;
+    }
+</style>
+
+<!-- NEW CSS -->
+<style>
+    .items.order-links {
+        display: flex;
+        align-items: center;
+        gap: 70px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    body.account ul.items.order-links {
+        background-color: white;
+    }
+
+    body.account ul.items.order-links>li.current {
+        border: none;
+    }
+
+    .items.order-links .nav.item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        margin: 0;
+    }
+
+    .items.order-links .nav.item a,
+    .items.order-links .nav.item strong {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: #575757;
+        text-decoration: none;
+        letter-spacing: .1px;
+        transition: all .25s ease;
+        padding: 0;
+        background: transparent !important;
+        border: none !important;
+    }
+
+    span.qty-item {
+        color: black !important;
+    }
+
+    .items.order-links .nav.item.current strong {
+        color: #111;
+        font-weight: 600;
+    }
+
+    .items.order-links .nav.item.current::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 120px;
+        height: 3px;
+        background: #111;
+        border-radius: 20px;
+    }
+
+    .items.order-links .nav.item strong:hover {
+        color: #111;
+    }
+
+    .items.order-links .nav.item:nth-child(2) strong::after {
+        content: "↓";
+        font-size: 16px;
+        margin-left: 12px;
+        color: black;
+        font-weight: 900;
+        position: relative;
+        top: -1px;
+    }
+
+    .items.order-links .nav.item strong:before,
+    .items.order-links .nav.item strong:after {
+        text-decoration: none !important;
+    }
+
+    .block.block-order-details-view .block-content {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0;
+    }
+
+    .block.block-order-details-view .block-content .box {
+        flex: 1;
+        position: relative;
+        padding: 0 40px;
+    }
+
+    .block.block-order-details-view .block-content .box:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 1px;
+        height: 100%;
+        background: #dcdcdc;
+    }
+
+    .block.block-order-details-view .block-content .box:first-child {
+        padding-left: 0;
+    }
+
+    .block.block-order-details-view .block-content .box:last-child {
+        padding-right: 0;
+    }
+
+    body.account #maincontent a.action {
+        background-color: white !important;
+        border: 1px solid #cacaca;
+        border-radius: 5px;
+        margin-left: 15px;
+    }
+
+    body.account.sales-order-invoice #maincontent .custom-order-header .order-actions a.action {
+        padding: 13px 10px !important;
+        margin-left: 0px !important;
+    }
+
+    .order-details-items .order-title>strong {
+        font-weight: 600;
+        font-size: 1.4rem !important;
+    }
+
+    body.account .table-wrapper {
+        padding: 0px;
+    }
+
+    body.account .table-wrapper,
+    body.account .block.block-gift-card .block-content,
+    body.account .box-content,
+    body.account ul.items.order-links {
+        background-color: #fff;
+    }
+
+    .order-details-items.invoice .actions-toolbar:first-of-type {
+        display: none !important;
+    }
+
+    .order-title {
+        border-bottom: 1px solid #ececec;
+        padding: 15px;
+        border: 1px solid #ececec;
+    }
+
+    table.data.table.table-order-items.invoice tfoot tr.grand_total {
+        border-top: 1px solid #ececec;
+    }
+
+    table.data.table.table-order-items.invoice tfoot>tr:last-child {
+        border-bottom: none;
+    }
+
+    table.data.table.table-order-items.invoice thead {
+        border-bottom: 1px solid #ececec;
+        border: 1px solid #ececec;
+        border-top: none;
+    }
+
+    table.data.table.table-order-items.invoice tbody {
+        border: 1px solid #ececec;
+        border-top: 0px;
+    }
+
+    table.data.table.table-order-items.invoice tfoot {
+        border: 1px solid #ececec;
+    }
+
+
+    body.account .table-wrapper th {
+        padding: 15px;
+        font-size: 12px;
+        color: #000;
+        font-weight: 600;
+    }
+
+    body.account .table-wrapper tfoot td {
+        padding: 10px !important;
+        font-size: 11px;
+    }
+
+    .price-including-tax .price,
+    .price-excluding-tax .price {
+        font-size: 11px;
+        color: black;
+        font-weight: 600;
+    }
+
+    .table:not(.cart):not(.totals) tfoot>tr:first-child th {
+        padding-top: 10px;
+    }
+
+    .item-options {
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .item-options a {
+        display: inline-block;
+        margin-bottom: 10px;
+        font-size: 12px;
+    }
+
+    .actions-toolbar {
+        display: none;
+    }
+
+    .option-row {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 0;
+    }
+
+    .item-options .option-row+.option-row::before {
+        content: "•";
+        color: #8b8b8b;
+        font-size: 11px;
+        line-height: 1;
+        margin-right: 3px;
+    }
+
+    .option-row p {
+        margin: 0;
+        font-size: 11px;
+        font-weight: 500;
+        color: #555;
+    }
+
+    .option-row span {
+        display: inline-flex;
+        align-items: center;
+        font-size: 11px;
+        font-weight: 500;
+        color: black;
+    }
+
+    .box.box-order-shipping-method,
+    .block-title {
+        display: none;
+    }
+
+    body.account strong.box-title * {
+        font-weight: 600 !important;
+        color: #000;
+        margin-bottom: 15px !important;
+        font-size: 13px !important;
+    }
+
+    body.account .box-content {
+        padding: 10px 0px;
+        font-size: 12px;
+    }
+
+    .box-content,
+    .block-order-details-view .box-content .payment-method .title {
+        font-size: 12px;
+        color: #000;
+        font-weight: 500;
+    }
+
+    .product.name.product-item-name {
+        font-size: 12px;
+        font-weight: 600;
+        color: black;
+        line-height: 1.4;
+        margin: 0;
+        max-width: 500px;
+        text-wrap: auto;
+    }
+
+    body.account .table-wrapper tfoot th,
+    body.account .table-wrapper tfoot tr.totals.tax.details td.mark,
+    body.account .table-wrapper tfoot tr.totals-tax-summary td.mark {
+        padding: 10px 60px 10px 10px;
+    }
+
+    .table:not(.cart):not(.totals) tfoot .mark {
+        font-weight: 500;
+    }
+</style>
+<style>
+    span.qty.summary {
+        line-height: 2;
+    }
+
+
+    .order-meta {
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    tfoot tr th {
+        vertical-align: middle !important;
+    }
+
+    .order-meta .order-status {
+        margin: 0px;
+        padding: 4px 30px;
+        font-size: 9px;
+        margin-left: 10px;
+    }
+
+    .order-meta span.order-status.status-closed {
+        background-color: #fa97974a;
+        color: red;
+        border: 1px solid #fcbfbf;
+    }
+
+    span.order-status.status-delivered {
+        color: green;
+        border: 1px solid #0080004d;
+        background: #00800024;
+    }
+
+    .custom-order-header {
+        border-bottom: 0px;
+    }
+
+    .invoice-date strong {
+        font-weight: 600;
+        font-size: 12px;
+    }
+
+    .invoice-date {
+        font-size: 11px;
+    }
+
+    .product-details {
+        display: flex;
+        gap: 20px;
+    }
+
+    .product-details>span {
+        width: 110px;
+        min-width: 110px;
+        height: 120px;
+        border-radius: 5px;
+        overflow: hidden;
+        background: #f7f7f7;
+        border: 1px solid #efefef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-details>span img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        mix-blend-mode: darken;
+        display: block;
+    }
+
+    body.account .table-wrapper td,
+    body.account .block.block-gift-card .block-content td {
+        vertical-align: top;
+    }
+
+    body.account .table-wrapper td {
+        padding: 30px 15px;
+    }
+
+    .block.block-order-details-view .box-content,
+    .block-order-details-view .box-content .payment-method .title {
+        font-size: 11px;
+        color: #000;
+        font-weight: 500;
+        padding: 10px 0px 10px 20px;
+    }
+
+    body.account #maincontent .actions-toolbar-bottom .secondary a.action.back {
+        background: #f5f5f5 !important;
+        border: none !important;
+        padding: 13px 30px 13px 50px !important;
+    }
+
+    body.account .actions-toolbar-bottom .secondary a.action.back:before {
+        content: "\f060" !important;
+        font: normal normal normal 14px / 1 FontAwesome;
+    }
+
+    body.account .table-wrapper tfoot td {
+        padding: 5px 15px;
+    }
+
+    .table:not(.cart):not(.totals) tfoot>tr:first-child td {
+        padding-top: 8px;
+    }
+
+    .order-left h1 {
+        font-size: 20px;
+    }
+
+    .order-title a span {
+        text-transform: initial;
+    }
+
+    @media (max-width:768px) {
+        body.account .table-wrapper tfoot td {
+            padding: 10px !important;
+
+        }
+
+        tr.subtotal_excl {
+            padding-bottom: 10px !important;
+        }
+
+        .order-left h1 {
+            font-size: 17px;
+        }
+
+        tfoot tr.subtotal_excl td.amount {
+            padding: 0px 10px !important;
+        }
+
+        .order-meta>span {
+            position: relative;
+            padding: 0 7px;
+        }
+
+        .custom-order-header {
+            padding: 24px 0px 0px 0px;
+        }
+
+        body.account .table-wrapper tr {
+            background-color: white !important;
+            padding: 0px;
+            margin-bottom: 0px;
+            border-radius: 0px;
+        }
+
+        .order-status {
+            background: #eef6e9;
+            color: #5e7f4c;
+            padding: 5px 10px !important;
+            border-radius: 30px;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .order-status {
+            margin-left: 0px;
+        }
+
+        .price {
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        body.account strong.box-title * {
+            font-size: 12px !important;
+        }
+
+        body.account .box-content * {
+            font-size: 10px;
+        }
+
+        .order-actions {
+            display: none;
+        }
+
+        .order-title {
+            border-bottom: 0px;
+        }
+
+        .items.order-links {
+            gap: 20px;
+        }
+
+        .order-details-items {
+            border-bottom: none !important;
+            margin-bottom: 0px;
+        }
+
+        body.account ul.items.order-links>li {
+            padding: 15px 10px;
+        }
+
+        .items.order-links .nav.item a,
+        .items.order-links .nav.item strong {
+            font-size: 12px;
+        }
+
+        .table-wrapper .table:not(.cart):not(.totals):not(.table-comparison)>tbody {
+
+            border: 1px solid #e5e5e5;
+            border-top: 0px;
+        }
+
+        .items.order-links .nav.item.current::after {
+            content: "" !important;
+            display: block !important;
+            position: absolute !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100% !important;
+            height: 2px !important;
+            background: #111 !important;
+            border-radius: 20px;
+            z-index: 2;
+        }
+
+        ul.items.order-links li.nav.item.current {
+            background-color: white !important;
+        }
+
+        .order-details-items .order-title>strong {
+            font-size: 1.1rem !important;
+        }
+
+        .order-title {
+            padding: 15px 10px;
+        }
+
+        body.account #maincontent a.action {
+            font-size: 9px !important;
+            margin-left: 5px;
+            padding: 10px 13px 7px 13px !important;
+        }
+
+        .invoice-date strong {
+            display: none;
+        }
+
+        .invoice-date {
+            font-weight: 500;
+            float: unset !important;
+            margin: 0px !important;
+            margin-left: 5px !important;
+        }
+
+        table#my-orders-table tbody tr td.col.name::before {
+            display: none;
+        }
+
+        .table-wrapper.table-order-items.invoice td.col.name[data-th="Product"]::before {
+            display: none !important;
+        }
+    }
+
+    .mobile-order-card {
+        display: none;
+    }
+
+    @media (max-width:767px) {
+
+
+        /* Hide Magento Table Columns */
+        td.col.sku,
+        td.col.hsn,
+        td.col.price,
+        td.col.qty,
+        td.col.subtotal {
+            display: none !important;
+        }
+
+        body.account .order-details-items .table-wrapper {
+            padding: 0px 0px 30px 0px !important;
+            border-bottom: 0px;
+            margin-bottom: 0px;
+            border-radius: 0px;
+        }
+
+        .table-wrapper .table:not(.cart):not(.totals):not(.table-comparison)>tbody>tr td {
+            padding: 14px 14px 10px 14px !important;
+        }
+
+        .product-details {
+            display: grid !important;
+            grid-template-columns: 86px minmax(0, 1fr);
+            align-items: start !important;
+            column-gap: 5px !important;
+            row-gap: 8px !important;
+            padding: 20px 14px 20px 14px;
+        }
+
+        table.data.table.table-order-items.shipment tbody tr {
+            border-bottom: 0px !important;
+        }
+
+        .product-details>span {
+            width: 80px !important;
+            min-width: 80px !important;
+            height: 80px !important;
+            border-radius: 8px !important;
+            border: 1px solid #ececec !important;
+            background: #f8f8f8 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            overflow: hidden !important;
+        }
+
+        .product-details>span img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+        }
+
+        .product.name.product-item-name {
+            margin: 0 0 6px !important;
+            font-size: 11px !important;
+            line-height: 1.4 !important;
+            font-weight: 600 !important;
+            color: #1f2937 !important;
+        }
+
+        .option-row {
+            margin-bottom: 3px !important;
+            gap: 4px !important;
+        }
+
+        .option-row p {
+            font-size: 10px !important;
+            line-height: 1.35 !important;
+            color: #5f6368 !important;
+        }
+
+        .option-row span {
+            font-size: 10px !important;
+            line-height: 1.35 !important;
+            color: black !important;
+        }
+
+        .mobile-order-card {
+            display: none !important;
+        }
+
+        .mobile-product-top {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 0px;
+        }
+
+        .mobile-product-image img {
+            width: 90px;
+            display: block;
+            border: 1px solid #efefef;
+            border-radius: 5px;
+        }
+
+        .mobile-product-info {
+            flex: 1;
+        }
+
+        .mobile-product-info h3 {
+            margin: 0 0 10px;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .mobile-option {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .mobile-meta-row {
+            display: flex;
+            gap: 50px;
+            margin-bottom: 10px;
+            margin-top: 15px;
+        }
+
+        .mobile-meta-item {
+            flex: 1;
+        }
+
+        .mobile-meta-item span {
+            display: block;
+            color: #888;
+            font-size: 10px;
+            margin-bottom: 4px;
+        }
+
+        .mobile-price-row {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .mobile-price-item {
+            flex: 1;
+        }
+
+        .mobile-price-item span {
+            display: block;
+            color: #888;
+            font-size: 10px;
+            margin-bottom: 4px;
+        }
+
+        .mobile-price-item strong {
+            font-size: 12px;
+        }
+
+        .product-details-mobile strong {
+            font-weight: 500;
+        }
+
+        .mobile-price-item.qty {
+            flex: 1.5;
+        }
+
+        .table-wrapper .table:not(.totals):not(.table-comparison) tfoot tr:first-child th,
+        .table-wrapper .table:not(.totals):not(.table-comparison) tfoot tr:first-child td {
+            padding-top: 0;
+            padding-bottom: 0px;
+        }
+
+        table.data.table.table-order-items.invoice tfoot {
+            border: 1px solid #e5e5e5;
+            border-radius: 0px 0px 12px 12px;
+            border-top: 0px;
+            padding: 15px;
+        }
+
+        .table:not(.cart):not(.totals) tfoot>tr:first-child th,
+        .table:not(.cart):not(.totals) tfoot>tr:first-child td,
+        table.data.table.table-order-items.invoice tbody {
+            border: none;
+        }
+
+        .table-wrapper .table:not(.cart):not(.totals):not(.table-comparison)>tbody>tr td {
+            padding: 0px !important;
+        }
+
+        body.account .table-wrapper tfoot th,
+        body.account .table-wrapper tfoot tr.totals.tax.details td.mark,
+        body.account .table-wrapper tfoot tr.totals-tax-summary td.mark {
+            padding: 10px 10px 10px 10px;
+        }
+
+        tfoot tr.totals.tax.details.details-1 td.amount {
+            width: 70%;
+        }
+
+        tfoot tr.totals.tax.details.details-1 td.mark {
+            text-align: left;
+            padding: 10px 0px !important;
+        }
+
+        .block.block-order-details-view .block-content .box {
+            margin-bottom: 0px !important;
+            border-bottom: 0px;
+        }
+
+        .block.block-order-details-view .block-content {
+            display: block;
+            padding: 0px;
+        }
+
+        body.account .box-content {
+            padding: 10px 0px 0px 20px;
+        }
+
+        .block.block-order-details-view .block-content .box {
+            padding: 10px 0px;
+            border: 1px solid #ececec;
+            border-right: 0px;
+        }
+
+        .block.block-order-details-view .block-content .box:last-child {
+            border-top: 0;
+        }
+
+        .box.box-order-billing-address strong.box-title span:before,
+        .box.box-order-billing-method strong.box-title span:before {
+            font-size: 1.5rem;
+            margin-right: 10px;
+            margin-left: 5px;
+        }
+
+        .block.block-order-details-view .box-content,
+        .block-order-details-view .box-content .payment-method .title {
+            padding: 10px 0px 10px 25px;
+        }
+
+        .block.block-order-details-view {
+            padding: 0px 0px;
+        }
+    }
+</style>

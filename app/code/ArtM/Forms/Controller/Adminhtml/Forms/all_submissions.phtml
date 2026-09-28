@@ -1,0 +1,487 @@
+<?php
+
+/** @var $block ArtM\Forms\Block\Adminhtml\Submissions */
+$formIdentifiers = $block->getIdentifiersWithNames();
+$formStats = $block->getFormSubmissionStats();
+$selectedIdentifier = isset($_GET['form_identifier']) ? $_GET['form_identifier'] : ($formIdentifiers[0]['identifier'] ?? null);
+$formFieldNames = $selectedIdentifier ? $block->getFormFields($selectedIdentifier) : [];
+// Pagination, sorting, filters
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$pageSize = isset($_GET['page_size']) ? max(1, (int)$_GET['page_size']) : 20;
+$sortField = $_GET['sort_field'] ?? 'created_at';
+$sortDir = strtoupper($_GET['sort_dir'] ?? 'DESC');
+if (!in_array($sortDir, ['ASC', 'DESC'])) $sortDir = 'DESC';
+$filters = [];
+foreach ($formFieldNames as $key) {
+  $filters[$key] = $_GET['filter_' . $key] ?? '';
+}
+$params = [
+  'page' => $page,
+  'page_size' => $pageSize,
+  'sort_field' => $sortField,
+  'sort_dir' => $sortDir,
+  'filters' => $filters,
+];
+$submissions = $selectedIdentifier ? $block->getSubmissions($selectedIdentifier, $params) : [];
+$totalCount = $selectedIdentifier ? $block->getTotalSubmissionsCount($selectedIdentifier, $params) : 0;
+$totalPages = $pageSize > 0 ? ceil($totalCount / $pageSize) : 1;
+function is_file_or_image($val)
+{
+  if (!is_string($val)) return false;
+  return preg_match('/\.(jpg|jpeg|png|gif|webp|pdf|docx?|xlsx?|csv|zip|txt)$/i', $val);
+}
+function build_query($params, $overrides = [])
+{
+  $merged = array_merge($params, $overrides);
+  return http_build_query($merged);
+}
+?>
+<style>
+  #filters-bar {
+    display: none;
+  }
+
+  .filters-tab-bar {
+    display: inline;
+    align-items: center;
+    margin-bottom: 0;
+    background: #fff;
+    float: right;
+  }
+
+  .filters-tab {
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    height: 48px;
+    font-size: 1.1em;
+    font-weight: 500;
+    color: #333;
+    border: none;
+    background: #fff;
+    border-bottom: 3px solid #eb5202;
+    cursor: pointer;
+    outline: none;
+    transition: color 0.2s, border-bottom 0.2s;
+  }
+
+  button#toggle-filters-btn::before {
+    content: '\e605';
+    font-family: 'Admin Icons';
+  }
+
+  .filters-tab.inactive {
+    border: 1px solid;
+    border-radius: 0;
+    display: inline-block;
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    line-height: 1.36;
+    padding: 0.5rem 1em 0.5rem;
+    text-align: center;
+    vertical-align: baseline;
+    background: #e3e3e3;
+    border-color: #adadad;
+    color: #514943;
+  }
+
+
+  .filters-bar {
+    background: #fff;
+    border: 1px solid #d6d6d6;
+    border-radius: 0 0 3px 3px;
+    padding: 18px 24px 12px 24px;
+    margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px 32px;
+    align-items: end;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  }
+
+  .filters-bar label {
+    font-size: 1em;
+    color: #303030;
+    font-weight: 500;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .filters-bar input[type="text"] {
+    border: 1px solid #adadad;
+    border-radius: 2px;
+    padding: 6px 10px;
+    font-size: 1em;
+    background: #fff;
+    width: 100%;
+    margin-top: 2px;
+    box-sizing: border-box;
+  }
+
+  .filters-bar .filter-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 10px;
+  }
+
+  .filters-bar .primary {
+    background: #514943;
+    color: #fff;
+    border: none;
+    border-radius: 2px;
+    padding: 8px 24px;
+    font-size: 1em;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+
+  .filters-bar .primary:hover {
+    background: #2a2522;
+  }
+
+  .filters-bar .secondary {
+    background: none;
+    color: #1979c3;
+    border: none;
+    font-size: 1em;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 8px 18px;
+  }
+
+  .rows-per-page-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    margin-top: 20px;
+  }
+
+  .rows-per-page-bar label {
+    font-size: 1em;
+    color: #303030;
+    font-weight: 500;
+  }
+
+  .rows-per-page-bar select {
+    border: 1px solid #adadad;
+    border-radius: 2px;
+    padding: 4px 8px;
+    font-size: 1em;
+    background: #f8f8f8;
+  }
+
+  .pagination-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 12px 0;
+  }
+
+  .pagination-bar a,
+  .pagination-bar b {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .pagination-bar a {
+    background: #f4f6fa;
+    color: #1979c3;
+    border: 1px solid #e3e3e3;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .pagination-bar a:hover {
+    background: #1979c3;
+    color: #fff;
+  }
+
+  .pagination-bar b {
+    background: #ef672f;
+    color: #fff;
+    border: 1px solid #ef672f;
+  }
+
+  .admin-submissions-table {
+    border-collapse: collapse;
+    width: 100%;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    overflow: hidden;
+    margin-top: 8px;
+  }
+
+  .admin-submissions-table th {
+    border: 1px solid #e3e3e3;
+    padding: 1rem 1rem;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 1.3rem;
+    line-height: 1.36;
+  }
+
+  .admin-submissions-table td {
+    font-weight: 500 !important;
+    border-left: 0.1rem dashed #d6d6d6 !important;
+    padding: 1rem 1rem;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 1.3rem;
+    line-height: 1.36;
+  }
+
+
+  .admin-submissions-table tr:nth-child(odd) td {
+    background-color: #f5f5f5;
+  }
+
+  .admin-submissions-table th:first-child {
+    border-left-color: #8a837f;
+  }
+
+  .admin-submissions-table th a {
+    color: #ffffff;
+    text-decoration: none;
+  }
+
+  .admin-submissions-table td:first-child {
+    border-left-style: solid !important;
+  }
+
+  .admin-submissions-table td:last-child {
+    border-right-style: solid;
+  }
+
+  .admin-submissions-table tr:last-child td {
+    border-bottom: 0.1rem solid #d6d6d6;
+  }
+
+  .admin-submissions-table th {
+    background-color: #514943;
+    border: 0.1rem solid #8a837f;
+    color: #ffffff;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  .admin-submissions-table tr:nth-child(even) {
+    background: #fafbfc;
+  }
+
+  .admin-submissions-table img {
+    max-width: 40px;
+    max-height: 40px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+  }
+
+  .admin-submissions-table .file-link {
+    display: inline-block;
+    max-width: 40px;
+    max-height: 40px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+  }
+
+  .admin-submissions-table .file-link i {
+    font-size: 1.2em;
+    margin-right: 3px;
+  }
+
+
+
+  /* khushi css */
+  select#form_identifier {
+    background-color: #ffffff;
+    border: 1px solid #adadad;
+    border-radius: 1px;
+    box-shadow: none;
+    color: #303030;
+    font-size: 1.4rem;
+    font-weight: 400;
+    height: auto;
+    line-height: 1.36;
+    padding: 0.6rem 1rem 0.6rem;
+    transition: border-color 0.1s linear;
+    vertical-align: baseline;
+  }
+
+  div#form-selector-bar {
+    border-bottom: 0.1rem solid #cccccc;
+  }
+
+  form.form-inline-block {
+    margin-bottom: 10px;
+  }
+
+  h2.submission-text {
+    font-size: 16px;
+    display: inline;
+  }
+
+  .admin-submissions-table tr:hover {
+    background-color: #e5f7fe !important;
+  }
+
+  .formsubmission-block {
+    margin-top: 15px;
+    border-bottom: 0.1rem solid #cccccc;
+    padding-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+</style>
+<div id="form-selector-bar">
+  <form class="form-inline-block" method="get" style="display:inline-flex;align-items:center;gap:12px;">
+    <label for="form_identifier" style="font-weight:600;">Select Form:</label>
+    <select name="form_identifier" id="form_identifier" onchange="this.form.submit()">
+      <?php foreach ($formIdentifiers as $f): 
+        $id = $f['identifier'] ?? '';
+        $stat = $formStats[$id] ?? ['unread'=>0,'total'=>0];
+        $label = htmlspecialchars($f['name'] ?? '') . ' (' . htmlspecialchars($id) . ')';
+        $label .= ' - ' . $stat['unread'] . ' unread / ' . $stat['total'] . ' total';
+      ?>
+        <option value="<?= htmlspecialchars($id) ?>" <?= $selectedIdentifier == $id ? ' selected' : '' ?>><?= $label ?></option>
+      <?php endforeach; ?>
+    </select>
+    <noscript><button type="submit">Show</button></noscript>
+  </form>
+</div>
+<div class="formsubmission-block">
+  <?php if ($selectedIdentifier): ?>
+    <h2 class="submission-text" style="margin-bottom:0px;">Submissions for: <span style="color:#1979c3;\"><?= htmlspecialchars($selectedIdentifier ?? '') ?></span></h2>
+    <?php
+    $anyFilterActive = false;
+    foreach ($filters as $v) {
+      if (trim($v) !== '') {
+        $anyFilterActive = true;
+        break;
+      }
+    }
+    ?>
+    <div class="filters-tab-bar">
+      <button class="filters-tab<?= ($anyFilterActive ? '' : ' inactive') ?>" type="button" id="toggle-filters-btn"
+        onclick="var f=document.getElementById('filters-bar');f.style.display=f.style.display==='none'?'grid':'none';this.classList.toggle('inactive');">
+        <span class="filterIcon"></span> Filters
+      </button>
+    </div>
+</div>
+<div class="rows-per-page-bar">
+  <form method="get" style="display:inline;">
+    <input type="hidden" name="form_identifier" value="<?= htmlspecialchars($selectedIdentifier) ?>" />
+    <?php foreach ($formFieldNames as $key): ?>
+      <input type="hidden" name="filter_<?= htmlspecialchars($key) ?>" value="<?= htmlspecialchars($filters[$key] ?? '') ?>" />
+    <?php endforeach; ?>
+    <label>Rows per page:
+      <select name="page_size" onchange="this.form.submit()">
+        <?php foreach ([10, 20, 50, 100] as $size): ?>
+          <option value="<?= $size ?>" <?= $pageSize == $size ? ' selected' : '' ?>><?= $size ?></option>
+        <?php endforeach; ?>
+      </select>
+    </label>
+  </form>
+</div>
+<form method="get" id="filters-bar" class="filters-bar" style="display:<?= $anyFilterActive ? 'grid' : 'none' ?>;">
+  <input type="hidden" name="form_identifier" value="<?= htmlspecialchars($selectedIdentifier) ?>" />
+  <?php foreach ($formFieldNames as $key): ?>
+    <label>
+      <?= htmlspecialchars($key) ?>
+      <input type="text" name="filter_<?= htmlspecialchars($key) ?>" value="<?= htmlspecialchars($filters[$key] ?? '') ?>" placeholder="Filter..." />
+    </label>
+  <?php endforeach; ?>
+  <div class="filter-actions">
+    <button type="submit" class="primary">Apply Filters</button>
+    <?php if ($anyFilterActive): ?>
+      <a href="?form_identifier=<?= urlencode($selectedIdentifier) ?>&page_size=<?= $pageSize ?>" class="secondary">Cancel</a>
+    <?php endif; ?>
+  </div>
+</form>
+<div class="pagination-bar">
+    <span>Page <?= $page ?> of <?= $totalPages ?></span>
+    <?php if ($page > 1): ?>
+      <a href="?<?= build_query($_GET, ['page' => 1]) ?>">First</a>
+      <a href="?<?= build_query($_GET, ['page' => $page - 1]) ?>">Prev</a>
+    <?php endif; ?>
+    <?php for ($p = max(1, $page - 2); $p <= min($totalPages, $page + 2); $p++): ?>
+      <?php if ($p == $page): ?><b><?= $p ?></b><?php else: ?><a href="?<?= build_query($_GET, ['page' => $p]) ?>"><?= $p ?></a><?php endif; ?>
+    <?php endfor; ?>
+    <?php if ($page < $totalPages): ?>
+      <a href="?<?= build_query($_GET, ['page' => $page + 1]) ?>">Next</a>
+      <a href="?<?= build_query($_GET, ['page' => $totalPages]) ?>">Last</a>
+    <?php endif; ?>
+    <span style="margin-left:16px;">Total: <?= $totalCount ?></span>
+  </div>
+<div style="overflow-x:auto;">
+  <table class="admin-submissions-table">
+    <thead>
+      <tr>
+        <th><a href="?<?= build_query($_GET, ['sort_field' => 'id', 'sort_dir' => ($sortField == 'id' && $sortDir == 'ASC' ? 'DESC' : 'ASC'), 'page' => 1]) ?>">ID<?= $sortField == 'id' ? ($sortDir == 'ASC' ? ' ▲' : ' ▼') : '' ?></a></th>
+        <th><a href="?<?= build_query($_GET, ['sort_field' => 'created_at', 'sort_dir' => ($sortField == 'created_at' && $sortDir == 'ASC' ? 'DESC' : 'ASC'), 'page' => 1]) ?>">Submitted At<?= $sortField == 'created_at' ? ($sortDir == 'ASC' ? ' ▲' : ' ▼') : '' ?></a></th>
+        <?php foreach ($formFieldNames as $key): ?>
+          <th><?= htmlspecialchars($key) ?></th>
+        <?php endforeach; ?>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($submissions as $submission): ?>
+        <?php
+        $data = $submission->getData('submitted_data');
+        $fields = @json_decode($data, true);
+        $isUnread = ($submission->getData('is_read') == 0);
+        ?>
+        <tr<?= $isUnread ? ' style="background-color:#fffbe6;"' : '' ?>>
+          <td><?= (int)$submission->getId() ?></td>
+          <td><?= htmlspecialchars($submission->getData('created_at') ?? '') ?></td>
+          <?php foreach ($formFieldNames as $key): ?>
+            <td>
+              <?php
+              $val = $fields[$key] ?? '';
+              if (is_array($val)) {
+                $all_files = true;
+                foreach ($val as $file) {
+                  if (!is_file_or_image($file)) {
+                    $all_files = false;
+                    break;
+                  }
+                }
+                if ($all_files && count($val)) {
+                  foreach ($val as $file) {
+                    if (is_string($file) && preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $file)) {
+                      echo '<img src="' . htmlspecialchars($file) . '" alt="image" /> ';
+                    } elseif (is_string($file) && $file) {
+                      $filename = basename($file);
+                      echo '<a class="file-link" href="' . htmlspecialchars($file) . '" target="_blank" title="' . $filename . '"><i class="fa fa-paperclip"></i>' . $filename . '</a> ';
+                    }
+                  }
+                } else {
+                  echo htmlspecialchars(implode(', ', $val));
+                }
+              } elseif (is_string($val) && preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $val)) {
+                echo '<img src="' . htmlspecialchars($val) . '" alt="image" />';
+              } elseif (is_string($val) && preg_match('/\.(pdf|docx?|xlsx?|csv|zip|txt)$/i', $val)) {
+                $filename = basename($val);
+                echo '<a class="file-link" href="' . htmlspecialchars($val) . '" target="_blank" title="' . $filename . '"><i class="fa fa-paperclip"></i>' . $filename . '</a>';
+              } else {
+                echo htmlspecialchars($val);
+              }
+              ?>
+            </td>
+          <?php endforeach; ?>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
+  
+</div>
+<?php endif; ?>
+<!-- FontAwesome for file icon (optional, only if not already loaded) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />

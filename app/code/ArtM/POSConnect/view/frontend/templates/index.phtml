@@ -1,0 +1,211 @@
+<style>
+    /* #pos-wrapper{width:480px;margin:0px auto;}*/
+     div#drag-area{max-width:120px;}
+     p.dragdrop{font-size:35px;margin:0px;cursor:pointer;padding:35px;}
+     input#print_file{margin-top:0px;height:1px;}
+     .img-cross{position: absolute;right: 0; cursor:pointer;top: 0;border-radius: 31px;width: 25px;
+     height: 25px;background: #fff;border: 1px solid gray;text-align: center;padding-top: 2px;}
+    .addaphoto{color:#646464;margin-bottom:4px;font-weight:bold;}
+    .resultimg.image{position:relative;margin-top:0px !important;margin-left:0px !important;width:100% !important;}
+    .product.data.items{background: #fff;}
+</style>
+<div class="container" style="margin-top:50px;">
+<?php
+
+$toshow = $block->getData('toshow');
+if($toshow == 'data'){ ?>
+
+<div class="product data items"
+     data-mage-init='{"mage/tabs": {"openedState": "active", "animate": {"duration": 100},"disabledState": "disabled"}}'>
+    <div class="item title" data-role="collapsible">
+        <a class="switch" data-toggle="trigger" href="#tab-logo">Upload logo</a>
+    </div>
+    <div id="tab-logo" class="item content" data-role="content">
+        <div id = "pos-wrapper">
+            <div id ="pimgdiv">    
+              <div class="addaphoto"> Add a photo </div>
+              <div id="drag-area" class="drag-area" style="border:3px dashed lightgray;border-radius:10px;">   
+                  <p class="dragdrop" style="text-align:center;color:gray;">+ </p>       
+                  <input type = "file" name= "print_file" id= "print_file" >
+              </div>
+            <p class="alert alert-success" style="margin-bottom:0px;">
+            Image Formats: JPG, PNG, GIF, TIF, BMP, PDF, EPS, or AI. Maximum File Size : 20MB
+            </p>
+            </div> 
+            <div id ="logopathdiv" style="display:none;"> <input type="text" value="" id="logopath" readonly>
+            <button id= "copybtn" >Copy text</button><span style="color:green;font-size:11px;"></span>
+            <br/><br/>
+            </div>
+        </div>
+    </div>
+
+    <div class="item title" data-role="collapsible">
+        <a class="switch" data-toggle="trigger" href="#tab-payment">Payment </a>
+    </div>
+    <div id="tab-payment" class="item content" data-role="content">reference</div>
+
+</div>
+
+<?php }else{ ?>
+
+  <form class="form contact" action="<?= $block->getUrl('posconnect/index/index'); ?>" id="posconnect-form" method="post" data-hasrequired="* Required Fields"  data-mage-init='{"validation":{}}'>
+<input name="form_key" type="hidden" value="<?php echo $block->getFormKey(); ?>" />
+<fieldset class="fieldset">         
+        <div class="field name required">
+            <label class="label" for="pin"><span>PIN</span></label>
+            <div class="control">
+                <input name="pospin" id="pospin" title="pin" value="" class="input-text" type="password" data-validate="{required:true}" aria-required="true">
+            </div>
+        </div>
+    </fieldset>
+    <div class="actions-toolbar">
+        <div class="primary" style="margin-bottom:50px;">
+            <button type="submit" title="Submit" class="action submit primary">
+                <span>Proceed</span>
+            </button>
+        </div>
+    </div>
+</form>
+
+<?php } ?>
+</div>
+
+<script type="text/javascript">
+    require([ 'jquery', 'jquery/ui'], function($){ $(document).ready(function($) {  
+        var fdata = '';
+        $(".dragdrop").click(function(){
+            $("#print_file").trigger('click');
+        }); 
+       
+          $("html").on("dragover", function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+             // $(".dragdrop").text("Drag here");
+          });
+    
+          $("html").on("drop", function(e) { e.preventDefault(); e.stopPropagation(); });
+    
+          // Drag enter
+          $('.drag-area').on('dragenter', function (e) {
+              e.stopPropagation();
+              e.preventDefault();
+             // $(".dragdrop").text("Drop");
+          });
+    
+          // Drag over
+          $('.drag-area').on('dragover', function (e) {
+              e.stopPropagation();
+              e.preventDefault();
+             // $(".dragdrop").text("Drop");
+          });
+    
+          // Drop
+          $('.drag-area').on('drop', function (e) {
+              e.stopPropagation();
+              e.preventDefault();
+              var file = e.originalEvent.dataTransfer.files;
+             // $(".dragdrop").text(file[0].name);
+              var fd = new FormData();
+              fd.append('file', file[0]);
+              fdata = fd;
+             // $("#print_file").val('').trigger('change'); 
+              uploadlogofunc(fdata);      
+          }); 
+          $("#print_file").change(function(){
+            var opimgval = $(this).val();
+            if(opimgval != ''){ 
+              var file_data = $('#print_file').prop('files')[0];  
+              var form_data = new FormData();                  
+              form_data.append('file', file_data);
+              fdata = form_data;
+              uploadlogofunc(fdata);     
+              }else{
+                
+              }
+          });
+          $('body').on('click', '#copybtn', function() {
+            var copyText = document.getElementById("logopath");
+            if(copyText.value != ''){
+              copyText.select();
+              copyText.setSelectionRange(0, 99999); 
+              navigator.clipboard.writeText(copyText.value);
+              $("#copybtn").next('span').html('copied.');
+              setTimeout(function() {
+                 $(this).next('span').html('');      
+              }, 10000);
+            }
+
+          });
+          $("#pos-wrapper").on("click", ".img-cross", function(){ 
+            var rel = $(this).attr('rel');
+                deletelogofunc();
+          });
+          function uploadlogofunc(fdata) { 
+           if(fdata != null && fdata != ''){
+            $.ajax({
+                url: "/customprinting/index/ajaxupload",
+                type: "POST",
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: fdata,      
+                dataType: 'json',
+                showLoader: true,
+                success:function(res){
+                  if(res.path){
+                    $htmlstr = '';
+                    if(res.path.split(".").pop() != 'pdf'){
+                      $htmlstr = $htmlstr +  '<div class ="resultimg image" ><img src = "/media/'+res.path+'"><div class="img-cross" rel = "'+res.path+'">&#10006;</div></div>';
+                    }else{
+                        $htmlstr = $htmlstr +  '<div class ="resultimg image" style="position:relative;text-align:center;font-weight:bold;">PDF<div class="img-cross" rel = "'+res.path+'">&#10006;</div></div>';
+                    }
+                    $("#logopath").val(res.path)
+                    $("#drag-area").append($htmlstr);                  
+                    $("#drag-area").css('border','none');
+                    $("p.dragdrop").hide();
+                    $("#logopathdiv").show();
+                    toappend = '<div class="message message-success success"><p>Image uploaded.</p></div>';
+                    $("#pos-wrapper").append(toappend);                 
+                  }
+                  if(res.error){   
+                    var toappend = '<div class="message message-error error">';
+                    $.each(res.error,function(index, value){
+                      toappend = toappend + '<p>'+ value +'</p>';
+                    });
+                    toappend = toappend + "</div>";
+                    $("#pos-wrapper").append(toappend);
+                  }
+                  
+                }
+            });  
+          }
+          }; 
+          function deletelogofunc() { 
+            if($("#pos-wrapper").find(".img-cross").length){
+                el = $("#pos-wrapper").find(".resultimg");
+                path = $("#pos-wrapper").find(".img-cross").attr('rel');
+                $.ajax({
+                    url: "/customprinting/index/deleteajaxupload",
+                    type: "POST",
+                    data: 'path='+path,      
+                    dataType: 'json',
+                    showLoader: true,
+                    success:function(res){
+                        el.remove();
+                        $("#logopath").val('');
+                        $("#logopathdiv").hide();
+                        $("#copybtn").next('span').html('');
+                        $("#pos-wrapper").find('div.message').remove();  
+                        $("#print_file").val('');  
+                        $("#print_text").val('');  
+                        $("p.dragdrop").show();
+                        $(".drag-area").css('border','3px dashed lightgray'); 
+                        $(".input-text.product-custom-option.inputprinting").val('').trigger('change'); 
+                    }
+                });  
+            }           
+          }
+      });
+    });  
+</script>
+	

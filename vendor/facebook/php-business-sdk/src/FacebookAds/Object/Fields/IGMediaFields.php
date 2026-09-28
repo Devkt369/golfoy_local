@@ -1,0 +1,98 @@
+<?php
+ /*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * All rights reserved.
+ *
+ * This source code is licensed under the license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+namespace FacebookAds\Object\Fields;
+
+use FacebookAds\Enum\AbstractEnum;
+
+/**
+ * This class is auto-generated.
+ *
+ * For any issues or feature requests related to this class, please let us know
+ * on github and we'll fix in our codegen framework. We'll not be able to accept
+ * pull request for this class.
+ *
+ */
+
+class IGMediaFields extends AbstractEnum {
+
+  const ALT_TEXT = 'alt_text';
+  const AUDIO_ID = 'audio_id';
+  const BOOST_ELIGIBILITY_INFO = 'boost_eligibility_info';
+  const CAPTION = 'caption';
+  const COMMENTS_COUNT = 'comments_count';
+  const COPYRIGHT_CHECK_INFORMATION = 'copyright_check_information';
+  const CURRENT_LIVE_VIEWER_COUNT = 'current_live_viewer_count';
+  const HAS_POLL = 'has_poll';
+  const HAS_SLIDER = 'has_slider';
+  const ID = 'id';
+  const IG_ID = 'ig_id';
+  const IS_AI_GENERATED = 'is_ai_generated';
+  const IS_COMMENT_ENABLED = 'is_comment_enabled';
+  const IS_SHARED_TO_FEED = 'is_shared_to_feed';
+  const LEGACY_INSTAGRAM_MEDIA_ID = 'legacy_instagram_media_id';
+  const LIKE_COUNT = 'like_count';
+  const MEDIA_AUDIO_TYPE = 'media_audio_type';
+  const MEDIA_PRODUCT_TYPE = 'media_product_type';
+  const MEDIA_TYPE = 'media_type';
+  const MEDIA_URL = 'media_url';
+  const OWNER = 'owner';
+  const PERMALINK = 'permalink';
+  const REPOSTS_COUNT = 'reposts_count';
+  const SAVED_COUNT = 'saved_count';
+  const SHARES_COUNT = 'shares_count';
+  const SHORTCODE = 'shortcode';
+  const THUMBNAIL_URL = 'thumbnail_url';
+  const TIMESTAMP = 'timestamp';
+  const TOTAL_COMMENTS_COUNT = 'total_comments_count';
+  const TOTAL_LIKE_COUNT = 'total_like_count';
+  const TOTAL_VIEWS_COUNT = 'total_views_count';
+  const USERNAME = 'username';
+  const VIDEO_TITLE = 'video_title';
+  const VIEW_COUNT = 'view_count';
+
+  public function getFieldTypes() {
+    return array(
+      'alt_text' => 'string',
+      'audio_id' => 'string',
+      'boost_eligibility_info' => 'IGMediaBoostEligibilityInfo',
+      'caption' => 'string',
+      'comments_count' => 'int',
+      'copyright_check_information' => 'IGVideoCopyrightCheckMatchesInformation',
+      'current_live_viewer_count' => 'int',
+      'has_poll' => 'bool',
+      'has_slider' => 'bool',
+      'id' => 'string',
+      'ig_id' => 'string',
+      'is_ai_generated' => 'bool',
+      'is_comment_enabled' => 'bool',
+      'is_shared_to_feed' => 'bool',
+      'legacy_instagram_media_id' => 'string',
+      'like_count' => 'int',
+      'media_audio_type' => 'string',
+      'media_product_type' => 'string',
+      'media_type' => 'string',
+      'media_url' => 'string',
+      'owner' => 'IGUser',
+      'permalink' => 'string',
+      'reposts_count' => 'int',
+      'saved_count' => 'int',
+      'shares_count' => 'int',
+      'shortcode' => 'string',
+      'thumbnail_url' => 'string',
+      'timestamp' => 'datetime',
+      'total_comments_count' => 'int',
+      'total_like_count' => 'int',
+      'total_views_count' => 'int',
+      'username' => 'string',
+      'video_title' => 'string',
+      'view_count' => 'int',
+    );
+  }
+}

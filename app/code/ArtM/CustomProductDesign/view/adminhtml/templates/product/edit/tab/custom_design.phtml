@@ -1,0 +1,740 @@
+<?php
+/**
+ * Custom Print Area Admin UI for Product Images
+ * - Shows all product images
+ * - Click image to open popup and draw/select printable areas
+ * - Existing areas shown in blue, new in green
+ * - Choose allowed type and extra price per area
+ * - Save/update/delete areas via AJAX
+ */
+$_product = $block->getProduct();
+$mediaGallery = $_product->getMediaGalleryImages();
+?>
+<style>
+
+	.customprint-image-list { display: flex; gap: 20px; flex-wrap: wrap; }
+	.customprint-image-item { border: 1px solid #ccc; padding: 10px; cursor: pointer; }
+	.customprint-image-item img { max-width: 150px; max-height: 150px; display: block; }
+	#customprint-config-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 9999; }
+	#customprint-config-content { 
+		
+		background: #fff;
+		margin: 40px auto;
+		padding: 20px;
+		width: 500px;
+		border-radius: 8px;
+		position: relative;
+		overflow: auto;
+		max-height: calc(100% - 80px);
+	}
+	#customprint-config-content label { display: block; margin-top: 10px; font-weight: 600; color: #333; }
+	#customprint-config-content input[type="number"] { width: 120px; }
+	#customprint-config-content .close-btn { position: absolute; top: 10px; right: 10px; cursor: pointer; }
+	#customprint-area-list { max-height: 200px; overflow-y: auto; }
+	
+	/* Form Group Styling */
+	.form-group { margin-bottom: 15px; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; background: #f9f9f9; }
+	.form-group label { margin-bottom: 5px; font-size: 14px; }
+	.form-group input[type="text"], .form-group input[type="number"], .form-group select { 
+		width: 100%; 
+		padding: 8px 12px; 
+		border: 1px solid #ccc; 
+		border-radius: 4px; 
+		font-size: 14px; 
+		box-sizing: border-box;
+	}
+	.form-group input[type="text"]:focus, .form-group input[type="number"]:focus, .form-group select:focus {
+		outline: none;
+		border-color: #007bff;
+		box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+	}
+	.checkbox-label { display: flex !important; align-items: center; gap: 8px; margin-top: 0 !important; }
+	.checkbox-label input[type="checkbox"] { width: auto !important; margin: 0; }
+	.submit-section { text-align: center; background: transparent !important; border: none !important; }
+	.add-area-btn { 
+		background: #007bff; 
+		color: white; 
+		padding: 10px 20px; 
+		border: none; 
+		border-radius: 4px; 
+		cursor: pointer; 
+		font-size: 16px; 
+		font-weight: 500;
+	}
+	.add-area-btn:hover { background: #0056b3; }
+	
+	/* Form Row Layout */
+	.form-row { display: flex; gap: 15px; align-items: flex-end; }
+	.form-col-left { flex: 2; }
+	.form-col-right { flex: 1; }
+	.form-col-left label, .form-col-right label { margin-bottom: 5px; }
+	.form-col-left input, .form-col-right input { width: 100%; }
+	
+	/* Toggle Button Styles */
+	.customprint-image-buttons { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0; margin-top: 20px; }
+	.customprint-image-buttons button {
+		padding: 10px 20px;
+		border: none;
+		background: #f8f9fa;
+		color: #495057;
+		cursor: pointer;
+		border-radius: 4px 4px 0 0;
+		font-weight: 500;
+		transition: all 0.3s ease;
+	}
+	.customprint-image-buttons button:hover {
+		background: #e9ecef;
+		color: #007bff;
+	}
+	.customprint-image-buttons button.active {
+		background: #007bff;
+		color: white;
+		border-bottom: 2px solid #007bff;
+	}
+</style>
+
+<div class="customprint-image-list">
+	<?php if ($mediaGallery && count($mediaGallery)): ?>
+		<?php foreach ($mediaGallery as $image): ?>
+			<div class="customprint-image-item" data-image="<?= $image->getFile(); ?>">
+				<img src="<?= $image->getUrl(); ?>" alt="Product Image" />
+				<div style="text-align:center;"><?= $image->getLabel(); ?></div>
+				<div class="customprint-available" style="text-align:center;color:green;font-weight:bold;"></div>
+			</div>
+		<?php endforeach; ?>
+	<?php else: ?>
+		<p>No images found for this product.</p>
+	<?php endif; ?>
+</div>
+
+<!-- Modal for area configuration -->
+<div id="customprint-config-modal">
+	<div id="customprint-config-content">
+		<span class="close-btn">✖</span>
+		<h3>Configure Printable Area</h3>
+		<div id="customprint-image-preview"></div>
+		<!-- Toggle Buttons -->
+		<div class="customprint-image-buttons">
+			<button type="button" class="select-image-btn active" onclick="showAddAreaForm()">Add Area</button>
+			<button type="button" class="remove-image-btn" onclick="showExistingAreas()">View Existing Areas</button>
+		</div>
+		<form id="customprint-area-form" style="display: block;">
+			<!-- Area Name Field -->
+			<div class="form-group area-name">
+				<label>Area Name:</label>
+				<input type="text" name="area_name" placeholder="Enter area name" required />
+			</div>
+
+			<!-- Printing Type Field -->
+			<div class="form-group printing-type">
+				<label>Allowed Printing Type:</label>
+				<select name="printing_type" required onchange="togglePriceFields(this.value)">
+					<option value="">Select printing type</option>
+					<option value="text">Text</option>
+					<option value="image">Image</option>
+					<option value="both">Both</option>
+				</select>
+			</div>
+
+			<!-- Text Settings (Initially Hidden) -->
+			<div class="form-group text-settings" style="display: none;">
+				<h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">Text Configuration</h4>
+				<div class="form-row">
+					<div class="form-col-left">
+						<label>Label for Text:</label>
+						<input type="text" name="label_for_text" placeholder="e.g., Embroidery, Text, Engrave" />
+					</div>
+					<div class="form-col-right">
+						<label>Extra Price for Text:</label>
+						<input type="number" name="extra_price_text" min="0" step="0.01" value="0" />
+					</div>
+				</div>
+			</div>
+
+			<!-- Image Settings (Initially Hidden) -->
+			<div class="form-group image-settings" style="display: none;">
+				<h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px;">Image Configuration</h4>
+				<div class="form-row">
+					<div class="form-col-left">
+						<label>Label for Image:</label>
+						<input type="text" name="label_for_image" placeholder="e.g., Upload your logo" />
+					</div>
+					<div class="form-col-right">
+						<label>Extra Price for Image:</label>
+						<input type="number" name="extra_price_image" min="0" step="0.01" value="0" />
+					</div>
+				</div>
+			</div>
+
+			<!-- Clipart Settings Field (Initially Hidden) -->
+			<div class="form-group clipart-settings" style="display: none;">
+				<label class="checkbox-label">
+					<input type="checkbox" name="clipart_allowed" value="1" />
+					Allow Clipart Selection
+				</label>
+			</div>
+
+			<!-- Hidden Fields for Product and Area Data -->
+			<input type="hidden" name="product_id" value="<?= $_product->getId(); ?>" />
+			<input type="hidden" name="image_file" value="" />
+			<input type="hidden" name="area_x" />
+			<input type="hidden" name="area_y" />
+			<input type="hidden" name="area_width" />
+			<input type="hidden" name="area_height" />
+			
+			<!-- Submit Button -->
+			<div class="form-group submit-section">
+				<button type="button" class="add-area-btn">Add Area</button>
+				<div class="cancel-edit-text" style="display: none; margin-top: 10px; text-align: center;">
+					<a href="#" onclick="cancelEditMode(); return false;" style="color: #007cba; text-decoration: underline; font-size: 14px;">
+						Wanna add a new area instead?
+					</a>
+				</div>
+			</div>
+		</form>
+		<div id="customprint-area-list" style="margin-top:20px; display: none;"></div>
+	</div>
+</div>
+
+<!-- RequireJS block for jQuery and fabric.js -->
+<script>
+// Function to toggle visibility of price and label fields based on printing type
+function togglePriceFields(printingType) {
+	// Get all the form groups
+	const textSettings = document.querySelector('.form-group.text-settings');
+	const imageSettings = document.querySelector('.form-group.image-settings');
+	const clipartSettings = document.querySelector('.form-group.clipart-settings');
+	
+	// Hide all fields initially
+	textSettings.style.display = 'none';
+	imageSettings.style.display = 'none';
+	clipartSettings.style.display = 'none';
+	
+	// Show fields based on selection
+	switch(printingType) {
+		case 'text':
+			textSettings.style.display = 'block';
+			break;
+		case 'image':
+			imageSettings.style.display = 'block';
+			clipartSettings.style.display = 'block';
+			break;
+		case 'both':
+			textSettings.style.display = 'block';
+			imageSettings.style.display = 'block';
+			clipartSettings.style.display = 'block';
+			break;
+		default:
+			// All fields remain hidden
+			break;
+	}
+}
+
+// Function to show Add Area form and hide area list
+function showAddAreaForm() {
+	// Toggle button states
+	document.querySelector('.select-image-btn').classList.add('active');
+	document.querySelector('.remove-image-btn').classList.remove('active');
+	
+	// Show form, hide list
+	document.getElementById('customprint-area-form').style.display = 'block';
+	document.getElementById('customprint-area-list').style.display = 'none';
+}
+
+// Function to show existing areas list and hide form
+function showExistingAreas() {
+	// Toggle button states
+	document.querySelector('.select-image-btn').classList.remove('active');
+	document.querySelector('.remove-image-btn').classList.add('active');
+	
+	// Hide form, show list
+	document.getElementById('customprint-area-form').style.display = 'none';
+	document.getElementById('customprint-area-list').style.display = 'block';
+}
+
+// Function to cancel edit mode and reset form for new area
+function cancelEditMode() {
+	// Reset the form
+	document.getElementById('customprint-area-form').reset();
+	document.querySelector('#customprint-area-form [name="image_file"]').value = currentImage;
+	
+	// Reset button text and remove editing data
+	document.querySelector('.add-area-btn').textContent = 'Add Area';
+	document.querySelector('.add-area-btn').removeAttribute('data-editing-idx');
+	
+	// Hide the cancel text
+	document.querySelector('.cancel-edit-text').style.display = 'none';
+	
+	// Hide all conditional fields initially
+	togglePriceFields('');
+}
+
+require([
+	'jquery',
+	'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js'
+], function($){
+	// On page load, check each image for custom print availability
+	$(document).ready(function(){
+		var productId = <?= (int)$_product->getId(); ?>;
+		$('.customprint-image-item').each(function(){
+			var $item = $(this);
+			var imageFile = $item.data('image');
+			$.ajax({
+				url: '<?= $block->getUrl("customprint/area/load") ?>',
+				type: 'GET',
+				data: {
+					product_id: productId,
+					image_file: imageFile
+				},
+				dataType: 'json',
+				success: function(response){
+					if (response.areas && response.areas.length > 0) {
+						$item.find('.customprint-available').text('Custom print available');
+					} else {
+						$item.find('.customprint-available').text('');
+					}
+				}
+			});
+		});
+	});
+	var currentImage = '';
+	var canvas, rect;
+	var areaConfigs = [];
+
+	// Show popup and load image/areas
+	$('.customprint-image-item').off('click').on('click', function(){
+		currentImage = $(this).data('image');
+		var imgSrc = $(this).find('img').attr('src');
+		// Load image to get its natural dimensions and set canvas accordingly
+		var imgObj = new window.Image();
+		imgObj.onload = function() {
+			var maxW = 500, maxH = 400;
+			var ratio = Math.min(maxW / imgObj.width, maxH / imgObj.height, 1);
+			var canvasW = Math.round(imgObj.width * ratio);
+			var canvasH = Math.round(imgObj.height * ratio);
+			$('#customprint-image-preview').html('<canvas id="customprint-canvas" width="' + canvasW + '" height="' + canvasH + '" style="border:2px solid red;"></canvas>');
+			$('#customprint-area-form')[0].reset();
+			$('#customprint-area-form [name="image_file"]')[0].value = currentImage;
+			$('#customprint-config-modal').fadeIn();
+			$('#customprint-area-list').empty();
+			areaConfigs = [];
+			canvas = new fabric.Canvas('customprint-canvas');
+			fabric.Image.fromURL(imgSrc, function(img) {
+				img.set({ selectable: false });
+				var scaleX = canvas.width / img.width;
+				var scaleY = canvas.height / img.height;
+				canvas.setBackgroundImage(img, function() {
+					canvas.renderAll();
+					canvas._customScaleX = scaleX;
+					canvas._customScaleY = scaleY;
+					areaConfigs = [];
+					loadSavedAreas($('#customprint-area-form [name="product_id"]').val(), currentImage);
+					// Re-attach area selection events
+					var rect = null, isDown = false, origX = 0, origY = 0;
+					canvas.off('mouse:down');
+					canvas.off('mouse:move');
+					canvas.off('mouse:up');
+					canvas.on('mouse:down', function(o){
+						canvas.getObjects('rect').forEach(function(o){
+							if(o.fill === 'rgba(0,255,0,0.2)') canvas.remove(o);
+						});
+						isDown = true;
+						var pointer = canvas.getPointer(o.e);
+						origX = pointer.x;
+						origY = pointer.y;
+						rect = new fabric.Rect({
+							left: origX,
+							top: origY,
+							width: 0,
+							height: 0,
+							fill: 'rgba(0,255,0,0.2)',
+							stroke: 'green',
+							strokeWidth: 2,
+							selectable: false
+						});
+						canvas.add(rect);
+					});
+					canvas.on('mouse:move', function(o){
+						if(!isDown) return;
+						var pointer = canvas.getPointer(o.e);
+						rect.set({ width: Math.abs(pointer.x-origX), height: Math.abs(pointer.y-origY) });
+						rect.set({ left: pointer.x < origX ? pointer.x : origX, top: pointer.y < origY ? pointer.y : origY });
+						canvas.renderAll();
+					});
+					canvas.on('mouse:up', function(o){
+						isDown = false;
+						var minSize = 10;
+						var left = Math.round(rect.left);
+						var top = Math.round(rect.top);
+						var width = Math.round(rect.width);
+						var height = Math.round(rect.height);
+						if (width < minSize || height < minSize) {
+							alert('Area too small! Please select a larger area.');
+							canvas.remove(rect);
+							rect = null;
+							return;
+						}
+						var scaleX = canvas._customScaleX || 1;
+						var scaleY = canvas._customScaleY || 1;
+						var percentX = left / canvas.width;
+						var percentY = top / canvas.height;
+						var percentW = width / canvas.width;
+						var percentH = height / canvas.height;
+						$('#customprint-area-form [name="area_x"]').val(percentX);
+						$('#customprint-area-form [name="area_y"]').val(percentY);
+						$('#customprint-area-form [name="area_width"]').val(percentW);
+						$('#customprint-area-form [name="area_height"]').val(percentH);
+					});
+				}, {
+					scaleX: scaleX,
+					scaleY: scaleY
+				});
+			});
+		};
+		imgObj.src = imgSrc;
+		rect = null;
+		// Drawing interaction
+		var isDown, origX, origY;
+		canvas.on('mouse:down', function(o){
+			// Remove previous green selection
+			canvas.getObjects('rect').forEach(function(o){
+				if(o.fill === 'rgba(0,255,0,0.2)') canvas.remove(o);
+			});
+			isDown = true;
+			var pointer = canvas.getPointer(o.e);
+			origX = pointer.x;
+			origY = pointer.y;
+			rect = new fabric.Rect({
+				left: origX,
+				top: origY,
+				width: 0,
+				height: 0,
+				fill: 'rgba(0,255,0,0.2)', // Green for current selection
+				stroke: 'green',
+				strokeWidth: 2,
+				selectable: false
+			});
+			canvas.add(rect);
+		});
+		canvas.on('mouse:move', function(o){
+			if(!isDown) return;
+			var pointer = canvas.getPointer(o.e);
+			rect.set({ width: Math.abs(pointer.x-origX), height: Math.abs(pointer.y-origY) });
+			rect.set({ left: pointer.x < origX ? pointer.x : origX, top: pointer.y < origY ? pointer.y : origY });
+			canvas.renderAll();
+		});
+		canvas.on('mouse:up', function(o){
+			isDown = false;
+			// Use rect's own properties for accurate size
+			var minSize = 10; // Minimum size in px
+			var left = Math.round(rect.left);
+			var top = Math.round(rect.top);
+			var width = Math.round(rect.width);
+			var height = Math.round(rect.height);
+			// Prevent tiny accidental areas
+			if (width < minSize || height < minSize) {
+				alert('Area too small! Please select a larger area.');
+				canvas.remove(rect);
+				rect = null;
+				return;
+			}
+			// Convert to percentage of image size
+			var scaleX = canvas._customScaleX || 1;
+			var scaleY = canvas._customScaleY || 1;
+			var imgWidth = canvas.width / scaleX;
+			var imgHeight = canvas.height / scaleY;
+			var percentX = left / canvas.width;
+			var percentY = top / canvas.height;
+			var percentW = width / canvas.width;
+			var percentH = height / canvas.height;
+			// Show area config form (store as percent)
+			$('#customprint-area-form [name="area_x"]').val(percentX);
+			$('#customprint-area-form [name="area_y"]').val(percentY);
+			$('#customprint-area-form [name="area_width"]').val(percentW);
+			$('#customprint-area-form [name="area_height"]').val(percentH);
+		});
+	});
+
+	// Close popup
+	$('.close-btn').on('click', function(){
+		$('#customprint-config-modal').fadeOut();
+		if(canvas) canvas.dispose();
+	});
+
+	// Add or update area
+	$('.add-area-btn').on('click', function(){
+		var editingIdx = $(this).data('editing-idx');
+		// Always use percentage values from form fields for correct scaling
+		var areaData = {
+			x: $('#customprint-area-form [name="area_x"]').val(),
+			y: $('#customprint-area-form [name="area_y"]').val(),
+			width: $('#customprint-area-form [name="area_width"]').val(),
+			height: $('#customprint-area-form [name="area_height"]').val(),
+			printing_type: $('#customprint-area-form [name="printing_type"]').val(),
+			extra_price_text: $('#customprint-area-form [name="extra_price_text"]').val(),
+			extra_price_image: $('#customprint-area-form [name="extra_price_image"]').val(),
+			product_id: $('#customprint-area-form [name="product_id"]').val(),
+			image_file: $('#customprint-area-form [name="image_file"]').val(),
+			additional_data: JSON.stringify({
+				area_name: $('#customprint-area-form [name="area_name"]').val(),
+				label_for_image: $('#customprint-area-form [name="label_for_image"]').val(),
+				label_for_text: $('#customprint-area-form [name="label_for_text"]').val(),
+				clipart_allowed: $('#customprint-area-form [name="clipart_allowed"]').is(':checked') ? 1 : 0
+			})
+		};
+		// Save area via AJAX immediately
+		$.ajax({
+			url: '<?= $block->getUrl("customprint/area/save") ?>',
+			method: 'POST',
+			data: {
+				areas: JSON.stringify([areaData]),
+				form_key: window.FORM_KEY,
+				product_id: areaData.product_id,
+				image_file: areaData.image_file
+			},
+			success: function(resp){
+				loadSavedAreas(areaData.product_id, areaData.image_file);
+				if (canvas) {
+					canvas.getObjects('rect').forEach(function(o){
+						if(o.fill === 'rgba(0,255,0,0.2)') canvas.remove(o);
+					});
+				}
+				$('#customprint-area-form')[0].reset();
+				$('#customprint-area-form [name="image_file"]')[0].value = currentImage;
+				
+				// Reset editing mode
+				$('.add-area-btn').text('Add Area').removeData('editing-idx');
+				$('.cancel-edit-text').hide();
+				
+				// Automatically switch to "View Existing" after adding/updating area
+				showExistingAreas();
+			},
+			error: function(xhr){
+				alert('Error saving area!');
+			}
+		});
+	});
+
+	// Save all areas via AJAX
+	$('.save-all-btn').on('click', function(){
+	// Save All Configurations button removed
+	});
+
+	// Delete area from DB and UI
+	$('#customprint-area-list').on('click', '.delete-area-btn', function(){
+		var idx = $(this).data('idx');
+		var area = areaConfigs[idx];
+		$.ajax({
+			url: '<?= $block->getUrl("customprint/area/delete") ?>',
+			method: 'POST',
+			data: {
+				product_id: area.product_id,
+				image_file: area.image_file,
+				area_data: JSON.stringify({x: area.x, y: area.y, width: area.width, height: area.height}),
+				form_key: window.FORM_KEY
+			},
+			success: function(resp){
+				areaConfigs.splice(idx, 1);
+				renderAreaList();
+				redrawAreasOnCanvas();
+			},
+			error: function(xhr){
+				alert('Error deleting area!');
+			}
+		});
+	});
+
+	// Edit area - populate form with existing data
+	$('#customprint-area-list').on('click', '.edit-area-btn', function(){
+		var idx = $(this).data('idx');
+		var area = areaConfigs[idx];
+		
+		// Automatically switch to "Add Area" form view for editing
+		showAddAreaForm();
+		
+		// Populate form fields with area data
+		$('#customprint-area-form [name="printing_type"]').val(area.printing_type);
+		$('#customprint-area-form [name="extra_price_text"]').val(area.extra_price_text);
+		$('#customprint-area-form [name="extra_price_image"]').val(area.extra_price_image);
+		$('#customprint-area-form [name="area_name"]').val(area.area_name || '');
+		$('#customprint-area-form [name="label_for_image"]').val(area.label_for_image || '');
+		$('#customprint-area-form [name="label_for_text"]').val(area.label_for_text || '');
+		$('#customprint-area-form [name="clipart_allowed"]').prop('checked', area.clipart_allowed || false);
+		
+		// Set position fields
+		$('#customprint-area-form [name="area_x"]').val(area.x);
+		$('#customprint-area-form [name="area_y"]').val(area.y);
+		$('#customprint-area-form [name="area_width"]').val(area.width);
+		$('#customprint-area-form [name="area_height"]').val(area.height);
+		
+		// Show appropriate price and label fields based on printing type
+		togglePriceFields(area.printing_type);
+		
+		// Change button text to indicate editing mode and show cancel option
+		$('.add-area-btn').text('Update Area').data('editing-idx', idx);
+		$('.cancel-edit-text').show();
+		
+		// Scroll to form
+		$('#customprint-area-form')[0].scrollIntoView({behavior: 'smooth'});
+	});
+
+	// Load existing areas from DB
+	function loadSavedAreas(productId, imageFile) {
+		$.ajax({
+			url: '<?= $block->getUrl("customprint/area/load") ?>',
+			type: 'GET',
+			data: {
+				product_id: productId,
+				image_file: imageFile
+			},
+			dataType: 'json',
+			success: function(response) {
+				areaConfigs = [];
+				if (response.areas && response.areas.length) {
+					response.areas.forEach(function(area) {
+						var data = {};
+						try {
+							data = JSON.parse(area.area_data);
+						} catch(e) {}
+						areaConfigs.push({
+							x: data.x,
+							y: data.y,
+							width: data.width,
+							height: data.height,
+							area_name: area.additional_data ? (JSON.parse(area.additional_data).area_name || '') : '',
+							label_for_image: area.additional_data ? (JSON.parse(area.additional_data).label_for_image || '') : '',
+							label_for_text: area.additional_data ? (JSON.parse(area.additional_data).label_for_text || '') : '',
+							clipart_allowed: area.additional_data ? (JSON.parse(area.additional_data).clipart_allowed || false) : false,
+							printing_type: area.allowed_types,
+							extra_price_text: area.extra_price_text,
+							extra_price_image: area.extra_price_image,
+							product_id: productId,
+							image_file: imageFile
+						});
+					});
+				}
+				renderAreaList();
+				setTimeout(function(){ redrawAreasOnCanvas(); }, 100);
+			}
+		});
+	}
+
+	// Render area list in popup
+	function renderAreaList() {
+		var html = '';
+		areaConfigs.forEach(function(area, idx){
+			var areaName = 'Area ' + (idx + 1);
+			if (area.additional_data) {
+				try {
+					var addData = typeof area.additional_data === 'string' ? JSON.parse(area.additional_data) : area.additional_data;
+					if (addData.name && addData.name.trim() !== '') {
+						areaName = addData.name;
+					}
+				} catch (e) {
+					// ignore JSON parse error
+				}
+			} else if (area.area_name && area.area_name.trim() !== '') {
+				areaName = area.area_name;
+			}
+			html += '<div class="customprint-area-row" data-idx="'+idx+'" style="display:flex;align-items:center;justify-content:space-between;background:#eef;padding:8px 12px;margin-bottom:5px;border:1px solid #bbb;cursor:pointer;border-radius:5px;">'+
+				'<div style="font-weight:bold;">'+areaName+'</div>'+
+				'<div style="margin-left:10px;">Type: <span style="color:#007bff;font-weight:500;">'+area.printing_type+'</span></div>'+
+				'<div style="margin-left:10px;">Text Price: <span style="color:#28a745;">'+parseFloat(area.extra_price_text).toFixed(2)+'</span></div>'+
+				'<div style="margin-left:10px;">Image Price: <span style="color:#dc3545;">'+parseFloat(area.extra_price_image).toFixed(2)+'</span></div>'+
+				'<button type="button" class="edit-area-btn" data-idx="'+idx+'" style="margin-left:10px;background:#007bff;color:white;border:none;border-radius:3px;padding:2px 8px;cursor:pointer;">✎</button>'+
+				'<button type="button" class="delete-area-btn" data-idx="'+idx+'" style="margin-left:5px;background:#fff;border:1px solid #bbb;border-radius:3px;padding:2px 8px;cursor:pointer;">✖</button>'+
+				'</div>';
+		});
+		$('#customprint-area-list').html(html);
+
+		// Add hover effect to highlight corresponding rectangle
+		$('.customprint-area-row').hover(function(){
+			var idx = $(this).data('idx');
+			if(canvas) {
+				canvas.getObjects('rect').forEach(function(o){
+					if(o.areaIdx === idx){
+						o.set({ stroke: 'red', strokeWidth: 5 });
+					}
+				});
+				canvas.renderAll();
+			}
+		}, function(){
+			var idx = $(this).data('idx');
+			if(canvas) {
+				canvas.getObjects('rect').forEach(function(o){
+					if(o.areaIdx === idx){
+						o.set({ stroke: 'blue', strokeWidth: 3 });
+					}
+				});
+				canvas.renderAll();
+			}
+		});
+	}
+
+	// Draw all areas on canvas
+	function redrawAreasOnCanvas() {
+    if (!canvas) return;
+    // Remove old rectangles
+    var objectsToRemove = [];
+    canvas.getObjects().forEach(function(o){
+        if(o.type === 'rect') objectsToRemove.push(o);
+    });
+    objectsToRemove.forEach(function(o){ canvas.remove(o); });
+
+	var scaleX = canvas._customScaleX || 1;
+	var scaleY = canvas._customScaleY || 1;
+	areaConfigs.forEach(function(area, idx){
+		// Convert percent back to canvas coordinates
+		var x = parseFloat(area.x) * canvas.width;
+		var y = parseFloat(area.y) * canvas.height;
+		var w = parseFloat(area.width) * canvas.width;
+		var h = parseFloat(area.height) * canvas.height;
+		console.log('Drawing area:', area, 'canvasX:', x, 'canvasY:', y, 'canvasW:', w, 'canvasH:', h);
+
+		if (w > 0 && h > 0) {
+			var newRect = new fabric.Rect({
+				left: x,
+				top: y,
+				width: w,
+				height: h,
+				scaleX: 1,
+				scaleY: 1,
+				fill: 'rgba(0,0,255,0.2)',
+				stroke: 'blue',
+				strokeWidth: 3,
+				selectable: true,
+				hasControls: false,
+				hasBorders: true,
+				areaIdx: idx
+			});
+			newRect.on('mousedown', function(){
+				if(confirm('Delete this area?')) {
+					var area = areaConfigs[this.areaIdx];
+					$.ajax({
+						url: '<?= $block->getUrl("customprint/area/delete") ?>',
+						method: 'POST',
+						data: {
+							product_id: area.product_id,
+							image_file: area.image_file,
+							area_data: JSON.stringify({x: area.x, y: area.y, width: area.width, height: area.height}),
+							form_key: window.FORM_KEY
+						},
+						success: function(resp){
+							areaConfigs.splice(newRect.areaIdx, 1);
+							renderAreaList();
+							redrawAreasOnCanvas();
+						},
+						error: function(xhr){
+							alert('Error deleting area!');
+						}
+					});
+				}
+			});
+			canvas.add(newRect);
+		}
+	});
+	canvas.renderAll();
+}
+
+});
+</script>

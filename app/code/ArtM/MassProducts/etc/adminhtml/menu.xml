@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="ArtM_MassProducts::inventory"
+             title="Inventory"
+             module="ArtM_MassProducts"
+             sortOrder="80"
+             parent="Magento_Catalog::catalog"
+             resource="ArtM_MassProducts::inventory"/>
+
+        <add id="ArtM_MassProducts::mass_upload_product"
+             title="Mass Upload Product"
+             module="ArtM_MassProducts"
+             sortOrder="90"
+             parent="ArtM_MassProducts::inventory"
+             action="massproducts/index/index"
+             resource="ArtM_MassProducts::mass_upload_product"/>
+    </menu>
+</config>

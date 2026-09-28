@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Magestore_ClickAndCollectFrontend::css/bootstrap/bootstrap.css"/>
+        <css src="Magestore_ClickAndCollectFrontend::css/bootstrap/glyphicons.css"/>
+        <css src="Magestore_ClickAndCollectFrontend::css/liststore.css"/>
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="Magestore\ClickAndCollectFrontend\Block\Wrapper"
+                   name="clickandcollect.wrapper"
+                   template="Magestore_ClickAndCollectFrontend::wrapper.phtml">
+                <block class="Magestore\ClickAndCollectFrontend\Block\ListStore\MapBox"
+                       name="clickandcollect.mapbox"
+                       template="Magestore_ClickAndCollectFrontend::liststore/mapbox.phtml"/>
+                <block class="Magestore\ClickAndCollectFrontend\Block\ListStore\SearchBox"
+                       name="clickandcollect.searchbox"
+                       template="Magestore_ClickAndCollectFrontend::liststore/searchbox.phtml"/>
+                <block class="Magestore\ClickAndCollectFrontend\Block\ListStore\ListStoreBox"
+                       name="clickandcollect.liststorebox"
+                       template="Magestore_ClickAndCollectFrontend::liststore/liststorebox.phtml"/>
+            </block>
+        </referenceContainer>
+        <referenceBlock name="page.main.title" remove="true"/>
+    </body>
+</page>

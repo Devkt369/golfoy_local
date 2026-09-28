@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
+    <module name="ArtM_InventoryPlanner">
+        <sequence>
+            <module name="Magento_Backend"/>
+            <module name="Magento_Sales"/>
+            <module name="Magento_Catalog"/>
+            <module name="Magento_Eav"/>
+            <!-- Sources setting + inventory snapshots use MSI's source/salable-qty APIs. -->
+            <module name="Magento_InventoryApi"/>
+            <module name="Magento_InventorySalesApi"/>
+            <!-- Our menu/ACL attach under the ArtM top-level node that ArtM_BlogEsg declares. -->
+            <module name="ArtM_BlogEsg"/>
+        </sequence>
+    </module>
+</config>

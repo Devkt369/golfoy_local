@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * ArtM ShortVideos ACL Configuration
+ *
+ * @category  ArtM
+ * @package   ArtM_ShortVideos
+ * @author    ArtM
+ * @copyright Copyright (c) 2025 ArtM
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="ArtM_ShortVideos::main" title="ArtM" sortOrder="100">
+                    <resource id="ArtM_ShortVideos::videos" title="Short Videos" sortOrder="10"/>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

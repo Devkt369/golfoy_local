@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+
+    <menu>
+    
+        <add id="ArtM_MsiPriority::sync_pos_order_root"
+             title="Vinculum POS Orders"
+             module="ArtM_MsiPriority"
+             sortOrder="200"
+             parent="Magento_Sales::sales"
+             resource="ArtM_MsiPriority::msipriority"/>
+
+        <add id="ArtM_MsiPriority::pendingposorder"
+             title="Unsynced POS Orders"
+             module="ArtM_MsiPriority"
+             sortOrder="100"
+             parent="ArtM_MsiPriority::sync_pos_order_root"
+             action="msipriority/order/pending"
+             resource="ArtM_MsiPriority::msipriority"/>
+
+        <add id="ArtM_MsiPriority::posordersenttovin"
+             title="Synced POS Orders"
+             module="ArtM_MsiPriority"
+             sortOrder="200"
+             parent="ArtM_MsiPriority::sync_pos_order_root"
+             action="msipriority/order/posordersenttovin"
+             resource="ArtM_MsiPriority::msipriority"/>
+
+        <add id="ArtM_MsiPriority::archiveorder"
+             title="Archive POS Orders"
+             module="ArtM_MsiPriority"
+             sortOrder="300"
+             parent="ArtM_MsiPriority::sync_pos_order_root"
+             action="msipriority/archiveorder/index"
+             resource="ArtM_MsiPriority::msipriority"/>
+
+        <add id="ArtM_MsiPriority::configuration"
+             title="Configuration"
+             module="ArtM_MsiPriority"
+             sortOrder="400"
+             parent="ArtM_MsiPriority::sync_pos_order_root"
+             action="admin/system_config/edit/section/msi_priority"
+             resource="ArtM_MsiPriority::configuration"/>
+    </menu>
+</config>

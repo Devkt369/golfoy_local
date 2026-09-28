@@ -1,0 +1,1364 @@
+<?php
+// Debug: Log all requests
+file_put_contents(sys_get_temp_dir() . '/clipart_debug.log', 
+    date('Y-m-d H:i:s') . " - Method: " . $_SERVER['REQUEST_METHOD'] . 
+    ", POST data: " . print_r($_POST, true) . "\n", FILE_APPEND);
+
+// Handle AJAX requests only
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && !empty($_POST['action'])) {
+    // Validate Magento form key for security
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $formKey = $objectManager->get(\Magento\Framework\Data\Form\FormKey\Validator::class);
+    $request = $objectManager->get(\Magento\Framework\App\RequestInterface::class);
+    
+    if (!$formKey->validate($request)) {
+        $response = ['success' => false, 'message' => 'Invalid form key. Please refresh the page.'];
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit;
+    }
+    
+    // Use Magento's proper filesystem methods
+    $filesystem = $objectManager->get(\Magento\Framework\Filesystem::class);
+    $mediaDirectory = $filesystem->getDirectoryWrite(\Magento\Framework\App\Filesystem\DirectoryList::MEDIA);
+    $storeManager = $objectManager->get(\Magento\Store\Model\StoreManagerInterface::class);
+    
+    // Get proper paths using Magento methods
+    $clipartRelativePath = 'customprint/cliparts/';
+    $baseDir = $mediaDirectory->getAbsolutePath($clipartRelativePath);
+    $mediaBaseUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+    
+    $thumbnailDir = $baseDir . 'thumbnail/';
+    
+    // Ensure directories exist
+    if (!is_dir($baseDir)) {
+        mkdir($baseDir, 0755, true);
+    }
+    if (!is_dir($thumbnailDir)) {
+        mkdir($thumbnailDir, 0755, true);
+    }
+    
+    $response = ['success' => false, 'message' => ''];
+    
+    try {
+        switch ($_POST['action']) {
+        case 'load_images':
+            $images = [];
+            $debugInfo = [
+                'baseDir' => $baseDir,
+                'thumbnailDir' => $thumbnailDir,
+                'baseDirExists' => is_dir($baseDir),
+                'thumbnailDirExists' => is_dir($thumbnailDir),
+                'files' => []
+            ];
+            
+            if (is_dir($baseDir)) {
+                $allFiles = scandir($baseDir);
+                $files = array_diff($allFiles, array('.', '..', 'thumbnail'));
+                $debugInfo['allFiles'] = $allFiles;
+                $debugInfo['filteredFiles'] = $files;
+                
+                foreach ($files as $filename) {
+                    $originalPath = $baseDir . $filename;
+                    $thumbnailPath = $thumbnailDir . $filename;
+                    
+                    if (is_file($originalPath) && in_array(strtolower(pathinfo($filename, PATHINFO_EXTENSION)), ['png', 'jpg', 'jpeg'])) {
+                        // Get file size
+                        $filesize = filesize($originalPath);
+                        $filesizeFormatted = $filesize < 1024 ? $filesize . ' B' : 
+                                           ($filesize < 1048576 ? round($filesize/1024, 1) . ' KB' : 
+                                            round($filesize/1048576, 1) . ' MB');
+                        
+                        // Check if hidden (we'll use a simple .hidden file system)
+                        $hiddenFile = $baseDir . '.' . $filename . '.hidden';
+                        $isHidden = file_exists($hiddenFile);
+                        
+                        $images[] = [
+                            'filename' => $filename,
+                            'original_url' => $mediaBaseUrl . 'customprint/cliparts/' . $filename,
+                            'thumbnail_url' => file_exists($thumbnailPath) ? 
+                                             $mediaBaseUrl . 'customprint/cliparts/thumbnail/' . $filename : 
+                                             $mediaBaseUrl . 'customprint/cliparts/' . $filename,
+                            'filesize' => $filesizeFormatted,
+                            'hidden' => $isHidden
+                        ];
+                    }
+                }
+            }
+            
+            $response = [
+                'success' => true, 
+                'images' => $images,
+                'debug' => $debugInfo
+            ];
+            break;
+            
+        case 'upload_images':
+            $uploadedCount = 0;
+            $errors = [];
+            
+            if (isset($_FILES['images']) && is_array($_FILES['images']['name'])) {
+                for ($i = 0; $i < count($_FILES['images']['name']); $i++) {
+                    $filename = $_FILES['images']['name'][$i];
+                    $tmpName = $_FILES['images']['tmp_name'][$i];
+                    $fileSize = $_FILES['images']['size'][$i];
+                    $fileType = $_FILES['images']['type'][$i];
+                    
+                    // Validate file type
+                    $allowedTypes = ['image/png', 'image/jpg', 'image/jpeg'];
+                    if (!in_array($fileType, $allowedTypes)) {
+                        $errors[] = "Invalid file type for $filename";
+                        continue;
+                    }
+                    
+                    // Generate unique filename if exists
+                    $originalFilename = $filename;
+                    $counter = 1;
+                    while (file_exists($baseDir . $filename)) {
+                        $pathInfo = pathinfo($originalFilename);
+                        $filename = $pathInfo['filename'] . '_' . $counter . '.' . $pathInfo['extension'];
+                        $counter++;
+                    }
+                    
+                    // Move original file
+                    $originalPath = $baseDir . $filename;
+                    if (move_uploaded_file($tmpName, $originalPath)) {
+                        // Create thumbnail
+                        createThumbnail($originalPath, $thumbnailDir . $filename);
+                        $uploadedCount++;
+                    } else {
+                        $errors[] = "Failed to upload $filename";
+                    }
+                }
+            }
+            
+            if ($uploadedCount > 0) {
+                $response = [
+                    'success' => true, 
+                    'uploaded_count' => $uploadedCount,
+                    'message' => $uploadedCount . ' files uploaded successfully'
+                ];
+                if (!empty($errors)) {
+                    $response['warnings'] = $errors;
+                }
+            } else {
+                $response = ['success' => false, 'message' => 'No files were uploaded. ' . implode(', ', $errors)];
+            }
+            break;
+            
+        case 'delete_image':
+            if (isset($_POST['filename'])) {
+                $filename = basename($_POST['filename']); // Security: prevent path traversal
+                $originalPath = $baseDir . $filename;
+                $thumbnailPath = $thumbnailDir . $filename;
+                $hiddenFile = $baseDir . '.' . $filename . '.hidden';
+                
+                $deleted = 0;
+                if (file_exists($originalPath) && unlink($originalPath)) $deleted++;
+                if (file_exists($thumbnailPath) && unlink($thumbnailPath)) $deleted++;
+                if (file_exists($hiddenFile) && unlink($hiddenFile)) $deleted++;
+                
+                $response = ['success' => $deleted > 0, 'message' => $deleted > 0 ? 'Image deleted successfully' : 'Failed to delete image'];
+            }
+            break;
+            
+        case 'bulk_delete':
+            if (isset($_POST['filenames']) && is_array($_POST['filenames'])) {
+                $deletedCount = 0;
+                foreach ($_POST['filenames'] as $filename) {
+                    $filename = basename($filename); // Security
+                    $originalPath = $baseDir . $filename;
+                    $thumbnailPath = $thumbnailDir . $filename;
+                    $hiddenFile = $baseDir . '.' . $filename . '.hidden';
+                    
+                    if (file_exists($originalPath) && unlink($originalPath)) $deletedCount++;
+                    if (file_exists($thumbnailPath)) unlink($thumbnailPath);
+                    if (file_exists($hiddenFile)) unlink($hiddenFile);
+                }
+                
+                $response = [
+                    'success' => $deletedCount > 0, 
+                    'message' => "$deletedCount images deleted successfully"
+                ];
+            }
+            break;
+            
+        case 'toggle_visibility':
+            if (isset($_POST['filename']) && isset($_POST['hidden'])) {
+                $filename = basename($_POST['filename']); // Security
+                $hiddenFile = $baseDir . '.' . $filename . '.hidden';
+                $hidden = filter_var($_POST['hidden'], FILTER_VALIDATE_BOOLEAN);
+                
+                if ($hidden) {
+                    // Hide the image
+                    $success = file_put_contents($hiddenFile, time());
+                } else {
+                    // Show the image
+                    $success = file_exists($hiddenFile) ? unlink($hiddenFile) : true;
+                }
+                
+                $response = [
+                    'success' => $success !== false, 
+                    'message' => 'Visibility updated successfully'
+                ];
+            }
+            break;
+            
+        case 'bulk_visibility':
+            if (isset($_POST['filenames']) && is_array($_POST['filenames']) && isset($_POST['visible'])) {
+                $updatedCount = 0;
+                $visible = filter_var($_POST['visible'], FILTER_VALIDATE_BOOLEAN);
+                
+                foreach ($_POST['filenames'] as $filename) {
+                    $filename = basename($filename); // Security
+                    $hiddenFile = $baseDir . '.' . $filename . '.hidden';
+                    
+                    if ($visible) {
+                        // Show the image
+                        if (file_exists($hiddenFile) && unlink($hiddenFile)) $updatedCount++;
+                    } else {
+                        // Hide the image
+                        if (file_put_contents($hiddenFile, time())) $updatedCount++;
+                    }
+                }
+                
+                $response = [
+                    'success' => $updatedCount > 0,
+                    'message' => "$updatedCount images updated successfully"
+                ];
+            }
+            break;
+            
+        default:
+            $response = ['success' => false, 'message' => 'Unknown action: ' . $_POST['action']];
+            break;
+        }
+    } catch (Exception $e) {
+        $response = ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
+    }
+    
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit;
+}
+
+// Function to create thumbnail
+function createThumbnail($sourcePath, $destPath) {
+    $imageInfo = getimagesize($sourcePath);
+    if (!$imageInfo) return false;
+    
+    $sourceWidth = $imageInfo[0];
+    $sourceHeight = $imageInfo[1];
+    $mimeType = $imageInfo['mime'];
+    
+    // Calculate new dimensions (70px width, maintain ratio)
+    $targetWidth = 70;
+    $targetHeight = (int) round(($sourceHeight * $targetWidth) / $sourceWidth);
+    
+    // Create source image resource
+    switch ($mimeType) {
+        case 'image/jpeg':
+            $sourceImage = imagecreatefromjpeg($sourcePath);
+            break;
+        case 'image/png':
+            $sourceImage = imagecreatefrompng($sourcePath);
+            break;
+        default:
+            return false;
+    }
+    
+    if (!$sourceImage) return false;
+    
+    // Create new image
+    $newImage = imagecreatetruecolor($targetWidth, $targetHeight);
+    
+    // Handle transparency for PNG
+    if ($mimeType === 'image/png') {
+        imagealphablending($newImage, false);
+        imagesavealpha($newImage, true);
+        $transparent = imagecolorallocatealpha($newImage, 255, 255, 255, 127);
+        imagefilledrectangle($newImage, 0, 0, $targetWidth, $targetHeight, $transparent);
+    }
+    
+    // Resize
+    imagecopyresampled(
+        $newImage, $sourceImage,
+        0, 0, 0, 0,
+        $targetWidth, $targetHeight,
+        $sourceWidth, $sourceHeight
+    );
+    
+    // Save thumbnail
+    $success = false;
+    switch ($mimeType) {
+        case 'image/jpeg':
+            $success = imagejpeg($newImage, $destPath, 90);
+            break;
+        case 'image/png':
+            $success = imagepng($newImage, $destPath, 9);
+            break;
+    }
+    
+    // Clean up
+    imagedestroy($sourceImage);
+    imagedestroy($newImage);
+    
+    return $success;
+}
+
+// Load images on page load (fallback method)
+$pageLoadImages = [];
+$pageLoadDebug = ['method' => 'page_load'];
+
+// Use Magento's proper filesystem methods for page load
+$pageLoadObjectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$pageLoadFilesystem = $pageLoadObjectManager->get(\Magento\Framework\Filesystem::class);
+$pageLoadMediaDirectory = $pageLoadFilesystem->getDirectoryWrite(\Magento\Framework\App\Filesystem\DirectoryList::MEDIA);
+$pageLoadStoreManager = $pageLoadObjectManager->get(\Magento\Store\Model\StoreManagerInterface::class);
+
+// Get proper paths using Magento methods
+$pageLoadClipartRelativePath = 'customprint/cliparts/';
+$pageLoadBaseDir = $pageLoadMediaDirectory->getAbsolutePath($pageLoadClipartRelativePath);
+$pageLoadMediaBaseUrl = $pageLoadStoreManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+
+$pageLoadDebug['magento_media_path'] = $pageLoadBaseDir;
+$pageLoadDebug['magento_media_url'] = $pageLoadMediaBaseUrl;
+
+$pageLoadThumbnailDir = $pageLoadBaseDir . 'thumbnail/';
+$pageLoadDebug['final_base_dir'] = $pageLoadBaseDir;
+$pageLoadDebug['thumbnail_dir'] = $pageLoadThumbnailDir;
+$pageLoadDebug['base_exists'] = is_dir($pageLoadBaseDir);
+$pageLoadDebug['thumb_exists'] = is_dir($pageLoadThumbnailDir);
+
+if (is_dir($pageLoadBaseDir)) {
+    $allFiles = scandir($pageLoadBaseDir);
+    $files = array_diff($allFiles, array('.', '..', 'thumbnail'));
+    $pageLoadDebug['all_files'] = $allFiles;
+    $pageLoadDebug['filtered_files'] = $files;
+    
+    foreach ($files as $filename) {
+        $originalPath = $pageLoadBaseDir . $filename;
+        $thumbnailPath = $pageLoadThumbnailDir . $filename;
+        
+        if (is_file($originalPath) && in_array(strtolower(pathinfo($filename, PATHINFO_EXTENSION)), ['png', 'jpg', 'jpeg'])) {
+            $filesize = filesize($originalPath);
+            $filesizeFormatted = $filesize < 1024 ? $filesize . ' B' : 
+                               ($filesize < 1048576 ? round($filesize/1024, 1) . ' KB' : 
+                                round($filesize/1048576, 1) . ' MB');
+            
+            $hiddenFile = $pageLoadBaseDir . '.' . $filename . '.hidden';
+            $isHidden = file_exists($hiddenFile);
+            
+            $pageLoadImages[] = [
+                'filename' => $filename,
+                'original_url' => $pageLoadMediaBaseUrl . 'customprint/cliparts/' . $filename,
+                'thumbnail_url' => file_exists($thumbnailPath) ? 
+                                 $pageLoadMediaBaseUrl . 'customprint/cliparts/thumbnail/' . $filename : 
+                                 $pageLoadMediaBaseUrl . 'customprint/cliparts/' . $filename,
+                'filesize' => $filesizeFormatted,
+                'hidden' => $isHidden
+            ];
+        }
+    }
+}
+
+$pageLoadDebug['images_found'] = count($pageLoadImages);
+?>
+
+<div class="clipart-manager">
+    <div class="clipart-header">
+        <h2>Clipart Image Manager</h2>
+        <div class="clipart-actions">
+            <button id="upload-clipart-btn" class="btn btn-primary">
+                <i class="fa fa-plus"></i> Upload Images
+            </button>
+            <button id="show-hidden-btn" class="btn btn-secondary">
+                <i class="fa fa-filter"></i> Show Only Hidden Images
+            </button>
+            <div id="selection-controls">
+                <button id="select-all-btn" class="btn btn-info btn-sm">
+                    <i class="fa fa-check-square-o"></i> Select All
+                </button>
+                <button id="deselect-all-btn" class="btn btn-outline-secondary btn-sm">
+                    <i class="fa fa-square-o"></i> Deselect All
+                </button>
+            </div>
+            <div id="bulk-actions" style="display: none;">
+                <button id="bulk-hide-btn" class="btn btn-warning">
+                    <i class="fa fa-eye-slash"></i> Hide Selected
+                </button>
+                <button id="bulk-show-btn" class="btn btn-success">
+                    <i class="fa fa-eye"></i> Show Selected
+                </button>
+                <button id="bulk-delete-btn" class="btn btn-danger">
+                    <i class="fa fa-trash"></i> Delete Selected
+                </button>
+                <span id="selected-count">0 selected</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for multiple uploads -->
+    <input type="file" id="clipart-file-input" multiple accept=".png,.jpg,.jpeg" style="display: none;">
+
+    <!-- Loading indicator -->
+    <div id="upload-progress" style="display: none;">
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+        <div class="progress-text">Uploading images...</div>
+    </div>
+
+    <!-- Clipart gallery -->
+    <div id="clipart-gallery" class="clipart-gallery">
+        <!-- Images will be loaded here -->
+    </div>
+
+    <!-- Image preview popup -->
+    <div id="image-preview-popup" class="image-popup" style="display: none;">
+        <div class="popup-overlay"></div>
+        <div class="popup-content">
+            <button class="popup-close">&times;</button>
+            <img id="preview-image" src="" alt="Preview">
+            <div class="popup-info">
+                <h3 id="popup-filename"></h3>
+                <p id="popup-filesize"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FontAwesome CSS for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+    .clipart-manager {
+        padding: 20px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .clipart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .clipart-header h2 {
+        margin: 0;
+        color: #333;
+        font-size: 24px;
+    }
+
+    .clipart-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+
+    .btn-warning {
+        background: #ffc107;
+        color: #212529;
+    }
+    .btn-warning:hover {
+        background: #e0a800;
+    }
+
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+    .btn-success:hover {
+        background: #218838;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+    .btn-danger:hover {
+        background: #c82333;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    .btn-secondary:hover {
+        background: #545b62;
+    }
+
+    .btn-info {
+        background: #17a2b8;
+        color: white;
+    }
+    .btn-info:hover {
+        background: #138496;
+    }
+
+    .btn-outline-secondary {
+        background: transparent;
+        color: #6c757d;
+        border: 1px solid #6c757d;
+    }
+    .btn-outline-secondary:hover {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-sm {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    #selection-controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    #bulk-actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
+    }
+
+    #selected-count {
+        font-weight: bold;
+        color: #007bff;
+        margin-left: 10px;
+    }
+
+    #upload-progress {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 20px;
+        background: #e9ecef;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #007bff, #28a745);
+        width: 0%;
+        transition: width 0.3s ease;
+        border-radius: 10px;
+    }
+
+    .progress-text {
+        text-align: center;
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .clipart-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 20px;
+        padding: 20px 0;
+    }
+
+    .clipart-item {
+        position: relative;
+        background: #fff;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 10px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .clipart-item:hover {
+        border-color: #007bff;
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .clipart-item.selected {
+        border-color: #007bff;
+        background: #e7f3ff;
+    }
+
+    .clipart-item.dimmed {
+        opacity: 0.4;
+    }
+
+    /* When filtering to show only hidden images, display them at full opacity */
+    .clipart-gallery.show-hidden-only .clipart-item.dimmed {
+        opacity: 1;
+        border-color: #ffc107;
+        background: #fff8e1;
+    }
+
+    .clipart-thumbnail {
+        width: 100%;
+        height: 80px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+        border-radius: 4px;
+    }
+
+    .clipart-controls {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    .control-btn {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        transition: all 0.3s ease;
+        pointer-events: all;
+    }
+
+    /* Position select checkbox at top-left */
+    .select-checkbox {
+        top: 3px;
+        left: 3px;
+    }
+
+    /* Position visibility toggle at bottom-left */
+    .toggle-visibility {
+        bottom: 3px;
+        left: 3px;
+    }
+
+    /* Position delete button at top-right */
+    .delete-btn {
+        top: 3px;
+        right: 3px;
+    }
+
+    .control-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .select-checkbox {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid #dee2e6;
+        color: #6c757d;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .select-checkbox.selected {
+        background: rgba(0, 123, 255, 0.9);
+        border-color: #007bff;
+        color: white;
+    }
+    .select-checkbox:hover {
+        border-color: #007bff;
+        background: rgba(248, 249, 255, 0.95);
+        transform: scale(1.05);
+    }
+    .select-checkbox.selected:hover {
+        background: rgba(0, 86, 179, 0.9);
+        transform: scale(1.05);
+    }
+
+    .toggle-visibility {
+        background: rgba(255, 193, 7, 0.9);
+        color: #212529;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .toggle-visibility:hover {
+        background: rgba(224, 168, 0, 0.95);
+        transform: scale(1.05);
+    }
+
+    .delete-btn {
+        background: rgba(220, 53, 69, 0.9);
+        color: white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .delete-btn:hover {
+        background: rgba(200, 35, 51, 0.95);
+        transform: scale(1.05);
+    }
+
+    .clipart-filename {
+        text-align: center;
+        margin-top: 8px;
+        font-size: 11px;
+        color: #6c757d;
+        word-break: break-all;
+    }
+
+    /* Popup Styles */
+    .image-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+    }
+
+    .popup-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+    }
+
+    .popup-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        max-width: 90%;
+        max-height: 90%;
+        overflow: auto;
+    }
+
+    .popup-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #999;
+    }
+
+    .popup-close:hover {
+        color: #333;
+    }
+
+    #preview-image {
+        max-width: 100%;
+        max-height: 70vh;
+        display: block;
+        margin: 0 auto 15px;
+        border-radius: 4px;
+    }
+
+    .popup-info h3 {
+        margin: 0 0 5px;
+        color: #333;
+    }
+
+    .popup-info p {
+        margin: 0;
+        color: #666;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .clipart-header {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .clipart-actions {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .clipart-gallery {
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 15px;
+        }
+    }
+</style>
+
+<script>
+require(['jquery'], function($) {
+    let selectedImages = new Set();
+    let allImages = [];
+    
+    // PHP-loaded data as fallback
+    const pageLoadImages = <?php echo json_encode($pageLoadImages); ?>;
+    const pageLoadDebug = <?php echo json_encode($pageLoadDebug); ?>;
+
+    // Initialize
+    $(document).ready(function() {
+        bindEvents();
+        
+        console.log('Page Load Debug:', pageLoadDebug);
+        console.log('Page Load Images:', pageLoadImages);
+        
+        // Load images on page load - try PHP data first, then AJAX
+        setTimeout(function() {
+            if (pageLoadImages && pageLoadImages.length > 0) {
+                console.log('Using PHP-loaded images (' + pageLoadImages.length + ' found)');
+                allImages = pageLoadImages;
+                renderGallery();
+            } else {
+                console.log('No PHP-loaded images, trying AJAX');
+                loadImages();
+            }
+        }, 100);
+    });
+
+    function bindEvents() {
+        // Upload button click
+        $('#upload-clipart-btn').on('click', function() {
+            $('#clipart-file-input').click();
+        });
+
+        // File input change
+        $('#clipart-file-input').on('change', function(e) {
+            const files = Array.from(e.target.files);
+            if (files.length > 0) {
+                uploadImages(files);
+            }
+        });
+
+        // Show only hidden images button
+        $('#show-hidden-btn').on('click', function() {
+            toggleHiddenFilter();
+        });
+
+        // Selection controls
+        $('#select-all-btn').on('click', function() {
+            selectAllImages();
+        });
+
+        $('#deselect-all-btn').on('click', function() {
+            deselectAllImages();
+        });
+
+        // Bulk actions
+        $('#bulk-hide-btn').on('click', function() {
+            bulkToggleVisibility(false);
+        });
+
+        $('#bulk-show-btn').on('click', function() {
+            bulkToggleVisibility(true);
+        });
+
+        $('#bulk-delete-btn').on('click', function() {
+            bulkDeleteImages();
+        });
+
+        // Popup close
+        $('.popup-close, .popup-overlay').on('click', function() {
+            $('#image-preview-popup').hide();
+        });
+    }
+
+    function loadImages() {
+        console.log('Loading images...');
+        
+        // Load images directly from the filesystem
+        $.ajax({
+            url: window.location.href,
+            method: 'POST',
+            data: {
+                action: 'load_images',
+                form_key: window.FORM_KEY
+            },
+            dataType: 'json',
+            success: function(response) {
+                console.log('Load images response:', response);
+                
+                // Show debug information
+                if (response && response.debug) {
+                    console.log('Debug Info:', response.debug);
+                    console.log('Base Directory:', response.debug.baseDir);
+                    console.log('Base Directory Exists:', response.debug.baseDirExists);
+                    console.log('Files Found:', response.debug.filteredFiles);
+                }
+                
+                if (response && response.success && response.images) {
+                    allImages = response.images;
+                    console.log('Loaded ' + allImages.length + ' images');
+                    
+                    if (allImages.length === 0) {
+                        var debugHtml = '<div style="text-align:center;padding:40px;color:#666;">';
+                        debugHtml += '<p>0 images found</p>';
+                        // if (response.debug) {
+                        //     debugHtml += '<div style="margin-top:20px;padding:15px;background:#f8f9fa;border-radius:4px;text-align:left;font-size:12px;">';
+                        //     debugHtml += '<strong>Debug Information:</strong><br>';
+                        //     debugHtml += 'Base Directory: ' + response.debug.baseDir + '<br>';
+                        //     debugHtml += 'Directory Exists: ' + response.debug.baseDirExists + '<br>';
+                        //     debugHtml += 'Files Found: ' + (response.debug.filteredFiles ? response.debug.filteredFiles.length : 0) + '<br>';
+                        //     if (response.debug.filteredFiles && response.debug.filteredFiles.length > 0) {
+                        //         debugHtml += 'Files: ' + response.debug.filteredFiles.join(', ');
+                        //     }
+                        //     debugHtml += '</div>';
+                        // }
+                        debugHtml += '</div>';
+                        $('#clipart-gallery').html(debugHtml);
+                    } else {
+                        renderGallery();
+                    }
+                } else {
+                    console.log('No images found or invalid response');
+                    allImages = [];
+                    $('#clipart-gallery').html('<div style="text-align:center;padding:40px;color:#666;">No images found. Click "Upload Images" to add some clipart images.</div>');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log('AJAX Error:', {xhr: xhr, status: status, error: error});
+                console.log('Response Text:', xhr.responseText);
+                
+                // Use PHP-loaded data as fallback
+                console.log('AJAX failed, using PHP-loaded data as fallback');
+                allImages = pageLoadImages || [];
+                console.log('Fallback loaded ' + allImages.length + ' images');
+                
+                if (allImages.length === 0) {
+                    var debugHtml = '<div style="text-align:center;padding:40px;color:#666;">';
+                    debugHtml += '<p>No images found. Click "Upload Images" to add some clipart images.</p>';
+                    if (pageLoadDebug) {
+                        debugHtml += '<div style="margin-top:20px;padding:15px;background:#f8f9fa;border-radius:4px;text-align:left;font-size:12px;">';
+                        debugHtml += '<strong>Debug Information (PHP Fallback):</strong><br>';
+                        debugHtml += 'Base Directory: ' + pageLoadDebug.final_base_dir + '<br>';
+                        debugHtml += 'Directory Exists: ' + pageLoadDebug.base_exists + '<br>';
+                        debugHtml += 'Files Found: ' + (pageLoadDebug.filtered_files ? pageLoadDebug.filtered_files.length : 0) + '<br>';
+                        if (pageLoadDebug.filtered_files && pageLoadDebug.filtered_files.length > 0) {
+                            debugHtml += 'Files: ' + pageLoadDebug.filtered_files.join(', ') + '<br>';
+                        }
+                        debugHtml += 'Images Processed: ' + pageLoadDebug.images_found + '<br>';
+                        if (pageLoadDebug.tried_paths) {
+                            debugHtml += 'Tried Paths: <br>';
+                            pageLoadDebug.tried_paths.forEach(function(path, index) {
+                                debugHtml += '- ' + path + ' (exists: ' + pageLoadDebug.path_exists[index] + ')<br>';
+                            });
+                        }
+                        debugHtml += '</div>';
+                    }
+                    debugHtml += '</div>';
+                    $('#clipart-gallery').html(debugHtml);
+                } else {
+                    renderGallery();
+                }
+            }
+        });
+    }
+
+    function renderGallery() {
+        const $gallery = $('#clipart-gallery');
+        $gallery.empty();
+
+        if (allImages.length === 0) {
+            $gallery.html('<div style="text-align:center;padding:40px;color:#666;font-size:16px;">No clipart images found.<br><br>Click the "Upload Images" button above to add some images.</div>');
+            return;
+        }
+
+        // Add/remove CSS class for hidden-only view
+        if (showOnlyHidden) {
+            $gallery.addClass('show-hidden-only');
+        } else {
+            $gallery.removeClass('show-hidden-only');
+        }
+
+        // Filter images based on current view mode
+        let imagesToShow = allImages;
+        if (showOnlyHidden) {
+            imagesToShow = allImages.filter(image => image.hidden);
+            
+            if (imagesToShow.length === 0) {
+                $gallery.html('<div style="text-align:center;padding:40px;color:#666;font-size:16px;">0 images found.</div>');
+                return;
+            }
+        }
+
+        imagesToShow.forEach(function(image) {
+            const $item = createImageItem(image);
+            $gallery.append($item);
+        });
+
+        // Show simple image count
+        const $imageCount = $('<div style="text-align:center;padding:5px;color:#666;font-size:14px;margin-bottom:15px;">' + imagesToShow.length + ' Image(s) found</div>');
+        $gallery.prepend($imageCount);
+    }
+
+    function createImageItem(image) {
+        const isSelected = selectedImages.has(image.filename);
+        const hiddenClass = image.hidden ? 'dimmed' : '';
+        const selectedClass = isSelected ? 'selected' : '';
+
+        const $item = $(`
+            <div class="clipart-item ${hiddenClass} ${selectedClass}" data-filename="${image.filename}">
+                <div class="clipart-controls">
+                    <button class="control-btn select-checkbox ${isSelected ? 'selected' : ''}" title="Select/Deselect">
+                        <i class="fa fa-${isSelected ? 'check-square' : 'square-o'}"></i>
+                    </button>
+                    <button class="control-btn toggle-visibility" title="${image.hidden ? 'Show Image' : 'Hide Image'}">
+                        <i class="fa fa-${image.hidden ? 'eye' : 'eye-slash'}"></i>
+                    </button>
+                    <button class="control-btn delete-btn" title="Delete Image">
+                        <i class="fa fa-trash-o"></i>
+                    </button>
+                </div>
+                <img src="${image.thumbnail_url}" alt="${image.filename}" class="clipart-thumbnail">
+                <div class="clipart-filename">${image.filename}</div>
+            </div>
+        `);
+
+        // Bind events
+        $item.find('.select-checkbox').on('click', function(e) {
+            e.stopPropagation();
+            toggleSelection(image.filename);
+        });
+
+        $item.find('.toggle-visibility').on('click', function(e) {
+            e.stopPropagation();
+            toggleImageVisibility(image.filename, !image.hidden);
+        });
+
+        $item.find('.delete-btn').on('click', function(e) {
+            e.stopPropagation();
+            deleteImage(image.filename);
+        });
+
+        $item.find('.clipart-thumbnail').on('click', function() {
+            showImagePreview(image);
+        });
+
+        return $item;
+    }
+
+    function uploadImages(files) {
+        const validFiles = files.filter(file => {
+            const validTypes = ['image/png', 'image/jpg', 'image/jpeg'];
+            return validTypes.includes(file.type);
+        });
+
+        if (validFiles.length === 0) {
+            showNotification('Please select valid image files (PNG, JPG, JPEG)', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        validFiles.forEach(file => {
+            formData.append('images[]', file);
+        });
+
+        $('#upload-progress').show();
+        updateProgress(0);
+
+        // Add action parameter to formData
+        formData.append('action', 'upload_images');
+        
+        // Add Magento form key for security
+        formData.append('form_key', window.FORM_KEY);
+
+        $.ajax({
+            url: window.location.href,
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            xhr: function() {
+                const xhr = new window.XMLHttpRequest();
+                xhr.upload.addEventListener("progress", function(evt) {
+                    if (evt.lengthComputable) {
+                        const percentComplete = (evt.loaded / evt.total) * 100;
+                        updateProgress(percentComplete);
+                    }
+                }, false);
+                return xhr;
+            },
+            success: function(response) {
+                $('#upload-progress').hide();
+                $('#clipart-file-input').val('');
+                
+                try {
+                    if (typeof response === 'string') {
+                        response = JSON.parse(response);
+                    }
+                    
+                    if (response.success) {
+                        showNotification(`Successfully uploaded ${response.uploaded_count} images`, 'success');
+                        loadImages(); // Reload gallery
+                    } else {
+                        showNotification(response.message || 'Upload failed', 'error');
+                    }
+                } catch (e) {
+                    showNotification('Upload completed but response was invalid', 'warning');
+                    loadImages(); // Still reload gallery
+                }
+            },
+            error: function() {
+                $('#upload-progress').hide();
+                showNotification('Upload failed', 'error');
+            }
+        });
+    }
+
+    function updateProgress(percent) {
+        $('.progress-fill').css('width', percent + '%');
+        $('.progress-text').text(`Uploading... ${Math.round(percent)}%`);
+    }
+
+    function toggleSelection(filename) {
+        if (selectedImages.has(filename)) {
+            selectedImages.delete(filename);
+        } else {
+            selectedImages.add(filename);
+        }
+        
+        updateSelectionUI();
+        updateBulkActionsVisibility();
+    }
+
+    function updateSelectionUI() {
+        $('.clipart-item').each(function() {
+            const filename = $(this).data('filename');
+            const isSelected = selectedImages.has(filename);
+            
+            $(this).toggleClass('selected', isSelected);
+            const $checkbox = $(this).find('.select-checkbox');
+            $checkbox.toggleClass('selected', isSelected);
+            $checkbox.find('i').removeClass().addClass(`fa fa-${isSelected ? 'check-square' : 'square-o'}`);
+        });
+
+        $('#selected-count').text(`${selectedImages.size} selected`);
+    }
+
+    function updateBulkActionsVisibility() {
+        $('#bulk-actions').toggle(selectedImages.size > 0);
+    }
+
+    function selectAllImages() {
+        // Get all visible images (considering current filter)
+        let imagesToSelect;
+        if (showOnlyHidden) {
+            imagesToSelect = allImages.filter(image => image.hidden);
+        } else {
+            imagesToSelect = allImages;
+        }
+
+        // Add all images to selection
+        imagesToSelect.forEach(image => {
+            selectedImages.add(image.filename);
+        });
+
+        updateSelectionUI();
+        updateBulkActionsVisibility();
+    }
+
+    function deselectAllImages() {
+        selectedImages.clear();
+        
+        updateSelectionUI();
+        updateBulkActionsVisibility();
+    }
+
+    let showOnlyHidden = false;
+
+    function toggleHiddenFilter() {
+        showOnlyHidden = !showOnlyHidden;
+        
+        const $btn = $('#show-hidden-btn');
+        if (showOnlyHidden) {
+            $btn.html('<i class="fa fa-list"></i> Show All Images');
+            $btn.removeClass('btn-secondary').addClass('btn-info');
+        } else {
+            $btn.html('<i class="fa fa-filter"></i> Show Only Hidden Images');
+            $btn.removeClass('btn-info').addClass('btn-secondary');
+        }
+        
+        renderGallery();
+    }
+
+    function bulkToggleVisibility(visible) {
+        if (selectedImages.size === 0) return;
+
+        const filenames = Array.from(selectedImages);
+        
+        $.ajax({
+            url: window.location.href,
+            method: 'POST',
+            data: {
+                action: 'bulk_visibility',
+                filenames: filenames,
+                visible: visible,
+                form_key: window.FORM_KEY
+            },
+            success: function(response) {
+                try {
+                    if (typeof response === 'string') {
+                        response = JSON.parse(response);
+                    }
+                    
+                    if (response.success) {
+                        showNotification(`Successfully ${visible ? 'showed' : 'hidden'} ${filenames.length} images`, 'success');
+                        loadImages();
+                        selectedImages.clear();
+                        updateBulkActionsVisibility();
+                    } else {
+                        showNotification(response.message || 'Operation failed', 'error');
+                    }
+                } catch (e) {
+                    showNotification('Operation completed but response was invalid', 'warning');
+                    loadImages();
+                }
+            }
+        });
+    }
+
+    function bulkDeleteImages() {
+        if (selectedImages.size === 0) return;
+
+        if (!confirm(`Are you sure you want to delete ${selectedImages.size} selected images?`)) {
+            return;
+        }
+
+        const filenames = Array.from(selectedImages);
+        
+        $.ajax({
+            url: window.location.href,
+            method: 'POST',
+            data: {
+                action: 'bulk_delete',
+                filenames: filenames,
+                form_key: window.FORM_KEY
+            },
+            success: function(response) {
+                try {
+                    if (typeof response === 'string') {
+                        response = JSON.parse(response);
+                    }
+                    
+                    if (response.success) {
+                        showNotification(`Successfully deleted ${filenames.length} images`, 'success');
+                        loadImages();
+                        selectedImages.clear();
+                        updateBulkActionsVisibility();
+                    } else {
+                        showNotification(response.message || 'Delete failed', 'error');
+                    }
+                } catch (e) {
+                    showNotification('Delete completed but response was invalid', 'warning');
+                    loadImages();
+                }
+            }
+        });
+    }
+
+    function toggleImageVisibility(filename, hidden) {
+        $.ajax({
+            url: window.location.href,
+            method: 'POST',
+            data: {
+                action: 'toggle_visibility',
+                filename: filename,
+                hidden: hidden,
+                form_key: window.FORM_KEY
+            },
+            success: function(response) {
+                try {
+                    if (typeof response === 'string') {
+                        response = JSON.parse(response);
+                    }
+                    
+                    if (response.success) {
+                        showNotification(`Image ${hidden ? 'hidden' : 'shown'} successfully`, 'success');
+                        loadImages();
+                    } else {
+                        showNotification(response.message || 'Operation failed', 'error');
+                    }
+                } catch (e) {
+                    showNotification('Operation completed but response was invalid', 'warning');
+                    loadImages();
+                }
+            }
+        });
+    }
+
+    function deleteImage(filename) {
+        if (!confirm('Are you sure you want to delete this image?')) {
+            return;
+        }
+
+        $.ajax({
+            url: window.location.href,
+            method: 'POST',
+            data: {
+                action: 'delete_image',
+                filename: filename,
+                form_key: window.FORM_KEY
+            },
+            success: function(response) {
+                try {
+                    if (typeof response === 'string') {
+                        response = JSON.parse(response);
+                    }
+                    
+                    if (response.success) {
+                        showNotification('Image deleted successfully', 'success');
+                        loadImages();
+                    } else {
+                        showNotification(response.message || 'Delete failed', 'error');
+                    }
+                } catch (e) {
+                    showNotification('Delete completed but response was invalid', 'warning');
+                    loadImages();
+                }
+            }
+        });
+    }
+
+    function showImagePreview(image) {
+        $('#preview-image').attr('src', image.original_url);
+        $('#popup-filename').text(image.filename);
+        $('#popup-filesize').text(`Size: ${image.filesize || 'Unknown'}`);
+        $('#image-preview-popup').show();
+    }
+
+    function showNotification(message, type) {
+        // You can integrate this with Magento's notification system
+        alert(message);
+    }
+});
+</script>

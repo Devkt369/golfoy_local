@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+	<type name="Magento\Checkout\Block\Checkout\AttributeMerger">
+        <plugin name="ArtM_checkout_phone_number"
+                type="ArtM\Common\Plugin\PhoneValidationPlugin" sortOrder="10"/>                
+        </type>
+        <preference for="Magento\Review\Controller\Product\Post" type="ArtM\Common\Controller\Review\Post" />
+        <preference for="Magento\Swatches\Block\LayeredNavigation\RenderLayered" type="ArtM\Common\Block\LayeredNavigation\RenderLayeredCount" />
+        <type name="Magento\Sitemap\Model\ResourceModel\Cms\Page">
+                <plugin name="artm_common_sitemap_page" type="ArtM\Common\Plugin\Sitemap\Page" />
+        </type>
+        <type name="Magento\Sitemap\Model\ResourceModel\Catalog\Category">
+                <plugin name="artm_common_sitemap_category" type="ArtM\Common\Plugin\Sitemap\Category" />
+        </type>
+        <type name="Magento\Sitemap\Model\ResourceModel\Catalog\Product">
+                <plugin name="artm_common_sitemap_product" type="ArtM\Common\Plugin\Sitemap\Product" />
+        </type>
+</config>

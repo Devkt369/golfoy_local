@@ -1,0 +1,132 @@
+<style>
+    table.address-details {
+        margin-bottom: 20px;
+    }
+    table.address-details tr > td:first-child {
+        width: 250px;
+    }
+</style>
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+
+
+$customerCollection = $objectManager->create('Magento\Customer\Model\Customer')
+//$customerCollection = $objectManager->create('Magento\Customer\Model\ResourceModel\Customer\Collection')
+    ->getCollection()
+    ->addAttributeToSelect("*")
+    ->addFieldToFilter('entity_id', ['gteq' => 1]) // Start customer ID
+    ->addFieldToFilter('entity_id', ['lteq' => 100]);
+//    ->addFieldToFilter('dob', ['neq' => ''])
+//    ->addAttributeToFilter('dob', "")
+//    ->setPageSize(1); 
+echo count($customerCollection);
+/*
+
+$customermodelsaver = $customerModel->setWebsiteId(1)->loadByEmail( 'mohit5sep1994@gmail.com' );
+$customermodelsaver->setData('phone_number', $phone_number);
+if( $customermodelsaver->save() ){
+    echo $customer->getId()." - Phone saved ".$address->getTelephone();
+}else{
+    echo $customer->getId()." - Phone not saved ".$address->getTelephone();
+}
+exit;*/
+        if ($customerCollection->getSize() > 0){
+            $i = 1;
+            
+            foreach ($customerCollection as $customer){
+                $cust_dob = $customer->getDob();
+                if($cust_dob != ''){
+                    echo "Customer ".$customer->getId()." has dob ".$cust_dob."<br>";
+                    
+                    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+                    $customerRepository = $objectManager->create('Magento\Customer\Api\CustomerRepositoryInterface');
+
+                    $customer = $customerRepository->getById( $customer->getId() );
+//                    $customer->setDob($dob);
+                    $customer->setCustomAttribute('sfmcsync', 0);
+                    $customerRepository->save($customer);
+                    
+                    
+                }else{
+                    continue;
+                }
+            }
+        }
+        ?>
+<?php 
+/*
+            
+    $customer_collection = array();
+    if ($customerCollection->getSize() > 0){
+        foreach ($customerCollection as $customer){
+            $array_to_push = array();
+            $count_address = count( $customer->getAddresses() );
+            $getStreet = '';
+            $getCity = '';
+            $getPostcode = '';
+            $getRegion = '';
+            $getTelephone = '';
+                
+            
+            //getting info
+            $getId = $customer->getId();
+            $getFirstname = $customer->getFirstname();
+            $getLastname = $customer->getLastname();
+            $getEmail = $customer->getEmail();
+            $getDob = $customer->getDob();
+            $getTelephone = $customer->getTelephone();
+            
+            if($count_address > 0){
+                foreach ($customer->getAddresses() as $address){
+                    $getStreet = $address->getStreet();
+//                    echo print_r($getStreet)."<br>"; 
+                    
+                    $getStreet = implode(' ', $getStreet);
+//                    echo $getStreet."<br>";
+                    
+                    $getCity = $address->getCity();
+//                    echo $getCity."<br>"; 
+                    
+                    $getPostcode = $address->getPostcode();
+//                    echo $getPostcode."<br>"; 
+                    
+                    $getRegion = $address->getRegion();
+//                    echo $getRegion."<br>"; 
+                    
+                    $getTelephone = $address->getTelephone();
+//                    echo $getTelephone."<br>"; 
+                    
+                    break;
+                }
+                
+            }
+                
+            $array_to_push = array($getId, $getFirstname, $getLastname, $getEmail, $getDob, $getTelephone, $getStreet, $getCity, $getPostcode, $getRegion, $getTelephone);
+//            print_r($array_to_push);
+//            echo '<br><br><br><br>';
+            array_push($customer_collection, $array_to_push);
+        }
+    }
+
+        // Define the CSV data
+
+        // Set the HTTP response headers for CSV download
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="example.csv"');
+
+        // Create a file pointer and output CSV data to the browser
+        $fp = fopen('php://output', 'w');
+
+        foreach ($customer_collection as $row) {
+            fputcsv($fp, $row);
+        }
+
+        fclose($fp);
+        */
+?>
+
+<?php 
+    function change_phone_number($cust_id, $phone){
+        
+    }
+?>

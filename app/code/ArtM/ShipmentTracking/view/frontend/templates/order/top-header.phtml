@@ -1,0 +1,558 @@
+<?php
+
+/** @var \Magento\Framework\View\Element\Template $block */
+
+$order = $block->getLayout()
+    ->getBlock('sales.order.info')
+    ->getOrder();
+
+$orderId = $order->getRealOrderId();
+$orderDate = $block->formatDate($order->getCreatedAt(), \IntlDateFormatter::LONG);
+$itemCount = (int)$order->getTotalItemCount();
+$grandTotal = $order->formatPrice($order->getGrandTotal());
+$status = strtoupper($order->getStatusLabel());
+
+// Create a CSS-friendly class name for the status (e.g., 'partially-delivered')
+$statusClass = strtolower(str_replace(' ', '-', $status));
+
+$showForm = false;
+$shippingAddress = $order->getShippingAddress() ?? "";
+$phone = '';
+if ($shippingAddress) {
+    $phone = $shippingAddress->getTelephone();
+}
+
+// echo "<pre>";
+// print_r($order->hasShipments());
+// print_r($order->getData());
+// print_r($order->getState());
+// echo $status;
+// print_r($order->getStatus());
+// die;
+
+
+foreach ($order->getAllVisibleItems() as $_item) {
+    $productTypeId = $_item->getProduct()->getTypeId();
+    if ($productTypeId !== 'giftvoucher') {
+        $showForm = true;
+        break;
+    }
+}
+
+$removeButton = true;
+if ($order->getStatus() == "cancelpending" || $order->getStatus() == "canceled" || $order->getStatus() == "closed") {
+    $showForm = false;
+}
+?>
+
+<div class="custom-order-header">
+    <div class="order-left">
+        <h1><?= __('Order #') . $orderId ?></h1>
+        <span class="order-status mobile-status status-<?= $statusClass ?>">
+            <?= $status ?>
+        </span>
+
+        <div class="order-meta">
+            <span class="meta-date" data-date="<?= $block->escapeHtml($orderDate) ?>"><?= __('Placed on %1', $orderDate) ?></span>
+            <span class="dot">•</span>
+            <span class="meta-count"><?= $itemCount . ' ' . __('Items') ?></span>
+            <span class="dot">•</span>
+            <span class="meta-total"><?= $grandTotal ?></span>
+            <span class="meta-status">
+                <span class="order-status web-status status-<?= $statusClass ?>">
+                    <?= $status ?>
+                </span>
+            </span>
+        </div>
+    </div>
+
+    <div class="order-actions">
+
+        <?php if ($showForm && !$order->hasShipments() && $order->getStatus() != "customization_pending") : ?>
+            <form method="post" class="form cancelcustomform_form" action="<?= $this->getUrl('cancelorder/index/submit'); ?>">
+                <input type="hidden" value="<?= $order->getCustomerFirstname() ?>" name="customer_name" />
+                <input type="hidden" value="<?= $order->getCustomerEmail() ?>" name="customer_email" />
+                <input type="hidden" value="<?= $order->getId() ?>" name="order_id" />
+                <input type="hidden" value="<?= $order->getIncrementId() ?>" name="incremented_id" />
+                <input type="hidden" value="<?= $order->getState() ?>" name="order_state" />
+                <input type="hidden" value="<?= $order->getStatus() ?>" name="order_status" />
+                <input type="hidden" value="cancel" name="return_cancel_status" />
+                <input type="hidden" value="<?= $order->getCustomerId(); ?>" name="customer_id" />
+                <input type="hidden" value="<?= $phone ?>" name="customer_phone" />
+                <input name="form_key" type="hidden" value="<?php echo $block->getFormKey(); ?>" />
+
+                <?php if ($order->getStatus() != "cancelpending") : ?>
+                    <input type="submit" value="Cancel Order" class="ordercancel action secondary" />
+                <?php endif ?>
+            </form>
+        <?php else: ?>
+            <?php if ($order->getStatus() != "cancelpending" && $order->getStatus() != "canceled" && $order->getStatus() != "closed") : ?>
+                <a class="action secondary shipment-track"
+                    href="<?= $block->getUrl('sales/order/shipment/order_id', ['order_id' => $order->getId()]) ?>">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                    <?= __('Track Order') ?>
+                </a>
+
+                <a class="action secondary invoice-download"
+                    href="<?= $block->getUrl('sales/order/invoice/order_id', ['order_id' => $order->getId()]) ?>">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    <?= __('Download Invoice') ?>
+                </a>
+
+                <a class="action secondary contact-support"
+                    onclick="window.open('https://api.whatsapp.com/send?phone=+919915065500&text=Hi, i have a query')"
+                    href="#">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                        <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                    </svg>
+                    <?= __('Contact Support') ?>
+                </a>
+            <?php endif; ?>
+        <?php endif ?>
+    </div>
+</div>
+
+<style>
+    .block.block-order-details-comments dt.comment-date,
+    .block.block-order-details-comments .block-title {
+        display: none;
+    }
+
+    /* Policy strip */
+    .return-policy-strip {
+        margin: 6px 0 8px;
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    .return-policy-strip .policy-row {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        margin-bottom: 2px;
+    }
+
+    .policy-type-label {
+        font-weight: 600;
+        min-width: 90px;
+        flex-shrink: 0;
+    }
+
+    .policy-open {
+        color: #2a7a2a;
+    }
+
+    .policy-closed {
+        color: #999;
+        font-style: italic;
+    }
+
+    .policy-na {
+        color: #bbb;
+    }
+
+    /* Popup */
+    .return-popup-main {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, .5);
+        z-index: 99999;
+        overflow: auto;
+    }
+
+    .return-popup-inner {
+        width: 700px;
+        max-width: 95%;
+        background: #fff;
+        margin: 40px auto;
+        padding: 25px;
+        position: relative;
+        border-radius: 8px;
+    }
+
+    .popup-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        cursor: pointer;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    /* Return / Replacement tab toggle */
+    .re-type-tabs {
+        display: flex;
+        gap: 8px;
+        margin: 14px 0 4px;
+    }
+
+    .re-tab {
+        flex: 1;
+        padding: 9px 14px;
+        border: 2px solid #ccc;
+        border-radius: 6px;
+        background: #f5f5f5;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all .2s;
+    }
+
+    .re-tab.active {
+        border-color: #006bb4;
+        background: #e8f3fb;
+        color: #006bb4;
+    }
+
+    .re-type-note {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 10px;
+        min-height: 18px;
+    }
+
+    /* Already-requested badge */
+    .already-requested {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 4px 0;
+        font-size: 13px;
+    }
+
+    .req-type-badge {
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+
+    .req-type-return {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .req-type-replacement {
+        background: #d1e7dd;
+        color: #0a5c36;
+    }
+
+    .req-type-cancel {
+        background: #f8d7da;
+        color: #842029;
+    }
+
+    /* Form sections */
+    .return-popup-inner .reason-box,
+    .return-popup-inner .upload-box,
+    .return-popup-inner .refund-box,
+    .return-popup-inner .consent-box {
+        margin-top: 16px;
+    }
+
+    .return-popup-inner select,
+    .return-popup-inner input[type="text"],
+    .return-popup-inner input[type="number"],
+    .return-popup-inner input[type="password"],
+    .return-popup-inner textarea {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        margin-bottom: 6px;
+    }
+
+    .return-popup-inner textarea {
+        min-height: 70px;
+        resize: vertical;
+    }
+
+    .refund_types_block_inside_single {
+        margin-bottom: 8px;
+    }
+
+    .refund-method-note {
+        font-size: 11px;
+        color: #777;
+        font-weight: 400;
+    }
+
+    /* Saved accounts */
+    .saved-accounts-block {
+        background: #f7f7f7;
+        padding: 10px 12px;
+        border-radius: 6px;
+        margin-bottom: 10px;
+    }
+
+    .saved-account-item {
+        margin-bottom: 6px;
+        font-size: 14px;
+    }
+
+    .saved-account-item label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+
+    .saved-acc-label small {
+        color: #777;
+    }
+
+    /* Drag-and-drop */
+    .review-drag-area {
+        border: 2px dashed #ccc;
+        text-align: center;
+        padding: 18px;
+        cursor: pointer;
+        border-radius: 6px;
+        margin-top: 6px;
+    }
+
+    .review-dragdrop {
+        font-size: 28px;
+        color: #aaa;
+        margin: 0;
+    }
+
+    .review-resultimg {
+        display: inline-block;
+        position: relative;
+        margin: 6px 4px 0;
+    }
+
+    .review-resultimg img {
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+
+    .review-img-cross {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        background: #e33;
+        color: #fff;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        font-size: 10px;
+        line-height: 18px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    iframe#track-order-iframe {
+        height: 500px !important;
+    }
+
+    /* Container Layout */
+    .custom-order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px 0;
+        border-bottom: 1px solid #eaeaea;
+        /* Optional: adds a nice separator if needed */
+    }
+
+    /* Left Side Typography */
+    .order-left h1 {
+        margin: 0 0 8px 0;
+        font-size: 22px;
+        font-weight: 500;
+        color: #333333;
+    }
+
+    .order-meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        color: #666666;
+    }
+
+    .order-meta .dot {
+        color: #999999;
+        font-size: 10px;
+    }
+
+    /* Status Badge */
+    .order-status {
+        margin-left: 4px;
+        padding: 4px 10px;
+        border-radius: 5px !important;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        /* Default style (fallback) */
+        background-color: #f3f4f6;
+        color: #374151;
+        border: 1px solid #e5e7eb;
+    }
+
+    /* Specific Style for the Green Partially Delivered Badge */
+    .order-status.status-partially-delivered,
+    .order-status.status-complete {
+        background-color: #edf7ed;
+        color: #5b8c5a;
+        border: 1px solid #d4e8d4;
+    }
+
+    /* Right Side Actions / Buttons */
+    .order-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .custom-order-header .order-actions .action.secondary {
+        display: flex !important;
+    }
+
+    .order-actions .action.secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background-color: #ffffff;
+        color: #4b5563;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .order-actions .action.secondary:hover {
+        background-color: #f9fafb;
+        border-color: #9ca3af;
+        color: #111827;
+    }
+
+    /* Icon Sizing inside Buttons */
+    .order-actions .action.secondary svg {
+        width: 16px;
+        height: 16px;
+        color: #6b7280;
+    }
+
+
+    body.sales-order-invoice .custom-order-header .order-actions .action.secondary.invoice-download {
+        display: none !important;
+    }
+
+    body.sales-order-shipment .custom-order-header .order-actions .action.secondary.shipment-track {
+        display: none !important;
+    }
+
+    span.order-status.mobile-status {
+        display: none;
+    }
+
+    @media only screen and (max-width: 768px) {
+        .custom-order-header {
+            display: block;
+            padding: 0;
+            border-bottom: 0;
+            margin-top: 10px;
+        }
+
+        .order-actions {
+            display: none;
+        }
+
+        .order-meta {
+
+            gap: 0px;
+
+        }
+
+        span.order-status.status-delivered {
+            position: absolute;
+            top: -39px;
+            right: 0;
+        }
+
+        .order-meta .meta-date,
+        .order-meta .meta-total,
+        .order-meta .meta-status {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 14px 5px;
+            min-width: 0;
+            color: #1f2937;
+        }
+
+        .order-meta .meta-date {
+            font-size: 11px;
+            line-height: 1.2;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .order-meta .meta-total {
+            font-size: 13px;
+            line-height: 1.2;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .order-meta .meta-status .order-status {
+            margin: 0;
+            border-radius: 999px;
+            padding: 7px 14px;
+            font-size: 8px;
+            line-height: 1.5;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+        }
+
+        .order-left h1 {
+            font-size: 20px;
+            display: inline;
+            margin-right: 11px;
+        }
+
+        span.order-status.web-status {
+            display: none;
+        }
+
+        span.order-status.mobile-status {
+            display: inline;
+        }
+    }
+</style>
+
+<script>
+    // require(['jquery'], function(jQuery) {
+    //     jQuery('.order-item-status-wrapper').each(function() {
+
+    //         if (jQuery(this).find('.return-policy-strip').length === 0) {
+    //             jQuery(this).find('.status-title').hide();
+    //             jQuery(this).find('.status-date').hide();
+    //         }
+
+    //     });
+    // });
+</script>

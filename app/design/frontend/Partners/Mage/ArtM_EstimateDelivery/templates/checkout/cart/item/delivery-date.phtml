@@ -1,0 +1,381 @@
+<?php
+
+/** @var $block \Magento\Checkout\Block\Cart\AbstractCart */
+$items = $block->getQuote()->getItems();
+$formKey = $block->getLayout()
+    ->createBlock(\Magento\Framework\View\Element\FormKey::class)
+    ->getFormKey();
+
+// Get product IDs for supported products only (simple and configurable)
+$productIds = [];
+foreach ($items as $item) {
+    $productType = $item->getProductType();
+    
+    // Only process simple and configurable products
+    if (!in_array($productType, ['simple', 'configurable'])) {
+        continue; // Skip gift vouchers, virtual, downloadable, etc.
+    }
+    
+    if ($productType == "configurable") {
+        if ($item->getOptionByCode('simple_product')) {
+            $productIds[] = $item->getOptionByCode('simple_product')->getProduct()->getId();
+        }
+    } else {
+        $productIds[] = $item->getProduct()->getId();
+    }
+}
+
+// Make unique product IDs
+$productIds = array_unique($productIds);
+
+if (empty($productIds)) {
+    return;
+}
+
+// Try to get cached data for all products (server-side)
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$helper = $objectManager->get('ArtM\EstimateDelivery\Helper\Data');
+$deliveryCacheResource = $objectManager->get('ArtM\EstimateDelivery\Model\ResourceModel\DeliveryCache');
+
+$deliveryDates = [];
+$hasAllCachedData = true;
+$isPartnerStore = $helper->isStorePartner();
+
+$cachedProductIds = [];
+
+// The bulk cache lookup below reads the DeliveryCache table directly,
+// bypassing Data::getCachedDeliveryData()'s isStorePartner() invalidation.
+// That's fine for normal stores (rows there are only ever written for
+// non-partner stores - see Data::saveCacheData()), but for the Partner
+// store any row found here could be stale data calculated under a
+// different store's config. So skip the bulk cache path entirely for the
+// Partner store and let every product go through the "missing" branch
+// below, which recalculates live via the helper (store-scope aware).
+if (!$isPartnerStore) {
+    // Check cached data for all products in a single query (optimized)
+    $cachedResults = $deliveryCacheResource->getCacheByProductIds($productIds);
+
+    foreach ($cachedResults as $cachedData) {
+        $cachedProductIds[] = $cachedData['product_id'];
+
+        // Check if cache is valid (less than 2 days old) - optimized check
+        $calculatedAt = new DateTime($cachedData['calculated_at']);
+        $now = new DateTime();
+        $diff = $now->diff($calculatedAt);
+
+        if ($diff->days < 2 && $cachedData['is_valid']) {
+            // Older cache rows may not carry a show_estimation column - treat
+            // missing as visible (this is the pre-existing/legacy behavior).
+            $showEstimation = !array_key_exists('show_estimation', $cachedData) || $cachedData['show_estimation'];
+
+            if ($showEstimation) {
+                $totalDays = (int)$cachedData['total_days'];
+                $deliveryDate = new DateTime();
+                $deliveryDate->modify("+{$totalDays} days");
+                $deliveryDates[] = $deliveryDate->format('Y-m-d');
+            }
+        }
+    }
+}
+
+// Calculate min and max dates
+$minDeliveryDate = null;
+$maxDeliveryDate = null;
+$displaySingleDate = false;
+
+if (!empty($deliveryDates)) {
+    sort($deliveryDates);
+    $minDeliveryDate = reset($deliveryDates);
+    $maxDeliveryDate = end($deliveryDates);
+    $displaySingleDate = ($minDeliveryDate === $maxDeliveryDate);
+    
+    // Format for display
+    $minFormatted = (new DateTime($minDeliveryDate))->format('F d, Y');
+    $maxFormatted = (new DateTime($maxDeliveryDate))->format('F d, Y');
+}
+// Check if we have all products cached
+$missingProductIds = array_diff($productIds, $cachedProductIds);
+if (!empty($missingProductIds)) {
+    $hasAllCachedData = false;
+    
+    // Calculate and cache missing products immediately (server-side)
+    foreach ($missingProductIds as $missingProductId) {
+        try {
+            // Use centralized calculation method to create cache entries
+            // (for the Partner store this recalculates live from that
+            // store's own/other/custom config and is never persisted -
+            // see Data::calculateAndCacheDelivery()/saveCacheData())
+            $calculatedData = $helper->calculateAndCacheDelivery($missingProductId);
+
+            if ($calculatedData) {
+                // Product is resolved either way - mark it handled so we
+                // don't keep treating it as "missing" and looping forever
+                // into the AJAX fallback below.
+                $cachedProductIds[] = $missingProductId;
+
+                $showEstimation = $calculatedData['show_estimation'] ?? true;
+
+                if ($showEstimation) {
+                    $totalDays = (int)$calculatedData['total_days'];
+                    $deliveryDate = new DateTime();
+                    $deliveryDate->modify("+{$totalDays} days");
+                    $deliveryDates[] = $deliveryDate->format('Y-m-d');
+                }
+                // else: this item's source doesn't match a configured group
+                // (Partner store) - it contributes no date and is excluded
+                // from the min/max range, same as it being hidden on the PDP.
+            }
+        } catch (Exception $e) {
+            // Continue with other products even if one fails
+            continue;
+        }
+    }
+    
+    // Recheck if we now have all data
+    $stillMissingIds = array_diff($productIds, $cachedProductIds);
+    if (empty($stillMissingIds)) {
+        $hasAllCachedData = true;
+        
+        // Recalculate min/max dates with newly calculated data
+        if (!empty($deliveryDates)) {
+            sort($deliveryDates);
+            $minDeliveryDate = reset($deliveryDates);
+            $maxDeliveryDate = end($deliveryDates);
+            $displaySingleDate = ($minDeliveryDate === $maxDeliveryDate);
+            
+            // Format for display
+            $minFormatted = (new DateTime($minDeliveryDate))->format('F d, Y');
+            $maxFormatted = (new DateTime($maxDeliveryDate))->format('F d, Y');
+        }
+    }
+}
+
+// Fallback: If module is disabled, use product attributes for shipping/dispatch
+// (Global module toggle - unrelated to Partner-store source matching, unchanged)
+if (!$helper->IsEnabled()) {
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $productRepository = $objectManager->get('Magento\Catalog\Api\ProductRepositoryInterface');
+    $fallbackDates = [];
+    foreach ($items as $item) {
+        $productType = $item->getProductType();
+        
+        // Only process simple and configurable products
+        if (!in_array($productType, ['simple', 'configurable'])) {
+            continue;
+        }
+        
+        $productId = $item->getProduct()->getId();
+        try {
+            $product = $productRepository->getById($productId);
+        } catch (Exception $e) {
+            $product = $item->getProduct();
+        }
+        $dispatchText = $product->getAttributeText('dispatch');
+        $shippingText = $product->getAttributeText('shippingdays');
+        $dispatchDays = is_string($dispatchText) ? (int)preg_replace('/[^0-9]/', '', $dispatchText) : (int)$dispatchText;
+        $shippingDays = is_string($shippingText) ? (int)preg_replace('/[^0-9]/', '', $shippingText) : (int)$shippingText;
+        $totalDays = $dispatchDays + $shippingDays;
+        $date = new DateTime();
+        $date->modify("+{$totalDays} days");
+        $expectedDate = $date->format('Y-m-d');
+        $fallbackDates[] = $expectedDate;
+    }
+    if (!empty($fallbackDates)) {
+        sort($fallbackDates);
+        $minFallback = reset($fallbackDates);
+        $maxFallback = end($fallbackDates);
+        $displaySingleFallback = ($minFallback === $maxFallback);
+        $minFormatted = (new DateTime($minFallback))->format('jS M');
+        $maxFormatted = (new DateTime($maxFallback))->format('F d, Y');
+        echo '<div id="cart-estimate-delivery">';
+        echo '<div class="cart-delivery-info">';
+        echo '<span class="delivery-text">Expected delivery by </span>';
+        if ($displaySingleFallback) {
+            echo '<span class="delivery-date">' . $maxFormatted . '</span>';
+        } else {
+            echo '<span class="delivery-date">' . $minFormatted . '</span>';
+            echo '<span class="delivery-text"> to </span>';
+            echo '<span class="delivery-date">' . $maxFormatted . '</span>';
+        }
+        echo '</div>';
+        echo '</div>';
+    }
+    return;
+}
+
+// All cart products resolved (visible or hidden), but none of them should
+// display an estimation - e.g. Partner store where none of the cart items'
+// sources match a configured own/other/custom group. Hide the box entirely
+// instead of showing "Calculating delivery time..." forever or a stale range.
+if ($hasAllCachedData && empty($deliveryDates)) {
+    return;
+}
+
+?>
+
+<div id="cart-estimate-delivery">
+    <?php if ($hasAllCachedData && !empty($deliveryDates)): ?>
+        <?php if ($displaySingleDate): ?>
+            <div class="cart-delivery-info">
+                <span class="delivery-text">Expected delivery by </span>
+                <span class="delivery-date"><?= $minFormatted ?></span>
+            </div>
+        <?php else: ?>
+            <div class="cart-delivery-info">
+                <span class="delivery-text">Expected delivery by </span>
+                <span class="delivery-date"><?= (new DateTime($minDeliveryDate))->format('jS M') ?></span>
+                <span class="delivery-text"> to </span>
+                <span class="delivery-date"><?= $maxFormatted ?></span>
+            </div>
+        <?php endif; ?>
+    <?php else: ?>
+        <div class="cart-delivery-info">
+            <span class="delivery-text">Calculating delivery time...</span>
+        </div>
+    <?php endif; ?>
+</div>
+
+<script>
+    require(['jquery'], function($) {
+        jQuery(document).ready(function($) {
+            <?php if (!$hasAllCachedData): ?>
+            // Some products missing cache - get batch delivery data
+            getBatchDeliveryData();
+            <?php endif; ?>
+        });
+
+        function formatShort(dateStr) {
+            const date = new Date(dateStr);
+            const day = ordinalSuffix(date.getDate());
+            const month = date.toLocaleString("en-GB", { month: "short" });
+            return `${day} ${month}`;
+        }
+
+        function ordinalSuffix(day) {
+            if (day > 3 && day < 21) return day + "th";
+            switch (day % 10) {
+                case 1: return day + "st";
+                case 2: return day + "nd"; 
+                case 3: return day + "rd";
+                default: return day + "th";
+            }
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const day = ordinalSuffix(date.getDate());
+            const month = date.toLocaleString("en-GB", { month: "short" });
+            const year = date.getFullYear();
+            return `${day} ${month} ${year}`;
+        }
+
+        function getBatchDeliveryData() {
+            var productIds = <?= json_encode(array_values($productIds)) ?>;
+            
+            $.ajax({
+                url: "/estimatedelivery/estimateDelivery/getBatchDelivery",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    product_ids: productIds,
+                    form_key: "<?= $formKey ?>"
+                },
+                success: function(response) {
+                    console.log('Batch delivery data received:', response);
+                    // NOTE: the getBatchDelivery controller isn't covered by this
+                    // fix - it needs to apply the same show_estimation filtering
+                    // (exclude items whose source doesn't match a configured
+                    // group) before it builds results.delivery_dates, or this
+                    // AJAX fallback path can still leak a Partner-store date
+                    // that shouldn't display. This only fires when a product
+                    // couldn't be resolved synchronously above.
+                    if (response.success && response.results) {
+                        var deliveryDates = response.results.delivery_dates || [];
+                        var container = $("#cart-estimate-delivery");
+
+                        if (deliveryDates.length > 0) {
+                            // Sort dates
+                            deliveryDates.sort();
+                            var minDate = deliveryDates[0];
+                            var maxDate = deliveryDates[deliveryDates.length - 1];
+                            
+                            // Check if all dates are same
+                            var allSameDate = deliveryDates.every(date => date === minDate);
+                            
+                            var html = '<div class="cart-delivery-info">';
+                            
+                            if (allSameDate) {
+                                // Single date
+                                html += '<span class="delivery-text">Expected delivery by </span>';
+                                html += '<span class="delivery-date">' + formatDate(minDate) + '</span>';
+                            } else {
+                                // Date range
+                                html += '<span class="delivery-text">Expected delivery by </span>';
+                                html += '<span class="delivery-date">' + formatShort(minDate) + '</span>';
+                                html += '<span class="delivery-text"> to </span>';
+                                html += '<span class="delivery-date">' + formatDate(maxDate) + '</span>';
+                            }
+                            
+                            html += '</div>';
+                            container.html(html);
+                        } else {
+                            // Nothing to show (e.g. no cart item matched a
+                            // configured source) - remove the placeholder
+                            // instead of leaving "Calculating..." stuck forever.
+                            container.remove();
+                        }
+                    }
+                },
+                error: function() {
+                    console.log('Failed to load cart delivery estimation');
+                }
+            });
+        }
+
+        function updateCartDelivery(deliveryDate) {
+            var container = $("#cart-estimate-delivery");
+            if (!container.length) return;
+
+            var formattedDate = formatDate(deliveryDate);
+            var html = '<div class="cart-delivery-info">';
+            html += '<span class="delivery-text">Expected delivery by </span>';
+            html += '<span class="delivery-date">' + formattedDate + '</span>';
+            html += '</div>';
+            
+            container.html(html);
+        }
+    });
+</script>
+
+<style>
+    #cart-estimate-delivery {
+        background-color: #F6F6F6;
+        border-radius: 10px;
+        border: 0px;
+        padding: 10px;
+        margin-bottom: 5px;
+    }
+    
+    .cart-delivery-info {
+        color: #e60023;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    
+    .cart-delivery-info .delivery-text {
+        font-weight: 400;
+        color: #646464;
+    }
+    
+    .cart-delivery-info .delivery-date {
+        font-weight: 700;
+        color: #e60023;
+    }
+    
+    /* Loading state styling */
+    .cart-delivery-loading {
+        color: #999;
+        font-size: 12px;
+        font-style: italic;
+    }
+</style>

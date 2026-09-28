@@ -1,0 +1,241 @@
+//
+//  Promo Base
+//  ____________________________________________
+
+//
+//  Variables
+//  --------------------------------------------
+
+@ampromo-items__background-color: #fff;
+@ampromo-overlay__background-color: rgba(0, 0, 0, .8);
+@ampromo-item__border: 1px solid #ededed;
+@ampromo-item-selected__color: #1f78c2;
+@ampromo-overlay-close__background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMWwxMCAxMG0wLTEwTDEgMTEiIHN0cm9rZT0iI0IyQjJCMiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvc3ZnPg==);
+
+//
+//  Common
+//  ----------------------------------------------
+
+& when (@media-common = true) {
+    .ampromo-overlay {
+        & {
+            background-color: @ampromo-overlay__background-color;
+            height: 100%;
+            left: 0;
+            opacity: 0;
+            position: fixed;
+            text-align: center;
+            top: -9999px;
+            transition: opacity .4s linear;
+            width: 100%;
+            z-index: 10000;
+        }
+
+        &.-show {
+            opacity: 1;
+            top: 0;
+        }
+
+        &.-hide {
+            display: none;
+        }
+    }
+
+    .ampromo-popup-wrapper {
+        & {
+            background-color: @ampromo-items__background-color;
+            border: @ampromo-item__border;
+            box-sizing: border-box;
+            display: inline-block;
+            margin: 30px auto;
+            max-height: 95vh;
+            overflow: auto;
+            overflow-x: hidden;
+            padding: 24px;
+            position: relative;
+            text-align: left;
+        }
+
+        .ampromo-gallery {
+            margin: 0 auto;
+        }
+
+        .ampromo-popup-title,
+        .ampromo-item-buttons,
+        .ampromo-title {
+            text-align: center;
+        }
+
+        .ampromo-popup-title .ampromo-counter {
+            font-weight: bold;
+        }
+
+        .ampromo-item-wrapper {
+            padding: 1rem;
+
+            .ampromo-item {
+                margin: 0 auto;
+                max-width: 250px;
+            }
+
+            .ampromo-title {
+                display: block;
+                font-weight: bold;
+                margin: 1.33em 0;
+                min-height: 3.2rem;
+            }
+        }
+
+        .ampromo-item {
+            & {
+                border: @ampromo-item__border;
+                box-sizing: border-box;
+                margin: 0 8px 7px;
+                padding: 20px;
+                position: relative;
+                transition: .6s;
+            }
+
+            &:hover {
+                background: @color-gray80;
+            }
+        }
+
+        .ampromo-item .fieldset .field {
+            margin-bottom: 10px;
+        }
+
+        .ampromo-item .fieldset .field .label {
+            margin-bottom: 3px;
+        }
+
+        .ampromo-popup-title {
+            margin: 0 auto 20px;
+        }
+
+        .ampromo-close {
+            & {
+                background: @ampromo-overlay-close__background-image no-repeat;
+                background-size: contain;
+                border: none;
+                cursor: pointer;
+                display: block;
+                font-size: 0;
+                height: 16px;
+                margin: 0;
+                opacity: .8;
+                padding: 0;
+                position: absolute;
+                right: 10px;
+                top: 10px;
+                width: 16px;
+                z-index: 1;
+            }
+
+            &:hover {
+                opacity: 1;
+                transition: opacity .2s ease;
+            }
+
+            &:focus-visible {
+                box-shadow: @focus__box-shadow;
+            }
+        }
+
+        .ampromo-button {
+            border: none;
+            box-shadow: none;
+        }
+
+        .ampromo-item.-selected {
+            background: @ampromo-item-selected__color;
+        }
+
+        .ampromo-item.-selected .ampromo-options {
+            max-height: 690px;
+        }
+
+        .ampromo-item-image {
+            display: block;
+            margin: 7px auto;
+        }
+
+        .ampromo-title {
+            margin: 0;
+        }
+
+        .slick-dots {
+            margin: 0 auto;
+            position: initial;
+            width: fit-content;
+
+            &:focus-within {
+                box-shadow: @focus__box-shadow;
+            }
+        }
+
+        .slick-dotted.slick-slider {
+            margin-bottom: 2rem;
+        }
+
+        &.ampromo-popup-compact {
+            .ampromo-title {
+                font-size: 1.6rem;
+            }
+
+            .product-info-price .price {
+                font-size: 2.7rem;
+            }
+        }
+    }
+}
+
+@media only screen and (max-width: 1000px) and (min-width: 701px) {
+    .ampromo-overlay .ampromo-gallery {
+        width: 570px;
+    }
+
+    .ampromo-popup-wrapper {
+        padding: 24px 54px;
+    }
+}
+
+@media only screen and (max-width: 700px) {
+    .ampromo-overlay .ampromo-gallery {
+        margin: 0 auto;
+        width: 280px;
+    }
+
+    .ampromo-popup-wrapper {
+        padding: 24px 54px;
+    }
+}
+
+@media only screen and (max-width: 400px) {
+    .ampromo-overlay .ampromo-gallery {
+        margin: 0 auto 30px auto;
+    }
+
+    //  rewrite slick styles
+    .ampromo-overlay .slick-prev,
+    .ampromo-overlay .slick-next {
+        display: none !important;
+    }
+
+    .ampromo-popup-wrapper {
+        padding: 15px;
+    }
+}
+
+.media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__l) {
+    .ampromo-popup-wrapper {
+        & {
+            max-width: 960px;
+            width: 100%;
+        }
+
+        .slick-dotted.slick-slider {
+            margin-bottom: 3rem;
+        }
+    }
+}

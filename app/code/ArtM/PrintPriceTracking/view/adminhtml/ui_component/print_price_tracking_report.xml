@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">print_price_tracking_report.print_price_tracking_report_data_source</item>
+        </item>
+    </argument>
+
+    <dataSource name="print_price_tracking_report_data_source"
+                component="Magento_Ui/js/grid/provider">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider</argument>
+            <argument name="name" xsi:type="string">print_price_tracking_report_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">entity_id</argument>
+            <argument name="requestFieldName" xsi:type="string">id</argument>
+        </argument>
+    </dataSource>
+
+    <columns name="columns">
+        <column name="entity_id">
+            <settings>
+                <label translate="true">ID</label>
+            </settings>
+        </column>
+    </columns>
+
+</listing>

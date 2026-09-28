@@ -1,0 +1,883 @@
+<?php
+
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// phpcs:disable Magento2.Templates.ThisInTemplate
+// @codingStandardsIgnoreFile
+
+/** @var \Magento\Sales\Block\Order\History $block */
+?>
+<?php $_orders = $block->getOrders(); ?>
+<?= $block->getChildHtml('info') ?>
+<?php if ($_orders && count($_orders)) : ?>
+    <div class="table-wrapper orders-history">
+        <table class="data table table-order-items history" id="my-orders-table">
+            <caption class="table-caption"><?= $block->escapeHtml(__('Orders')) ?></caption>
+            <thead>
+                <tr>
+                    <th scope="col" class="col id"><?= $block->escapeHtml(__('Order #')) ?></th>
+                    <th scope="col" class="col date"><?= $block->escapeHtml(__('Date')) ?></th>
+                    <?= $block->getChildHtml('extra.column.header') ?>
+                    <th scope="col" class="col shipping"><?= /* @escapeNotVerified */ __('Ship To') ?></th>
+                    <th scope="col" class="col total"><?= $block->escapeHtml(__('Order Total')) ?></th>
+                    <th scope="col" class="col status"><?= $block->escapeHtml(__('Status')) ?></th>
+                    <th scope="col" class="col actions"><?= $block->escapeHtml(__('Action')) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($_orders as $_order) : ?>
+                    <tr>
+                        <td data-th="<?= $block->escapeHtml(__('Order #')) ?>" class="col id"><?= $block->escapeHtml($_order->getRealOrderId()) ?></td>
+                        <td data-th="<?= $block->escapeHtml(__('Date')) ?>" class="col date"><?= /* @noEscape */ $block->formatDate($_order->getCreatedAt(), \IntlDateFormatter::MEDIUM, false) ?></td>
+                        <?php $extra = $block->getChildBlock('extra.container'); ?>
+                        <?php if ($extra) : ?>
+                            <?php $extra->setOrder($_order); ?>
+                            <?= $extra->getChildHtml() ?>
+                        <?php endif; ?>
+                        <td data-th="<?= $block->escapeHtml(__('Ship To')) ?>" class="col shipping"><?= $_order->getShippingAddress() ? $block->escapeHtml($_order->getShippingAddress()->getName()) : '&nbsp;' ?></td>
+                        <td data-th="<?= $block->escapeHtml(__('Order Total')) ?>" class="col total"><?= /* @noEscape */ $_order->formatPrice($_order->getGrandTotal()) ?></td>
+                        <?php
+                        $statusLabel = $_order->getStatusLabel();
+                        $statusClass = strtolower(str_replace([' ', '/'], ['-', ''], $statusLabel));
+                        ?>
+                        <td data-th="<?= $block->escapeHtml(__('Status')) ?>" class="col status" data-status="<?= $block->escapeHtml($statusLabel) ?>">
+                            <span class="status-pill <?= $statusClass ?>" data-status="<?= $block->escapeHtml($statusLabel) ?>">
+                                <?= $block->escapeHtml($statusLabel) ?>
+                            </span>
+                        </td>
+                        <td data-th="<?= $block->escapeHtml(__('Actions')) ?>" class="col actions">
+                            <a href="<?= $block->escapeUrl($block->getViewUrl($_order)) ?>" class="action view">
+                                <span><?= $block->escapeHtml(__('View Order')) ?></span>
+                            </a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <?php if ($block->getPagerHtml()) : ?>
+        <div class="order-products-toolbar toolbar bottom"><?= $block->getPagerHtml() ?></div>
+    <?php endif ?>
+<?php else : ?>
+    <div class="message info empty"><span><?= $block->escapeHtml($block->getEmptyOrdersMessage()) ?></span></div>
+<?php endif ?>
+
+<style>
+    body.account .table-wrapper {
+        background-color: #fff;
+        border: 1px solid #e9e9e9;
+        padding: 0;
+        margin-bottom: 0;
+    }
+
+    body.account #maincontent a.action {
+        font-weight: 600;
+        font-size: 12px !important;
+        background-color: white !important;
+        text-transform: capitalize;
+    }
+
+    .table-wrapper.orders-history {
+        background: #fff;
+        border: 1px solid #e9e9e9;
+        border-radius: 16px 16px 0 0;
+        margin-top: 24px;
+        overflow: hidden;
+        border-bottom: 0 !important;
+    }
+
+    #my-orders-table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    #my-orders-table thead {
+        background: #f6f7f8;
+    }
+
+    #my-orders-table thead th {
+        background: #f6f7f8;
+        color: #222;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 18px 20px;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    #my-orders-table tbody tr td {
+        border-bottom: 1px solid #eeeeee;
+        transition: background 0.2s ease;
+    }
+
+    #my-orders-table tbody tr:hover {
+        background: #fafafa;
+    }
+
+    #my-orders-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    #my-orders-table td {
+        padding: 16px 20px;
+        vertical-align: middle;
+        background: #fff;
+        font-size: 12px;
+        font-weight: 500;
+        color: #222;
+    }
+
+    #my-orders-table td.col.shipping {
+        white-space: normal;
+        word-break: break-word;
+        line-height: 1.4;
+    }
+
+    #my-orders-table td.col.status {
+        overflow: visible;
+    }
+
+    #my-orders-table th.col.status,
+    #my-orders-table td.col.status {
+        text-align: left;
+    }
+
+    #my-orders-table th.col.actions,
+    #my-orders-table td.col.actions {
+        text-align: left;
+    }
+
+    .pager ul.items.pages-items li.item.current strong {
+        border-bottom: 2px solid grey !important;
+    }
+
+    #my-orders-table th.col.actions {
+        width: 150px;
+    }
+
+    #my-orders-table td.col.actions {
+        min-width: 150px;
+    }
+
+    #my-orders-table .actions a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 130px;
+        height: 40px;
+
+        padding: 0;
+
+        border: 1px solid #cfcfcf;
+        border-radius: 8px;
+    }
+
+    #my-orders-table .actions a:hover {
+        background: #f5f5f5;
+        border-color: #bdbdbd;
+    }
+
+    #my-orders-table .actions a span {
+        white-space: nowrap;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+
+        padding: 10px 14px;
+        border-radius: 5px;
+
+        font-size: 12px;
+        font-weight: 600;
+
+        background: #f3f4f6;
+        color: #555;
+
+        max-width: 100%;
+        white-space: normal;
+        word-break: break-word;
+        line-height: 1.3;
+    }
+
+    .status-pill::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+        flex: 0 0 auto;
+    }
+
+    .status-pill.delivered {
+        background: #edf8ea;
+        color: #6ea85d;
+    }
+
+    .status-pill.dispatched {
+        background: #edf3fb;
+        color: #6e8fc8;
+    }
+
+    .status-pill.processing {
+        background: #fbf2e6;
+        color: #c58b2b;
+    }
+
+    .status-pill.pending,
+    .status-pill.send-on-cod- {
+        background: #f3f3f3;
+        color: #6f6f6f;
+    }
+
+    .status-pill.cancelled {
+        background: #fdecec;
+        color: #d14d4d;
+    }
+
+    .status-pill.closed {
+        background: #fdf0f0;
+        color: #b94a48;
+    }
+
+    .status-pill.order-cancellation-requested {
+        background: #f5efdb;
+        color: #6f5a1f;
+    }
+
+    .status-pill.delivered::before {
+        background: #6ea85d;
+    }
+
+    .status-pill.dispatched::before {
+        background: #4d8df7;
+    }
+
+    .status-pill.processing::before {
+        background: #d99928;
+    }
+
+    .status-pill.pending::before,
+    .status-pill.send-on-cod-::before {
+        background: #7b7b7b;
+    }
+
+    .status-pill.cancelled::before {
+        background: #d14d4d;
+    }
+
+    .status-pill.closed::before {
+        background: #b94a48;
+    }
+
+    .status-pill.order-cancellation-requested::before {
+        background: #6f5a1f;
+    }
+
+    .status-pill.replacement-request-placed {
+        background: #f3f4f6;
+        color: #444;
+    }
+
+    .status-pill.replacement-request-placed::before {
+        background: #444;
+    }
+
+    .order-products-toolbar.toolbar.bottom {
+        background: #fff;
+        border: 1px solid #e9e9e9;
+        border-top: 0 !important;
+        border-radius: 0 0 16px 16px;
+        padding: 18px 24px;
+        margin-bottom: 16px;
+    }
+
+    .pager {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .toolbar-amount {
+        color: #666;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .pages {
+        align-items: center;
+        gap: 8px;
+    }
+
+    .pages-label {
+        display: none;
+    }
+
+    .pages-items {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .pages-items .item {
+        margin: 0;
+    }
+
+    .pages-items .item .page,
+    .pages-items .item a.page {
+        border-radius: 8px;
+        color: #333;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        padding: 5px 12px;
+        text-align: center;
+        text-decoration: none;
+        transition: background 0.2s ease, border-color 0.2s ease;
+        font-weight: 500;
+    }
+
+    .pages-items .item.current .page,
+    .pages-items .item.current strong.page {
+        background: #fff;
+        border: 1.5px solid #888;
+        box-shadow: 0 1px 2px rgba(44, 62, 80, 0.03);
+        font-weight: 600;
+    }
+
+    .pages-items .item .page:hover,
+    .pages-items .item a.page:hover {
+        background: #f6f6f6;
+        border-color: #bdbdbd;
+    }
+
+    .pages-items .item .page span.label {
+        display: none;
+    }
+
+    body.account li.item.pages-item-previous {
+        border: none;
+        border-radius: 8px !important;
+    }
+
+    body.account li.item.pages-item-previous a.action.previous {
+        border: none;
+        margin-right: 0 !important;
+    }
+
+    body.account li.item.pages-item-previous a.action.previous::before {
+        content: "\f104";
+        font: normal normal normal 14px / 1 FontAwesome;
+        font-size: 20px;
+        margin-left: -8px;
+    }
+
+    body.account li.item.pages-item-previous a.action.previous::before {
+        margin-top: -7px;
+        font-size: 17px;
+    }
+
+    body.account.sales-order-history ul.items.pages-items li.item.current strong {
+        background-color: transparent !important;
+    }
+
+    .limiter {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        flex-wrap: wrap;
+    }
+
+    .limiter-label,
+    .limiter-text {
+        color: #666;
+    }
+
+    .limiter-options {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: #fff;
+        color: #666;
+        font-size: 14px;
+        margin: 0 4px;
+        outline: none;
+        padding: 4px 12px;
+        transition: border-color 0.2s ease;
+    }
+
+    .limiter-options:focus {
+        border-color: #3b82f6;
+    }
+
+    span.toolbar-number {
+        color: #222;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    a.action.order {
+        display: none !important;
+    }
+
+    .table#my-orders-table:not(.cart):not(.totals)>thead>tr>th {
+        border-bottom: 0 !important;
+    }
+
+    .account .pages a.page {
+        color: #888;
+    }
+
+    #my-orders-table th.col.id,
+    #my-orders-table td.col.id {
+        width: 14%;
+    }
+
+    #my-orders-table th.col.date,
+    #my-orders-table td.col.date {
+        width: 14%;
+    }
+
+    #my-orders-table th.col.shipping,
+    #my-orders-table td.col.shipping {
+        width: 24%;
+    }
+
+    #my-orders-table th.col.total,
+    #my-orders-table td.col.total {
+        width: 14%;
+    }
+
+    #my-orders-table th.col.status,
+    #my-orders-table td.col.status {
+        width: 20%;
+    }
+
+    #my-orders-table th.col.actions,
+    #my-orders-table td.col.actions {
+        width: 140px;
+    }
+
+    body.account #maincontent a.action.back {
+        background: #f6f6f6 !important;
+    }
+
+    table#my-orders-table .actions>a.action.view,
+    #additional-addresses-table .actions>a.action.view {
+        border: 1px solid #9797979e;
+    }
+
+    @media (max-width: 998px) {
+        .status-pill {
+            gap: 4px;
+            padding: 10px 5px;
+            font-size: 10px;
+        }
+
+        #my-orders-table .actions a span {
+            font-size: 10px;
+        }
+
+        #my-orders-table td {
+            padding: 16px 10px;
+            font-size: 10px;
+        }
+
+        body.account span.toolbar-number,
+        ul.items.pages-items li.item span,
+        body.account .toolbar .limiter-label,
+        .limiter-label,
+        .limiter-text {
+            font-size: 11px;
+        }
+
+        .order-products-toolbar.toolbar.bottom {
+            padding: 18px 10px;
+        }
+    }
+
+    @media (max-width: 900px) {
+
+        #my-orders-table thead th,
+        #my-orders-table td {
+            padding: 14px 10px;
+            font-size: 10px;
+        }
+
+        .pager {
+            gap: 10px !important;
+
+        }
+
+        body.account span.toolbar-number,
+        ul.items.pages-items li.item span,
+        body.account .toolbar .limiter-label,
+        .limiter-label,
+        .limiter-text,
+        body.account #maincontent .pager input,
+        body.account #maincontent .pager select {
+            font-size: 9px;
+        }
+
+        #my-orders-table td.col.actions {
+            min-width: 128px;
+        }
+
+        #my-orders-table .actions a {
+            padding: 8px 14px;
+        }
+
+        #my-orders-table td {
+            padding: 16px 10px;
+            font-size: 9px;
+        }
+
+        #my-orders-table .actions a span {
+            font-size: 10px;
+        }
+
+        .status-pill,
+        body.account #maincontent a.action {
+            font-size: 9px !important;
+            padding: 10px 10px;
+        }
+
+        .status-pill::before {
+            width: 5px;
+            height: 5px;
+        }
+
+        body.account #maincontent .table-wrapper.orders-history a.action {
+            padding: 9px 10px 0px 10px !important;
+            height: 35px;
+        }
+    }
+
+    @media (max-width: 700px) {
+        body.account #maincontent a.action.back {
+            max-width: 130px;
+        }
+
+        body.account #maincontent li.item.pages-item-next a.action.next,
+        body.account #maincontent a.action.previous {
+            border: none !important;
+            padding: 0px !important;
+        }
+
+        body.account.sales-order-history .toolbar-amount {
+            display: none;
+        }
+
+        body.account.sales-order-history .pages .item {
+            line-height: 5px;
+        }
+
+        body.account.sales-order-history .order-products-toolbar.toolbar.bottom .pager {
+            gap: 0px !important;
+
+        }
+
+        body.account.sales-order-history .order-products-toolbar.toolbar.bottom li.item.pages-item-next,
+        body.account.sales-order-history .order-products-toolbar.toolbar.bottom a.action.next {
+            display: inline !important;
+            padding: 0px 20px;
+            line-height: 0px;
+        }
+
+        body.account.sales-order-history select#limiter {
+            background-color: white;
+            border: 1px solid #dfdfdf;
+        }
+
+        body.account.sales-order-history .actions-toolbar {
+            margin-top: 0px !important;
+        }
+
+        body.account.sales-order-history .order-products-toolbar.toolbar.bottom {
+            margin-bottom: 0px !important;
+
+        }
+
+        body.account li.item.pages-item-previous a.action.previous::before {
+            margin-top: -6px;
+            position: unset;
+            font-size: 14px;
+        }
+
+        body.account.sales-order-history ul.items.pages-items li.item.current strong {
+            background: #e7e7e7 !important;
+            border-bottom: none !important;
+            padding: 10px 10px !important;
+        }
+
+        body.account.sales-order-history .pages-items .item .page,
+        body.account.sales-order-history .pages-items .item a.page {
+            min-width: 20px;
+            padding: 5px 8px;
+        }
+
+        body.account.sales-order-history .pages strong.page,
+        body.account li.item.pages-item-previous,
+        body.account li.item.pages-item-next {
+            border: none !important;
+
+        }
+
+        body.account li.item.pages-item-previous a::before {
+            content: "\f104";
+            font: normal normal normal 14px / 1 FontAwesome;
+        }
+
+        body.account li.item.pages-item-next a::before {
+            content: "\f105";
+            margin-top: 4px;
+            font: normal normal normal 14px / 1 FontAwesome;
+        }
+
+        body.account span.toolbar-number,
+        ul.items.pages-items li.item span,
+        body.account .toolbar .limiter-label,
+        .limiter-label,
+        .limiter-text,
+        body.account #maincontent .pager input,
+        body.account #maincontent .pager select {
+            font-size: 9px;
+        }
+
+        body.account #maincontent a.action {
+            font-size: 10px !important;
+            padding: 12px 10px 0px 10px !important;
+        }
+
+        .status-pill::before {
+            width: 5px;
+            height: 5px;
+        }
+
+        .status-pill {
+            padding: 10px 8px;
+            text-align: left;
+            gap: 10px;
+        }
+
+
+        #my-orders-table .actions a {
+            font-size: 11px;
+            padding: 10px 9px 8px 9px;
+
+        }
+
+        #my-orders-table,
+        #my-orders-table thead,
+        #my-orders-table tbody,
+        #my-orders-table th,
+        #my-orders-table td,
+        #my-orders-table tr {
+            display: block !important;
+            width: 100% !important;
+            box-sizing: border-box;
+        }
+
+        #my-orders-table thead {
+            display: none !important;
+        }
+
+        #my-orders-table tbody tr {
+            background: white !important;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.07);
+            margin-bottom: 18px;
+            border: 1.5px solid #eee;
+            padding: 10px 14px 14px 14px;
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+            grid-template-rows: auto auto;
+            gap: 20px 12px;
+            align-items: center;
+            min-width: 0;
+        }
+
+        .order-products-toolbar.toolbar.bottom {
+            border: none;
+        }
+
+        #my-orders-table td {
+            border: none !important;
+            padding: 0 !important;
+            background: none;
+            margin-bottom: 0;
+            min-width: 0;
+            font-size: 11px;
+            display: block;
+            box-sizing: border-box;
+            font-weight: 500;
+            color: black;
+            max-width: 100%;
+            overflow-wrap: break-word;
+            word-break: break-word;
+        }
+
+        /* Row 1 */
+        #my-orders-table td.col.id {
+            grid-column: 1 / 2;
+            grid-row: 1 / 2;
+            font-size: 11px;
+            font-weight: 500;
+            text-align: left;
+            max-width: 100%;
+        }
+
+        #my-orders-table td.col.date {
+            grid-column: 2 / 3;
+            grid-row: 1 / 2;
+            text-align: left;
+            max-width: 100%;
+        }
+
+        #my-orders-table td.col.status {
+            grid-column: 3 / 4;
+            grid-row: 1 / 2;
+            text-align: right;
+            justify-self: end;
+            align-self: start;
+            max-width: 100%;
+        }
+
+        /* Row 2 */
+        #my-orders-table td.col.shipping {
+            grid-column: 1 / 2;
+            grid-row: 2 / 3;
+            text-align: left;
+            font-size: 11px;
+            max-width: 100%;
+        }
+
+        #my-orders-table td.col.total {
+            grid-column: 2 / 3;
+            grid-row: 2 / 3;
+            text-align: left;
+            font-size: 11px;
+            max-width: 100%;
+        }
+
+        #my-orders-table td.col.actions {
+            grid-column: 3 / 4;
+            grid-row: 2 / 3;
+            min-width: auto !important;
+            justify-self: end;
+            align-self: end;
+            max-width: 100%;
+        }
+
+        /* Only show label for left and middle columns */
+        #my-orders-table td.col.id:before,
+        #my-orders-table td.col.shipping:before,
+        #my-orders-table td.col.date:before,
+        #my-orders-table td.col.total:before {
+            content: attr(data-th);
+            display: block;
+            font-size: 10px;
+            color: black;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        #my-orders-table td.col.status:before,
+        #my-orders-table td.col.actions:before {
+            display: none;
+            content: '';
+        }
+
+        /* Hide status text, show only dot on mobile */
+        #my-orders-table td.col.status .col.status {
+            color: inherit !important;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        #my-orders-table td.col.status .col.status::before {
+            content: '' !important;
+            display: inline-block !important;
+            width: 7px !important;
+            height: 7px !important;
+            border-radius: 50% !important;
+            margin-right: 2px !important;
+            background: currentColor !important;
+            flex-shrink: 0 !important;
+            position: static !important;
+            vertical-align: middle !important;
+            margin-top: -2px;
+        }
+
+        /* Fix status pill width */
+        #my-orders-table td.col.status .col.status {
+            display: flex !important;
+            align-items: center !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            font-size: 11px;
+            position: relative;
+            padding: 2px 10px 7px 10px;
+        }
+
+        /* Fix action button */
+        #my-orders-table td.col.actions .action {
+            max-width: 100%;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+        }
+
+        #my-orders-table td.col.status,
+        .table-wrapper.orders-history td.col.status {
+            margin: 0px;
+            padding: 10px 5px 3px 5px !important;
+            font-weight: 700;
+        }
+
+        .table-wrapper.orders-history {
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .pager {
+            gap: 0px;
+            justify-content: center;
+        }
+
+        table#my-orders-table td.col.actions {
+            text-align: right;
+        }
+
+        body.account #maincontent .table-wrapper.orders-history a.action {
+            padding: 9px 10px 0px 10px !important;
+            height: 35px;
+        }
+
+        #my-orders-table td.col.date,
+        #my-orders-table td.col.shipping,
+        #my-orders-table td.col.total,
+        #my-orders-table td.col.id {
+            font-weight: 600;
+        }
+
+    }
+</style>

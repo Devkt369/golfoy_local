@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © ArtM. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="product.info.options.wrapper">
+            <block class="ArtM\BulkProduct\Block\Product\View\BulkOptions"
+                   name="product.info.bulk.options"
+                   template="ArtM_BulkProduct::product/view/bulk-options.phtml"
+                   after="-" />
+        </referenceContainer>
+        <move element="custom_test_block" destination="product.info.options.wrapper" before="product.info.bulk.options" />
+    </body>
+</page>

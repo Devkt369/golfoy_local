@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>    
+        <referenceBlock name="breadcrumbs" remove="true"/>
+        <referenceBlock name="category_top_block" remove="true"/>
+        <referenceContainer name="page.wrapper">
+            <container name="wizzy_container" as="wizzy_container" label="Wizzy Container" htmlTag="div" htmlClass="wizzy-result-container" after="main.content">
+                <block class="Magento\Framework\View\Element\Template" name="wizzy.result.custom" template="ArtM_GraphqlCache::category/wizzy-custom.phtml" ifconfig="react_config/general/enable">
+                    <arguments>
+                        <argument name="text" xsi:type="string"><![CDATA[<!-- Add phtml file -->]]></argument>
+                    </arguments>
+                </block>
+            </container>
+        </referenceContainer>
+        <referenceContainer name="content">
+            <block class="Magento\Framework\View\Element\Template" name="category_page_products" template="ArtM_GraphqlCache::React/catalog_category_view/category_page_products.phtml" before="-" ifconfig="react_config/general/enable"/>
+            <block class="Magento\Framework\View\Element\Template" name="brand_page_react" template="ArtM_GraphqlCache::React/brandpage/brandpage.phtml" before="-" ifconfig="react_config/general/enable"/>
+        </referenceContainer>
+        <referenceContainer name="header.container">
+            <block class="Magento\Framework\View\Element\Template" 
+                   name="react.menu" 
+                   template="ArtM_GraphqlCache::React/menu/react_menu.phtml" 
+                   before="-" 
+                   ifconfig="react_config/general/enable" />
+        </referenceContainer>
+    </body>
+</page>

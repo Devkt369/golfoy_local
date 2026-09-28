@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="checkout_onepage_controller_success_action">
+        <observer name="meetanshi_sms_place_order_after" instance="Meetanshi\Sms\Observer\Frontend\Order\CreateAfter" />
+    </event>
+    <event name="sales_order_shipment_save_after">
+        <observer name="meetanshi_sms_shipment" instance="Meetanshi\Sms\Observer\Shipment" />
+    </event>
+    <event name="customer_register_success">
+        <observer name="phpcuong_transactional_email_customer_register_succes" instance="Meetanshi\Sms\Observer\Frontend\Customer\CreateAfter" />
+    </event>
+</config>

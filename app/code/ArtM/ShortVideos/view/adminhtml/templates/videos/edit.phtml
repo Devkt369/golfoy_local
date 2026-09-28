@@ -1,0 +1,988 @@
+<?php
+/**
+ * ArtM ShortVideos Edit Video Form Template
+ *
+ * @category  ArtM
+ * @package   ArtM_ShortVideos
+ * @author    ArtM
+ * @copyright Copyright (c) 2025 ArtM
+ * @var $block \Magento\Backend\Block\Template
+ */
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$registry = $objectManager->get('Magento\Framework\Registry');
+$video = $registry->registry('artm_shortvideo');
+$collection = $objectManager->create('ArtM\ShortVideos\Model\ResourceModel\Video\Collection');
+$categories = $collection->getAllCategories();
+$categoriesJson = json_encode($categories);
+?>
+
+<div class="admin__page-section video-form-container">
+    <div class="admin__page-section-title">
+        <h2 class="page-title">
+            <span class="title-icon">🎬</span>
+            <?= $video->getId() ? __('Edit Video: %1', $video->getTitle()) : __('Add New Video') ?>
+        </h2>
+    </div>
+    <div class="admin__page-section-content">
+        <form id="video_form" action="<?= $block->getUrl('shortvideos/video/save') ?>" method="post" enctype="multipart/form-data">
+            <?= $block->getBlockHtml('formkey') ?>
+            <input type="hidden" name="video_id" value="<?= $video->getId() ?>"/>
+            
+            <div class="form-columns">
+                <!-- Left Column -->
+                <div class="form-column form-column-left">
+                    <fieldset class="admin__fieldset fieldset-basic-info">
+                        <legend class="admin__legend legend-with-icon">
+                            <span>📝 <?= __('Basic Information') ?></span>
+                        </legend>
+                        
+                        <div class="admin__field-control">
+                            <div class="admin__field _required field-title">
+                                <label class="admin__field-label" for="title">
+                                    <span>📹 <?= __('Video Title') ?></span>
+                                </label>
+                                <div class="admin__field-control">
+                                    <input type="text" 
+                                           id="title" 
+                                           name="title" 
+                                           class="admin__control-text" 
+                                           required="required"
+                                           value="<?= $block->escapeHtml($video->getTitle()) ?>"
+                                           placeholder="<?= __('Enter an engaging video title...') ?>"/>
+                                </div>
+                            </div>
+
+                            <div class="admin__field field-description">
+                                <label class="admin__field-label" for="description">
+                                    <span>📄 <?= __('Description') ?></span>
+                                </label>
+                                <div class="admin__field-control">
+                                    <textarea id="description" 
+                                              name="description" 
+                                              class="admin__control-textarea" 
+                                              rows="5"
+                                              placeholder="<?= __('Tell us about this video...') ?>"><?= $block->escapeHtml($video->getDescription()) ?></textarea>
+                                </div>
+                            </div>
+
+                            <div class="admin__field field-category">
+                                <label class="admin__field-label" for="category">
+                                    <span>🏷️ <?= __('Category') ?></span>
+                                </label>
+                                <div class="admin__field-control">
+                                    <input type="text" 
+                                           id="category" 
+                                           name="category" 
+                                           class="admin__control-text"
+                                           value="<?= $block->escapeHtml($video->getCategory()) ?>"
+                                           placeholder="<?= __('Golf Tips, Equipment, etc.') ?>"
+                                           list="category_suggestions"/>
+                                    <datalist id="category_suggestions">
+                                        <?php foreach ($categories as $category): ?>
+                                            <option value="<?= $block->escapeHtml($category) ?>">
+                                        <?php endforeach; ?>
+                                    </datalist>
+                                    <p class="note">💡 <?= __('Type to see existing categories') ?></p>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="admin__fieldset fieldset-video-source">
+                        <legend class="admin__legend legend-with-icon">
+                            <span>🎥 <?= __('Video Source') ?></span>
+                        </legend>
+                        
+                        <div class="admin__field-control">
+                            <div class="admin__field _required field-video-type">
+                                <label class="admin__field-label" for="video_type">
+                                    <span><?= __('Video Type') ?></span>
+                                </label>
+                                <div class="admin__field-control">
+                                    <select id="video_type" 
+                                            name="video_type" 
+                                            class="admin__control-select" 
+                                            required="required"
+                                            onchange="handleVideoTypeChange(this.value)">
+                                        <option value=""><?= __('-- Select Source --') ?></option>
+                                        <option value="instagram" <?= $video->getVideoType() === 'instagram' ? 'selected' : '' ?>>📷 <?= __('Instagram Reel') ?></option>
+                                        <option value="youtube" <?= $video->getVideoType() === 'youtube' ? 'selected' : '' ?>>▶️ <?= __('YouTube Short') ?></option>
+                                        <option value="upload" <?= $video->getVideoType() === 'upload' ? 'selected' : '' ?>>☁️ <?= __('Upload Video') ?></option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="admin__field field-video-url" id="url_field" style="display:<?= in_array($video->getVideoType(), ['instagram', 'youtube']) ? 'block' : 'none' ?>;">
+                                <label class="admin__field-label" for="video_url">
+                                    <span>🔗 <?= __('Video URL') ?></span>
+                                </label>
+                                <div class="admin__field-control">
+                                    <input type="text" 
+                                           id="video_url" 
+                                           name="video_url" 
+                                           class="admin__control-text"
+                                           value="<?= $block->escapeHtml($video->getVideoUrl()) ?>"
+                                           placeholder="<?= __('https://...') ?>"/>
+                                    <p class="note" id="url_note">💡 <?= __('Paste the full video URL here') ?></p>
+                                </div>
+                            </div>
+
+                            <div class="admin__field field-video-upload" id="upload_field" style="display:<?= $video->getVideoType() === 'upload' ? 'block' : 'none' ?>;">
+                                <label class="admin__field-label" for="video_upload">
+                                    <span>☁️ <?= __('Upload Video File') ?></span>
+                                </label>
+                                <div class="admin__field-control">
+                                    <?php if ($video->getVideoUrl() && $video->getVideoType() === 'upload'): ?>
+                                        <div class="current-file">
+                                            <span class="file-icon">📁</span>
+                                            <span class="file-name"><?= basename($video->getVideoUrl()) ?></span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <input type="file" 
+                                           id="video_upload" 
+                                           name="video_upload" 
+                                           accept="video/*"
+                                           class="admin__control-text file-input"/>
+                                    <p class="note">💡 <?= __('Supported: MP4, MOV, AVI') ?></p>
+                                </div>
+                            </div>
+
+                            <div class="admin__field field-thumbnail">
+                                <label class="admin__field-label">
+                                    <span>🖼️ <?= __('Thumbnail') ?></span>
+                                </label>
+                                
+                                <!-- Thumbnail Type Selector -->
+                                <div class="thumbnail-type-selector">
+                                    <label class="thumbnail-radio">
+                                        <input type="radio" 
+                                               name="thumbnail_type" 
+                                               value="url" 
+                                               <?= $video->getThumbnailUrl() && !preg_match('/^data:/', $video->getThumbnailUrl()) ? 'checked' : '' ?>
+                                               onchange="toggleThumbnailType('url')"/>
+                                        <span>� <?= __('URL') ?></span>
+                                    </label>
+                                    <label class="thumbnail-radio">
+                                        <input type="radio" 
+                                               name="thumbnail_type" 
+                                               value="upload" 
+                                               <?= !$video->getThumbnailUrl() || preg_match('/^data:/', $video->getThumbnailUrl()) ? 'checked' : '' ?>
+                                               onchange="toggleThumbnailType('upload')"/>
+                                        <span>📤 <?= __('Upload') ?></span>
+                                    </label>
+                                </div>
+
+                                <!-- URL Input -->
+                                <div id="thumbnail_url_field" 
+                                     class="admin__field-control" 
+                                     style="display: <?= $video->getThumbnailUrl() && !preg_match('/^data:/', $video->getThumbnailUrl()) ? 'block' : 'none' ?>;">
+                                    <input type="text" 
+                                           id="thumbnail_url" 
+                                           name="thumbnail_url" 
+                                           class="admin__control-text"
+                                           value="<?= $block->escapeHtml($video->getThumbnailUrl()) ?>"
+                                           placeholder="<?= __('https://...image.jpg') ?>"/>
+                                    <p class="note">💡 <?= __('Enter image URL') ?></p>
+                                </div>
+
+                                <!-- Upload Input -->
+                                <div id="thumbnail_upload_field" 
+                                     class="admin__field-control" 
+                                     style="display: <?= !$video->getThumbnailUrl() || preg_match('/^data:/', $video->getThumbnailUrl()) ? 'block' : 'none' ?>;">
+                                    <input type="file" 
+                                           id="thumbnail_upload" 
+                                           name="thumbnail_upload" 
+                                           accept="image/*"
+                                           class="file-input"
+                                           onchange="previewThumbnail(this)"/>
+                                    <label for="thumbnail_upload" class="file-label">
+                                        <span class="file-icon">📁</span>
+                                        <span class="file-text"><?= __('Choose Image File') ?></span>
+                                    </label>
+                                    <p class="note">💡 <?= __('JPG, PNG, GIF - Max 2MB') ?></p>
+                                    
+                                    <?php if ($video->getThumbnailUrl()): ?>
+                                        <div class="thumbnail-preview" id="thumbnail_preview">
+                                            <img src="<?= $block->escapeUrl($video->getThumbnailUrl()) ?>" alt="Thumbnail Preview"/>
+                                            <button type="button" class="remove-thumbnail" onclick="removeThumbnail()">×</button>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="thumbnail-preview" id="thumbnail_preview" style="display: none;">
+                                            <img src="" alt="Thumbnail Preview"/>
+                                            <button type="button" class="remove-thumbnail" onclick="removeThumbnail()">×</button>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <!-- Right Column -->
+                <div class="form-column form-column-right">
+                    <fieldset class="admin__fieldset fieldset-link-settings">
+                        <legend class="admin__legend legend-with-icon">
+                            <span>🔗 <?= __('Link Settings') ?></span>
+                        </legend>
+                        
+                        <div class="admin__field-control">
+                            <div class="admin__field field-link-type">
+                                <label class="admin__field-label">
+                                    <span><?= __('Link Type') ?></span>
+                                </label>
+                                <div class="link-type-swatches">
+                                    <div class="link-type-swatch <?= !$video->getIsProductLink() || !$video->getProductId() ? 'active' : '' ?>" 
+                                         onclick="selectLinkType('url')">
+                                        <input type="radio" 
+                                               name="link_type_radio" 
+                                               value="url" 
+                                               id="link_type_url"
+                                               <?= !$video->getIsProductLink() || !$video->getProductId() ? 'checked' : '' ?>/>
+                                        <label for="link_type_url">
+                                            <span class="swatch-icon">🔗</span>
+                                            <span class="swatch-label"><?= __('Redirect URL') ?></span>
+                                        </label>
+                                    </div>
+                                    <div class="link-type-swatch <?= $video->getIsProductLink() && $video->getProductId() ? 'active' : '' ?>" 
+                                         onclick="selectLinkType('product')">
+                                        <input type="radio" 
+                                               name="link_type_radio" 
+                                               value="product" 
+                                               id="link_type_product"
+                                               <?= $video->getIsProductLink() && $video->getProductId() ? 'checked' : '' ?>/>
+                                        <label for="link_type_product">
+                                            <span class="swatch-icon">🛍️</span>
+                                            <span class="swatch-label"><?= __('Product ID') ?></span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- URL Field -->
+                            <div id="url_field_section" class="admin__field field-link-url" style="display: <?= !$video->getIsProductLink() || !$video->getProductId() ? 'block' : 'none' ?>;">
+                                <label class="admin__field-label" for="link_url">
+                                    <span>🔗 <?= __('Redirect URL') ?></span>
+                                </label>
+                                <div class="admin__field-control">
+                                    <input type="text" 
+                                           id="link_url" 
+                                           name="link_url" 
+                                           class="admin__control-text"
+                                           value="<?= $block->escapeHtml($video->getLinkUrl()) ?>"
+                                           placeholder="<?= __('https://example.com/page') ?>"/>
+                                    <p class="note">💡 <?= __('Where should users go when they click?') ?></p>
+                                </div>
+                            </div>
+
+                            <!-- Product ID Field -->
+                            <div id="product_field_section" style="display: <?= $video->getIsProductLink() && $video->getProductId() ? 'block' : 'none' ?>;">
+                                <div class="admin__field field-product-id">
+                                    <label class="admin__field-label" for="product_id">
+                                        <span>🛍️ <?= __('Product ID') ?></span>
+                                    </label>
+                                    <div class="admin__field-control">
+                                        <input type="number" 
+                                               id="product_id" 
+                                               name="product_id" 
+                                               class="admin__control-text" 
+                                               min="1"
+                                               value="<?= $video->getProductId() ?>"
+                                               <?= (!$video->getIsProductLink() || !$video->getProductId()) ? 'disabled' : '' ?>
+                                               placeholder="<?= __('e.g., 123') ?>"/>
+                                    </div>
+                                    <input type="hidden" 
+                                           id="is_product_link" 
+                                           name="is_product_link" 
+                                           value="<?= $video->getIsProductLink() ? '1' : '0' ?>"/>
+                                </div>
+
+                                <!-- Show Product Details or Title/Description Option -->
+                                <div class="admin__field field-product-details-toggle" id="product_details_toggle" style="display:none; margin-top:10px;">
+                                    <label class="admin__field-label">
+                                        <span>📝 <?= __('Show on Slider') ?></span>
+                                    </label>
+                                    <div class="admin__field-control">
+                                        <label style="margin-right:20px;">
+                                            <input type="radio" name="show_product_details" value="1" <?= ($video->getData('show_product_details') === null || $video->getData('show_product_details') == 1) ? 'checked' : '' ?> />
+                                            <?= __('Product Name & Price') ?>
+                                        </label>
+                                        <label>
+                                            <input type="radio" name="show_product_details" value="0" <?= ($video->getData('show_product_details') === '0' || $video->getData('show_product_details') === 0) ? 'checked' : '' ?> />
+                                            <?= __('Video Title & Description') ?>
+                                        </label>
+                                    </div>
+                                    <p class="note">💡 <?= __('Choose what to display below the video in the slider when a product is linked.') ?></p>
+                                </div>
+
+                                <div class="admin__field field-product-popup">
+                                    <input type="hidden" name="show_product_popup" value="0"/>
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" 
+                                               id="show_product_popup" 
+                                               name="show_product_popup" 
+                                               value="1"
+                                               <?= $video->getData('show_product_popup') ? 'checked' : '' ?>/>
+                                        <span class="checkbox-label">
+                                            <span class="checkbox-icon">🎬</span>
+                                            <?= __('Show Video Popup on Product Page') ?>
+                                        </span>
+                                    </label>
+                                    <p class="note">💡 <?= __('Display floating video when product page is opened via this video link') ?></p>
+                                </div>
+
+                                <script>
+                                // Show/hide product details toggle based on product_id
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    var productIdInput = document.getElementById('product_id');
+                                    var toggleDiv = document.getElementById('product_details_toggle');
+                                    if (!productIdInput || !toggleDiv) return;
+                                    function checkToggle() {
+                                        if (productIdInput.value && parseInt(productIdInput.value) > 0) {
+                                            toggleDiv.style.display = '';
+                                        } else {
+                                            toggleDiv.style.display = 'none';
+                                        }
+                                    }
+                                    productIdInput.addEventListener('input', checkToggle);
+                                    checkToggle();
+                                });
+                                </script>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="admin__fieldset fieldset-display-settings">
+                        <legend class="admin__legend legend-with-icon">
+                            <span>⚙️ <?= __('Display Settings') ?></span>
+                        </legend>
+                        
+                        <div class="field-group-inline">
+                            <div class="admin__field field-status">
+                                <label class="admin__field-label" for="status">
+                                    <span>🔄 <?= __('Status') ?></span>
+                                </label>
+                                <div class="admin__field-control">
+                                    <select id="status" name="status" class="admin__control-select status-select">
+                                        <option value="1" <?= $video->getStatus() == 1 ? 'selected' : '' ?>>✅ <?= __('Enabled') ?></option>
+                                        <option value="0" <?= $video->getStatus() == 0 ? 'selected' : '' ?>>❌ <?= __('Disabled') ?></option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="admin__field field-sort-order">
+                                <label class="admin__field-label" for="sort_order">
+                                    <span>📊 <?= __('Sort Order') ?></span>
+                                </label>
+                                <div class="admin__field-control">
+                                    <input type="number" 
+                                           id="sort_order" 
+                                           name="sort_order" 
+                                           class="admin__control-text" 
+                                           value="<?= $video->getSortOrder() ?: 0 ?>"
+                                           min="0"
+                                           placeholder="0"/>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="info-box">
+                        <div class="info-box-icon">💡</div>
+                        <div class="info-box-content">
+                            <h4><?= __('Quick Tips') ?></h4>
+                            <ul>
+                                <li><?= __('Use engaging titles to attract viewers') ?></li>
+                                <li><?= __('Categories help organize your videos') ?></li>
+                                <li><?= __('Lower sort order = appears first') ?></li>
+                                <li><?= __('Test video links before saving') ?></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin__page-section-item-actions">
+                <button type="submit" class="action-primary" title="<?= __('Save Video') ?>">
+                    <span><?= __('Save Video') ?></span>
+                </button>
+                <button type="button" 
+                        class="action-secondary" 
+                        onclick="window.location.href='<?= $block->getUrl('shortvideos/index/index') ?>'"
+                        title="<?= __('Back') ?>">
+                    <span><?= __('Back') ?></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .video-form-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    .page-title {
+        color: #2c3e50;
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 25px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .title-icon {
+        font-size: 32px;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    .form-columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 1200px) {
+        .form-columns {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .form-column {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .admin__fieldset {
+        background: white;
+        border: none;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .admin__fieldset:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+
+    .admin__legend {
+        font-size: 18px;
+        font-weight: 700;
+        color: #2c3e50;
+        padding: 0 0 15px 0;
+        margin-bottom: 20px;
+        border-bottom: 3px solid #3498db;
+        width: 100%;
+    }
+
+    .legend-with-icon span {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .admin__field {
+        margin-bottom: 20px;
+    }
+
+    .admin__field:last-child {
+        margin-bottom: 0;
+    }
+
+    label.admin__field-label {
+        display: inline-block !important;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #34495e;
+        font-size: 14px;
+    }
+
+    .admin__field-label span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        word-break: break-word;
+        max-width: 100%;
+    }
+
+    .admin__field-control input[type="text"],
+    .admin__field-control input[type="number"],
+    .admin__field-control textarea,
+    .admin__field-control select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s;
+        background: #fafafa;
+    }
+
+    .admin__field-control input:focus,
+    .admin__field-control textarea:focus,
+    .admin__field-control select:focus {
+        outline: none;
+        border-color: #3498db;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .admin__field-control textarea {
+        resize: vertical;
+        min-height: 100px;
+        font-family: inherit;
+    }
+
+    .admin__field-control .note {
+        font-size: 12px;
+        color: #7f8c8d;
+        margin-top: 6px;
+        font-style: italic;
+    }
+
+    .admin__field._required .admin__field-label span:after {
+        content: '*';
+        color: #e74c3c;
+        margin-left: 5px;
+        font-size: 16px;
+    }
+
+    .field-group-inline {
+        gap: 15px;
+    }
+
+    .status-select {
+        font-weight: 600;
+    }
+
+    .current-file {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #e3f2fd;
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        font-size: 13px;
+    }
+
+    .file-icon {
+        font-size: 20px;
+    }
+
+    .file-name {
+        font-weight: 600;
+        color: #1976d2;
+    }
+
+    .file-input {
+        cursor: pointer;
+    }
+
+    .info-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .info-box-icon {
+        font-size: 36px;
+        margin-bottom: 10px;
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .info-box-content h4 {
+        margin: 0 0 15px 0;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .info-box-content ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+
+    .info-box-content li {
+        margin-bottom: 8px;
+        line-height: 1.6;
+    }
+
+    .admin__page-section-item-actions {
+        margin-top: 30px;
+        padding: 25px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    .admin__page-section-item-actions button {
+        padding: 14px 35px;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .action-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .action-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    .action-secondary {
+        background: #ecf0f1;
+        color: #2c3e50;
+    }
+
+    .action-secondary:hover {
+        background: #bdc3c7;
+        transform: translateY(-2px);
+    }
+
+    /* Link Type Swatches */
+    .link-type-swatches {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .link-type-swatch {
+        flex: 1;
+        position: relative;
+        cursor: pointer;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s;
+    }
+
+    .link-type-swatch input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .link-type-swatch label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: #fafafa;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        min-height: 100px;
+    }
+
+    .link-type-swatch:hover label {
+        border-color: #667eea;
+        background: #f0f3ff;
+        transform: translateY(-2px);
+    }
+
+    .link-type-swatch.active label {
+        border-color: #667eea;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .link-type-swatch .swatch-icon {
+        font-size: 32px;
+        margin-bottom: 8px;
+    }
+
+    .link-type-swatch .swatch-label {
+        font-weight: 600;
+        font-size: 14px;
+        text-align: center;
+    }
+
+    /* Checkbox styling */
+    .checkbox-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 8px;
+    }
+
+    .checkbox-container:hover {
+        background: #e8ecff;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        color: #34495e;
+    }
+
+    .checkbox-icon {
+        font-size: 18px;
+    }
+
+    .thumbnail-type-selector {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .thumbnail-radio {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #555;
+    }
+
+    .thumbnail-radio input[type="radio"] {
+        cursor: pointer;
+    }
+
+    .file-label {
+        display: inline-block;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .file-label:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .file-label .file-icon {
+        margin-right: 8px;
+    }
+
+    #thumbnail_upload {
+        display: none;
+    }
+
+    .thumbnail-preview {
+        margin-top: 15px;
+        position: relative;
+        display: inline-block;
+    }
+
+    .thumbnail-preview img {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        display: block;
+    }
+
+    .remove-thumbnail {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #e74c3c;
+        color: white;
+        border: 2px solid white;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        transition: all 0.2s ease;
+    }
+
+    .remove-thumbnail:hover {
+        background: #c0392b;
+        transform: scale(1.1);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .field-group-inline {
+            grid-template-columns: 1fr;
+        }
+        
+        .admin__page-section-item-actions {
+            flex-direction: column;
+        }
+        
+        .admin__page-section-item-actions button {
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+    function handleVideoTypeChange(type) {
+        const urlField = document.getElementById('url_field');
+        const uploadField = document.getElementById('upload_field');
+        const videoUrlInput = document.getElementById('video_url');
+        const urlNote = document.getElementById('url_note');
+        
+        if (type === 'upload') {
+            urlField.style.display = 'none';
+            uploadField.style.display = 'block';
+            videoUrlInput.removeAttribute('required');
+        } else if (type === 'instagram' || type === 'youtube') {
+            urlField.style.display = 'block';
+            uploadField.style.display = 'none';
+            videoUrlInput.setAttribute('required', 'required');
+            
+            if (type === 'instagram') {
+                urlNote.textContent = '<?= __('Enter Instagram Reel URL (e.g., https://www.instagram.com/reel/...)') ?>';
+            } else if (type === 'youtube') {
+                urlNote.textContent = '<?= __('Enter YouTube Short URL (e.g., https://youtube.com/shorts/...)') ?>';
+            }
+        } else {
+            urlField.style.display = 'none';
+            uploadField.style.display = 'none';
+            videoUrlInput.removeAttribute('required');
+        }
+    }
+
+    function selectLinkType(type) {
+        const urlSection = document.getElementById('url_field_section');
+        const productSection = document.getElementById('product_field_section');
+        const isProductLinkInput = document.getElementById('is_product_link');
+        const productIdInput = document.getElementById('product_id');
+        const swatches = document.querySelectorAll('.link-type-swatch');
+        
+        // Update swatch active states
+        swatches.forEach(swatch => swatch.classList.remove('active'));
+        
+        if (type === 'url') {
+            document.getElementById('link_type_url').checked = true;
+            document.querySelector('.link-type-swatch:has(#link_type_url)').classList.add('active');
+            urlSection.style.display = 'block';
+            productSection.style.display = 'none';
+            isProductLinkInput.value = '0';
+            // Disable product_id to prevent validation error
+            productIdInput.disabled = true;
+            productIdInput.value = '';
+        } else if (type === 'product') {
+            document.getElementById('link_type_product').checked = true;
+            document.querySelector('.link-type-swatch:has(#link_type_product)').classList.add('active');
+            urlSection.style.display = 'none';
+            productSection.style.display = 'block';
+            isProductLinkInput.value = '1';
+            // Enable product_id for input
+            productIdInput.disabled = false;
+        }
+    }
+
+    function toggleThumbnailType(type) {
+        const urlField = document.getElementById('thumbnail_url_field');
+        const uploadField = document.getElementById('thumbnail_upload_field');
+        
+        if (type === 'url') {
+            urlField.style.display = 'block';
+            uploadField.style.display = 'none';
+        } else {
+            urlField.style.display = 'none';
+            uploadField.style.display = 'block';
+        }
+    }
+
+    function previewThumbnail(input) {
+        const preview = document.getElementById('thumbnail_preview');
+        const img = preview.querySelector('img');
+        
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            
+            // Validate file size (2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('<?= __('File size must be less than 2MB') ?>');
+                input.value = '';
+                return;
+            }
+            
+            // Validate file type
+            if (!file.type.match('image.*')) {
+                alert('<?= __('Please select an image file') ?>');
+                input.value = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function removeThumbnail() {
+        const preview = document.getElementById('thumbnail_preview');
+        const uploadInput = document.getElementById('thumbnail_upload');
+        const img = preview.querySelector('img');
+        
+        img.src = '';
+        preview.style.display = 'none';
+        uploadInput.value = '';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const categories = <?= $categoriesJson ?>;
+        const categoryInput = document.getElementById('category');
+        
+        if (categoryInput && categories.length > 0) {
+            console.log('Available categories:', categories);
+        }
+    });
+</script>

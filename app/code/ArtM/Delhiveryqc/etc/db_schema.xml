@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="artm_delhiveryqc_comment" resource="default" engine="innodb" comment="ArtM Delhivery QC Comment Table">
+        <column xsi:type="int" name="id" padding="10" unsigned="false" nullable="false" identity="true" comment="ID"/>
+        <column xsi:type="int" name="qc_order_table_primary_id" nullable="false" comment="QC Order Table Primary ID"/>
+        <column xsi:type="varchar" name="comment" nullable="false" length="50" comment="Comment"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="10" comment="Status"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+</schema>

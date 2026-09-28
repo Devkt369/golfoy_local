@@ -1,0 +1,42 @@
+<?php 
+$linksarray = [2816 => "https://mage.golfoy.com/choose-by-players/collin-morkiwas.html",
+2817 => "https://mage.golfoy.com/choose-by-players/viktor-hovland.html", 
+2818 => "https://mage.golfoy.com/choose-by-players/patrick-cantlay.html", 
+2819 => "https://mage.golfoy.com/choose-by-players/scottie-scheffler.html", 
+2820 => "https://mage.golfoy.com/choose-by-players/cameron-smith.html", 
+2821 => "https://mage.golfoy.com/choose-by-players/xander-schauffele.html",
+2824 => "https://mage.golfoy.com/choose-by-players/rory-mcllroy.html",
+2988 => "https://mage.golfoy.com/choose-by-players/jon-rahm.html",
+2989 => "https://mage.golfoy.com/choose-by-players/justin-thomas.html",
+2825 => "https://mage.golfoy.com/choose-by-players/sam-burns.html",
+2990 => "https://mage.golfoy.com/choose-by-players/jordan-spieth.html",
+2991 => "https://mage.golfoy.com/choose-by-players/hideki-matsuyamas.html",
+2992 => "https://mage.golfoy.com/choose-by-players/matt-fitzpatrick.html",
+2993 => "https://mage.golfoy.com/choose-by-players/max-homa.html",
+2994 => "https://mage.golfoy.com/choose-by-players/billy-horschel.html",
+2995 => "https://mage.golfoy.com/choose-by-players/shane-lowry.html",
+2996 => "https://mage.golfoy.com/choose-by-players/sepp-straka.html"
+];
+$link = "https://mage.golfoy.com/blog/whats-in-xanders-bag/";
+$_product = $block->getProduct();
+//$choicesstr =  $_product->getResource()->getAttribute('playerschoice')->getFrontend()->getValue($_product);
+
+if($_product->getData('playerschoice')){ 
+   $attr = $_product->getResource()->getAttribute('playerschoice');
+   $playerc = $_product->getData('playerschoice'); 
+   $allplayer = explode(',',$playerc); 
+    echo '<div class="choose_by_player description_side_tab_container">';
+   echo "<h3 class='description_side_tab_heading' style = 'font-weight:bold;'> Player's Choice</h3> <div class = 'pchoices row'>";   
+   foreach($allplayer as $ap){
+      $link = "https://mage.golfoy.com/blog/whats-in-collin-morikawas-bag-2/";
+      if(isset($linksarray[$ap])){$link = $linksarray[$ap];}
+      echo '<div class= "player-thumbs col-lg-4 col-sm-6 col-xs-6" style="overflow:hidden;"id = "player-'.$ap.'"> <center> 
+      <a target = "blank" href="'.$link.'"> 
+      <img style = "border-radius:50%;" src = "/pub/media/players/'.$ap.'.jpg" /> <br/><h6  style = "font-weight:bold;">';
+      echo $attr->getSource()->getOptionText($ap);
+      echo "</h6> </a> </center> </div>";      
+   }
+   echo "</div>";
+   echo "</div>";
+}
+?>

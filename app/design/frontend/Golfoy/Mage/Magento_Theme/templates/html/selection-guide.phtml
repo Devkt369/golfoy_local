@@ -1,0 +1,392 @@
+<style>
+    .selection-guide-container a.shop-nows.initial-caps {
+        text-transform: unset;
+    }
+
+    .row.selection-guide-container .col-sm-12 {
+        padding: 0px !important;
+    }
+
+    .selection-new-container strong.golfoy-cls {
+        color: black;
+        font-family: "headpro";
+        font-size: 30px;
+    }
+
+    .selection-guide-container .selection-new-container {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .selection-guide-container .course-selection-new-item img {
+        border-radius: 10px;
+    }
+
+    .selection-guide-container .ryt-arrow {
+        color: black;
+        font-weight: 600;
+        padding: 0;
+        margin-left: 5px;
+        background-color: transparent;
+        font-size: 11px;
+        margin-top: -1px;
+    }
+
+    .row.selection-guide-container .col-sm-9 {
+        padding-left: 30px;
+    }
+
+    .row.selection-guide-container button.explore-btn.action.primary a {
+        color: white;
+        text-decoration: none;
+    }
+
+    .cms-index-index main#maincontent .row.selection-guide-container {
+        display: flex;
+        border-radius: 5px;
+        align-items: center;
+        margin: 0px 13px 40px 13px !important;
+    }
+
+    .selection-guide-container .col-sm-8 {
+        padding: 0px;
+    }
+
+    .selection-guide-container h2 {
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .selection-guide-container button.explore-btn.action.primary {
+        margin-top: 25px;
+        font-weight: 500;
+    }
+
+    .selection-guide-container p {
+        font-size: 12px;
+        font-weight: 700;
+        color: #161616;
+    }
+
+    .selection-guide-container .selection-new-container a.shop-nows {
+        color: black;
+        font-size: 1.2rem;
+        font-weight: 500;
+        margin-top: 2px;
+    }
+
+    .row.selection-guide-container .col-sm-3 {
+        padding: 0px;
+    }
+
+    .course-selection-product-grids-block a {
+        text-decoration: none;
+        color: black;
+        font-size: 1.2rem;
+        font-weight: 500;
+        margin-top: 2px;
+    }
+
+    .selection-guide-container h4 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 25px 0 2px;
+        text-transform: uppercase;
+        color: black;
+    }
+
+    .selection-guide-container .slider-new-title {
+        font-size: 18px;
+        text-transform: uppercase;
+        margin-bottom: 40px;
+        color: white;
+        text-align: center;
+    }
+
+    .selection-guide-container .selection-new-scroll-container {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: hidden;
+        align-items: center;
+        gap: 15px;
+        justify-content: center;
+        white-space: nowrap;
+        max-width: 100%;
+    }
+
+    .selection-guide-container .course-selection-product-grids-block {
+        flex: 0 0 calc(20% - 20px);
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .selection-guide-container .course-selection-new-item {
+        width: 175px;
+        height: auto;
+        background-size: cover;
+        background-position: center;
+    }
+
+    .selection-guide-container .selection-new-scroll-btn {
+        position: absolute;
+        transform: translateY(-50%);
+        background-color: #fff;
+        border: none;
+        width: 37px;
+        color: black;
+        height: 35px;
+        cursor: pointer;
+        border-radius: 50% !important;
+        font-size: 15px;
+        box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+    }
+
+    .selection-guide-container .selection-slider-new-prev-btn {
+        left: -6px;
+        z-index: 999;
+        opacity: 50%;
+        top: 50%;
+        display: none;
+    }
+
+    .selection-guide-container .selection-slider-new-next-btn {
+        right: -5px;
+        top: 50%;
+        display: none;
+        opacity: 50%;
+    }
+
+    .selection-guide-container strong.golfoy-cls {
+        font-size: 26px;
+        /* padding-top: 28px; */
+        line-height: 43px;
+    }
+
+    .selection-guide-container span.latest-cls {
+        font-size: 16px;
+    }
+
+    .row.selection-guide-container {
+        margin-bottom: 60px;
+    }
+
+    /* button hide in payment page */
+
+    @media only screen and (max-width: 1024px) {
+        .selection-guide-container .course-selection-product-grids-block {
+            flex: 0 0 calc(25% - 10px);
+        }
+    }
+
+    @media only screen and (max-width: 768px) {
+        .row.selection-guide-container .col-sm-12 {
+            width: 100% !important;
+        }
+
+        .row.selection-guide-container {
+            margin-bottom: 0px;
+        }
+
+        .cms-index-index main#maincontent .row.selection-guide-container {
+            padding: 0px 10px !important;
+        }
+
+        .selection-guide-container .selection-new-scroll-container {
+            gap: 30px;
+        }
+
+        .selection-guide-container .course-selection-product-grids-block {
+            flex: 0 0 calc(15% - 10px);
+        }
+
+        .selection-guide-container .course-selection-new-item {
+            width: 165px;
+        }
+    }
+
+    @media only screen and (max-width: 480px) {
+        .selection-guide-container .selection-new-container {
+            padding: 0px 0px 30px 0px;
+        }
+
+        .selection-guide-container h2.center_heading {
+            font-size: 20px;
+            margin-top: 0px;
+        }
+
+        .selection-guide-container p {
+            font-size: 11px;
+        }
+
+        .selection-guide-container .selection-slider-new-prev-btn,
+        .selection-guide-container .selection-slider-new-next-btn {
+            top: 60%;
+        }
+
+        .selection-guide-container .ryt-arrow {
+            margin-top: 0px;
+        }
+
+        .selection-guide-container h4 {
+            font-size: 1.5rem;
+        }
+
+        .selection-guide-container .selection-new-container a.shop-nows {
+            font-size: 1rem;
+        }
+
+        .selection-guide-container .slider-new-title {
+            margin-bottom: 20px;
+        }
+
+        .selection-new-container strong.golfoy-cls {
+            font-size: 20px;
+        }
+
+        .selection-guide-container .selection-new-scroll-btn {
+            width: 34px;
+            height: 31px;
+            font-size: 12px;
+        }
+
+        .row.selection-guide-container .col-sm-12 {
+            padding: 0px;
+        }
+
+        .selection-guide-container h2 {
+            text-align: center;
+        }
+
+        .row.selection-guide-container .col-sm-9 {
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+
+        .selection-guide-container p {
+            text-align: center;
+        }
+
+        .selection-guide-container button.explore-btn.action.primary {
+            display: block;
+            text-align: center;
+            margin: 25px auto;
+        }
+
+        .cms-index-index main#maincontent .row.selection-guide-container {
+            display: revert-layer;
+            position: relative;
+            align-items: center;
+            overflow: hidden;
+            background-color: whitesmoke;
+        }
+
+        .selection-guide-container .course-selection-new-item {
+            width: 150px;
+        }
+
+        .selection-guide-container .selection-new-scroll-container {
+            gap: 0px;
+            justify-content: unset;
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+        }
+
+        .selection-guide-container .selection-new-scroll-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .selection-guide-container .selection-slider-new-prev-btn {
+            left: -10px;
+            display: block;
+        }
+
+        .selection-guide-container .selection-slider-new-next-btn {
+            right: -10px;
+            display: block;
+        }
+
+    }
+</style>
+
+<div class="row selection-guide-container">
+
+    <div class="col-sm-12">
+        <button class="selection-new-scroll-btn selection-slider-new-prev-btn" onclick="latestselectionSliderNewScrollLeft()">
+            &#10094;
+        </button>
+        <div class="selection-new-container">
+            <div class="slider-new-title">
+                <h2 class="center_heading">Equipment Selection Guide</h2>
+                <p>Not sure what's right for you? start here</p>
+            </div>
+            <div class="selection-new-scroll-container" id="latest-selection-new-scroll-container">
+                <div class="course-selection-product-grids-block">
+                    <a class="react-comp" href="https://golfoy.com/blog/post/buying_tips_driver">
+                        <div class="course-selection-new-item"><img src="https://golfoy.com/media/wysiwyg/2025/landing_page/sep/DRIVER-guide.jpg" alt="DRIVER"></div>
+                    </a>
+
+                </div>
+                <div class="course-selection-product-grids-block">
+                    <a class="react-comp" href="https://golfoy.com/blog/post/iron-buying-guide">
+                        <div class="course-selection-new-item"><img src="https://golfoy.com/media/wysiwyg/2025/landing_page/sep/irons-guide.jpg" alt="irons"></div>
+                    </a>
+
+                </div>
+                <div class="course-selection-product-grids-block">
+                    <a class="react-comp" href="https://golfoy.com/blog/post/wedges-buying-guide">
+                        <div class="course-selection-new-item"><img src="https://golfoy.com/media/wysiwyg/2025/landing_page/sep/wedge-guide.jpg" alt="wedge"></div>
+                    </a>
+
+                </div>
+                <div class="course-selection-product-grids-block">
+                    <a class="react-comp" href="https://golfoy.com/blog/post/putter-buying-guide">
+                        <div class="course-selection-new-item"><img src="https://golfoy.com/media/wysiwyg/2025/landing_page/sep/putter-guide.jpg" alt="putter"></div>
+                    </a>
+
+                </div>
+                <div class="course-selection-product-grids-block">
+                    <a class="react-comp" href="https://golfoy.com/blog/post/ball-buying-guide">
+                        <div class="course-selection-new-item"><img src="https://golfoy.com/media/wysiwyg/2025/landing_page/sep/balls-guide.jpg" alt="balls"></div>
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+        <button class="selection-new-scroll-btn selection-slider-new-next-btn" onclick="latestselectionSliderNewScrollRight()">
+            &#10095;
+        </button>
+    </div>
+
+</div>
+
+<script>
+    function latestselectionSliderNewScrollLeft() {
+        let container = document.getElementById('latest-selection-new-scroll-container');
+        let scrollAmount = container.children[0].offsetWidth + 100; // Width of an image + gap
+        if (container.scrollLeft > 0) {
+            container.scrollBy({
+                left: -scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    }
+
+    function latestselectionSliderNewScrollRight() {
+        let container = document.getElementById('latest-selection-new-scroll-container');
+        let scrollAmount = container.children[0].offsetWidth + 100; // Width of an image + gap
+        let maxScroll = container.scrollWidth - container.clientWidth;
+
+        if (container.scrollLeft < maxScroll) {
+            container.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    }
+</script>

@@ -1,0 +1,867 @@
+<?php
+
+/** @var \Magento\Catalog\Block\Category\View $block */
+$category = $block->getCurrentCategory();
+$subcategories = $category->getChildrenCategories();
+$cmsBlockId = $category->getData('staticblockontop');
+$categoryImageUrl = $category ? $category->getImageUrl() : null;
+
+// Function to remove brand name from product name
+function removeBrandName($productName, $brandValue = '')
+{
+    $brandLabel = '';
+    $eavConfig = \Magento\Framework\App\ObjectManager::getInstance()->get('Magento\Eav\Model\Config');
+    $attribute = $eavConfig->getAttribute('catalog_product', 'brand');
+    $options = $attribute->getSource()->getAllOptions(false);
+
+    foreach ($options as $option) {
+        if ($option['value'] == $brandValue) {
+            $brandLabel = $option['label'];
+            break;
+        }
+    }
+    return str_ireplace($brandLabel, '', $productName);
+}
+
+
+/** @var \Magento\Catalog\Helper\Image $imageHelper */
+$imageHelper = \Magento\Framework\App\ObjectManager::getInstance()->get('Magento\Catalog\Helper\Image');
+$priceBlock = $block->getLayout()->createBlock(\Magento\Catalog\Block\Product\ListProduct::class);
+
+?>
+
+<div class="container">
+    <div class="per_category_section">
+        <div class="two_div_cat">
+            <div class="row cat_box">
+                <!-- add new tab -->
+                <div class="col-xs-12 order-xs-2">
+                    <div class="col-md-4 col-xs-12 col-xs-12 subcategory_sections_box">
+                        <?php if (count($subcategories)) : ?>
+                            <?php foreach ($subcategories as $subcategory) : ?>
+                                <div class="subcategory_blocks">
+                                    <div class="subcategory_section">
+                                        <hr class="first_hr">
+                                        <div class="sub_cat_name" data-subcatid="<?php echo $subcategory->getId(); ?>">
+                                            <?php
+                                            // Load the products for each subcategory
+                                            // Load the products for each subcategory
+                                            $productCollection = $subcategory->getProductCollection()
+                                                ->addAttributeToSelect(['name', 'image', 'price', 'brand'])
+                                                ->addAttributeToFilter('status', \Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED)
+                                                ->setPageSize(50);
+
+
+                                            // Check if there are any products in the collection
+                                            if ($productCollection->count() > 0) :
+
+                                            ?>
+                                                <div class="subcat_name">
+                                                    <a href="<?php echo $subcategory->getUrl(); ?>">
+                                                        <?php echo $subcategory->getName(); ?>
+                                                    </a>
+                                                    <span class="toggle-button">+</span>
+                                                </div>
+                                                <div class="produc_name_sec">
+                                                    <div class="produc_list">
+                                                        <?php foreach ($productCollection as $product) :
+                                                            //print_r($product->getName()); die;
+                                                            $productImage = $product->getImage();
+                                                        ?>
+                                                            <div class="product">
+                                                                <a href="<?php echo $product->getProductUrl(); ?>">
+                                                                    <?php
+                                                                    // Get the product thumbnail URL
+                                                                    $thumbnailUrl = $imageHelper->init($product, 'product_page_image_large')->getUrl();
+
+                                                                    ?>
+                                                                    <img src="<?php echo $thumbnailUrl; ?>" alt="<?php echo $product->getName(); ?>" class="mobile-only">
+                                                                    <p class="product-name">
+                                                                        <?php echo removeBrandName($product->getName(), $product->getData('brand'));
+
+                                                                        echo $priceBlock->getProductPrice($product);
+                                                                        ?>
+                                                                    </p>
+                                                                </a>
+                                                            </div>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                </div>
+                                            <?php else : ?>
+                                                <div class="subcat_name">
+                                                    <a href="<?php echo $subcategory->getUrl(); ?>">
+                                                        <?php echo $subcategory->getName(); ?>
+                                                    </a>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else : ?>
+                            <p><?php echo __('No subcategories available.'); ?></p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="col-xs-12 order-xs-1">
+                    <div class="col-sm-12 col-md-8 col-xs-12 category-cms-block">
+                        <?php
+                        if ($cmsBlockId) {
+                            $cmsBlock = $block->getLayout()->createBlock('Magento\Cms\Block\Block')->setBlockId($cmsBlockId);
+                            if ($cmsBlock) {
+                                echo $cmsBlock->toHtml();
+                            } else {
+                                echo __('CMS block not found.');
+                            }
+                        } else {
+                            echo __('No CMS block assigned.');
+                        }
+                        ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="cat_description_sec">
+            <div class="row">
+                <div class="col-12">
+                    <div class="cat_desciption_box">
+                        <div class="col-md-4 col-sm-4 cat_box_img box_Sec">
+                            <?php if ($categoryImageUrl) : ?>
+                                <img src="<?php echo $categoryImageUrl; ?>" alt="<?php echo $category->getName(); ?>">
+                            <?php endif; ?>
+                        </div>
+                        <div class="col-md-8 col-sm-8 cat_box_desc box_Sec">
+                            <h4 class="car_box_head">About the brand</h4>
+                            <?php
+                            // Retrieve the current category object
+                            $currentCategory = $block->getCurrentCategory();
+
+                            // Check if the current category object is valid and has a description
+                            if ($currentCategory && $currentCategory->getDescription()) {
+                                echo $currentCategory->getDescription();
+                            } else {
+                                echo '<p>No description available for this category.</p>';
+                            }
+                            ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    require(['jquery'], function(jQuery) {
+        jQuery(document).ready(function() {
+
+            // Automatically open produc_name_sec on mobile screens
+            if (jQuery(window).width() < 990) {
+                jQuery('.produc_name_sec').show();
+                jQuery('.subcat_name .toggle-button').hide();
+            }
+
+            // Toggle on click for desktop screens
+            jQuery('.subcat_name').click(function() {
+                if (jQuery(window).width() >= 990) { // Only toggle for screens 990px and above
+                    var toggleButton = jQuery(this).find('.toggle-button');
+                    var productSection = jQuery(this).siblings('.produc_name_sec');
+
+                    jQuery(this).toggleClass('active');
+
+                    productSection.slideToggle(function() {
+                        if (toggleButton.text() === '+') {
+                            toggleButton.text('\u2212');
+                        } else {
+                            toggleButton.text('+');
+                        }
+                    });
+                }
+            });
+
+        });
+    });
+</script>
+
+
+<script>
+    require(['jquery', 'bootstrap'], function($) {
+        $(document).ready(function() {
+            var touchStartX = 0;
+            var touchEndX = 0;
+
+            // Register touchstart event to record the starting X-coordinate
+            $('#myCarousel').on('touchstart', function(e) {
+                touchStartX = e.originalEvent.touches[0].pageX;
+            });
+
+            // Register touchmove event to record the ending X-coordinate
+            $('#myCarousel').on('touchmove', function(e) {
+                touchEndX = e.originalEvent.touches[0].pageX;
+            });
+
+            // Determine the swipe direction and slide accordingly
+            $('#myCarousel').on('touchend', function() {
+                var deltaX = touchEndX - touchStartX;
+
+                if (deltaX > 50) {
+                    $('#myCarousel').carousel('prev');
+                } else if (deltaX < -50) {
+                    $('#myCarousel').carousel('next');
+                }
+            });
+        });
+    });
+
+    // ---Slider for brand page-----///
+    require(['jquery', 'bootstrap'], function($) {
+        $(document).ready(function() {
+            $('.brandcarasoul .right').on('click', function(e) {
+                e.preventDefault();
+                $('.brandcarasoul').carousel('next');
+            });
+
+            $('.brandcarasoul .left').on('click', function(e) {
+                e.preventDefault();
+                $('.brandcarasoul').carousel('prev');
+            });
+
+            // Make indicator clickable
+            $('.carousel-indicators li').on('click', function(e) {
+                e.preventDefault();
+                var slideIndex = $(this).data('slide-to');
+                $('.brandcarasoul').carousel(slideIndex);
+            });
+
+        });
+    });
+</script>
+<style>
+    .page-layout-brandpagelayout .category-description {
+        display: none;
+    }
+
+    p.product-name {
+        margin: 10px 0px 5px 0px;
+    }
+
+    .carousel-indicators li {
+        border: 1px solid #b9b9b9 !important;
+    }
+
+    .col-md-8.col-sm-8.cat_box_desc.box_Sec a {
+        text-decoration: none;
+        color: black;
+    }
+
+    .brandpage_slider {
+        margin-top: 8px;
+    }
+
+    .col-sm-12.col-md-8.col-xs-12.category-cms-block {
+        padding-right: 0px;
+    }
+
+    .col-md-4.col-xs-12.col-xs-12.subcategory_sections_box {
+        padding-left: 0px;
+    }
+
+    .carousel-indicators li.active {
+        background-color: #fff;
+        border-radius: 0px;
+        width: 25px;
+        margin: 0px !important;
+        height: 6px;
+    }
+
+    .carousel-indicators li {
+        border-radius: 0px;
+        width: 25px;
+        height: 6px;
+        margin: 0px !important;
+        background-color: #c3c3c3;
+    }
+
+    hr.first_hr {
+        border-top: 2px solid #cccccc63;
+    }
+
+    .subcat_name a {
+        text-decoration: none;
+        color: black;
+    }
+
+    .produc_list {
+        height: auto;
+        overflow-y: auto;
+    }
+
+    .col-sm-8.category-cms-block {
+        margin-top: 10px;
+    }
+
+    .product a {
+        text-decoration: none;
+        font-size: 12px;
+        color: black;
+        font-weight: 500;
+    }
+
+    .page-layout-brandpagelayout .categories_block_images.outer_width_js {
+        display: none;
+    }
+
+    .page-layout-brandpagelayout .category-cms {
+        display: none;
+    }
+
+    .subcategory_blocks:last-child {
+        border-bottom: 2px solid #cccccc63;
+        padding-bottom: 8px;
+    }
+
+    .toggle-button {
+        text-align: center;
+        font-weight: bold;
+        font-size: 18px;
+        color: #666;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .page-layout-brandpagelayout p.callpic {
+        padding: 0px 113px;
+    }
+
+    .page-layout-brandpagelayout .category_top_block .category_name {
+        margin: 20px auto 20px;
+    }
+
+    .page-layout-brandpagelayout .category_top_block {
+        background-color: black;
+        color: white;
+        width: 100%;
+        max-width: 1103px;
+        margin: 10px auto 0px auto !important;
+        padding: 10px 0px;
+    }
+
+    .page-layout-brandpagelayout .category_top_block .category_name {
+        border-bottom: 0px;
+    }
+
+    .page-layout-brandpagelayout .column.main {
+        width: 100% !important;
+    }
+
+    .repeated_name {
+        padding-left: 15px;
+    }
+
+    .brandpagelayout-index-index .column.main {
+        width: 100% !important;
+    }
+
+    .brandpage_slider a.left.carousel-control,
+    .brandpage_slider a.right.carousel-control {
+        padding-top: 30%;
+    }
+
+    .subcat_name {
+        font-weight: 600;
+        font-size: 16px;
+        line-height: 0px;
+        cursor: pointer;
+        padding: 12px 0px 9px 10px;
+        text-transform: uppercase;
+        display: flex !important;
+        justify-content: space-between !important;
+    }
+
+    .brandpage_slider .carousel-indicators {
+        position: absolute;
+        left: 45%;
+        top: 95%;
+    }
+
+    .col-md-6.col-xs-6.right-wrapper {
+        padding: 10px 0px 0px 5px;
+    }
+
+    .col-md-6.col-xs-6.left-wrapper {
+        padding: 10px 5px 0px 0px;
+    }
+
+    .sub_cat_name .produc_name_sec {
+        height: auto;
+        margin-bottom: 10px;
+        display: none;
+        max-height: 300px;
+        overflow: auto;
+    }
+
+    .produc_name_sec>div {
+        padding: 20px 10px;
+    }
+
+    .cat_desciption_box {
+        margin: 20px 0px;
+    }
+
+    .col-md-4.cat_box_img.box_Sec {
+        padding-left: 5px;
+        padding-right: 5px;
+        margin-left: 5px;
+        background-color: #F2F2F2;
+    }
+
+    .cat_box_img.box_Sec {
+        width: 347px !important;
+    }
+
+    .cat_box_img.box_Sec img {
+        height: 170px;
+        width: 100%;
+        max-width: 100%;
+        mix-blend-mode: darken;
+    }
+
+    .cat_box_desc.box_Sec {
+        text-align: center;
+        font-size: 13px;
+        color: grey;
+    }
+
+    .cat_box_desc.box_Sec {
+        width: calc(100% - 372px);
+        padding: 7px 0px 7px 20px !important;
+    }
+
+    .col-md-8.col-sm-8.cat_box_desc.box_Sec p {
+        text-align: center;
+        font-size: 12px;
+        color: grey;
+    }
+
+    h4.car_box_head {
+        color: #000000b5;
+        font-weight: 700;
+        font-size: 15px;
+        padding-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    .cat_desciption_box {
+        display: flex;
+        border: 5px solid #80808045;
+        padding: 5px 0px;
+        margin: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .col-sm-8.cms_brand_page {
+        margin-top: 10px;
+    }
+
+    .subcategory_blocks .subcat_name a {
+        text-decoration: none;
+        color: black;
+        pointer-events: none;
+        font-size: 12px;
+    }
+
+    .produc_name_sec>div.produc_list>.product {
+        border-bottom: 1px solid #f9f9f9;
+        padding: 7px 6px 7px 10px;
+        cursor: pointer;
+        transition: all .2s;
+        border-radius: 5px;
+    }
+
+    .produc_name_sec>div.produc_list>.product:hover {
+        box-shadow: 0px 0px 5px 4px #f8f8f8;
+        transition: all .2s;
+    }
+
+    .produc_name_sec>div.produc_list>.product a {
+        color: #797979;
+        font-size: 11px;
+    }
+
+    @media only screen and (min-width: 1100px) {
+        .mobile-only {
+            display: none;
+        }
+    }
+
+    @media only screen and (min-width: 990px) and (max-width:1199px) {
+        .page-layout-brandpagelayout .category_top_block {
+            max-width: 905px;
+        }
+
+        .mobile-only {
+            display: none;
+        }
+    }
+
+    @media only screen and (max-width: 875px) {
+        .cat_box_img.box_Sec img {
+            height: 187px;
+        }
+    }
+
+    @media only screen and (max-width: 990px) {
+        .subcat_name .toggle-button {
+            display: none;
+        }
+
+        .page-layout-brandpagelayout .category_top_block {
+            margin: 10px auto 10px auto !important;
+        }
+
+        .page-layout-brandpagelayout main#maincontent .container {
+            padding-left: 0px !important;
+            padding-right: 0px !important;
+        }
+
+        .produc_name_sec>div.produc_list>.product {
+            border-bottom: none;
+        }
+
+        p.product-name {
+            margin: 10px 0px;
+            font-size: 10px;
+        }
+
+        .brandpage_slider {
+            margin-top: 0px;
+        }
+
+        .cat_desciption_box {
+            margin: 20px 0px;
+        }
+
+        .col-sm-12.col-md-8.col-xs-12.category-cms-block {
+            padding: 0px;
+        }
+
+        .col-md-4.col-xs-12.col-xs-12.subcategory_sections_box {
+            padding: 0px;
+        }
+
+        .per_category_section .col-xs-12.order-xs-2 {
+            padding: 0px;
+        }
+
+        .per_category_section .col-xs-12.order-xs-1 {
+            padding: 0px;
+        }
+
+        /* .brandpage {
+            margin-top: 10px;
+        } */
+
+        .brandpage .container {
+            padding-left: 0px !important;
+            padding-right: 0px !important;
+        }
+
+        .row.cat_box {
+            display: flex;
+            flex-direction: column-reverse;
+        }
+
+        .produc_name_sec {
+            display: block !important;
+        }
+
+        .mobile-only {
+            display: block;
+            width: 100%;
+            width: 100px;
+            max-width: 100px;
+            margin: auto;
+        }
+
+        .brandpage .container {
+            width: 100%;
+        }
+
+        .page-layout-brandpagelayout .category_top_block {
+            width: 100%;
+        }
+
+        .produc_list {
+            display: flex;
+            height: auto;
+            width: 100%;
+        }
+
+        .produc_name_sec {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #ccc #f0f0f0;
+        }
+
+        .produc_name_sec .produc_name_sec>div {
+            padding: 20px 5px;
+        }
+
+        .produc_name_sec>div.produc_list>.product {
+            padding: 7px 5px 7px 5px;
+            max-width: 120px;
+        }
+
+        .produc_name_sec::-webkit-scrollbar {
+            height: 5px;
+        }
+
+        .page-layout-brandpagelayout .container {
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+
+        .produc_name_sec::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .produc_name_sec::-webkit-scrollbar-thumb {
+            background-color: #aaa;
+            border-radius: 3px;
+        }
+
+        .produc_name_sec::-webkit-scrollbar-track {
+            background-color: #f0f0f0;
+            border-radius: 3px;
+
+        }
+    }
+
+    /* Mobile-specific CSS */
+    @media (max-width: 767px) {
+        .produc_name_sec>div.produc_list>.product {
+            border-bottom: none;
+        }
+
+        .cat_box_img.box_Sec img {
+            height: 200px !important;
+            object-fit: fill;
+            padding: 0px 50px;
+        }
+
+        .produc_name_sec>div {
+            padding: 10px 0px;
+        }
+
+        body.page-layout-brandpagelayout .price-box.price-final_price .you-save-statement>* {
+            font-size: 9px !important;
+        }
+
+        body.page-layout-brandpagelayout .price-box.price-final_price span.yousave_price>* {
+            font-size: 9px !important;
+        }
+
+        body.page-layout-brandpagelayout .price-box.price-final_price span.price-container.price-final_price.tax.weee span.price-wrapper span {
+            font-size: 9px !important;
+        }
+
+        .page-layout-brandpagelayout .category_top_block {
+            margin: 0px auto 10px auto !important;
+        }
+
+        .cat_box_desc.box_Sec {
+            padding: 7px 5px 7px 5px !important;
+        }
+
+        .brandpage_slider .carousel-indicators {
+            top: 90%;
+        }
+
+        .row.cat_box {
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: column-reverse;
+        }
+
+        h4.car_box_head {
+            text-align: center;
+        }
+
+        p.product-name {
+            margin: 10px 0px 0px;
+            font-size: 10px;
+        }
+
+        .cat_desciption_box {
+            margin: 20px 5px;
+        }
+
+        .col-xs-12.order-xs-1 {
+            padding: 0px;
+        }
+
+        .col-md-6.col-xs-6.left-wrapper {
+            padding: 10px 5px 0px 0px;
+        }
+
+        .col-md-6.col-xs-6.right-wrapper {
+            padding: 10px 0px 0px 5px;
+        }
+
+        .col-md-4.cat_box_img.box_Sec {
+            margin-left: 0px;
+        }
+
+        .col-md-4.col-sm-4.cat_box_img.box_Sec {
+            width: 100% !important;
+        }
+
+        .page-layout-brandpagelayout .category_top_block {
+            width: 100%;
+        }
+
+        .subcategory_sections_box,
+        .category-cms-block,
+        .cat_box_img.box_Sec,
+        .cat_box_desc.box_Sec {
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+
+        .subcat_name {
+            font-size: 14px;
+        }
+
+        .toggle-button {
+            font-size: 16px;
+        }
+
+        .cat_desciption_box {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .cat_box_img.box_Sec img {
+            height: auto;
+            width: 100%;
+        }
+
+        .cat_box_desc.box_Sec {
+            width: 100%;
+            text-align: left;
+            padding: 7px 20px;
+        }
+
+        .mobile-only {
+            display: block;
+            width: 100px;
+            max-width: 100px;
+            margin: auto;
+        }
+
+        .brandpage_slider {
+            margin-top: 0px;
+        }
+
+        /* .page-layout-brandpagelayout .category_top_block {
+            margin: 10px 0px;
+        } */
+
+        .produc_name_sec {
+            width: 100%;
+            max-width: 505px;
+            overflow: auto !important;
+        }
+
+        .sub_cat_name .produc_name_sec {
+            display: block;
+        }
+
+        .col-xs-12.order-xs-2 {
+            padding: 0px;
+        }
+
+        .produc_list {
+            display: flex;
+            height: auto;
+            width: 100%;
+        }
+
+        .produc_name_sec {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #ccc #f0f0f0;
+        }
+
+        .produc_name_sec .produc_name_sec>div {
+            padding: 20px 5px;
+        }
+
+        .produc_name_sec>div.produc_list>.product {
+            padding: 10px 5px;
+            max-width: 120px;
+        }
+
+        .produc_name_sec::-webkit-scrollbar {
+            height: 5px;
+        }
+
+        .page-layout-brandpagelayout .container {
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+
+        .produc_name_sec::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .produc_name_sec::-webkit-scrollbar-thumb {
+            background-color: #aaa;
+            border-radius: 3px;
+        }
+
+        .produc_name_sec::-webkit-scrollbar-track {
+            background-color: #f0f0f0;
+            border-radius: 3px;
+
+        }
+
+        .page-layout-brandpagelayout .category_top_block .category_name {
+            margin: 0px auto 20px;
+        }
+
+        span.price-container.price-final_price.tax.weee span.price-label {
+            font-size: 10px !important;
+        }
+
+        .page-layout-brandpagelayout .price_html_category_page.configurable_product {
+            display: block !important;
+        }
+
+
+        a.left.carousel-control:after {
+            margin-left: 0;
+            top: -35px;
+            position: relative;
+        }
+
+        a.right.carousel-control:after {
+            margin-left: -30px;
+            position: relative;
+            top: -35px;
+        }
+    }
+
+    .page-layout-brandpagelayout .price_html_category_page.configurable_product {
+        display: none;
+    }
+</style>

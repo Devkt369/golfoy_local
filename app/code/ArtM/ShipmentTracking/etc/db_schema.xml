@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+
+    <!--
+        Table: artm_tracking_status_mapping
+        Stores admin-managed courier status → display label mappings.
+    -->
+    <table name="artm_tracking_status_mapping" resource="default" engine="innodb"
+           comment="ArtM Estimate Delivery - Tracking Status Mappings">
+
+        <column xsi:type="int"       name="mapping_id"      unsigned="true" nullable="false" identity="true" comment="Mapping ID"/>
+        <column xsi:type="varchar"   name="raw_status"      nullable="false" length="512"   comment="Normalized raw status from carrier (lowercase, trimmed)"/>
+        <column xsi:type="varchar"   name="display_label"   nullable="true"  length="255"   comment="Customer-facing label (empty when not yet mapped)"/>
+        <column xsi:type="varchar"   name="carrier_name"    nullable="true"  length="255"   comment="Informational: which carrier sent this status first"/>
+        <column xsi:type="smallint"  name="is_active"       unsigned="true" nullable="false" default="1" comment="1=Active"/>
+        <column xsi:type="smallint"  name="is_mapped"       unsigned="true" nullable="false" default="0" comment="0=Seen but not mapped, 1=Mapped by admin"/>
+        <column xsi:type="int"       name="seen_count"      unsigned="true" nullable="false" default="1" comment="How many times this status has been received"/>
+        <column xsi:type="timestamp" name="created_at"      nullable="false" default="CURRENT_TIMESTAMP" comment="First seen / created at"/>
+        <column xsi:type="timestamp" name="updated_at"      nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Last updated at"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="mapping_id"/>
+        </constraint>
+
+        <!-- raw_status alone is the unique key — no carrier split -->
+        <constraint xsi:type="unique" referenceId="ARTM_TRACKING_STATUS_MAPPING_RAW_STATUS">
+            <column name="raw_status"/>
+        </constraint>
+
+        <index referenceId="ARTM_TRACKING_STATUS_MAPPING_IS_MAPPED" indexType="btree">
+            <column name="is_mapped"/>
+        </index>
+    </table>
+
+    <!--
+        Table: artm_tracking_status_log
+        Auto-records every unique (raw_status, carrier, tracking_number) seen in the wild.
+        Admin can review these and promote them to the mapping table.
+    -->
+    <table name="artm_tracking_status_log" resource="default" engine="innodb"
+           comment="ArtM Estimate Delivery - Unmatched / Seen Tracking Statuses Log">
+        <column xsi:type="int"       name="log_id"          unsigned="true" nullable="false" identity="true" comment="Log ID"/>
+        <column xsi:type="varchar"   name="tracking_status"      nullable="false" length="512"  comment="Raw status string as received from carrier"/>
+        <column xsi:type="varchar"   name="order_id"    nullable="true"  length="255"  comment="Order ID"/>
+        <column xsi:type="timestamp" name="marked_delivered_at"    nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Last Seen At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="log_id"/>
+        </constraint>
+    </table>
+
+    <table name="artm_shipment_tracking_partner" resource="default" engine="innodb"
+           comment="ArtM Shipment Tracking - Courier Partner API Details">
+        <column xsi:type="int" name="partner_id" unsigned="true" nullable="false" identity="true" comment="Partner ID"/>
+        <column xsi:type="varchar" name="partner_name" nullable="false" length="255" comment="Partner Name"/>
+        <column xsi:type="smallint" name="is_active" unsigned="true" nullable="false" default="1" comment="1=Enabled, 0=Disabled"/>
+        <column xsi:type="varchar" name="api_url" nullable="true" length="1024" comment="API URL"/>
+        <column xsi:type="varchar" name="username" nullable="true" length="255" comment="API Username"/>
+        <column xsi:type="varchar" name="auth_type" nullable="true" length="64" comment="Token / Auth Type"/>
+        <column xsi:type="text" name="token" nullable="true" comment="API Token or Secret"/>
+        <column xsi:type="datetime" name="last_sync_at" nullable="true" comment="Last Cron or API Fetch"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="partner_id"/>
+        </constraint>
+
+        <index referenceId="ARTM_SHIPMENT_TRACKING_PARTNER_ACTIVE" indexType="btree">
+            <column name="is_active"/>
+        </index>
+
+        <index referenceId="ARTM_SHIPMENT_TRACKING_PARTNER_NAME" indexType="btree">
+            <column name="partner_name"/>
+        </index>
+    </table>
+
+</schema>

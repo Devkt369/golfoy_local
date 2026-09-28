@@ -1,0 +1,241 @@
+<?php
+
+/** @var $block \Magento\Framework\View\Element\Template */
+
+$helper = $block->getSearchDataHelper();
+$configs = $block->getConfigs();
+$placeholder = $configs['search']['input']['placeholder'];
+
+
+//Get search placeholders for animate
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+
+// Get the Scope Config instance
+$scopeConfig = $objectManager->get('\Magento\Framework\App\Config\ScopeConfigInterface');
+
+// Retrieve the configuration value
+$enable_animate = $scopeConfig->getValue('common/search_animate/enable_animate', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+$configValue = $scopeConfig->getValue('common/search_animate/common_placeholder_animate', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+$placeholderArr = [];
+
+if ($enable_animate == 1) {
+    $placeholderArr = explode('|', $configValue);
+    $placeholderJson = json_encode($placeholderArr);
+} else {
+    $placeholderJson = '';
+}
+
+?>
+
+<div class="block block-search wizzy-search-mini-block">
+    <div class="block block-title"><strong><?= $block->escapeHtml(__('Search')) ?></strong></div>
+    <div class="block block-content">
+        <form class="form minisearch" id="search_mini_form" action="<?= $block->escapeUrl($helper->getResultUrl()) ?>" method="get">
+            <div class="wizzy-search-form-wrapper">
+                <div class="wizzy-search-form-mobile-wrapper"></div>
+                <div class="wizzy-search-form">
+                    <label for="search"><?= $block->escapeHtml(__('Search')) ?></label>
+
+                    <input id="search" type="text" name="<?= $block->escapeHtmlAttr($helper->getQueryParamName()) ?>" placeholder="<?= $block->escapeHtmlAttr($placeholder) ?>" class="input-text wizzy-search-input" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" />
+
+                    <a href="#" class="wizzy-search-glass">
+                        <span class="wizzy-icon"><img src="https://golfoy.com/media/Search-Icon.svg" alt=""></span>
+                    </a>
+                    <a href="#" class="wizzy-search-back">
+                        <span class="wizzy-icon"></span>
+                    </a>
+                    <a href="#" class="wizzy-search-clear">
+                        <span class="wizzy-icon"></span>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    require(['jquery', 'bootstrap'], function(jQuery) {
+        jQuery(document).ready(function() {
+            jQuery('.wizzy-common-select-selectedItem').on('click', function() {
+                jQuery('.wizzy-common-select-options').toggleClass('active', jQuery(this).css('display') === 'block');
+            });
+        });
+    });
+</script>
+<script>
+    require(['jquery', 'bootstrap'], function(jQuery) {
+        jQuery(document).ready(function() {
+            jQuery(document).on("click", ".cross-icon-result", function(e) {
+                e.preventDefault();
+                jQuery('.wizzy-autocomplete-wrapper.onLeft').hide();
+            });
+
+            // ----Placeholder animation on mage
+            const DELAY_AFTER_ANIMATION = 1000;
+            /* const PLACEHOLDERS = [
+                'Search for Shoes.....',
+                'Search for Drivers.....',
+                'Search for our latest Products.....',
+                'Find your favorite Brands.....'
+            ]; */
+
+            const PLACEHOLDERS = <?php echo empty($placeholderJson) ? '" "' : json_encode($placeholderJson); ?>;
+            const MIN_ANIMATION_DELAY = 50;
+            const MAX_ANIMATION_DELAY = 90;
+
+            function typePlaceholder(placeholder, index, direction) {
+                if (direction === "forward") {
+                    if (index < placeholder.length) {
+                        jQuery('.wizzy-search-input').attr('placeholder', placeholder.substring(0, index + 1));
+                        setTimeout(function() {
+                            typePlaceholder(placeholder, index + 1, "forward");
+                        }, Math.floor(Math.random() * (MAX_ANIMATION_DELAY - MIN_ANIMATION_DELAY)) + MIN_ANIMATION_DELAY);
+                    } else {
+                        setTimeout(function() {
+                            typePlaceholder(placeholder, index - 1, "backward");
+                        }, DELAY_AFTER_ANIMATION);
+                    }
+                } else {
+                    if (index >= 0) {
+                        jQuery('.wizzy-search-input').attr('placeholder', placeholder.substring(0, index + 1));
+                        setTimeout(function() {
+                            typePlaceholder(placeholder, index - 1, "backward");
+                        }, Math.floor(Math.random() * (MAX_ANIMATION_DELAY - MIN_ANIMATION_DELAY)) + MIN_ANIMATION_DELAY);
+                    } else {
+                        setTimeout(function() {
+                            animatePlaceholders();
+                        }, DELAY_AFTER_ANIMATION);
+                    }
+                }
+            }
+
+            function animatePlaceholders() {
+                if (PLACEHOLDERS.length === 0) {
+                    // If all placeholders have been used, refill the array
+                    const additionalArray = <?php echo empty($placeholderJson) ? '" "' : json_encode($placeholderJson); ?>;
+                    // Push each element from the additionalArray into PLACEHOLDERS
+                    additionalArray.forEach(function(element) {
+                        PLACEHOLDERS.push(element);
+                    });
+                    const placeholder = PLACEHOLDERS.shift();
+                    typePlaceholder(placeholder, 0, "forward");
+                }
+            }
+
+            animatePlaceholders();
+        });
+    });
+</script>
+
+<script>
+    require(['jquery'], function($) {
+        $(document).ready(function() {
+            $(document).on("click", "span.cross-btn-shipping", function(e) {
+                e.preventDefault();
+                $('li#shipping').removeClass('fixed');
+            });
+            $(document).on("click", ".cross-icon-result", function(e) {
+                e.preventDefault();
+                $('.wizzy-autocomplete-wrapper.onLeft').hide();
+            });
+            var liElements = $('#block-collapsible-nav .nav.items > .nav.item');
+            liElements.each(function() {
+                var text = $(this).text().trim();
+                var newClass = text.replace(/\s+/g, '_').toLowerCase();
+                $(this).addClass(newClass);
+            });
+
+        });
+    });
+</script>
+
+<script>
+    require(['jquery'], function($) {
+        $(window).on('load', function() { // Ensure everything (images, resources) is fully loaded
+            function applyStyles() {
+                if ($('body').hasClass('wizzyMobileTapped') || $(window).width() <= 768) {
+                    $('.block.block-search.wizzy-search-mini-block').css({
+                        'background-image': 'url(https://golfoy.com/media/Search-Icon.svg)',
+                        'background-repeat': 'no-repeat',
+                        'background-position': 'center right',
+                        'height': '37px',
+                        'background-size': '23px'
+                    });
+                } else {
+                    $('.block.block-search.wizzy-search-mini-block').css({
+                        'background-image': '',
+                        'background-repeat': '',
+                        'background-position': '',
+                        'height': '',
+                        'background-size': ''
+                    });
+                }
+            }
+
+            applyStyles();
+
+            const observer = new MutationObserver(function(mutationsList) {
+                for (const mutation of mutationsList) {
+                    if (mutation.attributeName === 'class') {
+                        applyStyles();
+                    }
+                }
+            });
+
+            observer.observe(document.body, {
+                attributes: true
+            });
+
+            $(window).on('resize', applyStyles);
+        });
+    });
+</script>
+
+<style>
+    .wizzy-search-wrapper .wizzy-search-filters-left .wizzy-facet-head {
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+
+    body.search-index-index.wizzy-search-results-rendered .wizzy-search-wrapper .wizzy-search-filters-left .wizzy-filters-facet-block.collapsible.collapsed .wizzy-facet-head .facet-head-right:after {
+        top: 12px !important;
+    }
+
+    body.search-index-index.wizzy-search-results-rendered .wizzy-search-wrapper.has-left-facets .wizzy-search-results-wrapper .wizzy-search-results-container .wizzy-search-filters-top {
+        margin-top: 40px !important;
+    }
+
+    @media only screen and (max-width: 768px) {
+        body.wizzyMobileTapped .block.block-search.wizzy-search-mini-block {
+            background-image: url('https://golfoy.com/media/Search-Icon.svg');
+            background-repeat: no-repeat;
+            background-size: 23px;
+            height: 37px;
+            background-position: center right;
+        }
+
+        .block.block-search.wizzy-search-mini-block {
+            background-image: url('https://golfoy.com/media/Search-Icon.svg') !important;
+            background-repeat: no-repeat;
+            background-position: center right;
+            height: 37px;
+            background-size: 23px;
+        }
+
+        .minicart_account_inside {
+            padding: 7px 10px !important;
+        }
+
+        .block.block-search.wizzy-search-mini-block {
+            padding: 4px 0px;
+
+        }
+    }
+
+    @media only screen and (max-width:990px) and (min-width:480px) {
+        body.wizzyMobileTapped .block.block-search.wizzy-search-mini-block {
+            height: 35px !important;
+        }
+    }
+</style>

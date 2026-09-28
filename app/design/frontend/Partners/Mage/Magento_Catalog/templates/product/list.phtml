@@ -1,0 +1,579 @@
+<?php
+
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+use Magento\Framework\App\Action\Action;
+
+// @codingStandardsIgnoreFile
+
+?>
+<?php
+/**
+ * Product list template
+ *
+ * @var $block \Magento\Catalog\Block\Product\ListProduct
+ */
+?>
+
+<?php
+$_productCollection = $block->getLoadedProductCollection();
+$_helper = $this->helper('Magento\Catalog\Helper\Output');
+
+
+
+?>
+
+<?php if (!$_productCollection->count()) : ?>
+    <div class="message info empty">
+        <div><?= /* @escapeNotVerified */ __('We can\'t find products matching the selection.') ?></div>
+    </div>
+<?php else : ?>
+    <?= $block->getToolbarHtml() ?>
+    <?= $block->getAdditionalHtml() ?>
+    <?php
+    if ($block->getMode() == 'grid') {
+        $viewMode = 'grid';
+        $imageDisplayArea = 'category_page_grid';
+        $showDescription = false;
+        $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VIEW;
+    } else {
+        $viewMode = 'list';
+        $imageDisplayArea = 'category_page_list';
+        $showDescription = true;
+        $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::FULL_VIEW;
+    }
+    /**
+     * Position for actions regarding image size changing in vde if needed
+     */
+    $pos = $block->getPositioned();
+    //-------------------
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $chelper = $objectManager->get('ArtM\Common\Helper\Data');
+    $recommedHelper = $objectManager->get('ArtM\RecommendedFilter\Helper\Data');
+
+    //------ad block data ------------------------------------------
+    $category = $objectManager->get('Magento\Framework\Registry')->registry('current_category');
+    $adblock = '';
+    if ($category) {
+        $adblock = $category->getAdblock();
+        if ($adblock != '') {
+            $adblockarr = explode('|', $adblock);
+            $adblkid = $adblockarr[0];
+            $adblkposition = (int) $adblockarr[1];
+
+            $cmsBlock = $objectManager->get('\Magento\Cms\Block\Block');
+            $cmsBlock->setBlockId($adblkid);
+            $adblkcontent = $cmsBlock->toHtml();
+            $pgno = $block->getChildBlock('toolbar')->getCurrentPage();
+        }
+    }
+    //-----------------------------------------------------------------
+    /* $pids = [];
+    foreach ($_productCollection as $singleproduct) {
+        $type = $singleproduct->getTypeId();
+        if($type == 'configurable'){
+            $pids[] =  $singleproduct->getId() ;
+        }
+    } 
+    $nin = $chelper->getOutofStockIds($pids);   */
+    //print_r($nin); 
+    //-------------------check if isAjaxPricesEnabled and isSizerollEnabled---------
+    $isAjaxPricesEnabled = $this->helper('ArtM\Common\Helper\Data')->getConfig('common/ajaxprice/common_ajaxprice');
+    $isSizerollEnabled = $this->helper('ArtM\Common\Helper\Data')->getConfig('common/sizeroll/common_sizeroll');
+
+    $attributeSet = $objectManager->create('Magento\Eav\Api\AttributeSetRepositoryInterface');
+    $sizerollHelper = $this->helper('\ArtM\Sizeroll\Helper\Data');
+
+    //--------------------------------------------------------------
+
+
+    // $moduleStatus = $block->getCacheStatus();
+
+    ?>
+    <div class="products wrapper <?= /* @escapeNotVerified */ $viewMode ?> products-<?= /* @escapeNotVerified */ $viewMode ?>">
+        <ol class="products list items product-items">
+            <?php /** @var $_product \Magento\Catalog\Model\Product */ ?>
+            <?php
+
+            $licnt = 1;
+            foreach ($_productCollection as $_product) : ?>
+
+                <?php
+                $customPrintTitle = 'Custom';
+                $productOptionPrice = $block->getCustomOptionPrice($_product->getId());
+                if ($productOptionPrice == 'free') {
+                    $customPrintTitle = 'Free';
+                } elseif ($productOptionPrice == 'partial_free') {
+                    $customPrintTitle = 'Free';
+                } else {
+                    $customPrintTitle = 'Custom';
+                }
+
+                $RatingOb = $objectManager->create('Magento\Review\Model\Rating');
+                //            if ($_product->isAvailable() && (!in_array($_product->getId(), $nin))):
+
+                $attributeSetRepository = $attributeSet->get($_product->getAttributeSetId());
+                $attribute_set_name = $attributeSetRepository->getAttributeSetName();
+                //echo 'attribute_set_name-'.   $attribute_set_name; die('ed');
+                // var_dump($_product->isAvailable());die;
+                if ($_product->isAvailable()) :
+                    $outstockclass = '';
+                else :
+                    $outstockclass = 'out_of_stock';
+                endif;
+                ?>
+
+                <?php //----------------ad block display li -----------------------------
+                if ($adblock != '') {
+                    if ($adblkposition == $licnt && $pgno == 1) {
+                        echo '<li class="item product product-item"> ' . $adblkcontent . ' </li>';
+                    }
+                }
+                $licnt++;
+                ?>
+
+                <li class="item product product-item <?= $outstockclass; ?>">
+                    <div class="product-item-info" data-container="product-<?= /* @escapeNotVerified */ $viewMode ?>">
+
+                        <?php
+
+                        // if($moduleStatus){
+                        //     $block->checkAndUpdateProductCacheData($_product); // create html for tier price , price and product tag
+                        //     $al = $block->getCacheValueFromTable('newarrivals' , $_product->getId());
+                        //     $offer_status = $block->getCacheValueFromTable('offer_status' , $_product->getId());
+                        //     $sp = $block->getCacheValueFromTable('special_price' , $_product->getId());
+                        //     $pi = $block->getCacheValueFromTable('can_print' , $_product->getId());
+                        //     $player_chocie = $block->getCacheValueFromTable('playerschoice' , $_product->getId());
+                        //     $limitedstock = $block->getCacheValueFromTable('limitedstock' , $_product->getId());
+                        //     $bestseller = $block->getCacheValueFromTable('bestseller' , $_product->getId());
+                        //     $newarrivals = $block->getCacheValueFromTable('newarrivals' , $_product->getId());
+                        //     $waterproof = $block->getCacheValueFromTable('waterproof' , $_product->getId());
+                        //     $waterrepel = $block->getCacheValueFromTable('waterrepel' , $_product->getId());
+                        // }else{
+                        $offer_status = $_product->getAttributeText('offer_status');
+                        $al = $_product->getAttributeText('newarrivals');
+                        $sp = $_product->getAttributeText('special_price');
+                        $pi = $_product->getAttributeText('can_print');
+                        $player_chocie = $_product->getAttributeText('playerschoice');
+                        $limitedstock = $_product->getData('limitedstock');
+                        $bestseller = $_product->getData('bestseller');
+                        $newarrivals = $_product->getData('newarrivals');
+                        $waterproof = $_product->getData('waterproof');
+                        $waterrepel = $_product->getData('waterrepel');
+                        // }
+
+
+                        echo '<div class="tags"><div class="tagouter" style="float:left;">';
+                        if ($player_chocie) {
+                            echo '<div class="tag tag-pc"> <i class="fa fa-trophy" aria-hidden="true"></i> Pro\'s Choice';
+                            echo '</div>';
+                        }
+                        if ($bestseller == 1) {
+                            echo '<div class="tag tag-bs"><i class="fa fa-star" aria-hidden="true"></i>
+                                Best Seller';
+                            echo '</div>';
+                        }
+                        if ($newarrivals == 1) {
+                            echo '<div class="tag tag-newarrivals"> New Arrival';
+                            echo '</div>';
+                        }
+                        if ($offer_status == '1') {
+                            echo '<span class="tag tag-cl" style="float:left;"> Lowest Price';
+                            echo '</span>';
+                        }
+                        echo "</div>";
+
+                        if ($pi == '1') {
+                            if ($attribute_set_name == 'Irons' || $attribute_set_name == 'Putter' || $attribute_set_name == 'Wedges' || $attribute_set_name == 'Individual Irons' || $attribute_set_name == 'Hybrid' || $attribute_set_name == 'Drivers' || $attribute_set_name == 'Fairways') {
+                                $canPrintLabel = $customPrintTitle . ' Engrave';
+                            } else {
+                                $canPrintLabel = $customPrintTitle . ' Print';
+                            }
+                            echo '<div class="tag tag-print ' . $productOptionPrice . '" style="float:right;"><i class="fa fa-pencil-square-o" aria-hidden="true"></i>' . ' ' . $canPrintLabel;
+                            echo '</div>';
+                        }
+                        echo '</div>';
+                        $lshtml = '';
+                        if ($limitedstock == 1) {
+                            $lshtml = '<div class= "limitedstock-text">Limited Stock</div>';
+                        }
+
+                        $productImage = $block->getImage($_product, $imageDisplayArea);
+                        if ($pos != null) {
+                            $position = ' style="left:' . $productImage->getWidth() . 'px;'
+                                . 'top:' . $productImage->getHeight() . 'px;"';
+                        }
+                        ?>
+                        <?php // Product Image 
+                        ?>
+                        <a href="<?= /* @escapeNotVerified */ $_product->getProductUrl() ?>" title="<?php echo $_helper->productAttribute($_product, $_product->getName(), 'name'); ?>" class="product photo product-item-photo" tabindex="-1">
+                            <?= $productImage->toHtml() ?>
+                        </a>
+                        <!-----------------rating html start--------------->
+                        <!-- new rating code -->
+                        <?php
+
+                        ?>
+                        <div class="rating_block">
+                            <div class="customratinghtml star_back">
+                                <?php
+                                $ratingShow = '';
+
+                                $RatingOb->getEntitySummary($_product->getId());
+
+                                $total = $RatingOb->getSum();
+                                if ($total != '') {
+                                    $outof =  $RatingOb->getCount() * 100;
+                                    $ratingpercent = ($total * 100) / $outof;
+                                    $ratingAvg = $ratingpercent / 20;
+                                    $ratingf = round($ratingAvg, 1);
+                                    $ratingShow =  $ratingf . "/" . "5";
+                                    $numberOfRatings = $RatingOb->getCount();
+                                    $ratingInt = (int)$ratingf;
+                                    echo '<div class="customratinghtml star_back"><span style="font-size: 20px;color: #F0C808;">&starf;</span> ' . $ratingShow .   '<div class="people_rate">' . $numberOfRatings . ' <span class="total_rev">' . ($numberOfRatings == 1 ? 'Review' : ($numberOfRatings == 0 ? '' : 'Reviews')) . '</span>' . '</div>' . "</div>";
+                                }
+                                ?>
+                            </div>
+                            <div class="water_tags">
+                                <?php
+                                if ($waterproof == 1) {
+                                    echo '<div class="waterproof_label"><span class="waterproof_img"><img src="/media/wysiwyg/flayers/Water-proof-new.svg"' . '</span></div>';
+                                }
+                                if ($waterrepel == 1) {
+                                    echo '<div class="waterrepel_label"><span class="waterrepel_img"><img src="/media/wysiwyg/flayers/Water-repellent-new.svg"' . '</span></div>';
+                                } ?></div>
+                        </div>
+
+                        <?php
+
+                        ?>
+                        <!-- new rating code -end-->
+                        <!-----------------rating html end--------------->
+                        <div class="product details product-item-details">
+
+                            <?php echo $lshtml;
+                            $_productNameStripped = $block->stripTags($_product->getName(), null, true);
+                            ?>
+                            <?= $block->getProductDetailsHtml($_product) ?>
+                            <?php $bl = $_product->getAttributeText('quality');
+                            if ($bl == 'Brand New') {
+                                echo ' <div class="ballbanddiv"><span class="ballband"><img src="/media/deals/new.png"' . '</span></div>';
+                            } else if ($bl == 'Gold') {
+                                echo ' <div class="ballbanddiv"><span class="ballband"><img src="/media/deals/gold.png"' . '</span></div>';
+                            } else if ($bl == 'Silver') {
+                                echo ' <div class="ballbanddiv"><span class="ballband"><img src="/media/deals/silver.png"' . '</span></div>';
+                            } else if ($bl == 'Range') {
+                                echo ' <div class="ballbanddiv"><span class="ballband"><img src="/media/deals/range.png"' . '</span></div>';
+                            }
+
+                            ?>
+                            <div class="brand_name">
+                                <?php echo $brand_name = $_product->getResource()->getAttribute('brand')->getFrontend()->getValue($_product) ?>
+                            </div>
+                            <strong class="product name product-item-name">
+                                <a class="product-item-link" title="<?php echo $_helper->productAttribute($_product, $_product->getName(), 'name'); ?>" href="<?= /* @escapeNotVerified */ $_product->getProductUrl() ?>">
+                                    <?php
+                                    //                                echo $brand_name.str_replace($brand_name , '' , $_helper->productAttribute($_product, $_product->getName(), 'name') ) 
+                                    $prd_name = $_helper->productAttribute($_product, $_product->getName(), 'name');
+
+                                    //                                    $prd_name = str_ireplace("(CS)" , "" , $prd_name );
+                                    $prd_name = str_ireplace("Men's", "", $prd_name);
+                                    $prd_name = str_ireplace("US sizes", "", $prd_name);
+                                    $prd_name = str_ireplace("Indian Sizes", "", $prd_name);
+                                    //                                    $prd_name = str_ireplace("Prior Generation" , "" , $prd_name );
+                                    $prd_name = str_ireplace("()", "", $prd_name);
+
+                                    echo $final_name = str_ireplace($brand_name, "", $prd_name);
+                                    ?>
+                                </a>
+                            </strong>
+                            <?php
+
+                            $p_brand_name = $_product->getResource()->getAttribute('brand')->getFrontend()->getValue($_product);
+                            $p_brand_name = trim((string) $p_brand_name);
+                            $p_brand_name = strtolower((string) $p_brand_name);
+
+                            $sizeroll_data = $sizerollHelper->getrow(strtolower($attribute_set_name), $p_brand_name);
+                            if ((!$this->getRequest()->isXmlHttpRequest() && $isAjaxPricesEnabled) || ($isSizerollEnabled && (isset($sizeroll_data[0])))) {
+                                if ($isSizerollEnabled && (isset($sizeroll_data[0]))) {
+                                    $sendAttrName = $sizeroll_data[0]['attribute'];
+                                    $sizearray = $sizeroll_data[0]['totalsizedarrayvalue'];
+                                } else {
+                                    $sendAttrName = '';
+                                    $sizearray = '';
+                                }
+                                echo '<input type="hidden" data-attr = "' . $sendAttrName . '" data-array = "' . $sizearray . '" class ="list-hidd-pid" rel = "' . $_product->getId() . '" />';
+                            }
+
+                            echo "<div class='product-sku hide'>" . $_product->getSku() . "</div>";
+
+                            // if($moduleStatus){
+                            //     echo $block->getPriceHtmlFromCache($_product->getId());
+                            //     echo $block->getTierPriceHtmlFromCache($_product->getId());
+                            // }else{
+                            echo /* @noEscape */ $block->getProductPrice($_product);
+
+                            echo $block->getLayout()
+                                    ->createBlock(\Magento\Framework\Pricing\Render::class)
+                                    ->setData('price_render_handle', 'catalog_product_prices')
+                                    ->render(
+                                        'tier_price',
+                                        $_product,
+                                        [
+                                            'zone' => \Magento\Framework\Pricing\Render::ZONE_ITEM_LIST
+                                        ]
+                                    );
+                            // }
+
+                            try {
+                                $finalPriceOtherStore = 0;
+                                $regularPriceOtherStore = 0;
+                                $appEmulation = $objectManager->get(\Magento\Store\Model\App\Emulation::class);
+                                $emulationInfo = $appEmulation->startEnvironmentEmulation(1);
+                                $productRepository = $objectManager->get(\Magento\Catalog\Api\ProductRepositoryInterface::class);
+                                $mainStoreProduct = $productRepository->getById($_product->getId(), false, 1);
+                                $finalPriceOtherStore = $mainStoreProduct->getSpecialPrice();
+                                $regularPriceOtherStore = $mainStoreProduct->getPrice();
+                                $priceHelperOtherStore = $objectManager->get(\Magento\Framework\Pricing\Helper\Data::class);
+                                $appEmulation->stopEnvironmentEmulation($emulationInfo);
+
+                                if ($finalPriceOtherStore == 0) {
+                                    echo '<div class="selling-price"><span>Our Selling Price: </span><span class="selling-price-rate">'
+                                        . $priceHelperOtherStore->currency($regularPriceOtherStore, true, false) .
+                                        '</span></div>';
+                                } else {
+                                    echo '<div class="selling-price"><span>Our Selling Price: </span><span class="selling-price-rate">'
+                                        . $priceHelperOtherStore->currency($finalPriceOtherStore, true, false) .
+                                        '</span></div>';
+                                }
+
+                                if (($isSizerollEnabled && (isset($sizeroll_data[0]))) && ($_product->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE)) {
+                                    echo '<div class="sizerolldiv_container" id="ajax-sizeroll-' . $_product->getId() . '"></div>';
+                                }
+                            } catch (Exception $e) {
+                                // Handle the exception if needed
+                            }
+
+                            ?>
+
+                            <?php
+                            $showaddtocartrow = false;
+                            if ($showaddtocartrow) {
+                            ?>
+                                <div class="product-item-inner">
+                                    <div class="product actions product-item-actions" <?= strpos($pos, $viewMode . '-actions') ? $position : '' ?>>
+                                        <div class="actions-primary" <?= strpos($pos, $viewMode . '-primary') ? $position : '' ?>>
+                                            <?php if ($_product->isSaleable()) : ?>
+                                                <?php $postParams = $block->getAddToCartPostParams($_product); ?>
+                                                <form data-role="tocart-form" data-product-sku="<?= $block->escapeHtml($_product->getSku()) ?>" action="<?= /* @NoEscape */ $postParams['action'] ?>" method="post">
+                                                    <input type="hidden" name="product" value="<?= /* @escapeNotVerified */ $postParams['data']['product'] ?>">
+                                                    <input type="hidden" name="<?= /* @escapeNotVerified */ Action::PARAM_NAME_URL_ENCODED ?>" value="<?= /* @escapeNotVerified */ $postParams['data'][Action::PARAM_NAME_URL_ENCODED] ?>">
+                                                    <?= $block->getBlockHtml('formkey') ?>
+                                                    <button type="submit" title="<?= $block->escapeHtml(__('Add to Cart')) ?>" class="action tocart primary">
+                                                        <span><?= /* @escapeNotVerified */ __('Add to Cart') ?></span>
+                                                    </button>
+                                                </form>
+                                            <?php else : ?>
+                                                <?php if ($_product->isAvailable()) : ?>
+                                                    <div class="stock available"><span><?= /* @escapeNotVerified */ __('In stock') ?></span></div>
+                                                <?php else : ?>
+                                                    <div class="stock unavailable"><span><?= /* @escapeNotVerified */ __('Out of stock') ?></span></div>
+                                                <?php endif; ?>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div data-role="add-to-links" class="actions-secondary" <?= strpos($pos, $viewMode . '-secondary') ? $position : '' ?>>
+                                            <?php if ($addToBlock = $block->getChildBlock('addto')) : ?>
+                                                <?= $addToBlock->setProduct($_product)->getChildHtml() ?>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    <?php if ($showDescription) : ?>
+                                        <div class="product description product-item-description">
+                                            <?= /* @escapeNotVerified */ $_helper->productAttribute($_product, $_product->getShortDescription(), 'short_description') ?>
+                                            <a href="<?= /* @escapeNotVerified */ $_product->getProductUrl() ?>" title="<?= /* @escapeNotVerified */ $_productNameStripped ?>" class="action more"><?= /* @escapeNotVerified */ __('Learn More') ?></a>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            <?php
+                            }
+
+
+                            ?>
+
+                            <div class="catalog_attributes_value">
+                                <?php
+
+                                $common_categoryfeaturedattr_enable = $chelper->getConfig('common/categoryfeaturedattr/common_categoryfeaturedattr_enable');
+                                if ($common_categoryfeaturedattr_enable == 1) {
+                                    $attr_set_vals = $chelper->getConfig('common/categoryfeaturedattr/common_categoryfeaturedattr');
+
+                                    $attr_set_vals = strtolower($attr_set_vals);
+                                    $attribute_set_name = strtolower($attribute_set_name);
+
+                                    $attr_Arr = explode('|', $attr_set_vals);
+                                    foreach ($attr_Arr as $attr) {
+                                        $single_attr = explode(':', trim($attr));
+
+                                        if (trim($single_attr[0]) == trim($attribute_set_name)) {
+
+                                            if (trim($single_attr[1]) != '') {
+                                                $attr_vals_to_show_arr = explode(',', $single_attr[1]);
+
+                                                foreach ($attr_vals_to_show_arr as $attr_vals_to_show) {
+                                                    $attr_vals_to_show = trim($attr_vals_to_show);
+                                                    echo "<div class='hide'>" . $attribute_set_name . "-" . $_product->getId() . "</div>";
+                                                    $_product_two = $objectManager->create('Magento\Catalog\Model\Product')->load($_product->getId());
+
+
+                                                    // If the custom attribute is a select or multiselect type, you can get the label(s) instead of the value(s):
+
+
+                                                    $attributeModel = $_product_two->getResource()->getAttribute($attr_vals_to_show);
+                                                    if ($attributeModel && $attributeModel->getId()) {
+                                                        $attributeLabel = $attributeModel->getDefaultFrontendLabel();
+                                                        //                                                    echo "Attribute Label: " . $attributeLabel;
+
+                                                        $customAttributeOptionId = $_product_two->getData($attr_vals_to_show);
+                                                        $customAttributeOptions = $_product_two->getResource()->getAttribute($attr_vals_to_show)->getSource()->getOptionText($customAttributeOptionId);
+                                                        if (trim($attributeLabel) != '' && trim($customAttributeOptions) != '') {
+                                                            echo "<div class='attr_label_and_value'><div class='attr_label'>$attributeLabel</div> : <div class='attr_value'>$customAttributeOptions</div></div><br>";
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                ?>
+                            </div>
+                            <?php
+
+
+                            ?>
+                        </div>
+                    </div>
+                </li>
+            <?php endforeach; ?>
+        </ol>
+    </div>
+    <?= $block->getChildBlock('toolbar')->setIsBottom(true)->toHtml() ?>
+    <?php if (!$block->isRedirectToCartEnabled()) : ?>
+        <script type="text/x-magento-init">
+            {
+            "[data-role=tocart-form], .form.map.checkout": {
+                "catalogAddToCart": {
+                    "product_sku": "<?= /* @NoEscape */ $_product->getSku() ?>"
+                }
+            }
+        }
+        </script>
+    <?php endif; ?>
+<?php endif; ?>
+<?php
+
+
+?>
+<script>
+    require(['jquery', 'bootstrap'], function(jQuery) {
+        jQuery(document).ready(function() {
+            // ****ajax load for price, special price, tier price on category page
+            function ajaxPriceSizeroll() {
+                jQuery('.list-hidd-pid').each(function() {
+                    var el = jQuery(this);
+                    var rel = jQuery(this).attr("rel");
+                    var url = '/common/index/productprices';
+                    var curr_param = jQuery("#ajax-price-" + rel);
+                    var curr_sizeroll = jQuery("#ajax-sizeroll-" + rel);
+                    var attrdata = jQuery(this).attr("data-attr");
+                    var arraydata = jQuery(this).attr("data-array");
+                    jQuery.ajax({
+                        url: url,
+                        type: "POST",
+                        dataType: 'json',
+                        data: {
+                            pid: rel,
+                            attrdata: attrdata,
+                            arraydata: arraydata
+                        },
+                        success: function(response) {
+                            if (curr_param.length) {
+                                curr_param.html(response.output);
+                                curr_param.css('min-height', '0px');
+                            }
+                            if (curr_sizeroll.length && response.outputSizeroll) {
+                                curr_sizeroll.html(response.outputSizeroll);
+                            }
+                            el.removeClass("list-hidd-pid").addClass("list-hidd-pid-done");
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.log(textStatus, errorThrown);
+                        }
+                    });
+                });
+            }
+            ajaxPriceSizeroll();
+            jQuery('#ajaxlist-reload-product_list').on('contentUpdated', function() {
+                ajaxPriceSizeroll();
+            });
+
+            function ajaxGetQty() {
+                jQuery('.product-sku').each(function() {
+                    var el = jQuery(this);
+                    var sku = jQuery(this).text();
+                    var url = '/artm_partnersauthentication/index/getsourceqty';
+                    jQuery.ajax({
+                        url: url,
+                        type: "POST",
+                        data: {
+                            sku: sku
+                        },
+                        success: function(response) {
+                            // console.log(response); // {"success": true,"qty": 62}
+                            // append after this .product.details.product-item-details and create html in green color Available qty
+                            if (response.success) {
+                                var qtyHtml = '<div class="available-qty" style="color: green; ">' + response.qty + ' Available</div>';
+                                el.closest('.product.details.product-item-details').append(qtyHtml);
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.log(textStatus, errorThrown);
+                        }
+                    });
+                });
+            }
+            ajaxGetQty();
+            jQuery('#ajaxlist-reload-product_list').on('contentUpdated', function() {
+                ajaxGetQty();
+            });
+
+        });
+    });
+</script>
+<style>
+    .custom-data {
+        font-size: 10px;
+        text-align: left;
+        display: none !important;
+    }
+
+    .available-qty {
+        font-weight: bold;
+        font-size: 10px;
+    }
+        body.catalog-category-view ul.prices-tier.items .item {
+        padding: 5px 0px 5px 0;
+    }
+    body.catalog-category-view ul.prices-tier.items {
+        margin: unset !important;
+        padding: unset !important;
+    }
+    body.catalog-category-view span.price-container.price-final_price.tax.weee span.price-label {
+        display: none !important;
+    }
+    .price-box.price-final_price span.normal-price {
+        width: auto !important;
+    }
+</style>

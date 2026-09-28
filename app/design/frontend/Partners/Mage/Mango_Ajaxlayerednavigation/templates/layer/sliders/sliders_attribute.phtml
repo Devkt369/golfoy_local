@@ -1,0 +1,82 @@
+<?php
+/**
+ * Template for filter items block
+ *
+ * @var $block \Magento\LayeredNavigation\Block\Navigation\FilterRenderer
+ */
+?>
+<?php
+$filter_is_active = $filter->isFilterActive();
+$active_filter_items = $filter->getActiveFilterItems();
+?>
+
+
+<div id="<?= $attribute->getAttributeCode();?>_slider_outer" class="slider_outer">
+    <div class="ajax-layered-navigation-slider">
+        <div id="<?= $attribute->getAttributeCode();?>-slider-container" class="attribute-slider-container"></div>
+    </div>
+
+    <div class="attribute-slider-values">
+        <?php
+        $_item_width = 100;
+        $_divider_width = 100;
+        $_count = (int) count($filterItems);
+        $_item_width = 100;
+        $_divider_width = 100;
+        if ($_count > 1) {
+            $_item_width = floor((10000 / $_count)) / 100;
+            $_divider_width = floor((10000 / ($_count - 1))) / 100;
+        }
+        ?>
+        <ol class="slider-divisions">
+            <?php for ($i = 1; $i <= ($_count - 1); $i++) { ?>
+                <li style="left:<?= $_divider_width*($i-1); ?>%;">&nbsp;</li>
+            <?php } ?>
+        </ol>
+        <ol id="<?= $attribute->getAttributeCode();?>_slider-links" 
+            data-attribute-code="<?= $attribute->getAttributeCode();?>"  
+            class="slider-links<?= ($filter_is_active) ? " active-layer" : " unactive-layer"; ?>">
+            <?php
+            $_counter = 0;
+            $_first_item = -1;
+            $_last_item = -1;
+             foreach ($filterItems as $filterItem) : ?>
+                <?php
+                $_item_active = ($active_filter_items && in_array($filterItem->getValue(), $active_filter_items));
+                if ($_first_item == -1 && $_item_active) {
+                    $_first_item = $_counter;
+                }
+                if ($_item_active || ($_counter == ($_count - 1) && $_last_item == -1 )) {
+                    $_last_item = $_counter;
+                }
+                ?>
+                <li style="width:<?= $_item_width; ?>%;" class="<?php if ($_item_active): ?>active-filter-option <?php endif; ?> <?php if ($filterItem->getCount() == 0): ?>no-items<?php endif; ?>">
+                    <a href="<?= $block->escapeUrl($filterItem->getUrl()) ?>" 
+                       data-attribute-value="<?= $filterItem->getValue(); ?>" 
+                       id="slider-<?= $attribute->getAttributeCode();?>-link-<?= $_counter; ?>" 
+                       title="<?= /* @escapeNotVerified */ $filterItem->getLabel() ?>">
+                       <?= /* @escapeNotVerified */ $filterItem->getLabel() ?>
+                    </a>
+                </li>
+                <?php
+                $_counter++;
+            endforeach;
+            ?>
+        </ol>
+    </div>
+    
+    <?php
+    
+    $_slider_settings = [
+        'min' => 0,
+        'max' => ($_count - 1),
+        'values' => [$_first_item, $_last_item]
+    ];
+    
+    ?>
+    
+    <div style="display:none" id="<?= $attribute->getAttributeCode();?>-config" data-slider-config='<?= $encoder->encode($_slider_settings) ;?>'></div>
+    
+    
+</div>
+

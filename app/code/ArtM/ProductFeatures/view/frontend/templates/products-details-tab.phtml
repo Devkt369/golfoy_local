@@ -1,0 +1,224 @@
+<!-- mobile-product-details-click-event(10-may-2024) -->
+<style>
+    body.catalog-product-view.no_notice .product-mobile-details {
+        top: 92px;
+    }
+
+    body.catalog-product-view .product-mobile-details {
+        top: 63px;
+    }
+
+    html.wizzyMobileTapped body.catalog-product-view .product-mobile-details {
+        top: 96px;
+    }
+
+    html.wizzyMobileTapped body.catalog-product-view.no_notice .product-mobile-details {
+        top: 119px;
+    }
+
+    .clickable-details {
+        padding: 10px 0px 10px 0px;
+        background-color: #f0f0f0;
+        border-radius: 0px;
+        margin: 0px 2px;
+        cursor: pointer;
+        display: none;
+        text-align: center;
+        width: auto;
+        /* Adjust width as per content */
+        min-width: 100px;
+        /* Set a minimum width to prevent tabs from becoming too narrow */
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        transition: background-color 0.3s ease;
+    }
+
+    .product-mobile-details::-webkit-scrollbar {
+        height: 1px;
+    }
+
+    .product-mobile-details {
+        display: flex;
+        position: fixed;
+        width: 100%;
+        z-index: 999999999999;
+        left: 0;
+        overflow-x: auto;
+        /* Enable horizontal scrolling */
+        white-space: nowrap;
+        /* Prevent wrapping */
+    }
+
+    .tabs-container {
+        display: inline-flex;
+        /* Make the container flex and horizontally inline */
+    }
+
+    .clickable-details.active {
+        background-color: black;
+        color: white;
+    }
+
+    @media only screen and (max-width:480px) {
+        .clickable-details {
+            display: block;
+        }
+    }
+</style>
+<div class="product-mobile-details">
+    <div class="tabs-container">
+        <!-- Tabs will be dynamically added here -->
+    </div>
+</div>
+
+<style>
+    /* CSS for Mobile View */
+    @media (max-width: 768px) {
+        .product.data {
+            position: relative;
+        }
+
+        .product-content-title-tabs.tabs {
+            position: fixed;
+            top: 90px;
+            left: 0px;
+            width: 100%;
+            background-color: white;
+            z-index: 999;
+            display: flex;
+            justify-content: space-around;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .product-content-title-tabs.tabs a {
+            display: block;
+            padding: 10px;
+            text-align: center;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .product-content-title-tabs.tabs a.active {
+            color: #e60023;
+            border-bottom: 2px solid #e60023;
+        }
+
+        .data.item.content {
+            padding-top: 50px;
+            /* Adjust this value based on the height of the tabs */
+        }
+        .product-content-title-tabs.tabs > a {
+            text-transform: capitalize;
+        }
+    }
+</style>
+<script>
+    require(["jquery"], function($) {
+        jQuery(document).ready(function() {
+            if (jQuery(window).width() < 768) {
+                // Generate tabs
+                let tabs = jQuery('<div class="product-content-title-tabs tabs" style="display: none;"></div>'); // Set tabs to display: none by default
+                jQuery('.product.data .data.item.title').each(function() {
+                    if (jQuery(this).css('display') !== 'none') {
+                        let tabTitle = jQuery(this).find('a').text().trim();
+                        let tabTitleCapitalized = tabTitle.charAt(0).toUpperCase() + tabTitle.slice(1).toLowerCase();
+                        let tabId = jQuery(this).attr('id');
+                        tabs.append(`<a href="#${tabId}" class="tab-link">${tabTitleCapitalized}</a>`);
+                    }
+                });
+                jQuery('.product.data').before(tabs);
+
+                // Handle tab clicks
+                jQuery('.tab-link').click(function(e) {
+                    e.preventDefault();
+                    // Remove active class from all tabs
+                    jQuery('.tab-link').removeClass('active');
+                    // Add active class to the clicked tab
+                    jQuery(this).addClass('active');
+                    let target = jQuery(jQuery(this).attr('href')).next('.data.item.content');
+                    let offset = target.offset().top - jQuery('.tabs').outerHeight() - 150; // Adjusted by 150px to align with top of viewport
+                    jQuery('html, body').animate({
+                        scrollTop: offset
+                    }, 500);
+                });
+
+                // Use Intersection Observer to update active tab
+                let observerOptions = {
+                    root: null,
+                    rootMargin: '0px',
+                    threshold: 0.1 // Adjust threshold as needed
+                };
+
+                let observerCallback = function(entries, observer) {
+                    if (!jQuery('html, body').is(':animated')) {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                let id = entry.target.getAttribute('aria-labelledby');
+                                jQuery('.tab-link').removeClass('active');
+                                jQuery(`.tab-link[href="#${id}"]`).addClass('active');
+                            }
+                        });
+                    }
+                };
+
+                let observer = new IntersectionObserver(observerCallback, observerOptions);
+
+                // Observe each content section
+                jQuery('.data.item.content').each(function() {
+                    observer.observe(this);
+                });
+
+                // Check if .product.info.detailed is in viewport
+                function checkViewport() {
+                    let productInfoDetailed = jQuery('.product.data.items.col-md-8.mage-tabs-disabled');
+                    if (productInfoDetailed.length) {
+                        let elementTop = 600 + productInfoDetailed.offset().top;
+                        let elementBottom = elementTop + productInfoDetailed.outerHeight() - 1000;
+                        let viewportTop = jQuery(window).scrollTop();
+                        let viewportBottom = viewportTop + jQuery(window).height();
+
+                        if (elementBottom > viewportTop && elementTop < viewportBottom) {
+                            console.log('in viewport');
+                            if (jQuery('.tabs').is(':hidden')) {
+                             //  console.log("Tabs are now visible");
+                                jQuery('.tabs').fadeIn();
+                            }
+                        } else {
+                            if (jQuery('.tabs').is(':visible')) {
+                            //  console.log("Tabs are now hidden");
+                                jQuery('.tabs').fadeOut();
+                            }
+                        }
+                    }
+                }
+
+                // Initial check if .product.info.detailed is in viewport
+                function initialViewportCheck() {
+                    let productInfoDetailed = jQuery('.product.data.items.col-md-8.mage-tabs-disabled');
+                    if (productInfoDetailed.length) {
+                        let elementTop = productInfoDetailed.offset().top;
+                        let elementBottom = elementTop + productInfoDetailed.outerHeight();
+                        let viewportTop = jQuery(window).scrollTop();
+                        let viewportBottom = viewportTop + jQuery(window).height();
+
+                        if (elementBottom > viewportTop && elementTop < viewportBottom) {
+                           // console.log("Tabs are now visible");
+                            jQuery('.tabs').show();
+                        }
+                    }
+                }
+
+                // Bind scroll event
+                jQuery(window).on('scroll', function() {
+                    checkViewport();
+                });
+
+                // Initial load
+                initialViewportCheck();
+                checkViewport();
+            }
+        });
+    });
+</script>

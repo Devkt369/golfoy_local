@@ -1,0 +1,304 @@
+<?xml version="1.0"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">artm_productslider_slider_form.artm_productslider_slider_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Slider</item>
+    </argument>
+
+    <settings>
+        <namespace>artm_productslider_slider_form</namespace>
+        <dataScope>slider</dataScope>
+        <deps>
+            <dep>artm_productslider_slider_form.artm_productslider_slider_form_data_source</dep>
+        </deps>
+        <buttons>
+            <button name="back" class="ArtM\ProductSlider\Block\Adminhtml\Slider\Edit\BackButton"/>
+            <button name="delete" class="ArtM\ProductSlider\Block\Adminhtml\Slider\Edit\DeleteButton"/>
+            <button name="save" class="ArtM\ProductSlider\Block\Adminhtml\Slider\Edit\SaveButton"/>
+            <button name="save_and_continue" class="ArtM\ProductSlider\Block\Adminhtml\Slider\Edit\SaveAndContinueButton"/>
+        </buttons>
+    </settings>
+
+    <dataSource name="artm_productslider_slider_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <settings>
+            <submitUrl path="*/*/save"/>
+        </settings>
+        <dataProvider class="ArtM\ProductSlider\Ui\DataProvider\Slider\FormDataProvider"
+                      name="artm_productslider_slider_form_data_source">
+            <settings>
+                <requestFieldName>slider_id</requestFieldName>
+                <primaryFieldName>slider_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <fieldset name="general" sortOrder="10">
+        <settings>
+            <label translate="true">General</label>
+        </settings>
+        <field name="slider_id" formElement="input" sortOrder="10">
+            <settings>
+                <visible>false</visible>
+                <dataType>number</dataType>
+                <dataScope>slider_id</dataScope>
+            </settings>
+        </field>
+        <field name="title" formElement="input" sortOrder="20">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Title</label>
+                <dataScope>title</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+        <field name="identifier" formElement="input" sortOrder="30">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Identifier</label>
+                <dataScope>identifier</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-identifier" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+        <field name="group_id" formElement="select" sortOrder="40">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Slider Group</label>
+                <dataScope>group_id</dataScope>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="ArtM\ProductSlider\Model\Source\SliderGroups"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="status" formElement="select" sortOrder="50">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Status</label>
+                <dataScope>status</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="ArtM\ProductSlider\Model\Source\Status"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="sort_order" formElement="input" sortOrder="60">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Sort Order</label>
+                <dataScope>sort_order</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-number" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+    </fieldset>
+
+    <fieldset name="product_source" sortOrder="20">
+        <settings>
+            <label translate="true">Product Source</label>
+        </settings>
+        <field name="source_type" formElement="select" sortOrder="10">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Source Type</label>
+                <dataScope>source_type</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="ArtM\ProductSlider\Model\Source\ProductSourceType"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="source_value" formElement="textarea" sortOrder="20">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Source Value</label>
+                <dataScope>source_value</dataScope>
+                <notice translate="true">Comma separated values based on source type.</notice>
+            </settings>
+        </field>
+    </fieldset>
+
+    <fieldset name="product_sorting" sortOrder="30">
+        <settings>
+            <label translate="true">Product Sorting</label>
+        </settings>
+        <field name="sort_by" formElement="select" sortOrder="10">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Sort By</label>
+                <dataScope>sort_by</dataScope>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="ArtM\ProductSlider\Model\Source\SortBy"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="sort_direction" formElement="select" sortOrder="20">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Sort Direction</label>
+                <dataScope>sort_direction</dataScope>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="ArtM\ProductSlider\Model\Source\SortDirection"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="product_limit" formElement="input" sortOrder="30">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Product Limit</label>
+                <dataScope>product_limit</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-digits" xsi:type="boolean">true</rule>
+                    <rule name="validate-greater-than-zero" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+    </fieldset>
+
+    <fieldset name="display_settings" sortOrder="40">
+        <settings>
+            <label translate="true">Display Settings</label>
+        </settings>
+        <field name="slides_to_show" formElement="multiselect" sortOrder="10">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Slides To Show</label>
+                <dataScope>slides_to_show</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+            <formElements>
+                <multiselect>
+                    <settings>
+                        <options class="ArtM\ProductSlider\Model\Source\SlidesToShow"/>
+                    </settings>
+                </multiselect>
+            </formElements>
+        </field>
+        <field name="autoplay" formElement="select" sortOrder="20">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Autoplay</label>
+                <dataScope>autoplay</dataScope>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="ArtM\ProductSlider\Model\Source\Status"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="autoplay_speed" formElement="input" sortOrder="30">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Autoplay Speed (ms)</label>
+                <dataScope>autoplay_speed</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-digits" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+    </fieldset>
+
+    <fieldset name="product_card" sortOrder="50">
+        <settings>
+            <label translate="true">Product Card</label>
+        </settings>
+        <field name="show_name" formElement="select" sortOrder="10">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Show Name</label>
+                <dataScope>show_name</dataScope>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="ArtM\ProductSlider\Model\Source\Status"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="show_price" formElement="select" sortOrder="20">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Show Price</label>
+                <dataScope>show_price</dataScope>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="ArtM\ProductSlider\Model\Source\Status"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="show_add_to_cart" formElement="select" sortOrder="30">
+            <settings>
+                <dataType>number</dataType>
+                <label translate="true">Show Add To Cart</label>
+                <dataScope>show_add_to_cart</dataScope>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="ArtM\ProductSlider\Model\Source\Status"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+    </fieldset>
+
+    <fieldset name="preview" sortOrder="60">
+        <settings>
+            <label translate="true">Preview</label>
+        </settings>
+        <field name="preview_notes" formElement="textarea" sortOrder="10">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Preview Notes</label>
+                <dataScope>preview_notes</dataScope>
+            </settings>
+        </field>
+    </fieldset>
+</form>

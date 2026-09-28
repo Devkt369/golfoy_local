@@ -1,0 +1,1140 @@
+.adminai-dashboard {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.adminai-sidebar,
+.adminai-content__panel {
+    background: #fff;
+    border: 1px solid #d8d8d8;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.adminai-sidebar {
+    padding: 20px 0;
+    position: sticky;
+    top: 88px;
+}
+
+.adminai-sidebar__title {
+    margin: 0 20px 18px;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.adminai-sidebar__nav {
+    display: flex;
+    flex-direction: column;
+}
+
+.adminai-sidebar__link {
+    color: #514943;
+    border-left: 3px solid transparent;
+    padding: 12px 20px;
+    text-decoration: none;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.adminai-sidebar__link:hover,
+.adminai-sidebar__link:focus {
+    background: #f5f5f5;
+    color: #000;
+    text-decoration: none;
+}
+
+.adminai-sidebar__link.is-active {
+    background: #ebf7ff;
+    border-left-color: #007bdb;
+    color: #003b66;
+    font-weight: 600;
+}
+
+.adminai-content__header {
+    margin-bottom: 16px;
+}
+
+.adminai-content__eyebrow {
+    color: #757575;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.adminai-content__title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.adminai-content__subtitle {
+    margin: 6px 0 0;
+    color: #666;
+    font-size: 13px;
+}
+
+.adminai-content__panel {
+    min-height: 420px;
+    padding: 24px;
+}
+
+.adminai-toolbar {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(140px, 1fr)) auto;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 16px;
+}
+
+.adminai-toolbar__group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.adminai-toolbar__group label {
+    font-size: 12px;
+    color: #666;
+}
+
+.adminai-toolbar__group input {
+    min-height: 32px;
+    padding: 6px 8px;
+    border: 1px solid #c2c2c2;
+    border-radius: 3px;
+}
+
+.adminai-toolbar__group select {
+    min-height: 32px;
+    padding: 6px 8px;
+    border: 1px solid #c2c2c2;
+    border-radius: 3px;
+    background: #fff;
+}
+
+.adminai-toolbar__actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+#adminai-dashboard-root {
+    min-height: 320px;
+}
+
+.adminai-meta-line {
+    margin: 8px 0 10px;
+    color: #666;
+    font-size: 12px;
+}
+
+.adminai-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.adminai-grid-title {
+    margin: 10px 0 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.adminai-grid-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 0;
+    gap: 12px;
+}
+
+.adminai-grid-controls__left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.adminai-grid-controls__left select {
+    min-height: 30px;
+}
+
+.adminai-pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.adminai-page-info {
+    color: #666;
+    font-size: 12px;
+}
+
+.adminai-kpi-item {
+    background: #fff;
+    border: 1px solid #e2e2e2;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.adminai-kpi-label {
+    color: #7b7b7b;
+    font-size: 11px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.adminai-kpi-value {
+    color: #222;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.adminai-grid-wrap {
+    border: 1px solid #e2e2e2;
+    border-radius: 4px;
+    overflow: auto;
+    background: #fff;
+}
+
+.adminai-grid-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 680px;
+}
+
+.adminai-grid-table th,
+.adminai-grid-table td {
+    border-bottom: 1px solid #ededed;
+    padding: 8px 10px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.adminai-grid-table th {
+    background: #f7f7f7;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #5e5e5e;
+}
+
+.adminai-grid-table th.adminai-grid-sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.adminai-grid-table th.adminai-grid-sortable:hover {
+    background: #edf5fb;
+}
+
+.adminai-grid-table th.adminai-grid-sortable.is-sorted {
+    color: #003b66;
+}
+
+.adminai-empty {
+    padding: 12px;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+    color: #666;
+    background: #fff;
+}
+
+.adminai-chart-stack {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.adminai-overview-zone {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.adminai-section-zone {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.adminai-overview-zone.is-hidden {
+    display: none;
+}
+
+.adminai-section-zone.is-hidden {
+    display: none;
+}
+
+.adminai-zone-card {
+    border: 1px solid #e2e2e2;
+    border-radius: 4px;
+    background: #fafafa;
+    padding: 12px;
+}
+
+.adminai-zone-title {
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.adminai-zone-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.adminai-zone-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.adminai-overview-kpis {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(120px, 1fr));
+    gap: 8px;
+}
+
+.adminai-overview-kpi {
+    border: 1px solid #e3e3e3;
+    border-radius: 4px;
+    background: #fff;
+    padding: 10px;
+}
+
+.adminai-overview-kpi__label {
+    color: #6b6b6b;
+    font-size: 11px;
+    margin-bottom: 4px;
+}
+
+.adminai-overview-kpi__value {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.adminai-segment-cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(140px, 1fr));
+    gap: 8px;
+}
+
+.adminai-segment-card {
+    border: 1px solid #d7e6f2;
+    border-radius: 4px;
+    background: #fff;
+    padding: 10px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.adminai-segment-card:hover {
+    background: #f2f9ff;
+    border-color: #9ec8ea;
+}
+
+.adminai-segment-card__code {
+    display: block;
+    font-size: 11px;
+    color: #4a4a4a;
+}
+
+.adminai-segment-card__count {
+    display: block;
+    margin-top: 4px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.adminai-risk-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 60px;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.adminai-risk-row__bar {
+    height: 10px;
+    border-radius: 999px;
+    background: #ebebeb;
+    overflow: hidden;
+}
+
+.adminai-risk-row__bar span {
+    display: block;
+    height: 100%;
+}
+
+.adminai-risk-low { background: #2ca01c; }
+.adminai-risk-medium { background: #f59d00; }
+.adminai-risk-high { background: #d9534f; }
+
+.adminai-acq-retention__row {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #ececec;
+    padding: 8px 0;
+}
+
+.adminai-acq-retention__row:last-child {
+    border-bottom: 0;
+}
+
+.adminai-alert-pill {
+    display: inline-block;
+    border: 1px solid #f1d58a;
+    background: #fff8e6;
+    padding: 6px 10px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+}
+
+.adminai-alert-feed {
+    display: grid;
+    gap: 6px;
+}
+
+.adminai-alert-item {
+    display: grid;
+    grid-template-columns: 90px 1fr 160px;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #ededed;
+    border-radius: 4px;
+    padding: 8px;
+}
+
+.adminai-alert-item__severity {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.adminai-alert-item__title {
+    font-size: 13px;
+}
+
+.adminai-alert-item__time {
+    color: #666;
+    font-size: 12px;
+    text-align: right;
+}
+
+.adminai-chart-card {
+    border: 1px solid #e2e2e2;
+    border-radius: 4px;
+    padding: 12px;
+    background: #fafafa;
+    max-width: 640px;
+    width: 100%;
+    justify-self: start;
+}
+
+.adminai-chart-card.is-hidden {
+    display: none;
+}
+
+.adminai-chart-card__title {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.adminai-chart-card__description {
+    margin: 0 0 8px;
+    color: #555;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.adminai-chart-card canvas {
+    width: 100% !important;
+}
+
+.adminai-chart-axis-meta {
+    margin-top: 8px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    color: #666;
+    font-size: 12px;
+}
+
+.adminai-chart-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(140px, 1fr));
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.adminai-chart-summary__card {
+    border: 1px solid #e4e4e4;
+    background: #fff;
+    border-radius: 4px;
+    padding: 8px;
+}
+
+.adminai-chart-summary__label {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.adminai-chart-summary__value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #222;
+}
+
+.adminai-chart-legend {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.adminai-chart-legend__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #444;
+}
+
+.adminai-chart-legend__swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.adminai-widget-list {
+    display: grid;
+    gap: 8px;
+}
+
+.adminai-widget-list__item {
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    background: #fff;
+    padding: 8px 10px;
+    font-size: 13px;
+}
+
+.adminai-widget-table__wrap {
+    border: 1px solid #ececec;
+    border-radius: 4px;
+    overflow: auto;
+    background: #fff;
+}
+
+.adminai-widget-table__controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.adminai-widget-table__controls-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.adminai-widget-table__controls-left label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #555;
+}
+
+.adminai-widget-page-size {
+    min-height: 28px;
+}
+
+.adminai-widget-search {
+    min-height: 30px;
+    min-width: 180px;
+    border: 1px solid #c2c2c2;
+    border-radius: 3px;
+    padding: 5px 8px;
+}
+
+.adminai-widget-table__controls-left select,
+.adminai-widget-table__controls-left input[type="number"] {
+    min-height: 30px;
+    border: 1px solid #c2c2c2;
+    border-radius: 3px;
+    padding: 5px 8px;
+    background: #fff;
+}
+
+.adminai-widget-table__controls-left input[type="date"] {
+    min-height: 30px;
+    border: 1px solid #c2c2c2;
+    border-radius: 3px;
+    padding: 5px 8px;
+}
+
+.adminai-widget-days-threshold {
+    min-height: 30px;
+    width: 82px;
+    border: 1px solid #c2c2c2;
+    border-radius: 3px;
+    padding: 5px 8px;
+}
+
+.adminai-widget-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #555;
+}
+
+.adminai-widget-pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #666;
+}
+
+.adminai-widget-table__wrap table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 420px;
+}
+
+.adminai-widget-table__wrap th,
+.adminai-widget-table__wrap td {
+    border-bottom: 1px solid #efefef;
+    padding: 7px 8px;
+    font-size: 12px;
+    white-space: nowrap;
+    text-align: left;
+}
+
+.adminai-widget-table__wrap th {
+    color: #666;
+    text-transform: uppercase;
+    background: #f8f8f8;
+}
+
+.adminai-widget-table__wrap th.adminai-widget-table-sort {
+    cursor: pointer;
+    user-select: none;
+}
+
+.adminai-widget-table__wrap th.adminai-widget-table-sort:hover {
+    background: #edf5fb;
+}
+
+.adminai-widget-table__wrap th.adminai-widget-table-sort.is-sorted {
+    color: #003b66;
+}
+
+.adminai-widget-table__wrap--customer {
+    overflow-x: hidden;
+}
+
+.adminai-widget-table__wrap--customer table {
+    min-width: 100%;
+    table-layout: fixed;
+}
+
+.adminai-widget-table__wrap--customer th,
+.adminai-widget-table__wrap--customer td {
+    white-space: normal;
+    vertical-align: top;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.adminai-widget-table__wrap--customer th:nth-child(1),
+.adminai-widget-table__wrap--customer td:nth-child(1) {
+    width: 10%;
+}
+
+.adminai-widget-table__wrap--customer th:nth-child(2),
+.adminai-widget-table__wrap--customer td:nth-child(2) {
+    width: 17%;
+}
+
+.adminai-widget-table__wrap--customer th:nth-child(3),
+.adminai-widget-table__wrap--customer td:nth-child(3),
+.adminai-widget-table__wrap--customer th:nth-child(4),
+.adminai-widget-table__wrap--customer td:nth-child(4),
+.adminai-widget-table__wrap--customer th:nth-child(5),
+.adminai-widget-table__wrap--customer td:nth-child(5),
+.adminai-widget-table__wrap--customer th:nth-child(6),
+.adminai-widget-table__wrap--customer td:nth-child(6) {
+    width: 12%;
+}
+
+.adminai-widget-table__wrap--customer th:nth-child(7),
+.adminai-widget-table__wrap--customer td:nth-child(7) {
+    width: 25%;
+}
+
+.adminai-order-dates-scroll {
+    max-height: 100px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+.adminai-section-zone--customers .adminai-widget-table__controls-left {
+    flex-wrap: wrap;
+}
+
+.adminai-section-zone--customers .adminai-widget-search {
+    min-width: 140px;
+}
+
+.adminai-zone-title--sub {
+    margin-top: 12px;
+}
+
+.adminai-sku-tracker {
+    display: grid;
+    gap: 10px;
+}
+
+.adminai-sku-tracker__controls {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(140px, 1fr)) auto;
+    gap: 10px;
+    align-items: end;
+}
+
+.adminai-sku-tracker__controls label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+    color: #555;
+}
+
+.adminai-sku-tracker__controls input {
+    min-height: 32px;
+    border: 1px solid #c2c2c2;
+    border-radius: 3px;
+    padding: 6px 8px;
+}
+
+.adminai-sku-tracker__actions {
+    display: flex;
+    gap: 8px;
+}
+
+.adminai-sku-meta-pill {
+    display: inline-block;
+    font-size: 12px;
+    color: #003b66;
+    background: #edf5fb;
+    border: 1px solid #cfe3f5;
+    border-radius: 999px;
+    padding: 4px 10px;
+}
+
+.adminai-sku-product-card {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 12px;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    background: #fff;
+    padding: 10px;
+}
+
+.adminai-sku-image,
+.adminai-sku-child-card__image {
+    width: 120px;
+    height: 120px;
+    border: 1px solid #ececec;
+    border-radius: 4px;
+    background: #fafafa;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.adminai-sku-image img,
+.adminai-sku-child-card__image img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.adminai-sku-image__placeholder {
+    color: #777;
+    font-size: 12px;
+}
+
+.adminai-sku-product-info {
+    display: grid;
+    gap: 4px;
+    font-size: 13px;
+}
+
+.adminai-sku-product-info h4 {
+    margin: 0 0 4px;
+    font-size: 15px;
+}
+
+.adminai-sku-subtitle {
+    margin: 2px 0 8px;
+    font-size: 13px;
+}
+
+.adminai-sku-children-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 10px;
+}
+
+.adminai-sku-child-card {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 10px;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    background: #fff;
+    padding: 8px;
+}
+
+.adminai-sku-child-card__image {
+    width: 100px;
+    height: 100px;
+}
+
+.adminai-sku-child-card__meta {
+    display: grid;
+    gap: 3px;
+    font-size: 12px;
+}
+
+.adminai-stock-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.adminai-stock-badge.is-out {
+    background: #fde8e8;
+    border: 1px solid #f3c2c2;
+    color: #b42318;
+}
+
+.adminai-stock-badge.is-in {
+    background: #eaf7ec;
+    border: 1px solid #bde4c4;
+    color: #1f7a2d;
+}
+
+.adminai-sku-kpis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+}
+
+.adminai-customer-period-card {
+    display: grid;
+    gap: 12px;
+}
+
+.adminai-customer-orders-chart-card {
+    display: grid;
+    gap: 12px;
+}
+
+.adminai-customer-orders-chart-card__hint {
+    margin: 0;
+    color: #5f6b7a;
+    font-size: 12px;
+}
+
+.adminai-customer-orders-chart-meta {
+    display: grid;
+    gap: 6px;
+}
+
+.adminai-customer-orders-band-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.adminai-order-band-col {
+    display: grid;
+    gap: 6px;
+    background: #f9f9f9;
+    border: 1px solid #e2e2e2;
+    border-radius: 6px;
+    padding: 12px;
+}
+
+.adminai-order-band-col__label {
+    font-weight: 700;
+    font-size: 13px;
+    color: #222;
+}
+
+.adminai-order-band-col__bar {
+    height: 10px;
+    border-radius: 999px;
+    background: #ebebeb;
+    overflow: hidden;
+}
+
+.adminai-order-band-col__count {
+    font-size: 15px;
+    font-weight: 600;
+    color: #111;
+}
+
+.adminai-order-band-col__caption {
+    font-size: 12px;
+    color: #555;
+}
+
+.adminai-order-band-col__pct {
+    font-size: 11px;
+    color: #888;
+}
+
+.adminai-customer-orders-chart-header {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.adminai-customer-orders-chart-header .adminai-meta-line {
+    margin: 0;
+}
+
+.adminai-customer-insights-row {
+    align-items: start;
+}
+
+.adminai-customer-orders-band-list--4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.adminai-customer-engagement-bars {
+    display: grid;
+    gap: 16px;
+}
+
+.adminai-engagement-row {
+    display: grid;
+    gap: 4px;
+}
+
+.adminai-engagement-row__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.adminai-engagement-row__label {
+    font-weight: 600;
+    font-size: 13px;
+    color: #222;
+}
+
+.adminai-engagement-row__count {
+    font-size: 12px;
+    color: #666;
+}
+
+.adminai-engagement-row__desc {
+    font-size: 11px;
+    color: #888;
+    margin-top: 2px;
+}
+
+.adminai-engagement-inactive  { background: #9ca3af; }
+.adminai-engagement-active     { background: #2ca01c; }
+.adminai-engagement-super      { background: #007bdb; }
+.adminai-engagement-superduper { background: #6f42c1; }
+
+.adminai-customer-order-band-caption {
+    margin: -4px 0 8px 98px;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.adminai-customer-period-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.adminai-customer-period-card__hint {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #666;
+}
+
+.adminai-customer-period-card__label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+    color: #555;
+}
+
+.adminai-customer-period-card__label select,
+.adminai-customer-lookup__controls input {
+    min-height: 32px;
+    border: 1px solid #c2c2c2;
+    border-radius: 3px;
+    padding: 6px 8px;
+    background: #fff;
+}
+
+.adminai-customer-summary__grid,
+.adminai-customer-profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+}
+
+.adminai-customer-lookup {
+    display: grid;
+    gap: 12px;
+}
+
+.adminai-customer-lookup__controls {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) auto;
+    gap: 10px;
+    align-items: end;
+}
+
+.adminai-customer-lookup__controls label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+    color: #555;
+}
+
+.adminai-customer-lookup__actions {
+    display: flex;
+    gap: 8px;
+}
+
+.adminai-customer-address-grid,
+.adminai-customer-recent-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+}
+
+.adminai-customer-address-card,
+.adminai-customer-recent-card {
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+    background: #fff;
+    padding: 10px;
+    display: grid;
+    gap: 4px;
+    font-size: 12px;
+}
+
+.adminai-customer-address-card__type,
+.adminai-customer-recent-card__sku {
+    font-size: 11px;
+    font-weight: 700;
+    color: #003b66;
+    text-transform: uppercase;
+}
+
+@media (max-width: 1024px) {
+    .adminai-dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .adminai-sidebar {
+        position: static;
+    }
+
+    .adminai-toolbar {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .adminai-toolbar__actions {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+    }
+
+    .adminai-grid-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .adminai-zone-grid-2,
+    .adminai-zone-grid-3,
+    .adminai-overview-kpis,
+    .adminai-segment-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .adminai-chart-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .adminai-alert-item {
+        grid-template-columns: 1fr;
+    }
+
+    .adminai-alert-item__time {
+        text-align: left;
+    }
+
+    .adminai-sku-tracker__controls {
+        grid-template-columns: 1fr;
+    }
+
+    .adminai-customer-period-card__header,
+    .adminai-customer-lookup__controls {
+        grid-template-columns: 1fr;
+        display: grid;
+    }
+
+    .adminai-customer-order-band-caption {
+        margin-left: 0;
+    }
+
+    .adminai-sku-product-card,
+    .adminai-sku-child-card {
+        grid-template-columns: 1fr;
+    }
+}

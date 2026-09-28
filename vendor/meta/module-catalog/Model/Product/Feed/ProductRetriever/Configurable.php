@@ -1,0 +1,186 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+namespace Meta\Catalog\Model\Product\Feed\ProductRetriever;
+
+use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Catalog\Model\ResourceModel\Product\Collection as ProductCollection;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Meta\BusinessExtension\Helper\FBEHelper;
+use Meta\BusinessExtension\Model\System\Config as SystemConfig;
+use Meta\Catalog\Model\Product\Feed\ProductRetrieverInterface;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable as ConfigurableType;
+use Magento\Framework\Exception\LocalizedException;
+use Meta\Catalog\Model\ProductRepository;
+
+class Configurable implements ProductRetrieverInterface
+{
+    private const LIMIT = 200;
+
+    /**
+     * @var ProductRepositoryInterface
+     */
+    private $productRepo;
+
+    /**
+     * @var SearchCriteriaBuilder
+     */
+    private $searchCriteriaBuilder;
+
+    /**
+     * @var int
+     */
+    private $storeId;
+
+    /**
+     * @var FBEHelper
+     */
+    private $fbeHelper;
+
+    /**
+     * @var CollectionFactory
+     */
+    private $productCollectionFactory;
+
+    /**
+     * @var ProductRepository
+     */
+    private $metaProductRepo;
+
+    /**
+     * @var SystemConfig
+     */
+    private $systemConfig;
+
+    /**
+     * Constructor
+     *
+     * @param FBEHelper $fbeHelper
+     * @param CollectionFactory $productCollectionFactory
+     * @param ProductRepository $metaProductRepo
+     * @param ProductRepositoryInterface $productRepo
+     * @param SearchCriteriaBuilder $searchCriteriaBuilder
+     * @param SystemConfig $systemConfig
+     */
+    public function __construct(
+        FBEHelper                  $fbeHelper,
+        CollectionFactory          $productCollectionFactory,
+        ProductRepository          $metaProductRepo,
+        ProductRepositoryInterface $productRepo,
+        SearchCriteriaBuilder      $searchCriteriaBuilder,
+        SystemConfig               $systemConfig
+    ) {
+        $this->fbeHelper = $fbeHelper;
+        $this->productCollectionFactory = $productCollectionFactory;
+        $this->metaProductRepo = $metaProductRepo;
+        $this->productRepo = $productRepo;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->systemConfig = $systemConfig;
+    }
+
+    /**
+     * Set store id
+     *
+     * @param int $storeId
+     * @return ProductRetrieverInterface
+     */
+    public function setStoreId($storeId): ProductRetrieverInterface
+    {
+        $this->storeId = $storeId;
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * @throws LocalizedException
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     */
+    public function retrieve($offset = 1, $limit = self::LIMIT): array
+    {
+        $storeId = $this->storeId ?? $this->fbeHelper->getStore()->getId();
+
+        /** @var ProductCollection $configurableCollection */
+        $configurableCollection = $this->productCollectionFactory->create();
+        $configurableCollection->addAttributeToSelect('*')
+            ->addAttributeToFilter([
+                [
+                    'attribute' => 'send_to_facebook',
+                    'neq' => \Magento\Eav\Model\Entity\Attribute\Source\Boolean::VALUE_NO
+                ],
+                [
+                    'attribute' => 'send_to_facebook',
+                    'null' => true
+                ]
+            ], null, 'left')
+            ->addAttributeToFilter('type_id', ConfigurableType::TYPE_CODE)
+            ->addMediaGalleryData()
+            ->addStoreFilter($storeId)
+            ->setStoreId($storeId);
+
+        $configurableCollection->getSelect()->limit($limit, $offset);
+
+        if ($this->systemConfig->isAdditionalAttributesSyncDisabled()) {
+            $products = $configurableCollection->getData();
+        } else {
+            $productData = $configurableCollection->getData();
+            $entityIds = [];
+            foreach ($productData as $item) {
+                if (isset($item['entity_id']) && ($item['entity_id'] != null || $item['entity_id'] != '')) {
+                    $entityIds[] = $item['entity_id'];
+                }
+            }
+            if (empty($entityIds)) {
+                return [];
+            }
+
+            // in case of unsupported product we need complete data for products which is return by product repo api.
+            $search = $this
+                ->searchCriteriaBuilder
+                ->addFilter('entity_id', $entityIds, 'in')
+                ->addFilter('store_id', $storeId)
+                ->create();
+
+            $products = $this->productRepo->getList($search)->getItems();
+        }
+
+        $simpleProducts = [];
+
+        foreach ($products as $product) {
+            /** @var Product $product */
+            /** @var ConfigurableType $configurableType */
+            $configurableType = $product->getTypeInstance();
+            foreach ($configurableType->getUsedProducts($product) as $childProduct) {
+                $simpleProducts[] = $this->metaProductRepo->loadParentProductData($childProduct, $product);
+            }
+        }
+        return $simpleProducts;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getLimit()
+    {
+        return self::LIMIT;
+    }
+}

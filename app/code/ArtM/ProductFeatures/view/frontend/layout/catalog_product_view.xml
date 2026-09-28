@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<page layout="1column" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="ArtM_ProductFeatures::css/features.css" />
+        <script src="ArtM_ProductFeatures::js/features.js" />       
+     </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="ArtM\ProductFeatures\Block\Features" before="product.info.details" name="product-featured-attributes" template="ArtM_ProductFeatures::feature-attributes.phtml"/>
+            <block class="ArtM\ProductFeatures\Block\Features" before="feature-attributes.phtml" name="product-tabs" template="ArtM_ProductFeatures::products-details-tab.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

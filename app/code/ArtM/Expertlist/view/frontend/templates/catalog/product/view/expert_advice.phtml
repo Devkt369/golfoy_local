@@ -1,0 +1,40 @@
+<style>
+    a.expert_advice {
+        color: black;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 10px;
+        font-size: 12px;
+        text-decoration: none;
+        display:none;
+    }
+</style>
+<?php
+
+    $link = '';
+    $_product = $block->getProduct();
+    $prd_id = $_product->getId();
+
+
+    $product_page_url = $this->getLayout()
+        ->createBlock('Magento\Cms\Block\Block')
+        ->setBlockId('product_page_url')
+        ->toHtml();
+    //echo $this->getLayout()->createBlock('cms/block')->setBlockId('product_page_url')->toHtml();
+    $product_page_url = str_replace('<p>' , '' , $product_page_url);
+    $product_page_url = str_replace('</p>' , '' , $product_page_url);
+
+
+    $product_page_urls_arr = explode('|' , $product_page_url);
+
+    foreach($product_page_urls_arr as $product_page_urls){
+        $product_page_urls_link = explode(',' , $product_page_urls);
+        if( $prd_id == $product_page_urls_link[0] ){
+            $link = $product_page_urls_link[1];
+        }
+    }
+
+    if($link != ''){
+        //echo "<a class='expert_advice' href='".$link."' target='_blank'>Expert Advice</a>";
+    }
+?>

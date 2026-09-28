@@ -1,0 +1,278 @@
+<style>
+    .box-tocart {
+    z-index: 1 !important;
+}
+@media only screen and (max-width:767px){
+    aside.modal-popup.modal-slide {
+    margin-top: 35px;
+}
+    
+}
+  header.page-header.fixed{
+   z-index: 111 !important;
+}
+</style>
+<?php
+
+/**
+ * NOTICE OF LICENSE
+ * You may not sell, distribute, sub-license, rent, lease or lend complete or portion of software to anyone.
+ *
+ * DISCLAIMER
+ * Do not edit or add to this file if you wish to upgrade to newer
+ * versions in the future.
+ *
+ * @package   RLTSquare_ProductReviewImages
+ * @copyright Copyright (c) 2017 RLTSquare (https://www.rltsquare.com)
+ * @contacts  support@rltsquare.com
+ * @license  See the LICENSE.md file in module root directory
+ */
+?>
+<?php
+/** @var Magento\Review\Block\Product\View\ListView $block */
+?>
+<?php
+$_items = $block->getReviewsCollection()->getItems();
+// var_dump($_items);die('asdfsdf');
+$format = $block->getDateFormat() ?: \IntlDateFormatter::SHORT;
+
+$_objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$storeManager = $_objectManager->create('\Magento\Store\Model\StoreManagerInterface');
+$mediaDirectoryPath = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'review_images';
+
+?>
+<?php if (count($_items)): ?>
+    <div class="block review-list" id="customer-reviews">
+        <div class="block-title">
+            <strong><?php /* @escapeNotVerified */
+                echo __('Customer Reviews') ?></strong>
+        </div>
+        <div class="block-content">
+            <div class="toolbar review-toolbar">
+                <?php echo $block->getChildHtml('toolbar') ?>
+            </div>
+            <ol class="items review-items custom_class">
+                <?php $imgcnt = 0; foreach ($_items as $_review):  $reviewId = $_review->getId();?>
+                    <li id ="reviewli_<?php echo $reviewId;?>" class="item review-item" itemscope itemprop="review" itemtype="http://schema.org/Review">
+                        <div class="author_name_review">
+                            <div class="author_initial">
+                                <span class="initial_inside profile_text">
+                                    <?php
+                                        $name = $block->escapeHtml($_review->getNickname()); 
+                                        echo $initial = $name[0]
+                                    ?>
+                                </span>
+                            </div>
+                            <div class="author_name">
+                                <strong class="review-details-value" itemprop="author">
+                                    <?= $name ?>
+                                </strong>
+                            </div>
+                        </div>
+                        <div class="review_details_and_title">
+                            <div class="review_details">
+                                <?php foreach ($_review->getRatingVotes() as $_vote): ?>
+                                    <div class="rating-summary item rat_items"itemprop="reviewRating" itemscope itemtype="http://schema.org/Rating">
+                                        <div class="rating-result"
+                                             id="review_<?= /* @noEscape */ $_review->getReviewId()
+                                                ?>_vote_<?= /* @noEscape */ $_vote->getVoteId() ?>"
+                                             title="<?= $block->escapeHtmlAttr($_vote->getPercent()) ?>%">
+                                            <meta itemprop="worstRating" content = "1"/>
+                                            <meta itemprop="bestRating" content = "100"/>
+                                            <span>
+                                                <span itemprop="ratingValue"><?= $block->escapeHtml($_vote->getPercent()) ?>%</span>
+                                            </span>
+                                        </div>
+                                        <?= /* @noEscape */ $secureRenderer->renderStyleAsTag(
+                                            'width:' . $_vote->getPercent() . '%',
+                                            'div#review_' . $_review->getReviewId() . '_vote_' . $_vote->getVoteId() . ' span'
+                                        ) ?>
+                                    </div>
+                                    <?php endforeach; ?>
+                            </div>
+                            <div class="review_title">
+                                <div class="review-title" itemprop="name">
+                                    <?php
+                                        $review_title = $block->escapeHtml($_review->getTitle());
+                                        if (strpos( strtolower($review_title) , 'reviewing') !== false) {
+                                            echo "<span class='hide'>".$review_title."</span>";
+                                        }else{
+                                            echo $review_title;
+                                        }
+                                    ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="review_date">
+                            <time class="review-details-value"
+                                  itemprop="datePublished"
+                                  datetime="<?= $block->escapeHtmlAttr($block->formatDate(
+                                      $_review->getCreatedAt(),
+                                      $format
+                                  )) ?>">
+
+                                <?php
+                                    $date = date_create( $block->escapeHtml($block->formatDate($_review->getCreatedAt(), $format)) );
+                                    echo date_format( $date,"j F Y" );
+                                ?>
+                            </time>
+                        </div>
+                        <div class="review_description">
+                            <div class="review-content" itemprop="description">
+                        <?php
+                          $editreview = $_review->getDetail();
+                          $newString = str_replace("|empty|", "", $editreview);         
+                        ?>
+                                <?= /* @noEscape */ nl2br($block->escapeHtml($newString)) ?>
+                            </div>    
+                        </div>
+                        
+                        
+
+                        <div class="review-attachments">
+                            <p class="hide review-attachments-label">Attachments</p>
+                            <div class="review-media-value">
+                                <?php
+                                $thisReviewMediaCollection = $_objectManager->get('\RLTSquare\ProductReviewImages\Model\ReviewMediaFactory')
+                                    ->create()
+                                    ->getCollection()
+                                    ->addFieldToFilter('review_id', $_review->getReviewId());
+                                if (count($thisReviewMediaCollection)){                                   
+                                    foreach ($thisReviewMediaCollection as $m) {   
+                                        $imgcnt = $imgcnt +1;                                    
+                                        ?>
+                                        <div class="image item base-image" data-role="image">
+                                            <div class="product-image-wrapper">
+                                                <img data-reviewid = "<?php echo $reviewId;?>" rel = "<?php echo $imgcnt;?>" class="product-image" data-role="image-element"
+                                                     src="<?php echo rtrim($mediaDirectoryPath, '/') . $m->getMediaUrl(); ?>"
+                                                     alt="Image">
+                                            </div>
+                                        </div>
+                                    <?php   }  } ?>   
+                            </div>
+                        </div>
+                    </li>
+                <?php endforeach; ?>
+            </ol>
+
+            <div id="review-image-modal" style="display:none;">
+            <div class="review_btn_section">
+                <div class="rev_btn_left">
+            <button class="slider-button slider-button-left"><span id="prevarr"></span></button></div>
+            <div class="rev_btn_right">
+            <button class="slider-button slider-button-right"><span id="nextarr"></span></button></div></div>
+            <!-- <span id="prevarr">&#8592;</span> &nbsp; &nbsp;<span id="nextarr">&#8594;</span> -->
+               <div id="review-image-modal-content"></div>
+                
+            </div>
+
+            <script>
+                require(
+                    [
+                        'jquery',
+                        'Magento_Ui/js/modal/modal'
+                    ],
+                    function ($, modal) {
+                        var totalimgs =  $(".product-image").length;
+                        totalimgs = parseInt(totalimgs);
+                        $('body').on('click', ".product-image", function() {
+                       // $(".product-image").on('click', function () {
+                            var rel = $(this).attr('rel');
+                            var reviewid = $(this).attr('data-reviewid');
+                            var reviewhtmlli = $("#reviewli_"+reviewid).html();
+                            var reviewhtml = '<li class="item review-item">' + reviewhtmlli + '</li>';
+                             //update code of popup - 18-03-2023
+                             if ($(window).innerWidth() >= 768) {
+                                reviewhtml = '<div class="col-md-4 review_text_sec">' + reviewhtml + '</div>';
+                            }
+
+                            // Add a class for mobile screens
+                            if ($(window).innerWidth() < 768) {
+                                reviewhtml = '<div class="col-12 review_text_sec">' + reviewhtml + '</div>';
+                            }
+
+                            // Add a class for tablet screens
+                            if ($(window).innerWidth() >= 768 && $(window).innerWidth() < 992) {
+                                reviewhtml = '<div class="col-lg-4 col-md-6 review_text_sec">' + reviewhtml + '</div>';
+                            }
+
+                            //end
+
+                            var nextrel = parseInt(rel) + 1;
+                            if(nextrel > totalimgs){nextrel = 1;}
+
+                            var prevrel = parseInt(rel) - 1;
+                            if(prevrel < 1){prevrel = totalimgs;}
+
+                            $("#prevarr").attr('rel',prevrel);
+                            $("#nextarr").attr('rel',nextrel);                           
+                            
+                            $("#review-image-modal-content").html('<div class="row"></div>');
+                            $("#review-image-modal-content").prepend(reviewhtml + '<div class="col-md-8 col-sm-8 col-xs-12 review_img_sec"><img id="review-image-lg"  src="' + $(this).attr("src") + '"/></div>');
+
+
+                            $("#review-image-modal").modal({
+                                type: 'popup',
+                                title: 'Review Image',
+                                modalClass: 'my-custom-class',
+                                clickableOverlay: true,
+                                buttons: [],
+                                responsive: true
+                            }).modal('openModal').css({"text-align": "center"});
+                        });
+                        //border-black
+                        $('#review-image-modal').on('click', "#prevarr,#nextarr,.product-image", function() {
+                        var torel = $(this).attr('rel'); 
+                        var $newsrc = $('.product-image[rel="'+torel +'"]').attr("src");
+                        var reviewid = $('.product-image[rel="'+torel +'"]').attr('data-reviewid');
+                        $('.product-image').removeClass('border-black');
+                        $('.product-image[rel="'+torel +'"]').addClass('border-black');
+                        var reviewhtmlli = $("#reviewli_"+reviewid).html();
+                        var reviewhtml = '<li class="item review-item">' + reviewhtmlli + '</li>';
+
+
+                                    // border black end 
+
+                             //update code of popup - 18-03-2023
+                             if ($(window).innerWidth() >= 768) {
+                                reviewhtml = '<div class="col-md-4 review_text_sec">' + reviewhtml + '</div>';
+                            }
+
+                            // Add a class for mobile screens
+                            if ($(window).innerWidth() < 768) {
+                                reviewhtml = '<div class="col-12 review_text_sec">' + reviewhtml + '</div>';
+                            }
+
+                            // Add a class for tablet screens
+                            if ($(window).innerWidth() >= 768 && $(window).innerWidth() < 992) {
+                                reviewhtml = '<div class="col-sm-4 review_text_sec">' + reviewhtml + '</div>';
+                            }
+
+                            //end
+                            $("#review-image-modal-content").html('<div class="row"></div>');
+                            $("#review-image-modal-content").prepend(reviewhtml + '<div class="col-md-8 col-md-8 col-xs-12 review_img_sec"><img id="review-image-lg"  src="' + $newsrc + '"/></div>');
+
+                           
+                            var nextrel = parseInt(torel) + 1;
+                            if(nextrel > totalimgs){nextrel = 1;}
+
+                            var prevrel = parseInt(torel) - 1;
+                            if(prevrel < 1){prevrel = totalimgs;}
+
+                            $("#prevarr").attr('rel',prevrel);
+                            $("#nextarr").attr('rel',nextrel); 
+
+
+                        });
+                        
+                    }
+                );
+            </script>
+
+
+            <div class="toolbar review-toolbar">
+                <?php echo $block->getChildHtml('toolbar') ?>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>

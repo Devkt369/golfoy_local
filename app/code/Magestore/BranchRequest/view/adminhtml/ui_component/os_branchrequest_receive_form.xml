@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2016 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">os_branchrequest_receive_form.os_branchrequest_receive_form_data_source
+            </item>
+            <item name="deps" xsi:type="string">os_branchrequest_receive_form.os_branchrequest_receive_form_data_source</item>
+            <item name="namespace" xsi:type="string">os_branchrequest_receive_form</item>
+        </item>
+        <item name="config" xsi:type="array">
+            <item name="dataScope" xsi:type="string">data</item>
+        </item>
+        <item name="buttons" xsi:type="array">
+            <item name="back" xsi:type="string">Magestore\BranchRequest\Block\Adminhtml\InventoryTransfer\Receive\BackToBranch</item>
+            <item name="print" xsi:type="string">Magestore\BranchRequest\Block\Adminhtml\InventoryTransfer\Receive\PrintReceive</item>
+            <item name="export" xsi:type="string">Magestore\BranchRequest\Block\Adminhtml\InventoryTransfer\Receive\Export</item>
+        </item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+        <item name="childrenFromMeta" xsi:type="boolean">true</item>
+    </argument>
+    <dataSource name="os_branchrequest_receive_form_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">Magestore\BranchRequest\Ui\DataProvider\InventoryTransfer\Receive\ReceiveView</argument>
+            <argument name="name" xsi:type="string">os_branchrequest_receive_form_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">receive_id</argument>
+            <argument name="requestFieldName" xsi:type="string">id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="submit_url" xsi:type="url" path="*/inventoryTransfer/save"/>
+                </item>
+            </argument>
+        </argument>
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+    </dataSource>
+    <!--General Information-->
+    <fieldset name="receive_information">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="label" xsi:type="string" translate="true"></item>
+                <item name="collapsible" xsi:type="boolean">false</item>
+            </item>
+        </argument>
+        <insertListing name="os_branchrequest_receive_product_view">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="cssclass" xsi:type="string">noclass</item>
+                </item>
+            </argument>
+            <settings>
+                <autoRender>true</autoRender>
+                <ns>os_branchrequest_receive_product_view</ns>
+                <externalProvider>os_branchrequest_receive_product_view.os_branchrequest_receive_product_view_data_source
+                </externalProvider>
+                <dataLinks>
+                    <imports>false</imports>
+                    <exports>true</exports>
+                </dataLinks>
+                <externalFilterMode>true</externalFilterMode>
+                <imports>
+                    <link name="receive_id">
+                        ${ $.provider }:data.receive_id
+                    </link>
+                </imports>
+                <exports>
+                    <link name="receive_id">${ $.externalProvider }:params.receive_id</link>
+                </exports>
+            </settings>
+        </insertListing>
+        <field name="note" formElement="input">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">Magestore_BranchRequest/js/form/element/html</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Against Delivery Note</label>
+                <dataScope>note</dataScope>
+            </settings>
+        </field>
+        <field name="remarks" formElement="textarea">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">Magestore_BranchRequest/js/form/element/html</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Remarks</label>
+                <dataScope>remarks</dataScope>
+            </settings>
+        </field>
+    </fieldset>
+</form>

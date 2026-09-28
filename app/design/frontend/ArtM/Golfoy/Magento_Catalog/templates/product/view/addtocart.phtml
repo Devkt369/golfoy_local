@@ -1,0 +1,89 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var $block \Magento\Catalog\Block\Product\View */
+?>
+<?php $_product = $block->getProduct(); 
+
+if($_product->getData('enable_bulk_ordering') == 1){
+    return;
+}
+
+?>
+
+<?php $isPrebookEnabled = ($_product->getData('prebook') == 1); ?>
+<?php $buttonTitle = ($isPrebookEnabled) ? __('PRE-BOOK') : __('Add to Cart'); ?>
+<?php if ($_product->isSaleable()) :?>
+<div class="box-tocart">
+    <div class="fieldset">
+        <?php if ($block->shouldRenderQuantity()) :?>
+        <div class="product-actions-row">
+            <div class="field qty">
+                <label class="label" for="qty"><span><?= $block->escapeHtml(__('Qty')) ?></span></label>
+                <div class="control">
+                    <div class="qty-control">
+                        <button type="button" class="qty-btn qty-minus" onclick="decrementQty()">-</button>
+                        <input type="number"
+                               name="qty"
+                               id="qty"
+                               min="1"
+                               value="<?= $block->getProductDefaultQty() * 1 ?>"
+                               title="<?= $block->escapeHtmlAttr(__('Qty')) ?>"
+                               class="input-text qty"
+                               data-validate="<?= $block->escapeHtml(json_encode($block->getQuantityValidators())) ?>"
+                               />
+                        <button type="button" class="qty-btn qty-plus" onclick="incrementQty()">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="actions">
+                <button type="submit"
+                        title="<?= $block->escapeHtmlAttr($buttonTitle) ?>"
+                        class="action primary tocart"
+                        id="product-addtocart-button" disabled>
+                    <span><?= $block->escapeHtml($buttonTitle) ?></span>
+                </button>
+            </div>
+            <div class="wishlist-action">
+                <?php
+                echo $block->getLayout()
+                    ->createBlock(\Magento\Wishlist\Block\Catalog\Product\View\AddTo\Wishlist::class)
+                    ->setTemplate('Magento_Wishlist::catalog/product/view/addto/wishlist.phtml')
+                    ->toHtml();
+                ?>
+            </div>
+        </div>
+        <?php else: ?>
+        <div class="product-actions-row no-qty">
+            <div class="actions">
+                <button type="submit"
+                        title="<?= $block->escapeHtmlAttr($buttonTitle) ?>"
+                        class="action primary tocart"
+                        id="product-addtocart-button" disabled>
+                    <span><?= $block->escapeHtml($buttonTitle) ?></span>
+                </button>
+            </div>
+            <div class="wishlist-action">
+                <?php
+                echo $block->getLayout()
+                    ->createBlock(\Magento\Wishlist\Block\Catalog\Product\View\AddTo\Wishlist::class)
+                    ->setTemplate('Magento_Wishlist::catalog/product/view/addto/wishlist.phtml')
+                    ->toHtml();
+                ?>
+            </div>
+        </div>
+        <?php endif; ?>
+        <?= $block->getChildHtml('', true) ?>
+    </div>
+</div>
+<?php endif; ?>
+<script type="text/x-magento-init">
+    {
+        "#product_addtocart_form": {
+            "Magento_Catalog/js/validate-product": {}
+        }
+    }
+</script>

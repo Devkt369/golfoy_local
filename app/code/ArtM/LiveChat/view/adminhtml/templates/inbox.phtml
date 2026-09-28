@@ -1,0 +1,26 @@
+<?php /** @var \ArtM\LiveChat\Block\Adminhtml\Inbox $block */ ?>
+<div id="artm-livechat-inbox" class="artm-inbox">
+    <aside class="artm-inbox__rail">
+        <div class="artm-inbox__rail-head">
+            <h1>Customer Care</h1>
+            <span id="artm-inbox-connection">Connecting...</span>
+        </div>
+        <div id="artm-inbox-list" class="artm-inbox__list" aria-label="Open conversations"></div>
+    </aside>
+    <section class="artm-inbox__thread" aria-label="Selected conversation">
+        <header class="artm-inbox__thread-head">
+            <div><strong id="artm-inbox-customer">Select a conversation</strong><span id="artm-inbox-email"></span></div>
+            <button id="artm-inbox-close" type="button" title="Close conversation" aria-label="Close conversation" disabled>Close chat</button>
+        </header>
+        <div id="artm-inbox-messages" class="artm-inbox__messages" role="log" aria-label="Conversation messages"></div>
+        <form id="artm-inbox-form" class="artm-inbox__form">
+            <input id="artm-inbox-input" maxlength="2000" autocomplete="off" placeholder="Reply to customer..." disabled>
+            <button type="submit" title="Send reply" aria-label="Send reply" disabled>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 20 18-8L3 4v6l12 2-12 2z"/></svg>
+            </button>
+        </form>
+    </section>
+</div>
+<script type="text/x-magento-init">
+    {"#artm-livechat-inbox":{"ArtM_LiveChat/js/inbox":<?= /* @noEscape */ $block->getJsConfig() ?>}}
+</script>

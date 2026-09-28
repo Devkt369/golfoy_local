@@ -1,0 +1,71 @@
+<?php
+declare(strict_types=1);
+
+namespace ArtM\LuxuryCategory\Plugin\Catalog\Model;
+
+use ArtM\LuxuryCategory\Service\LuxuryModeService;
+use Magento\Catalog\Model\Layer\Category as CategoryLayer;
+use Magento\Catalog\Model\ResourceModel\Product\Collection;
+
+/**
+ * When luxury mode is active, restricts the category's product collection
+ * to `luxury = 1` products only.
+ *
+ * Targets `Magento\Catalog\Model\Layer\Category::getProductCollection()`
+ * ONLY — not the base `Layer`, not the Search layer, and deliberately no
+ * plugin on the shared `Magento\Catalog\Model\ResourceModel\Product\
+ * Collection` class itself (see etc/frontend/di.xml comment: that class
+ * is instantiated across the whole site, and plugging it caused a
+ * site-wide memory exhaustion bug unrelated to /luxe pages).
+ *
+ * Filters via `addAttributeToFilter('luxury', 1)` — the same call
+ * Magento's own layered navigation attribute filter
+ * (`Magento\Catalog\Model\Layer\Filter\Attribute`) makes when a shopper
+ * clicks a facet value. Requires `luxury` to be configured as filterable
+ * in layered navigation (and, on Elasticsearch/OpenSearch stores, indexed
+ * for search) to take effect through the search engine's own query.
+ *
+ * KNOWN LIMITATION on Elasticsearch/OpenSearch-backed catalog listing:
+ * the search engine can bake the toolbar's page size into its own query
+ * before this filter narrows the result further, meaning pagination
+ * beyond page 1 can undercount versus the true total. A more complete fix
+ * (widening the page temporarily, filtering, then paginating in PHP) was
+ * attempted and reverted after it caused the memory issue described
+ * above — see git history on this file and
+ * etc/frontend/di.xml for details. Revisit only with a narrower
+ * mechanism that doesn't require plugins on the shared base collection
+ * class.
+ */
+class LuxuryLayerProductCollectionPlugin
+{
+    private const ATTRIBUTE_CODE = 'luxury';
+
+    /** Guards against filtering the same collection instance twice. */
+    private const APPLIED_FLAG = 'artm_luxury_filter_applied';
+
+    public function __construct(
+        private readonly LuxuryModeService $luxuryModeService
+    ) {
+    }
+
+    /**
+     * @param CategoryLayer $subject
+     * @param Collection $result
+     * @return Collection
+     */
+    public function afterGetProductCollection(CategoryLayer $subject, Collection $result): Collection
+    {
+        if (!$this->luxuryModeService->isLuxuryMode()) {
+            return $result;
+        }
+
+        if ($result->getFlag(self::APPLIED_FLAG)) {
+            return $result;
+        }
+
+        $result->addAttributeToFilter(self::ATTRIBUTE_CODE, 1);
+        $result->setFlag(self::APPLIED_FLAG, true);
+
+        return $result;
+    }
+}

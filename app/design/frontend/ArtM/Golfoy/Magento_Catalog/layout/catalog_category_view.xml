@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <link src="js/category-page.js"/>
+        <css src="css/category-page.css"/>
+    </head>
+    <body>
+        <referenceContainer name="columns.top">
+            <referenceBlock name="page.main.title" remove="true" />
+            <block class="Magento\Catalog\Block\Category\View" name="page.main.title.category" template="Magento_Catalog::catalog/category/title.phtml"/>
+        </referenceContainer>
+        <move element="category.description" destination="content" before="product_list_toolbar"/>    
+        <move element="breadcrumbs" destination="category.view.container" after="category_top_block" />
+        <referenceContainer name="category.view.container">
+            <block class="Magento\Catalog\Block\Category\View" name="category_top_block" template="Magento_Catalog::catalog/category/top_block.phtml" after="breadcrumbs" />
+        
+        </referenceContainer>
+    </body>
+</page>

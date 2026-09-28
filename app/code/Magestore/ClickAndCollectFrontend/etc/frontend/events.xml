@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2015 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <!-- Click And Collect Send Email To Owner -->
+    <event name="checkout_submit_all_after">
+        <observer name="click_and_collect_checkout_submit_all_after" instance="Magestore\ClickAndCollectFrontend\Observer\SalesModelServiceQuoteSubmitSuccess" />
+    </event>
+</config>

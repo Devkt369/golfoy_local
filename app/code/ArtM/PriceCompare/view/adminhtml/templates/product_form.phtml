@@ -1,0 +1,219 @@
+<?php
+// $curl = curl_init();
+// curl_setopt_array($curl, [
+//     CURLOPT_URL => 'http://127.0.0.1:5001/get-price?url=https://golfoy.com/callaway-supersoft-distressed-blue-stripe-golf-balls-white.html&selector=.product-info-price%20.special-price%20.price-wrapper%20.price',
+//     CURLOPT_RETURNTRANSFER => true,
+//     CURLOPT_FOLLOWLOCATION => true,
+//     CURLOPT_TIMEOUT => 30,
+//     CURLOPT_VERBOSE => true,
+// ]);
+// $response = curl_exec($curl);
+// if (curl_errno($curl)) {
+//     echo '<pre>CURL Error: ' . curl_error($curl) . '</pre>';
+// } else {
+//     echo '<pre>' . htmlspecialchars($response) . '</pre>';
+// }
+// curl_close($curl);
+?>
+<form id="product_form" method="post" enctype="multipart/form-data" action="<?= $block->getUrl('pricecompare/manageproducts/save') ?>">
+    <?= $block->getBlockHtml('formkey') ?>
+    <div class="admin__field">
+        <label for="product_name" class="admin__field-label">Product Name</label>
+        <div class="admin__field-control">
+            <input type="text" name="product_name" id="product_name" class="admin__control-text" required />
+        </div>
+    </div>
+    <div class="admin__field">
+        <label for="sku" class="admin__field-label">SKU</label>
+        <div class="admin__field-control">
+            <input type="text" name="sku" id="sku" class="admin__control-text" required />
+        </div>
+    </div>
+    <div class="admin__field">
+        <label for="product_image" class="admin__field-label">Product Image</label>
+        <div class="admin__field-control">
+            <input type="file" name="product_image" id="product_image" class="admin__control-file" />
+        </div>
+    </div>
+    <div class="admin__field">
+        <label for="brand" class="admin__field-label">Brand</label>
+        <div class="admin__field-control">
+            <select name="brand" id="brand" class="admin__control-select"></select>
+            <button type="button" id="add_brand" class="action-default">Add</button>
+        </div>
+    </div>
+    <div class="admin__field">
+        <label for="category" class="admin__field-label">Category</label>
+        <div class="admin__field-control">
+            <select name="category" id="category" class="admin__control-select"></select>
+            <button type="button" id="add_category" class="action-default">Add</button>
+        </div>
+    </div>
+    <div class="admin__field">
+        <label for="websites" class="admin__field-label">Select Websites</label>
+        <div class="admin__field-control">
+            <select name="websites[]" id="websites" class="admin__control-multiselect" multiple></select>
+        </div>
+    </div>
+    <div id="website_urls_container"></div>
+    <div class="admin__field">
+        <label for="custom_selector" class="admin__field-label">Custom Selector</label>
+        <div class="admin__field-control">
+            <input type="text" name="custom_selector" id="custom_selector" class="admin__control-text" placeholder="Enter custom selector" />
+        </div>
+    </div>
+    <script type="text/javascript">
+    // Use correct URLs for each AJAX endpoint
+    var ajaxWebsitesUrl = '<?= $block->getUrl("pricecompare/ajax/websites") ?>';
+    var ajaxListdataUrl = '<?= $block->getUrl("pricecompare/ajax/listdata") ?>';
+    var ajaxBrandUrl = '<?= $block->getUrl("pricecompare/ajax/brand") ?>';
+    var ajaxCategoryUrl = '<?= $block->getUrl("pricecompare/ajax/category") ?>';
+    require(['jquery'], function($) {
+        $(function() {
+            // Debug: Print AJAX URLs for manual testing
+            console.log('Websites AJAX: GET', ajaxWebsitesUrl);
+            // Populate websites
+            $.ajax({
+                url: ajaxWebsitesUrl,
+                type: 'GET',
+                dataType: 'json',
+                showLoader: true,
+                success: function(resp) {
+                    console.log('Websites AJAX response:', resp);
+                    if(resp.success && resp.websites) {
+                        var select = $('#websites');
+                        select.empty();
+                        $.each(resp.websites, function(i, w) {
+                            select.append('<option value="'+w.website_id+'">'+w.name+'</option>');
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Websites AJAX error:', status, error, xhr.responseText);
+                }
+            });
+            // Debug: Print Brands AJAX request for manual testing
+            console.log('Brands AJAX: GET', ajaxListdataUrl, {type: 'brand'});
+            // Populate brands
+            $.ajax({
+                url: ajaxListdataUrl,
+                type: 'GET',
+                data: {type: 'brand'},
+                dataType: 'json',
+                showLoader: true,
+                success: function(resp) {
+                    console.log('Brands AJAX response:', resp);
+                    if(resp.success && resp.items) {
+                        var select = $('#brand');
+                        select.empty();
+                        $.each(resp.items, function(i, item) {
+                            select.append('<option value="'+item.brand_id+'">'+item.name+'</option>');
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Brands AJAX error:', status, error, xhr.responseText);
+                }
+            });
+            // Debug: Print Categories AJAX request for manual testing
+            console.log('Categories AJAX: GET', ajaxListdataUrl, {type: 'category'});
+            // Populate categories
+            $.ajax({
+                url: ajaxListdataUrl,
+                type: 'GET',
+                data: {type: 'category'},
+                dataType: 'json',
+                showLoader: true,
+                success: function(resp) {
+                    console.log('Categories AJAX response:', resp);
+                    if(resp.success && resp.items) {
+                        var select = $('#category');
+                        select.empty();
+                        $.each(resp.items, function(i, item) {
+                            select.append('<option value="'+item.category_id+'">'+item.name+'</option>');
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Categories AJAX error:', status, error, xhr.responseText);
+                }
+            });
+        });
+    });
+    </script>
+    <div class="admin__field">
+        <button type="submit" class="action-default scalable save primary">Save Product</button>
+    </div>
+</form>
+<script type="text/javascript">
+    require(['ArtM_PriceCompare/js/brand_category_popup', 'ArtM_PriceCompare/js/product_form']);
+</script>
+<!-- Popups for add brand/category will be implemented in JS -->
+
+
+
+<h2>All Products</h2>
+<table class="admin__table-primary">
+    <thead>
+        <tr>
+            <th>ID</th>
+            
+            <th>Image</th>
+            <th>Name</th>
+            <th>SKU</th>
+            <th>Brand</th>
+            <th>Category</th>
+            <th>Websites</th>
+            <th>Custom Selector</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $productCollection = $objectManager->create('ArtM\\PriceCompare\\Model\\ResourceModel\\Product\\Collection');
+        // Preload brand, category, and website names
+        $brandMap = [];
+        $categoryMap = [];
+        $websiteMap = [];
+        $resource = $objectManager->get('Magento\\Framework\\App\\ResourceConnection');
+        $connection = $resource->getConnection();
+        foreach ($connection->fetchAll('SELECT brand_id, name FROM ' . $resource->getTableName('artm_pricecompare_brand')) as $row) {
+            $brandMap[$row['brand_id']] = $row['name'];
+        }
+        foreach ($connection->fetchAll('SELECT category_id, name FROM ' . $resource->getTableName('artm_pricecompare_category')) as $row) {
+            $categoryMap[$row['category_id']] = $row['name'];
+        }
+        foreach ($connection->fetchAll('SELECT website_id, name FROM ' . $resource->getTableName('artm_pricecompare_website')) as $row) {
+            $websiteMap[$row['website_id']] = $row['name'];
+        }
+        foreach ($productCollection as $product): ?>
+        <tr>
+            
+            <td><?= $product->getId() ?></td>
+            <td><?php if ($product->getImage()): ?><img src="<?= $block->getBaseUrl(['_type' => \Magento\Framework\UrlInterface::URL_TYPE_MEDIA]) ."media/". $product->getImage() ?>" width="50" /><?php endif; ?></td>
+            <td><?= $product->getName() ?></td>
+            <td><?= $product->getSku() ?></td>
+            
+            <td><?= isset($brandMap[$product->getBrandId()]) ? $brandMap[$product->getBrandId()] : $product->getBrandId() ?></td>
+            <td><?= isset($categoryMap[$product->getCategoryId()]) ? $categoryMap[$product->getCategoryId()] : $product->getCategoryId() ?></td>
+            <td>
+                <?php
+                $table = $resource->getTableName('artm_pricecompare_product_website');
+                $websiteIds = $connection->fetchCol('SELECT website_id FROM ' . $table . ' WHERE product_id = ?', [$product->getId()]);
+                $websiteNames = [];
+                foreach ($websiteIds as $wid) {
+                    $websiteNames[] = isset($websiteMap[$wid]) ? $websiteMap[$wid] : $wid;
+                }
+                echo implode(', ', $websiteNames);
+                ?>
+            </td>
+            <td><?= $product->getCustomSelector() ?></td>
+            <td>
+                <a href="#" class="action-edit">Edit</a> |
+                <a href="#" class="action-delete">Delete</a>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>

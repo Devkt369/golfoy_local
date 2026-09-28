@@ -1,0 +1,25 @@
+<div class="artm-cs-location-preview-wrapper">
+    <div class="artm-cs-location-images-preview">
+        <h3 class="artm-cs-location-preview-title">Selected Location Images</h3>
+        <div class="artm-cs-location-images-grid" data-bind="foreach: selectedLocations()">
+            <div class="artm-cs-location-card">
+                <div class="artm-cs-location-image-container">
+                    <!-- ko if: screenshot -->
+                    <img class="artm-cs-location-image" 
+                         data-bind="attr: { src: screenshot_url, alt: name, title: name }"/>
+                    <!-- /ko -->
+                    <!-- ko ifnot: screenshot -->
+                    <div class="artm-cs-location-no-image">No Image</div>
+                    <!-- /ko -->
+                </div>
+                <div class="artm-cs-location-info">
+                    <div class="artm-cs-location-name" data-bind="text: name"></div>
+                    <div class="artm-cs-location-type" data-bind="text: 'Page: ' + page_type"></div>
+                </div>
+            </div>
+        </div>
+        <!-- ko if: selectedLocations().length === 0 -->
+        <div class="artm-cs-location-empty">No locations selected</div>
+        <!-- /ko -->
+    </div>
+</div>

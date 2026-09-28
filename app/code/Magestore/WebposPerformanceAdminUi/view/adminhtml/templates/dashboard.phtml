@@ -1,0 +1,17 @@
+<?php /* @var \Magestore\WebposPerformanceAdminUi\Block\Adminhtml\PerformanceGraph $block */?>
+<canvas id="canvas"></canvas>
+<script>
+    require(
+        [
+            'jquery',
+            'Magestore_WebposPerformanceAdminUi/js/performance/chart_detail'
+        ], function ($, chartDetail) {
+            $(document).ready(function () {
+                chartDetail(
+                    <?= /* @noEscape */ $block->getDataForGraph(); ?>,
+                    '<?= /* @noEscape */ $block->getRequest()->getParam('action_code'); ?>'
+                );
+            });
+        }
+    );
+</script>

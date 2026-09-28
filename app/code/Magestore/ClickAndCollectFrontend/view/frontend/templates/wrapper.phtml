@@ -1,0 +1,63 @@
+<?php
+
+/**
+ * Copyright © Magestore. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var \Magestore\ClickAndCollectFrontend\Block\Wrapper $block */
+?>
+
+<div class="storepickup-wrapper col-full">
+    <h2 class="title-page"><?= /* @noEscape */ __('Click And Collect') ?></h2>
+    <?= /* @noEscape */ $block->getChildHtml('clickandcollect.searchbox'); ?>
+    <div class="boxes-content">
+        <?= /* @noEscape */ $block->getChildHtml('clickandcollect.mapbox'); ?>
+        <?= /* @noEscape */ $block->getChildHtml('clickandcollect.liststorebox'); ?>
+    </div>
+    <div class="overlay-bg">
+        <img src="<?= /* @noEscape */
+            $block->getViewFileUrl('Magestore_ClickAndCollectFrontend::images/ajax-loader.gif') ?>" alt="overlay"/>
+    </div>
+    <script type="text/javascript">
+        require(
+            [
+                'mage/url',
+            ],
+            function (url) {
+                url.setBaseUrl('<?= /* @noEscape */ $block->getBaseUrl();?>');
+            }
+        );
+        window.googleMapApiKey = "<?= /* @noEscape */ $block->getHelperData()->getGoogleApiKey()?>";
+    </script>
+    <script type="text/javascript">
+        var mcOptions = JSON.parse('<?= /* @noEscape */ $block->getMarkerClusterOptions() ?>');
+        require(
+            [
+                'jquery',
+                'Magestore_ClickAndCollectFrontend/js/liststore',
+                'Magestore_ClickAndCollectFrontend/js/googlemap',
+                'Magestore_ClickAndCollectFrontend/js/makercluster',
+                'Magestore_ClickAndCollectFrontend/js/pagination'
+            ],
+            function ($) {
+                $(document).ready(function ($) {
+                    $('.googlemap').GoogleMap({
+                        paginationWrapper: '.pagination-wrapper',
+                        liststoreContainer: '.list-store-container',
+                        storePopupTemplate: '.popup-store-template',
+                        searchBox: '.search-box',
+                        loader: '.overlay-bg',
+                        defaultRadius: <?= /* @noEscape */ $block->getHelperData()->getDefaultRadius() ?>,
+                        distanceUnit: '<?= /* @noEscape */ $block->getHelperData()->getDistanceUnit() ?>',
+                        circleCenterIcon: '<?= /* @noEscape */
+                            $block->getViewFileUrl('Magestore_ClickAndCollectFrontend/images/circlecenter.png') ?>',
+                        mediaUrlImage: '<?= /* @noEscape */ $block->getMediaUrlImage() ?>',
+                        stockId: <?= /* @noEscape */ $block->getStockId() ?>
+                    });
+                });
+            }
+        );
+        window.googleMapApiKey = "<?= /* @noEscape */ $block->getHelperData()->getGoogleApiKey()?>";
+    </script>
+</div>

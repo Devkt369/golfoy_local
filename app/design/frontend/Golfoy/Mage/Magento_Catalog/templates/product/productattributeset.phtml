@@ -1,0 +1,134 @@
+<?php
+
+$_product = $block->getProduct();
+$pi = $_product->getData('can_print');
+$offer_status = $_product->getData('clearance_sale');
+//$offer_status = $_product->getData('offer_status');
+$player_chocie = $_product->getData('playerschoice');
+$bestseller = $_product->getData('bestseller');
+$limitedstock = $_product->getData('limitedstock');
+$newarrivals = $_product->getData('newarrivals');
+$waterproof = $_product->getData('waterproof');
+$waterrepel = $_product->getData('waterrepel');
+
+$options = $_product->getOptions();
+$prices = [];
+foreach ($options as $option) {
+    $prices[] = (float)$option['price'];
+}
+
+$customPrintOptionTitle = 'Custom';
+
+if (array_sum($prices) == 0) {
+    $customPrintOptionTitle = 'Free';
+} else {
+    $customPrintOptionTitle = 'Custom';
+}
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$attributeSet = $objectManager->create('Magento\Eav\Api\AttributeSetRepositoryInterface');
+$attributeSetRepository = $attributeSet->get($_product->getAttributeSetId());
+$attribute_set_name = $attributeSetRepository->getAttributeSetName();
+
+echo '<div class="tags"><div class="tagouter" style="float:left;">';
+if ($player_chocie) {
+    echo '<div class="tag tag-pc"> <i class="fa fa-trophy" aria-hidden="true"></i> Pro\'s Choice';
+    echo '</div>';
+}
+
+
+// here used club product code
+if ($_product->getData('used_clubs_grade') == '4773') { // Excellent
+    echo '<div class="star-ratings excellent">
+        <i class="fa fa-star"></i>
+        <i class="fa fa-star"></i>
+        <i class="fa fa-star"></i>
+        <i class="fa fa-star"></i>
+        <i class="fa fa-star"></i>
+        <p>Excellent</p>
+    </div>';
+}
+
+if ($_product->getData('used_clubs_grade') == '4774') { // Very Good
+    echo '<div class="star-ratings very-good">
+        <i class="fa fa-star"></i>
+        <i class="fa fa-star"></i>
+        <i class="fa fa-star"></i>
+        <i class="fa fa-star"></i>
+        <i class="fa fa-star-half-o" aria-hidden="true"></i>
+        <p>very-good</p>
+    </div>';
+}
+
+if ($_product->getData('used_clubs_grade') == '4782') { // Good
+    echo '<div class="star-ratings good">
+        <i class="fa fa-star"></i>
+        <i class="fa fa-star"></i>
+        <i class="fa fa-star"></i>
+        <i class="fa fa-star-half-o" aria-hidden="true"></i>
+        <i class="fa fa-star-o"></i>
+        <p>good</p>
+    </div>';
+}
+
+if ($_product->getData('used_clubs_grade') == '4775') { // Value
+    echo '<div class="star-ratings average">
+        <i class="fa fa-star"></i>
+        <i class="fa fa-star"></i>
+       <i class="fa fa-star-half-o" aria-hidden="true"></i>
+        <i class="fa fa-star-o"></i>
+        <i class="fa fa-star-o"></i>
+        <p>average</p>
+    </div>';
+}
+
+
+// here used club product code
+if ($bestseller == 1) {
+    echo '<div class="tag tag-bs"><i class="fa fa-star" aria-hidden="true"></i>
+        Best Seller';
+    echo '</div>';
+}
+if ($newarrivals == 1) {
+    echo '<div class="tag newarrivals">
+        New Arrival';
+    echo '</div>';
+}
+if ($offer_status == 1) {
+    echo '<span class="tag tag-cl" style="float:left;"> Lowest Price';
+    echo '</span>';
+}
+echo "</div>";
+if ($pi == 1) {
+    if ($attribute_set_name == 'Irons' || $attribute_set_name == 'Putter' || $attribute_set_name == 'Wedges' || $attribute_set_name == 'Individual Irons' || $attribute_set_name == 'Hybrid' || $attribute_set_name == 'Drivers' || $attribute_set_name == 'Fairways') {
+        $canPrintLabel = $customPrintOptionTitle . ' Engrave';
+    } else {
+        $canPrintLabel = $customPrintOptionTitle . ' Print';
+    }
+
+    echo '<div class="tag tag-print" style="float:right;"><i class="fa fa-pencil-square-o" aria-hidden="true"></i>' . ' ' . $canPrintLabel;
+    echo '</div>';
+}
+echo '<div class="water_labels">';
+if ($waterproof == 1) {
+    echo '<div class="waterproof_label"><span class="waterproof_img"><img src="' . $block->getBaseUrl() . '/media/wysiwyg/flayers/Water-proof-new.svg"' . '</span></div>';
+}
+if ($waterrepel == 1) {
+    echo '<div class="waterrepel_label"><span class="waterrepel_img"><img src="' . $block->getBaseUrl() . '/media/wysiwyg/flayers/Water-repellent-new.svg"' . '</span></div>';
+}
+echo '</div></div>';
+
+?>
+
+<!-- this temporary script we can remove this any time if we show this similar attribute lable on product page -->
+<script>
+    require(["jquery", "bootstrap"], function (jQuery) {
+        jQuery(document).ready(function () {
+            jQuery('#product-attribute-specs-table tr').each(function() {
+                if (jQuery(this).find('th').text().trim() === 'Similar attribute Label and attribute') {
+                    jQuery(this).css('display', 'none');
+                }
+            });
+        });
+    });
+</script>

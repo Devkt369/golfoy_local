@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">artm_tracking_status_mapping_listing.artm_tracking_status_mapping_listing_data_source</item>
+        </item>
+    </argument>
+
+    <settings>
+        <spinner>artm_tracking_status_mapping_columns</spinner>
+        <deps>
+            <dep>artm_tracking_status_mapping_listing.artm_tracking_status_mapping_listing_data_source</dep>
+        </deps>
+    </settings>
+
+    <!-- ================================================================== -->
+    <!-- Data Source                                                          -->
+    <!-- ================================================================== -->
+    <dataSource name="artm_tracking_status_mapping_listing_data_source"
+                component="Magento_Ui/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">mapping_id</param>
+            </storageConfig>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <aclResource>artm_shipmenttracking::tracking_status</aclResource>
+        <dataProvider class="ArtM\ShipmentTracking\Ui\DataProvider\TrackingStatusMappingDataProvider"
+                      name="artm_tracking_status_mapping_listing_data_source">
+            <settings>
+                <requestFieldName>mapping_id</requestFieldName>
+                <primaryFieldName>mapping_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <!-- ================================================================== -->
+    <!-- Toolbar                                                              -->
+    <!-- ================================================================== -->
+    <listingToolbar name="listing_top">
+        <settings>
+            <sticky>true</sticky>
+        </settings>
+
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <!-- <filterSearch name="fulltext"/> -->
+
+        <filters name="listing_filters">
+            <filterSelect name="is_mapped" provider="${ $.parentName }">
+                <settings>
+                    <captionValue>0</captionValue>
+                    <options class="ArtM\ShipmentTracking\Ui\Component\Listing\Column\IsMappedOptions"/>
+                    <label translate="true">Mapping Status</label>
+                    <dataScope>is_mapped</dataScope>
+                </settings>
+            </filterSelect>
+        </filters>
+
+        <massaction name="listing_massaction"
+                    component="Magento_Ui/js/grid/tree-massactions">
+            <action name="delete">
+                <settings>
+                    <confirm>
+                        <message translate="true">Are you sure you want to delete the selected mappings?</message>
+                        <title translate="true">Delete Mappings</title>
+                    </confirm>
+                    <url path="artm_shipmenttracking/trackingstatus/massDelete"/>
+                    <type>delete</type>
+                    <label translate="true">Delete</label>
+                </settings>
+            </action>
+        </massaction>
+
+        <paging name="listing_paging"/>
+    </listingToolbar>
+
+    <!-- ================================================================== -->
+    <!-- Columns                                                              -->
+    <!-- ================================================================== -->
+    <columns name="artm_tracking_status_mapping_columns">
+
+        <settings>
+            <editorConfig>
+                <param name="clientConfig" xsi:type="array">
+                    <item name="saveUrl" xsi:type="url" path="artm_shipmenttracking/trackingstatus/inlineEdit"/>
+                    <item name="validateBeforeSave" xsi:type="boolean">false</item>
+                </param>
+                <param name="indexField" xsi:type="string">mapping_id</param>
+                <param name="enabled" xsi:type="boolean">true</param>
+                <param name="selectProvider" xsi:type="string">artm_tracking_status_mapping_listing.artm_tracking_status_mapping_listing.artm_tracking_status_mapping_columns.ids</param>
+            </editorConfig>
+            <childDefaults>
+                <param name="fieldAction" xsi:type="array">
+                    <item name="provider" xsi:type="string">artm_tracking_status_mapping_listing.artm_tracking_status_mapping_listing.artm_tracking_status_mapping_columns_editor</item>
+                    <item name="target" xsi:type="string">startEdit</item>
+                    <item name="params" xsi:type="array">
+                        <item name="0" xsi:type="string">${ $.$data.rowIndex }</item>
+                        <item name="1" xsi:type="boolean">true</item>
+                    </item>
+                </param>
+            </childDefaults>
+        </settings>
+
+        <!-- Checkbox -->
+        <selectionsColumn name="ids">
+            <settings>
+                <indexField>mapping_id</indexField>
+            </settings>
+        </selectionsColumn>
+
+        <!-- ID -->
+        <column name="mapping_id">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">ID</label>
+                <sorting>asc</sorting>
+            </settings>
+        </column>
+
+        <!-- Raw Status -->
+        <column name="raw_status">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Raw Carrier Status</label>
+                <editor>
+                    <editorType>text</editorType>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                    </validation>
+                </editor>
+            </settings>
+        </column>
+
+        <!-- Carrier Name -->
+        <column name="carrier_name">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Carrier Name</label>
+                <editor>
+                    <editorType>text</editorType>
+                </editor>
+            </settings>
+        </column>
+
+        <!-- Display Label -->
+        <column name="display_label">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Display Label</label>
+                <editor>
+                    <editorType>text</editorType>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                    </validation>
+                </editor>
+            </settings>
+        </column>
+
+        <!-- Is Mapped — custom renderer for badge, select for inline edit -->
+        <column name="is_mapped"
+                class="ArtM\ShipmentTracking\Ui\Component\Listing\Column\IsMapped"
+                component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <options class="ArtM\ShipmentTracking\Ui\Component\Listing\Column\IsMappedOptions"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Mapped?</label>
+                <editor>
+                    <editorType>select</editorType>
+                </editor>
+            </settings>
+        </column>
+
+        <!-- Is Active -->
+        <column name="is_active"
+                component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Active</label>
+                <editor>
+                    <editorType>select</editorType>
+                </editor>
+            </settings>
+        </column>
+
+        <!-- Created At -->
+        <column name="created_at"
+                class="Magento\Ui\Component\Listing\Columns\Date"
+                component="Magento_Ui/js/grid/columns/date">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Created</label>
+            </settings>
+        </column>
+
+        <!-- Updated At -->
+        <column name="updated_at"
+                class="Magento\Ui\Component\Listing\Columns\Date"
+                component="Magento_Ui/js/grid/columns/date">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Last Updated</label>
+            </settings>
+        </column>
+
+        <!-- Row Actions -->
+        <!-- <actionsColumn name="actions"
+                       class="ArtM\ShipmentTracking\Ui\Component\Listing\Column\TrackingStatusActions">
+            <settings>
+                <indexField>mapping_id</indexField>
+                <resizeEnabled>false</resizeEnabled>
+                <resizeDefaultWidth>107</resizeDefaultWidth>
+            </settings>
+        </actionsColumn> -->
+
+    </columns>
+</listing>

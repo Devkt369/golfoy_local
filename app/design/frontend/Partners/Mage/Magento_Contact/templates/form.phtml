@@ -1,0 +1,588 @@
+<style>
+    form#contact-form .fieldset {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(28, 26, 23, .04);
+        padding: 20px;
+    }
+
+    form#contact-form label.label {
+        width: 100%;
+    }
+
+    .column:not(.sidebar-main) form .actions-toolbar,
+    .column:not(.sidebar-additional) form .actions-toolbar {
+        margin-left: 0px !important;
+    }
+
+    .contact-index-index form#contact-form .fieldset>.field.required>.label:after {
+        color: black;
+        font-size: 1.5rem;
+        margin-left: 2px !important;
+    }
+
+    form#contact-form .fieldset {
+        margin-bottom: 0px !important;
+    }
+
+    .contact-index-index form#contact-form {
+        margin-top: 10px;
+        max-width: 100% !important;
+        box-shadow: none;
+        border: none;
+    }
+
+    legend.legend.contact_head p {
+        font-weight: 600;
+        display: inline;
+    }
+
+    legend.legend.contact_head {
+        padding-bottom: 10px;
+    }
+
+    .field.note.no-label.contact_text {
+        font-size: 12px;
+        font-weight: 500;
+        color: grey;
+    }
+
+    .fieldset>.field {
+        margin: 0 0 20px;
+    }
+
+    .fieldset>.field:not(.choice)>.control {
+        width: 100% !important;
+    }
+
+    form#contact-form {
+        padding: 30px;
+    }
+
+
+    @media only screen and (max-width:840px) {
+        .contact-index-index main#maincontent {
+            height: 100vh;
+        }
+    }
+
+    @media screen and (max-width:480px) {
+        .contact-index-index main#maincontent {
+            height: unset;
+        }
+
+        .contact-index-index form#contact-form {
+            padding: 50px 10px 30px 10px !important;
+            background: #f4f4f45e;
+            margin-top: 0px;
+        }
+
+        form#contact-form .fieldset {
+            margin-bottom: 0px !important;
+
+            padding: 20px;
+
+
+        }
+
+        main#maincontent {
+            margin-top: 95px !important;
+        }
+    }
+</style>
+<?php
+/**
+ * Contact Form Template
+ */
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$customerSession = $objectManager->get('Magento\Customer\Model\Session');
+$customerSessionLogged = $customerSession->isLoggedIn();
+?>
+
+<?php if (!$customerSessionLogged): ?>
+    <div class="logo_full_width">
+        <a class="logo react-comp" href="/" title="Golfoy.com: India's Online Golf Shop" aria-label="store logo">
+            <img src="https://golfoy.com/media/partners/Golfoy-partners-black.png"
+                title="Golfoy.com: India's Online Golf Shop"
+                alt="Golfoy.com: India's Online Golf Shoppp"
+                loading="lazy" width="403" height="103">
+        </a>
+    </div>
+<?php endif; ?>
+
+<form class="form contact"
+    action="<?= $block->escapeUrl($block->getFormAction()) ?>"
+    id="contact-form"
+    method="post"
+    data-hasrequired="<?= $block->escapeHtmlAttr(__('* Required Fields')) ?>"
+    data-mage-init='{"validation":{}}'>
+
+    <?= $block->getBlockHtml('formkey'); ?>
+
+    <fieldset class="fieldset">
+        <legend class="legend contact_head">
+            <p><?= $block->escapeHtml(__('Contact Us')) ?></p>
+        </legend>
+
+        <br />
+
+        <div class="contact-fields">
+
+            <!-- Name -->
+            <div class="field name required">
+                <label class="label" for="name"><span><?= $block->escapeHtml(__('Name')) ?></span></label>
+                <div class="control">
+                    <input name="name" id="name"
+                        title="<?= $block->escapeHtmlAttr(__('Name')) ?>"
+                        value="<?= $block->escapeHtmlAttr($this->helper('Magento\Contact\Helper\Data')->getPostValue('name') ?: $this->helper('Magento\Contact\Helper\Data')->getUserName()) ?>"
+                        class="input-text" type="text"
+                        data-validate="{required:true}" />
+                </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="field telephone required">
+                <label class="label" for="telephone"><span><?= $block->escapeHtml(__('Phone Number')) ?></span></label>
+                <div class="control">
+                    <input name="telephone" id="telephone"
+                        title="<?= $block->escapeHtmlAttr(__('Phone Number')) ?>"
+                        value="<?= $block->escapeHtmlAttr($this->helper('Magento\Contact\Helper\Data')->getPostValue('telephone')) ?>"
+                        class="input-text" type="tel"
+                        data-validate="{required:true}" />
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="field email required">
+                <label class="label" for="email"><span><?= $block->escapeHtml(__('Email')) ?></span></label>
+                <div class="control">
+                    <input name="email" id="email"
+                        title="<?= $block->escapeHtmlAttr(__('Email')) ?>"
+                        value="<?= $block->escapeHtmlAttr($this->helper('Magento\Contact\Helper\Data')->getPostValue('email') ?: $this->helper('Magento\Contact\Helper\Data')->getUserEmail()) ?>"
+                        class="input-text" type="email"
+                        data-validate="{required:true, 'validate-email':true}" />
+                </div>
+            </div>
+
+            <!-- Company Name -->
+            <div class="field company-name">
+                <label class="label" for="company-name"><span><?= $block->escapeHtml(__('Company Name')) ?></span></label>
+                <div class="control">
+                    <input name="company_name" id="company-name"
+                        title="<?= $block->escapeHtmlAttr(__('Company Name')) ?>"
+                        value="<?= $block->escapeHtmlAttr($this->helper('Magento\Contact\Helper\Data')->getPostValue('company_name')) ?>"
+                        class="input-text" type="text" />
+                </div>
+            </div>
+
+            <!-- Message -->
+            <div class="field comment required">
+                <label class="label" for="comment"><span><?= $block->escapeHtml(__('Message')) ?></span></label>
+                <div class="control">
+                    <textarea name="comment" id="comment"
+                        title="<?= $block->escapeHtmlAttr(__('Message')) ?>"
+                        class="input-text" cols="5" rows="3"
+                        data-validate="{required:true}"><?= $block->escapeHtml($this->helper('Magento\Contact\Helper\Data')->getPostValue('comment')) ?></textarea>
+                </div>
+            </div>
+
+            <?= $block->getChildHtml('form.additional.info') ?>
+
+        </div>
+
+        <div class="contact-form-btn">
+
+            <!-- Cancel Button (Only when logged out) -->
+            <?php if (!$customerSessionLogged): ?>
+                <div class="actions-toolbar cancel-btn">
+                    <a href="/customer/account" class="action cancel create-account" id="create_account">
+                        <?= $block->escapeHtml(__('Cancel')) ?>
+                    </a>
+                </div>
+            <?php endif; ?>
+
+            <!-- Send Button -->
+            <div class="actions-toolbar">
+                <div class="primary">
+                    <input type="hidden" name="hideit" id="hideit" value="" />
+                    <button type="submit"
+                        title="<?= $block->escapeHtmlAttr(__('Submit')) ?>"
+                        class="action submit primary">
+                        <span><?= $block->escapeHtml(__('Submit')) ?></span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </fieldset>
+
+
+</form>
+
+
+<style>
+    body.contact-sign-out .logo_full_width {
+        width: 100%;
+        margin: auto;
+        display: block;
+        text-align: center;
+        background: white;
+        margin-top: 0px;
+        padding: 10px 0px;
+        box-shadow: rgba(27, 31, 35, 0.04) 0px 1px 0px, rgba(255, 255, 255, 0.25) 0px 1px 0px inset;
+    }
+
+    body.contact-sign-out a.logo.react-comp {
+        text-align: center;
+        margin: auto !important;
+        display: block !important;
+        width: 100%;
+        float: unset !important;
+    }
+
+    .contact-form-btn a {
+        background: white !important;
+    }
+
+    .form.contact {
+        max-width: 520px;
+        margin: 0 auto;
+    }
+
+    /* .logo_full_width {
+        max-width: 520px;
+        margin: 16px auto 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+    }
+
+    .logo_full_width .logo img {
+        display: block;
+        height: auto;
+        max-width: 100%;
+    } */
+
+    a#create_account.create-account.back {
+        display: inline-block;
+        padding: 8px 15px;
+        border-radius: 5px;
+        border: 1px solid transparent;
+        background-color: #e2e2e2;
+        color: black;
+        text-decoration: none;
+        font-weight: 600;
+        line-height: 1.25;
+        cursor: pointer;
+        transition: background-color 150ms ease, box-shadow 150ms ease, transform 50ms ease;
+    }
+
+    a#create_account.create-account.back[aria-disabled="true"] {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .contact-index-index main#maincontent {
+        padding: 0px !important;
+        background-color: #f4f4f45e;
+    }
+
+    .actions-toolbar.cancel-btn {
+        padding: 12px 0px;
+        margin-right: 20px;
+        border-radius: 5px;
+    }
+
+    .actions-toolbar.cancel-btn a {
+        padding: 10px 30px;
+        background: white !important;
+        border: 1px solid #646464 !important;
+        margin-right: 0px;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+
+    .actions-toolbar.cancel-btn a#create_account {
+        color: grey;
+        font-weight: 700 !important;
+        font-size: 1.4rem;
+        color: #646464;
+        text-transform: uppercase;
+    }
+
+    button.action.submit.primary span {
+        font-size: 1.4rem;
+        text-transform: uppercase;
+    }
+
+    legend.legend.contact_head a#create_account {
+        float: right;
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    @media screen and (max-width: 768px) {
+        .contact-index-index main#maincontent {
+            padding: 0px !important;
+        }
+
+        .actions-toolbar a#create_account {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+<!-- FULL UPDATED CODE WITH YOUR HTML PRESERVED AND IMPROVED DESIGN  -->
+
+<style>
+    .contact-fields .field {
+        margin-bottom: 20px;
+    }
+
+    form#contact-form label.label {
+        width: 100%;
+    }
+
+    .column:not(.sidebar-main) form .actions-toolbar,
+    .column:not(.sidebar-additional) form .actions-toolbar {
+        margin-left: 0px !important;
+    }
+
+    form#contact-form {
+        border: 1px solid transparent;
+        box-shadow: 0 5px 10px rgb(0 0 0 / 20%);
+        margin-top: 20px;
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 30px;
+        font-family: Arial, sans-serif;
+        border-radius: 8px;
+    }
+
+    legend.legend.contact_head p {
+        font-weight: 600;
+        display: inline;
+        font-size: 26px;
+        margin-bottom: 15px;
+    }
+
+    legend.legend.contact_head {
+        padding-bottom: 10px;
+        width: 100%;
+        display: block;
+    }
+
+    .field.note.no-label.contact_text {
+        font-size: 12px;
+        font-weight: 500;
+        color: grey;
+    }
+
+    .fieldset>.field {
+        margin: 0 0 20px;
+    }
+
+    .fieldset>.field:not(.choice)>.control {
+        width: 100% !important;
+    }
+
+    #contact-form .field.name,
+    #contact-form .field.email,
+    #contact-form .field.telephone,
+    #contact-form .field.company-name {
+        width: 48%;
+        display: inline-block;
+        vertical-align: top;
+    }
+
+    #contact-form .field.comment {
+        width: 100%;
+    }
+
+    #contact-form label.label span {
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 6px;
+        font-family: 'spartan';
+    }
+
+    #contact-form input.input-text,
+    #contact-form textarea.input-text {
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        transition: 0.3s;
+    }
+
+    #contact-form input.input-text:focus,
+    #contact-form textarea.input-text:focus {
+        border: 1px solid #66686C !important;
+        box-shadow: none;
+    }
+
+    .actions-toolbar .primary button.action.submit.primary {
+        background: #e60023;
+        border: none;
+        padding: 12px 40px;
+        color: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: .3s;
+    }
+
+    .actions-toolbar .primary button.action.submit.primary:hover {
+        background: #c4001c;
+    }
+
+    /* 
+    .logo_full_width {
+        max-width: 900px;
+        margin: 16px auto 24px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .logo_full_width .logo img {
+        max-width: 100%;
+        display: block;
+    } */
+
+    form#contact-form legend.legend {
+        border-bottom: 1px solid #dedede;
+        margin-bottom: 20px;
+    }
+
+    .contact-form-btn {
+        display: flex;
+        align-items: center;
+    }
+
+    .contact-index-index .column:not(.sidebar-additional) .form.contact {
+        width: 60% !important;
+    }
+
+    .contact-fields {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    #contact-form .actions-toolbar {
+        margin-top: 0px !important;
+    }
+
+    #contact-form button.action.cancel {
+        padding: 10px 110px;
+        border: 3px solid #e60023 !important;
+        background: white;
+    }
+
+    #contact-form button.action.submit.primary {
+        padding: 8px 40px !important;
+    }
+
+    #contact-form .actions-toolbar .primary .action {
+        margin: 0 20px 0 0;
+    }
+
+    #contact-form .actions-toolbar>.primary>a {
+        padding: unset !important;
+    }
+
+    @media only screen and (min-width: 1439px) and (max-width: 1920px) {
+        .contact-index-index .column:not(.sidebar-additional) .form.contact {
+            width: 50% !important;
+        }
+    }
+
+    @media (max-width: 768px) {
+        legend.legend.contact_head p {
+
+            font-size: 16px;
+
+        }
+
+        .contact-index-index .columns .column.main {
+            padding-bottom: 0px;
+        }
+
+        .contact-index-index form#contact-form {
+            background: #f4f4f45e;
+            height: 100vh;
+        }
+
+        form#contact-form label.label {
+            margin-bottom: 3px;
+        }
+
+        #contact-form label.label span {
+            font-size: 12px;
+        }
+
+        .logo_full_width a.logo img {
+            height: auto;
+        }
+
+        #contact-form button.action.cancel {
+            padding: 10px 40px;
+        }
+
+        #contact-form .field.name,
+        #contact-form .field.email,
+        #contact-form .field.telephone,
+        #contact-form .field.company-name {
+            width: 100%;
+        }
+
+        #contact-form .actions-toolbar {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .actions-toolbar a#create_account,
+        .actions-toolbar .primary button {
+            width: 100%;
+            text-align: center;
+        }
+
+        .contact-index-index .column:not(.sidebar-additional) .form.contact {
+            width: 100% !important;
+        }
+
+        .contact-index-index form#contact-form {
+            padding: 50px 10px 30px 10px !important;
+        }
+
+        #contact-form .actions-toolbar {
+            margin: 10px 0px;
+            margin-right: 20px;
+        }
+
+        .contact-fields {
+            margin-bottom: 20px;
+        }
+
+        #contact-form .actions-toolbar .primary .action {
+            margin: 0 0px 0 0;
+        }
+
+        .actions-toolbar.cancel-btn a,
+        #contact-form button.action.submit.primary {
+            padding: 10px 20px !important;
+        }
+    }
+</style>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        <?php if ($customerSessionLogged): ?>
+            document.body.classList.add("contact-sign-in");
+        <?php else: ?>
+            document.body.classList.add("contact-sign-out");
+        <?php endif; ?>
+    });
+</script>

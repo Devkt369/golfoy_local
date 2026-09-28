@@ -1,0 +1,179 @@
+<?php
+/** @var \Magento\Backend\Block\Template $block */
+$matrixUrl = $block->getUrl('massproducts/success/tabMatrix');
+$uploadProductImageUrl = $block->getUrl('massproducts/success/uploadProductImage');
+$ajaxUploadUrl = $block->getUrl('massproducts/media/ajaxupload');
+$ajaxDeleteUrl = $block->getUrl('massproducts/media/deleteajaxupload');
+$addImagesToProductUrl = $block->getUrl('massproducts/success/addImagesToProduct');
+$setProductImageUrl = $block->getUrl('massproducts/success/setproductimage');
+$productEditUrlTemplate = $block->getUrl('catalog/product/edit', ['id' => '__ID__']);
+?>
+
+<div id="artm-success-products-tab-root">
+	<style>
+		#artm-success-products-tab-root .artm-success-toolbar {
+			display: flex;
+			gap: 8px;
+			align-items: center;
+			margin-bottom: 12px;
+			flex-wrap: wrap;
+		}
+		#artm-success-products-tab-root .artm-success-table-wrap {
+			overflow: auto;
+		}
+		#artm-success-products-tab-root .artm-success-table {
+			min-width: 1200px;
+		}
+		#artm-success-products-tab-root .artm-success-table tbody tr:nth-child(odd) td {
+			background: #f8fafc;
+		}
+		#artm-success-products-tab-root .artm-success-table tbody tr:nth-child(even) td {
+			background: #ffffff;
+		}
+		#artm-success-products-tab-root .artm-success-table th,
+		#artm-success-products-tab-root .artm-success-table td {
+			padding: 6px 8px;
+			vertical-align: top;
+		}
+		#artm-success-products-tab-root .artm-col-media,
+		#artm-success-products-tab-root .artm-success-table th.artm-col-media {
+			position: sticky;
+			left: 0;
+			z-index: 3;
+			min-width: 180px;
+			max-width: 180px;
+			border-right: 1px solid #d7dce1;
+			background: #ffffff;
+		}
+		#artm-success-products-tab-root .artm-col-actions,
+		#artm-success-products-tab-root .artm-success-table th.artm-col-actions {
+			position: sticky;
+			right: 0;
+			z-index: 3;
+			min-width: 200px;
+			border-left: 1px solid #d7dce1;
+			background: #ffffff;
+		}
+		#artm-success-products-tab-root .artm-success-table thead .artm-col-media,
+		#artm-success-products-tab-root .artm-success-table thead .artm-col-actions {
+			background: #eef2f7;
+			z-index: 4;
+		}
+		#artm-success-products-tab-root .artm-success-thumb-wrap {
+			display: flex;
+			flex-direction: column;
+			gap: 6px;
+			align-items: center;
+		}
+		#artm-success-products-tab-root .artm-success-thumb {
+			width: 150px;
+			height: 100px;
+			border: 1px solid #dbe2ea;
+			background: #f8fafc;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 4px;
+			overflow: hidden;
+		}
+		#artm-success-products-tab-root .artm-success-thumb img {
+			max-width: 150px;
+			max-height: 100px;
+			object-fit: contain;
+			display: block;
+		}
+		#artm-success-products-tab-root .artm-success-name {
+			font-size: 12px;
+			color: #334155;
+			text-align: center;
+			line-height: 1.3;
+			word-break: break-word;
+		}
+		#artm-success-products-tab-root .artm-ready-status.queued {
+			background: #fef9c3;
+			color: #b45309;
+		}
+		#artm-success-products-tab-root .artm-ready-status.processing {
+			background: #e0e7ff;
+			color: #3730a3;
+		}
+		#artm-success-products-tab-root .artm-ready-status.success {
+			background: #dcfce7;
+			color: #166534;
+		}
+		#artm-success-products-tab-root .artm-ready-status.failed {
+			background: #fee2e2;
+			color: #dc2626;
+		}
+		td.artm-col-product-url a {
+			color: black !important;
+			text-decoration: none !important;
+			font-size: 10px;
+			font-weight: 600 !important;
+		}
+		/* Target only the first uploaded image container */
+		.product-field-media .product-resultimg:first-of-type {
+			border: 2px solid #28a745; /* Magento success green */
+			border-radius: 4px;
+			position: relative;
+			padding: 2px;
+		}
+		
+		.product-field-media .product-resultimg:first-of-type::after {
+			content: "Base";
+			display: block;
+			font-size: 10px;
+			font-weight: bold;
+			color: #28a745;
+			text-align: center;
+			text-transform: uppercase;
+			line-height: 1;
+			margin-top: -2px;
+		}
+
+		.product-resultimg {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+	</style>
+
+	<div class="message message-notice notice">
+		<div><?= $block->escapeHtml(__('Success tab shows products that were successfully created.')) ?></div>
+	</div>
+
+	<div id="artm-success-msg" class="message" style="display:none;"></div>
+	<div id="artm-success-groups"></div>
+</div>
+
+<script>
+require(['ArtM_MassProducts/js/ready-attribute-set-tab'], function (initReadyAttributeSetTab) {
+	initReadyAttributeSetTab({
+		rootSelector: '#artm-success-products-tab-root',
+		groupsSelector: '#artm-success-groups',
+		msgSelector: '#artm-success-msg',
+		matrixUrl: '<?= $block->escapeJs($matrixUrl) ?>',
+		isReadOnly: true,
+		showViewDetailsAction: true,
+		showViewProductAction: true,
+		showSkuLink: true,
+		showUploadImageAction: true,
+		showApplyImagesAction: true,
+		showProductMediaGallery: true,
+		showUploadColumnRight: true,
+		uploadProductImageUrl: '<?= $block->escapeJs($uploadProductImageUrl) ?>',
+		ajaxUploadUrl: '<?= $block->escapeJs($ajaxUploadUrl) ?>',
+		ajaxDeleteUrl: '<?= $block->escapeJs($ajaxDeleteUrl) ?>',
+		addImagesToProductUrl: '<?= $block->escapeJs($addImagesToProductUrl) ?>',
+		productEditUrlTemplate: '<?= $block->escapeJs($productEditUrlTemplate) ?>',
+		setProductImageUrl: '<?= $block->escapeJs($setProductImageUrl) ?>',
+	});
+});
+</script>
+<script>
+window.artmMediaConfig = {
+    ajaxUploadUrl: '<?= $block->escapeJs($ajaxUploadUrl) ?>',
+    ajaxDeleteUrl: '<?= $block->escapeJs($ajaxDeleteUrl) ?>',
+    setProductImageUrl: '<?= $block->escapeJs($setProductImageUrl) ?>'
+};
+</script>

@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="orderfeedback_data_source" xsi:type="string">ArtM\OrderFeedback\Model\ResourceModel\Maintable\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="ArtM\OrderFeedback\Model\ResourceModel\Maintable\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">artm_orderfeedback</argument>
+            <argument name="resourceModel" xsi:type="string">ArtM\OrderFeedback\Model\ResourceModel\Maintable</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="artm_survey_results_data_source" xsi:type="string">ArtM\OrderFeedback\Model\ResourceModel\SurveyFactory\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="ArtM\OrderFeedback\Model\ResourceModel\SurveyFactory\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">artm_survey_results</argument>
+            <argument name="resourceModel" xsi:type="string">ArtM\OrderFeedback\Model\ResourceModel\SurveyFactory</argument>
+        </arguments>
+    </virtualType>
+</config>

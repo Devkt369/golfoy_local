@@ -1,0 +1,92 @@
+<?php
+/**
+ * @author Amasty Team
+ * @copyright Copyright (c) Amasty (https://www.amasty.com)
+ * @package Free Gift Base for Magento 2
+ */
+/** @var $block Amasty\Promo\Block\Popup */
+/** @var $escaper Magento\Framework\Escaper */
+
+$countersMode = $block->getCountersMode();
+$promoAddBlock = $block->getPromoAddBlock();
+$quote = $block->getQuote();
+$giftsQty = $block->getGiftsQtyForPopup();
+?>
+
+<?php if ($block->hasQuoteItems()): ?>
+    <?= $block->getChildHtml('html_calendar') ?>
+    <div class="ampromo-overlay -hide" data-role="ampromo-overlay">
+        <div data-role="focusable-start" tabindex="0"></div>
+        <div class="ampromo-popup-wrapper"
+             data-ampromo-js="items-content"
+             role="dialog"
+             aria-labelledby="ampromo-popup-description"
+             aria-modal="true"
+        >
+            <?php if ($countersMode): ?>
+                <h2  id="ampromo-popup-description"
+                     class="ampromo-popup-title"
+                     data-ampromo-js="popup-title"
+                >
+                    <?= $escaper->escapeHtml($block->getPopupName(), ['b', 'i', 'em', 'mark']) . ' ('?>
+                    <span class="ampromo-counter" data-role="ampromo-popup-common-qty"></span>
+                    <?= $escaper->escapeHtml(__(' left)')) ?>
+                </h2>
+            <?php else: ?>
+                <h2 id="ampromo-popup-description">
+                    <?= $escaper->escapeHtml($block->getPopupName())?>
+                </h2>
+            <?php endif; ?>
+            <button class="ampromo-close"
+                    data-role="ampromo-popup-hide"
+                    aria-label="<?= $escaper->escapeHtmlAttr(__('Close Dialog')) ?>"
+            ></button>
+            <div class="ampromo-popup-container" data-ampromo-js="popup-container">
+                <?= $block->getChildHtml('items') ?>
+            </div>
+        </div>
+        <div data-role="focusable-end" tabindex="0"></div>
+    </div>
+
+    <script type="text/x-magento-init">
+    {
+        "[data-role=ampromo-overlay]": {
+            "Amasty_Promo/js/popup": {
+                "sourceUrl": "<?= $escaper->escapeUrl($promoAddBlock->getUrl('amasty_promo/popup/reload')) ?>",
+                "uenc":   "<?= $escaper->escapeUrl($promoAddBlock->getCurrentBase64Url()) ?>",
+                "slickSettings": {
+                    "slidesToShow": <?= $escaper->escapeHtml($giftsQty)?>,
+                    "slidesToScroll": <?= $escaper->escapeHtml($giftsQty)?>,
+                    "dots": true,
+                    "infinite": false,
+                    "respondTo": "slider",
+                    "rows": 0,
+                    "responsive": [
+                        {
+                            "breakpoint": 571,
+                            "settings": {
+                                "slidesToShow": 2,
+                                "slidesToScroll": 2
+                            }
+                        },
+                        {
+                            "breakpoint": 281,
+                            "settings": {
+                                "slidesToShow": 1,
+                                "slidesToScroll": 1
+                            }
+                        }
+                    ]
+                },
+                "commonQty": "<?= (int)$promoAddBlock->getAvailableProductQty($quote)['common_qty'] ?>",
+                "products": <?= /* @noEscape */ $block->jsonSerialize($promoAddBlock->getAvailableProductQty($quote)) ?>,
+                "formUrl": "<?= $escaper->escapeUrl($promoAddBlock->getFormActionUrl()) ?>",
+                "selectionMethod": <?= (int)$promoAddBlock->getSelectionMethod() ?>,
+                "giftsCounter": <?= (int)$promoAddBlock->getGiftsCounter() ?>,
+                "autoOpenPopup": <?= $promoAddBlock->isOpenAutomatically((int)$quote->getId()) ? "true" : "false" ?>,
+                "shouldUpdateCartSection": <?= $promoAddBlock->shouldUpdateCartSection() ? 'true' : 'false' ?>
+            }
+        }
+    }
+    </script>
+<?php endif; ?>

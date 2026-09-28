@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="get_loyalty_collection">
+        <observer name="webpos_amasty_rewards_get_loyalty_collection"
+                  instance="Magestore\WebposAmastyRewards\Observer\Webpos\GetLoyaltyCollection" />
+    </event>
+
+    <event name="loyalty_add_filter_group">
+        <observer name="webpos_amasty_rewards_loyalty_add_filter_group"
+                  instance="Magestore\WebposAmastyRewards\Observer\Webpos\LoyaltyAddFilterGroup" />
+    </event>
+    <event name="sales_order_place_after">
+        <observer name="webpos_amasty_rewards_sales_order_place_after"
+                  instance="Magestore\WebposAmastyRewards\Observer\Webpos\Order\SalesOrderSaveAfter" />
+    </event>
+    <!-- POS creditmemo -->
+    <event name="pos_prepare_creditmemo_data_after">
+        <observer name="webpos_amasty_rewards_pos_prepare_creditmemo_data_after"
+                  instance="Magestore\WebposAmastyRewards\Observer\Webpos\Sales\Creditmemo\PrepareDataAfter" />
+    </event>
+    <!-- End: POS creditmemo -->
+    <!-- prepare data rewardpoint creditmemo -->
+    <event name="adminhtml_sales_order_creditmemo_register_before">
+        <observer name="webpos_amasty_rewards_sales_order_creditmemo_register_before"
+                  instance="Magestore\WebposAmastyRewards\Observer\Backend\SalesOrderCreditmemoRegisterBefore" />
+    </event>
+</config>

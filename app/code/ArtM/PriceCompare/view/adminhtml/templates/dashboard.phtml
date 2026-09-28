@@ -1,0 +1,301 @@
+<?php
+/**
+ * Product Attribute Dashboard Table
+ */
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$resource = $objectManager->get('Magento\\Framework\\App\\ResourceConnection');
+$connection = $resource->getConnection();
+
+// Pagination logic
+$productTable = $resource->getTableName('artm_pricecompare_product');
+$perPage = isset($_GET['per_page']) ? (int)$_GET['per_page'] : 50;
+if (!in_array($perPage, [50, 100, 200])) $perPage = 50;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+if ($page < 1) $page = 1;
+$totalProducts = (int)$connection->fetchOne("SELECT COUNT(*) FROM $productTable");
+$totalPages = max(1, ceil($totalProducts / $perPage));
+$offset = ($page - 1) * $perPage;
+
+$productRows = $connection->fetchAll("SELECT * FROM $productTable ORDER BY name ASC LIMIT $perPage OFFSET $offset");
+// Fetch all categories
+$catTable = $resource->getTableName('artm_pricecompare_category');
+$categoryMap = [];
+foreach ($connection->fetchAll("SELECT category_id, name FROM $catTable") as $row) {
+	$categoryMap[$row['category_id']] = $row['name'];
+}
+
+// Fetch all websites
+$websiteTable = $resource->getTableName('artm_pricecompare_website');
+$websites = $connection->fetchAll("SELECT * FROM $websiteTable ORDER BY name ASC");
+$websiteMap = [];
+foreach ($websites as $w) {
+	$websiteMap[$w['website_id']] = $w;
+}
+
+// Fetch all attribute selectors
+$attrTable = $resource->getTableName('artm_pricecompare_attribute_selector');
+$attrRows = $connection->fetchAll("SELECT * FROM $attrTable ORDER BY website_id, attribute_name ASC");
+
+// Group attributes by product and website
+$attrMap = [];
+foreach ($attrRows as $row) {
+	$attrMap[$row['website_id']][$row['attribute_name']] = $row['selector'];
+}
+
+?>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+	<h2>Product Attribute Dashboard</h2>
+	<div style="display: flex; align-items: center; gap: 16px;">
+		<form id="per-page-form" method="get" style="margin:0;">
+			<label for="per-page-select">Show per page:</label>
+			<select name="per_page" id="per-page-select" onchange="this.form.submit()">
+				<option value="50"<?= $perPage==50?' selected':'' ?>>50</option>
+				<option value="100"<?= $perPage==100?' selected':'' ?>>100</option>
+				<option value="200"<?= $perPage==200?' selected':'' ?>>200</option>
+			</select>
+			<input type="hidden" name="page" value="1"/>
+		</form>
+		<button id="sync-all-btn" class="action-default scalable save primary" style="margin-bottom: 10px;">Sync All</button>
+	</div>
+</div>
+<!-- Removed misplaced endif, endfor, and duplicate HTML/PHP blocks above table -->
+<table class="admin__table-primary" border="1" cellpadding="5" cellspacing="0">
+	<thead>
+		<tr>
+			   <th><input type="checkbox" id="select-all-products" title="Select All"/></th>
+			   <th>Product Name</th>
+			   <th>Category</th>
+				  <?php foreach ($websites as $website): ?>
+					  <th style="text-align:center">
+						  <?php $websiteUrl = trim((string)($website['url'] ?? '')); ?>
+						  <?php if ($websiteUrl): ?>
+							  <a href="<?= htmlspecialchars($websiteUrl) ?>" target="_blank" rel="noopener noreferrer" style="text-decoration:none; color:inherit;">
+								  <?php if ($website['logo']): ?>
+									  <img src="<?= $block->getBaseUrl(['_type' => \Magento\Framework\UrlInterface::URL_TYPE_MEDIA]) . 'media/' . $website['logo'] ?>" width="120" style="vertical-align:middle"/>
+								  <?php endif; ?>
+								  <div><?= htmlspecialchars($website['name']) ?></div>
+							  </a>
+						  <?php else: ?>
+							  <?php if ($website['logo']): ?>
+								  <img src="<?= $block->getBaseUrl(['_type' => \Magento\Framework\UrlInterface::URL_TYPE_MEDIA]) . 'media/' . $website['logo'] ?>" width="120" style="vertical-align:middle"/>
+							  <?php endif; ?>
+							  <div><?= htmlspecialchars($website['name']) ?></div>
+						  <?php endif; ?>
+					  </th>
+				  <?php endforeach; ?>
+				  <th>Action</th>
+		</tr>
+	</thead>
+	<tbody>
+		<?php foreach ($productRows as $product): ?>
+			<?php
+			$websiteAttrs = [];
+			$maxAttrCount = 1;
+			// Load fetched_data for this product (JSON)
+			$fetchedData = [];
+			if (!empty($product['fetched_data'])) {
+				$fetchedData = json_decode($product['fetched_data'], true) ?: [];
+			}
+			foreach ($websites as $website) {
+				$websiteId = $website['website_id'];
+				$websiteAttrs[$websiteId] = [];
+				foreach ($attrMap[$websiteId] ?? [] as $attrName => $selector) {
+					$websiteAttrs[$websiteId][] = ['name' => $attrName, 'selector' => $selector];
+				}
+				$maxAttrCount = max($maxAttrCount, count($websiteAttrs[$websiteId]));
+			}
+			   for ($i = 0; $i < $maxAttrCount; $i++): ?>
+			   <tr>
+				   <?php if ($i === 0): ?>
+					   <td rowspan="<?= $maxAttrCount ?>">
+						   <input type="checkbox" class="select-product" value="<?= $product['product_id'] ?>" />
+					   </td>
+					   <td rowspan="<?= $maxAttrCount ?>">
+							<?= htmlspecialchars($product['name']) ?>
+							<div class="updated-at" style="font-size:11px;color:#888;">
+								<?php
+								if (!empty($product['updated_at'])) {
+									try {
+										$updatedAt = new \DateTime($product['updated_at'], new \DateTimeZone('UTC'));
+										$updatedAt->setTimezone(new \DateTimeZone('Asia/Kolkata'));
+										echo 'Updated: ' . htmlspecialchars($updatedAt->format('F d, Y h:iA'));
+									} catch (\Exception $e) {
+										echo 'Updated: ' . htmlspecialchars($product['updated_at']);
+									}
+								} else {
+									echo '<span style="color:#aaa">Not synced</span>';
+								}
+								?>
+							</div>
+						</td>
+					   <td rowspan="<?= $maxAttrCount ?>">
+							<?php
+							$catId = isset($product['category_id']) ? $product['category_id'] : null;
+							echo ($catId && isset($categoryMap[$catId]))
+								? htmlspecialchars($categoryMap[$catId])
+								: '<span style="color:#aaa">-</span>';
+								?>
+								</td>
+				   <?php endif; ?>
+				   <?php foreach ($websites as $website): ?>
+					   <?php $websiteId = $website['website_id']; ?>
+					   <?php
+                           $pwTable = $resource->getTableName('artm_pricecompare_product_website');
+                           $productUrl = $connection->fetchOne("SELECT product_url FROM $pwTable WHERE product_id = ? AND website_id = ?", [$product['product_id'], $websiteId]);
+                       ?>
+                       <td
+                           data-website-id="<?= $websiteId ?>"
+                           data-selectors="<?php
+                               $selectorsArr = [];
+                               foreach ($websiteAttrs[$websiteId] as $attr) {
+                                   $label = $attr['name'];
+                                   $selectors = $attr['selector'];
+                                   $selectorsArr[] = $label . ':' . $selectors;
+                               }
+                               echo htmlspecialchars(implode('|', $selectorsArr), ENT_QUOTES);
+                           ?>"
+                           data-url="<?= htmlspecialchars($productUrl ?: '', ENT_QUOTES); ?>"
+                       >
+                           <?php if (!$productUrl): ?>
+                               <span style="color:#aaa; font-size:8px;">Product not added</span>
+                           <?php elseif (isset($websiteAttrs[$websiteId][$i])): ?>
+                               <strong><?= htmlspecialchars($websiteAttrs[$websiteId][$i]['name']) ?>:</strong>
+                               <span class="fetched-value" data-attr-name="<?= htmlspecialchars($websiteAttrs[$websiteId][$i]['name']) ?>">
+                               <?php
+                                   $attrName = $websiteAttrs[$websiteId][$i]['name'];
+                                   $val = $fetchedData[$websiteId][$attrName] ?? '';
+                                   echo $val ? htmlspecialchars($val) : '<span style="color:#aaa">(not synced)</span>';
+                               ?>
+                               </span>
+							   <?php if ($i === 0): ?>
+								   <div style="margin-top:4px;">
+									   <a href="<?= htmlspecialchars($productUrl) ?>" target="_blank" rel="noopener noreferrer" style="font-size:11px;">Open Product</a>
+								   </div>
+							   <?php endif; ?>
+                           <?php endif; ?>
+                       </td>
+				   <?php endforeach; ?>
+				   <?php if ($i === 0): ?>
+					   <td rowspan="<?= $maxAttrCount ?>">
+						   <button class="action-default sync-now-btn" data-product-id="<?= $product['product_id'] ?>" type="button">Sync Now</button>
+					   </td>
+				   <?php endif; ?>
+			   </tr>
+			   <?php endfor; ?>
+		<?php endforeach; ?>
+	</tbody>
+</table>
+<script>
+// Select all products checkbox
+document.addEventListener('DOMContentLoaded', function() {
+	var formKey = '<?= $block->getFormKey() ?>';
+	var selectAll = document.getElementById('select-all-products');
+	if (selectAll) {
+		selectAll.addEventListener('change', function() {
+			var checkboxes = document.querySelectorAll('.select-product');
+			checkboxes.forEach(function(cb) { cb.checked = selectAll.checked; });
+		});
+	}
+	// Sync All button
+	document.getElementById('sync-all-btn').addEventListener('click', function() {
+		var ids = Array.from(document.querySelectorAll('.select-product:checked')).map(cb => cb.value);
+		if (ids.length === 0) { alert('Select at least one product to sync.'); return; }
+		// TODO: Implement bulk sync logic here
+		alert('Syncing products: ' + ids.join(', '));
+	});
+	// Sync Now buttons
+	document.querySelectorAll('.sync-now-btn').forEach(function(btn) {
+		btn.addEventListener('click', function() {
+			var pid = btn.getAttribute('data-product-id');
+			var row = btn.closest('tr');
+			var actionCell = btn.closest('td');
+			var rowSpan = actionCell ? parseInt(actionCell.getAttribute('rowspan') || '1', 10) : 1;
+			var productRows = [row];
+			var nextRow = row;
+			for (var i = 1; i < rowSpan; i++) {
+				nextRow = nextRow ? nextRow.nextElementSibling : null;
+				if (!nextRow) {
+					break;
+				}
+				productRows.push(nextRow);
+			}
+
+			var websiteIds = <?php echo json_encode(array_column($websites, 'website_id')); ?>;
+			var originalText = btn.textContent;
+			btn.textContent = 'Syncing...';
+			btn.disabled = true;
+
+			function syncNext(index) {
+				if (index >= websiteIds.length) {
+					btn.textContent = originalText;
+					btn.disabled = false;
+					return;
+				}
+				var websiteId = websiteIds[index];
+				var websiteCells = productRows.map(function(r) {
+					return r.querySelector('[data-website-id="' + websiteId + '"]');
+				}).filter(function(c) {
+					return !!c;
+				});
+
+				if (!websiteCells.length) { syncNext(index + 1); return; }
+
+				var requestCell = websiteCells.find(function(c) {
+					return c.getAttribute('data-selectors') && c.getAttribute('data-url');
+				}) || websiteCells[0];
+
+				var selectors = requestCell.getAttribute('data-selectors');
+				var url = requestCell.getAttribute('data-url');
+				if (!selectors || !url) { syncNext(index + 1); return; }
+				fetch('<?= $block->getUrl("*/*/ajaxSyncProduct") ?>', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						'X-Requested-With': 'XMLHttpRequest',
+					},
+					body: 'form_key=' + encodeURIComponent(formKey) +
+						  '&product_id=' + encodeURIComponent(pid) +
+						  '&website_id=' + encodeURIComponent(websiteId) +
+						  '&selectors=' + encodeURIComponent(selectors) +
+						  '&url=' + encodeURIComponent(url)
+				})
+				.then(r => r.json())
+				.then(function(resp) {
+					if (resp.success) {
+						var values = resp.value || {};
+						if (typeof values === 'object') {
+							websiteCells.forEach(function(cell) {
+								cell.querySelectorAll('.fetched-value').forEach(function(span) {
+									var attrName = span.getAttribute('data-attr-name');
+									var newVal = values[attrName];
+									var oldVal = span.textContent;
+									if (Array.isArray(newVal) || newVal === undefined || newVal === null || newVal === '' || newVal === 'null') {
+										if (oldVal && oldVal !== '(not synced)' && oldVal.indexOf(' - old') === -1) {
+											span.textContent = oldVal + ' - old';
+										} else if (!oldVal || oldVal === '(not synced)') {
+											span.textContent = '(not synced)';
+										}
+									} else {
+										span.textContent = newVal;
+									}
+								});
+							});
+						}
+						websiteCells.forEach(function(cell) {
+							cell.style.background = '#eaffea';
+							setTimeout(function(){ cell.style.background = ''; }, 1200);
+						});
+					} else {
+						alert('Sync error: ' + (resp.error || 'Unknown error'));
+					}
+				})
+				.finally(function() {
+					syncNext(index + 1);
+				});
+			}
+			syncNext(0);
+		});
+	});
+});
+</script>
+</table>

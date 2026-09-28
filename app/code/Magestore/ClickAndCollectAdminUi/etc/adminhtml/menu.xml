@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2018 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Magestore_ClickAndCollectAdminUi::physical_store" title="Physical Store" translate="title" resource="Magestore_ClickAndCollectAdminUi::physical_store" module="Magestore_ClickAndCollectAdminUi" sortOrder="60" parent="Magento_Backend::stores"/>
+        <add id="Magestore_ClickAndCollectAdminUi::manage_order" title="Click &amp; Collect Orders" translate="title" resource="Magestore_ClickAndCollectAdminUi::manage_order" parent="Magestore_ClickAndCollectAdminUi::physical_store" action="clickandcollectadmin/order/index" module="Magestore_ClickAndCollectAdminUi" sortOrder="10"/>
+        <add id="Magestore_ClickAndCollectAdminUi::store" title="Manage Locations" translate="title" resource="Magestore_ClickAndCollectAdminUi::store" parent="Magestore_ClickAndCollectAdminUi::physical_store" action="webposadmin/location_location/index" module="Magestore_ClickAndCollectAdminUi" sortOrder="20"/>
+        <add id="Magestore_ClickAndCollectAdminUi::schedule" title="Store Schedule" translate="title" resource="Magestore_ClickAndCollectAdminUi::schedule" parent="Magestore_ClickAndCollectAdminUi::physical_store" action="clickandcollectadmin/schedule" module="Magestore_ClickAndCollectAdminUi" sortOrder="30"/>
+        <add id="Magestore_ClickAndCollectAdminUi::specialday" title="Manage Special Day" translate="title" resource="Magestore_ClickAndCollectAdminUi::specialday" parent="Magestore_ClickAndCollectAdminUi::physical_store" action="clickandcollectadmin/specialday" module="Magestore_ClickAndCollectAdminUi" sortOrder="40"/>
+        <add id="Magestore_ClickAndCollectAdminUi::config" title="Settings" translate="title" module="Magestore_ClickAndCollectAdminUi" parent="Magestore_ClickAndCollectAdminUi::physical_store" action="adminhtml/system_config/edit/section/click_and_collect" resource="Magestore_ClickAndCollectAdminUi::config" sortOrder="50"/>
+    </menu>
+</config>

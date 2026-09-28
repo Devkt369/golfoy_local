@@ -1,0 +1,143 @@
+{
+  "artm_product_slider": {
+    "column": {
+      "slider_id": true,
+      "group_id": true,
+      "title": true,
+      "identifier": true,
+      "store_view_ids": true,
+      "customer_group_ids": true,
+      "from_date": true,
+      "to_date": true,
+      "status": true,
+      "heading": true,
+      "sub_heading": true,
+      "content_description": true,
+      "button_text": true,
+      "button_link": true,
+      "button_link_type": true,
+      "show_desktop": true,
+      "show_tablet": true,
+      "show_mobile": true,
+      "source_type": true,
+      "source_value": true,
+      "category_ids": true,
+      "allow_multiple_categories": true,
+      "include_child_categories": true,
+      "exclude_product_ids": true,
+      "source_product_ids": true,
+      "mixed_category_ids": true,
+      "mixed_product_ids": true,
+      "mixed_excluded_product_ids": true,
+      "mixed_priority": true,
+      "max_products_desktop": true,
+      "max_products_tablet": true,
+      "max_products_mobile": true,
+      "sort_by": true,
+      "sort_direction": true,
+      "sorting_type": true,
+      "manual_sort_product_ids": true,
+      "custom_sort_attribute": true,
+      "product_limit": true,
+      "slides_to_show": true,
+      "display_type": true,
+      "desktop_items": true,
+      "tablet_items": true,
+      "mobile_items": true,
+      "space_between": true,
+      "show_arrows": true,
+      "show_dots": true,
+      "infinite_loop": true,
+      "autoplay": true,
+      "autoplay_delay": true,
+      "swipe": true,
+      "mouse_drag": true,
+      "touch_support": true,
+      "lazy_load": true,
+      "animation_speed": true,
+      "grid_desktop_columns": true,
+      "grid_tablet_columns": true,
+      "grid_mobile_columns": true,
+      "card_components": true,
+      "custom_attributes": true,
+      "hover_image_enabled": true,
+      "image_role": true,
+      "autoplay_speed": true,
+      "show_name": true,
+      "show_price": true,
+      "show_add_to_cart": true,
+      "remove_brand_from_name": true,
+      "preview_notes": true,
+      "sort_order": true,
+      "created_at": true,
+      "updated_at": true
+    },
+    "index": {
+      "ARTM_PRODUCT_SLIDER_GROUP_ID": true,
+      "ARTM_PRODUCT_SLIDER_STATUS": true,
+      "ARTM_PRODUCT_SLIDER_IDENTIFIER_UNQ": true
+    },
+    "constraint": {
+      "PRIMARY": true,
+      "ARTM_PRODUCT_SLIDER_IDENTIFIER_UNQ": true,
+      "ARTM_PRODUCT_SLIDER_GROUP_ID_ARTM_PRODUCT_SLIDER_GROUP_GROUP_ID": true
+    }
+  },
+  "artm_product_slider_group": {
+    "column": {
+      "group_id": true,
+      "name": true,
+      "identifier": true,
+      "description": true,
+      "sort_order": true,
+      "tabs_json": true,
+      "status": true,
+      "created_at": true,
+      "updated_at": true
+    },
+    "index": {
+      "ARTM_PRODUCT_SLIDER_GROUP_STATUS": true
+    },
+    "constraint": {
+      "PRIMARY": true,
+      "ARTM_PRODUCT_SLIDER_GROUP_IDENTIFIER_UNQ": true
+    }
+  },
+  "artm_product_slider_products": {
+    "column": {
+      "item_id": true,
+      "slider_id": true,
+      "product_id": true,
+      "position": true
+    },
+    "index": {
+      "ARTM_SLIDER_PRODUCTS_PRODUCT_ID": true
+    },
+    "constraint": {
+      "PRIMARY": true,
+      "ARTM_SLIDER_PRODUCTS_SLIDER_PRODUCT_UNQ": true,
+      "ARTM_SLIDER_PRODUCTS_SLIDER_ID_ARTM_PRODUCT_SLIDER_SLIDER_ID": true,
+      "ARTM_SLIDER_PRODUCTS_PRODUCT_ID_CATALOG_PRODUCT_ENTITY_ENTITY_ID": true
+    }
+  },
+  "artm_product_slider_group_items": {
+    "column": {
+      "item_id": true,
+      "group_id": true,
+      "slider_id": true,
+      "tab_title": true,
+      "position": true,
+      "status": true
+    },
+    "index": {
+      "ARTM_SLIDER_GROUP_ITEMS_SLIDER_ID": true,
+      "ARTM_SLIDER_GROUP_ITEMS_STATUS": true
+    },
+    "constraint": {
+      "PRIMARY": true,
+      "ARTM_SLIDER_GROUP_ITEMS_GROUP_ID_ARTM_PRODUCT_SLIDER_GROUP_GROUP_ID": true,
+      "ARTM_SLIDER_GROUP_ITEMS_SLIDER_ID_ARTM_PRODUCT_SLIDER_SLIDER_ID": true,
+      "ARTM_SLIDER_GROUP_ITEMS_GROUP_SLIDER_UNQ": true
+    }
+  }
+}

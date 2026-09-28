@@ -1,0 +1,58 @@
+
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+
+$helper = $objectManager->get(\Meetanshi\Sms\Helper\Data::class);
+
+// Your test values
+$otp = '122124';
+$mobilenumber = '9034434050';
+
+// Call the function
+//$response = $helper->sendOTPText($otp, $mobilenumber);
+
+
+
+$data = [
+    'orderId'       => "1234567890",
+    'firstname'     => "Mohit",
+    'product_name'  => ''
+];
+
+
+
+//$response = $helper->sendSmsReplaceRequest($data, $mobilenumber, "sendSmsReplaceRequest");
+//$response = $helper->sendSmsReplaceApproved($data, $mobilenumber, "sendSmsReplaceApproved");
+//$response = $helper->sendSmsCancelRequest($data, $mobilenumber, "sendSmsCancelRequest");
+//$response = $helper->sendSmsReturnRequest($data, $mobilenumber, "sendSmsReturnRequest");
+//$response = $helper->sendSmsReturnApproved($data, $mobilenumber, "sendSmsReturnApproved");
+
+$data = [
+    'orderId'       => "orderId1234",
+    'carrierCode'     => "carrierCode1234",
+    'trackId'     => "trackId1234",
+    'shipmentId'     => "shipmentId1234",
+    'firstName'     => "firstName1234",
+    'lastName'     => "lastName1234",
+    'telephone'  => 'telephone1234'
+];
+
+$response = $helper->trackingNumAdded($data, $mobilenumber, "sendSmsReturnApproved");
+
+
+/*
+$data = [
+    'orderId'       => "orderId1234",
+    'order_total'     => "order_total1234",
+    'first_name'     => "first_name1234",
+    'last_name'     => "last_name1234"
+];
+$response = $helper->OrderSuccess($data, $mobilenumber, "OrderSuccess");
+
+*/
+
+
+    
+?>
+

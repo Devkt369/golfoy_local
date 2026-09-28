@@ -1,0 +1,94 @@
+<?php
+
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// @codingStandardsIgnoreFile
+
+/** @var $block \Magento\Catalog\Block\Product\View */
+?>
+<?php $_product = $block->getProduct(); 
+
+if($_product->getData('enable_bulk_ordering') == 1){
+    return;
+}
+
+if ($_product && $_product->getTypeId() == \Magento\Catalog\Model\Product\Type::TYPE_SIMPLE) {
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $salableQty = $objectManager->get(\Magento\InventorySalesApi\Api\GetProductSalableQtyInterface::class);
+    $stockResolver = $objectManager->get(\Magento\InventorySalesApi\Api\StockResolverInterface::class);
+    $storeManager = $objectManager->get(\Magento\Store\Model\StoreManagerInterface::class);
+
+    try {
+        $websiteCode = $storeManager->getWebsite()->getCode();
+        $stock = $stockResolver->execute(\Magento\InventorySalesApi\Api\Data\SalesChannelInterface::TYPE_WEBSITE, $websiteCode);
+        $stockId = $stock->getStockId();
+        $availableQty = (int)$salableQty->execute($_product->getSku(), $stockId);
+        if ($availableQty > 0) {
+            echo '<div class="show-available-qty stock-message">';
+            if ($availableQty <= 10) {
+                $message = $block->escapeHtml(__('Qty: Only %1 left ', $availableQty));
+            }else {
+                $message = $block->escapeHtml(__('Qty: 10+ Available'));
+            }
+            echo $message;
+            echo '</div>';
+        }
+    } catch (\Exception $e) {
+    }
+}
+
+?>
+<?php $isPrebookEnabled = ($_product->getData('prebook') == 1); ?>
+<?php $buttonTitle = ($isPrebookEnabled) ? __('PRE-BOOK') : __('Add to Cart'); ?>
+<?php if ($_product->isSaleable()) : ?>
+    <div class="box-tocart">
+        <div class="fieldset">
+            <div class="field qty">
+                <label class="label" for="qty"><span><?= /* @escapeNotVerified */ __('Qty') ?></span></label>
+                <div class="control">
+                    <span class="qty_decrement">-</span>
+                    <input type="number" name="qty" id="qty" value="<?= /* @escapeNotVerified */ $block->getProductDefaultQty() * 1 ?>" title="<?= /* @escapeNotVerified */ __('Qty') ?>" class="input-text qty" data-validate="<?= $block->escapeHtml(json_encode($block->getQuantityValidators())) ?>" />
+                    <span class="qty_increment">+</span>
+                </div>
+            </div>
+            <div class="actions">
+                <button type="submit" title="<?= /* @escapeNotVerified */ $buttonTitle ?>" class="action primary <?= ($isPrebookEnabled) ? 'prebook' : 'tocart' ?>" id="<?= ($isPrebookEnabled) ? 'product-prebook-button' : 'product-addtocart-button' ?>">
+                    <span><?= /* @escapeNotVerified */ $buttonTitle ?></span>
+                </button>
+                <?= $block->getChildHtml('', true) ?>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+<script type="text/x-magento-init">
+    {
+        "#product_addtocart_form": {
+            "Magento_Catalog/js/validate-product": {}
+        }
+    }
+</script>
+<style>
+    button#product-prebook-button span {
+        font-weight: 600;
+        font-family: 'spartan';
+        padding: 14px 17px;
+        text-transform: uppercase;
+    }
+    /* .show-available-qty.stock-message {
+        width: 100%;
+        position: relative;
+        float: left;
+        color: green;
+        font-weight: 500;
+    } */
+</style>
+<audio id="click-sound" style="display: none;" controls>
+    <source src="/pub/media/ringtones/order_success.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
+
+<!-- Element to trigger the sound -->
+<button id="play-sound" class="hide">Click Me</button>

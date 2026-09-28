@@ -1,0 +1,120 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$transportBuilder = $objectManager->create('Magento\Framework\Mail\Template\TransportBuilder');
+
+    //$storeId = $this->storeManager->getStore()->getStoreId();
+    $templateVars = [];
+    $sendor_name = 'nigam';
+    $sendor_email = 'tech1@golfoy.com';
+    $bcc = 'krnigam2@gmail.com';
+    $subject = "Bulk Order Request";
+    $templateidentifier = '12';
+    $recipient_name = 'Nigam ';
+    $content = "Thank you";
+    if($sendor_name != '' || $sendor_email != '' || $bcc != '' || $content != '' ){
+        $subject   = $recipient_name.', '.$subject;
+            $templateVars = [
+            'cname' => $sendor_name,
+            'subj'  => $subject,
+            'mail_body' => $content
+        ];          
+        $transportBuilder->setTemplateIdentifier($templateidentifier)
+                         ->setTemplateOptions(['area' => \Magento\Framework\App\Area::AREA_FRONTEND, 'store' => 1])
+                         ->setTemplateVars($templateVars)
+                         ->setFrom(['name' => $sendor_name,'email' => $sendor_email])
+                         //->addTo([$recipient_email])
+                         ->addTo(['testing@golfoy.com'])
+                         ->addBcc([$bcc]);
+        $transport = $transportBuilder->getTransport();
+        //$transport->sendMessage();
+    }
+?>
+
+<style>
+    .fieldset>.field:not(.choice)>.label {
+        width: 34.8%;
+    }
+
+    form#contact-form label.label {
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+form#contact-form{
+    padding: 25px;
+}
+form#contact-form{
+border: 1px solid transparent;
+    border-radius: 6px;
+    box-shadow: 0 5px 10px rgb(0 0 0 / 20%);
+}
+form#contact-form{
+max-width: 650px !important;
+}
+.column:not(.sidebar-main) form .actions-toolbar, .column:not(.sidebar-additional) form .actions-toolbar{
+margin-left: 0.8%;
+}
+.breadcrumbs{
+display: none;
+}
+.bulk_form {
+    margin-top: 40px;
+}
+@media screen and (max-width:480px){
+.bulk_form {
+    margin-top: 0px;
+}
+}
+</style>
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// @codingStandardsIgnoreFile
+/** @var \Magento\Contact\Block\ContactForm $block */
+?>
+<div class="bulk_form">
+<form class="form contact" id="contact-form" method="post">
+    <fieldset class="fieldset">
+        <div class="contact_text">
+            <legend class="legend"><span>Bulk Order Form</span></legend><br />
+            <div class="field note no-label">Looking for customized golf gear for your tournament, team or corporate gifts?</div>
+        </div>
+        <div class="contact_form">
+            <div class="field name required">
+                <label class="label" for="name">Name</label>
+                <div class="control">
+                    <input name="name" id="name" title="Name" value="" class="input-text" type="text" data-validate="{required:true}" />
+                </div>
+            </div>
+            <div class="field email required">
+                <label class="label" for="email"><span>Email</span></label>
+                <div class="control">
+                    <input name="email" id="email" title="Email" value="" class="input-text" type="email" data-validate="{required:true, 'validate-email':true}" />
+                </div>
+            </div>
+            <div class="field telephone">
+                <label class="label" for="telephone"><span>Phone Number</span></label>
+                <div class="control">
+                    <input name="telephone" id="telephone" title="Phone Number" value="" class="input-text" type="text" />
+                </div>
+            </div>
+            <div class="field comment required">
+                <label class="label" for="comment"><span>Order Details</span></label>
+                <div class="control">
+                    <textarea name="comment" id="comment" title="Order Details" class="input-text" cols="5" rows="3" data-validate="{required:true}"></textarea>
+                </div>
+            </div>
+    </fieldset>
+    <div class="actions-toolbar">
+        <div class="primary">
+            <input type="hidden" name="hideit" id="hideit" value="" />
+            <button type="submit" title="Submit" class="action submit primary">
+                <span>Submit</span>
+            </button>
+        </div>
+    </div>
+    </div>
+</form>
+</div>

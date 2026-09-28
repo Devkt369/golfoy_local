@@ -1,0 +1,158 @@
+<div class="artm-couponvalidation-container">
+    <div class="admin__fieldset-wrapper-content">
+        <form id="coupon-validation-form"
+              action="<?= $block->escapeUrl($block->getSaveUrl()) ?>"
+              method="post"
+              enctype="multipart/form-data">
+
+            <?= $block->getBlockHtml('formkey'); ?>
+
+            <fieldset class="admin__fieldset">
+
+                <legend class="admin__legend">
+                    <span>Coupon Allocation</span>
+                </legend>
+
+                
+                <div class="admin__field field">
+                    <label class="admin__field-label"
+                           for="coupon_count">
+                        <span>Number Of Coupons Required</span>
+                    </label>
+
+                    <div class="admin__field-control">
+                        <input type="number"
+                               min="1"
+                               name="coupon_count"
+                               id="coupon_count"
+                               class="admin__control-text" />
+
+                        <div class="admin__field-note">
+                            If entered, this value takes priority over CSV row count.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="admin__field field">
+                    <label class="admin__field-label">
+                    </label>
+
+                    <div class="admin__field-control">
+                        
+                    ---or---
+                    </div>
+                </div>
+                <div class="admin__field field">
+                    <label class="admin__field-label"
+                           for="csv_file">
+                        <span>Upload CSV</span>
+                    </label>
+
+                    <div class="admin__field-control">
+                        <input type="file"
+                               name="csv_file"
+                               id="csv_file"
+                               accept=".csv"
+                               class="admin__control-file" />
+
+                        <div class="admin__field-note">
+                            CSV upload is optional.
+                        </div>
+                    </div>
+                </div>
+                <br><br>
+                <div class="admin__field field required">
+                    <label class="admin__field-label" for="rule_id">
+                        <span>Sales Rule</span>
+                    </label>
+
+                    <div class="admin__field-control">
+                        <select name="rule_id"
+                                id="rule_id"
+                                class="admin__control-select"
+                                required>
+
+                            <option value="">
+                                -- Select Rule --
+                            </option>
+
+                            <?php foreach ($block->getRules() as $rule): ?>
+                                <option value="<?= (int)$rule->getRuleId() ?>">
+                                    <?= $block->escapeHtml(
+                                        $rule->getName() . ' (#' . $rule->getRuleId() . ')'
+                                    ) ?>
+                                </option>
+                            <?php endforeach; ?>
+
+                        </select>
+                    </div>
+                </div>
+
+                <div class="admin__field field required">
+                    <label class="admin__field-label" for="expiry_date">
+                        <span>Expiry Date</span>
+                    </label>
+
+                    <div class="admin__field-control">
+                        <input type="datetime-local"
+                               name="expiry_date"
+                               id="expiry_date"
+                               class="admin__control-text"
+                               required />
+                    </div>
+                </div>
+
+
+                <div class="admin__field field">
+                    <div class="admin__field-control">
+
+                        <button type="submit"
+                                class="action-primary">
+                            <span>Allocate Coupons</span>
+                        </button>
+
+                    </div>
+                </div>
+
+            </fieldset>
+
+        </form>
+    </div>
+</div>
+
+<div id="coupon-allocation-result" style="margin-top:18px;"></div>
+
+<style>
+.artm-couponvalidation-container {
+    background: #fff;
+    padding: 25px;
+    margin-bottom: 30px;
+    border: 1px solid #e3e3e3;
+}
+
+.artm-couponvalidation-container .admin__field {
+    margin-bottom: 20px;
+}
+
+.artm-couponvalidation-container .admin__control-text,
+.artm-couponvalidation-container .admin__control-select {
+    max-width: 500px;
+    width: 100%;
+}
+
+.artm-couponvalidation-container .action-primary {
+    min-width: 180px;
+}
+
+.artm-couponvalidation-container .admin__field-note {
+    margin-top: 8px;
+    color: #666;
+    font-size: 12px;
+}
+</style>
+
+<script>
+    require(['jquery', 'ArtM_CouponValidation/js/coupon-allocation'], function($, initModule) {
+        initModule({ formSelector: '#coupon-validation-form', resultSelector: '#coupon-allocation-result' });
+    });
+</script>

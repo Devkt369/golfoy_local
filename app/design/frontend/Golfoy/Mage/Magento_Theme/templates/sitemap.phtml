@@ -1,0 +1,144 @@
+<?php
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$category_id = 307;
+
+$category = $objectManager->create('Magento\Catalog\Model\Category')->load($category_id);
+$productCollection = $objectManager->create('Magento\Catalog\Model\ResourceModel\Product\CollectionFactory')->create();
+$productCollection->addAttributeToSelect('manufacturer')->addCategoryFilter($category)->addAttributeToFilter('manufacturer', ['notnull' => true])->getSelect()->group('manufacturer');
+$categoryFactory = $objectManager->create('Magento\Catalog\Model\ResourceModel\Category\CollectionFactory');
+$categoryCollection = $categoryFactory->create()->addAttributeToSelect('*');
+
+$cmsPageCollection = $objectManager->create('Magento\Cms\Model\ResourceModel\Page\CollectionFactory')->create();
+$cmsPages = $cmsPageCollection->addFieldToFilter('is_active', 1);
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+$baseUrl = $storeManager->getStore()->getBaseUrl();
+
+?>
+
+<div class="container sitemap-page">
+    <h1 class="sitemap-heading">Sitemap</h1>
+    <div class="sitelist">
+        <!-- home page -->
+        <div class="sitemap-list-menu brands">
+            <h3 class="sitemap-main-title">Home</h3>
+            <div class="site-map-menu-list">
+                <a class="submenu-sitemap" href="<?= $block->escapeUrl($block->getBaseUrl()) ?>">Golfoy Homepage</a>
+            </div>
+        </div>
+        <!--  -->
+        <!-- Brands section -->
+        <div class="sitemap-list-menu brands">
+            <h3 class="sitemap-main-title">Brands</h3>
+            <div class="site-map-menu-list">
+                <?php
+                // Check if category exists
+                if ($category->getId()) {
+                    // Get subcategories of the Brands category
+                    $subcategories = $category->getChildrenCategories();
+                    foreach ($subcategories as $subcategory) {
+                ?>
+                        <a class="submenu-sitemap" href="<?php echo $subcategory->getUrl(); ?>"><?php echo $subcategory->getName(); ?></a>
+                <?php
+                    }
+                } else {
+                    echo "Error: Category with ID $category_id not found.";
+                }
+                ?>
+            </div>
+        </div>
+
+        <!-- Categories section -->
+        <div class="sitemap-list-menu categories">
+            <h3 class="sitemap-main-title">Categories</h3>
+            <div class="site-map-menu-list">
+                <?php
+                // Parent category IDs to display their subcategories
+                $parentCategoryIdsToShow = array(2, 162, 172, 304, 109, 773, 291, 174, 898, 294, 760, 192, 455, 278, 185, 1110, 1361);
+
+                // Array of category IDs to hide
+                $hiddenCategoryIds = array(157, 687, 1400, 688, 640);
+
+                // Loop through category collection
+                foreach ($categoryCollection as $category) {
+                    // Check if the category ID should be hidden
+                    if (!in_array($category->getId(), $hiddenCategoryIds)) {
+                        // Check if the category ID is one of the specified parent categories
+                        if (in_array($category->getId(), $parentCategoryIdsToShow)) {
+                            // Get the children categories
+                            $subcategories = $category->getChildrenCategories();
+                        } else {
+                            // If it's not a parent category, treat it as a subcategory and check for hiding
+                            // Skip if it's in the hiddenCategoryIds
+                            continue;
+                        }
+
+                        // Loop through subcategories
+                        foreach ($subcategories as $subcategory) {
+                            // Check if the subcategory ID should be hidden
+                            if (!in_array($subcategory->getId(), $hiddenCategoryIds) && $subcategory->getIsActive()) {
+                ?>
+                                <a class="submenu-sitemap" href="<?php echo $subcategory->getUrl(); ?>">
+                                    <?php echo $subcategory->getName(); ?>
+                                    <?php if ($brandName = $subcategory->getBrandName()) : ?>
+                                        - <?php echo $brandName; ?>
+                                    <?php endif; ?>
+                                </a>
+                <?php
+                            }
+                        }
+                    }
+                }
+                ?>
+
+
+            </div>
+        </div>
+
+
+        <!-- Pages section for CMS pages -->
+        <div class="sitemap-list-menu cms-pages">
+            <h3 class="sitemap-main-title">Pages</h3>
+            <div class="site-map-menu-list">
+                <?php
+                // Array of page IDs to hide
+                $hiddenPageIds = array(1, 2, 11, 16, 55, 54, 123, 14, 15, 50, 17, 18, 19, 21, 22, 27, 32, 36, 37, 40, 49, 50, 51, 58, 60, 61, 62, 65, 68, 69, 71, 73, 81, 82, 98, 118, 119);
+
+                // Loop through CMS pages
+                foreach ($cmsPages as $cmsPage) {
+                    // Check if the page ID should be hidden
+                    if (in_array($cmsPage->getId(), $hiddenPageIds)) {
+                        continue; // Skip this page
+                    }
+
+                    // Replace special characters with spaces in the title
+                    $title = preg_replace('/[^a-zA-Z0-9\s]/', ' ', $cmsPage->getTitle());
+                ?>
+                    <a class="submenu-sitemap" href="<?php echo $cmsPage->getIdentifier(); ?>"><?php echo $title; ?></a>
+                <?php
+                }
+                ?>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+<style>
+    .cms-footer-sitemap main#maincontent {
+        padding-left: 0px;
+        padding-right: 0px;
+        background: #f5f5f5;
+        box-shadow: rgb(213 213 213) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) 0px -3px 6px 1px inset;
+    }
+
+    @media only screen and (max-width:767px) {
+        .submenu-sitemap {
+            width: calc(30.6666% - 0px);
+            padding: 0px;
+        }
+    }
+</style>

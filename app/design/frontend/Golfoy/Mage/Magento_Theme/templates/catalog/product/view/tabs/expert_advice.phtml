@@ -1,0 +1,43 @@
+<?php
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$dataHelper = $objectManager->get('ArtM\Expertlist\Helper\Data');
+
+$_product = $block->getProduct();
+$prd_id = $_product->getId();
+
+$expertHeading = $_product->getResource()->getAttribute('expert_heading')->getFrontend()->getValue($_product);
+$expertName = $_product->getResource()->getAttribute('expert_name')->getFrontend()->getValue($_product);
+$expertReviewContent = $_product->getResource()->getAttribute('expert_review_content')->getFrontend()->getValue($_product);
+
+$expertData = $dataHelper->getrow($expertName);
+
+if ($expertName && $expertReviewContent && $expertData) {
+
+    echo '<div class="expert_block">';
+    echo '<div class="expert_block_details">';
+    echo '<div class="row expert_sections">';
+    echo '<div class="col-sm-12 expert_content_block">';
+    echo '<div class="expert_review_content">';
+    echo '<p>' . $expertReviewContent . '</p>';
+    echo '</div>';
+    echo '</div>';
+    echo '</div>';
+    echo '<div class="row expert_img_block">';
+    echo '<div class="col-sm-4 col-xs-4 expert_img"><img id="image_url_preview" alt="Expert Image Preview" style="max-width: 100%;" src="' . $expertData[0]['image_url'] . '" /></div>';
+    echo '<div class="col-sm-8 col-xs-8 expert-details">';
+    echo '<h3>' . $expertName . '</h3>';
+    echo '<p class="span_line"><em>' . $expertData[0]['designation'] . '</em></p>';
+    echo '<p class="span_line_second"><em>' . $expertData[0]['role'] . '</em></p>';
+
+    echo '</div>';
+    echo '</div>';
+    echo '</div>';
+    echo '</div>';
+} else {
+    echo '<style>';
+    echo 'div#tab-label-tab_expert_advice { display: none !important; }';
+    echo 'div#tab_expert_advice { display: none !important; }';
+    echo '</style>';
+}
+?>

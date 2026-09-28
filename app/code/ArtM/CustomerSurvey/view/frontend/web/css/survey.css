@@ -1,0 +1,344 @@
+/* ============================================================
+   UPDATED CSS — golfoy.com brand redesign, v2
+   Primary action color now matches your actual brand red (#e60023).
+   Paired with near-black ink and a warm neutral background so the
+   red reads as a confident, clean accent rather than loud/garish.
+   ============================================================ */
+
+.artm-cs-widget {
+    /* ---- brand tokens: edit these to fine-tune ---- */
+    --artm-red-700: #c8001d;
+    --artm-red-600: #e60023;
+    --artm-red-500: #ff2745;
+    --artm-red-100: #fdeaec;
+    --artm-ink: #1a1a1a;
+    --artm-muted: #6b6b6b;
+    --artm-line: #e6e2e0;
+    --artm-bg: #faf9f8;
+    --artm-danger: #c8001d;
+
+    font-family: "Poppins", "Segoe UI", "Trebuchet MS", sans-serif;
+    color: var(--artm-ink);
+}
+
+.artm-cs-card {
+    border: 1px solid var(--artm-line);
+    border-radius: 16px;
+    background: linear-gradient(160deg, #ffffff 0%, var(--artm-bg) 100%);
+    box-shadow: 0 14px 32px rgba(13, 59, 38, 0.14);
+    padding: 22px 24px;
+    max-width: 540px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* subtle top accent bar for a premium, branded feel */
+.artm-cs-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--artm-red-600);
+}
+
+.artm-cs-title {
+    margin: 6px 0 4px;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.1px;
+    color: var(--artm-ink);
+}
+
+.artm-cs-desc,
+.artm-cs-q-desc {
+    margin: 0 0 14px;
+    color: var(--artm-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.artm-cs-q-title {
+    margin: 12px 0 8px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--artm-ink);
+}
+
+.artm-cs-progress {
+    height: 7px;
+    background: var(--artm-red-100);
+    border-radius: 999px;
+    margin-bottom: 14px;
+    overflow: hidden;
+}
+
+.artm-cs-progress span {
+    display: block;
+    height: 100%;
+    background: var(--artm-red-600);
+    transition: width 0.25s ease;
+}
+
+.artm-cs-field {
+    width: 100%;
+    border: 1px solid var(--artm-line);
+    border-radius: 10px;
+    height: 45px;
+    padding: 11px 13px;
+    font-size: 14px;
+    background: #fff;
+    color: var(--artm-ink);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.artm-cs-field:focus {
+    outline: none;
+    border-color: none;
+    box-shadow: none !important;
+}
+
+.artm-cs-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--artm-line);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    background: var(--artm-bg);
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+    cursor: pointer;
+}
+
+.artm-cs-option:hover {
+    border-color: #6b6b6b;
+    background: #ededed;
+}
+
+.artm-cs-option.is-selected {
+    border-color: var(--artm-red-600);
+    background: var(--artm-red-100);
+    box-shadow: 0 0 0 1px var(--artm-red-600) inset;
+}
+
+.artm-cs-option-content {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 6px;
+    flex: 1;
+}
+
+.artm-cs-option-image {
+    max-width: 100px;
+    max-height: 100px;
+    width: auto;
+    height: auto;
+    mix-blend-mode: darken;
+    display: block;
+    margin: unset !important;
+    border-radius: 8px;
+}
+
+.artm-cs-option-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--artm-ink);
+    text-align: center;
+    text-transform: capitalize;
+    word-break: break-word;
+    margin-left: 13px;
+}
+
+.artm-cs-option input[type="radio"] {
+    accent-color: #e60023;
+}
+
+.artm-cs-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 18px;
+}
+
+.artm-cs-btn {
+    border: 0;
+    border-radius: 10px;
+    padding: 11px 20px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 14px;
+    transition: transform 0.1s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.artm-cs-btn-primary {
+    background: var(--artm-red-600);
+    color: #fff;
+    border-radius: 5px !important;
+}
+
+.artm-cs-btn-primary:hover:not(:disabled) {
+    background: var(--artm-red-700);
+    color: white;
+    border: none !important
+}
+
+.artm-cs-btn-light {
+    font-size: 13px;
+    color: var(--artm-ink);
+    padding: 0px;
+    background: none !important;
+}
+
+.artm-cs-btn-light:hover:not(:disabled) {
+    background: none !important;
+    border: none !important
+}
+
+input:not([disabled]):focus {
+    box-shadow: none !important;
+}
+
+.artm-cs-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    border-radius: 5px !important;
+    box-shadow: none;
+    transform: none;
+}
+
+button.artm-cs-btn.artm-cs-btn-light:disabled {
+    font-size: 13px;
+    background: none;
+    padding: 0px;
+}
+
+.artm-cs-validation {
+    min-height: 18px;
+    margin: 6px 0 0;
+    color: var(--artm-danger);
+    font-size: 12px;
+}
+
+.artm-cs-thankyou {
+    border: 1px solid var(--artm-line);
+    border-radius: 14px;
+    background: #f6f6f6;
+    padding: 20px;
+    text-align: center;
+}
+
+.artm-cs-thankyou h4 {
+    margin: 0 0 6px;
+    font-size: 18px;
+    color: var(--artm-ink);
+}
+
+.artm-cs-popup {
+    position: fixed;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+    z-index: 9999;
+}
+
+.artm-cs-popup.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.artm-cs-popup-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(26, 26, 26, 0.55);
+}
+
+.artm-cs-popup-panel {
+    position: relative;
+    z-index: 2;
+    max-width: 620px;
+    margin: 8vh auto 0;
+    padding: 14px;
+    animation: artm-cs-rise 0.25s ease;
+}
+
+.artm-cs-popup-close {
+    position: absolute;
+    right: 20px;
+    top: 18px;
+    border: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f1f0ee;
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 30px;
+    color: var(--artm-ink);
+    transition: background 0.15s ease;
+}
+
+.artm-cs-popup-close:hover {
+    background: #e6e2e0;
+}
+
+.artm-cs-rating {
+    display: flex;
+    gap: 6px;
+}
+
+.artm-cs-rating-star {
+    border: 0;
+    background: transparent;
+    color: #cdd6cf;
+    font-size: 28px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.15s ease, transform 0.1s ease;
+}
+
+.artm-cs-rating-star:hover {
+    border: none !important;
+    background-color: transparent !important;
+}
+
+.artm-cs-rating-star.is-active {
+    color: var(--artm-red-600);
+    border: none !important
+}
+
+.artm-cs-rating-star.is-active:focus {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+@keyframes artm-cs-rise {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 767px) {
+    .artm-cs-card {
+        max-width: 100%;
+        border-radius: 12px;
+        padding: 16px;
+    }
+
+    .artm-cs-popup-panel {
+        margin-top: 10vh;
+        padding: 10px;
+    }
+}

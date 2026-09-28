@@ -1,0 +1,479 @@
+<style>
+    .analysis-section {
+        background-color: #F8F8F8;
+        padding: 20px;
+    }
+    .analysis-container {
+        background-color: #fff;
+        padding: 20px;
+        
+    }
+    .analysis-container .container.row{
+        /*margin-top:50px;*/
+    }
+    h4.newblk{margin-top:50px;}
+    .analysis-data a{display:block !important;}
+    .analysis-main{padding-left:20px;}
+    .analysis-container .col-m-12{margin-top:50px; }
+    .analyse-export{margin-bottom:15px;}
+
+</style>
+<section class = "admin__page-section analysis-section">
+    <div class ="analysis-container row">
+        <div class="analysis-main col-m-10 col-m-push-2">
+            <?php
+              $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+
+ 
+              $helper = $this->helper('ArtM\Analysis\Helper\Data');
+              $dateRange = $helper->getDaterange();
+             
+             // $dateRangeCurr = $helper->getDaterangeCurr();
+             // print_r($dateRangeCurr);
+
+
+              $type = 'all';
+              $attr = '';
+              $brandselected = '';
+              $defaultBrandid = 133;
+              if($block->getData('type') ) {
+                $type = $block->getData('type');
+              }
+              if($block->getData('attr') ) {
+                $attr = $block->getData('attr');
+                switch($attr) {
+                  case  'shoes':
+                    $defaultAttrsetid = 25;
+
+                  break;
+                  case  'tshirts':
+                    $defaultAttrsetid = [31,60];
+
+                  break;
+                  case  'gloves':
+                    $defaultAttrsetid = 13;
+
+                  break;
+                  case  'ball':
+                    $defaultAttrsetid = 9;
+
+                  break;
+                  case  'standbags':
+                    $defaultAttrsetid = 15;
+
+                  break;
+                  case  'grip':
+                  $defaultAttrsetid = 11;
+
+                  break;
+                  case  'driver':
+                    $defaultAttrsetid = 28;
+  
+                  break;  
+                  case  'irons':
+                    $defaultAttrsetid = 27;
+  
+                  break;  
+                  case  'wedges':
+                    $defaultAttrsetid = 35;
+  
+                  break;  
+                  case  'putters':
+                    $defaultAttrsetid = 38;
+  
+                  break;  
+                  case  'fairways':
+                    $defaultAttrsetid = 36;
+  
+                  break;  
+                  case  'hybrid':
+                    $defaultAttrsetid = 37;
+  
+                  break;  
+                  case  'packageset':
+                    $defaultAttrsetid = [29,55];
+  
+                  break; 
+                  case  'headwear':
+                    $defaultAttrsetid = 34;
+  
+                  break; 
+                  case  'trousers':
+                    $defaultAttrsetid = 42;
+  
+                  break; 
+                  case  'cartbags':
+                    $defaultAttrsetid = 15;
+  
+                  break; 
+                  case  'travelbags':
+                    $defaultAttrsetid = 15;
+  
+                  break; 
+                  case  'training':
+                    $defaultAttrsetid = 23;
+  
+                  break;
+                  case  'trolley':
+                    $defaultAttrsetid = 26;
+  
+                  break; 
+                  default:
+                  break;
+                }
+              }
+              if($block->getData('brandselected') ) {
+                $brandselected = $block->getData('brandselected');
+              }
+              
+              
+              $labels = ['shoes' => 'Shoes', 'tshirts' => 'T-Shirts', 'gloves' => 'Gloves', 'ball' => 'Ball', 'grip' => 'Grip',
+              'driver' => 'Driver', 'wedges' => 'Wedges', 'irons' => 'Irons', 'fairways' => 'Fairways', 'hybrid' => 'Hybrid',
+              'packageset' => 'Package Sets', 'headwear' => 'Headwear', 'trousers' => 'Trousers', 'trolley' => 'Trolley',
+              'standbags' => 'Stand Bags', 'cartbags' => 'Cart Bags', 'travelbags' => 'Travel Bags',
+              'putters' => 'Putters', 'training' => 'Training aid'];
+              
+              $arrToPass = [];
+              if($type != 'all'){
+                $arrToPass = $dateRange[$type];
+              }
+              
+              
+              
+              if($attr != ''){
+                
+                    //brand, time period dropdown
+                    echo '<div class="row"> <div class ="col-m-6"><h2> '. $labels[$attr].' </h2></div>';
+                    echo '<div class ="col-m-6" style="text-align:right;">';
+                    $timeOptions = ["all"=>"All time", "yearly"=>"Annual", "quarterly"=>"Quarterly", "monthly"=>"Monthly"];
+                    $brandOptions = $helper->getAttributeArrayOptions($defaultAttrsetid, $defaultBrandid);
+                    $actionurl = $block->getUrl('*/*/*',['attr'=> $attr]); 
+                    ?>
+
+
+
+                    <form name = "analyseform" method = "POST" action ="<?php echo $actionurl; ?>">
+                    <?php echo $block->getBlockHtml('formkey') ?>
+                  
+                    <input type = "hidden" name= "attr" value ="<?php echo $attr; ?>"/>
+                    <select name="brandselected" id="brandselected" class="admin__control-select">
+                        <?php foreach($brandOptions as $k => $v){  
+                              $selected = ($k == $brandselected) ? 'selected = "selected"' : '';                      
+                              echo '<option value="'.$k.'"'.$selected.'>'.$v.'</option>';
+                        } ?>
+                      </select>
+                      <select name="type" id="type" class="admin__control-select">
+                        <?php foreach($timeOptions as $k => $v){
+                              $selected = ($k == $type) ? 'selected = "selected"' : '';
+                              echo '<option value="'.$k.'"'.$selected.'>'.$v.'</option>';
+                        } ?>
+                      </select>
+                      <input type ="submit" name="submit" id ="submitanalyse" value ="Submit"/>
+                    </form>
+                    <?php
+                    echo '</div></div>';
+
+
+                     // main content                      
+                      
+                      switch($attr) {
+                        case 'tshirts':
+                            $helper->getTshirtsContent($arrToPass, $type, $brandselected);
+                          break;
+                        case 'gloves':
+                            $helper->getGlovesContent($arrToPass, $type, $brandselected);
+                          break;
+                        case 'ball':
+                            $helper->getBallContent($arrToPass, $type, $brandselected);
+                        break;
+                        case 'standbags':
+                          $helper->getStandbagsContent($arrToPass, $type, $brandselected);
+                        break;
+                        case 'grip':
+                          $helper->getGripContent($arrToPass, $type, $brandselected);
+                        break;
+                        case 'driver':
+                          $helper->getDriverContent($arrToPass, $type, $brandselected);
+                        break;
+                        case 'irons':
+                          $helper->getIronsContent($arrToPass, $type, $brandselected);
+                        break;
+                        case 'wedges':
+                          $helper->getWedgesContent($arrToPass, $type, $brandselected);
+                        break;
+                        case 'putters':
+                          $helper->getPuttersContent($arrToPass, $type, $brandselected);
+                        break;
+                        case 'fairways':
+                          $helper->getFairwaysContent($arrToPass, $type, $brandselected);
+                        break;
+                        case 'hybrid':
+                          $helper->getHybridContent($arrToPass, $type, $brandselected);
+                        break;
+                        case 'packageset':
+                          $helper->getPackagesetContent($arrToPass, $type, $brandselected);
+                        break;
+                        case 'headwear':
+                          $helper->getHeadwearContent($arrToPass, $type, $brandselected);
+                        break;
+                        case 'trousers':
+                          $helper->getTrousersContent($arrToPass, $type, $brandselected);
+                        break;
+                        case 'cartbags':
+                          $helper->getCartbagsContent($arrToPass, $type, $brandselected);
+                        break;
+                        case 'travelbags':
+                          $helper->getTravelbagsContent($arrToPass, $type, $brandselected);
+                        break;
+                        case 'training':
+                          $helper->getTrainingContent($arrToPass, $type, $brandselected);
+                        break;
+                        case 'trolley':
+                          $helper->getTrolleyContent($arrToPass, $type, $brandselected);
+                        break;
+                        default:
+                            $helper->getShoesContent($arrToPass, $type, $brandselected);
+                        break;
+                      }
+
+
+
+              }else{
+                
+                    //time period dropdown
+                    echo '<div class="row"> <div class ="col-m-6"><h2> Orders </h2></div>';
+                    echo '<div class ="col-m-6" style="text-align:right;">';
+                    $timeOptions = ["all"=>"All time", "yearly"=>"Annual", "quarterly"=>"Quarterly", "monthly"=>"Monthly"];
+                   
+                    $actionurl = $block->getUrl('*/*/*'); 
+                    ?>
+
+
+
+                    <form name = "analyseform" method = "POST" action ="<?php echo $actionurl; ?>">
+                    <?php echo $block->getBlockHtml('formkey') ?>
+                  
+                    <input type = "hidden" name= "attr" value ="<?php echo $attr; ?>"/>
+                    
+                      <select name="type" id="type" class="admin__control-select">
+                        <?php foreach($timeOptions as $k => $v){
+                              $selected = ($k == $type) ? 'selected = "selected"' : '';
+                              echo '<option value="'.$k.'"'.$selected.'>'.$v.'</option>';
+                        } ?>
+                      </select>
+                      <input type ="submit" name="submit" id ="submitanalyse" value ="Submit"/>
+                    </form>
+                    <?php
+                    echo '</div></div>';
+
+                    // main content
+                    if($type != 'all'){   
+                      $helper->totalOrdersAll("Total orders placed", $arrToPass);                  
+                      $helper->AttrSetRevenueTotal("Total Sales", $arrToPass);
+                    }else{
+                      $Odata = $helper->totalOrdersAlltype();
+                      // Set default values for array keys that might not be set
+                      $total = isset($Odata['total']) ? $Odata['total'] : 0;
+                      $complete = isset($Odata['complete']) ? $Odata['complete'] : 0;
+                      $canceled = isset($Odata['canceled']) ? $Odata['canceled'] : 0;
+                      $reordered = isset($Odata['reordered']) ? $Odata['reordered'] : 0;
+                      $replaced = isset($Odata['replaced']) ? $Odata['replaced'] : 0;
+                      $returned = isset($Odata['returned']) ? $Odata['returned'] : 0;
+                      
+                          echo "<div class= 'container row'><div class = 'col-m-12'> <h4> Total orders ($total) </h4>";
+                          echo "<table class='admin__table-primary analysis-data'><tr>";
+                          echo "<th> fulfilled </th><th> Cancelled </th><th> Cancelled and reordered </th><th> Replaced </th><th> Return & Refunded </th></tr>";
+                          echo "<tr><td> $complete </td><td> $canceled </td><td> $reordered </td><td> $replaced </td><td> $returned </td>";
+                          echo "</tr></table></div></div>";
+                          $labelsjsonenc = json_encode(['fulfilled','Cancelled', 'Cancelled and reordered', 'Replaced','Return & Refunded']);
+                          $labelsjsonvalue = htmlspecialchars($labelsjsonenc, ENT_QUOTES, 'UTF-8');
+
+                          $datasets = [];                          
+                            $datasets[] =   [
+                                'label' => 'total orders',
+                                'data' => [$complete, $canceled, $reordered, $replaced, $returned],
+                                'backgroundColor'=> [
+                                  'rgb(60, 179, 113)',
+                                  'rgb(255, 99, 132)',  
+                                  'rgb(182, 204, 79)',
+                                  'rgb(54, 162, 235)',                                
+                                  'rgb(255, 205, 86)'
+                                  ],
+                                'hoverOffset'=> 4
+                            ];
+                           
+                          $datasetsjsonenc = json_encode($datasets);
+                          $datasetsjsonvalue = htmlspecialchars($datasetsjsonenc, ENT_QUOTES, 'UTF-8');
+
+                          echo '<div class = "col-m-3"> </div><div class = "col-m-6" style="margin-top:50px;">';
+                          echo '<canvas class ="drawChartpie" data-label = "'.$labelsjsonvalue.'" data-dataset = "'.$datasetsjsonvalue.'"  id="chart-total-sales-orders"></canvas>';
+                          echo '</div><div class = "col-m-3"> </div>';
+
+
+                         //----------------------------attrset data
+                         //$attrsets = $helper->getAttrsets();
+                        // print_r($attrsets);
+                        echo "<div class= 'container row'><div class = 'col-m-12'>";
+                        $helper->AttrSetRevenueTotal("Total Sales");
+                        echo "</div></div>";
+                         //--------------------------------------------
+                     }
+         
+              }
+              
+            ?>
+        </div>
+
+
+        <!-- left category menu-->
+        <div class="analysis-secondary col-m-2 col-m-pull-10">
+          <table class="admin__table-primary analysis-data" >
+              <thead><tr><th class="data-grid-th  no-link"><span>          
+                Category
+              </span></th> </tr></thead>
+              <tbody>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'shoes']); ?>">
+                Shoes</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'tshirts'] ); ?>">
+                T-shirts</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'gloves'] ); ?>">
+                Gloves</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'ball'] ); ?>">
+                Ball</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'standbags'] ); ?>">
+                Stand Bags</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'grip'] ); ?>">
+                Grip</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'driver'] ); ?>">
+                Driver</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'irons'] ); ?>">
+                Irons</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'wedges'] ); ?>">
+                Wedges</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'putters'] ); ?>">
+                Putters</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'fairways'] ); ?>">
+                Fairways</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'hybrid'] ); ?>">
+                Hybrid</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'packageset'] ); ?>">
+                Package Sets</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'headwear'] ); ?>">
+                Headwear</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'trousers'] ); ?>">
+                Trousers</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'cartbags'] ); ?>">
+                Cart Bags</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'travelbags'] ); ?>">
+                Travel Bags</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'training'] ); ?>">
+                Training Aid</a></td></tr>
+                <tr class="even _clickable">
+                 <td class="col-customer"> <a href= "<?php echo $block->getUrl('*/*/*',['attr'=> 'trolley'] ); ?>">
+                Trolley</a></td></tr>
+              </tbody>
+          </table>
+        </div>
+
+    </div>
+    <div class ="col-m-6">  <canvas id="myChart"></canvas> </div>
+</section>
+<script type="text/javascript">
+  require(['jquery', 'chartJs'], function($, Chart) {
+
+    /*$("#analysisperiod").change(function() {
+        var currVal = $(this).val(); 
+        $(document).find("#period-"+currVal).trigger('click');
+    });*/
+
+
+    $(".analyse-export-btn").click(function() {
+        var st_date = $(this).parents('.analyse-export').find('.st_date').val();
+        var end_date = $(this).parents('.analyse-export').find('.end_date').val();
+        var limitvalue = $(this).parents('.analyse-export').find('.limitvalue').val();
+        var ftype = $(this).parents('.analyse-export').find('.ftype').val();
+        var attrset = $(this).parents('.analyse-export').find('.attrset').val();
+        var csvfilename = $(this).parents('.analyse-export').find('.csvfilename');
+        var brandattr = $(this).parents('.analyse-export').find('.brandattr').val();
+       // console.log(st_date + end_date + limitvalue + ftype + attrset);
+       
+       csvfilename.html("generating ...");
+        var url = "<?php echo $block->getUrl('analysis/data/createcsv'); ?>";
+        $.ajax({
+          url: url,
+          type: "POST",
+          dataType: 'json',
+          data: { st_date: st_date, end_date: end_date, limitvalue: limitvalue, ftype: ftype, attrset: attrset, brandattr: brandattr},
+          success: function (response) { 
+           csvfilename.html(response.link);
+          }
+        });
+    });
+
+
+    if($('.drawChartline').length) {
+        $('.drawChartline').each(function() {
+
+          var ctx = $(this).attr('id'); 
+          var labels = JSON.parse($(this).attr('data-label'));
+          var dataset = JSON.parse($(this).attr('data-dataset'));
+          var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: labels,
+              datasets: dataset
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+
+        });
+    }
+    if($('.drawChartpie').length) {
+        $('.drawChartpie').each(function() {
+
+          var ctx = $(this).attr('id'); 
+          var labels = JSON.parse($(this).attr('data-label'));
+          var dataset = JSON.parse($(this).attr('data-dataset'));
+          var myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: labels,
+              datasets: dataset
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+
+        });
+    }
+  });
+</script>

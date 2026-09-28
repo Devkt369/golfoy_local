@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\StoreGraphQl\Model\Resolver\Store\StoreConfigDataProvider">
+        <arguments>
+            <argument name="extendedConfigData" xsi:type="array">
+                <item name="magestore_giftvoucher_general_active" xsi:type="string">giftvoucher/general/active</item>
+                <item name="magestore_giftvoucher_general_pattern" xsi:type="string">giftvoucher/general/pattern</item>
+                <item name="magestore_giftvoucher_general_showprefix" xsi:type="string">giftvoucher/general/showprefix</item>
+                <item name="magestore_giftvoucher_general_hiddenchar" xsi:type="string">giftvoucher/general/hiddenchar</item>
+                <item name="magestore_giftvoucher_general_expire" xsi:type="string">giftvoucher/general/expire</item>
+                <item name="magestore_giftvoucher_general_maximum" xsi:type="string">giftvoucher/general/maximum</item>
+                <item name="magestore_giftvoucher_general_share_card" xsi:type="string">giftvoucher/general/share_card</item>
+                <item name="magestore_giftvoucher_general_use_for_ship" xsi:type="string">giftvoucher/general/use_for_ship</item>
+                <item name="magestore_giftvoucher_general_use_with_coupon" xsi:type="string">giftvoucher/general/use_with_coupon</item>
+                <item name="magestore_giftvoucher_general_gc_show_check_link" xsi:type="string">giftvoucher/general/gc_show_check_link</item>
+                <item name="magestore_giftvoucher_general_show_expiry_date" xsi:type="string">giftvoucher/general/show_expiry_date</item>
+                <item name="magestore_giftvoucher_interface_amount" xsi:type="string">giftvoucher/interface/amount</item>
+                <item name="magestore_giftvoucher_interface_description" xsi:type="string">giftvoucher/interface/description</item>
+                <item name="magestore_giftvoucher_interface_custom_image" xsi:type="string">giftvoucher/interface/custom_image</item>
+                <item name="magestore_giftvoucher_interface_upload_max_size" xsi:type="string">giftvoucher/interface/upload_max_size</item>
+                <item name="magestore_giftvoucher_interface_postoffice" xsi:type="string">giftvoucher/interface/postoffice</item>
+                <item name="magestore_giftvoucher_interface_postoffice_date" xsi:type="string">giftvoucher/interface/postoffice_date</item>
+                <item name="magestore_giftvoucher_interface_max" xsi:type="string">giftvoucher/interface/max</item>
+                <item name="magestore_giftvoucher_interface_schedule" xsi:type="string">giftvoucher/interface/schedule</item>
+                <item name="magestore_giftvoucher_interface_checkout_show_gift_card" xsi:type="string">giftvoucher/interface_checkout/show_gift_card</item>
+                <item name="magestore_giftvoucher_interface_checkout_display" xsi:type="string">giftvoucher/interface_checkout/display</item>
+                <item name="magestore_giftvoucher_interface_checkout_display_image_item" xsi:type="string">giftvoucher/display_image_item/product</item>
+                <item name="magestore_giftvoucher_interface_payment_show_gift_card" xsi:type="string">giftvoucher/interface_payment/show_gift_card</item>
+                <item name="magestore_giftvoucher_email_enable" xsi:type="string">giftvoucher/email/enable</item>
+                <item name="magestore_giftvoucher_email_only_complete" xsi:type="string">giftvoucher/email/only_complete</item>
+                <item name="magestore_giftvoucher_email_sender" xsi:type="string">giftvoucher/email/sender</item>
+                <item name="magestore_giftvoucher_email_send_with_ship" xsi:type="string">giftvoucher/email/send_with_ship</item>
+                <item name="magestore_giftvoucher_email_self" xsi:type="string">giftvoucher/email/self</item>
+                <item name="magestore_giftvoucher_email_template_success" xsi:type="string">giftvoucher/email/template_success</item>
+                <item name="magestore_giftvoucher_email_send_refund" xsi:type="string">giftvoucher/email/send_refund</item>
+                <item name="magestore_giftvoucher_email_template" xsi:type="string">giftvoucher/email/template</item>
+                <item name="magestore_giftvoucher_email_template_refund" xsi:type="string">giftvoucher/email/template_refund</item>
+                <item name="magestore_giftvoucher_email_autosend" xsi:type="string">giftvoucher/email/autosend</item>
+                <item name="magestore_giftvoucher_email_daybefore" xsi:type="string">giftvoucher/email/daybefore</item>
+                <item name="magestore_giftvoucher_print_voucher_logo" xsi:type="string">giftvoucher/print_voucher/logo</item>
+                <item name="magento_sales_totals_sort_giftvoucher" xsi:type="string">sales/totals_sort/giftvoucher</item>
+                <item name="magento_sales_totals_sort_giftvoucher_after_tax" xsi:type="string">sales/totals_sort/giftvoucher_after_tax</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Framework\GraphQl\Schema\Type\Entity\DefaultMapper">
+        <arguments>
+            <argument name="map" xsi:type="array">
+                <item name="catalog_product" xsi:type="array">
+                    <item name="giftvoucher" xsi:type="string">GiftCardProduct</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\CatalogGraphQl\Model\ProductInterfaceTypeResolverComposite">
+        <arguments>
+            <argument name="productTypeNameResolvers" xsi:type="array">
+                <item name="giftvoucher_product_type_resolver" xsi:type="object">Magestore\GiftvoucherGraphQl\Model\GiftCardProductTypeResolver</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Framework\GraphQl\Schema\Type\Enum\DefaultDataMapper">
+        <arguments>
+            <argument name="map" xsi:type="array">
+                <item name="GiftCardTypeEnum" xsi:type="array">
+                    <item name="physical" xsi:type="string">1</item>
+                    <item name="virtual" xsi:type="string">2</item>
+                    <item name="combined" xsi:type="string">3</item>
+                </item>
+
+                <item name="GiftCardValueTypeEnum" xsi:type="array">
+                    <item name="fixed" xsi:type="string">1</item>
+                    <item name="range" xsi:type="string">2</item>
+                    <item name="dropdown" xsi:type="string">3</item>
+                </item>
+
+                <item name="GiftCardPriceTypeEnum" xsi:type="array">
+                    <item name="same" xsi:type="string">1</item>
+                    <item name="fixed" xsi:type="string">2</item>
+                    <item name="percent" xsi:type="string">3</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\QuoteGraphQl\Model\Cart\BuyRequest\BuyRequestBuilder">
+        <arguments>
+            <argument name="providers" xsi:type="array">
+                <item name="giftcard_options" xsi:type="object">Magestore\GiftvoucherGraphQl\Model\Cart\BuyRequest\GiftCardDataProvider</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

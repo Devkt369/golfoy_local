@@ -1,0 +1,27 @@
+<?php
+/**
+ * @author Amasty Team
+ * @copyright Copyright (c) Amasty (https://www.amasty.com)
+ * @package Free Gift Base for Magento 2
+ */
+/**
+ * @var $block Magento\Backend\Block\Template
+ * @var $viewModel Amasty\Promo\ViewModel\Checkout\Messenger
+ * @var $escaper Magento\Framework\Escaper
+ * @var $secureRenderer Magento\Framework\View\Helper\SecureHtmlRenderer
+ */
+$viewModel = $block->getViewModel();
+$errorMessages = /* @noEscape */ $viewModel->getErrorMessages();
+?>
+<?php if ($viewModel->isShowErrorMessage()): ?>
+    <?php
+    $messengerScript = <<<SCRIPT
+        require(['uiRegistry'], function (registry) {
+                registry.get('checkout.errors', function (errors) {
+                    errors.messageContainer.errorMessages({$errorMessages});
+                });
+            });
+    SCRIPT;
+    ?>
+    <?= /* @noEscape */ $secureRenderer->renderTag('script', [], $messengerScript, false) ?>
+<?php endif; ?>

@@ -1,0 +1,245 @@
+<?php
+/**
+ * Copyright © Magefan (support@magefan.com). All rights reserved.
+ * Please visit Magefan.com for license details (https://magefan.com/end-user-license-agreement).
+ *
+ * Glory to Ukraine! Glory to the heroes!
+ */
+?>
+<?php
+/**
+ * Blog recent posts widget
+ *
+ * @var $block \Magefan\Blog\Block\Widget\Recent
+ */
+?>
+ <style>
+     .blog-page-list .column.main {
+            width: 100%;
+        }
+        .bottom-left {
+            position: absolute;
+            bottom: 0px;
+            left: 5px;
+            text-align: left;
+            color: white;
+            width: Calc(100% - 10px);
+            padding: 0px 10px;
+            background-image: linear-gradient(to bottom, rgb(135 135 135 / 12%), rgb(6 6 6));
+            /* border-radius: 5px; */
+        }
+        .item.post-posed-date span {
+            font-weight: 600;
+            font-size: 10px;
+        }
+
+        .box_container {
+            display: inline-block;
+            width: 100%;
+        }
+
+        .img_sec {
+            width: auto;
+            height: auto;
+            overflow: hidden;
+        }
+
+        .img_sec img {
+            width: 100%;
+            transition: transform .5s, filter .3s ease-in-out;
+            transform-origin: center center;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-radius: 5px;
+        }
+
+        .box_section:hover .img_sec img {
+            filter: brightness(80%);
+            transform: scale(1.1);
+            border-radius: 5px;
+        }
+
+        p.post_title {
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .container-fuid.pro_image_container {
+            margin-top: 20px;
+        }
+
+        a.post_read_more_ {
+            text-transform: uppercase;
+            font-size: 10px;
+            font-family: 'spartan';
+            font-weight: 500;
+            letter-spacing: 1px;
+            padding: 6px 15px;
+            background: #e60023;
+            color: white;
+            border-color: transparent;
+            border-radius: 5px;
+        }
+        p.post_title {
+            color: white;
+            text-transform: capitalize;
+            font-size: 14px;
+            text-decoration: none !important;
+        }
+     .box_section a{
+         text-decoration: none;
+     }
+     a.post_read_more {
+        text-transform: capitalize;
+        font-size: 11px;
+        padding: 6px 10px;
+        letter-spacing: 0px;
+        background-color: #e60023;
+        color: white;
+        border-radius: 5px;
+         font-weight: 500;
+         float: left;
+    }
+     .post_tags_and_cats {
+        float: right;
+    }
+     .post_bottom_info {
+        display: inline-block;
+        width: 100%;
+    }
+     .post-list-wrapper.blog-widget-recent > h3.title {
+        display: inline-block;
+        border: 1px solid #dddddd;
+        min-width: 100%;
+        padding: 20px 0px;
+        text-align: center;
+        text-transform: uppercase;
+        font-weight: 700;
+        font-family: headpro;
+        background-color: #ebebeb;
+    }
+     .box_section_block {
+        margin: 0px;
+        width: 33.33%;
+        display: inline-block;
+        float: left;
+        position: relative;
+        text-align: center;
+        border: 1px solid transparent;
+        border-radius: 7px;
+        overflow: hidden;
+        background-position: inherit;
+        background-size: auto 100%;
+        /* background-image: linear-gradient(to bottom, rgba(255,0,0,0), rgb(151 151 151)); */
+        /* border-radius: 5px; */
+        /* overflow: hidden; */
+    }
+     .box_section {
+    padding: 5px;
+    border-radius: 5px !important;
+    overflow: hidden;
+}
+     @media only screen and (max-width: 1100px) {
+         
+         .box_section_block {
+            width: 50%;
+         }
+     }
+     @media only screen and (max-width: 700px) {
+         
+         .box_section_block {
+            width: 100%;
+         }
+     }
+        @media only screen and (max-width: 480px) {
+            .box_section {
+                margin-bottom: 0px;
+            }
+
+            .container-fuid.pro_image_container {
+                margin-top: 0px;
+            }
+            .img_sec:hover img {
+                filter: brightness(80%);
+                transform: scale(1.1);
+            }
+        }
+
+        @media only screen and (max-width: 768px) {
+            .box_section {
+                margin-bottom: 0px;
+            }
+        }
+    </style>
+<?php
+    $_postCollection = $block->getPostCollection();
+?>
+<?php if ($_postCollection->count()) { ?>
+<div class="post-list-wrapper blog-widget-recent">
+    <h3 class="title">
+    <?php if($block->getCategory()){
+        echo $block->getCategory()->getTitle(); }
+
+        if($block->getTag()){
+            echo $block->getTag()->getTitle(); }
+    ?> 
+    </h3>
+    
+    <div class="container-fuid pro_image_container">
+        <div class="box_container">
+            <?php foreach ($_postCollection as $_post) { ?>
+            <?php
+                $_postUrl = $block->escapeUrl($_post->getPostUrl());
+                $_postName = $block->escapeHtml($_post->getTitle());
+            ?>
+            <a href="<?= /*@noEscape*/ $_postUrl ?>">
+                    <div class="box_section_block">
+                        <div class="box_section">
+                            <div class="img_sec">
+                                <?php $featuredImage = $_post->getFeaturedListImage() ?: $_post->getFeaturedImage(); ?>
+                                <?php if ($featuredImage) { ?>
+                                    <?php
+                                        $featuredImgAlt = $_post->getData('featured_list_img_alt') ?: $_post->getData('featured_img_alt');
+                                    if (!$featuredImgAlt) {
+                                        $featuredImgAlt = $_postName;
+                                    }
+                                    ?>
+                                        <img src="<?= $block->escapeHtml($featuredImage) ?>"
+                                                 alt="<?= $block->escapeHtml($featuredImgAlt) ?>" />
+                                <?php } ?>
+                            </div>
+                            <div class="bottom-left">
+                                <p class="post_title"><?= /*@noEscape*/ $_postName ?></p>
+                                <div class="post_bottom_info">
+                                    <a class="post_read_more" href="<?= /*@noEscape*/ $_postUrl ?>">Read More >></a>
+                                    <div class="post_tags_and_cats">
+                                        <?php if ($_post->isPublishDateEnabled()) { ?>
+                                            <div class="item post-posed-date">
+
+                                                <span class="value"><?= $block->escapeHtml($_post->getPublishDate()) ?></span>
+                                            </div>
+                                        <?php } ?>
+                                        <?php if ($_categoriesCount = $_post->getCategoriesCount()) { ?>
+                                        <div class="item post-categories hide">
+                                            <span class="label"><?= $block->escapeHtml(__('Categories:')) ?></span>
+                                            <?php $n = 0;
+                                            foreach ($_post->getParentCategories() as $ct) { $n++; ?>
+                                                <a title="<?= $block->escapeHtml($ct->getTitle()) ?>"
+                                                   href="<?= $block->escapeUrl($ct->getCategoryUrl()) ?>">
+                                                    <?= $block->escapeHtml($ct->getTitle()) ?>
+                                                </a>
+                                                <?php if ($n != $_categoriesCount) { ?>, <?php } ?>
+                                            <?php } ?>
+                                        </div>
+                                        <?php } ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            <?php } ?>
+        </div>
+    </div>
+</div>
+<?php } ?>

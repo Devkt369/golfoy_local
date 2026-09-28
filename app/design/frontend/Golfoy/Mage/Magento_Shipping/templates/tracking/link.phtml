@@ -1,0 +1,14 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+?>
+<?php /** @var $block \Magento\Shipping\Block\Tracking\Link */ ?>
+<?php $order = $block->getOrder();
+$orderid = $order->getId();
+$url = $block->getUrl("sales/order/shipment/order_id/$orderid");
+?>
+<a href="<?= $url ?>" class="action track" title="<?= $block->escapeHtmlAttr($block->getLabel()) ?>">
+<span><?= $block->escapeHtml($block->getLabel()) ?></span>
+</a>

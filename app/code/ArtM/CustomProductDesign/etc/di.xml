@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Quote\Model\Quote\Item">
+        <plugin name="vendor_module_custom_price" type="ArtM\CustomProductDesign\Plugin\QuoteItemPlugin" />
+    </type>
+    <preference for="Magento\Sales\Model\Order\Pdf\Items\Invoice\DefaultInvoice" type="ArtM\CustomProductDesign\Model\Order\Pdf\Items\Invoice\CustomInvoice"/>
+    <preference for="Magento\Sales\Model\Order\Pdf\Items\Shipment\DefaultShipment" type="ArtM\CustomProductDesign\Model\Order\Pdf\Items\Shipment\CustomShipment"/>
+    <preference for="Magento\Sales\Model\Order\Pdf\Creditmemo" type="ArtM\CustomProductDesign\Model\Order\Pdf\Items\CreditMemo\CustomCreditMemo"/>
+
+</config>

@@ -1,0 +1,115 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+$baseUrl = $block->getBaseUrl();
+?>
+
+<div id="review-popup-wrapper"></div>
+
+<script>
+require(['jquery'], function ($) {
+    'use strict';
+
+    var STORAGE_KEY  = 'artm_review_popup_closed';
+    var HOURS_48     = 48 * 60 * 60 * 1000; // 48 hours in milliseconds
+
+    // ── CHECK localStorage BEFORE AJAX ───────────────────
+    function shouldShowPopup() {
+        var stored = localStorage.getItem(STORAGE_KEY);
+        if (!stored) {
+            return true; // never closed or submitted — show popup
+        }
+
+        try {
+            var data    = JSON.parse(stored);
+            var now     = new Date().getTime();
+            var elapsed = now - data.timestamp;
+
+            if (elapsed < HOURS_48) {
+                // within 48 hours — do not show
+                console.log('ArtM Review: popup suppressed for ' +
+                    Math.round((HOURS_48 - elapsed) / 3600000) + ' more hours');
+                return false;
+            } else {
+                // 48 hours passed — clear and show again
+                localStorage.removeItem(STORAGE_KEY);
+                return true;
+            }
+        } catch (e) {
+            // invalid data in localStorage — clear and show
+            localStorage.removeItem(STORAGE_KEY);
+            return true;
+        }
+    }
+
+    // ── SET localStorage WITH TIMESTAMP ──────────────────
+    function suppressPopup(reason) {
+        var data = {
+            reason    : reason,       // 'closed' or 'submitted'
+            timestamp : new Date().getTime()
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        console.log('ArtM Review: popup suppressed for 48 hours - reason: ' + reason);
+    }
+
+    // ── STOP HERE IF WITHIN 48 HOURS ─────────────────────
+    if (!shouldShowPopup()) {
+        return;
+    }
+
+    $(document).ready(function () {
+
+        setTimeout(function () {
+            console.log('ArtM Review: checking for popup via AJAX', window.BASE_URL);
+            if(window.BASE_URL != "https://golfoy.com/") {
+                return;
+            }
+            $.ajax({
+                url:      '<?= $baseUrl ?>reviewpopup/index/check',
+                type:     'POST',
+                dataType: 'json',
+                data:     { form_key: window.FORM_KEY },
+                success: function (response) {
+
+                    if (!response.success || response.html === '') {
+                        console.log('ArtM Review: no popup -', response.reason || '');
+                        return;
+                    }
+
+                    // inject popup HTML
+                    $('#review-popup-wrapper').html(response.html);
+
+                    // show popup
+                    setTimeout(function () {
+                        suppressPopup('closed');
+                        $('#popupreviewmodel').show();
+                    }, 300);
+                },
+                error: function () {
+                    console.log('ArtM Review: AJAX load failed');
+                }
+            });
+        }, 1500);
+
+        // ── CLOSE BUTTON ─────────────────────────────────
+        $(document).on('click', 'div#popupreviewmodel button.close', function () {
+            $('#popupreviewmodel').hide();
+            suppressPopup('closed');
+        });
+
+        // ── FOOTER CLOSE BUTTON ──────────────────────────
+        $(document).on('click', '#popupreviewmodel .btn-default', function () {
+            $('#popupreviewmodel').hide();
+            suppressPopup('closed');
+        });
+
+        // ── REVIEW SUBMITTED ─────────────────────────────
+        $(document).on('artm:review:submitted', function () {
+            setTimeout(function () {
+                $('#popupreviewmodel').hide();
+                suppressPopup('submitted');
+            }, 1500);
+        });
+
+    });
+});
+</script>

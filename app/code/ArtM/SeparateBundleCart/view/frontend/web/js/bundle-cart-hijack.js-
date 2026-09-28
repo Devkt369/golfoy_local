@@ -1,0 +1,194 @@
+/**
+ * ArtM SeparateBundleCart - Simple Button Hijack
+ * Prevents bundle product submission when attribute is set
+ */
+
+define([
+    'jquery',
+    'mage/url',
+    'Magento_Customer/js/customer-data',
+    'Magento_Ui/js/modal/modal'
+], function ($, urlBuilder, customerData, modal) {
+    'use strict';
+
+    return function (config) {
+        
+        $(document).ready(function () {
+            
+            console.log('ArtM SeparateBundleCart: Starting simple hijack');
+            
+            // Check if bundle product on page load
+            var productId = $('input[name="product"]').val();
+            if (!productId) {
+                console.log('No product ID found');
+                return;
+            }
+            
+            // Check product info
+            $.ajax({
+                url: urlBuilder.build('artm_separatebundlecart/debug/productinfo'),
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    product_id: productId,
+                    form_key: $('input[name="form_key"]').val()
+                },
+                success: function(response) {
+                    console.log('Product response:', response);
+                    
+                    if (response.product_type === 'bundle' && 
+                        (response.add_product_separate == 1 || response.add_product_separate === 'Yes')) {
+                        
+                        console.log('HIJACKING BUNDLE PRODUCT BUTTONS');
+                        hijackButtons(response);
+                    }
+                }
+            });
+            
+            function hijackButtons(productInfo) {
+                // Find ALL possible add to cart buttons and forms
+                var buttons = $('button[type="submit"], input[type="submit"]');
+                var forms = $('form[data-role="tocart-form"], #product_addtocart_form');
+                
+                console.log('Found buttons:', buttons.length);
+                console.log('Found forms:', forms.length);
+                
+                // Completely disable forms
+                forms.off().on('submit', function(e) {
+                    console.log('FORM SUBMIT BLOCKED');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    processInstead();
+                    return false;
+                });
+                
+                // Hijack button clicks
+                buttons.off().on('click', function(e) {
+                    console.log('BUTTON CLICK HIJACKED');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    processInstead();
+                    return false;
+                });
+                
+                function processInstead() {
+                    console.log('HIJACKED! Bundle product with add_product_separate=Yes detected. Processing individual products via AJAX instead of normal submission.');
+                    
+                    // Get form data
+                    var form = $('form[data-role="tocart-form"], #product_addtocart_form').first();
+                    
+                    var bundleOptions = {};
+                    form.find('select[name^="bundle_option"], input[name^="bundle_option"]:checked').each(function() {
+                        var name = $(this).attr('name');
+                        var value = $(this).val();
+                        var match = name.match(/bundle_option\[(\d+)\]/);
+                        if (match) {
+                            bundleOptions[match[1]] = bundleOptions[match[1]] || [];
+                            bundleOptions[match[1]].push(value);
+                        }
+                    });
+                    
+                    var bundleOptionQty = {};
+                    form.find('input[name^="bundle_option_qty"]').each(function() {
+                        var name = $(this).attr('name');
+                        var value = $(this).val();
+                        var match = name.match(/bundle_option_qty\[(\d+)\]/);
+                        if (match) {
+                            bundleOptionQty[match[1]] = value;
+                        }
+                    });
+                    
+                    console.log('Bundle options:', bundleOptions);
+                    
+                    // Process via AJAX
+                    $.ajax({
+                        url: urlBuilder.build('artm_separatebundlecart/ajax/addtocart'),
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            product_id: productId,
+                            bundle_options: bundleOptions,
+                            bundle_option_qty: bundleOptionQty,
+                            qty: form.find('input[name="qty"]').val() || 1,
+                            form_key: form.find('input[name="form_key"]').val()
+                        },
+                        success: function(response) {
+                            console.log('AJAX success:', response);
+                            if (response.success) {
+                                console.log('SUCCESS! Added individual products:', response.message);
+                                console.log('Products added count:', response.count);
+                                
+                                // Update minicart counter and sections
+                                updateMinicart();
+                                
+                                // Show success popup like normal add to cart
+                                showSuccessPopup(response);
+                            } else {
+                                console.error('Error adding products:', response.message);
+                            }
+                        },
+                        error: function() {
+                            console.error('AJAX Error occurred while adding products to cart');
+                        }
+                    });
+                }
+            }
+            
+            // Function to update minicart after AJAX cart addition
+            function updateMinicart() {
+                console.log('Updating minicart sections');
+                
+                // Reload cart section data from server
+                customerData.reload(['cart'], false);
+                
+                // Also trigger cart update event for other components
+                $('body').trigger('processStart');
+                
+                // Force refresh of customer sections after a short delay
+                setTimeout(function() {
+                    customerData.invalidate(['cart']);
+                    customerData.reload(['cart'], false);
+                    $('body').trigger('processStop');
+                    console.log('Minicart update completed');
+                }, 500);
+            }
+            
+            // Function to show success popup like normal Magento add to cart
+            function showSuccessPopup(response) {
+                console.log('Showing success popup');
+                
+                // Create popup content
+                var popupContent = '<div class="message-success success message">' +
+                    '<div>You added individual products to your shopping cart.</div>' +
+                    '<div style="margin-top: 10px; font-size: 14px; color: #666;">' +
+                    response.message.replace(/\n/g, '<br>') +
+                    '</div>' +
+                    '</div>' +
+                    '<div style="margin-top: 20px; text-align: center;">' +
+                    '<button type="button" class="action-primary action primary continue" onclick="$(\'#success-popup\').modal(\'closeModal\')" style="margin-right: 10px;">Continue Shopping</button>' +
+                    '<button type="button" class="action secondary" onclick="window.location.href=\'' + urlBuilder.build('checkout/cart') + '\'">View Cart</button>' +
+                    '</div>';
+                
+                // Create modal container if it doesn't exist
+                if ($('#success-popup').length === 0) {
+                    $('body').append('<div id="success-popup" style="display: none;"></div>');
+                }
+                
+                // Set content and show modal
+                $('#success-popup').html(popupContent);
+                
+                // Initialize and show modal
+                var popup = modal({
+                    type: 'popup',
+                    responsive: true,
+                    innerScroll: true,
+                    title: 'Success',
+                    modalClass: 'add-to-cart-popup',
+                    buttons: []
+                }, $('#success-popup'));
+                
+                $('#success-popup').modal('openModal');
+            }
+        });
+    };
+});

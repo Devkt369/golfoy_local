@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * ArtM ShortVideos Admin Menu Configuration
+ *
+ * @category  ArtM
+ * @package   ArtM_ShortVideos
+ * @author    ArtM
+ * @copyright Copyright (c) 2025 ArtM
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <!-- Short Videos Parent Menu Heading -->
+        <add id="ArtM_ShortVideos::shortvideos" 
+             title="Short Videos" 
+             module="ArtM_ShortVideos" 
+             sortOrder="30" 
+             resource="ArtM_ShortVideos::shortvideos" 
+             parent="ArtM_BlogEsg::BlogEsgmenu" />
+        
+        <!-- Manage Videos Submenu -->
+        <add id="ArtM_ShortVideos::index" 
+             title="Manage Videos" 
+             module="ArtM_ShortVideos" 
+             sortOrder="10" 
+             action="shortvideos/index/index" 
+             resource="ArtM_ShortVideos::videos" 
+             parent="ArtM_ShortVideos::shortvideos" />
+        
+        <!-- Add New Video Submenu -->
+        <add id="ArtM_ShortVideos::add" 
+             title="Add New Video" 
+             module="ArtM_ShortVideos" 
+             sortOrder="20" 
+             action="shortvideos/video/new" 
+             resource="ArtM_ShortVideos::videos" 
+             parent="ArtM_ShortVideos::shortvideos" />
+    </menu>
+</config>

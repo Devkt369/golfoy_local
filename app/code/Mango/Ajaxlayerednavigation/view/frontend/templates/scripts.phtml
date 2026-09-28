@@ -1,0 +1,53 @@
+<?php
+/**
+ * Copyright © 2016 MangoExtensions. All rights reserved.
+ * */
+?>
+
+<script type="text/javascript">
+    /* grid mode or list mode , different settings ... */
+    var _ajaxlayerednavigation_url_handler = "<?= $block->getUrlHandlerPlugin(); ?>";
+    require([
+        'jquery',
+        'Mango_Ajaxlayerednavigation/ajaxlist',
+        'domReady!'], function ($) {
+
+        _ajaxlist_settings = <?= $block->getWidgetOptionsJson(); ?>;
+        _ajaxlist_settings.product_list_element = "#ajaxlist-reload-product_list";
+        _ajaxlist_settings.layered_navigation_element = "#ajaxlist-reload-layered-navigation";
+        _ajaxlist_settings.horizontal_layered_navigation_element = "#horizontal-layered-navigation-container";
+        _ajaxlist_settings.paginationLinks = ".toolbar-products ul.pages-items li a.page, .toolbar-products ul.pages-items li a.action";
+        _ajaxlist_settings.layeredNavigationLinks = "#ajaxlist-reload-layered-navigation .filter-items-list a, #ajaxlist-reload-layered-navigation #layered-navigation-state a, a#layered-navigation-filter-clear, #category-filters a.category-filter-link";
+
+        $(document).ajaxLayeredNavigation(_ajaxlist_settings);
+    });
+
+
+    // auto scroll while show more button is in viewport but autotrigger should be disable from admin
+    window.addEventListener('scroll', function () {
+        const el = document.querySelector(
+        '.infinite-scroll-page-link-container a.ajaxcatalog-infinite-scroll-next.action.primary'
+        );
+
+        if (el && isElementInViewport(el) && !el.dataset.clicked) {
+            el.dataset.clicked = "true"; // mark this specific element
+            jQuery(el).trigger('click');
+        }
+    });
+
+    function isElementInViewport(el) {
+        if (typeof jQuery === "function" && el instanceof jQuery) {
+            el = el[0];
+        }
+
+        var rect = el.getBoundingClientRect();
+
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
+    }
+
+</script>

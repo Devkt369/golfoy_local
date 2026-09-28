@@ -1,0 +1,480 @@
+<style>
+    /* 27-march-2024 */
+    .dob_prechild_sec select#dob_day {
+        background: transparent;
+        border-color: darkgrey;
+        border-width: 0px 0px 1px 0px;
+        font-size: 12px;
+        text-align: center;
+        padding: 0px !important;
+        cursor: pointer;
+    }
+
+    .row.dob-input-field .col-sm-4 {
+        margin-top: 10px;
+    }
+
+    .col-sm-4.date-block label,
+    .col-sm-4.month-block label,
+    .col-sm-4.year-block label {
+        text-transform: uppercase;
+        font-size: 12px;
+    }
+
+    .dob_prechild_sec select#dob_month {
+        background: transparent;
+        border-color: darkgrey;
+        border-width: 0px 0px 1px 0px;
+        font-size: 12px;
+        text-align: center;
+        padding: 0px !important;
+        cursor: pointer;
+    }
+
+    .dob_prechild_sec select#dob_year {
+        background: transparent;
+        border-color: darkgrey;
+        border-width: 0px 0px 1px 0px;
+        font-size: 12px;
+        text-align: center;
+        padding: 0px !important;
+        cursor: pointer;
+    }
+
+    /* 27-march-2024 end  */
+    .bday_input_button {
+        color: #fff;
+        /* padding: 5px 20px !important; */
+        font-size: 14px !important;
+        background: red;
+        border: transparent;
+        background: #e60023 !important;
+        border: 1px solid #e60023 !important;
+        font-weight: 700;
+        border-radius: 5px !important;
+        display: block;
+        /* added */
+    }
+
+    h2.bday_number {
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        text-transform: uppercase;
+        font-family: 'spartan';
+    }
+
+    .dob_prechild_sec {
+        position: absolute;
+        top: 50%;
+        left: 46%;
+        transform: translate(-50%, -50%);
+        background: #fad3cc;
+        /* padding: 20px; */
+        width: 450px;
+        text-align: center;
+    }
+
+    .dob_prechild_sec span {
+        font-weight: 500;
+        font-size: 10px;
+    }
+
+    div#dob-popup {
+        display: block;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999 !important;
+    }
+
+    input[type="date"] {
+        padding: 10px;
+        border: none;
+        background-color: #debbb5;
+        border-radius: 5px;
+        font-size: 12px;
+    }
+
+
+    .dob_prechild_sec input[type="submit"] {
+        width: auto;
+        padding: 10px 15px;
+        background: #E60023 !important;
+        border-radius: 10px !important;
+        font-weight: 600;
+        margin-left: 35%;
+    }
+
+    @media only screen and (max-width:500px) {
+        .dob_prechild_sec {
+            width: 368px !important;
+        }
+
+        .dob_prechild_sec input[type="date"] {
+            font-size: 12px;
+            outline: none;
+        }
+
+        .dob_prechild_sec input[type="submit"] {
+            margin-left: 33%;
+        }
+    }
+
+    /* new css */
+    .part_of_dob_customer:focus {
+        border: 0px !important;
+        outline: 0px !important;
+        box-shadow: none !important;
+        border-bottom: 2px solid black !important;
+    }
+
+    input.bday_input_button {
+        margin-top: 15px;
+    }
+
+    input#dob_day,
+    input#dob_month,
+    input#dob_year {
+        width: auto;
+        height: 37px;
+        font-size: 23px;
+        text-align: center;
+        max-width: 201px;
+        background-color: transparent;
+        color: black;
+        border-bottom: 2px solid black;
+    }
+
+    .part_of_dob_customer::placeholder {
+        color: black !important;
+    }
+
+    /* new css 05-05-2023 */
+    input#dob_customer {
+        display: none;
+    }
+
+    input#dob_day {
+        width: 60px;
+    }
+
+    input#dob_month {
+        width: 60px;
+    }
+
+    input#dob_year {
+        width: 85px;
+    }
+
+    #dob-popup input[type="number"] {
+        border-left: 1px solid transparent !important;
+        border-right: 1px solid transparent !important;
+        border-top: 1px solid transparent !important;
+    }
+
+    #dob-popup .error-message {
+        color: red !important;
+    }
+
+    /* 15-may-2023 */
+
+    .dob_prechild_sec form#myForm input {
+        font-size: 17px;
+        opacity: 1;
+    }
+
+    .dob_prechild_sec form#myForm input[type=number] {
+        font-size: 17px;
+        opacity: .7;
+        border-bottom: 1px solid;
+        margin: 0px 4px;
+    }
+
+    .dob_prechild_sec {
+        padding-bottom: 20px;
+    }
+
+    #dob-popup .error-message {
+        color: #e60023 !important;
+        font-size: 11px;
+        margin: 7px auto 15px;
+    }
+
+    /* 15-may-2023 */
+    .dob_prechild_sec img {
+        border: 1px solid transparent;
+        border-radius: 20px;
+    }
+
+    .dob_prechild_sec {
+        border: 1px solid transparent;
+        border-radius: 5px;
+        margin: 15px;
+    }
+
+    input#dob_day::placeholder {
+        opacity: 1;
+    }
+
+    input#dob_month::placeholder {
+        opacity: 1;
+    }
+
+    input#dob_year::placeholder {
+        opacity: 1;
+    }
+
+    @media screen and (max-width:767px) {
+        .dob_prechild_sec select#dob_month {
+            font-size: 11px;
+        }
+
+        .dob_prechild_sec select#dob_day {
+            font-size: 11px;
+        }
+
+        .dob_prechild_sec select#dob_year {
+            font-size: 11px;
+        }
+    }
+</style>
+<?php
+
+$block = $this->getLayout()->createBlock('ArtM\Dob\Block\Index\Dbtest');
+$customerId = $block->getCustomerId();
+$customerDob = $block->getCustomerDob();
+$saveDobSuccess = false;
+
+// if ($dob) {
+//     if ($saveDobSuccess) {
+//         //$customerDob = $dob;
+//        echo "<script>document.getElementById('dob-popup').style.display = 'none';</script>"; // Hide the popup after saving the DOB
+//         //header("Refresh:0");
+//     }
+// }
+
+
+if ($customerId && !$customerDob) { // Display the popup if the customer is logged in and DOB is not set
+
+    $cookie_name = "Dob";
+    $cookie_value = "date";
+    $monthNameArry = '';
+    for ($month = 1; $month <= 12; $month++) {
+        $monthValue = str_pad($month, 2, 0, STR_PAD_LEFT);
+        $monthName = date("F", mktime(0, 0, 0, $month, 1)); // Get month name
+        $monthNameArry .= "<option value=\"$monthValue\">$monthName</option>";
+    }
+
+    $days = '';
+    $currentDay = date("d");
+    for ($day = 1; $day <= $currentDay; $day++) {
+        $dayValue = str_pad($day, 2, 0, STR_PAD_LEFT);
+        $days .= "<option value=\"$dayValue\">$dayValue</option>";
+    }
+
+    $years = '';
+    $currentYear = date("Y");
+    $startYear = 1930;
+    for ($year = $startYear; $year <= $currentYear; $year++) {
+        $years .= "<option value=\"$year\">$year</option>";
+    }
+
+    $_html =   '<div id="parent-container">
+                    <div id="dob-popup" style="display:block;">
+                        <div class="dob_prechild_sec">
+                            <span style="position: absolute; top: 5px; right: 5px; cursor: pointer; font-size: 20px;" onclick="closePopup()">&times;</span> <!-- Cross sign to close the popup -->
+                            <!--  <h2 class="bday_text">Please enter your Date of Birth</h2>  -->
+                            <img src="' . $this->getViewFileUrl('ArtM_Dob::images/birthday card_1.jpg') . '" alt="Cupcake DOB">
+                                <form method="post" action="" id="myForm" name="f1" onsubmit="return validateForm()">
+                                    <!--  new Dob  -->
+                                    ' . $block->getBlockHtml('formkey') . '<input type="text" id="dob_customer" name="dob_customer" />
+                                    <div class="row dob-input-field">
+                                    <tr>
+                                    <div class="col-sm-4 col-xs-4 year-block">
+                                        <td align="left">
+                                            <label for="year">Birth Year</label>
+                                            <select onchange="updateDays()" id="dob_year" name="year">
+                                            ' . $years . '
+                                            </select>
+                                        </td>
+                                    </div>
+                                    <div class="col-sm-4 col-xs-4 month-block">
+                                        <td align="left">
+                                        <label for="month">Month</label>
+                                            <select onchange="updateDays()" id="dob_month" name="month">
+                                                <option value="">Select Month</option>
+                                                ' . $monthNameArry . '
+                                            </select>
+                                        </td>
+                                    </div>
+                                    <div class="col-sm-4 col-xs-4 date-block">
+                                        <td align="left">
+                                            <label for="day" style="display: flex;
+                                            flex-direction: column;">Date</label>
+                                            <select id="dob_day" name="day">
+                                                <option value="">Select Date</option>
+                                                ' . $days . '
+                            
+                                            </select>
+                                        </td>
+                                    </div>
+                                    </tr>
+                                    </div>
+                                </table>
+                                    <!--  new Dob  -->
+                                    <input type="submit" value="Save my DOB" class="bday_input_button">
+                                </form>
+
+                                <div class="error-message"></div>
+                        <span>DOB Can Not Be Updated Once Submitted</span>
+                        </div>
+                    </div>
+                </div>';
+    // Set the cookie expiration time to 30 days from now in GMT time    30 * 24 * 60 * 60
+    $expiration = strtotime(gmdate("D, d M Y H:i:s T", time() + (30 * 24 * 60 * 60)));
+    // Check if the cookie is set
+    if (isset($_COOKIE[$cookie_name])) {
+    } else {
+        // Set the cookie
+        setcookie($cookie_name, $cookie_value, $expiration, "/");
+        $_htmlveiw = $_html;
+        echo $_html;
+    }
+    // Check if the cookie has expired
+    if (isset($_COOKIE[$cookie_name]) && time() > $expiration) {
+        // Delete the cookie by setting an expiration time in the past
+        setcookie($cookie_name, "", time() - 3600, "/");
+    }
+
+?>
+    <script>
+        if (document.querySelector('#popupreviewmodel')) {
+            console.log('already one popup has display');
+            document.getElementById("dob-popup").style.display = "none";
+        }
+
+        function closePopup() {
+            document.getElementById("dob-popup").style.display = "none";
+        }
+    </script>
+
+    <script>
+        window.addEventListener('click', function(event) {
+
+            var popup = document.getElementById('dob-popup');
+            if (event.target == popup) {
+                popup.style.display = "none";
+            }
+        });
+    </script>
+
+    <script>
+        function validateForm() {
+            var selectedMonth = document.forms["f1"]["month"].value;
+            var selectedDay = document.forms["f1"]["day"].value;
+            var selectedYear = document.forms["f1"]["year"].value;
+
+            // Check if February is selected and the year is a leap year
+            if (selectedMonth === "02" && selectedDay === "29" && !isLeapYear(selectedYear)) {
+                alert("The selected year is not a leap year. Please choose a valid date.");
+                return false;
+            }
+            return true;
+        }
+
+        function isLeapYear(year) {
+            return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+        }
+
+        function updateDays() {
+            var selectedMonth = parseInt(document.forms["f1"]["month"].value);
+            var selectedYear = parseInt(document.forms["f1"]["year"].value);
+            var currentYear = new Date().getFullYear();
+            var currentMonth = new Date().getMonth() + 1; // Adding 1 because getMonth() returns zero-based index
+            var currentDay = new Date().getDate();
+
+            // If the selected year is the current year, limit the months based on the current month
+            if (selectedYear === currentYear) {
+                var maxMonth = currentMonth;
+            } else {
+                var maxMonth = 12;
+            }
+
+            // If the selected month is greater than the maximum month allowed, reset it
+            if (selectedMonth > maxMonth) {
+                document.forms["f1"]["month"].value = maxMonth;
+                selectedMonth = maxMonth;
+            }
+
+            // Get the maximum number of days for the selected month and year
+            var maxDaysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+
+            // Clear previous options
+            var daySelect = document.forms["f1"]["day"];
+            daySelect.innerHTML = "";
+
+            // Add new options
+            for (var i = 1; i <= maxDaysInMonth; i++) {
+                var option = document.createElement("option");
+                option.value = ("0" + i).slice(-2); // Pad single digit numbers with leading zero
+                option.text = ("0" + i).slice(-2); // Pad single digit numbers with leading zero
+                daySelect.appendChild(option);
+            }
+
+            // If the selected year is the current year, limit the days based on the current day
+            if (selectedYear === currentYear && selectedMonth === currentMonth) {
+                var maxDay = currentDay;
+                // If the selected day is greater than the maximum day allowed, reset it
+                if (parseInt(document.forms["f1"]["day"].value) > maxDay) {
+                    document.forms["f1"]["day"].value = maxDay;
+                }
+            }
+        }
+    </script>
+    <!-- new 05-may-2023 -->
+    <script>
+        require(['jquery', 'bootstrap'], function(jQuery) {
+            jQuery(document).ready(function() {
+                jQuery('#myForm').submit(function(event) {
+                    event.preventDefault();
+                    var day = jQuery('select[name="day"]').val();
+                    var month = jQuery('select[name="month"]').val();
+                    var year = jQuery('select[name="year"]').val();
+                    var formData = {
+                        'dob_customer': day + '-' + month + '-' + year,
+                        'month': month,
+                        'day': day,
+                        'year': year
+                    };
+
+                    jQuery.ajax({
+                        url: '/dob/index/index/',
+                        method: 'POST',
+                        dataType: 'json',
+                        data: formData,
+                        success: function(response) {
+                            //alert(JSON.stringify(response));
+                            //console.log(response);
+                            if (response.result == "False") {
+                                jQuery('.error-message').text('Please enter a valid date');
+                            } else {
+                                document.getElementById('dob-popup').style.display = 'none';
+                            }
+                        }
+
+                    });
+                });
+
+
+            });
+        });
+    </script>
+
+
+
+<?php
+}
+?>

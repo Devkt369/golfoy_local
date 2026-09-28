@@ -1,0 +1,276 @@
+<style>
+    .video-slider {
+        position: relative;
+        width: 100%;
+        max-width: 1200px;
+        margin: auto;
+        overflow: hidden;
+    }
+
+    .video-thumbnail {
+        width: 100px;
+    }
+
+    .video-slides {
+        display: flex;
+        transition: transform 0.5s ease-in-out;
+        padding: 0;
+        margin: 0;
+    }
+
+    .video-slide {
+        flex: 0 0 23%;
+        box-sizing: border-box;
+        padding: 0 4px;
+        margin: 0;
+    }
+
+    .slider-prev,
+    .slider-next {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        padding: 15px;
+        cursor: pointer;
+        z-index: 1;
+        display: none;
+        /* Ensure buttons are hidden initially */
+    }
+
+    .slider-prev {
+        left: 10px;
+    }
+
+    .slider-next {
+        right: 10px;
+    }
+
+    .video-slide img {
+        width: 100%;
+        height: 190px;
+        object-fit: cover;
+        border-radius: 7px;
+        display: block;
+    }
+
+    @media (max-width: 768px) {
+        .video-slide {
+            flex: 0 0 48%;
+        }
+
+        .video-slide img {
+            height: 120px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .video-slide {
+            flex: 0 0 29%;
+        }
+
+        .video-slider {
+            overflow: auto;
+            padding-bottom: 10px;
+
+        }
+
+        .custom-videos .custom-modal-body {
+            background: linear-gradient(to bottom, #000 5%, rgb(0 0 0) 41%, rgb(0 0 0) calc(100% - 140px), #000 calc(100% - 70px));
+            padding: 25px 0px 0px 0px !important;
+        }
+
+        .video-slider::-webkit-scrollbar {
+            height: 2px;
+        }
+
+        .video-slide img {
+            height: 191px;
+        }
+
+        /* new css */
+        .short-video-modal .custom-modal-body {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .short-video-modal .custom-modal-dialog {
+            width: 100%;
+            padding: 0px;
+        }
+
+        /* .short-video-modal .custom-modal-body {
+            padding: 0px;
+        } */
+
+        .short-video-modal button.close {
+            z-index: 99999;
+            right: 3px;
+            top: 3px;
+        }
+
+        .short-video-modal .custom-modal-header {
+            padding: 0px !important;
+        }
+
+        .custom-modal.short-video-modal {
+            padding: 0px !important;
+        }
+
+        .no-scroll {
+            overflow: hidden;
+        }
+
+        .short-video-modal .video-container iframe {
+            height: 80vh;
+
+        }
+
+        .short-video-modal .video-groups {
+            padding: 0px 30px;
+        }
+
+        /* new--- */
+        .slider-prev,
+        .slider-next {
+            position: absolute;
+            /* Ensure they are positioned relative to the container */
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+        }
+
+        .slider-prev {
+            left: 0;
+            /* Always on the left */
+        }
+
+        .slider-next {
+            right: 0;
+            /* Always on the right */
+        }
+    }
+</style>
+
+<!-- <div class="video-slider">
+    <button class="slider-prev">&#10094;</button>
+    <div class="video-slides">
+        <div video-src="https://youtube.com/shorts/ztBy5CmLeRg?si=RCLdJdynx99Z1w08" video-title="Short Video 4" source="youtube" class="video-slide video-trigger" group="short_videos">
+            <img src="https://img.youtube.com/vi/ztBy5CmLeRg/0.jpg" alt="Short Video 4 Thumbnail">
+        </div>
+        <div video-src="https://youtube.com/shorts/Kb6SFKPkvSs?si=SUnnNpb4Osq-tgC2" video-title="Short Video 4" source="youtube" class="video-slide video-trigger" group="short_videos">
+            <img src="https://img.youtube.com/vi/Kb6SFKPkvSs/0.jpg" alt="Short Video 4 Thumbnail">
+        </div>
+        <div video-src="https://youtube.com/shorts/Nx-TrdMr1aM?si=LdXY9lsMGJW5q6qy" video-title="Short Video 4" source="youtube" class="video-slide video-trigger" group="short_videos">
+            <img src="https://img.youtube.com/vi/Nx-TrdMr1aM/0.jpg" alt="Short Video 4 Thumbnail">
+        </div>
+        <div video-src="https://youtube.com/shorts/Nx-TrdMr1aM?si=LdXY9lsMGJW5q6qy" video-title="Short Video 4" source="youtube" class="video-slide video-trigger" group="short_videos">
+            <img src="https://img.youtube.com/vi/Nx-TrdMr1aM/0.jpg" alt="Short Video 4 Thumbnail">
+        </div>
+    </div>
+    <button class="slider-next">&#10095;</button>
+</div> -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const slidesContainer = document.querySelector('.video-slides');
+        const slides = document.querySelectorAll('.video-slide');
+        const prevButton = document.querySelector('.slider-prev');
+        const nextButton = document.querySelector('.slider-next');
+        let currentIndex = 0;
+        let startX = 0; // For touch event
+
+        function getVisibleSlides() {
+            if (window.innerWidth <= 480) {
+                return 3; // Show 3 slides at a time on very small screens
+            } else if (window.innerWidth <= 768) {
+                return 2; // Show 2 slides at a time on medium screens
+            } else {
+                return 4; // Show 4 slides at a time on larger screens
+            }
+        }
+
+        function updateSliderPosition() {
+            const slideWidth = slides[0].clientWidth + parseFloat(getComputedStyle(slides[0]).marginRight);
+            const visibleSlides = getVisibleSlides();
+            const totalSlidesWidth = slides.length * slideWidth;
+            const containerWidth = slidesContainer.clientWidth;
+            const maxTranslateX = Math.max(totalSlidesWidth - containerWidth, 0);
+
+            // Calculate translateX value
+            const translateX = -Math.min(currentIndex * slideWidth, maxTranslateX);
+            slidesContainer.style.transform = `translateX(${translateX}px)`;
+        }
+
+        function updateButtonVisibility() {
+            const visibleSlides = getVisibleSlides();
+            nextButton.style.display = currentIndex < slides.length - visibleSlides ? 'block' : 'none';
+            prevButton.style.display = currentIndex > 0 ? 'block' : 'none';
+        }
+
+        function slideForward() {
+            const visibleSlides = getVisibleSlides();
+            if (currentIndex < slides.length - visibleSlides) {
+                currentIndex++;
+                updateSliderPosition();
+            }
+        }
+
+        function slideBackward() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateSliderPosition();
+            }
+        }
+
+        // Next button click
+        nextButton.addEventListener('click', () => {
+            slideForward();
+            updateButtonVisibility(); // Update button visibility after sliding
+        });
+
+        // Prev button click
+        prevButton.addEventListener('click', () => {
+            slideBackward();
+            updateButtonVisibility(); // Update button visibility after sliding
+        });
+
+        // Touch event handling for swipe detection
+        slidesContainer.addEventListener('touchstart', (event) => {
+            startX = event.touches[0].clientX; // Get the starting X coordinate when the touch starts
+        });
+
+        slidesContainer.addEventListener('touchend', (event) => {
+            const endX = event.changedTouches[0].clientX; // Get the ending X coordinate when the touch ends
+            const diffX = startX - endX; // Calculate the difference
+
+            // Check if the swipe was significant (adjust threshold as needed)
+            if (Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    // Swiped left, go to next slide
+                    slideForward();
+                } else {
+                    // Swiped right, go to previous slide
+                    slideBackward();
+                }
+                updateButtonVisibility(); // Update button visibility after swiping
+            }
+        });
+
+        // Initialize position and button visibility
+        function initialize() {
+            updateSliderPosition();
+            updateButtonVisibility();
+        }
+
+        // Initialize on page load and resize
+        initialize();
+        window.addEventListener('resize', () => {
+            setTimeout(() => {
+                initialize();
+            }, 100); // Adjust delay as needed
+        });
+    });
+</script>

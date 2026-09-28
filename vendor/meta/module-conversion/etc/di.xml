@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Meta\Conversion\Helper\ServerSideHelper">
+        <plugin name="capi_events_modifier_plugin" type="Meta\Conversion\Plugin\CAPIEventsModifierPlugin" sortOrder="1" disabled="false" />
+    </type>
+    <type name="Meta\Conversion\Helper\ServerEventFactory">
+        <arguments>
+            <argument name="customDataMapping" xsi:type="array">
+                <item name="currency" xsi:type="string">setCurrency</item>
+                <item name="value" xsi:type="string">setValue</item>
+                <item name="status" xsi:type="string">setStatus</item>
+                <item name="content_ids" xsi:type="string">setContentIds</item>
+                <item name="content_type" xsi:type="string">setContentType</item>
+                <item name="content_name" xsi:type="string">setContentName</item>
+                <item name="content_category" xsi:type="string">setContentCategory</item>
+                <item name="search_string" xsi:type="string">setSearchString</item>
+                <item name="num_items" xsi:type="string">setNumItems</item>
+                <item name="order_id" xsi:type="string">setOrderId</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Plugin to trigger add payment info capi event   -->
+    <type name="Magento\Checkout\Model\PaymentInformationManagement">
+        <plugin name="trigger_add_payment_info_capi_event" type="Meta\Conversion\Plugin\Tracker\AddPaymentInfo" sortOrder="10" disabled="false"  />
+    </type>
+    <type name="Magento\Checkout\Model\GuestPaymentInformationManagement">
+        <plugin name="trigger_add_payment_info_capi_event" type="Meta\Conversion\Plugin\Tracker\AddGuestPaymentInfo" sortOrder="10" disabled="false"  />
+    </type>
+</config>

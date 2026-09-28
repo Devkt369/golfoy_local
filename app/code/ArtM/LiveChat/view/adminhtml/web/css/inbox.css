@@ -1,0 +1,31 @@
+.artm-inbox { display: grid; grid-template-columns: 320px minmax(0, 1fr); min-height: min(720px, calc(100vh - 190px)); border: 1px solid #d8ded9; background: #fff; color: #26382f; }
+.artm-inbox__rail { display: flex; min-height: 0; flex-direction: column; border-right: 1px solid #d8ded9; }
+.artm-inbox__rail-head { display: grid; gap: 5px; padding: 18px; border-bottom: 1px solid #e2e8e3; }
+.artm-inbox__rail-head h1 { margin: 0; color: #174f37; font-size: 20px; }
+.artm-inbox__rail-head span { color: #65766b; font-size: 12px; }
+.artm-inbox__list { flex: 1; overflow-y: auto; }
+.artm-inbox__conversation { display: grid; width: 100%; gap: 5px; padding: 14px 16px; border: 0; border-bottom: 1px solid #edf1ed; background: #fff; color: inherit; text-align: left; cursor: pointer; }
+.artm-inbox__conversation:hover, .artm-inbox__conversation.is-active { background: #edf5ef; }
+.artm-inbox__conversation strong { overflow: hidden; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.artm-inbox__conversation span { overflow: hidden; color: #5d6d63; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.artm-inbox__conversation time { color: #7c8980; font-size: 11px; }
+.artm-inbox__empty { padding: 16px; color: #68766e; }
+.artm-inbox__thread { display: grid; min-width: 0; grid-template-rows: auto minmax(0, 1fr) auto; }
+.artm-inbox__thread-head { display: flex; min-height: 68px; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; border-bottom: 1px solid #dfe6e0; }
+.artm-inbox__thread-head div { display: grid; gap: 3px; }
+.artm-inbox__thread-head strong { font-size: 15px; }
+.artm-inbox__thread-head span { color: #65766b; font-size: 12px; }
+.artm-inbox__thread-head button { padding: 7px 11px; border: 1px solid #bdc9bf; background: #fff; color: #325641; cursor: pointer; }
+.artm-inbox__thread-head button:disabled { opacity: .45; cursor: default; }
+.artm-inbox__messages { display: flex; min-height: 260px; flex-direction: column; gap: 12px; overflow-y: auto; padding: 18px; background: #f5f8f5; }
+.artm-inbox__message { max-width: min(620px, 82%); align-self: flex-start; }
+.artm-inbox__message--agent { align-self: flex-end; }
+.artm-inbox__message header { display: flex; justify-content: space-between; gap: 12px; margin: 0 3px 5px; color: #637168; font-size: 11px; }
+.artm-inbox__message p { margin: 0; padding: 10px 12px; border: 1px solid #e0e8e1; border-radius: 2px 10px 10px; background: #fff; overflow-wrap: anywhere; line-height: 1.45; }
+.artm-inbox__message--agent p { border-color: #176b45; border-radius: 10px 2px 10px 10px; background: #176b45; color: #fff; }
+.artm-inbox__form { display: flex; gap: 9px; padding: 12px; border-top: 1px solid #dfe6e0; }
+.artm-inbox__form input { min-width: 0; height: 40px; flex: 1; padding: 0 11px; border: 1px solid #cbd7ce; }
+.artm-inbox__form button { display: grid; width: 42px; height: 40px; place-items: center; border: 0; background: #176b45; color: #fff; cursor: pointer; }
+.artm-inbox__form button:disabled { opacity: .45; cursor: default; }
+.artm-inbox__form svg { width: 18px; height: 18px; fill: currentColor; }
+@media (max-width: 780px) { .artm-inbox { grid-template-columns: minmax(190px, 34%) minmax(0, 1fr); } .artm-inbox__thread-head { align-items: flex-start; flex-direction: column; } }

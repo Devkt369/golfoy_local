@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                
+                <!-- Option A: Standalone top-level (RECOMMENDED) -->
+                <resource id="ArtM_RecommendedSort::recommendedsort" 
+                          title="Recommended Sort" 
+                          translate="title" 
+                          sortOrder="60">
+                    <resource id="ArtM_RecommendedSort::index" title="Index"/>
+                    <resource id="ArtM_RecommendedSort::processlisting" title="Batch"/>
+                    <resource id="ArtM_RecommendedSort::queuelisting" title="Queue"/>
+                    <resource id="ArtM_RecommendedSort::manual_index" title="Manual Edits"/>
+                </resource>
+                
+            </resource>
+        </resources>
+    </acl>
+</config>

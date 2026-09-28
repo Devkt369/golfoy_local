@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+
+<!--
+  ~  Copyright © Magestore. All rights reserved.
+  ~  See COPYING.txt for license details.
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="click_and_collect" translate="label" sortOrder="800" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Click &amp; Collect</label>
+            <class>separator-top</class>
+            <tab>magestore</tab>
+            <resource>Magestore_ClickAndCollectAdminUi::config</resource>
+            <group id="general" translate="label" sortOrder="10" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General</label>
+                <field id="allow_to_choose_collect_data_and_time" translate="label comment" sortOrder="10" type="select" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Allow to choose collect date &amp; time</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>If this setting is enabled, customer will be allowed to select date and time that they expect to collect items.</comment>
+                </field>
+                <field id="search_radius" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Search Radius</label>
+                    <comment>Radius in kilometers for store click &amp; collect search on storefront checkout.</comment>
+                    <validate>validate-number validate-number-range number-range-0-50</validate>
+                </field>
+                <field id="show_store_list_on_frontend" translate="label" sortOrder="40" type="select" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Show store list on Frontend</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="staff_sharing_account_between_apps" translate="label" sortOrder="50" type="select" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Staff Account Sharing</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment><![CDATA[ If set to Yes, you can log in from multiple apps into the same account.]]>
+                    </comment>
+                </field>
+                <field id="time_to_prepare_pickup" translate="label comment" type="text" sortOrder="15"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Display Collect time after (minutes)</label>
+                    <validate>integer validate-greater-than-zero</validate>
+                </field>
+            </group>
+        </section>
+        <section id="carriers">
+            <group id="clickandcollect" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Click &amp; Collect</label>
+                <field id="active" translate="label comment" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <backend_model>Magestore\ClickAndCollectAdminUi\Model\Validate\ConfigClickAndCollect</backend_model>
+                </field>
+                <field id="title" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Title</label>
+                </field>
+                <field id="method_name" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Method Name</label>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="price" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Price</label>
+                    <validate>vaidate-number validate-zero-or-greater</validate>
+                </field>
+                <field id="displayed_error_message" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <label>Displayed Error Message</label>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

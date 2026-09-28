@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_layout.xsd">
+    <update handle="empty"/><!-- you can change the handle like 2columns-left or 3columns etc-->
+    <referenceContainer name="page.wrapper">
+        <container name="header.container" as="header_container" label="Page Header Container"  htmlTag="header" htmlClass="page-header header_onecolumn" before="main.content"/>
+        <container name="page.top" as="page_top" label="After Page Header" after="header.container" htmlTag="div"  htmlClass="page-top top_onecolumn" />
+        <container name="main.content" htmlTag="main" htmlId="maincontent" htmlClass="page-main container_full_width">
+            <container name="columns.top" label="Before Main Columns"/>
+            <container name="columns" htmlTag="div" htmlClass="columns">
+                <container name="main" label="Main Content Container" htmlTag="div" htmlClass="column main"/>
+            </container>
+            <referenceBlock name="category.products" remove="true" />
+        </container>
+        <container name="footer-container" as="footer" after="-" label="Page Footer Container" htmlTag="footer" htmlClass="page-footer footer_onecolumn" />
+    </referenceContainer>
+</layout>

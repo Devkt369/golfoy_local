@@ -1,0 +1,967 @@
+<script type="text/javascript">
+    require(['jquery', 'bootstrap'], function($) {
+
+        /* ===============================
+           MATCH HEIGHTS (DESKTOP ONLY)
+        =============================== */
+        function matchHeights() {
+            if ($(window).width() >= 1024) {
+                $('.launches_first_block .la_first_text')
+                    .css('height', 'auto')
+                    .height($('.launches_first_block .la_first_image').outerHeight(true))
+                    .removeClass('hide');
+            } else {
+                $('.launches_first_block .la_first_text').css('height', 'auto');
+            }
+        }
+
+        /* ===============================
+           GET FIXED HEADER HEIGHT
+        =============================== */
+        function getHeaderHeight() {
+            return $('.page-header.header_onecolumn').outerHeight(true) || 0;
+        }
+
+        /* ===============================
+           SCROLL FUNCTION (ALL DEVICES)
+        =============================== */
+        function scrollToSection(id) {
+            var headerHeight = getHeaderHeight();
+
+            $('html, body').stop().animate({
+                scrollTop: $(id).offset().top - headerHeight
+            }, 300);
+        }
+
+        /* ===============================
+           DOCUMENT READY
+        =============================== */
+        $(document).ready(function() {
+
+            matchHeights();
+            $(window).on('load resize', matchHeights);
+
+            $('.clubs_click').on('click', function(e) {
+                e.preventDefault();
+                scrollToSection('#clubs-mb');
+            });
+
+            $('.apparels_click').on('click', function(e) {
+                e.preventDefault();
+                scrollToSection('#apparels-mb');
+            });
+
+            $('.techno_clicks').on('click', function(e) {
+                e.preventDefault();
+                scrollToSection('#technology-mb');
+            });
+
+        });
+
+    });
+</script>
+
+<style>
+    html {
+        scroll-behavior: smooth;
+    }
+
+    .scroll-anchor {
+        display: block;
+        position: relative;
+        height: 0;
+        visibility: hidden;
+    }
+
+
+    .new_launch_space {
+        margin: 30px 0px;
+    }
+
+    .la_image img {
+        width: 100%;
+        border: 1px solid transparent;
+        border-radius: 10px 0px 0px 10px;
+    }
+
+    .launch_header h2 {
+        text-align: center;
+        font-weight: 700;
+        font-size: 25px;
+        padding: 15px 0px;
+        text-transform: uppercase;
+        width: 50%;
+        margin: 30px auto 10px auto;
+        background-color: #f6f6f6;
+        border-radius: 10px;
+    }
+
+    .row.launches_menu {
+        border-top: 1px solid #f4f4f4;
+        padding-top: 25px;
+    }
+
+    .row.launches_menu {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .launches_menu {
+        margin: 20px 0px 30px;
+    }
+
+    .launches_menu a {
+        color: black;
+        text-align: center;
+        font-weight: 700;
+        text-decoration: none;
+        font-size: 17px;
+        cursor: pointer;
+    }
+
+    .la_first_text {
+        background-color: #f6f6f6;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 0px 10px 10px 0px;
+        border: 1px solid transparent;
+    }
+
+    .la_first_image {
+        padding: 0px;
+    }
+
+    /* .txt { padding: 10.7% 0% 10.7% 38%; } */
+    .txt1 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 0px;
+        line-height: 25px;
+        color: black !important;
+    }
+
+    .txt .txt2 {
+        height: 35px;
+    }
+
+    .txt2 {
+        font-size: 15px;
+        font-weight: 600;
+        color: #8e8e8e;
+    }
+
+    .mybutton {
+        border-radius: 3px;
+        color: #fff;
+        background: #e60023;
+        font-size: 9px;
+        height: 36px;
+        padding: 5px 23px;
+        border: transparent;
+    }
+
+    .col.menu_col {
+        flex: 1 0 18%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .container.full_launch_web.hidden-xs {
+        max-width: 1440px;
+        width: 100%;
+    }
+
+    .container.full_launch_mob.visible-xs {
+        max-width: 1280px;
+        width: 100%;
+    }
+
+    .la_first_image {
+        height: auto;
+    }
+
+    .product_slider_container .header_link_product_slider {
+        display: none;
+    }
+
+    .header_content_product_slider {
+        display: none;
+    }
+
+    img.product-image-photo {
+        margin: 35px 0px !important;
+    }
+
+    .product_slider_container li.item.product.product-item {
+        width: 200px !important;
+        margin-top: 3px;
+    }
+
+    .product_slider_container .slider_arrows>.right_arrow:after,
+    .product_slider_container .slider_arrows>.left_arrow:before {
+        font-size: 40px !important;
+        line-height: 40px !important;
+    }
+
+    .product_slider_container .slider_arrows>div {
+        margin-top: 135px;
+    }
+
+    h4.card-title {
+        font-weight: 700;
+    }
+
+    .card-body {
+        padding: 10px 10px 20px 10px;
+        background-color: #f6f6f6;
+        border-radius: 0px 0px 10px 10px;
+    }
+
+    a.card_button {
+        background: #e60023;
+        font-size: 10px;
+        height: 36px;
+        padding: 12px 23px;
+        color: #fff !important;
+        text-decoration: none !important;
+        font-weight: 700;
+        margin: 10px 0px !important;
+        border-radius: 6px;
+    }
+
+    p.card-text {
+        font-size: 13px;
+        font-weight: 600;
+        color: #8e8e8e;
+        margin-bottom: 20px;
+    }
+
+    .col-md-7.col-xs-12.col-xs-pull-5.la_second_slider {
+        margin-top: -17px;
+        padding-left: 0px;
+    }
+
+    .col-md-5.col-xs-12.col-xs-push-7.la_second_image {
+        padding-right: 0px;
+    }
+
+    .col-md-5.col-xs-12.col-md-pull-7.col-xs-pull-7.la_third_image {
+        padding-left: 0px;
+        margin-top: 13px;
+    }
+
+    .col-md-7.col-xs-12.col-md-push-5.col-xs-push-5.la_third_slider {
+        padding-right: 0px;
+    }
+
+    .launches_product_slider {
+        margin-top: 45px;
+    }
+
+    .launch_second_block,
+    .launch_fourth_block {
+        margin-top: 30px;
+    }
+
+    .launch_third_block {
+        margin-top: 30px;
+    }
+
+    ol.products.list.items.product-items {
+        margin-top: 0px !important;
+    }
+
+    .product_slider_container {
+        margin: 0px !important;
+    }
+
+    .container.full_launch_web>div {
+        border-radius: 10px;
+        overflow: hidden !important;
+    }
+
+    .slide_banner_content_row>div {
+        padding: 5px;
+        border-radius: 10px !important;
+        overflow: hidden;
+    }
+
+    .slide_banner_content_row>div .card>img {
+        border-radius: 10px 10px 0px 0px;
+    }
+
+    @media screen and (max-width:480px) {
+        .launches_menu a {
+            font-size: 12px;
+        }
+
+        .la_first_text {
+            border-radius: 0px 0px 10px 10px;
+        }
+
+        .slider_html_here.container-fluid.shoe.golfoy_sliders.container.product-slider-first.head_golfoy {
+            padding: 0px;
+        }
+
+        .mybutton {
+            margin-bottom: 12px;
+            height: 30px;
+        }
+
+        .txt .txt2 {
+            height: 15px;
+        }
+
+        .txt1 {
+            font-size: 13px !important;
+        }
+
+        .txt2 {
+            font-size: 12px !important;
+        }
+
+        .txt {
+            margin-top: 5px;
+        }
+
+        p.card-text {
+            font-size: 10px;
+        }
+
+        h4.card-title {
+            font-size: 14px;
+        }
+
+        a.card_button {
+            padding: 9px 23px;
+            font-size: 10px;
+        }
+
+        .product-item-info .brand_name {
+            font-size: 11px;
+        }
+
+        .product_slider_container span.special-price span {
+            font-size: 12px !important;
+        }
+
+        .container.new_launches {
+            padding: 0px !important;
+        }
+
+        .columns .column.main {
+            padding-bottom: 0px !important;
+        }
+
+        .launches_product_slider {
+            margin-top: 0px;
+        }
+
+        .product_slider_container .product.details.product-item-details {
+            padding: 5px 10px 5px 10px !important;
+        }
+
+        div#Bags {
+            background-color: white !important;
+        }
+
+        div#vokey_SM9_1 {
+            margin-top: 0px !important;
+        }
+
+        .launch_second_block {
+            margin-top: 0px;
+        }
+
+        .new_launch_hr {
+            border-bottom: 2px solid #e60023 !important;
+        }
+    }
+
+    body:not(.catalog-product-view) .product.details.product-item-details span.special-price .price,
+    body:not(.catalog-product-view) .price-box.price-final_price span.special-price .price {
+        margin-left: -7px;
+        color: black;
+        opacity: .7;
+        size: 14px !important;
+        line-height: 20px;
+        font-weight: 800 !important;
+    }
+
+    body:not(.catalog-product-view) .product.details.product-item-details span.old-price .price,
+    body:not(.catalog-product-view) .price-box.price-final_price span.old-price .price {
+        display: none;
+    }
+
+    span.product-image-wrapper {
+        padding-bottom: 145% !important;
+    }
+
+    .product_slider_container .product_content_product_slider_before_list::-webkit-scrollbar {
+        height: 0px !important;
+        background-color: none !important;
+    }
+
+    .product_slider_container .product.details.product-item-details {
+        padding: 20px 10px 20px 10px !important;
+    }
+
+    .sizerolldiv_label {
+        display: none;
+    }
+
+    @media screen and (max-width:768px) {
+        .la_first_text {
+            min-height: 138px !important;
+            justify-content: start;
+            padding: 17px;
+        }
+
+        .product_slider_container .slider_arrows>.right_arrow:after,
+        .product_slider_container .slider_arrows>.left_arrow:before {
+            width: 38px;
+        }
+    }
+
+    .la_second_slider p {
+        margin: 0 0 0px !important;
+    }
+
+    .la_third_slider p {
+        margin: 0 0 0px !important;
+    }
+
+    .brand_name {
+        display: none;
+    }
+
+    .product-item-info strong.product.name.product-item-name a {
+        font-size: 12px !important;
+        line-height: 17px;
+        font-weight: 600 !important;
+        display: inline-block;
+        overflow: hidden;
+    }
+
+    .price-final_price .price-wrapper .price {
+        color: black;
+        opacity: .7;
+        size: 14px !important;
+        line-height: 20px;
+        font-weight: 800 !important;
+    }
+
+    .product_slider_container li.item.product.product-item {
+        padding: 5px !important;
+    }
+
+    .container.full_launch_web.hidden-xs {
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    .new_launch_hr {
+        margin-top: -16px !important;
+        max-width: 300px;
+        width: 50%;
+        border: 4px solid #e60023;
+        border-radius: 3px;
+    }
+
+    .slide_banner_content_row {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+    }
+
+    @media only screen and (max-width:768px) {
+        .row.launches_menu {
+            margin-top: 5px;
+            margin-bottom: 10px;
+            padding-top: 10px;
+        }
+
+        .row.launches_menu .col.menu_col a {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .launch_header h2 {
+            font-size: 19px;
+        }
+
+        .new_launch_hr {
+            margin-top: -13px !important;
+            max-width: 200px;
+            width: 30%;
+            border: 2px solid #e60023;
+        }
+
+        .container.full_launch_web {
+            margin: auto;
+            width: 100%;
+            padding-left: 5px !important;
+            padding-right: 5px !important;
+        }
+
+        main#maincontent {
+            padding: 5px !important;
+        }
+    }
+
+    @media screen and (max-width:480px) {
+        .container {
+            margin: 0px 0px !important;
+            width: 100%;
+        }
+
+        .container.full_launch_web.hidden-xs {
+            max-width: 1280px;
+        }
+
+        .launch_header h2 {
+            width: 90%;
+        }
+
+        .launch_fourth_block {
+            margin-top: 0px;
+        }
+
+        .txtarea .txt1 {
+            font-size: 15px;
+        }
+
+        .txtarea .txt2 {
+            font-size: 13px !important;
+        }
+
+        .slide_banner_content_row {
+            margin-bottom: 0px;
+        }
+
+        .slide_banner_content_row {
+            padding-bottom: 0px !important;
+        }
+
+        .la_image img {
+            border-radius: 10px 10px 0px 0px;
+        }
+    }
+
+    .mybutton a {
+        color: white;
+        text-decoration: none;
+    }
+
+    .card-body a {
+        text-decoration: none;
+        color: black;
+    }
+
+    .round {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .txtarea {
+        padding: 6%;
+        background-color: #f6f6f6;
+        width: 100%;
+        height: 152px;
+    }
+
+    .txtarea .txt1 {
+        font-size: 18px;
+        line-height: 25px;
+        color: #000;
+        font-weight: 600;
+        margin-bottom: 0px;
+    }
+
+    .txtarea .txt2 {
+        font-size: 15px;
+        height: 35px;
+        font-weight: 600;
+        color: #8e8e8e;
+    }
+
+    div#Bags {
+        background-color: #f6f6f6;
+    }
+
+    div#vokey_SM9_1 {
+        margin-top: 20px;
+    }
+
+    img.card-img-top {
+        margin-top: 8px;
+        border-radius: 10px 10px 0px 0px;
+    }
+
+    .products {
+        margin: 0px 0;
+    }
+
+    @media only screen and (max-width:480px) {
+        .la_first_text {
+            padding: 0px 17px !important;
+            text-decoration: none !important;
+        }
+
+        .new_launches a {
+            text-decoration: none !important;
+        }
+
+    }
+
+    .container.web_device {
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+
+    .honma-sec {
+        margin: 30px 0px;
+    }
+
+    .stealth {
+        margin-top: 30px
+    }
+
+    .cms-golfoy-premieres button:hover {
+        background: #e60023 !important;
+        color: white;
+    }
+
+    .cms-golfoy-premieres button:active {
+        background: #e60023 !important;
+        color: white;
+    }
+
+    .cms-golfoy-premieres button:focus {
+        background: #e60023 !important;
+        color: white;
+    }
+
+    .col-lg-6.col-sm-6.col-xs-12.margin_top_bottom.round.left_space_div {
+        padding-left: 0px !important;
+        padding-right: 6px;
+    }
+
+    .col-lg-6.col-sm-6.col-xs-12.margin_top_bottom.right_space_div {
+        padding-right: 0px !important;
+        padding-left: 6px;
+    }
+
+    .col-lg-6.col-sm-6.col-xs-12.margin_top_bottom.left_space_div {
+        padding-left: 0px !important;
+        padding-right: 6px;
+    }
+
+    .col-lg-6.col-sm-6.col-xs-12.margin_top_bottom.round.right_space_space {
+        padding-right: 0px !important;
+    }
+</style>
+<div class="container mobile_device">
+    <div class="row">
+        <div class="col-sm-12 launch_header">
+            <h2>New Launches</h2>
+            <hr class="new_launch_hr">
+        </div>
+    </div>
+    <!-----------------------------------MENU---------------------------------------------------------------------------------->
+    <div class="row launches_menu">
+        <div class="col menu_col"><a class="clubs clubs_click" href="#clubs-mb">Clubs </a></div>
+        <div class="col menu_col"><a class="apparels apparels_click" href="#apparels-mb">Apparels</a></div>
+        <div class="col menu_col"><a class="techno techno_clicks" href="#technology-mb">Technology</a></div>
+
+
+        <!-- <div class="col menu_col"><a class="shoes shoes_click" href="#shoes-mb">Shoes</a></div> -->
+        <!-- <div class="col menu_col"><a class="bags bags_click">Bags</a></div> -->
+    </div>
+    <!-----------------------------------MENU END---------------------------------------------------------------------------------->
+    <!-----------------------------------TaylorMade Qi35---------------------------------------------------------------------------------->
+    <span id="clubs-mb" class="scroll-anchor"></span>
+    <a href="https://golfoy.com/taylormade-qi4d">
+        <div class="q10 new_launch_space">
+            <div class="launches_first_block ">
+                <div class="row">
+                    <div class="col-md-7 la_first_image">
+                        <div class="la_image"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/Taylormade-qi4.jpg" alt="Taylormade-Qi4-Fullwidth"></div>
+                    </div>
+                    <div class="col-md-5 la_first_text">
+                        <div class="txt">
+                            <p class="txt1">TaylorMade Qi4D</p>
+                            <p class="txt2">Find Your New Fast</p>
+                            <button class="mybutton">SHOP NOW</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </a>
+    <!-----------------------------------TaylorMade Qi35--------------------------------------------------------------------------------->
+    <!----------------------------------Callaway Quantum & Srixon ZXi--------------------------------------------------------------------------------->
+    <div class="row new_launch_space">
+        <a href="https://golfoy.com/clubs/by-brand/callaway/by-type/quantum-family.html">
+            <div class="col-lg-6 col-sm-6 col-xs-12 margin_top_bottom round right_space_div left_space_div">
+                <div class="round"><img src="https://golfoy.com//media/wysiwyg/2026/new_launch/Callaway-Quantum-New-Arrival-2-Block.jpg" alt="Callaway Elyte">
+                    <div class="txtarea">
+                        <p class="txt1">Callaway Quantum</p>
+                        <p class="txt2">A Quantum Leap in Distance</p>
+                        <button class="mybutton">SHOP NOW</button>
+                    </div>
+                </div>
+            </div>
+        </a>
+        <a href="https://golfoy.com/clubs/by-brand/srixon/by-type/srixon-zxi.html">
+            <div class="col-lg-6 col-sm-6 col-xs-12 margin_top_bottom left_space_div right_space_div"
+                style="margin-top: 20px;">
+                <div class="round"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/Srixon ZXi-29.jpg" alt="Srixon ZXi">
+                    <div class="txtarea">
+                        <p class="txt1">Srixon ZXi</p>
+                        <p class="txt2">Meet the new Tour-inspired lineup of ZXi</p>
+                        <button class="mybutton">SHOP NOW</button>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <!-----------------------------------END--------------------------------------------------------------------------------->
+    <!----------------------------------Ping G440 & Cobra DS-Adapt--------------------------------------------------------------------------------->
+    <div class="row new_launch_space">
+        <a href="https://golfoy.com/clubs/by-brand/ping/by-type/g440-family.html">
+            <div class="col-lg-6 col-sm-6 col-xs-12 margin_top_bottom round right_space_div left_space_div">
+                <div class="round"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/Ping G440-29.jpg" alt="Ping G440">
+                    <div class="txtarea">
+                        <p class="txt1">Ping G440</p>
+                        <p class="txt2">Our Best Brings Out Yours</p>
+                        <button class="mybutton">SHOP NOW</button>
+                    </div>
+                </div>
+            </div>
+        </a>
+        <a href="https://golfoy.com/clubs/by-brand/cobra/by-type/ds-adapt-family.html">
+            <div class="col-lg-6 col-sm-6 col-xs-12 margin_top_bottom left_space_div right_space_div"
+                style="margin-top: 20px;">
+                <div class="round"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/Cobra DS-Adapt-29.jpg" alt="Cobra DS-Adapt">
+                    <div class="txtarea">
+                        <p class="txt1">Cobra DS-Adapt</p>
+                        <p class="txt2">Dial-In Your Game</p>
+                        <button class="mybutton">SHOP NOW</button>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <!----------------------------------END--------------------------------------------------------------------------------->
+    <!----------------------------------Honma TW 767 & Cobra King--------------------------------------------------------------------------------->
+    <div class="row new_launch_space">
+        <a href="https://golfoy.com/clubs/by-brand/honma.html#1272">
+            <div class="col-lg-6 col-sm-6 col-xs-12 margin_top_bottom round right_space_div left_space_div">
+                <div class="round"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/Honma TW 767-29.jpg" alt="Honma TW 767">
+                    <div class="txtarea">
+                        <p class="txt1">Honma</p>
+                        <p class="txt2">Experience next-level performance</p>
+                        <button class="mybutton">SHOP NOW</button>
+                    </div>
+                </div>
+            </div>
+        </a>
+        <a href="https://golfoy.com/clubs/by-brand/cobra/by-type/wedges.html">
+            <div class="col-lg-6 col-sm-6 col-xs-12 margin_top_bottom left_space_div right_space_div"
+                style="margin-top: 20px;">
+                <div class="round"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/Cobra King-29.jpg" alt="Cobra King">
+                    <div class="txtarea">
+                        <p class="txt1">Cobra King</p>
+                        <p class="txt2">Command the course</p>
+                        <button class="mybutton">SHOP NOW</button>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <!----------------------------------END--------------------------------------------------------------------------------->
+    <!---------------------------------Ping Scottdales Putters & Scotty Cameron Studio Styles--------------------------------------------------------------------------------->
+    <div class="row new_launch_space">
+        <a href="https://golfoy.com/clubs/by-brand/ping/by-type/putter/by-type/scottsdale.html">
+            <div class="col-lg-6 col-sm-6 col-xs-12 margin_top_bottom round right_space_div left_space_div">
+                <div class="round"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/Ping Scottdales Putters-29.jpg" alt="Ping Scottdales Putters">
+                    <div class="txtarea">
+                        <p class="txt1">Ping Studio Style Putters</p>
+                        <p class="txt2">One-Piece Face Insert. Pure, Controlled Contact.</p>
+                        <button class="mybutton">SHOP NOW</button>
+                    </div>
+                </div>
+            </div>
+        </a>
+        <a href="https://golfoy.com/clubs/by-brand/scotty-camerons/by-type/studio-style.html#1801">
+            <div class="col-lg-6 col-sm-6 col-xs-12 margin_top_bottom left_space_div right_space_div"
+                style="margin-top: 20px;">
+                <div class="round"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/Scotty Cameron Studio Styles-29.jpg" alt="Scotty Cameron Studio Styles">
+                    <div class="txtarea">
+                        <p class="txt1">Scotty Cameron Studio Styles</p>
+                        <p class="txt2">Command the course</p>
+                        <button class="mybutton">SHOP NOW</button>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <!----------------------------------END--------------------------------------------------------------------------------->
+    <!---------------------------------Jlinderberg---------------------------------------------------------------------------------->
+    <span id="apparels-mb" class="scroll-anchor"></span>
+    <a href="https://golfoy.com/jlindeberg">
+        <div class="Cobra Aerojet new_launch_space">
+            <div class="launches_first_block ">
+                <div class="row">
+                    <div class="col-md-7 la_first_image">
+                        <div class="la_image"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/fullwidth-launch-page.jpg" alt="Jlinderberg">
+                        </div>
+                    </div>
+                    <div class="col-md-5 la_first_text">
+                        <div class="txt">
+                            <p class="txt1">J.lindeberg</p>
+                            <p class="txt2">Fall / Winter Collection '25</p>
+                            <button class="mybutton">SHOP NOW</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </a>
+    <!----------------------------------END---------------------------------------------------------------------------------->
+    <!-----------------------------------Footjoy & Ping---------------------------------------------------------------------------------->
+    <div class="row new_launch_space">
+        <a href="https://golfoy.com/golf-apparels.html?brand=128">
+            <div class="col-lg-6 col-sm-6 col-xs-12 margin_top_bottom round right_space_div left_space_div">
+                <div class="round"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/Footjoy-29.jpg" alt="Footjoy">
+                    <div class="txtarea">
+                        <p class="txt1">Footjoy</p>
+                        <p class="txt2">Perfect for the Course and The Clubhouse</p>
+                        <button class="mybutton">SHOP NOW</button>
+                    </div>
+                </div>
+            </div>
+        </a>
+        <a href="https://golfoy.com/golf-apparels.html?brand=421">
+            <div class="col-lg-6 col-sm-6 col-xs-12 margin_top_bottom left_space_div right_space_div"
+                style="margin-top: 20px;">
+                <div class="round"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/Ping-29.jpg" alt="Ping">
+                    <div class="txtarea">
+                        <p class="txt1">Ping</p>
+                        <p class="txt2">Performance you can feel</p>
+                        <button class="mybutton">SHOP NOW</button>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <!----------------------------------END--------------------------------------------------------------------------------->
+    <!-----------------------------------Jack Nicklaus Sundog | Oakley---------------------------------------------------------------------------------->
+    <div class="row new_launch_space">
+        <a href="https://golfoy.com/golf-apparels.html?brand=3779">
+            <div class="col-lg-6 col-sm-6 col-xs-12 margin_top_bottom round right_space_div left_space_div">
+                <div class="round"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/Jack Nicklaus-29.jpg" alt="Jack Nicklaus">
+                    <div class="txtarea">
+                        <p class="txt1">Jack Nicklaus</p>
+                        <p class="txt2">Inspired by JACK – Designed for You</p>
+                        <button class="mybutton">SHOP NOW</button>
+                    </div>
+                </div>
+            </div>
+        </a>
+        <a href="https://golfoy.com/golf-apparels.html?brand=421">
+            <div class="col-lg-6 col-sm-6 col-xs-12 margin_top_bottom left_space_div right_space_div"
+                style="margin-top: 20px;">
+                <div class="round"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/Sundog _ Oakley-29.jpg" alt="Sundog _ Oakley">
+                    <div class="txtarea">
+                        <p class="txt1">Sundog | Oakley</p>
+                        <p class="txt2">Meet the New Collection</p>
+                        <button class="mybutton">SHOP NOW</button>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <!----------------------------------END--------------------------------------------------------------------------------->
+
+    <!-----------------------------------Rapsodo ---------------------------------------------------------------------------------->
+    <span id="technology-mb" class="scroll-anchor"></span>
+    <a href="https://golfoy.com/golf-accessories/buy-golf-accessories/technology.html?brand=4564">
+        <div class="Cobra Aerojet new_launch_space">
+            <div class="launches_first_block ">
+                <div class="row">
+                    <div class="col-md-7 la_first_image">
+                        <div class="la_image"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/Rapsodo-29.jpg" alt="Rapsodo">
+                        </div>
+                    </div>
+                    <div class="col-md-5 la_first_text">
+                        <div class="txt">
+                            <p class="txt1">Rapsodo</p>
+                            <p class="txt2">Revolutionize your golf game</p>
+                            <button class="mybutton">SHOP NOW</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </a>
+    <!----------------------------------END--------------------------------------------------------------------------------->
+    <!-----------------------------------Shotscope | Voice Caddie---------------------------------------------------------------------------------->
+    <div class="row new_launch_space">
+        <a href="https://golfoy.com/all-golf-brands-india/shot-scope.html">
+            <div class="col-lg-6 col-sm-6 col-xs-12 margin_top_bottom round right_space_div left_space_div">
+                <div class="round"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/Shotscope-29.jpg" alt="Shotscope">
+                    <div class="txtarea">
+                        <p class="txt1">Shotscope</p>
+                        <p class="txt2">A product for every golfer</p>
+                        <button class="mybutton">SHOP NOW</button>
+                    </div>
+                </div>
+            </div>
+        </a>
+        <a href="https://golfoy.com/all-golf-brands-india/voice-caddie-store.html">
+            <div class="col-lg-6 col-sm-6 col-xs-12 margin_top_bottom left_space_div right_space_div"
+                style="margin-top: 20px;">
+                <div class="round"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/Voice Caddie-29.jpg" alt="Voice Caddie">
+                    <div class="txtarea">
+                        <p class="txt1">Voice Caddie</p>
+                        <p class="txt2">Enhancing Experiences Through Technology</p>
+                        <button class="mybutton">SHOP NOW</button>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <!----------------------------------END--------------------------------------------------------------------------------->
+    <!-----------------------------------Hyperice Massager | Full Swing---------------------------------------------------------------------------------->
+    <div class="row new_launch_space">
+        <a href="https://golfoy.com/all-golf-brands-india/hyperice.html">
+            <div class="col-lg-6 col-sm-6 col-xs-12 margin_top_bottom round right_space_div left_space_div">
+                <div class="round"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/Hyperice Massager-29.jpg" alt="Hyperice">
+                    <div class="txtarea">
+                        <p class="txt1">Hyperice Massager</p>
+                        <p class="txt2">Recover like a Pro</p>
+                        <button class="mybutton">SHOP NOW</button>
+                    </div>
+                </div>
+            </div>
+        </a>
+        <a href="https://golfoy.com/full-swing-kit-launch-monitor.html/">
+            <div class="col-lg-6 col-sm-6 col-xs-12 margin_top_bottom left_space_div right_space_div"
+                style="margin-top: 20px;">
+                <div class="round"><img src="https://golfoy.com//media/wysiwyg/2024/new_launch/Full Swing-29.jpg" alt="Full Swing">
+                    <div class="txtarea">
+                        <p class="txt1">Full Swing</p>
+                        <p class="txt2">Play Golf In Your Home</p>
+                        <button class="mybutton">SHOP NOW</button>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <!----------------------------------END--------------------------------------------------------------------------------->
+
+
+    <!----------------------------------MOBILE DEVICE END ---------------------------------------------------------------------------------->
+</div>

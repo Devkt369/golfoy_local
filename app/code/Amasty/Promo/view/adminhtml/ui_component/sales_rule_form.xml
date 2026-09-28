@@ -1,0 +1,774 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * @author Amasty Team
+ * @copyright Copyright (c) Amasty (https://www.amasty.com)
+ * @package Free Gift Base for Magento 2
+ */-->
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <fieldset name="actions">
+        <field name="discount_qty">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="sortOrder" xsi:type="number">10</item>
+                </item>
+            </argument>
+        </field>
+        <field name="ampromorule[apply_tax]" sortOrder="25" formElement="checkbox">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="source" xsi:type="string">sales_rule</item>
+                    <item name="default" xsi:type="number">0</item>
+                </item>
+            </argument>
+            <settings>
+                <dataType>boolean</dataType>
+                <tooltip>
+                    <description translate="true">The setting regulates the collection of tax when
+                        Free Gifts are being represented as a product with $0 price.
+                        Other settings for tax calculated on Free Gifts are ignored.
+                    </description>
+                </tooltip>
+                <label translate="true">Apply tax on original price of promo items added for free</label>
+                <dataScope>extension_attributes.ampromo_rule.apply_tax</dataScope>
+            </settings>
+            <formElements>
+                <checkbox>
+                    <settings>
+                        <valueMap>
+                            <map name="false" xsi:type="string">0</map>
+                            <map name="true" xsi:type="string">1</map>
+                        </valueMap>
+                        <prefer>toggle</prefer>
+                    </settings>
+                </checkbox>
+            </formElements>
+        </field>
+        <field name="ampromorule[apply_shipping]">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">boolean</item>
+                    <item name="formElement" xsi:type="string">checkbox</item>
+                    <item name="prefer" xsi:type="string">toggle</item>
+                    <item name="valueMap" xsi:type="array">
+                        <item name="true" xsi:type="number">1</item>
+                        <item name="false" xsi:type="number">0</item>
+                    </item>
+                    <item name="default" xsi:type="number">0</item>
+                    <item name="label" xsi:type="string" translate="true">Apply shipping on promo items added for free</item>
+                    <item name="source" xsi:type="string">sales_rule</item>
+                    <item name="dataScope" xsi:type="string">extension_attributes.ampromo_rule.apply_shipping</item>
+                    <item name="sortOrder" xsi:type="number">26</item>
+                </item>
+            </argument>
+        </field>
+        <field name="ampromorule[sku]">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Promo Items</item>
+                    <item name="dataType" xsi:type="string">text</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="source" xsi:type="string">sales_rule</item>
+                    <item name="dataScope" xsi:type="string">extension_attributes.ampromo_rule.sku</item>
+                    <item name="notice" xsi:type="string" translate="true">Comma separated list of the SKUs</item>
+                    <item name="sortOrder" xsi:type="number">9</item>
+                </item>
+            </argument>
+        </field>
+        <field name="ampromorule[type]">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Type</item>
+                    <item name="dataType" xsi:type="string">number</item>
+                    <item name="formElement" xsi:type="string">select</item>
+                    <item name="source" xsi:type="string">sales_rule</item>
+                    <item name="dataScope" xsi:type="string">extension_attributes.ampromo_rule.type</item>
+                    <item name="options" xsi:type="array">
+                        <item name="0" xsi:type="array">
+                            <item name="value" xsi:type="number">0</item>
+                            <item name="label" xsi:type="string" translate="true">All SKUs below</item>
+                        </item>
+                        <item name="1" xsi:type="array">
+                            <item name="value" xsi:type="number">1</item>
+                            <item name="label" xsi:type="string" translate="true">One of the SKUs below</item>
+                        </item>
+                    </item>
+                    <item name="sortOrder" xsi:type="number">8</item>
+                </item>
+            </argument>
+        </field>
+        <field name="stop_rules_processing">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="sortOrder" xsi:type="number">31</item>
+                    <item name="default" xsi:type="number">0</item>
+                </item>
+            </argument>
+        </field>
+    </fieldset>
+    <fieldset name="ampromorule_items_price">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="label" xsi:type="string" translate="true">Promo Items With Discount</item>
+                <item name="collapsible" xsi:type="boolean">true</item>
+                <item name="sortOrder" xsi:type="string">35</item>
+            </item>
+        </argument>
+        <field name="ampromorule_items_discount">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">string</item>
+                    <item name="label" xsi:type="string" translate="true">Promo Items Discount</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="visible" xsi:type="boolean">true</item>
+                    <item name="required" xsi:type="boolean">false</item>
+                    <item name="sortOrder" xsi:type="number">10</item>
+                    <item name="notice" xsi:type="string" translate="true"><![CDATA[Set fixed price (e.g. 20), fixed discount (e.g. -20) or a percent discount (e.g. 50%). Leave empty if you want to add product for free.]]></item>
+                    <item name="source" xsi:type="string">sales_rule</item>
+                    <item name="dataScope" xsi:type="string">extension_attributes.ampromo_rule.items_discount</item>
+                </item>
+            </argument>
+        </field>
+        <field name="ampromorule_minimal_items_price">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">string</item>
+                    <item name="label" xsi:type="string" translate="true">Minimal Price</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="visible" xsi:type="boolean">true</item>
+                    <item name="required" xsi:type="boolean">false</item>
+                    <item name="sortOrder" xsi:type="number">20</item>
+                    <item name="source" xsi:type="string">sales_rule</item>
+                    <item name="dataScope" xsi:type="string">extension_attributes.ampromo_rule.minimal_items_price</item>
+                    <item name="validation" xsi:type="array">
+                        <item name="validate-number validate-zero-or-greater" xsi:type="boolean">true</item>
+                    </item>
+                </item>
+            </argument>
+        </field>
+    </fieldset>
+    <fieldset name="promo_banners_highlights">
+        <fieldset name="top_banner">
+            <field name="top_banner_show_gift_images" sortOrder="50"
+                   formElement="checkbox"
+                   component="Amasty_Promo/js/form/element/gift-image-toggle">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">sales_rule</item>
+                        <item name="default" xsi:type="number">0</item>
+                    </item>
+                </argument>
+                <settings>
+                    <label translate="true">Show Gift Images</label>
+                    <dataType>boolean</dataType>
+                    <dataScope>extension_attributes.ampromo_rule.top_banner_show_gift_images</dataScope>
+                    <switcherConfig>
+                        <enabled>true</enabled>
+                        <rules>
+                            <rule name="0">
+                                <value>1</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>sales_rule_form.sales_rule_form.promo_banners_highlights.top_banner.top_banner_show_gift_name</target>
+                                        <callback>show</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">false</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                            <rule name="1">
+                                <value>0</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>sales_rule_form.sales_rule_form.promo_banners_highlights.top_banner.top_banner_show_gift_name</target>
+                                        <callback>hide</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">true</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                        </rules>
+                    </switcherConfig>
+                </settings>
+                <formElements>
+                    <checkbox>
+                        <settings>
+                            <prefer>toggle</prefer>
+                            <valueMap>
+                                <map name="false" xsi:type="number">0</map>
+                                <map name="true" xsi:type="number">1</map>
+                            </valueMap>
+                        </settings>
+                    </checkbox>
+                </formElements>
+            </field>
+            <field name="top_banner_show_gift_name" sortOrder="60"
+                   formElement="checkbox">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">sales_rule</item>
+                        <item name="default" xsi:type="number">0</item>
+                    </item>
+                </argument>
+                <settings>
+                    <label translate="true">Show Gift Product Name</label>
+                    <dataType>boolean</dataType>
+                    <dataScope>extension_attributes.ampromo_rule.top_banner_show_gift_name</dataScope>
+                </settings>
+                <formElements>
+                    <checkbox>
+                        <settings>
+                            <prefer>toggle</prefer>
+                            <valueMap>
+                                <map name="false" xsi:type="number">0</map>
+                                <map name="true" xsi:type="number">1</map>
+                            </valueMap>
+                        </settings>
+                    </checkbox>
+                </formElements>
+            </field>
+        </fieldset>
+        <fieldset name="after_description_banner">
+            <field name="after_product_banner_show_gift_images" sortOrder="50"
+                   formElement="checkbox"
+                   component="Amasty_Promo/js/form/element/gift-image-toggle">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">sales_rule</item>
+                        <item name="default" xsi:type="number">0</item>
+                    </item>
+                </argument>
+                <settings>
+                    <label translate="true">Show Gift Images</label>
+                    <dataType>boolean</dataType>
+                    <dataScope>extension_attributes.ampromo_rule.after_product_banner_show_gift_images</dataScope>
+                    <switcherConfig>
+                        <enabled>true</enabled>
+                        <rules>
+                            <rule name="0">
+                                <value>1</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>sales_rule_form.sales_rule_form.promo_banners_highlights.after_description_banner.after_product_banner_show_gift_name</target>
+                                        <callback>show</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">false</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                            <rule name="1">
+                                <value>0</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>sales_rule_form.sales_rule_form.promo_banners_highlights.after_description_banner.after_product_banner_show_gift_name</target>
+                                        <callback>hide</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">true</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                        </rules>
+                    </switcherConfig>
+                </settings>
+                <formElements>
+                    <checkbox>
+                        <settings>
+                            <prefer>toggle</prefer>
+                            <valueMap>
+                                <map name="false" xsi:type="number">0</map>
+                                <map name="true" xsi:type="number">1</map>
+                            </valueMap>
+                        </settings>
+                    </checkbox>
+                </formElements>
+            </field>
+            <field name="after_product_banner_show_gift_name" sortOrder="60"
+                   formElement="checkbox">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">sales_rule</item>
+                        <item name="default" xsi:type="number">0</item>
+                    </item>
+                </argument>
+                <settings>
+                    <label translate="true">Show Gift Product Name</label>
+                    <dataType>boolean</dataType>
+                    <dataScope>extension_attributes.ampromo_rule.after_product_banner_show_gift_name</dataScope>
+                </settings>
+                <formElements>
+                    <checkbox>
+                        <settings>
+                            <prefer>toggle</prefer>
+                            <valueMap>
+                                <map name="false" xsi:type="number">0</map>
+                                <map name="true" xsi:type="number">1</map>
+                            </valueMap>
+                        </settings>
+                    </checkbox>
+                </formElements>
+            </field>
+        </fieldset>
+        <fieldset name="ampromo_free_bar">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Free Gift Bar</item>
+                    <item name="collapsible" xsi:type="boolean">true</item>
+                    <item name="opened" xsi:type="boolean">false</item>
+                    <item name="component" xsi:type="string">Amasty_Promo/js/free-bar</item>
+                    <item name="isPromo" xsi:type="boolean">true</item>
+                    <item name="currentPlanType" xsi:type="string">upgrade</item>
+                    <item name="message" xsi:type="string" translate="true"><![CDATA[The functionality is available in the Pro tariff of the Free Gift module.
+                    To upgrade and obtain functionality please follow the <a href="https://amasty.com/amcustomer/account/products/?utm_source=extension&utm_medium=backend&utm_campaign=subscribe_freegift" target="_blank">link</a>.]]>
+                    </item>
+                    <item name="visibleOnActions" xsi:type="array">
+                        <item name="ampromo_spent" xsi:type="string">ampromo_spent</item>
+                    </item>
+                </item>
+            </argument>
+            <field name="ampromo_free_bar_status" formElement="checkbox" sortOrder="10">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">sales_rule</item>
+                        <item name="default" xsi:type="number">0</item>
+                        <item name="toggleLabels" xsi:type="array">
+                            <item name="on" xsi:type="string" translate="true">Active</item>
+                            <item name="off" xsi:type="string" translate="true">Inactive</item>
+                        </item>
+                    </item>
+                </argument>
+                <settings>
+                    <label translate="true">Status</label>
+                    <dataType>boolean</dataType>
+                    <dataScope>extension_attributes.ampromo_free_bar.status</dataScope>
+                    <notice>Enable or disable the status of free gift bar by choosing Active/Inactive.</notice>
+                </settings>
+                <formElements>
+                    <checkbox>
+                        <settings>
+                            <prefer>toggle</prefer>
+                            <valueMap>
+                                <map name="false" xsi:type="number">0</map>
+                                <map name="true" xsi:type="number">1</map>
+                            </valueMap>
+                        </settings>
+                    </checkbox>
+                </formElements>
+            </field>
+            <field name="ampromo_free_bar_position" formElement="select" sortOrder="20">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">sales_rule</item>
+                        <item name="default" xsi:type="number">10</item>
+                    </item>
+                </argument>
+                <settings>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                    </validation>
+                    <label translate="true">Bar Position</label>
+                    <dataType>number</dataType>
+                    <dataScope>extension_attributes.ampromo_free_bar.position</dataScope>
+                </settings>
+                <formElements>
+                    <select>
+                        <settings>
+                            <options class="Amasty\Promo\Model\OptionSource\Positions"/>
+                        </settings>
+                    </select>
+                </formElements>
+            </field>
+            <field name="ampromo_free_bar_pages" formElement="multiselect" sortOrder="30">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">sales_rule</item>
+                    </item>
+                </argument>
+                <settings>
+                    <dataType>text</dataType>
+                    <label translate="true">Also Show for Pages</label>
+                    <dataScope>extension_attributes.ampromo_free_bar.pages</dataScope>
+                    <notice>Leave empty to display only for selected products.</notice>
+                </settings>
+                <formElements>
+                    <multiselect>
+                        <settings>
+                            <options class="Amasty\Promo\Model\OptionSource\Pages"/>
+                        </settings>
+                    </multiselect>
+                </formElements>
+            </field>
+            <field name="ampromo_free_bar_action_clickable" formElement="checkbox" sortOrder="40">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">sales_rule</item>
+                        <item name="default" xsi:type="number">0</item>
+                    </item>
+                </argument>
+                <settings>
+                    <label translate="true">Add Link to the Bar</label>
+                    <dataType>boolean</dataType>
+                    <dataScope>extension_attributes.ampromo_free_bar.action_clickable</dataScope>
+                    <switcherConfig>
+                        <enabled>true</enabled>
+                        <rules>
+                            <rule name="0">
+                                <value>1</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>
+                                            sales_rule_form.sales_rule_form.promo_banners_highlights.ampromo_free_bar.ampromo_free_bar_action_link
+                                        </target>
+                                        <callback>show</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">false</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                            <rule name="1">
+                                <value>0</value>
+                                <actions>
+                                    <action name="0">
+                                        <target>
+                                            sales_rule_form.sales_rule_form.promo_banners_highlights.ampromo_free_bar.ampromo_free_bar_action_link
+                                        </target>
+                                        <callback>hide</callback>
+                                        <params>
+                                            <param name="0" xsi:type="boolean">true</param>
+                                        </params>
+                                    </action>
+                                </actions>
+                            </rule>
+                        </rules>
+                    </switcherConfig>
+                </settings>
+                <formElements>
+                    <checkbox>
+                        <settings>
+                            <prefer>toggle</prefer>
+                            <valueMap>
+                                <map name="false" xsi:type="number">0</map>
+                                <map name="true" xsi:type="number">1</map>
+                            </valueMap>
+                        </settings>
+                    </checkbox>
+                </formElements>
+            </field>
+            <field name="ampromo_free_bar_action_link" formElement="input" sortOrder="50">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">sales_rule</item>
+                    </item>
+                </argument>
+                <settings>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">true</rule>
+                    </validation>
+                    <label translate="true">Link Address</label>
+                    <dataType>text</dataType>
+                    <dataScope>extension_attributes.ampromo_free_bar.action_link</dataScope>
+                    <notice>The bar will be clickable if you add the link.</notice>
+                </settings>
+            </field>
+            <field name="ampromo_free_bar_closeable" formElement="checkbox" sortOrder="60">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">sales_rule</item>
+                        <item name="default" xsi:type="number">0</item>
+                    </item>
+                </argument>
+                <settings>
+                    <label translate="true">Add Close Button</label>
+                    <dataType>boolean</dataType>
+                    <dataScope>extension_attributes.ampromo_free_bar.closeable</dataScope>
+                    <notice>Users will be able to hide bar with 'x' button.</notice>
+                </settings>
+                <formElements>
+                    <checkbox>
+                        <settings>
+                            <prefer>toggle</prefer>
+                            <valueMap>
+                                <map name="false" xsi:type="number">0</map>
+                                <map name="true" xsi:type="number">1</map>
+                            </valueMap>
+                        </settings>
+                    </checkbox>
+                </formElements>
+            </field>
+            <container name="ampromo_free_bar_variable">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="template" xsi:type="string">Amasty_Promo/freebar/form/element/notice</item>
+                        <item name="value" xsi:type="string" translate="true"><![CDATA[
+                       Variables:</br>
+                            <b>{{ruleGoal}}</b> returns value of the Discount Qty Step (Buy X);</br>
+                            <b>{{ruleGoalLeft}}</b> returns result of "Discount Qty Step (Buy X) - Cart Subtotal".
+                    ]]></item>
+                        <item name="sortOrder" xsi:type="number">70</item>
+                    </item>
+                </argument>
+            </container>
+            <fieldset name="init_message">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="collapsible" xsi:type="boolean">true</item>
+                        <item name="label" xsi:type="string" translate="true">Initial Message</item>
+                        <item name="sortOrder" xsi:type="number">80</item>
+                    </item>
+                </argument>
+                <!--Inserting store labels, @see \Amasty\FreeBarPromo\Plugin\SalesRule\Model\Rule\DataProvider\AddBarData::getLabels-->
+                <field name="ampromo_free_bar_init_message_promo" formElement="input" sortOrder="10">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="source" xsi:type="string">sales_rule</item>
+                            <item name="default" xsi:type="string">Get Free Gift for the order over {{ruleGoal}}.</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <label translate="true">Default Store View</label>
+                        <dataType>text</dataType>
+                    </settings>
+                </field>
+            </fieldset>
+            <fieldset name="progress_message">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="collapsible" xsi:type="boolean">true</item>
+                        <item name="label" xsi:type="string" translate="true">In Progress Message</item>
+                        <item name="sortOrder" xsi:type="number">90</item>
+                    </item>
+                </argument>
+                <!--Inserting store labels, @see \Amasty\FreeBarPromo\Plugin\SalesRule\Model\Rule\DataProvider\AddBarData::getLabels-->
+                <field name="ampromo_free_bar_progress_message_promo" formElement="input" sortOrder="10">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="source" xsi:type="string">sales_rule</item>
+                            <item name="default" xsi:type="string">Only {{ruleGoalLeft}} left to obtain Free Gift.</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <label translate="true">Default Store View</label>
+                        <dataType>text</dataType>
+                    </settings>
+                </field>
+            </fieldset>
+            <fieldset name="achieved_message">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="collapsible" xsi:type="boolean">true</item>
+                        <item name="label" xsi:type="string" translate="true">Achieved Message</item>
+                        <item name="sortOrder" xsi:type="number">100</item>
+                    </item>
+                </argument>
+                <!--Inserting store labels, @see \Amasty\FreeBarPromo\Plugin\SalesRule\Model\Rule\DataProvider\AddBarData::getLabels-->
+                <field name="ampromo_free_bar_achieved_message_promo" formElement="input" sortOrder="10">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="source" xsi:type="string">sales_rule</item>
+                            <item name="default" xsi:type="string">Good news: you received Free Gift.</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <label translate="true">Default Store View</label>
+                        <dataType>text</dataType>
+                    </settings>
+                </field>
+            </fieldset>
+            <fieldset name="terms_message">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="collapsible" xsi:type="boolean">true</item>
+                        <item name="label" xsi:type="string" translate="true">Free Gift Terms Content</item>
+                        <item name="sortOrder" xsi:type="number">110</item>
+                    </item>
+                </argument>
+                <!--Inserting store labels, @see \Amasty\FreeBarPromo\Plugin\SalesRule\Model\Rule\DataProvider\AddBarData::getLabels-->
+                <field name="ampromo_free_bar_terms_message_promo" formElement="textarea" sortOrder="10">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="source" xsi:type="string">sales_rule</item>
+                            <item name="default" xsi:type="string">Free Gift is available for orders over {{ruleGoal}} only.</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <label translate="true">Default Store View</label>
+                        <dataType>text</dataType>
+                    </settings>
+                </field>
+            </fieldset>
+            <fieldset name="design">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="collapsible" xsi:type="boolean">true</item>
+                        <item name="label" xsi:type="string" translate="true">Design</item>
+                        <item name="sortOrder" xsi:type="number">120</item>
+                    </item>
+                </argument>
+                <field name="ampromo_free_bar_text_font" formElement="select" sortOrder="10">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="source" xsi:type="string">sales_rule</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <label translate="true">Font</label>
+                        <dataType>text</dataType>
+                        <dataScope>extension_attributes.ampromo_free_bar.text_font</dataScope>
+                    </settings>
+                    <formElements>
+                        <select>
+                            <settings>
+                                <options class="Amasty\Promo\Model\OptionSource\TextFonts"/>
+                            </settings>
+                        </select>
+                    </formElements>
+                </field>
+                <field name="ampromo_free_bar_text_size" formElement="input" sortOrder="20">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="source" xsi:type="string">sales_rule</item>
+                            <item name="default" xsi:type="string">18</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <validation>
+                            <rule name="required-entry" xsi:type="boolean">true</rule>
+                            <rule name="integer" xsi:type="boolean">true</rule>
+                            <rule name="validate-greater-than-zero" xsi:type="boolean">true</rule>
+                        </validation>
+                        <label translate="true">Font Size, px</label>
+                        <dataType>text</dataType>
+                        <dataScope>extension_attributes.ampromo_free_bar.text_size</dataScope>
+                    </settings>
+                </field>
+                <field name="ampromo_free_bar_text_color" formElement="input" sortOrder="30"
+                       component="Amasty_Promo/js/form/element/color-select">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="source" xsi:type="string">sales_rule</item>
+                            <item name="default" xsi:type="string">#ffffff</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <validation>
+                            <rule name="required-entry" xsi:type="boolean">true</rule>
+                        </validation>
+                        <label translate="true">Text Color</label>
+                        <dataType>text</dataType>
+                        <dataScope>extension_attributes.ampromo_free_bar.text_color</dataScope>
+                    </settings>
+                </field>
+                <field name="ampromo_free_bar_extra_color" formElement="input" sortOrder="40"
+                       component="Amasty_Promo/js/form/element/color-select">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="source" xsi:type="string">sales_rule</item>
+                            <item name="default" xsi:type="string">#ffc7a8</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <validation>
+                            <rule name="required-entry" xsi:type="boolean">true</rule>
+                        </validation>
+                        <label translate="true">Extra Color</label>
+                        <dataType>text</dataType>
+                        <dataScope>extension_attributes.ampromo_free_bar.extra_color</dataScope>
+                    </settings>
+                </field>
+                <field name="ampromo_free_bar_background_color" formElement="input" sortOrder="50"
+                       component="Amasty_Promo/js/form/element/color-select">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="source" xsi:type="string">sales_rule</item>
+                            <item name="default" xsi:type="string">#1979c3</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <validation>
+                            <rule name="required-entry" xsi:type="boolean">true</rule>
+                        </validation>
+                        <label translate="true">Background Color</label>
+                        <dataType>text</dataType>
+                        <dataScope>extension_attributes.ampromo_free_bar.background_color</dataScope>
+                    </settings>
+                </field>
+                <field name="ampromo_free_bar_custom_style" formElement="textarea" sortOrder="60">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="source" xsi:type="string">sales_rule</item>
+                            <item name="additionalInfo" xsi:type="string"><![CDATA[<span class="admin__field-note">
+                                Customize bar and text styles with CSS parameters.
+                                For more information click <a href="https://www.w3schools.com/cssref/default.asp" target="_blank">here</a>.</span>]]>
+                            </item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <validation>
+                            <rule name="validate-no-html-tags" xsi:type="boolean">true</rule>
+                        </validation>
+                        <label translate="true">Custom CSS</label>
+                        <dataType>text</dataType>
+                        <tooltipTpl>Amasty_Promo/freebar/form/element/tooltip</tooltipTpl>
+                        <dataScope>extension_attributes.ampromo_free_bar.custom_style</dataScope>
+                        <tooltip>
+                            <description translate="true">
+                                <![CDATA[Example: <br> <pre>.amasty-freebar .content {<br/>    margin:0;<br/>}</pre>]]></description>
+                        </tooltip>
+                    </settings>
+                </field>
+            </fieldset>
+        </fieldset>
+        <fieldset name="countdown_timer">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Countdown Timer</item>
+                    <item name="collapsible" xsi:type="boolean">true</item>
+                    <item name="sortOrder" xsi:type="number">40</item>
+                    <item name="opened" xsi:type="boolean">false</item>
+                    <item name="isPromo" xsi:type="boolean">true</item>
+                    <item name="currentPlanType" xsi:type="string">upgrade</item>
+                    <item name="component" xsi:type="string">Amasty_Promo/js/countdown-timer</item>
+                    <item name="message" xsi:type="string" translate="true"><![CDATA[The functionality is available in the Pro tariff of the Free Gift module.
+                    To upgrade and obtain functionality please follow the <a href="https://amasty.com/amcustomer/account/products/?utm_source=extension&utm_medium=backend&utm_campaign=subscribe_freegift" target="_blank">link</a>.]]>
+                    </item>
+                </item>
+            </argument>
+            <field name="timer_id">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Choose Countdown</item>
+                        <item name="dataType" xsi:type="string">select</item>
+                        <item name="formElement" xsi:type="string">select</item>
+                        <item name="component" xsi:type="string">Amasty_Promo/js/form/rule/timer-select-switcher</item>
+                        <item name="sortOrder" xsi:type="number">20</item>
+                        <item name="source" xsi:type="string">sales_rule</item>
+                        <item name="dataScope" xsi:type="string">extension_attributes.promo_countdown.widget_id</item>
+                    </item>
+                    <item name="options" xsi:type="array">
+                        <item name="0" xsi:type="array">
+                            <item name="value" xsi:type="number">0</item>
+                            <item name="label" xsi:type="string" translate="true">Please Select</item>
+                        </item>
+                    </item>
+                </argument>
+            </field>
+            <field name="timer_position">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="label" xsi:type="string" translate="true">Display</item>
+                        <item name="dataType" xsi:type="string">select</item>
+                        <item name="formElement" xsi:type="string">select</item>
+                        <item name="sortOrder" xsi:type="number">30</item>
+                        <item name="visible" xsi:type="boolean">false</item>
+                        <item name="source" xsi:type="string">sales_rule</item>
+                        <item name="dataScope" xsi:type="string">extension_attributes.promo_countdown.timer_position</item>
+                    </item>
+                </argument>
+            </field>
+        </fieldset>
+    </fieldset>
+</form>

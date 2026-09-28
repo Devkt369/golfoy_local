@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+
+<!--
+  ~  Copyright © Magestore. All rights reserved.
+  ~  See COPYING.txt for license details.
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="inventory_movement" translate="label" sortOrder="500" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Inventory Movement</label>
+            <class>separator-top</class>
+            <tab>magestore</tab>
+            <resource>Magestore_InventoryMovementAdminUi::config</resource>
+            <group id="orders_potential_error" translate="label comment" sortOrder="10" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Potential Error Orders</label>
+                <field id="check_orders_since" translate="label" sortOrder="10" type="select" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Check orders since</label>
+                    <source_model>Magestore\InventoryMovement\Model\Source\Adminhtml\CheckOrdersSince</source_model>
+                    <comment>If you change this setting, don't forget to refresh the report statistics</comment>
+                </field>
+                <field id="enable_admin_notification" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Enable Admin Notification</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="enable_email_notification" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Enable Email Notification</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="recipient_email" translate="label comment" sortOrder="40" type="text" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Send Emails To</label>
+                    <validate>required-entry validate-email</validate>
+                    <comment>Email to receive notifications when there are potential error orders</comment>
+                    <depends>
+                        <field id="enable_email_notification">1</field>
+                    </depends>
+                </field>
+                <field id="additional_emails" translate="label comment" sortOrder="50" type="text" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Additional Emails</label>
+                    <validate>validate-emails</validate>
+                    <comment>Comma-separated.</comment>
+                    <depends>
+                        <field id="enable_email_notification">1</field>
+                    </depends>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

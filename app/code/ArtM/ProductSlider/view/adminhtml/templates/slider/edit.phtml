@@ -1,0 +1,908 @@
+<?php
+/** @var \ArtM\ProductSlider\Block\Adminhtml\Slider\Edit $block */
+$data = $block->getDataValues();
+$selectedSlides = $block->getSlidesToShowSelected();
+$selectedGroupIds = $block->getSelectedGroupIds();
+$selectedStoreViews = $block->getSelectedValues('store_view_ids');
+$selectedCustomerGroups = $block->getSelectedValues('customer_group_ids');
+$selectedCardComponents = $block->getSelectedValues('card_components');
+$selectedCustomAttributes = $block->getSelectedValues('custom_attributes');
+$cardComponentOptions = $block->getCardComponentOptions();
+$productAttributeOptions = $block->getProductAttributeOptions();
+?>
+<div class="admin__page-section artm-ps-page">
+    <div class="admin__page-section-title artm-ps-header">
+        <span class="title"><?= $block->escapeHtml($block->isEdit() ? __('Edit Slider') : __('New Slider')) ?></span>
+    </div>
+    <div class="admin__page-section-content artm-ps-content">
+        <div class="artm-ps-toolbar">
+            <a class="action-default" href="<?= $block->escapeUrl($block->getBackUrl()) ?>"><?= $block->escapeHtml(__('Back')) ?></a>
+            <?php if ($block->isEdit()): ?>
+                <a class="action-delete" href="<?= $block->escapeUrl($block->getDeleteUrl()) ?>" onclick="return confirm('<?= $block->escapeHtmlAttr(__('Delete this slider?')) ?>');"><?= $block->escapeHtml(__('Delete')) ?></a>
+            <?php endif; ?>
+        </div>
+
+        <div class="artm-ps-tabs">
+            <a href="#tab-general"><?= $block->escapeHtml(__('General')) ?></a>
+            <a href="#tab-source"><?= $block->escapeHtml(__('Product Source')) ?></a>
+            <a href="#tab-sorting"><?= $block->escapeHtml(__('Product Sorting')) ?></a>
+            <a href="#tab-display"><?= $block->escapeHtml(__('Display Settings')) ?></a>
+            <a href="#tab-card"><?= $block->escapeHtml(__('Product Card')) ?></a>
+            <a href="#tab-preview"><?= $block->escapeHtml(__('Preview')) ?></a>
+        </div>
+
+        <form method="post" action="<?= $block->escapeUrl($block->getSaveUrl()) ?>" class="artm-ps-form" id="artm-slider-form">
+            <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>" />
+            <input type="hidden" name="slider[slider_id]" value="<?= (int)$data['slider_id'] ?>" />
+            <input type="hidden" name="slider[button_link]" id="button_link_hidden" value="<?= $block->escapeHtmlAttr((string)$data['button_link']) ?>" />
+
+            <div class="artm-ps-save-fixed-wrap">
+                <button type="submit" class="action-primary" name="back" value="1"><?= $block->escapeHtml(__('Save and Continue Edit')) ?></button>
+            </div>
+
+            <h3 id="tab-general"><?= $block->escapeHtml(__('General')) ?></h3>
+            <div class="artm-ps-grid-form">
+                <div class="artm-ps-card">
+                    <h4><?= $block->escapeHtml(__('General Information')) ?></h4>
+                    <p><label><?= $block->escapeHtml(__('Status')) ?></label><select name="slider[status]"><?php foreach ($block->getStatusOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['status'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Slider Name')) ?> *</label><input type="text" name="slider[title]" value="<?= $block->escapeHtmlAttr((string)$data['title']) ?>" required /></p>
+                    <p><label><?= $block->escapeHtml(__('Identifier (Auto Generated)')) ?></label><input type="text" name="slider[identifier]" value="<?= $block->escapeHtmlAttr((string)$data['identifier']) ?>" /></p>
+                    <p>
+                        <label><?= $block->escapeHtml(__('Slider Groups')) ?></label>
+                        <select name="slider[group_ids][]" multiple size="6">
+                            <?php foreach ($block->getGroupOptions() as $option): ?>
+                                <?php $groupValue = (string)$option['value']; ?>
+                                <option value="<?= $block->escapeHtmlAttr($groupValue) ?>" <?= in_array($groupValue, $selectedGroupIds, true) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </p>
+                    <p><label><?= $block->escapeHtml(__('Sort Order')) ?></label><input type="number" name="slider[sort_order]" value="<?= (int)$data['sort_order'] ?>" /></p>
+                    <p><label><?= $block->escapeHtml(__('From Date')) ?></label><input type="datetime-local" name="slider[from_date]" value="<?= $block->escapeHtmlAttr((string)$data['from_date']) ?>" /></p>
+                    <p><label><?= $block->escapeHtml(__('To Date')) ?></label><input type="datetime-local" name="slider[to_date]" value="<?= $block->escapeHtmlAttr((string)$data['to_date']) ?>" /></p>
+                </div>
+
+                <div class="artm-ps-card">
+                    <h4><?= $block->escapeHtml(__('Audience')) ?></h4>
+                    <p><label><?= $block->escapeHtml(__('Store Views')) ?></label><select name="slider[store_view_ids][]" multiple size="6"><?php foreach ($block->getStoreViewOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= in_array((string)$option['value'], $selectedStoreViews, true) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Customer Groups')) ?></label><select name="slider[customer_group_ids][]" multiple size="6"><?php foreach ($block->getCustomerGroupOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= in_array((string)$option['value'], $selectedCustomerGroups, true) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                </div>
+
+                <div class="artm-ps-card">
+                    <h4><?= $block->escapeHtml(__('Content')) ?></h4>
+                    <p><label><?= $block->escapeHtml(__('Heading')) ?></label><input type="text" name="slider[heading]" value="<?= $block->escapeHtmlAttr((string)$data['heading']) ?>" /></p>
+                    <p><label><?= $block->escapeHtml(__('Sub Heading')) ?></label><input type="text" name="slider[sub_heading]" value="<?= $block->escapeHtmlAttr((string)$data['sub_heading']) ?>" /></p>
+                    <p><label><?= $block->escapeHtml(__('Description')) ?></label><textarea name="slider[content_description]" rows="4"><?= $block->escapeHtml((string)$data['content_description']) ?></textarea></p>
+                    <p><label><?= $block->escapeHtml(__('Button Text')) ?></label><input type="text" name="slider[button_text]" value="<?= $block->escapeHtmlAttr((string)$data['button_text']) ?>" /></p>
+                    <p><label><?= $block->escapeHtml(__('Button Link Type')) ?></label><select name="slider[button_link_type]" id="button_link_type"><?php foreach ($block->getButtonLinkTypeOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['button_link_type'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p data-dep="button-link-manual"><label><?= $block->escapeHtml(__('Manual URL')) ?></label><input type="text" id="button_link_manual" value="<?= $block->escapeHtmlAttr((string)$data['button_link_type'] === 'manual' ? (string)$data['button_link'] : '') ?>" placeholder="https://example.com/page" /></p>
+                    <p data-dep="button-link-category"><label><?= $block->escapeHtml(__('Category ID')) ?></label><input type="number" id="button_link_category" value="<?= $block->escapeHtmlAttr((string)$data['button_link_type'] === 'category' ? (string)$data['button_link'] : '') ?>" placeholder="42" /></p>
+                </div>
+
+                <div class="artm-ps-card">
+                    <h4><?= $block->escapeHtml(__('Visibility')) ?></h4>
+                    <p><label><?= $block->escapeHtml(__('Desktop')) ?></label><select name="slider[show_desktop]"><?php foreach ($block->getYesNoOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['show_desktop'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Tablet')) ?></label><select name="slider[show_tablet]"><?php foreach ($block->getYesNoOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['show_tablet'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Mobile')) ?></label><select name="slider[show_mobile]"><?php foreach ($block->getYesNoOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['show_mobile'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                </div>
+            </div>
+
+            <h3 id="tab-source"><?= $block->escapeHtml(__('Product Source')) ?></h3>
+            <div class="artm-ps-grid-form">
+                <div class="artm-ps-card">
+                    <h4><?= $block->escapeHtml(__('Source Type')) ?></h4>
+                    <p><label><?= $block->escapeHtml(__('Type')) ?></label><select name="slider[source_type]" id="source_type"><?php foreach ($block->getSourceTypeOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['source_type'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                </div>
+
+                <div class="artm-ps-card" data-dep="source-category">
+                    <h4><?= $block->escapeHtml(__('Category Source')) ?></h4>
+                    <p><label><?= $block->escapeHtml(__('Category Selector')) ?></label><input type="text" name="slider[category_ids]" value="<?= $block->escapeHtmlAttr((string)$data['category_ids']) ?>" placeholder="Comma separated category IDs" /></p>
+                    <p><label><?= $block->escapeHtml(__('Allow Multiple Categories')) ?></label><select name="slider[allow_multiple_categories]"><?php foreach ($block->getYesNoOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['allow_multiple_categories'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Include Child Categories')) ?></label><select name="slider[include_child_categories]"><?php foreach ($block->getYesNoOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['include_child_categories'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Exclude Products')) ?></label><textarea name="slider[exclude_product_ids]" rows="3"><?= $block->escapeHtml((string)$data['exclude_product_ids']) ?></textarea></p>
+                </div>
+
+                <div class="artm-ps-card" data-dep="source-products">
+                    <h4><?= $block->escapeHtml(__('Products Source')) ?></h4>
+                    <p><label><?= $block->escapeHtml(__('Selected Product IDs')) ?></label><textarea id="source_product_ids" name="slider[source_product_ids]" rows="3" placeholder="Comma separated product IDs"><?= $block->escapeHtml((string)$data['source_product_ids']) ?></textarea></p>
+                    <p data-dep="sorting-manual"><label><?= $block->escapeHtml(__('Manual Product Ordering (IDs)')) ?></label><textarea id="manual_sort_product_ids" name="slider[manual_sort_product_ids]" rows="3"><?= $block->escapeHtml((string)$data['manual_sort_product_ids']) ?></textarea></p>
+                    <div class="artm-ps-picker-controls">
+                        <input type="text" id="products_picker_q" placeholder="<?= $block->escapeHtmlAttr(__('Search by SKU or Name')) ?>" />
+                        <button type="button" class="action-default" id="products_picker_search"><?= $block->escapeHtml(__('Search')) ?></button>
+                    </div>
+                    <div class="artm-ps-picker-grid-wrap">
+                        <table class="artm-ps-table" id="products_picker_grid">
+                            <thead>
+                                <tr>
+                                    <th><?= $block->escapeHtml(__('Select')) ?></th>
+                                    <th><?= $block->escapeHtml(__('Image')) ?></th>
+                                    <th><?= $block->escapeHtml(__('SKU')) ?></th>
+                                    <th><?= $block->escapeHtml(__('Name')) ?></th>
+                                    <th><?= $block->escapeHtml(__('Price')) ?></th>
+                                    <th><?= $block->escapeHtml(__('Stock')) ?></th>
+                                </tr>
+                            </thead>
+                            <tbody id="products_picker_grid_body"></tbody>
+                        </table>
+                    </div>
+                    <p class="artm-ps-note" id="products_picker_status"></p>
+                    <p class="artm-ps-note"><?= $block->escapeHtml(__('Selected products below support drag and drop. When Sorting Type is Manual, this order is used automatically.')) ?></p>
+                    <ul id="selected_products_order" class="artm-ps-selected-list"></ul>
+                </div>
+
+                <div class="artm-ps-card" data-dep="source-mixed">
+                    <h4><?= $block->escapeHtml(__('Mixed Source')) ?></h4>
+                    <p><label><?= $block->escapeHtml(__('Category Selection')) ?></label><input type="text" name="slider[mixed_category_ids]" value="<?= $block->escapeHtmlAttr((string)$data['mixed_category_ids']) ?>" /></p>
+                    <p><label><?= $block->escapeHtml(__('Product Selection')) ?></label><input type="text" id="mixed_product_ids" name="slider[mixed_product_ids]" value="<?= $block->escapeHtmlAttr((string)$data['mixed_product_ids']) ?>" /></p>
+                    <p><label><?= $block->escapeHtml(__('Excluded Products')) ?></label><input type="text" name="slider[mixed_excluded_product_ids]" value="<?= $block->escapeHtmlAttr((string)$data['mixed_excluded_product_ids']) ?>" /></p>
+                    <p>
+                        <label><?= $block->escapeHtml(__('Priority')) ?></label>
+                        <select name="slider[mixed_priority]">
+                            <option value="category_then_manual" <?= ((string)$data['mixed_priority'] === 'category_then_manual') ? 'selected' : '' ?>><?= $block->escapeHtml(__('Category then Manual')) ?></option>
+                            <option value="manual_then_category" <?= ((string)$data['mixed_priority'] === 'manual_then_category') ? 'selected' : '' ?>><?= $block->escapeHtml(__('Manual then Category')) ?></option>
+                        </select>
+                    </p>
+                </div>
+
+                <div class="artm-ps-card">
+                    <h4><?= $block->escapeHtml(__('Product Limits')) ?></h4>
+                    <p><label><?= $block->escapeHtml(__('Product Limit')) ?></label><input type="number" name="slider[product_limit]" value="<?= (int)$data['product_limit'] ?>" /></p>
+                    <p class="artm-ps-note"><?= $block->escapeHtml(__('Only the first N products (based on sorting) will be used in slider/grid output.')) ?></p>
+                </div>
+            </div>
+
+            <h3 id="tab-sorting"><?= $block->escapeHtml(__('Product Sorting')) ?></h3>
+            <div class="artm-ps-grid-form">
+                <div class="artm-ps-card">
+                    <p><label><?= $block->escapeHtml(__('Sorting Type')) ?></label><select name="slider[sorting_type]" id="sorting_type"><?php foreach ($block->getSortingTypeOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['sorting_type'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p data-dep="sorting-manual"><label><?= $block->escapeHtml(__('Manual Product Ordering (IDs)')) ?></label><textarea name="slider[manual_sort_product_ids]" rows="3"><?= $block->escapeHtml((string)$data['manual_sort_product_ids']) ?></textarea></p>
+                    <p data-dep="sorting-custom"><label><?= $block->escapeHtml(__('Custom Attribute')) ?></label><input type="text" name="slider[custom_sort_attribute]" value="<?= $block->escapeHtmlAttr((string)$data['custom_sort_attribute']) ?>" /></p>
+                </div>
+            </div>
+
+            <h3 id="tab-display"><?= $block->escapeHtml(__('Display Settings')) ?></h3>
+            <div class="artm-ps-grid-form">
+                <div class="artm-ps-card">
+                    <p><label><?= $block->escapeHtml(__('Display Type')) ?></label><select name="slider[display_type]" id="display_type"><?php foreach ($block->getDisplayTypeOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['display_type'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                </div>
+
+                <div class="artm-ps-card" data-dep="display-slider">
+                    <h4><?= $block->escapeHtml(__('Slider Options')) ?></h4>
+                    <?php /*
+                    //<p><label><?= $block->escapeHtml(__('Slides To Show')) ?></label><select name="slider[slides_to_show][]" multiple size="6"><?php foreach ($block->getSlidesToShowOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= in_array((string)$option['value'], $selectedSlides, true) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                        */
+                    ?>
+                    <p><label><?= $block->escapeHtml(__('Desktop Items')) ?></label><input type="number" name="slider[desktop_items]" value="<?= (int)$data['desktop_items'] ?>" /></p>
+                    <p><label><?= $block->escapeHtml(__('Tablet Items')) ?></label><input type="number" name="slider[tablet_items]" value="<?= (int)$data['tablet_items'] ?>" /></p>
+                    <p><label><?= $block->escapeHtml(__('Mobile Items')) ?></label><input type="number" name="slider[mobile_items]" value="<?= (int)$data['mobile_items'] ?>" /></p>
+                    <p><label><?= $block->escapeHtml(__('Space Between')) ?></label><input type="number" name="slider[space_between]" value="<?= (int)$data['space_between'] ?>" /></p>
+                    <p><label><?= $block->escapeHtml(__('Show Arrows')) ?></label><select name="slider[show_arrows]"><?php foreach ($block->getYesNoOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['show_arrows'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Show Dots')) ?></label><select name="slider[show_dots]"><?php foreach ($block->getYesNoOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['show_dots'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Infinite Loop')) ?></label><select name="slider[infinite_loop]"><?php foreach ($block->getYesNoOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['infinite_loop'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Autoplay')) ?></label><select name="slider[autoplay]" id="autoplay"><?php foreach ($block->getYesNoOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['autoplay'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p data-dep="autoplay-on"><label><?= $block->escapeHtml(__('Autoplay Delay')) ?></label><input type="number" name="slider[autoplay_delay]" value="<?= (int)$data['autoplay_delay'] ?>" /></p>
+                    <p data-dep="autoplay-on"><label><?= $block->escapeHtml(__('Autoplay Speed')) ?></label><input type="number" name="slider[autoplay_speed]" value="<?= (int)$data['autoplay_speed'] ?>" /></p>
+                    <p><label><?= $block->escapeHtml(__('Swipe')) ?></label><select name="slider[swipe]"><?php foreach ($block->getYesNoOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['swipe'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Mouse Drag')) ?></label><select name="slider[mouse_drag]"><?php foreach ($block->getYesNoOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['mouse_drag'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Touch Support')) ?></label><select name="slider[touch_support]"><?php foreach ($block->getYesNoOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['touch_support'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Lazy Load')) ?></label><select name="slider[lazy_load]"><?php foreach ($block->getYesNoOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['lazy_load'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Animation Speed')) ?></label><input type="number" name="slider[animation_speed]" value="<?= (int)$data['animation_speed'] ?>" /></p>
+                </div>
+
+                <div class="artm-ps-card" data-dep="display-grid">
+                    <h4><?= $block->escapeHtml(__('Grid Options')) ?></h4>
+                    <p><label><?= $block->escapeHtml(__('Desktop Columns')) ?></label><input type="number" name="slider[grid_desktop_columns]" value="<?= (int)$data['grid_desktop_columns'] ?>" /></p>
+                    <p><label><?= $block->escapeHtml(__('Tablet Columns')) ?></label><input type="number" name="slider[grid_tablet_columns]" value="<?= (int)$data['grid_tablet_columns'] ?>" /></p>
+                    <p><label><?= $block->escapeHtml(__('Mobile Columns')) ?></label><input type="number" name="slider[grid_mobile_columns]" value="<?= (int)$data['grid_mobile_columns'] ?>" /></p>
+                    <p><label><?= $block->escapeHtml(__('Space Between')) ?></label><input type="number" name="slider[space_between]" value="<?= (int)$data['space_between'] ?>" /></p>
+                </div>
+            </div>
+
+            <h3 id="tab-card"><?= $block->escapeHtml(__('Product Card')) ?></h3>
+            <div class="artm-ps-grid-form">
+                <div class="artm-ps-card">
+                    <p><label><?= $block->escapeHtml(__('Show Name')) ?></label><select name="slider[show_name]"><?php foreach ($block->getYesNoOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['show_name'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Show Price')) ?></label><select name="slider[show_price]"><?php foreach ($block->getYesNoOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['show_price'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Show Add To Cart')) ?></label><select name="slider[show_add_to_cart]"><?php foreach ($block->getYesNoOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['show_add_to_cart'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                </div>
+
+                <div class="artm-ps-card">
+                    <p><label><?= $block->escapeHtml(__('Card Components')) ?></label></p>
+                    <div class="artm-ps-component-picker">
+                        <select id="card_component_add_select">
+                            <optgroup label="<?= $block->escapeHtmlAttr(__('Components')) ?>"><?php foreach ($cardComponentOptions as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>"><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></optgroup>
+                            <optgroup label="<?= $block->escapeHtmlAttr(__('Product Attributes')) ?>"><?php foreach ($productAttributeOptions as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>"><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></optgroup>
+                        </select>
+                        <input type="number" id="card_component_priority" min="1" value="1" title="<?= $block->escapeHtmlAttr(__('Priority (render order)')) ?>" />
+                        <button type="button" id="card_component_add_btn" class="action-default"><?= $block->escapeHtml(__('Add')) ?></button>
+                    </div>
+                    <ul id="card_component_order_list" class="artm-ps-component-list"></ul>
+                    <p class="artm-ps-note"><?= $block->escapeHtml(__('Pick a component, set its priority (render order), then Add. Edit the number on an added row to move it; × removes it.')) ?></p>
+                    <select name="slider[card_components][]" id="card_components" multiple size="10" style="display:none" aria-hidden="true"><?php foreach (array_merge($cardComponentOptions, $productAttributeOptions) as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= in_array((string)$option['value'], $selectedCardComponents, true) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select>
+                    <script type="application/json" id="card_components_saved_order"><?= /* @noEscape */ json_encode(array_values($selectedCardComponents)) ?></script>
+                    <p data-dep="card-custom-attributes"><label><?= $block->escapeHtml(__('Custom Attributes')) ?></label><input type="text" name="slider[custom_attributes]" value="<?= $block->escapeHtmlAttr(implode(',', $selectedCustomAttributes)) ?>" placeholder="Material,Gender,Fragrance Type" /></p>
+                    <p>
+                        <label>
+                            <input type="checkbox" name="slider[remove_brand_from_name]" value="1" <?= ((int)$data['remove_brand_from_name'] === 1) ? 'checked' : '' ?> />
+                            <?= $block->escapeHtml(__('Remove brand name from product name')) ?>
+                        </label>
+                    </p>
+                    <p><label><?= $block->escapeHtml(__('Hover Image')) ?></label><select name="slider[hover_image_enabled]"><?php foreach ($block->getYesNoOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['hover_image_enabled'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Image Role')) ?></label><select name="slider[image_role]"><?php foreach ($block->getImageRoleOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['image_role'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                </div>
+            </div>
+
+            <h3 id="tab-preview"><?= $block->escapeHtml(__('Preview')) ?></h3>
+            <div class="artm-ps-grid-form">
+                <div class="artm-ps-card">
+                    <p><strong><?= $block->escapeHtml(__('Source Type')) ?>:</strong> <span id="preview_source_type"></span></p>
+                    <p><strong><?= $block->escapeHtml(__('Products Loaded (Limit)')) ?>:</strong> <span id="preview_product_limit"></span></p>
+                    <p><strong><?= $block->escapeHtml(__('Current Sorting')) ?>:</strong> <span id="preview_sorting"></span></p>
+                    <p><strong><?= $block->escapeHtml(__('Display Type')) ?>:</strong> <span id="preview_display_type"></span></p>
+                    <p><strong><?= $block->escapeHtml(__('Autoplay')) ?>:</strong> <span id="preview_autoplay"></span></p>
+                    <p><strong><?= $block->escapeHtml(__('Configured Source Count')) ?>:</strong> <span id="preview_source_count"></span></p>
+                    <p><strong><?= $block->escapeHtml(__('Total Products Found')) ?>:</strong> <span id="preview_total_found">0</span></p>
+                    <p class="artm-ps-note" id="preview_hint"><?= $block->escapeHtml(__('Live preview summary is based on current form values. Product rendering preview is available after frontend integration.')) ?></p>
+                    <div class="artm-ps-picker-grid-wrap">
+                        <table class="artm-ps-table" id="preview_products_table">
+                            <thead>
+                                <tr>
+                                    <th><?= $block->escapeHtml(__('Image')) ?></th>
+                                    <th><?= $block->escapeHtml(__('SKU')) ?></th>
+                                    <th><?= $block->escapeHtml(__('Name')) ?></th>
+                                    <th><?= $block->escapeHtml(__('Price')) ?></th>
+                                    <th><?= $block->escapeHtml(__('Stock')) ?></th>
+                                    <th><?= $block->escapeHtml(__('Category')) ?></th>
+                                    <th><?= $block->escapeHtml(__('Position')) ?></th>
+                                </tr>
+                            </thead>
+                            <tbody id="preview_products_body"></tbody>
+                        </table>
+                    </div>
+                    <p class="artm-ps-note" id="preview_products_status"></p>
+                    <p><label><?= $block->escapeHtml(__('Preview Notes')) ?></label><textarea name="slider[preview_notes]" rows="4"><?= $block->escapeHtml((string)$data['preview_notes']) ?></textarea></p>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+(function () {
+    var form = document.getElementById('artm-slider-form');
+    if (!form) { return; }
+
+    var sourceType = document.getElementById('source_type');
+    var displayType = document.getElementById('display_type');
+    var sortingType = document.getElementById('sorting_type');
+    var autoplay = document.getElementById('autoplay');
+    var buttonLinkType = document.getElementById('button_link_type');
+    var cardComponents = document.getElementById('card_components');
+    var cardComponentAddSelect = document.getElementById('card_component_add_select');
+    var cardComponentPriority = document.getElementById('card_component_priority');
+    var cardComponentAddBtn = document.getElementById('card_component_add_btn');
+    var cardComponentOrderList = document.getElementById('card_component_order_list');
+    var cardComponentsSavedOrderEl = document.getElementById('card_components_saved_order');
+    var hiddenButtonLink = document.getElementById('button_link_hidden');
+    var buttonManual = document.getElementById('button_link_manual');
+    var buttonCategory = document.getElementById('button_link_category');
+    var previewSourceType = document.getElementById('preview_source_type');
+    var previewProductLimit = document.getElementById('preview_product_limit');
+    var previewSorting = document.getElementById('preview_sorting');
+    var previewDisplayType = document.getElementById('preview_display_type');
+    var previewAutoplay = document.getElementById('preview_autoplay');
+    var previewSourceCount = document.getElementById('preview_source_count');
+    var previewHint = document.getElementById('preview_hint');
+    var previewTotalFound = document.getElementById('preview_total_found');
+    var previewProductsBody = document.getElementById('preview_products_body');
+    var sourceProductIdsField = document.getElementById('source_product_ids');
+    var mixedProductIdsField = document.getElementById('mixed_product_ids');
+    var manualSortProductIdsField = document.getElementById('manual_sort_product_ids');
+    var pickerQuery = document.getElementById('products_picker_q');
+    var pickerSearch = document.getElementById('products_picker_search');
+    var pickerGridBody = document.getElementById('products_picker_grid_body');
+    var pickerStatus = document.getElementById('products_picker_status');
+    var previewStatus = document.getElementById('preview_products_status');
+    var selectedProductsOrder = document.getElementById('selected_products_order');
+    var productSearchUrls = [
+        '<?= $block->escapeJs($block->getUrl('artm_productslider/slider/productSearch')) ?>',
+        '<?= $block->escapeJs($block->getUrl('artm_productslider/slider/product_search')) ?>'
+    ];
+    var previewProductsUrls = [
+        '<?= $block->escapeJs($block->getUrl('artm_productslider/slider/previewProducts')) ?>',
+        '<?= $block->escapeJs($block->getUrl('artm_productslider/slider/preview_products')) ?>'
+    ];
+
+    function setText(el, text) {
+        if (el) { el.textContent = text || ''; }
+    }
+
+    function requestJson(url, options, onSuccess, onError) {
+        if (typeof window.fetch === 'function') {
+            fetch(url, options)
+                .then(function (r) {
+                    if (!r.ok) {
+                        throw new Error('HTTP ' + r.status);
+                    }
+                    return r.text();
+                })
+                .then(function (txt) {
+                    var json;
+                    try {
+                        json = JSON.parse(txt);
+                    } catch (e) {
+                        throw new Error('Invalid JSON response');
+                    }
+                    onSuccess(json);
+                })
+                .catch(function (e) {
+                    onError(e);
+                });
+            return;
+        }
+
+        try {
+            var xhr = new XMLHttpRequest();
+            xhr.open((options && options.method) || 'GET', url, true);
+            xhr.withCredentials = true;
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState !== 4) {
+                    return;
+                }
+                if (xhr.status < 200 || xhr.status >= 300) {
+                    onError(new Error('HTTP ' + xhr.status));
+                    return;
+                }
+                try {
+                    onSuccess(JSON.parse(xhr.responseText));
+                } catch (e) {
+                    onError(new Error('Invalid JSON response'));
+                }
+            };
+            xhr.send((options && options.body) || null);
+        } catch (e) {
+            onError(e);
+        }
+    }
+
+    function parseCsv(value) {
+        if (!value) { return []; }
+        var out = [];
+        value.split(',').forEach(function (v) {
+            var n = parseInt(String(v).trim(), 10);
+            if (!isNaN(n) && n > 0 && out.indexOf(n) === -1) {
+                out.push(n);
+            }
+        });
+        return out;
+    }
+
+    function csv(ids) {
+        return ids.join(',');
+    }
+
+    function getActiveProductIdsField() {
+        var source = sourceType ? sourceType.value : 'category';
+        if (source === 'mixed') {
+            return mixedProductIdsField;
+        }
+        return sourceProductIdsField;
+    }
+
+    function hydrateSelectedFromActiveField() {
+        var activeField = getActiveProductIdsField();
+        selectedSourceIds = parseCsv(activeField ? activeField.value : '');
+    }
+
+    var selectedSourceIds = [];
+    var manualOrderIds = parseCsv(manualSortProductIdsField ? manualSortProductIdsField.value : '');
+    hydrateSelectedFromActiveField();
+
+    function syncIdsToFields() {
+        var activeField = getActiveProductIdsField();
+        if (activeField) {
+            activeField.value = csv(selectedSourceIds);
+        }
+
+        var sorting = sortingType ? sortingType.value : '';
+        if (sorting === 'manual') {
+            manualOrderIds = selectedSourceIds.slice();
+        } else {
+            manualOrderIds = manualOrderIds.filter(function (id) { return selectedSourceIds.indexOf(id) !== -1; });
+        }
+
+        if (manualSortProductIdsField) {
+            manualSortProductIdsField.value = csv(manualOrderIds);
+        }
+    }
+
+    function renderSelectedOrderList() {
+        if (!selectedProductsOrder) { return; }
+        selectedProductsOrder.innerHTML = '';
+        selectedSourceIds.forEach(function (id) {
+            var li = document.createElement('li');
+            li.draggable = true;
+            li.dataset.id = String(id);
+            li.textContent = '#' + id;
+            selectedProductsOrder.appendChild(li);
+        });
+        bindSelectedOrderDnD();
+    }
+
+    function bindSelectedOrderDnD() {
+        if (!selectedProductsOrder) { return; }
+        var dragging = null;
+        selectedProductsOrder.querySelectorAll('li').forEach(function (li) {
+            li.addEventListener('dragstart', function () { dragging = li; li.classList.add('dragging'); });
+            li.addEventListener('dragend', function () { li.classList.remove('dragging'); dragging = null; syncFromSelectedList(); });
+            li.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                if (!dragging || dragging === li) { return; }
+                var box = li.getBoundingClientRect();
+                if (e.clientY < box.top + box.height / 2) {
+                    selectedProductsOrder.insertBefore(dragging, li);
+                } else {
+                    selectedProductsOrder.insertBefore(dragging, li.nextSibling);
+                }
+            });
+        });
+    }
+
+    function syncFromSelectedList() {
+        var ids = [];
+        selectedProductsOrder.querySelectorAll('li').forEach(function (li) {
+            ids.push(parseInt(li.dataset.id, 10));
+        });
+        selectedSourceIds = ids.filter(function (v) { return !isNaN(v) && v > 0; });
+        syncIdsToFields();
+        updatePreview();
+    }
+
+    function getCardComponentOption(value) {
+        if (!cardComponents) { return null; }
+        var found = null;
+        Array.from(cardComponents.options).forEach(function (opt) {
+            if (opt.value === value) { found = opt; }
+        });
+        return found;
+    }
+
+    function getSelectedCardComponents() {
+        if (!cardComponents) { return []; }
+        return Array.from(cardComponents.options).filter(function (opt) { return opt.selected; });
+    }
+
+    function renderCardComponentList() {
+        if (!cardComponentOrderList) { return; }
+        cardComponentOrderList.innerHTML = '';
+        getSelectedCardComponents().forEach(function (opt, index) {
+            var li = document.createElement('li');
+            li.draggable = true;
+            li.dataset.value = opt.value;
+
+            var badge = document.createElement('span');
+            badge.className = 'artm-ps-component-list__priority';
+            badge.textContent = String(index + 1);
+
+            var label = document.createElement('span');
+            label.className = 'artm-ps-component-list__label';
+            label.textContent = opt.textContent;
+
+            var removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'artm-ps-component-list__remove';
+            removeBtn.setAttribute('aria-label', 'Remove');
+            removeBtn.textContent = '×';
+            removeBtn.addEventListener('click', function () {
+                opt.selected = false;
+                renderCardComponentList();
+                refresh();
+            });
+
+            li.appendChild(badge);
+            li.appendChild(label);
+            li.appendChild(removeBtn);
+            cardComponentOrderList.appendChild(li);
+        });
+        bindCardComponentDnD();
+    }
+
+    function bindCardComponentDnD() {
+        if (!cardComponentOrderList) { return; }
+        var dragging = null;
+        cardComponentOrderList.querySelectorAll('li').forEach(function (li) {
+            li.addEventListener('dragstart', function () { dragging = li; li.classList.add('dragging'); });
+            li.addEventListener('dragend', function () {
+                li.classList.remove('dragging');
+                dragging = null;
+                syncCardComponentOrderFromList();
+            });
+            li.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                if (!dragging || dragging === li) { return; }
+                var box = li.getBoundingClientRect();
+                if (e.clientY < box.top + box.height / 2) {
+                    cardComponentOrderList.insertBefore(dragging, li);
+                } else {
+                    cardComponentOrderList.insertBefore(dragging, li.nextSibling);
+                }
+            });
+        });
+    }
+
+    function syncCardComponentOrderFromList() {
+        if (!cardComponentOrderList || !cardComponents) { return; }
+        var order = Array.from(cardComponentOrderList.querySelectorAll('li')).map(function (li) {
+            return li.dataset.value;
+        });
+        reorderCardComponentSelect(order);
+        renderCardComponentList();
+        refresh();
+    }
+
+    function reorderCardComponentSelect(orderedValues) {
+        if (!cardComponents) { return; }
+        orderedValues.forEach(function (value) {
+            var opt = getCardComponentOption(value);
+            if (opt) {
+                cardComponents.appendChild(opt);
+            }
+        });
+    }
+
+    function addCardComponent(value, priority) {
+        var opt = getCardComponentOption(value);
+        if (!opt) { return; }
+        opt.selected = true;
+
+        var order = getSelectedCardComponents().map(function (o) { return o.value; });
+        order = order.filter(function (v) { return v !== value; });
+        var targetIndex = Math.max(1, priority || (order.length + 1)) - 1;
+        targetIndex = Math.min(targetIndex, order.length);
+        order.splice(targetIndex, 0, value);
+
+        reorderCardComponentSelect(order);
+        renderCardComponentList();
+        refresh();
+
+        if (cardComponentPriority) {
+            cardComponentPriority.value = String(order.length + 1);
+        }
+    }
+
+    if (cardComponentAddBtn) {
+        cardComponentAddBtn.addEventListener('click', function () {
+            if (!cardComponentAddSelect || !cardComponentAddSelect.value) { return; }
+            var priority = cardComponentPriority ? parseInt(cardComponentPriority.value, 10) : 0;
+            addCardComponent(cardComponentAddSelect.value, priority);
+        });
+    }
+
+    (function initCardComponentOrder() {
+        if (!cardComponents || !cardComponentsSavedOrderEl) { return; }
+        var savedOrder = [];
+        try {
+            savedOrder = JSON.parse(cardComponentsSavedOrderEl.textContent || '[]');
+        } catch (e) {
+            savedOrder = [];
+        }
+        if (Array.isArray(savedOrder) && savedOrder.length) {
+            reorderCardComponentSelect(savedOrder);
+        }
+        if (cardComponentPriority) {
+            cardComponentPriority.value = String(getSelectedCardComponents().length + 1);
+        }
+    })();
+
+    function renderPickerRows(rows) {
+        if (!pickerGridBody) { return; }
+        pickerGridBody.innerHTML = '';
+        rows.forEach(function (row) {
+            var tr = document.createElement('tr');
+            var checked = selectedSourceIds.indexOf(row.id) !== -1;
+            tr.innerHTML = '' +
+                '<td><input type="checkbox" data-id="' + row.id + '" ' + (checked ? 'checked' : '') + ' /></td>' +
+                '<td>' + (row.image ? '<img src="' + row.image + '" alt="" width="40" />' : '-') + '</td>' +
+                '<td>' + row.sku + '</td>' +
+                '<td>' + row.name + '</td>' +
+                '<td>' + Number(row.price).toFixed(2) + '</td>' +
+                '<td>' + row.stock + '</td>';
+            pickerGridBody.appendChild(tr);
+        });
+
+        pickerGridBody.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
+            cb.addEventListener('change', function () {
+                var id = parseInt(cb.getAttribute('data-id') || '0', 10);
+                if (!id) { return; }
+                if (cb.checked) {
+                    if (selectedSourceIds.indexOf(id) === -1) {
+                        selectedSourceIds.push(id);
+                    }
+                } else {
+                    selectedSourceIds = selectedSourceIds.filter(function (v) { return v !== id; });
+                }
+                syncIdsToFields();
+                renderSelectedOrderList();
+                updatePreview();
+            });
+        });
+    }
+
+    function loadPickerProducts(attempt) {
+        var tryIndex = typeof attempt === 'number' ? attempt : 0;
+        var productSearchUrl = productSearchUrls[tryIndex] || '';
+        if (!productSearchUrl) {
+            setText(pickerStatus, 'Unable to load products (endpoint unavailable).');
+            return;
+        }
+        var q = pickerQuery ? pickerQuery.value.trim() : '';
+        var url = productSearchUrl + '?q=' + encodeURIComponent(q) + '&page=1&page_size=20&selected=' + encodeURIComponent(csv(selectedSourceIds));
+        setText(pickerStatus, 'Loading products...');
+        requestJson(url, { credentials: 'same-origin' }, function (json) {
+            if (!json || !json.success || !json.data) {
+                throw new Error((json && json.message) ? json.message : 'Unexpected response');
+            }
+            renderPickerRows(json.data.items || []);
+            setText(pickerStatus, 'Loaded ' + ((json.data.items || []).length) + ' products. Tick checkboxes to select.');
+        }, function (e) {
+            if (tryIndex + 1 < productSearchUrls.length) {
+                loadPickerProducts(tryIndex + 1);
+                return;
+            }
+            if (pickerGridBody) {
+                pickerGridBody.innerHTML = '';
+            }
+            setText(pickerStatus, 'Product search failed: ' + (e && e.message ? e.message : 'Request error'));
+        });
+    }
+
+    function loadPreviewProducts(attempt) {
+        var tryIndex = typeof attempt === 'number' ? attempt : 0;
+        var previewProductsUrl = previewProductsUrls[tryIndex] || '';
+        if (!previewProductsUrl || !previewProductsBody) {
+            setText(previewStatus, 'Preview endpoint unavailable.');
+            return;
+        }
+        var fd = new FormData(form);
+        setText(previewStatus, 'Refreshing preview...');
+        requestJson(previewProductsUrl, {
+            method: 'POST',
+            body: fd,
+            credentials: 'same-origin'
+        }, function (json) {
+            if (!json || !json.success || !json.data) {
+                throw new Error((json && json.message) ? json.message : 'Unexpected response');
+            }
+            var data = json.data;
+            if (previewTotalFound) {
+                previewTotalFound.textContent = String(data.total_found || 0);
+            }
+            previewProductsBody.innerHTML = '';
+            (data.items || []).forEach(function (row) {
+                var tr = document.createElement('tr');
+                tr.innerHTML = '' +
+                    '<td>' + (row.image ? '<img src="' + row.image + '" alt="" width="40" />' : '-') + '</td>' +
+                    '<td>' + row.sku + '</td>' +
+                    '<td>' + row.name + '</td>' +
+                    '<td>' + Number(row.price).toFixed(2) + '</td>' +
+                    '<td>' + row.stock + '</td>' +
+                    '<td>' + row.category + '</td>' +
+                    '<td>' + row.position + '</td>';
+                previewProductsBody.appendChild(tr);
+            });
+            setText(previewStatus, 'Preview loaded: ' + ((data.items || []).length) + ' rows.');
+        }, function (e) {
+            if (tryIndex + 1 < previewProductsUrls.length) {
+                loadPreviewProducts(tryIndex + 1);
+                return;
+            }
+            if (previewProductsBody) {
+                previewProductsBody.innerHTML = '';
+            }
+            setText(previewStatus, 'Preview failed: ' + (e && e.message ? e.message : 'Request error'));
+        });
+    }
+
+    function getField(name) {
+        return form.querySelector('[name="' + name + '"]');
+    }
+
+    function getCsvCount(value) {
+        if (!value) { return 0; }
+        return value.split(',').map(function (v) { return v.trim(); }).filter(function (v) { return v !== ''; }).length;
+    }
+
+    function getSelectText(el) {
+        if (!el || !el.options || el.selectedIndex < 0) {
+            return '-';
+        }
+        return (el.options[el.selectedIndex].text || '-').trim();
+    }
+
+    function updatePreview() {
+        var source = sourceType ? sourceType.value : '';
+        var sourceLabel = getSelectText(sourceType);
+        var sortingLabel = getSelectText(sortingType);
+        var displayLabel = getSelectText(displayType);
+        var autoplayValue = autoplay ? autoplay.value : '0';
+        var productLimitField = getField('slider[product_limit]');
+        var productLimit = productLimitField ? (productLimitField.value || '0') : '0';
+
+        var configuredCount = 0;
+        if (source === 'products') {
+            var sourceProducts = getField('slider[source_product_ids]');
+            configuredCount = getCsvCount(sourceProducts ? sourceProducts.value : '');
+        } else if (source === 'category') {
+            var categoryIds = getField('slider[category_ids]');
+            configuredCount = getCsvCount(categoryIds ? categoryIds.value : '');
+        } else if (source === 'mixed') {
+            var mixedCategories = getField('slider[mixed_category_ids]');
+            var mixedProducts = getField('slider[mixed_product_ids]');
+            configuredCount = getCsvCount(mixedCategories ? mixedCategories.value : '') + getCsvCount(mixedProducts ? mixedProducts.value : '');
+        }
+
+        if (previewSourceType) { previewSourceType.textContent = sourceLabel; }
+        if (previewProductLimit) { previewProductLimit.textContent = productLimit; }
+        if (previewSorting) { previewSorting.textContent = sortingLabel; }
+        if (previewDisplayType) { previewDisplayType.textContent = displayLabel; }
+        if (previewAutoplay) {
+            if (autoplayValue === '1') {
+                var delayField = getField('slider[autoplay_delay]');
+                var speedField = getField('slider[autoplay_speed]');
+                var delay = delayField ? delayField.value : '3000';
+                var speed = speedField ? speedField.value : '300';
+                previewAutoplay.textContent = 'On (Delay: ' + delay + 'ms, Speed: ' + speed + 'ms)';
+            } else {
+                previewAutoplay.textContent = 'Off';
+            }
+        }
+        if (previewSourceCount) {
+            previewSourceCount.textContent = configuredCount > 0 ? String(configuredCount) : '-';
+        }
+        if (previewHint) {
+            if (configuredCount > 0) {
+                previewHint.textContent = 'Preview estimate: up to ' + Math.min(configuredCount, parseInt(productLimit, 10) || 0) + ' products can be shown after filters and sorting.';
+            } else {
+                previewHint.textContent = 'Add source IDs to see a better preview estimate.';
+            }
+        }
+
+        loadPreviewProducts();
+    }
+
+    function toggle(selector, show) {
+        form.querySelectorAll(selector).forEach(function (el) {
+            el.style.display = show ? '' : 'none';
+            el.querySelectorAll('input, select, textarea').forEach(function (field) {
+                if (field.id === 'button_link_manual' || field.id === 'button_link_category') {
+                    return;
+                }
+                field.disabled = !show;
+            });
+        });
+    }
+
+    function syncButtonLinkValue() {
+        if (!hiddenButtonLink) { return; }
+        if (buttonLinkType && buttonLinkType.value === 'category') {
+            hiddenButtonLink.value = buttonCategory ? buttonCategory.value : '';
+        } else {
+            hiddenButtonLink.value = buttonManual ? buttonManual.value : '';
+        }
+    }
+
+    function refresh() {
+        var source = sourceType ? sourceType.value : '';
+        toggle('[data-dep="source-category"]', source === 'category');
+        toggle('[data-dep="source-products"]', source === 'products' || source === 'mixed');
+        toggle('[data-dep="source-mixed"]', source === 'mixed');
+
+        var display = displayType ? displayType.value : '';
+        toggle('[data-dep="display-slider"]', display === 'slider');
+        toggle('[data-dep="display-grid"]', display === 'grid');
+
+        var sorting = sortingType ? sortingType.value : '';
+        toggle('[data-dep="sorting-manual"]', sorting === 'manual');
+        toggle('[data-dep="sorting-custom"]', sorting === 'custom_attribute');
+
+        var ap = autoplay ? autoplay.value : '0';
+        toggle('[data-dep="autoplay-on"]', ap === '1');
+
+        var linkType = buttonLinkType ? buttonLinkType.value : 'manual';
+        toggle('[data-dep="button-link-manual"]', linkType === 'manual');
+        toggle('[data-dep="button-link-category"]', linkType === 'category');
+
+        var customEnabled = false;
+        if (cardComponents) {
+            Array.from(cardComponents.options).forEach(function (opt) {
+                if (opt.selected && opt.value === 'custom_attributes') {
+                    customEnabled = true;
+                }
+            });
+        }
+        toggle('[data-dep="card-custom-attributes"]', customEnabled);
+
+        syncButtonLinkValue();
+        updatePreview();
+    }
+
+    [sourceType, displayType, sortingType, autoplay, buttonLinkType, cardComponents, buttonManual, buttonCategory].forEach(function (el) {
+        if (!el) { return; }
+        el.addEventListener('change', refresh);
+        el.addEventListener('input', refresh);
+    });
+
+    if (sourceType) {
+        sourceType.addEventListener('change', function () {
+            hydrateSelectedFromActiveField();
+            renderSelectedOrderList();
+            loadPickerProducts();
+            updatePreview();
+        });
+    }
+
+    if (pickerSearch) {
+        pickerSearch.addEventListener('click', loadPickerProducts);
+    }
+    if (pickerQuery) {
+        pickerQuery.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                loadPickerProducts();
+            }
+        });
+    }
+
+    if (sourceProductIdsField) {
+        sourceProductIdsField.addEventListener('change', function () {
+            if (sourceType && sourceType.value !== 'products') {
+                return;
+            }
+            selectedSourceIds = parseCsv(sourceProductIdsField.value);
+            syncIdsToFields();
+            renderSelectedOrderList();
+            loadPickerProducts();
+        });
+        sourceProductIdsField.addEventListener('input', function () {
+            if (sourceType && sourceType.value !== 'products') {
+                return;
+            }
+            selectedSourceIds = parseCsv(sourceProductIdsField.value);
+            syncIdsToFields();
+            renderSelectedOrderList();
+        });
+    }
+
+    if (mixedProductIdsField) {
+        mixedProductIdsField.addEventListener('change', function () {
+            if (sourceType && sourceType.value !== 'mixed') {
+                return;
+            }
+            selectedSourceIds = parseCsv(mixedProductIdsField.value);
+            syncIdsToFields();
+            renderSelectedOrderList();
+            loadPickerProducts();
+        });
+        mixedProductIdsField.addEventListener('input', function () {
+            if (sourceType && sourceType.value !== 'mixed') {
+                return;
+            }
+            selectedSourceIds = parseCsv(mixedProductIdsField.value);
+            syncIdsToFields();
+            renderSelectedOrderList();
+        });
+    }
+
+    form.querySelectorAll('input, select, textarea').forEach(function (el) {
+        el.addEventListener('change', updatePreview);
+        el.addEventListener('input', updatePreview);
+    });
+
+    form.addEventListener('submit', syncButtonLinkValue);
+    syncIdsToFields();
+    renderSelectedOrderList();
+    renderCardComponentList();
+    loadPickerProducts();
+    refresh();
+})();
+</script>

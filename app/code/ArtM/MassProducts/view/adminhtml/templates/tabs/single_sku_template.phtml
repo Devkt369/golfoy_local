@@ -1,0 +1,390 @@
+<?php
+/** @var \Magento\Backend\Block\Template $block */
+$setsUrl         = $block->getUrl('massproducts/attributesassignment/sets');
+$groupsUrl       = $block->getUrl('massproducts/singleskulayout/groups');
+$groupsSaveUrl   = $block->getUrl('massproducts/singleskulayout/groupsave');
+$templateLoadUrl = $block->getUrl('massproducts/singleskulayout/templateload');
+$templateSaveUrl = $block->getUrl('massproducts/singleskulayout/templatesave');
+?>
+
+<!-- Attribute popup modal -->
+<div id="artm-sst-attr-modal" style="display:none;">
+    <div class="artm-sst-modal-overlay" data-role="sst-modal-close-overlay"></div>
+    <div class="artm-sst-modal-box">
+        <div class="artm-sst-modal-head">
+            <strong data-role="sst-modal-title"></strong>
+            <button type="button" class="artm-sst-modal-close" data-role="sst-modal-close-btn" title="Close">&#x2715;</button>
+        </div>
+        <div class="artm-sst-modal-embed" data-role="sst-modal-embed"></div>
+        <ul class="artm-sst-modal-list" data-role="sst-modal-attr-list"></ul>
+    </div>
+</div>
+
+<div id="artm-single-sku-template" class="artm-single-sku-template"
+    data-sets-url="<?= $block->escapeUrl($setsUrl) ?>"
+    data-groups-url="<?= $block->escapeUrl($groupsUrl) ?>"
+    data-groups-save-url="<?= $block->escapeUrl($groupsSaveUrl) ?>"
+    data-template-load-url="<?= $block->escapeUrl($templateLoadUrl) ?>"
+    data-template-save-url="<?= $block->escapeUrl($templateSaveUrl) ?>">
+
+    <style>
+        /* layout */
+        #artm-single-sku-template { margin-top: 12px; color: #1f2937; }
+        #artm-single-sku-template .artm-sst-layout { display: block; }
+        #artm-single-sku-template .artm-sst-panel { border: 1px solid #d8e2ec; border-radius: 8px; background: #fff; overflow: hidden; }
+        #artm-single-sku-template .artm-sst-panel.artm-sst-left-only { width: 50%; min-width: 420px; max-width: 100%; }
+        #artm-single-sku-template .artm-sst-head { padding: 12px; border-bottom: 1px solid #e7edf4; background: linear-gradient(180deg,#fff 0%,#f8fbff 100%); }
+        #artm-single-sku-template .artm-sst-title { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+        #artm-single-sku-template .artm-sst-subtitle { font-size: 12px; color: #6b7280; }
+        #artm-single-sku-template .artm-sst-body { padding: 12px; }
+        #artm-single-sku-template .artm-sst-msg { margin-bottom: 8px; color: #6b7280; font-size: 12px; min-height: 16px; }
+        /* left toolbar */
+        #artm-single-sku-template .artm-sst-top-row { display: grid; grid-template-columns: 1fr; gap: 6px; margin-bottom: 8px; }
+        #artm-single-sku-template .artm-sst-add-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 6px; }
+        #artm-single-sku-template .artm-sst-search { width: 100%; box-sizing: border-box; }
+        /* group list */
+        #artm-single-sku-template .artm-sst-groups { max-height: 66vh; overflow-y: auto; border: 1px solid #e3eaf2; border-radius: 6px; padding: 6px; }
+        /* group card */
+        #artm-single-sku-template .artm-sst-group { position: relative; border: 1px solid #e7edf4; border-radius: 6px; background: #fbfdff; margin-bottom: 6px; }
+        #artm-single-sku-template .artm-sst-group:last-child { margin-bottom: 0; }
+        #artm-single-sku-template .artm-sst-card-view { padding: 9px 10px 9px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        #artm-single-sku-template .artm-sst-card-name-text { font-size: 13px; font-weight: 600; color: #1f2937; word-break: break-word; flex: 1 1 0; min-width: 0; }
+        /* hover action icons */
+        #artm-single-sku-template .artm-sst-card-actions {
+            display: flex; align-items: center; gap: 2px; flex-shrink: 0;
+            opacity: 0; pointer-events: none; transition: opacity .15s;
+        }
+        #artm-single-sku-template .artm-sst-card-meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-right: 6px;
+            flex-shrink: 0;
+        }
+        #artm-single-sku-template .artm-sst-card-meta-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            line-height: 1;
+            border: 1px solid #d3dee9;
+            border-radius: 999px;
+            background: #f8fbff;
+            color: #334155;
+            padding: 4px 8px;
+            white-space: nowrap;
+        }
+        #artm-single-sku-template .artm-sst-group:hover .artm-sst-card-actions { opacity: 1; pointer-events: auto; }
+        #artm-single-sku-template .artm-sst-act-btn {
+            background: none; border: none; cursor: pointer;
+            padding: 3px 6px; border-radius: 4px; font-size: 13px; line-height: 1;
+            color: #374151; transition: background .12s, color .12s;
+        }
+        #artm-single-sku-template .artm-sst-act-btn:hover { background: #e9f0fa; color: #1d4f7d; }
+        #artm-single-sku-template .artm-sst-act-btn.is-del:hover { background: #fde8e8; color: #b91c1c; }
+        #artm-single-sku-template .artm-sst-act-btn.is-ok  { color: #15803d; }
+        #artm-single-sku-template .artm-sst-act-btn.is-ok:hover { background: #dcfce7; }
+        /* inline edit panel */
+        #artm-single-sku-template .artm-sst-card-edit { display: none; padding: 6px 8px 8px; border-top: 1px dashed #d7e3f0; background: #fff; }
+        #artm-single-sku-template .artm-sst-card-edit.is-open { display: block; }
+        #artm-single-sku-template .artm-sst-card-edit input[type="text"] { width: 100%; box-sizing: border-box; font-size: 12px; }
+        /* hidden payload inputs */
+        #artm-single-sku-template .artm-sst-payload { display: none; }
+        #artm-single-sku-template .artm-sst-edit-grid { display: grid; grid-template-columns: minmax(0,1fr) 130px 130px; gap: 8px; margin-top: 8px; }
+        #artm-single-sku-template .artm-sst-edit-label { display: block; font-size: 11px; color: #6b7280; margin-bottom: 4px; }
+        /* modal */
+        #artm-sst-attr-modal { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        #artm-sst-attr-modal .artm-sst-modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.45); }
+        #artm-sst-attr-modal .artm-sst-modal-box { position: relative; background: #fff; border-radius: 8px; width: 400px; max-width: 92vw; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 8px 32px rgba(0,0,0,.18); }
+        #artm-sst-attr-modal .artm-sst-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid #e7edf4; flex-shrink: 0; }
+        #artm-sst-attr-modal .artm-sst-modal-head strong { font-size: 14px; }
+        #artm-sst-attr-modal .artm-sst-modal-close { background: none; border: none; font-size: 16px; cursor: pointer; color: #6b7280; padding: 2px 6px; border-radius: 4px; }
+        #artm-sst-attr-modal .artm-sst-modal-close:hover { background: #f3f4f6; color: #111; }
+        #artm-sst-attr-modal .artm-sst-modal-embed { font-size: 11px; color: #1d4f7d; background: #eef6ff; border-bottom: 1px solid #c9ddf2; padding: 7px 14px; flex-shrink: 0; font-family: monospace; }
+        #artm-sst-attr-modal .artm-sst-modal-list { margin: 0; padding: 10px 14px 10px 28px; overflow-y: auto; flex: 1; }
+        #artm-sst-attr-modal .artm-sst-modal-list li { margin-bottom: 5px; font-size: 13px; }
+        #artm-sst-attr-modal .artm-sst-modal-list li span { color: #6b7280; font-size: 11px; }
+        #artm-sst-attr-modal .artm-sst-empty { padding: 16px; color: #6b7280; font-size: 12px; }
+        @media (max-width: 1100px) {
+            #artm-single-sku-template .artm-sst-panel.artm-sst-left-only { width: 100%; min-width: 0; }
+            #artm-single-sku-template .artm-sst-edit-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+
+    <div class="artm-sst-layout">
+
+        <!-- LEFT: Groups -->
+        <section class="artm-sst-panel artm-sst-left-only">
+            <div class="artm-sst-head">
+                <div class="artm-sst-title">Groups</div>
+                <div class="artm-sst-subtitle">Hover a card for edit, attributes, copy token, or delete.</div>
+            </div>
+            <div class="artm-sst-body">
+                <div class="artm-sst-top-row">
+                    <input type="text" class="admin__control-text artm-sst-search" data-role="sst-group-search" placeholder="Search groups&hellip;" />
+                    <div class="artm-sst-add-row">
+                        <input type="text" class="admin__control-text" data-role="sst-new-group-name" placeholder="New group name" />
+                        <button type="button" class="action-secondary" data-role="sst-add-group-btn"><span>+ Add</span></button>
+                    </div>
+                </div>
+                <div class="artm-sst-msg" data-role="sst-msg">Select attribute set to load groups.</div>
+                <div class="artm-sst-groups" data-role="sst-groups-list"></div>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<script>
+require(['jquery'], function ($) {
+    'use strict';
+
+    var $root  = $('#artm-single-sku-template');
+    var $modal = $('#artm-sst-attr-modal');
+    if (!$root.length || $root.data('sstInit')) { return; }
+    $root.data('sstInit', true);
+
+    var setsUrl         = String($root.data('sets-url') || '');
+    var groupsUrl       = String($root.data('groups-url') || '');
+    var groupsSaveUrl   = String($root.data('groups-save-url') || '');
+    var $msg          = $root.find('[data-role="sst-msg"]');
+    var $groupsList   = $root.find('[data-role="sst-groups-list"]');
+    var $newGroupName = $root.find('[data-role="sst-new-group-name"]');
+    var $groupSearch  = $root.find('[data-role="sst-group-search"]');
+
+    var currentSetId     = 0;
+    var groupsData       = [];
+
+    function esc(v) { return $('<div/>').text(String(v || '')).html(); }
+    function getFormKey() {
+        var k = $('meta[name="form-key"]').attr('content');
+        return k ? String(k) : String(window.FORM_KEY || '');
+    }
+    function setMessage(text, isError) {
+        $msg.text(String(text || '')).css('color', isError ? '#b91c1c' : '#6b7280');
+    }
+
+    /* build one card */
+    function buildCard(name, col, sort, enabled, attrCount, embed) {
+        var chk     = enabled ? ' checked="checked"' : '';
+        return '<div class="artm-sst-group" data-role="sst-group" data-original-name="' + esc(name) + '">'
+            + '<div class="artm-sst-payload">'
+            +   '<input type="text"     data-role="sst-group-name" value="' + esc(name) + '" />'
+            +   '<input type="checkbox" data-role="sst-enabled"' + chk + ' />'
+            + '</div>'
+            + '<div class="artm-sst-card-view">'
+            +   '<div class="artm-sst-card-name-text" data-role="sst-card-name-text">' + esc(name) + '</div>'
+            +   '<div class="artm-sst-card-meta">'
+            +     '<span class="artm-sst-card-meta-pill" data-role="sst-card-sort-pill">Sort: <strong>' + esc(sort) + '</strong></span>'
+            +     '<span class="artm-sst-card-meta-pill" data-role="sst-card-col-pill">Width: <strong>' + esc(col) + '</strong></span>'
+            +   '</div>'
+            +   '<div class="artm-sst-card-actions">'
+            +     '<button type="button" class="artm-sst-act-btn" data-role="sst-edit-group"  title="Edit">&#x270E;</button>'
+            +     '<button type="button" class="artm-sst-act-btn" data-role="sst-view-attrs"  title="Attributes">&#x1F441;</button>'
+            +     '<button type="button" class="artm-sst-act-btn" data-role="sst-copy-embed"  title="Copy token" data-embed="' + esc(embed) + '">&#x1F4CB;</button>'
+            +     '<button type="button" class="artm-sst-act-btn is-del" data-role="sst-delete-group" title="Delete">&#x1F5D1;</button>'
+            +   '</div>'
+            + '</div>'
+            + '<div class="artm-sst-card-edit" data-role="sst-edit-panel">'
+                +   '<div class="artm-sst-edit-grid">'
+                +     '<div>'
+                +       '<label class="artm-sst-edit-label">Group Name</label>'
+                +       '<input type="text" class="admin__control-text" data-role="sst-edit-name" value="' + esc(name) + '" placeholder="Group name" />'
+                +     '</div>'
+                +     '<div>'
+                +       '<label class="artm-sst-edit-label">Sort Order</label>'
+                +       '<input type="number" class="admin__control-text" data-role="sst-sort" value="' + esc(sort) + '" min="0" />'
+                +     '</div>'
+                +     '<div>'
+                +       '<label class="artm-sst-edit-label">Column Width</label>'
+                +       '<select class="admin__control-select" data-role="sst-column">'
+                +         '<option value="1"' + (parseInt(col, 10) === 1 ? ' selected="selected"' : '') + '>1</option>'
+                +         '<option value="2"' + (parseInt(col, 10) === 2 ? ' selected="selected"' : '') + '>2</option>'
+                +         '<option value="3"' + (parseInt(col, 10) === 3 ? ' selected="selected"' : '') + '>3</option>'
+                +       '</select>'
+                +     '</div>'
+                +   '</div>'
+            + '</div>'
+            + '</div>';
+    }
+
+    function renderGroups(term) {
+        term = String(term !== undefined ? term : ($groupSearch.val() || '')).trim().toLowerCase();
+        var html = [], cnt = 0;
+        $.each(groupsData, function (_, g) {
+            if (term && String(g.name || '').toLowerCase().indexOf(term) === -1) { return; }
+            var attrs = Array.isArray(g.attributes) ? g.attributes : [];
+            var embed = String(g.embed_code || ('{{group:' + g.name + '}}'));
+            html.push(buildCard(g.name, g.column_index || 1, g.sort_order || 0, !!g.is_enabled, attrs.length, embed));
+            cnt++;
+        });
+        $groupsList.html(cnt ? html.join('') : '<div class="artm-sst-empty">'
+            + (term ? 'No groups match &ldquo;' + esc(term) + '&rdquo;.' : 'No groups found.') + '</div>');
+    }
+
+    function collectGroupsPayload() {
+        var rows = [];
+        $groupsList.find('[data-role="sst-group"]').each(function () {
+            var $g = $(this);
+            rows.push({
+                original_name: String($g.attr('data-original-name') || ''),
+                group_name:    String($g.find('[data-role="sst-group-name"]').val() || $g.attr('data-original-name') || '').trim(),
+                is_enabled:    $g.find('[data-role="sst-enabled"]').is(':checked') ? 1 : 0,
+                column_index:  parseInt($g.find('[data-role="sst-column"]').val(), 10) || 1,
+                sort_order:    parseInt($g.find('[data-role="sst-sort"]').val(), 10) || 0,
+                is_deleted:    $g.attr('data-deleted') === '1' ? 1 : 0
+            });
+        });
+        return rows;
+    }
+
+    function loadSets() {
+        var stored = parseInt(localStorage.getItem('artm_selected_set_id'), 10) || 0;
+        if (stored) {
+            currentSetId = stored;
+            loadGroups();
+            return;
+        }
+        /* fallback: fetch sets silently and take the first one */
+        $.ajax({ url: setsUrl, type: 'GET', dataType: 'json' })
+            .done(function (r) {
+                if (!r || !r.success || !Array.isArray(r.items) || !r.items.length) { setMessage('Cannot load attribute sets.', true); return; }
+                currentSetId = parseInt(r.items[0].attribute_set_id, 10) || 0;
+                localStorage.setItem('artm_selected_set_id', currentSetId);
+                loadGroups();
+            })
+            .fail(function () { setMessage('Cannot load attribute sets.', true); });
+    }
+
+    function loadGroups() {
+        setMessage('Loading\u2026', false);
+        $.ajax({ url: groupsUrl, type: 'GET', dataType: 'json', data: { attribute_set_id: currentSetId, form_key: getFormKey() } })
+            .done(function (g) {
+                groupsData = (g && g.success && Array.isArray(g.groups)) ? g.groups : [];
+                if (!g || !g.success) {
+                    setMessage((g && g.message) || 'Cannot load groups.', true);
+                    return;
+                }
+                renderGroups();
+                setMessage('Loaded.', false);
+            })
+            .fail(function () { setMessage('Cannot load groups.', true); });
+    }
+
+    function saveGroups() {
+        setMessage('Saving groups\u2026', false);
+        $.ajax({ url: groupsSaveUrl, type: 'POST', dataType: 'json',
+            data: { form_key: getFormKey(), attribute_set_id: currentSetId, groups: JSON.stringify(collectGroupsPayload()) }
+        }).done(function (r) {
+            if (r && r.success) { setMessage(r.message || 'Groups saved.', false); loadGroups(); return; }
+            setMessage((r && r.message) || 'Cannot save groups.', true);
+        }).fail(function () { setMessage('Cannot save groups.', true); });
+    }
+
+    function openAttrModal($card) {
+        var name  = String($card.find('[data-role="sst-group-name"]').val() || $card.attr('data-original-name') || '');
+        var embed = String($card.find('[data-role="sst-copy-embed"]').attr('data-embed') || ('{{group:' + name + '}}'));
+        var attrs = [];
+        $.each(groupsData, function (_, g) { if (String(g.name || '') === name) { attrs = Array.isArray(g.attributes) ? g.attributes : []; return false; } });
+        $modal.find('[data-role="sst-modal-title"]').text(name);
+        $modal.find('[data-role="sst-modal-embed"]').text(embed);
+        var li = '';
+        if (attrs.length) {
+            $.each(attrs, function (_, a) {
+                var code  = typeof a === 'object' ? String(a.attribute_code || '') : String(a || '');
+                var label = typeof a === 'object' ? String(a.label || code) : code;
+                li += '<li>' + esc(label) + (code ? ' <span>(' + esc(code) + ')</span>' : '') + '</li>';
+            });
+        } else { li = '<li style="color:#6b7280;">No attributes in this group.</li>'; }
+        $modal.find('[data-role="sst-modal-attr-list"]').html(li);
+        $modal.show();
+    }
+    function closeModal() { $modal.hide(); }
+
+    /* ── events ── */
+    $groupSearch.on('input', function () { renderGroups($(this).val()); });
+
+    $root.on('click', '[data-role="sst-add-group-btn"]', function () {
+        var name = String($newGroupName.val() || '').trim();
+        if (!name) { return; }
+        $groupsList.prepend(buildCard(name, 1, 0, true, 0, '{{group:' + name + '}}'));
+        $newGroupName.val('');
+        saveGroups();
+    });
+    $newGroupName.on('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); $root.find('[data-role="sst-add-group-btn"]').trigger('click'); }
+    });
+
+    $root.on('click', '[data-role="sst-edit-group"]', function () {
+        var $card  = $(this).closest('[data-role="sst-group"]');
+        var $panel = $card.find('[data-role="sst-edit-panel"]');
+        if ($panel.hasClass('is-open')) {
+            $panel.find('[data-role="sst-edit-name"]').blur();
+        } else {
+            $panel.addClass('is-open').find('[data-role="sst-edit-name"]').focus().select();
+        }
+    });
+    $root.on('focusout', '[data-role="sst-edit-name"]', function () {
+        var $input  = $(this);
+        var $card   = $input.closest('[data-role="sst-group"]');
+        var newName = $input.val().trim();
+        var oldName = String($card.find('[data-role="sst-group-name"]').val() || $card.attr('data-original-name') || '');
+        if (!newName) { $input.val(oldName); return; }
+        $card.find('[data-role="sst-group-name"]').val(newName);
+        $card.find('[data-role="sst-card-name-text"]').text(newName);
+        $card.find('[data-role="sst-copy-embed"]').attr('data-embed', '{{group:' + newName + '}}');
+        if (newName !== oldName) { saveGroups(); }
+    });
+
+    $root.on('change', '[data-role="sst-sort"]', function () {
+        var $card = $(this).closest('[data-role="sst-group"]');
+        var nextSort = parseInt($(this).val(), 10);
+        if (isNaN(nextSort) || nextSort < 0) {
+            nextSort = 0;
+            $(this).val(nextSort);
+        }
+        $card.find('[data-role="sst-card-sort-pill"] strong').text(String(nextSort));
+        saveGroups();
+    });
+
+    $root.on('change', '[data-role="sst-column"]', function () {
+        var $card = $(this).closest('[data-role="sst-group"]');
+        var nextCol = parseInt($(this).val(), 10);
+        if (isNaN(nextCol) || nextCol < 1 || nextCol > 3) {
+            nextCol = 1;
+            $(this).val(nextCol);
+        }
+        $card.find('[data-role="sst-card-col-pill"] strong').text(String(nextCol));
+        saveGroups();
+    });
+
+    $root.on('keydown', '[data-role="sst-edit-name"]', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            $(this).trigger('focusout');
+        }
+    });
+
+    $root.on('click', '[data-role="sst-view-attrs"]', function () {
+        openAttrModal($(this).closest('[data-role="sst-group"]'));
+    });
+    $root.on('click', '[data-role="sst-copy-embed"]', function () {
+        var code = String($(this).attr('data-embed') || '');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(code)
+                .then(function () { setMessage('Copied: ' + code, false); })
+                .catch(function () { setMessage('Copy failed.', true); });
+        } else { setMessage('Clipboard API unavailable.', true); }
+    });
+    $root.on('click', '[data-role="sst-delete-group"]', function () {
+        $(this).closest('[data-role="sst-group"]').attr('data-deleted', '1').fadeOut(180, function () {
+            saveGroups();
+        });
+    });
+
+    $modal.on('click', '[data-role="sst-modal-close-btn"], [data-role="sst-modal-close-overlay"]', closeModal);
+    $(document).on('keydown.sstModal', function (e) { if (e.key === 'Escape') { closeModal(); } });
+
+    loadSets();
+});
+</script>

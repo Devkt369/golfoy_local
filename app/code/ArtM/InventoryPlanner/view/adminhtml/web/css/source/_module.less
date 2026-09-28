@@ -1,0 +1,841 @@
+//
+//  Inventory Planner - dashboard styling
+//  _____________________________________________
+
+@artm-color-bg-dark: #202020;
+@artm-color-bg-dark-alt: #262626;
+@artm-color-bg-dark-hover: #333333;
+@artm-color-header-dark: #3a3f47;
+@artm-color-border-dark: #444444;
+@artm-color-text-light: #f1f1f1;
+@artm-color-text-muted: #999999;
+
+@artm-color-primary: #1979c3;
+@artm-color-primary-dark: #145d94;
+@artm-color-border: #d6d9dc;
+@artm-color-card-bg: #ffffff;
+@artm-color-label: #41362f;
+
+@artm-color-green: #2fad4e;
+@artm-color-green-bg: rgba(47, 173, 78, 0.14);
+@artm-color-red: #e22626;
+@artm-color-red-bg: rgba(226, 38, 38, 0.14);
+@artm-color-grey-bg: rgba(153, 153, 153, 0.16);
+
+@artm-radius: 6px;
+
+.artm-inventory-planner {
+    font-size: 13px;
+
+    // ---------------------------------------------------------------------
+    // Toolbar (weeks/page-size form + Filters button)
+    // ---------------------------------------------------------------------
+    .artm-toolbar {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 18px;
+        padding: 16px 20px;
+        background: @artm-color-card-bg;
+        border: 1px solid @artm-color-border;
+        border-radius: @artm-radius;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    // The weeks/page-size/filters GET form has to be a sibling of the Columns POST
+    // form (can't nest a <form> inside another <form>), but still needs its own
+    // children (.artm-filter-form, the Filters <details>) to lay out as if they were
+    // direct children of .artm-toolbar - display:contents removes the <form> itself
+    // from the box tree while keeping its children in the flex flow.
+    .artm-toolbar-get-form {
+        display: contents;
+    }
+
+    .artm-filter-form {
+        display: flex;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 18px;
+    }
+
+    .artm-filter-field {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+
+        label {
+            font-weight: 600;
+            font-size: 12px;
+            color: @artm-color-label;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        select,
+        input[type="number"],
+        input[type="text"] {
+            border: 1px solid @artm-color-border;
+            border-radius: 4px;
+            padding: 7px 10px;
+            font-size: 13px;
+            background: #ffffff;
+            color: #303030;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+            &:focus {
+                outline: none;
+                border-color: @artm-color-primary;
+                box-shadow: 0 0 0 3px rgba(25, 121, 195, 0.15);
+            }
+        }
+
+        select[multiple] {
+            min-width: 220px;
+            padding: 4px;
+
+            option {
+                padding: 5px 8px;
+                border-radius: 3px;
+            }
+
+            option:checked {
+                background: @artm-color-primary;
+                color: #ffffff;
+            }
+        }
+    }
+
+    .artm-filter-checkbox {
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 0;
+            text-transform: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            width: auto;
+        }
+    }
+
+    .artm-multiselect-hint {
+        text-transform: none;
+        font-weight: 400;
+        letter-spacing: normal;
+        color: #8c8c8c;
+        font-size: 11px;
+    }
+
+    .artm-field-note {
+        font-size: 12px;
+        color: #6b6b6b;
+        max-width: 320px;
+    }
+
+    .artm-field-note-label {
+        font-weight: 600;
+        margin-right: 5px;
+    }
+
+    .artm-range-inputs {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        input {
+            width: 85px;
+        }
+    }
+
+    // ---------------------------------------------------------------------
+    // Buttons
+    // ---------------------------------------------------------------------
+    button[type="submit"] {
+        border: none;
+        border-radius: 4px;
+        padding: 8px 20px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s ease, transform 0.05s ease;
+
+        &:active {
+            transform: translateY(1px);
+        }
+    }
+
+    button.action-default {
+        background: #eef1f4;
+        color: #303030;
+
+        &:hover {
+            background: #e2e6ea;
+        }
+    }
+
+    button.action-primary {
+        background: @artm-color-primary;
+        color: #ffffff;
+
+        &:hover {
+            background: @artm-color-primary-dark;
+        }
+    }
+
+    // ---------------------------------------------------------------------
+    // Filters panel - native <details>/<summary>, zero JavaScript
+    // ---------------------------------------------------------------------
+    .artm-filters-panel {
+        position: relative;
+        flex-shrink: 0;
+
+        .artm-filters-button {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 22px;
+            border: 1px solid @artm-color-primary;
+            border-radius: 20px;
+            background: #ffffff;
+            color: @artm-color-primary;
+            font-weight: 600;
+            font-size: 13px;
+            list-style: none;
+            transition: background 0.15s ease, color 0.15s ease;
+
+            &::-webkit-details-marker {
+                display: none;
+            }
+
+            &:hover {
+                background: rgba(25, 121, 195, 0.08);
+            }
+
+            &::after {
+                content: '\25BE';
+                font-size: 11px;
+            }
+        }
+
+        &[open] .artm-filters-button {
+            background: @artm-color-primary;
+            color: #ffffff;
+        }
+
+        .artm-filters-panel-body {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            z-index: 100;
+            margin-top: 8px;
+            padding: 18px;
+            min-width: 380px;
+            background: @artm-color-bg-dark;
+            border: 1px solid @artm-color-border-dark;
+            border-radius: @artm-radius;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            animation: artm-fade-in 0.15s ease;
+
+            label {
+                color: @artm-color-text-light;
+            }
+
+            select,
+            input {
+                background: #2f2f2f;
+                border: 1px solid @artm-color-border-dark;
+                color: @artm-color-text-light;
+
+                &:focus {
+                    border-color: @artm-color-primary;
+                }
+            }
+        }
+
+        .artm-columns-panel-body {
+            max-height: 420px;
+            overflow-y: auto;
+            min-width: 280px;
+        }
+
+        .artm-column-checkbox-group {
+            padding-bottom: 10px;
+            border-bottom: 1px solid @artm-color-border-dark;
+
+            &:last-of-type {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+        }
+
+        .artm-column-group-master {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            cursor: pointer;
+        }
+
+        .artm-column-checkbox-children {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-left: 22px;
+        }
+
+        .artm-column-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 400;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .artm-filter-clear-one {
+            position: absolute;
+            top: 0;
+            right: 0;
+            color: #cccccc;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 15px;
+            line-height: 1;
+
+            &:hover {
+                color: #ffffff;
+            }
+        }
+    }
+
+    @keyframes artm-fade-in {
+        from {
+            opacity: 0;
+            transform: translateY(-4px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    // ---------------------------------------------------------------------
+    // Active filter chips
+    // ---------------------------------------------------------------------
+    .artm-filter-chips {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 18px;
+    }
+
+    .artm-filter-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 12px;
+        background: #eef4fa;
+        color: @artm-color-primary-dark;
+        border: 1px solid rgba(25, 121, 195, 0.25);
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+
+        a {
+            color: inherit;
+            opacity: 0.65;
+            text-decoration: none;
+            font-weight: 700;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------------
+    // Table
+    // ---------------------------------------------------------------------
+    .artm-table-card {
+        background: @artm-color-bg-dark;
+        border-radius: @artm-radius;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .artm-table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .artm-report-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: @artm-color-bg-dark;
+        color: @artm-color-text-light;
+
+        th,
+        td {
+            padding: 11px 14px;
+            border-bottom: 1px solid @artm-color-border-dark;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        th {
+            background: @artm-color-header-dark;
+            color: @artm-color-text-light;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            position: sticky;
+            top: 0;
+
+            a {
+                color: inherit;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+
+                &:hover {
+                    color: #ffffff;
+                    text-decoration: underline;
+                }
+            }
+        }
+
+        // Magento's core admin .data-grid styling (this table also carries that class
+        // for baseline grid look) fights our own td background/color here, so force it.
+        td {
+            color: #000000 !important;
+        }
+    }
+
+    // Belt and suspenders: target Magento's own .data-grid td selector directly too,
+    // scoped to this page only, in case core admin CSS loads after ours in the cascade.
+    .data-grid td {
+        color: #000000 !important;
+    }
+
+    .artm-report-table {
+        tbody tr {
+            transition: background 0.1s ease;
+        }
+
+        tbody tr:nth-child(even) {
+            background: @artm-color-bg-dark-alt;
+        }
+
+        tbody tr:hover {
+            background: @artm-color-bg-dark-hover;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+    }
+
+    // ---------------------------------------------------------------------
+    // Growth badge
+    // ---------------------------------------------------------------------
+    .artm-growth-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 12px;
+    }
+
+    .artm-growth-positive {
+        color: @artm-color-green;
+        background: @artm-color-green-bg;
+    }
+
+    .artm-growth-negative {
+        color: @artm-color-red;
+        background: @artm-color-red-bg;
+    }
+
+    .artm-growth-neutral {
+        color: @artm-color-text-muted;
+        background: @artm-color-grey-bg;
+    }
+
+    .artm-trend-icon {
+        font-size: 10px;
+        line-height: 1;
+    }
+
+    .artm-trend-up {
+        color: @artm-color-red;
+    }
+
+    .artm-trend-down {
+        color: @artm-color-green;
+    }
+
+    .artm-trend-flat {
+        color: @artm-color-text-muted;
+    }
+
+    // ---------------------------------------------------------------------
+    // Pagination
+    // ---------------------------------------------------------------------
+    .artm-pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 14px 2px;
+        font-size: 12px;
+        color: #555555;
+
+        .artm-pagination-summary {
+            font-weight: 500;
+        }
+
+        .artm-pagination-links {
+            display: flex;
+            gap: 8px;
+
+            a,
+            .artm-pagination-disabled {
+                padding: 5px 14px;
+                border-radius: 16px;
+                font-weight: 600;
+            }
+
+            a {
+                color: @artm-color-primary;
+                text-decoration: none;
+                border: 1px solid rgba(25, 121, 195, 0.3);
+                transition: background 0.15s ease;
+
+                &:hover {
+                    background: rgba(25, 121, 195, 0.08);
+                }
+            }
+
+            .artm-pagination-disabled {
+                color: @artm-color-text-muted;
+                border: 1px solid transparent;
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------------
+    // Empty state
+    // ---------------------------------------------------------------------
+    .message.message-notice {
+        border-radius: @artm-radius;
+    }
+
+    // ---------------------------------------------------------------------
+    // Page header (Settings / Sync Data)
+    // ---------------------------------------------------------------------
+    .artm-page-header {
+        margin-bottom: 20px;
+
+        h2 {
+            margin: 0 0 4px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #202020;
+        }
+
+        p {
+            margin: 0;
+            font-size: 13px;
+            color: #6b6b6b;
+        }
+    }
+
+    // ---------------------------------------------------------------------
+    // Cards (Settings page sections)
+    // ---------------------------------------------------------------------
+    .artm-card {
+        background: @artm-color-card-bg;
+        border: 1px solid @artm-color-border;
+        border-radius: @artm-radius;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        padding: 20px 24px;
+        margin-bottom: 20px;
+    }
+
+    .artm-card-title {
+        margin: 0 0 3px;
+        font-size: 15px;
+        font-weight: 700;
+        color: @artm-color-label;
+    }
+
+    .artm-card-subtitle {
+        margin: 0 0 16px;
+        font-size: 12px;
+        color: #8c8c8c;
+    }
+
+    .artm-card-footer {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid @artm-color-border;
+        font-size: 13px;
+        color: #444444;
+    }
+
+    // ---------------------------------------------------------------------
+    // Sync report - stat tiles shown after Sync Now / Calculate
+    // ---------------------------------------------------------------------
+    .artm-sync-report {
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid @artm-color-border;
+    }
+
+    .artm-sync-report-title {
+        margin: 0 0 12px;
+        font-size: 13px;
+        font-weight: 700;
+        color: @artm-color-label;
+    }
+
+    .artm-sync-report-range {
+        margin: 0 0 14px;
+        font-size: 13px;
+        color: #444444;
+
+        strong {
+            color: @artm-color-primary-dark;
+        }
+    }
+
+    .artm-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 12px;
+    }
+
+    .artm-stat-tile {
+        background: #f7f9fb;
+        border: 1px solid @artm-color-border;
+        border-radius: @artm-radius;
+        padding: 12px 14px;
+    }
+
+    .artm-stat-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: #8c8c8c;
+        margin-bottom: 4px;
+    }
+
+    .artm-stat-value {
+        font-size: 19px;
+        font-weight: 700;
+        color: @artm-color-primary-dark;
+    }
+
+    // ---------------------------------------------------------------------
+    // Dashboard table: Product Details / Inventory columns
+    // ---------------------------------------------------------------------
+    .artm-product-details {
+        white-space: normal;
+        min-width: 160px;
+    }
+
+    .artm-product-name {
+        font-weight: 600;
+        color: #202020;
+        margin-bottom: 2px;
+    }
+
+    .artm-product-sku {
+        font-size: 11px;
+        color: #6b6b6b;
+    }
+
+    .artm-inventory-empty {
+        color: #8c8c8c;
+    }
+
+    .artm-inventory-cell {
+        white-space: normal;
+        min-width: 200px;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .artm-inventory-line {
+        color: #202020;
+    }
+
+    .artm-inventory-label {
+        color: #6b6b6b;
+    }
+
+    .artm-inventory-dated {
+        font-size: 11px;
+        font-style: italic;
+        color: #8c8c8c;
+        margin: 2px 0 4px;
+    }
+
+    .artm-inventory-source-line {
+        color: #555555;
+        padding-left: 8px;
+    }
+
+    // ---------------------------------------------------------------------
+    // Column Grouping configurator (Settings page)
+    // ---------------------------------------------------------------------
+    .artm-column-grouping {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+    }
+
+    .artm-column-groups-panel,
+    .artm-column-available-panel {
+        flex: 1 1 300px;
+        min-width: 280px;
+        background: #f7f9fb;
+        border: 1px solid @artm-color-border;
+        border-radius: @artm-radius;
+        padding: 14px;
+
+        h4 {
+            margin: 0 0 10px;
+            font-size: 13px;
+            font-weight: 700;
+            color: @artm-color-label;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+    }
+
+    .artm-column-groups-header {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+
+        input {
+            flex: 1;
+        }
+    }
+
+    .artm-column-groups-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .artm-column-group {
+        background: #ffffff;
+        border: 1px solid @artm-color-border;
+        border-radius: 4px;
+        padding: 10px;
+    }
+
+    .artm-column-group-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+
+        .artm-column-group-name {
+            flex: 1;
+            border: 1px solid transparent;
+            background: transparent;
+            font-weight: 600;
+            font-size: 13px;
+            color: #202020;
+            padding: 4px 6px;
+            border-radius: 4px;
+
+            &:hover,
+            &:focus {
+                border-color: @artm-color-border;
+                background: #ffffff;
+                outline: none;
+            }
+        }
+
+        .artm-column-group-delete {
+            border: none;
+            background: transparent;
+            color: @artm-color-red;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            padding: 2px 6px;
+
+            &:hover {
+                opacity: 0.75;
+            }
+        }
+    }
+
+    .artm-column-list {
+        list-style: none;
+        margin: 0;
+        padding: 8px;
+        min-height: 36px;
+        display: flex;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        gap: 6px;
+        border: 1px dashed @artm-color-border;
+        border-radius: 4px;
+        background: #fafbfc;
+    }
+
+    .artm-column-item {
+        display: inline-block;
+        padding: 5px 10px;
+        background: #ffffff;
+        border: 1px solid @artm-color-border;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #202020;
+        cursor: move;
+        user-select: none;
+
+        &:hover {
+            border-color: @artm-color-primary;
+        }
+    }
+
+    .artm-column-item-placeholder {
+        display: inline-block;
+        width: 100px;
+        height: 26px;
+        background: rgba(25, 121, 195, 0.12);
+        border: 1px dashed @artm-color-primary;
+        border-radius: 4px;
+    }
+}

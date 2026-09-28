@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Meetanshi_Sms::smsgateway" title="SMSGateway" module="Meetanshi_Sms" sortOrder="500" resource="Meetanshi_Sms::data" parent="ArtM_BlogEsg::BlogEsgmenu"/>
+        <add id="Meetanshi_Sms::index" title="Configuration" module="Meetanshi_Sms" sortOrder="10" action="adminhtml/system_config/edit/section/sms" resource="Meetanshi_Sms::data" parent="Meetanshi_Sms::smsgateway"/>
+        <add id="Meetanshi_Sms::index/index" title="SMS History" module="Meetanshi_Sms" sortOrder="20" action="meetanshisms/index/index" resource="Meetanshi_Sms::data" parent="Meetanshi_Sms::smsgateway"/>
+    </menu>
+</config>

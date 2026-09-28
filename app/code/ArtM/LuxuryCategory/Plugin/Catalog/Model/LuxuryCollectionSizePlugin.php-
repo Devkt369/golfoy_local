@@ -1,0 +1,49 @@
+<?php
+declare(strict_types=1);
+
+namespace ArtM\LuxuryCategory\Plugin\Catalog\Model;
+
+use Magento\Catalog\Model\ResourceModel\Product\Collection;
+
+/**
+ * Corrects `getSize()` for collections that
+ * `LuxuryLayerProductCollectionPlugin` has filtered.
+ *
+ * On stores using Elasticsearch/OpenSearch for catalog listing, the
+ * category collection is `Magento\CatalogSearch\Model\ResourceModel\
+ * Fulltext\Collection`, whose `_renderFiltersBefore()` sets the pager
+ * total directly from the search engine's own result count — a value
+ * computed before our additional `luxury` id filter is applied, and never
+ * recalculated afterwards. Left alone, this means the toolbar/pager keep
+ * showing the pre-filter total even though the actual rows returned are
+ * correctly filtered.
+ *
+ * Only ever touches collections carrying
+ * `LuxuryLayerProductCollectionPlugin::APPLIED_FLAG` — i.e. only the
+ * exact collection instance that plugin filtered for a /luxe request — so
+ * every other product collection in the application (search results,
+ * related products, admin grids, etc.) is completely unaffected.
+ */
+class LuxuryCollectionSizePlugin
+{
+    /**
+     * @param Collection $subject
+     * @param int $result
+     * @return int
+     */
+    public function afterGetSize(Collection $subject, $result): int
+    {
+        if (!$subject->getFlag(LuxuryLayerProductCollectionPlugin::APPLIED_FLAG)) {
+            return $result;
+        }
+
+        // By the time this runs, the collection's filters (including our
+        // id filter, ANDed onto the same select the search engine's own
+        // matched-id filter uses) have already been rendered as part of
+        // the original getSize()/load() call, so this reuses that select
+        // rather than triggering a second search-engine query.
+        $countSelect = $subject->getSelectCountSql();
+
+        return (int)$subject->getConnection()->fetchOne($countSelect);
+    }
+}

@@ -1,0 +1,1572 @@
+<style>
+@media only screen and (max-width:768px) {
+    #golfoy_container {
+        width:100% !important;
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+    .two_coll{
+        padding-bottom:15px;
+    }
+    .three-coll{
+        padding-bottom:15px;
+    }
+}
+#golfoy_container {
+     max-width: 1440px;
+     width:100%;
+}
+ .head_golfoy > h1{
+    font-size: 25px;
+    font-family: 'headpro';
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: black;
+    text-transform: uppercase;
+  }
+.product_slider_container {
+    margin: 10px 0px 0px !important;
+}
+.row.block_landing_page{
+    padding:20px 0px;
+}
+.header_golfoy  h1{
+    margin-top:0px !important;
+    font-size: 25px;
+    font-family: 'headpro';
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: black;
+    text-transform: uppercase;
+}
+main#maincontent {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+}
+.feature_head h1{
+    margin-top:20px !important;
+}
+.columns .column.main {
+    padding-bottom: 0px !important;
+}
+.heading_golfoy  h1{
+    margin-top:30px;
+}
+.product-slider-first{
+    margin-bottom:30px;
+}
+    @media only screen and (min-width:1280px){
+        .visible_div_small > div {
+            min-height: 175px;
+        }
+        .visible_div_big > div {
+            min-height: 335px;
+        }
+    }
+    @media only screen and (min-width:1092px) and (max-width:1280px){
+        .visible_div_small > div {
+            min-height: 150px;
+        }
+        .visible_div_big > div {
+            min-height: 290px;
+        }
+    }
+    @media only screen and (min-width:768px) and (max-width:1092px){
+        .visible_div_small > div {
+            min-height: 115px;
+        }
+        .visible_div_big > div {
+            min-height: 205px;
+        }
+    }
+    @media only screen and (min-width:550px) and (max-width:768px){
+        .visible_div_small > div {
+            min-height: 120px;
+        }
+        .visible_div_big > div {
+            min-height: 250px;
+        }
+    }
+    @media only screen and (max-width:550px) {
+        .visible_div_small > div {
+            min-height: 90px;
+        }
+        .visible_div_big > div {
+            min-height: 200px;
+        }
+    }
+</style>
+
+<script type="text/javascript" defer>
+    require(['jquery', 'bootstrap'],function(jQuery){
+        jQuery(document).ready(function() {
+            
+            if ( jQuery(window).width() > 768 ){
+                //desktop slider
+                setTimeout(function(){
+                    jQuery('#golfoy_slider').find('img').each(function(){
+                        jQuery(this).attr('src' , jQuery(this).attr('data-src') );
+                    });
+                }, 2000)
+            }else{
+                //mobile slider
+                setTimeout(function(){
+                    jQuery('#golfoy-carousel-mobile').find('img').each(function(){
+                        jQuery(this).attr('src' , jQuery(this).attr('data-src') );
+                    });
+                }, 2000)
+            }
+            
+            jQuery('#golfoy_container').find('.animation_div').each(function(){
+                jQuery(this).find('img').attr('src' , jQuery(this).find('img').attr('data-src') );
+                jQuery(this).removeClass('animation_div');
+            });
+
+        });
+    });
+</script>
+
+<div class="row slider_landing_page desktop_slider hidden-xs">  
+    <div id="golfoy_slider" class="carousel slide" data-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-inner home_slider_pc">
+                <div class="item pc_banner_home active">
+                    <a title="Shop Now" href="https://golfoy.com/golf-apparels/apparel-category/golf-winter-wear.html">
+                        <img src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/winter_wear_slider.jpg" alt="winter-wear" />
+                    </a>
+                </div>
+                <div class="item pc_banner_home ">
+                    <a title="Shop Now" href="https://golfoy.com/shoes/waterproof-shoes.html">
+                        <img data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/shoes_slider_1.jpg" alt="shoes" />
+                    </a>
+                </div>
+                <div class="item pc_banner_home">
+                    <a title="Shop Now" href="https://golfoy.com/clubs/clubs/irons.html">
+                        <img data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/iron_set_slider.jpg" alt="irons" />
+                    </a>
+                </div>
+                <div class="item pc_banner_home">
+                    <a title="Shop Now" href="https://golfoy.com/offers-628/custom-printing-bag.html">
+                        <img data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/bags_slider_1.jpg" alt="bags" />
+                    </a>
+                </div>
+            </div>
+        </div>
+            <a class="left carousel-control" href="#golfoy_slider" data-slide="prev"> <span class="sr-only">Previous</span> </a> 
+            <a class="right carousel-control" href="#golfoy_slider" data-slide="next"> <span class="sr-only">Next</span> </a>
+    </div>
+</div>
+<!-- mobile slider -->
+<div class="row mobile_slider visible-xs">
+    <div id="golfoy-carousel-mobile" class="carousel slide lazy-load" data-ride="carousel">
+        <div class="carousel-inner home_slider_mobile">
+            <div class="item mobile_banner_home active">
+                <a title="Shop Now" href="https://golfoy.com/golf-apparels/apparel-category/golf-winter-wear.html">
+                    <img src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/winter_wear_mobslider.jpg" alt="winter-wear" />
+                </a>
+            </div>
+            <div class="item mobile_banner_home ">
+                <a title="Shop Now" href="https://golfoy.com/shoes/waterproof-shoes.html">
+                    <img data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/shoes_mobslider_1.jpg" alt="shoes" />
+                </a>
+            </div>
+            <div class="item mobile_banner_home">
+                <a title="Shop Now" href="https://golfoy.com/clubs/clubs/irons.html">
+                    <img data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/iron_mobslider.jpg" alt="irons" />
+                </a>
+            </div>
+            <div class="item mobile_banner_home">
+                <a title="Shop Now" href="https://golfoy.com/offers-628/custom-printing-bag.html">
+                    <img data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/bags_mobslider_1.jpg" alt="" />
+                </a>
+            </div>
+        </div>
+        <a id="mobgolfpre" class="left carousel-control" role="button" href="#golfoy-carousel-mobile" data-slide="prev"> <span class="sr-only">Previous</span> </a> 
+        <a id="mobgolfnxt" class="right carousel-control" role="button" href="#golfoy-carousel-mobile" data-slide="next"> <span class="sr-only">Next</span> </a>
+    </div>
+</div>
+
+
+<div id="golfoy_container" class="container">
+    <!-- 2-callout-row -->
+    <div class="row block_landing_page visible_div_small">
+        <div class="col-sm-6 col-xs-12 block_col two_coll animation_div">
+            <a href="https://golfoy.com/blog/shane-lowry-whats-in-the-bag/">
+                <img class="lazy_load" alt="whats-in-bag" data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/August1/1_1__1.jpeg" />
+            </a>
+        </div>
+        <div class="col-sm-6 col-xs-12 block_col  animation_div">
+            <a href="https://golfoy.com/golfoy-premieres">
+                <img class="lazy_load" alt="golfoy-premiers" data-src="https://cdn.golfoy.com/media/wysiwyg/callout1/junc2/new-launches.jpg" />
+            </a>
+        </div>
+    </div>
+    <!-- 2-width -->
+    <div class="row block_landing_page two_collumn visible_div_big">
+        <div class="col-sm-6 col-xs-12 block_col  two_coll animation_div">
+            <a href="https://golfoy.com/clubs/clubs/putters/putters-by-type/blade-putter.html">
+                <img class="lazy_load" alt="odyseey_putter" data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/odyssey_chicago_putter.jpg" />
+            </a>
+        </div>
+        <div class="col-sm-6 col-xs-12 block_col animation_div">
+            <a href="https://golfoy.com/clubs/clubs/putters/putters-by-type/mallet-putter.html">
+                <img class="lazy_load" alt="pxg_putter" data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/pxg_bat_attack_putter.jpg" />
+            </a>
+        </div>
+    </div>
+    <!-- end- -->
+    <!-- full-width -->
+    <div class="row block_landing_page full_collumn">
+        <div class="col-xs-12 block_col  ">
+            <a href="https://golfoy.com/golf-apparels/apparel-category/trousers.html">
+                <img class="web hidden-xs lazy_load" alt="trousers" data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/trouser_off_3.jpg" />
+                <img class="mobile visible-xs lazy_load" data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/trouser_mob_2.jpg" />
+            </a>
+        </div>
+    </div>
+    <!-- end -->
+    <!-- p-slider -->
+    <!-- end -->
+    <!-- first-3-coll -->
+    <div class="row block_landing_page third-collumn">
+        <p></p>
+        <div class="container-fluid shoe golfoy_sliders container product-slider-second ">
+            <div class="container-fluid product_slider_container">
+                <div class="container-fluid product_container_inside">
+                    <div class="header_content_product_slider">
+                        <div class="header_content_product_slider_inside">
+                            <div class="heading_product_slider">
+                                <div class="heading_golfoy left">
+                                    <h1> Buy More, Save More </h1>
+                                </div>
+                            </div>
+                            <div class="header_link_product_slider">
+                                <a href="https://golfoy.com/golf-balls.html"> View all </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product_content_product_slider">
+                        <div class="product_content_product_slider_inside">
+                            <div class="slider_arrows">
+                                <div class="left_arrow"></div>
+                                <div class="right_arrow"></div>
+                            </div>
+                            <div class="product_content_product_slider_before_list">
+                                <ol class="products list items product-items" style="width: 3300px;">
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/titleist-2021-pro-v1x-golf-balls.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/p/r/prov1x-8._2.jpg" alt="Titleist Pro V1x Golf Balls">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Titleist </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/titleist-2021-pro-v1x-golf-balls.html"> Pro V1x Golf Balls </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="16302" data-price-box="product-id-16302">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-16302" data-price-amount="5940" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 5,940</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-16302" data-price-amount="5795" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 5,795</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 145 </span>
+                                                                    <span> (3% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tier_price_category_page">Buy 2 for <strong>₹5295</strong> each and save <strong>11%</strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/titleists-2021-pro-v1-golf-balls.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/p/r/prov1-white-2_3.jpg" alt="Titleist Pro V1 Golf Balls ">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Titleist </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/titleists-2021-pro-v1-golf-balls.html"> Pro V1 Golf Balls </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="16296" data-price-box="product-id-16296">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-16296" data-price-amount="5940" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 5,940</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-16296" data-price-amount="5795" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 5,795</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 145 </span>
+                                                                    <span> (3% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tier_price_category_page">Buy 2 for <strong>₹5295</strong> each and save <strong>11%</strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/taylormade-2021-rbz-soft-golf-balls.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/t/a/taylormade-ball-1.jpg" alt="TaylorMade RBZ Soft Golf Balls">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Taylormade </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/taylormade-2021-rbz-soft-golf-balls.html"> RBZ Soft Golf Balls </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="19335" data-price-box="product-id-19335">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-19335" data-price-amount="2690" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 2,690</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-19335" data-price-amount="1995" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,995</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 695 </span>
+                                                                    <span> (26% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tier_price_category_page">Buy 3 for <strong>₹1795</strong> each and save <strong>34%</strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/srixon-soft-feel-golf-balls-9040.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/s/r/srixon-white_2.jpg" alt="Srixon Soft Feel Golf Balls ">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Srixon </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/srixon-soft-feel-golf-balls-9040.html"> Soft Feel Golf Balls </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="9040" data-price-box="product-id-9040">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-9040" data-price-amount="2300" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 2,300</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-9040" data-price-amount="1895" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,895</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 405 </span>
+                                                                    <span> (18% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tier_price_category_page">Buy 3 for <strong>₹1745</strong> each and save <strong>25%</strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/taylormade-noodle-long-and-soft-golf-balls.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/n/o/noodles-1.jpg" alt="TaylorMade Noodle Long and Soft Golf Balls ">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Taylormade </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/taylormade-noodle-long-and-soft-golf-balls.html"> Noodle Long and Soft Golf Balls </a>
+                                                </strong>
+                                                <div class="custom_code simple_prd">
+                                                    <div class="price-box price-final_price" data-role="priceBox" data-product-id="8966" data-price-box="product-id-8966">
+                                                        <span class="old-price">
+                                                            <span class="price-container price-final_price tax weee">
+                                                                <span class="price-label">MRP</span>
+                                                                <span id="old-price-8966" data-price-amount="1990" data-price-type="oldPrice" class="price-wrapper ">
+                                                                    <span class="price">₹ 1,990</span>
+                                                                </span>
+                                                            </span>
+                                                        </span>
+                                                        <div class="break_here"></div>
+                                                        <span class="special-price">
+                                                            <span class="price-container price-final_price tax weee">
+                                                                <span class="price-label">Deal Price</span>
+                                                                <span id="product-price-8966" data-price-amount="1495" data-price-type="finalPrice" class="price-wrapper ">
+                                                                    <span class="price">₹ 1,495</span>
+                                                                </span>
+                                                            </span>
+                                                        </span>
+                                                        <div class="break_here"></div>
+                                                        <div class="you-save-statement">
+                                                            <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                            <span class="yousave_price">
+                                                                <span> ₹ 495 </span>
+                                                                <span> (25% OFF) </span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/srixon-tour-special-golf-balls-5737.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/i/m/image_2_1__1.jpg" alt="Srixon Tour Special Golf Balls">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Srixon </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/srixon-tour-special-golf-balls-5737.html"> Tour Special Golf Balls </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="5737" data-price-box="product-id-5737">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-5737" data-price-amount="1600" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,600</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-5737" data-price-amount="1395" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,395</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 205 </span>
+                                                                    <span> (13% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tier_price_category_page">Buy 3 for <strong>₹1245</strong> each and save <strong>23%</strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/callaway-2019-erc-soft-triple-track-golf-balls.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/e/_/e_r_c-soft-golf-balls_1_2.jpg" alt="Callaway ERC Soft Triple Track Golf Balls">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Callaway </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/callaway-2019-erc-soft-triple-track-golf-balls.html"> ERC Soft Triple Track Golf Balls </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="7068" data-price-box="product-id-7068">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-7068" data-price-amount="4000" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 4,000</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-7068" data-price-amount="3845" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 3,845</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 155 </span>
+                                                                    <span> (4% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tier_price_category_page">Buy 3 for <strong>₹3595</strong> each and save <strong>11%</strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/volvik-power-soft-golf-balls.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/v/o/volvik-white-1_2.jpg" alt="Volvik Power Soft Golf Balls">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Volvik </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/volvik-power-soft-golf-balls.html"> Power Soft Golf Balls </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="17157" data-price-box="product-id-17157">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-17157" data-price-amount="1800" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,800</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-17157" data-price-amount="1645" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,645</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 155 </span>
+                                                                    <span> (9% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tier_price_category_page">Buy 3 for <strong>₹1495</strong> each and save <strong>17%</strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/callaway-supersoft-balls-yellow.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/c/a/callaway-supersoft-yellow-golf-balls_1.jpg" alt="Callaway Supersoft Golf Balls - Yellow">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Callaway </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/callaway-supersoft-balls-yellow.html"> Supersoft Golf Balls - Yellow </a>
+                                                </strong>
+                                                <div class="custom_code simple_prd">
+                                                    <div class="price-box price-final_price" data-role="priceBox" data-product-id="23148" data-price-box="product-id-23148">
+                                                        <span class="old-price">
+                                                            <span class="price-container price-final_price tax weee">
+                                                                <span class="price-label">MRP</span>
+                                                                <span id="old-price-23148" data-price-amount="2200" data-price-type="oldPrice" class="price-wrapper ">
+                                                                    <span class="price">₹ 2,200</span>
+                                                                </span>
+                                                            </span>
+                                                        </span>
+                                                        <div class="break_here"></div>
+                                                        <span class="special-price">
+                                                            <span class="price-container price-final_price tax weee">
+                                                                <span class="price-label">Deal Price</span>
+                                                                <span id="product-price-23148" data-price-amount="2125" data-price-type="finalPrice" class="price-wrapper ">
+                                                                    <span class="price">₹ 2,125</span>
+                                                                </span>
+                                                            </span>
+                                                        </span>
+                                                        <div class="break_here"></div>
+                                                        <div class="you-save-statement">
+                                                            <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                            <span class="yousave_price">
+                                                                <span> ₹ 75 </span>
+                                                                <span> (4% OFF) </span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/bridgestone-tour-b-rxs-golf-balls-white.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/e/z/ezgif-3-6b68be25bf.jpg" alt="Bridgestone Tour B RXS Golf Balls - White">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Bridgestone </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/bridgestone-tour-b-rxs-golf-balls-white.html"> Tour B RXS Golf Balls - White </a>
+                                                </strong>
+                                                <div class="custom_code simple_prd">
+                                                    <div class="price-box price-final_price" data-role="priceBox" data-product-id="21530" data-price-box="product-id-21530">
+                                                        <span class="old-price">
+                                                            <span class="price-container price-final_price tax weee">
+                                                                <span class="price-label">MRP</span>
+                                                                <span id="old-price-21530" data-price-amount="5600" data-price-type="oldPrice" class="price-wrapper ">
+                                                                    <span class="price">₹ 5,600</span>
+                                                                </span>
+                                                            </span>
+                                                        </span>
+                                                        <div class="break_here"></div>
+                                                        <span class="special-price">
+                                                            <span class="price-container price-final_price tax weee">
+                                                                <span class="price-label">Deal Price</span>
+                                                                <span id="product-price-21530" data-price-amount="5145" data-price-type="finalPrice" class="price-wrapper ">
+                                                                    <span class="price">₹ 5,145</span>
+                                                                </span>
+                                                            </span>
+                                                        </span>
+                                                        <div class="break_here"></div>
+                                                        <div class="you-save-statement">
+                                                            <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                            <span class="yousave_price">
+                                                                <span> ₹ 455 </span>
+                                                                <span> (9% OFF) </span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/2021-callaway-supersoft-golf-balls-white.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/s/u/super-soft-1_1.jpg" alt="Callaway Supersoft Golf Balls - White">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Callaway </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/2021-callaway-supersoft-golf-balls-white.html"> Supersoft Golf Balls - White </a>
+                                                </strong>
+                                                <div class="custom_code simple_prd">
+                                                    <div class="price-box price-final_price" data-role="priceBox" data-product-id="16590" data-price-box="product-id-16590">
+                                                        <span class="old-price">
+                                                            <span class="price-container price-final_price tax weee">
+                                                                <span class="price-label">MRP</span>
+                                                                <span id="old-price-16590" data-price-amount="2500" data-price-type="oldPrice" class="price-wrapper ">
+                                                                    <span class="price">₹ 2,500</span>
+                                                                </span>
+                                                            </span>
+                                                        </span>
+                                                        <div class="break_here"></div>
+                                                        <span class="special-price">
+                                                            <span class="price-container price-final_price tax weee">
+                                                                <span class="price-label">Deal Price</span>
+                                                                <span id="product-price-16590" data-price-amount="2375" data-price-type="finalPrice" class="price-wrapper ">
+                                                                    <span class="price">₹ 2,375</span>
+                                                                </span>
+                                                            </span>
+                                                        </span>
+                                                        <div class="break_here"></div>
+                                                        <div class="you-save-statement">
+                                                            <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                            <span class="yousave_price">
+                                                                <span> ₹ 125 </span>
+                                                                <span> (5% OFF) </span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/bridgestone-extrasoft-golf-balls.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/b/a/ball-1_4.jpg" alt="Bridgestone Extra Soft Golf Balls">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Bridgestone </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/bridgestone-extrasoft-golf-balls.html"> Extra Soft Golf Balls </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="15119" data-price-box="product-id-15119">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-15119" data-price-amount="3200" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 3,200</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-15119" data-price-amount="3095" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 3,095</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 105 </span>
+                                                                    <span> (4% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tier_price_category_page">Buy 3 for <strong>₹2995</strong> each and save <strong>7%</strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p></p>
+        <div class="col-xs-12">
+            <div class="header_golfoy left" style="margin-top:20px;">
+                <h1>Trolleys</h1>
+            </div>
+        </div>
+        <div class="row ">
+            <div class="col-sm-4 col-xs-12 block_col three-coll  ">
+                <a href="https://golfoy.com/golf-trolleys-and-golf-carts/golf-trolleys-and-golf-carts/two-wheel-trolleys.html">
+                    <img class="lazy_load" alt="two-trolley" data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/golfoybasics_2_wheel_golf_cart.jpg" />
+                </a>
+            </div>
+            <div class="col-sm-4 col-xs-12 block_col three-coll  ">
+                <a href="https://golfoy.com/golf-trolleys-and-golf-carts/golf-trolleys-and-golf-carts/three-wheel-trolleys.html">
+                    <img class="lazy_load" alt="three-trolley" data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/bigmax_ti-one_3_wheel_golf_cart.jpg" />
+                </a>
+            </div>
+            <div class="col-sm-4 col-xs-12 block_col three-coll  ">
+                <a href="https://golfoy.com/golf-trolleys-and-golf-carts/golf-trolleys-and-golf-carts/four-wheel-trolleys.html">
+                    <img class="lazy_load" alt="four-trolley" data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/bagboy_fourwheel_golf_cart.jpg" />
+                </a>
+            </div>
+        </div>
+        <!-- end -->
+        <!-- p-slider -->
+        <p></p>
+        <div class="container-fluid shoe golfoy_sliders container product-slider-first ">
+            <div class="container-fluid product_slider_container">
+                <div class="container-fluid product_container_inside">
+                    <div class="header_content_product_slider">
+                        <div class="header_content_product_slider_inside">
+                            <div class="heading_product_slider">
+                                <div class="heading_golfoy left">
+                                    <h1> Headwear </h1>
+                                </div>
+                            </div>
+                            <div class="header_link_product_slider">
+                                <a href="https://golfoy.com/golf-apparels/apparel-category/headwear.html"> View all </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product_content_product_slider">
+                        <div class="product_content_product_slider_inside">
+                            <div class="slider_arrows">
+                                <div class="left_arrow"></div>
+                                <div class="right_arrow"></div>
+                            </div>
+                            <div class="product_content_product_slider_before_list">
+                                <ol class="products list items product-items" style="width: 3300px;">
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/callaway-men-s-classic-beanie-hat.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/c/a/callaway-classic-beanie_1.jpg" alt="Callaway Men's Classic Beanie Hat">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Callaway </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/callaway-men-s-classic-beanie-hat.html"> Men's Classic Beanie Hat </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="21896" data-price-box="product-id-21896">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-21896" data-price-amount="1390" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,390</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-21896" data-price-amount="1295" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,295</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 95 </span>
+                                                                    <span> (7% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/taylormade-men-s-tour-radar-adjustable-golf-caps.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/t/a/taylomade-tour-radar-stealth-cap_black_1_1.jpg" alt="TaylorMade Men's Tour Radar Adjustable Cap">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Taylormade </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/taylormade-men-s-tour-radar-adjustable-golf-caps.html"> Men's Tour Radar Adjustable Cap </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="20751" data-price-box="product-id-20751">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-20751" data-price-amount="2190" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 2,190</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-20751" data-price-amount="1995" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,995</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 195 </span>
+                                                                    <span> (9% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/puma-men-s-lifestyle-beanie.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/p/u/puma-cap_1.jpg" alt="Puma Men's Lifestyle Beanie">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Puma </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/puma-men-s-lifestyle-beanie.html"> Men's Lifestyle Beanie </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="19577" data-price-box="product-id-19577">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-19577" data-price-amount="1299" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,299</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-19577" data-price-amount="1195" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,195</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 104 </span>
+                                                                    <span> (9% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/puma-men-s-ess-logo-winter-beanie-hat.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/r/o/rou-navy-1_2.jpg" alt="Puma Men's ESS Logo Winter Beanie Hat ">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Puma </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/puma-men-s-ess-logo-winter-beanie-hat.html"> Men's ESS Logo Winter Beanie Hat </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="14730" data-price-box="product-id-14730">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-14730" data-price-amount="999" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 999</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-14730" data-price-amount="895" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 895</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 104 </span>
+                                                                    <span> (11% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/titleist-men-s-charleston-garment-wash-cap.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/w/h/white_black1.jpg" alt="Titleist Men's Charleston Garment Wash Cap">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Titleist </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/titleist-men-s-charleston-garment-wash-cap.html"> Men's Charleston Garment Wash Cap </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="22722" data-price-box="product-id-22722">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-22722" data-price-amount="1395" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,395</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-22722" data-price-amount="1345" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,345</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 50 </span>
+                                                                    <span> (4% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/taylormade-men-s-sim2-iron-adjustable-cap.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/t/a/taylormade-sim2-irons-hat-black-2_2.jpg" alt="TaylorMade Men's Sim2 Iron Adjustable Cap">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Taylormade </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/taylormade-men-s-sim2-iron-adjustable-cap.html"> Men's Sim2 Iron Adjustable Cap </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="16929" data-price-box="product-id-16929">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-16929" data-price-amount="1690" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,690</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-16929" data-price-amount="1495" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,495</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 195 </span>
+                                                                    <span> (12% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/titleist-men-s-tour-performance-adjustable-cap.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/t/i/titleist-cap_1.jpg" alt="Titleist Men's Tour Performance Adjustable Cap">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Titleist </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/titleist-men-s-tour-performance-adjustable-cap.html"> Men's Tour Performance Adjustable Cap </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="6356" data-price-box="product-id-6356">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-6356" data-price-amount="1495" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,495</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-6356" data-price-amount="1425" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,425</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 70 </span>
+                                                                    <span> (5% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/titleist-men-s-stadry-performance-adjustable-cap.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/s/t/sta-dry-cap-black-1_3.jpg" alt="Titleist Men's StaDry Performance Adjustable Cap">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Titleist </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/titleist-men-s-stadry-performance-adjustable-cap.html"> Men's StaDry Performance Adjustable Cap </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="13343" data-price-box="product-id-13343">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-13343" data-price-amount="2295" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 2,295</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-13343" data-price-amount="2195" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 2,195</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 100 </span>
+                                                                    <span> (5% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/footjoy-men-s-dryjoys-tour-bucket-rain-hat.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/e/z/ezgif-5-2fd31bf878.jpg" alt="Footjoy Men's DryJoys Tour Bucket Rain Hat">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> FootJoy </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/footjoy-men-s-dryjoys-tour-bucket-rain-hat.html"> Men's DryJoys Tour Bucket Rain Hat </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="18208" data-price-box="product-id-18208">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-18208" data-price-amount="1995" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,995</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-18208" data-price-amount="1895" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,895</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 100 </span>
+                                                                    <span> (6% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/titleist-men-s-tour-sports-mesh-fitted-cap.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/r/o/royalwhite-th20ftms_1_1.jpg" alt="Titleist Men's Tour Sports Mesh Fitted Cap">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Titleist </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/titleist-men-s-tour-sports-mesh-fitted-cap.html"> Men's Tour Sports Mesh Fitted Cap </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="18136" data-price-box="product-id-18136">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-18136" data-price-amount="1695" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,695</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-18136" data-price-amount="1595" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,595</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 100 </span>
+                                                                    <span> (6% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/callaway-men-s-ta-low-profile-adjustable-visor.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/c/a/callaway-visor-1.jpg" alt="Callaway Men's TA Low Profile Adjustable Visor">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Callaway </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/callaway-men-s-ta-low-profile-adjustable-visor.html"> Men's TA Low Profile Adjustable Visor </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="18116" data-price-box="product-id-18116">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-18116" data-price-amount="1590" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,590</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-18116" data-price-amount="1495" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,495</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 95 </span>
+                                                                    <span> (6% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li class="item product product-item">
+                                        <div class="product-item-info" data-container="product-grid">
+                                            <a href="https://golfoy.com/titleist-junior-tour-performance-adjustable-cap.html" class="product photo product-item-photo" tabindex="-1">
+                                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                                        <img class="product-image-photo" src="https://cdn.golfoy.com/media/catalog/product/cache/194f66d402ca5f719dd8e49f8a4e5c11/n/i/niagara-white-th22ajrtp-31.jpg" alt="Titleist Junior Tour Performance Adjustable Cap ">
+                                                    </span>
+                                                </span>
+                                            </a>
+                                            <div class="product details product-item-details">
+                                                <div class="brand_name"> Titleist </div>
+                                                <strong class="product name product-item-name">
+                                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="https://golfoy.com/titleist-junior-tour-performance-adjustable-cap.html"> Junior Tour Performance Adjustable Cap </a>
+                                                </strong>
+                                                <div class="custom_code configurable_prd">
+                                                    <div class="custom_code simple_prd">
+                                                        <div class="price-box price-final_price" data-role="priceBox" data-product-id="7836" data-price-box="product-id-7836">
+                                                            <span class="old-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">MRP</span>
+                                                                    <span id="old-price-7836" data-price-amount="1495" data-price-type="oldPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,495</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <span class="special-price">
+                                                                <span class="price-container price-final_price tax weee">
+                                                                    <span class="price-label">Deal Price</span>
+                                                                    <span id="product-price-7836" data-price-amount="1425" data-price-type="finalPrice" class="price-wrapper ">
+                                                                        <span class="price">₹ 1,425</span>
+                                                                    </span>
+                                                                </span>
+                                                            </span>
+                                                            <div class="break_here"></div>
+                                                            <div class="you-save-statement">
+                                                                <span class="label_special_price_custom yousave_price_label">You save:</span>
+                                                                <span class="yousave_price">
+                                                                    <span> ₹ 70 </span>
+                                                                    <span> (5% OFF) </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p></p>
+        <!-- full-width -->
+        <div class="row block_landing_page full_width">
+            <div class="col-xs-12 block_col  " style="margin-top: 0px;">
+                <a href="https://golfoy.com/clubs/clubs/wedges.html">
+                    <img class="lazy_load web hidden-xs " alt="wedges" data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/wedges_3.jpg" />
+                    <img class="lazy_load mobile visible-xs " alt="customized-bag" data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/wedges_mob_2.jpg" src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/wedges_mob_2.jpg">
+                </a>
+            </div>
+        </div>
+        <br>
+        <!-- end -->
+        <div class="row block_landing_page two_collumn ">
+            <div class="col-sm-6 col-xs-12 block_col two_coll ">
+                <a href="https://golfoy.com/golf-grips/buy-golf-grips-all-types/swing-shaft-golf-grips.html">
+                    <img class="lazy_load" alt="golfpride_plusgrip" data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/golfpride_mcc_plus4_grip.jpg" />
+                </a>
+            </div>
+            <div class="col-sm-6 col-xs-12 block_col ">
+                <a href="https://golfoy.com/golf-grips/buy-golf-grips-all-types/putter-grips.html">
+                    <img class="lazy_load" alt="superstroke_puttergrip" data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/superstroke_traxion_putter_grip.jpg" />
+                </a>
+            </div>
+        </div>
+        <!-- end -->
+        <!-- three-colout -->
+        <div class="row block_landing_page third-collumn">
+            <div class="col-xs-12">
+                <div class="header_golfoy left">
+                    <h1>Package Set</h1>
+                </div>
+            </div>
+            <div class="row ">
+                <div class="col-sm-4 col-xs-12 block_col three-coll  ">
+                    <a href="https://golfoy.com/clubs/clubs/golf-full-sets.html">
+                        <img class="lazy_load" alt="mens_golfset" data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/taylormade_rbz_speedlite_men_golfsetS.jpg" />
+                    </a>
+                </div>
+                <div class="col-sm-4 col-xs-12 block_col three-coll  ">
+                    <a href="https://golfoy.com/clubs/clubs/golf-full-sets/by-type/women-s-sets.html">
+                        <img class="lazy_load" alt="women_golfset" data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/callaway_reva_women_golfset.jpg" />
+                    </a>
+                </div>
+                <div class="col-sm-4 col-xs-12 block_col three-coll  ">
+                    <a href="https://golfoy.com/clubs/clubs/golf-full-sets/by-type/junior-sets.html">
+                        <img class="lazy_load" alt="junior_golfset" data-src="https://cdn.golfoy.com/media/wysiwyg/new_sliders/nov1/cobra_king_junior_golfset.jpg" />
+                    </a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="header_golfoy left feature_head">
+                        <h1>Featured brand</h1>
+                    </div>
+                </div>
+                <div class="col-xs-12 brand_icon_landing_page_block">
+                    <div class="row brand_icon_landing_page  ">
+                        <div class="block_col col-md-2 col-sm-4 col-xs-12">
+                            <a href="https://golfoy.com/all-golf-brands-india/buy-taylormade-golf-store-india.html">
+                                <img class="lazy_load" alt="taylormade-golf" data-src="https://golfoy.com/media/wysiwyg/callout1/taylormade store.jpg" />
+                            </a>
+                        </div>
+                        <div class="block_col col-md-2 col-sm-4 col-xs-12">
+                            <a href="https://golfoy.com/all-golf-brands-india/callaway-golf-india.html">
+                                <img class="lazy_load" alt="callaway-golf" data-src="https://golfoy.com/media/wysiwyg/callout1/callaway store.jpg" />
+                            </a>
+                        </div>
+                        <div class="block_col col-md-2 col-sm-4 col-xs-12">
+                            <a href="https://golfoy.com/all-golf-brands-india/mizuno-golf-store.html">
+                                <img class="lazy_load" alt="mizuno-golf" data-src="https://golfoy.com/media/wysiwyg/callout1/mizuno store.jpg" />
+                            </a>
+                        </div>
+                        <div class="block_col col-md-2 col-sm-4 col-xs-12">
+                            <a href="https://golfoy.com/all-golf-brands-india/ping-golf-store-india.html">
+                                <img class="lazy_load" alt="ping-golf" data-src="https://golfoy.com/media/wysiwyg/callout1/ping store.jpg" />
+                            </a>
+                        </div>
+                        <div class="block_col col-md-2 col-sm-4 col-xs-12">
+                            <a href="https://golfoy.com/all-golf-brands-india/adidas-store.html">
+                                <img class="lazy_load" alt="adidas-store" data-src="https://golfoy.com/media/wysiwyg/callout1/adidas store.jpg" />
+                            </a>
+                        </div>
+                        <div class="block_col col-md-2 col-sm-4 col-xs-12">
+                            <a href="https://golfoy.com/all-golf-brands-india/srixon-store.html">
+                                <img class="lazy_load" alt="srixon-store" data-src="https://golfoy.com/media/wysiwyg/callout1/srixon store.jpg" />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end -->
+</div>

@@ -1,0 +1,91 @@
+<?php
+if ($product = $block->getProduct()) {
+    $productName = $product->getName();
+    $productUrl = $product->getProductUrl();
+    $brandname = $product->getResource()->getAttribute('brand')->getFrontend()->getValue($product);
+    $gtin = $product->getResource()->getAttribute('gtin')->getFrontend()->getValue($product);
+
+
+    $imagewidth = 200;
+    $imageheight = 200;
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $imageHelper  = $objectManager->get('\Magento\Catalog\Helper\Image');
+    $image_url = $imageHelper->init($product, 'product_page_image_small')->setImageFile($product->getFile())->resize($imagewidth, $imageheight)->getUrl();
+
+    $attributeSet = $objectManager->create('Magento\Eav\Api\AttributeSetRepositoryInterface');
+    $attributeSetRepository = $attributeSet->get($product->getAttributeSetId());
+    $attribute_set_name = $attributeSetRepository->getAttributeSetName();
+
+    $limitedstock = $product->getData('limitedstock');
+    $lshtml = '';
+    if ($limitedstock == 1) {
+        $lshtml = '<div class= "limitedstock-text">Limited Stock</div>';
+    }
+?>
+    <div class="top_product_details">
+        <?php echo $lshtml; ?>
+        <div itemprop="brand" itemtype="https://schema.org/Brand" itemscope>
+            <meta itemprop="name" content="<?php echo $brandname; ?>" />
+        </div>
+        <?php if ($gtin != '') { ?>
+            <meta itemprop="gtin" content="<?php echo $gtin; ?>" />
+        <?php } ?>
+        <div class="brand_logo col-md-12 col-xs-4">
+            <div class="brandname_text"><?php echo $brandname; ?></div>
+            <!--    <img src="<?php //echo $this->getUrl('media').'catalog/brands/'.$brandname; 
+                                ?>.png" />-->
+        </div>
+        <div class="product_name col-md-12 col-xs-8">
+
+            <?php
+            $trimmedname = $productName;
+            if ($brandname) {
+                if (stripos($productName, $brandname) !== false) {
+                    $trimmedname = trim(str_ireplace($brandname, '', $productName));
+                }
+            }
+            ?>
+            <a href="<?= $productUrl; ?>">
+                <?= $trimmedname; ?>
+            </a>
+            <h1 class="hide" itemprop="name"><?php echo $productName; ?></h1>
+
+            <div class="ballbrandinfo">
+                <?php
+                $_product = $block->getProduct();
+                $cl = $_product->getData('quality');
+                if ($cl == 131) {
+                    echo '<a href="' . $block->getBaseUrl() . '/quality" target="_blank">
+                            <span class="ballband"><img src="' . $block->getBaseUrl() . '/media/deals/new.png"></span></a>
+                            <button data-toggle="tooltip" class="ballinfoicon" data-placement="bottom"
+                            title="NEW: These golf balls are brand new and come in boxes sealed at the time of manufacturing. Ball qualites marked GOLD, SILVER &amp; RANGE are pre-owned. Please visit QUALITY INFORMATION  for more details">
+                                <span class="glyphicon glyphicon-info-sign ballicon" ></span></button>';
+                } ?>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="right_side_addtocart_button">
+        <div class="left_section">
+            <div class="img_section">
+                <img src="<?= $image_url ?>">
+            </div>
+        </div>
+        <div class="right_section">
+            <div class="name_section hidden-xs">
+                <?= $productName; ?>
+            </div>
+            <div class="button_section">
+                <div class="shop_button">add to cart</div>
+            </div>
+        </div>
+        <div class="abcdef">
+        </div>
+    </div>
+
+
+
+<?php
+}
+?>

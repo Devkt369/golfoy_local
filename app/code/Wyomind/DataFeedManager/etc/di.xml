@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2019 Wyomind. All rights reserved.
+  ~ See LICENSE.txt for license details.
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../lib/internal/Magento/Framework/ObjectManager/etc/config.xsd">
+
+    <!-- PROGRESS BAR CONFIGURATION STARTS -->
+    <virtualType name="Wyomind\DataFeedManager\Block\Adminhtml\Progress\Status" type="Wyomind\Framework\Block\Adminhtml\Progress\Status">
+        <arguments>
+            <argument name="module" xsi:type="string">DataFeedManager</argument>
+            <argument name="field" xsi:type="string">cron_expr</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Wyomind\DataFeedManager\Helper\Progress" type="Wyomind\Framework\Helper\Progress">
+        <arguments>
+            <argument name="module" xsi:type="string">DataFeedManager</argument>
+            <argument name="tempDirectory" xsi:type="string">/var/tmp/DataFeedManager/</argument>
+            <argument name="filePrefix" xsi:type="string">feed_</argument>
+        </arguments>
+    </virtualType>
+    <!-- PROGRESS BAR CONFIGURATION ENDS -->
+
+    <!-- LOGGER CONFIGURATION STARTS -->
+    <virtualType name="Wyomind\DataFeedManager\Logger\Logger" type="\Monolog\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">DataFeedManager</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="DataFeedManager" xsi:type="object">Wyomind\DataFeedManager\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Wyomind\DataFeedManager\Logger\Handler" type="\Wyomind\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/Wyomind_DataFeedManager.log</argument>
+            <argument name="filePath" xsi:type="string"/>
+        </arguments>
+    </virtualType>
+
+    <!-- LOGGER CONFIGURATION ENDS -->
+
+    <!-- LOGGERCRON CONFIGURATION STARTS -->
+    <virtualType name="Wyomind\DataFeedManager\Logger\LoggerCron" type="\Monolog\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">DataFeedManagerCron</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="DataFeedManager" xsi:type="object">Wyomind\DataFeedManager\Logger\HandlerCron</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Wyomind\DataFeedManager\Logger\HandlerCron" type="\Wyomind\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/Wyomind_DataFeedManagerCron.log</argument>
+            <argument name="filePath" xsi:type="string"/>
+        </arguments>
+    </virtualType>
+    <!-- LOGGERCRON CONFIGURATION ENDS -->
+
+
+    <!-- COMMAND LINE -->
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="dfm_generate" xsi:type="object">Wyomind\DataFeedManager\Console\Command\Generate</item>
+                <item name="dfm_list" xsi:type="object">Wyomind\DataFeedManager\Console\Command\Listing</item>
+            </argument>
+        </arguments>
+    </type>
+
+
+
+
+    <type name="Wyomind\DataFeedManager\Controller\Adminhtml\AbstractAction">
+        <arguments>
+            <argument name="attributesHelper" xsi:type="object">Wyomind\DataFeedManager\Helper\Attributes\Proxy</argument>
+            <argument name="dfmHelper" xsi:type="object">Wyomind\DataFeedManager\Helper\Data\Proxy</argument>
+            <argument name="dfmModel" xsi:type="object">Wyomind\DataFeedManager\Model\Feeds\Proxy</argument>
+        </arguments>
+    </type>
+
+</config>

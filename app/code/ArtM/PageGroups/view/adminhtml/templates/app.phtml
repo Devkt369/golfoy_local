@@ -1,0 +1,82 @@
+<div class="artm-pagegroups-app">
+    <div class="pg-app-layout">
+        <section class="pg-panel pg-panel-pages">
+            <div class="pg-panel-head">
+                <div class="pg-panel-head-left">
+                    <h2>Pages</h2>
+                    <span>Select a page to manage its groups</span>
+                </div>
+                <button type="button" id="add-page-btn" class="action-primary">Add Page</button>
+            </div>
+            <div id="pages-panel" class="pg-panel-body"></div>
+        </section>
+
+        <section class="pg-panel pg-panel-groups">
+            <div class="pg-panel-head">
+                <h2>Groups</h2>
+                <span>Drag cards to reorder. Each group can hold multiple images.</span>
+                <button type="button" id="add-group-btn" class="action-primary">Add Group</button>
+            </div>
+            <div id="groups-panel" class="pg-panel-body"></div>
+        </section>
+    </div>
+
+    <div id="media-modal" class="pg-modal"></div>
+</div>
+
+<script type="text/template" id="pg-page-card-template">
+    <div class="pg-card" data-page-id="{{page_id}}">
+        <h3>{{title}}</h3>
+        <p><strong>Identifier:</strong> {{identifier}}</p>
+        <p><strong>Sort Order:</strong> {{sort_order}}</p>
+        {{actions}}
+    </div>
+</script>
+
+<script type="text/template" id="pg-group-card-template">
+    <div class="pg-group-card {{collapsed_class}}" data-group-id="{{group_id}}">
+        <div class="pg-group-top">
+            <strong>{{title}}</strong>
+            <div class="pg-group-top-actions">
+                <button type="button" class="pg-group-toggle" data-group-id="{{group_id}}" title="Collapse/Expand">{{collapse_label}}</button>
+                <button type="button" class="pg-group-delete" data-group-id="{{group_id}}">Delete</button>
+            </div>
+        </div>
+        {{images_html}}
+        <div class="pg-group-card-footer">
+            <button type="button" class="pg-group-media-btn action-secondary" data-group-id="{{group_id}}">Add Images</button>
+            <button type="button" class="pg-group-save-meta action-primary" data-group-id="{{group_id}}">Save Attributes</button>
+            <button type="button" class="pg-group-embed-btn" data-group-id="{{group_id}}">Embed</button>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-magento-init">
+{
+    "*": {
+        "ArtM_PageGroups/js/app": {
+            "listUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/page/listing')) ?>",
+            "saveUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/page/save')) ?>",
+            "deleteUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/page/delete')) ?>",
+            "groupListUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/group/listing')) ?>",
+            "groupSaveUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/group/save')) ?>",
+            "groupDeleteUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/group/delete')) ?>",
+            "groupSortUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/group/sort')) ?>",
+            "groupImageSortUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/group/imagesort')) ?>",
+            "groupImageAddUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/group/imageadd')) ?>",
+            "groupImageSaveUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/group/imagesave')) ?>",
+            "groupImageDeleteUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/group/imagedelete')) ?>",
+            "groupMetadataSaveUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/group/metadatasave')) ?>",
+            "attributeListUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/groupattribute/listing')) ?>",
+            "attributeSaveUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/groupattribute/save')) ?>",
+            "mediaFoldersUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/media/folders')) ?>",
+            "mediaFilesUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/media/files')) ?>",
+            "mediaUploadUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/media/upload')) ?>",
+            "mediaDeleteUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/media/delete')) ?>",
+            "mediaCreateFolderUrl": "<?= $block->escapeUrl($block->getUrl('pagegroups/media/createfolder')) ?>",
+            "formKey": "<?= $block->escapeHtmlAttr($block->getFormKey()) ?>"
+        }
+    }
+}
+</script>
+

@@ -1,0 +1,191 @@
+<?php 
+    // Code to fetch customer group if logged in
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $customerSession = $objectManager->get('Magento\Customer\Model\Session');
+    $customerGroup = null;
+    $customerGroupId = null;
+    $isLoggedIn = false;
+
+    if ($customerSession->isLoggedIn()) {
+        $isLoggedIn = true;
+        $customer = $customerSession->getCustomer();
+        $customerGroupId = $customer->getGroupId();
+        
+        // Get customer group model
+        $customerGroupRepository = $objectManager->get('Magento\Customer\Api\GroupRepositoryInterface');
+        try {
+            $customerGroup = $customerGroupRepository->getById($customerGroupId);
+        } catch (\Exception $e) {
+            $customerGroup = null;
+        }
+    }
+
+    echo $this->getLayout()->createBlock('Magento\Cms\Block\Block')->setBlockId('notice_header')->toHtml();
+?>
+
+<?php if ($isLoggedIn && $customerGroup){ ?>
+<div class="customer-group-display" style="display:none; background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px;">
+    <strong>Customer Group:</strong> <?php echo $customerGroup->getCode(); ?>
+</div>
+<?php }else{
+
+    echo "<div style='display:none'><strong>Customer Group:</strong> Guest</div>";
+} ?>
+
+<?php
+// Check for Elite customer group and working parameter
+$showElitePopup = false;
+$workingParam = isset($_GET['working']) ? $_GET['working'] : '';
+
+if ($isLoggedIn && $customerGroup && $customerGroup->getCode() === 'Elite' && $workingParam === 'enable') {
+    $showElitePopup = true;
+}
+?>
+
+<?php if ($showElitePopup): ?>
+    <div class="elite_text">Elite</div>
+<!-- Elite Customer Popup -->
+<div id="elitePopup" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; justify-content: center; align-items: center;">
+    <div style="position: relative; background: white; padding: 20px; border-radius: 10px; max-width: 500px; width: 90%; text-align: center;">
+        <button id="closeElitePopup" style="position: absolute; top: 10px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">&times;</button>
+        
+        <!-- Replace with your image URL -->
+        <img src="/pub/media/wysiwyg/elite-popup-image.jpg" alt="Elite Customer Special" style="max-width: 100%; height: auto; margin-bottom: 15px;" />
+        
+        <p style="margin: 10px 0; font-weight: bold;">Special Elite Member Offer!</p>
+    </div>
+</div>
+<?php endif; ?>
+
+<script type="text/javascript">
+    require(["jquery", "bootstrap"], function(jQuery) {
+        jQuery(document).ready(function() {
+            // Elite Popup functionality
+            function setCookie(name, value, days) {
+                var expires = "";
+                if (days) {
+                    var date = new Date();
+                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                    expires = "; expires=" + date.toUTCString();
+                }
+                document.cookie = name + "=" + (value || "") + expires + "; path=/";
+            }
+
+            function getCookie(name) {
+                var nameEQ = name + "=";
+                var ca = document.cookie.split(';');
+                for(var i = 0; i < ca.length; i++) {
+                    var c = ca[i];
+                    while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+                }
+                return null;
+            }
+
+            // Show Elite popup if conditions are met and cookie is not set
+            if (jQuery('#elitePopup').length > 0) {
+                var elitePopupCookie = getCookie('elitePopupShown');
+                if (!elitePopupCookie) {
+                    jQuery('#elitePopup').show().css('display', 'flex');
+                }
+            }
+
+            // Close popup and set cookie
+            jQuery('#closeElitePopup').on('click', function() {
+                jQuery('#elitePopup').fadeOut();
+                setCookie('elitePopupShown', '1', 1); // Set cookie for 1 day
+            });
+
+            // Close popup when clicking outside
+            jQuery('#elitePopup').on('click', function(e) {
+                if (e.target === this) {
+                    jQuery('#elitePopup').fadeOut();
+                    setCookie('elitePopupShown', '1', 1); // Set cookie for 1 day
+                }
+            });
+
+            // Add 'no_notice' class to body by default
+            jQuery("body").addClass("no_notice");
+
+            // Function to check and remove 'no_notice' class if 'notice_top' is not found
+            function checkNoticeTop() {
+                if (jQuery(".notice_top").length === 0) {
+                    jQuery("body").removeClass("no_notice");
+                }
+            }
+
+            // Initial check when the page loads
+            checkNoticeTop();
+
+            // Event handler for closing notice
+            jQuery(".close_notice").on("click", function() {
+                jQuery("body").removeClass("no_notice");
+            });
+
+            // Check again after any DOM manipulation or AJAX loading
+            jQuery(document).ajaxComplete(function() {
+                checkNoticeTop();
+            });
+        });
+    });
+</script>
+
+<style>
+    .elite_text {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        font-size: 10px;
+        font-weight: bold;
+        color: transparent;
+        background: linear-gradient(45deg, #FFD700, #F4A460, #DAA520, #B8860B, #FFD700);
+        background-size: 300% 300%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: gradientShift 4s ease-in-out infinite;
+        padding: 8px 15px;
+        z-index: 9998;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+    }
+    
+    .elite_text::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, #000000, #1a1a1a, #000000);
+        transform: skew(-15deg);
+        z-index: -1;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    
+    @keyframes gradientShift {
+        0%, 100% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+    }
+
+    .product.media {
+        min-height: auto !important;
+    }
+
+    .product.media>.tags {
+        height: 0px;
+    }
+
+    body {
+        overflow-x: hidden;
+    }
+</style>
+<?php
+//    echo $window_width = "<script type='text/javascript'>document.write(window.innerWidth);</script>";
+?>

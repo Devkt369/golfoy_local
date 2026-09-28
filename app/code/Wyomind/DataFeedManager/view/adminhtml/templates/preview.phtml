@@ -1,0 +1,35 @@
+<?php
+/**
+ * Copyright © 2019 Wyomind. All rights reserved.
+ * See LICENSE.txt for license details.
+ */
+?>
+    <!-- Preview popup template -->
+<?php /** @var \Wyomind\DataFeedManager\Block\Adminhtml\Feeds\Preview $block */?>
+<?php $content = $block->getContent(); ?>
+<?php if ($block->fileType == 'xml') : ?>
+    <textarea id="preview"><?php /* @noEscape */ echo $content; ?></textarea>
+    <style>
+        .CodeMirror {
+            height: 100%;
+        }
+    </style>
+    <script>
+        window.onload = function () {
+            CodeMirrorPattern = CodeMirror.fromTextArea(document.getElementById('preview'), {
+                matchBrackets: true,
+                mode: "application/x-httpd-php",
+                indentUnit: 2,
+                indentWithTabs: false,
+                lineWrapping: false,
+                lineNumbers: true,
+                styleActiveLine: true,
+                readOnly: true
+            });
+        };
+    </script>
+<?php else : ?>
+    <div id="preview-table-area" class="preview-table-area" style="display: block; position: relative !important;top:0">
+        <?php /* @noEscape */ echo $content; ?>
+    </div>
+<?php endif;

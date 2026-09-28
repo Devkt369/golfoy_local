@@ -1,0 +1,153 @@
+type Mutation {
+    msApplyStoreCreditToCart(cartId: ID!, creditApplied: Int!): MsApplyStoreCreditToCartOutput @resolver (class: "\\Magestore\\CustomercreditGraphQl\\Model\\Resolver\\ApplyStoreCredit") @doc(description: "Apply Store Credit to cart. ")
+    msRemoveStoreCreditFromCart(cartId: ID!): MsRemoveStoreCreditFromCartOutput @resolver (class: "\\Magestore\\CustomercreditGraphQl\\Model\\Resolver\\RemoveStoreCredit") @doc(description: "Cancel the application of Store Credit to the cart")
+    addStoreCreditProductsToCart(input: AddStoreCreditProductsToCartInput): AddStoreCreditProductsToCardOutput @resolver(class: "Magestore\\CustomercreditGraphQl\\Model\\Resolver\\AddStoreCreditProductsToCart")
+    msRedeemCreditCode(credit_code: String!): RedeemStoreCreditCodeOutput @resolver(class: "Magestore\\CustomercreditGraphQl\\Model\\Resolver\\RedeemStoreCreditCode")
+}
+
+type MsApplyStoreCreditToCartOutput {
+    cart: Cart! @doc(description: "The customer cart after store credit are applied")
+}
+
+type MsRemoveStoreCreditFromCartOutput {
+    cart: Cart! @doc(description: "The customer cart after store credit are removed")
+}
+
+type CartPrices {
+    ms_store_credit: MagestoreStoreCredit @doc(description: "Store credit in quote") @resolver(class: "Magestore\\CustomercreditGraphQl\\Model\\Resolver\\GetStoreCreditInfoInQuote")
+}
+
+type MagestoreStoreCredit {
+    use_customer_credit: Int @doc(description: "Use customer credit in quote")
+    customer_credit_amount: Int @doc(description: "Credit amount in quote")
+    customer_credit_amount_entered: Int @doc(description: "Credit amount entered in quote")
+    creditdiscount_amount: Float @doc(description: "Credit discount amount in quote")
+    base_creditdiscount_amount: Float @doc(description: "Base Credit discount amount in quote")
+    customercredit_discount: Float @doc(description: "Customercredit Discount in quote")
+    base_customercredit_discount: Float @doc(description: "Base Customercredit Discount in quote")
+    customercredit_discount_for_shipping: Float @doc(description: "Customercredit Discount For Shipping in quote")
+    base_customercredit_discount_for_shipping: Float @doc(description: "Base Customercredit Discount For Shipping in quote")
+}
+
+type StoreConfig {
+    magestore_customercredit_general_enable: String @doc(description: "Enable Store Credit")
+    magestore_customercredit_general_enable_send_credit: String @doc(description: "Allow sending credit")
+    magestore_customercredit_general_validate: String @doc(description: "Verify before sending credit")
+    magestore_customercredit_spend_shipping: String @doc(description: "Shipping Fee")
+    magestore_customercredit_email_creditcode: String @doc(description: "Email template with credit code sent to recipients")
+    magestore_customercredit_email_verify: String @doc(description: "Email template with verification code sent to credit sender")
+    magestore_customercredit_email_notify: String @doc(description: "Email template notifying customers")
+    magestore_customercredit_email_notify_success: String @doc(description: "Send-to-customer email template when recipient receives credit")
+    magestore_customercredit_report_ytd_start: String @doc(description: "Select start time for current year")
+    magestore_customercredit_report_mtd_start: String @doc(description: "Select start date for current month")
+    magestore_customercredit_style_management_background_title: String @doc(description: "Background of Title")
+    magestore_customercredit_style_management_color_title: String @doc(description: "Color of Titl")
+}
+
+type Query {
+    msGetCreditTransactionHistory (
+        filter: CreditTransactionAttributeFilterInput @doc(description: "Identifies which transaction attributes to search for and return."),
+        pageSize: Int = 20 @doc(description: "Specifies the maximum number of results to return at once. This attribute is optional."),
+        currentPage: Int = 1 @doc(description: "Specifies which page of results to return. The default value is 1."),
+    ): MSCreditTransactions @resolver (class: "\\Magestore\\CustomercreditGraphQl\\Model\\Resolver\\CustomerCreditTransactionHistory") @doc(description: "Credit transaction history of current customer")
+}
+
+type MSCreditTransactions @doc(description: "List store credit transaction") {
+    items: [MSStoreCreditTransaction] @doc(description: "An array of transactions that match the specified search criteria.")
+    page_info: SearchResultPageInfo @doc(description: "An object that includes the page_info and currentPage values specified in the query.")
+    total_count: Int @doc(description: "The total number of reward point transactions.")
+}
+
+input CreditTransactionAttributeFilterInput @doc(description: "CreditTransactionAttributeFilterInput defines the filters to be used in the search. A filter contains at least one attribute, a comparison operator, and the value that is being searched for.") {
+    transaction_id: FilterTypeInput @doc(description: "Filter by transaction ID")
+    customer_id: FilterTypeInput @doc(description: "Filter by customer ID")
+    order_increment_id: FilterTypeInput @doc(description: "Filter by order increment id")
+    amount_credit: FilterTypeInput @doc(description: "Filter by amount_credit")
+    begin_balance: FilterTypeInput @doc(description: "Filter by begin_balance")
+    end_balance: FilterTypeInput @doc(description: "Filter by end_balance")
+    transaction_time: FilterTypeInput @doc(description: "Filter by transaction_time")
+    status: FilterTypeInput @doc(description: "Filter by status")
+    spent_credit: FilterTypeInput @doc(description: "Filter by spent_credit")
+    received_credit: FilterTypeInput @doc(description: "Filter by received_credit")
+}
+
+type MSStoreCreditTransaction @doc(description:"MSStoreCreditTransaction") {
+    transaction_id: Int @doc(description: "Transaction ID")
+    customer_id: Int @doc(description: "Customer ID")
+    type_transaction_id: Int @doc(description: "Type Transaction ID")
+    detail_transaction: String @doc(description: "Detail Transaction")
+    order_increment_id: String @doc(description: "Order Increment Id")
+    amount_credit: Float @doc(description: "Amount Credit")
+    begin_balance: Float @doc(description: "Begin Balance")
+    end_balance: Float @doc(description: "End Balance")
+    transaction_time: String @doc(description: "Transaction Time")
+    customer_group_ids: String @doc(description: "Customer Group Ids")
+    status: String @doc(description: "Status")
+    spent_credit: Float @doc(description: "Spent Credit")
+    received_credit: Float @doc(description: "Received Credit")
+}
+
+interface ProductInterface {
+    storecredit_dropdown: [Float] @doc(description: "The store credit options array") @resolver(class: "Magestore\\CustomercreditGraphQl\\Model\\Resolver\\Product\\StoreCreditDropdown")
+}
+
+type StoreCreditProduct implements ProductInterface, PhysicalProductInterface, CustomizableProductInterface @doc(description: "StoreCreditProduct defines properties of a store credit, including the minimum and maximum values and an array that contains the current and past values on the specific store credit") {
+    storecredit_type: Int @doc(description: "Store credit type")
+    storecredit_rate: Float @doc(description: "The store credit rate")
+    storecredit_value: Float @doc(description: "The fixed value of store credit.")
+    storecredit_from: Float @doc(description: "The minimum acceptable value of an open amount store credit.")
+    storecredit_to: Float @doc(description: "The maximum acceptable value of an open amount store credit.")
+    storecredit_options: [CustomizableOptionInterface] @doc(description: "An array of store credit options.") @resolver(class: "Magestore\\CustomercreditGraphQl\\Model\\Resolver\\Product\\StoreCreditOptions")
+}
+
+type RedeemStoreCreditCodeOutput {
+    status: Boolean @doc(description: "Redeem Status")
+    message: String @doc(description: "Redeem Message")
+}
+
+type Customer {
+    ms_store_credit_balance: Float @resolver (class: "\\Magestore\\CustomercreditGraphQl\\Model\\Resolver\\CustomerStoreCreditBalance") @doc(description: "Customer store credit balance")
+}
+
+input AddStoreCreditProductsToCartInput {
+    cart_id: String!
+    cart_items: [StoreCreditProductCartItemInput!]!
+}
+
+input StoreCreditProductCartItemInput {
+    data: CartItemInput!
+    customizable_options:[CustomizableOptionInput!]
+}
+
+input CartItemInput {
+    storecredit_options: StoreCreditOptions @doc(description: "Store Credit Option")
+}
+
+input StoreCreditOptions {
+    amount: Float @doc(description: "Amount")
+    credit_price_amount: Float @doc(description: "Gift card amount")
+    customer_name: String @doc(description: "Customer Name")
+    send_friend: Int @doc(description: "Send Friend")
+    recipient_name: String @doc(description: "Recipient Name")
+    recipient_email: String @doc(description: "Recipient Email")
+    message: String @doc(description: "Message")
+}
+
+type AddStoreCreditProductsToCardOutput {
+    cart: Cart!
+}
+
+type StoreCreditCartItem implements CartItemInterface @doc(description: "Store Credit Cart Item") {
+    customizable_options: [SelectedCustomizableOption] @resolver(class: "Magento\\QuoteGraphQl\\Model\\Resolver\\CustomizableOptions")
+    storecredit_options: StoreCreditOptionsOutput @doc(description: "Store Credit options output") @resolver(class: "Magestore\\CustomercreditGraphQl\\Model\\Resolver\\StoreCreditOptions")
+}
+
+type StoreCreditOptionsOutput {
+    amount: Float @doc(description: "Amount")
+    credit_price_amount: Float @doc(description: "Gift card amount")
+    customer_name: String @doc(description: "Customer Name")
+    send_friend: Int @doc(description: "Send Friend")
+    recipient_name: String @doc(description: "Recipient Name")
+    recipient_email: String @doc(description: "Recipient Email")
+    message: String @doc(description: "Message")
+}

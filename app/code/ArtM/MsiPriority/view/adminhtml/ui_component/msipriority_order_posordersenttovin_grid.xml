@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">msipriority_order_posordersenttovin_grid.vin_request_grid_listing_data_source</item>
+            <item name="deps" xsi:type="string">msipriority_order_posordersenttovin_grid.vin_request_grid_listing_data_source</item>
+        </item>
+        <item name="spinner" xsi:type="string">vinrequest_columns</item>
+    </argument>
+    <dataSource name="vin_request_grid_listing_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider</argument>
+            <argument name="name" xsi:type="string">vin_request_grid_listing_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">id</argument>
+            <argument name="requestFieldName" xsi:type="string">id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+                    <item name="update_url" xsi:type="url" path="mui/index/render" />
+                    <item name="storageConfig" xsi:type="array">
+                        <item name="indexField" xsi:type="string">id</item>
+                    </item>
+                </item>
+            </argument>
+        </argument>
+    </dataSource>
+    <listing>
+        <listingToolbar>
+            <bookmark name="bookmarks" />
+            <columnsControls name="columns_controls" />
+            <filters>
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="applied" xsi:type="array">
+                            <item name="is_approved" xsi:type="string">1</item>
+                        </item>
+                    </item>
+                </argument>
+            </filters>
+            <paging name="listing_paging" />
+        </listingToolbar>
+    </listing>
+    <columns name="vinrequest_columns">
+        <column name="id">
+            <settings>
+                <filter>text</filter>
+                <label>ID</label>
+            </settings>
+        </column>
+        <column name="pos_order_id">
+            <settings>
+                <filter>text</filter>
+                <label>POS Incremented ID</label>
+            </settings>
+        </column>
+        <column name="request_payload">
+            <settings>
+                <filter>text</filter>
+                <label>Request Payload</label>
+            </settings>
+        </column>
+        <column name="response_payload">
+            <settings>
+                <filter>text</filter>
+                <label>Response</label>
+            </settings>
+        </column>
+        <column name="status">
+            <settings>
+                <filter>text</filter>
+                <label>Status</label>
+            </settings>
+        </column>
+        <column name="created_at">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label>Order Date</label>
+            </settings>
+        </column>
+    </columns>
+</listing>
+
+

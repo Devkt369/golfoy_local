@@ -1,0 +1,432 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="artm_intake_products" resource="default" engine="innodb" comment="ArtM Intake Products">
+        <column xsi:type="int" name="id" nullable="false" identity="true" unsigned="true" comment="ID"/>
+        <column xsi:type="varchar" name="sku" nullable="true" length="64" comment="SKU"/>
+        <column xsi:type="int" name="attribute_set_id" nullable="true" unsigned="true" comment="Attribute Set ID"/>
+        <column xsi:type="varchar" name="attribute_set_code" nullable="true" length="100" comment="Attribute Set Code"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="16" default="draft" comment="Status"/>
+        <column xsi:type="longtext" name="raw_data" nullable="true" comment="Raw Data JSON"/>
+        <column xsi:type="longtext" name="mapped_data" nullable="true" comment="Mapped Data JSON"/>
+        <column xsi:type="text" name="missing_attributes" nullable="true" comment="Missing Attributes"/>
+        <column xsi:type="longtext" name="msi_data_json" nullable="true" comment="MSI Data JSON"/>
+        <column xsi:type="text" name="error_message" nullable="true" comment="Error Message"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <index referenceId="ARTM_INTAKE_PRODUCTS_SKU" indexType="btree">
+            <column name="sku"/>
+        </index>
+        <index referenceId="ARTM_INTAKE_PRODUCTS_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+    </table>
+
+    <table name="artm_intake_mappings" resource="default" engine="innodb" comment="ArtM Intake Mappings">
+        <column xsi:type="int" name="id" nullable="false" identity="true" unsigned="true" comment="ID"/>
+        <column xsi:type="varchar" name="profile_name" nullable="false" length="255" comment="Profile Name"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <index referenceId="ARTM_INTAKE_MAPPINGS_PROFILE_NAME" indexType="btree">
+            <column name="profile_name"/>
+        </index>
+    </table>
+
+    <table name="artm_intake_uploads" resource="default" engine="innodb" comment="ArtM Intake Uploads">
+        <column xsi:type="int" name="id" nullable="false" identity="true" unsigned="true" comment="ID"/>
+        <column xsi:type="varchar" name="filename" nullable="false" length="255" comment="Filename"/>
+        <column xsi:type="varchar" name="original_filename" nullable="true" length="255" comment="Original Filename"/>
+        <column xsi:type="varchar" name="uploaded_by" nullable="true" length="64" comment="Uploaded By"/>
+        <column xsi:type="int" name="total_rows" nullable="true" unsigned="true" comment="Total Rows"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <index referenceId="ARTM_INTAKE_UPLOADS_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+
+    <table name="artm_massupload_mapping" resource="default" engine="innodb" comment="ArtM Mass Upload Mapping">
+        <column xsi:type="int" name="mapping_id" nullable="false" identity="true" unsigned="true" comment="Mapping ID"/>
+        <column xsi:type="int" name="upload_id" nullable="false" unsigned="true" comment="Upload ID"/>
+        <column xsi:type="varchar" name="csv_column" nullable="false" length="255" comment="CSV Column"/>
+        <column xsi:type="varchar" name="attribute_code" nullable="false" length="255" comment="Attribute Code"/>
+        <column xsi:type="smallint" name="is_new" nullable="false" unsigned="true" default="0" comment="Is New Mapping"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="mapping_id"/>
+        </constraint>
+        <index referenceId="ARTM_MASSUPLOAD_MAPPING_UPLOAD_ID" indexType="btree">
+            <column name="upload_id"/>
+        </index>
+    </table>
+
+    <table name="artm_massproducts_draft" resource="default" engine="innodb" comment="ArtM Mass Products Draft Rows">
+        <column xsi:type="int" name="entity_id" nullable="false" identity="true" unsigned="true" comment="Entity ID"/>
+        <column xsi:type="varchar" name="batch_id" nullable="false" length="64" comment="Batch ID"/>
+        <column xsi:type="int" name="row_number" nullable="false" unsigned="true" default="0" comment="CSV Row Number"/>
+        <column xsi:type="varchar" name="sku" nullable="true" length="255" comment="SKU"/>
+        <column xsi:type="varchar" name="parent_sku" nullable="true" length="255" comment="Parent SKU (for simple products under a configurable)"/>
+        <column xsi:type="varchar" name="child_sku" nullable="true" length="255" comment="Child SKU hint (from CSV child column, for configurable products)"/>
+        <column xsi:type="varchar" name="product_name" nullable="true" length="255" comment="Product Name"/>
+        <column xsi:type="varchar" name="attribute_set" nullable="true" length="255" comment="Attribute Set Name"/>
+        <column xsi:type="int" name="attribute_set_id" nullable="true" unsigned="true" comment="Attribute Set ID"/>
+        <column xsi:type="varchar" name="product_type" nullable="false" length="32" default="simple" comment="Product Type"/>
+        <column xsi:type="varchar" name="operation_type" nullable="false" length="20" default="create" comment="Operation Type"/>
+        <column xsi:type="longtext" name="mapped_data" nullable="true" comment="Mapped Attribute Data JSON"/>
+        <column xsi:type="longtext" name="raw_data" nullable="true" comment="Original CSV Row JSON"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="32" default="incomplete" comment="Status"/>
+        <column xsi:type="int" name="missing_attributes_count" nullable="false" unsigned="true" default="0" comment="Missing Required Attributes Count"/>
+        <column xsi:type="datetime" name="last_uploaded_at" nullable="true" comment="Last Uploaded At"/>
+        <column xsi:type="varchar" name="last_uploaded_by" nullable="true" length="20" comment="Last Uploaded By"/>
+        <column xsi:type="varchar" name="drafted_by" nullable="true" length="64" comment="Drafted By"/>
+        <column xsi:type="varchar" name="ready_by" nullable="true" length="64" comment="Ready By"/>
+        <column xsi:type="varchar" name="added_by" nullable="true" length="64" comment="Added By"/>
+        <column xsi:type="varchar" name="base_image" nullable="true" length="255" comment="Base Image"/>
+        <column xsi:type="varchar" name="product_url" nullable="true" length="255" comment="Product URL"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <index referenceId="ARTM_MASSPRODUCTS_DRAFT_BATCH_ID" indexType="btree">
+            <column name="batch_id"/>
+        </index>
+        <index referenceId="ARTM_MASSPRODUCTS_DRAFT_SKU" indexType="btree">
+            <column name="sku"/>
+        </index>
+        <index referenceId="ARTM_MASSPRODUCTS_DRAFT_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+        <index referenceId="ARTM_MASSPRODUCTS_DRAFT_OPERATION_TYPE" indexType="btree">
+            <column name="operation_type"/>
+        </index>
+    </table>
+
+    <table name="artm_massproducts_draft_values" resource="default" engine="innodb" comment="ArtM Draft Attribute Values">
+        <column xsi:type="int" name="value_id" nullable="false" identity="true" unsigned="true" comment="Value ID"/>
+        <column xsi:type="int" name="draft_id" nullable="false" unsigned="true" comment="Draft ID"/>
+        <column xsi:type="varchar" name="attribute_code" nullable="false" length="255" comment="Attribute Code"/>
+        <column xsi:type="text" name="value" nullable="true" comment="Attribute Value"/>
+        <column xsi:type="smallint" name="store_id" nullable="false" unsigned="true" default="0" comment="Store ID"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="value_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_MASSPRODUCTS_DRAFT_VALUES_UNQ">
+            <column name="draft_id"/>
+            <column name="attribute_code"/>
+            <column name="store_id"/>
+        </constraint>
+        <index referenceId="ARTM_MASSPRODUCTS_DRAFT_VALUES_DRAFT_ID" indexType="btree">
+            <column name="draft_id"/>
+        </index>
+        <index referenceId="ARTM_MASSPRODUCTS_DRAFT_VALUES_ATTRIBUTE_CODE" indexType="btree">
+            <column name="attribute_code"/>
+        </index>
+    </table>
+
+    <table name="artm_massproducts_column_mapping" resource="default" engine="innodb" comment="ArtM Global Column Mapping">
+        <column xsi:type="int" name="entity_id" nullable="false" identity="true" unsigned="true" comment="Entity ID"/>
+        <column xsi:type="varchar" name="csv_column" nullable="false" length="255" comment="CSV Column"/>
+        <column xsi:type="varchar" name="attribute_code" nullable="false" length="255" comment="Magento Attribute Code"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_MASSPRODUCTS_COLMAP_CSV_COLUMN_UNQ">
+            <column name="csv_column"/>
+        </constraint>
+        <index referenceId="ARTM_MASSPRODUCTS_COLMAP_ATTRIBUTE_CODE" indexType="btree">
+            <column name="attribute_code"/>
+        </index>
+    </table>
+
+    <table name="artm_massproducts_attrset_cache" resource="default" engine="innodb" comment="ArtM Attribute Set Attribute Cache">
+        <column xsi:type="int" name="cache_id" nullable="false" identity="true" unsigned="true" comment="Cache ID"/>
+        <column xsi:type="int" name="attribute_set_id" nullable="false" unsigned="true" comment="Attribute Set ID"/>
+        <column xsi:type="varchar" name="attribute_set_name" nullable="false" length="255" comment="Attribute Set Name"/>
+        <column xsi:type="longtext" name="attributes_json" nullable="false" comment="Attributes JSON (includes required flags)"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="cache_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_MASSPRODUCTS_ATTRSET_CACHE_SET_ID_UNQ">
+            <column name="attribute_set_id"/>
+        </constraint>
+    </table>
+
+    <table name="artm_massproducts_attr_assignment" resource="default" engine="innodb" comment="ArtM Attribute Visibility Assignment">
+        <column xsi:type="int" name="entity_id" nullable="false" identity="true" unsigned="true" comment="Entity ID"/>
+        <column xsi:type="int" name="attribute_set_id" nullable="false" unsigned="true" default="0" comment="Attribute Set ID (0 = global)"/>
+        <column xsi:type="varchar" name="attribute_code" nullable="false" length="255" comment="Attribute Code"/>
+        <column xsi:type="smallint" name="is_enabled" nullable="false" unsigned="true" default="1" comment="1 enabled, 0 disabled"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_MASSPRODUCTS_ATTR_ASSIGN_UNQ">
+            <column name="attribute_set_id"/>
+            <column name="attribute_code"/>
+        </constraint>
+        <index referenceId="ARTM_MASSPRODUCTS_ATTR_ASSIGN_SET" indexType="btree">
+            <column name="attribute_set_id"/>
+        </index>
+    </table>
+
+    <table name="artm_massproducts_attr_sort" resource="default" engine="innodb" comment="ArtM Attribute Sort Order">
+        <column xsi:type="int" name="entity_id" nullable="false" identity="true" unsigned="true" comment="Entity ID"/>
+        <column xsi:type="int" name="attribute_set_id" nullable="false" unsigned="true" comment="Attribute Set ID"/>
+        <column xsi:type="varchar" name="attribute_code" nullable="false" length="255" comment="Attribute Code"/>
+        <column xsi:type="int" name="sort_order" nullable="false" unsigned="true" default="0" comment="Sort Order"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_MASSPRODUCTS_ATTR_SORT_UNQ">
+            <column name="attribute_set_id"/>
+            <column name="attribute_code"/>
+        </constraint>
+        <index referenceId="ARTM_MASSPRODUCTS_ATTR_SORT_SET" indexType="btree">
+            <column name="attribute_set_id"/>
+        </index>
+    </table>
+
+    <table name="artm_massproducts_draft_media" resource="default" engine="innodb" comment="ArtM Draft Product Media">
+        <column xsi:type="int" name="media_id" nullable="false" identity="true" unsigned="true" comment="Media ID"/>
+        <column xsi:type="int" name="draft_id" nullable="false" unsigned="true" comment="Draft ID"/>
+        <column xsi:type="varchar" name="file_path" nullable="false" length="500" comment="Relative path under pub/media"/>
+        <column xsi:type="varchar" name="roles" nullable="false" length="100" default="" comment="Comma-separated roles: base,small,thumbnail"/>
+        <column xsi:type="int" name="position" nullable="false" unsigned="true" default="0" comment="Sort Position"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="media_id"/>
+        </constraint>
+        <index referenceId="ARTM_MASSPRODUCTS_DRAFT_MEDIA_DRAFT_ID" indexType="btree">
+            <column name="draft_id"/>
+        </index>
+    </table>
+
+    <table name="artm_massproducts_cron_log" resource="default" engine="innodb" comment="ArtM Cron Execution Log">
+        <column xsi:type="int" name="log_id" nullable="false" identity="true" unsigned="true" comment="Log ID"/>
+        <column xsi:type="datetime" name="started_at" nullable="true" comment="Started At"/>
+        <column xsi:type="datetime" name="finished_at" nullable="true" comment="Finished At"/>
+        <column xsi:type="int" name="total_products" nullable="false" unsigned="true" default="0" comment="Total Products"/>
+        <column xsi:type="int" name="success_count" nullable="false" unsigned="true" default="0" comment="Success Count"/>
+        <column xsi:type="int" name="failure_count" nullable="false" unsigned="true" default="0" comment="Failure Count"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="32" default="failed" comment="Status"/>
+        <column xsi:type="varchar" name="triggered_by" nullable="false" length="20" default="cron" comment="Triggered By"/>
+        <column xsi:type="text" name="message" nullable="true" comment="Message"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="log_id"/>
+        </constraint>
+        <index referenceId="ARTM_MASSPRODUCTS_CRON_LOG_FINISHED_AT" indexType="btree">
+            <column name="finished_at"/>
+        </index>
+        <index referenceId="ARTM_MASSPRODUCTS_CRON_LOG_TRIGGERED_BY" indexType="btree">
+            <column name="triggered_by"/>
+        </index>
+    </table>
+
+    <table name="artm_massproducts_product_log" resource="default" engine="innodb" comment="ArtM Product Upload Log">
+        <column xsi:type="int" name="entity_id" nullable="false" identity="true" unsigned="true" comment="Entity ID"/>
+        <column xsi:type="int" name="product_id" nullable="true" unsigned="true" comment="Product ID"/>
+        <column xsi:type="varchar" name="sku" nullable="true" length="255" comment="SKU"/>
+        <column xsi:type="int" name="draft_id" nullable="true" unsigned="true" comment="Draft ID"/>
+        <column xsi:type="datetime" name="uploaded_at" nullable="true" comment="Uploaded At"/>
+        <column xsi:type="varchar" name="uploaded_by" nullable="false" length="20" default="cron" comment="Uploaded By"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="32" default="failed" comment="Status"/>
+        <column xsi:type="text" name="message" nullable="true" comment="Message"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <index referenceId="ARTM_MASSPRODUCTS_PRODUCT_LOG_SKU" indexType="btree">
+            <column name="sku"/>
+        </index>
+        <index referenceId="ARTM_MASSPRODUCTS_PRODUCT_LOG_DRAFT_ID" indexType="btree">
+            <column name="draft_id"/>
+        </index>
+        <index referenceId="ARTM_MASSPRODUCTS_PRODUCT_LOG_UPLOADED_AT" indexType="btree">
+            <column name="uploaded_at"/>
+        </index>
+    </table>
+
+    <table name="artm_massproduct_activity_log" resource="default" engine="innodb" comment="ArtM MassProduct Activity Log">
+        <column xsi:type="int" name="entity_id" nullable="false" identity="true" unsigned="true" comment="Entity ID"/>
+        <column xsi:type="varchar" name="action_type" nullable="false" length="64" comment="Action Type"/>
+        <column xsi:type="varchar" name="sku" nullable="true" length="255" comment="Product SKU"/>
+        <column xsi:type="int" name="draft_id" nullable="true" unsigned="true" comment="Draft ID"/>
+        <column xsi:type="int" name="upload_id" nullable="true" unsigned="true" comment="Upload ID"/>
+        <column xsi:type="varchar" name="sheet_name" nullable="true" length="255" comment="Sheet Name"/>
+        <column xsi:type="int" name="product_count" nullable="true" unsigned="true" comment="Product Count"/>
+        <column xsi:type="int" name="admin_user_id" nullable="true" unsigned="true" comment="Admin User ID"/>
+        <column xsi:type="varchar" name="admin_username" nullable="true" length="64" comment="Admin Username"/>
+        <column xsi:type="text" name="details" nullable="true" comment="Details"/>
+        <column xsi:type="text" name="comment" nullable="true" comment="Comment"/>
+        <column xsi:type="datetime" name="occurred_at" nullable="false" comment="Occurred At"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <index referenceId="ARTM_MASSPRODUCT_ACTIVITY_ACTION" indexType="btree">
+            <column name="action_type"/>
+        </index>
+        <index referenceId="ARTM_MASSPRODUCT_ACTIVITY_SKU" indexType="btree">
+            <column name="sku"/>
+        </index>
+        <index referenceId="ARTM_MASSPRODUCT_ACTIVITY_ADMIN" indexType="btree">
+            <column name="admin_username"/>
+        </index>
+        <index referenceId="ARTM_MASSPRODUCT_ACTIVITY_OCCURRED" indexType="btree">
+            <column name="occurred_at"/>
+        </index>
+    </table>
+
+    <table name="artm_massproducts_user_store_pref" resource="default" engine="innodb" comment="ArtM Per User Store Preference">
+        <column xsi:type="int" name="pref_id" nullable="false" identity="true" unsigned="true" comment="Preference ID"/>
+        <column xsi:type="int" name="user_id" nullable="false" unsigned="true" comment="Admin User ID"/>
+        <column xsi:type="smallint" name="selected_store_id" nullable="false" unsigned="true" default="0" comment="Selected Store View ID"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="pref_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_MASSPRODUCTS_USER_STORE_PREF_USER_UNQ">
+            <column name="user_id"/>
+        </constraint>
+        <index referenceId="ARTM_MASSPRODUCTS_USER_STORE_PREF_STORE" indexType="btree">
+            <column name="selected_store_id"/>
+        </index>
+    </table>
+
+    <table name="artm_single_sku_layout" resource="default" engine="innodb" comment="ArtM Single SKU Layout Configuration">
+        <column xsi:type="int" name="entity_id" nullable="false" identity="true" unsigned="true" comment="Entity ID"/>
+        <column xsi:type="int" name="attribute_set_id" nullable="false" unsigned="true" default="0" comment="Attribute Set ID (0 = global)"/>
+        <column xsi:type="varchar" name="attribute_code" nullable="false" length="255" comment="Attribute Code"/>
+        <column xsi:type="varchar" name="group_name" nullable="false" length="255" default="Basic Info" comment="Group Name"/>
+        <column xsi:type="smallint" name="is_enabled" nullable="false" unsigned="true" default="0" comment="Enabled Flag"/>
+        <column xsi:type="int" name="sort_order" nullable="false" unsigned="true" default="0" comment="Sort Order"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_SINGLE_SKU_LAYOUT_UNQ_SET_ATTR">
+            <column name="attribute_set_id"/>
+            <column name="attribute_code"/>
+        </constraint>
+        <index referenceId="ARTM_SINGLE_SKU_LAYOUT_SET" indexType="btree">
+            <column name="attribute_set_id"/>
+        </index>
+        <index referenceId="ARTM_SINGLE_SKU_LAYOUT_GROUP" indexType="btree">
+            <column name="group_name"/>
+        </index>
+        <index referenceId="ARTM_SINGLE_SKU_LAYOUT_ENABLED" indexType="btree">
+            <column name="is_enabled"/>
+        </index>
+    </table>
+
+    <table name="artm_single_sku_group_layout" resource="default" engine="innodb" comment="ArtM Single SKU Group Placement">
+        <column xsi:type="int" name="entity_id" nullable="false" identity="true" unsigned="true" comment="Entity ID"/>
+        <column xsi:type="int" name="attribute_set_id" nullable="false" unsigned="true" default="0" comment="Attribute Set ID"/>
+        <column xsi:type="varchar" name="group_name" nullable="false" length="255" comment="Group Name"/>
+        <column xsi:type="smallint" name="is_enabled" nullable="false" unsigned="true" default="1" comment="Group Enabled"/>
+        <column xsi:type="smallint" name="column_index" nullable="false" unsigned="true" default="1" comment="Column Index"/>
+        <column xsi:type="int" name="sort_order" nullable="false" unsigned="true" default="0" comment="Group Sort Order"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_SINGLE_SKU_GROUP_LAYOUT_UNQ">
+            <column name="attribute_set_id"/>
+            <column name="group_name"/>
+        </constraint>
+        <index referenceId="ARTM_SINGLE_SKU_GROUP_LAYOUT_SET" indexType="btree">
+            <column name="attribute_set_id"/>
+        </index>
+    </table>
+
+    <table name="artm_single_sku_template" resource="default" engine="innodb" comment="ArtM Single SKU HTML Template">
+        <column xsi:type="int" name="entity_id" nullable="false" identity="true" unsigned="true" comment="Entity ID"/>
+        <column xsi:type="int" name="attribute_set_id" nullable="false" unsigned="true" default="0" comment="Attribute Set ID"/>
+        <column xsi:type="longtext" name="template_html" nullable="true" comment="Sanitized Template HTML"/>
+        <column xsi:type="longtext" name="custom_css" nullable="true" comment="Sanitized CSS"/>
+        <column xsi:type="longtext" name="fallback_template_html" nullable="true" comment="Fallback Template HTML"/>
+        <column xsi:type="smallint" name="is_valid" nullable="false" unsigned="true" default="1" comment="Template Valid Flag"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_SINGLE_SKU_TEMPLATE_UNQ_SET">
+            <column name="attribute_set_id"/>
+        </constraint>
+    </table>
+
+    <table name="artm_category_reorder_history" resource="default" engine="innodb" comment="ArtM Category Reorder History">
+        <column xsi:type="int" name="entity_id" nullable="false" identity="true" unsigned="true" comment="Entity ID"/>
+        <column xsi:type="int" name="category_id" nullable="false" unsigned="true" comment="Category ID"/>
+        <column xsi:type="int" name="version" nullable="false" unsigned="true" default="1" comment="Version"/>
+        <column xsi:type="varchar" name="file_name" nullable="true" length="255" comment="File Name"/>
+        <column xsi:type="varchar" name="file_path" nullable="true" length="500" comment="File Path Under var"/>
+        <column xsi:type="datetime" name="downloaded_at" nullable="true" comment="Downloaded At"/>
+        <column xsi:type="varchar" name="downloaded_by" nullable="true" length="64" comment="Downloaded By"/>
+        <column xsi:type="datetime" name="uploaded_at" nullable="true" comment="Uploaded At"/>
+        <column xsi:type="varchar" name="uploaded_by" nullable="true" length="64" comment="Uploaded By"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="32" default="pending" comment="Status"/>
+        <column xsi:type="int" name="total_products" nullable="false" unsigned="true" default="0" comment="Total Products"/>
+        <column xsi:type="int" name="success_count" nullable="false" unsigned="true" default="0" comment="Success Count"/>
+        <column xsi:type="int" name="failed_count" nullable="false" unsigned="true" default="0" comment="Failed Count"/>
+        <column xsi:type="text" name="remarks" nullable="true" comment="Remarks"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <index referenceId="ARTM_CAT_REORDER_HISTORY_CAT" indexType="btree">
+            <column name="category_id"/>
+        </index>
+        <index referenceId="ARTM_CAT_REORDER_HISTORY_VER" indexType="btree">
+            <column name="category_id"/>
+            <column name="version"/>
+        </index>
+        <index referenceId="ARTM_CAT_REORDER_HISTORY_STAT" indexType="btree">
+            <column name="status"/>
+        </index>
+    </table>
+
+    <table name="artm_category_reorder_item" resource="default" engine="innodb" comment="ArtM Category Reorder Items">
+        <column xsi:type="int" name="item_id" nullable="false" identity="true" unsigned="true" comment="Item ID"/>
+        <column xsi:type="int" name="history_id" nullable="false" unsigned="true" comment="History ID"/>
+        <column xsi:type="int" name="category_id" nullable="false" unsigned="true" comment="Category ID"/>
+        <column xsi:type="int" name="product_id" nullable="true" unsigned="true" comment="Product ID"/>
+        <column xsi:type="varchar" name="sku" nullable="false" length="255" comment="SKU"/>
+        <column xsi:type="varchar" name="product_name" nullable="true" length="255" comment="Product Name"/>
+        <column xsi:type="int" name="old_position" nullable="false" default="0" comment="Old Position"/>
+        <column xsi:type="int" name="new_position" nullable="false" default="0" comment="New Position"/>
+        <column xsi:type="varchar" name="row_status" nullable="false" length="20" default="pending" comment="Row Status"/>
+        <column xsi:type="text" name="remarks" nullable="true" comment="Remarks"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="item_id"/>
+        </constraint>
+        <index referenceId="ARTM_CAT_REORDER_ITEM_HIS" indexType="btree">
+            <column name="history_id"/>
+        </index>
+        <index referenceId="ARTM_CAT_REORDER_ITEM_CAT" indexType="btree">
+            <column name="category_id"/>
+        </index>
+        <index referenceId="ARTM_CAT_REORDER_ITEM_SKU" indexType="btree">
+            <column name="sku"/>
+        </index>
+    </table>
+</schema>

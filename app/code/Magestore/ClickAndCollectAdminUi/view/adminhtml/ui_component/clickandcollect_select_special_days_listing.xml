@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Copyright © 2020 Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">clickandcollect_select_special_days_listing.clickandcollect_select_special_days_listing_data_source</item>
+            <item name="deps" xsi:type="string">clickandcollect_select_special_days_listing.clickandcollect_select_special_days_listing_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <spinner>clickandcollectadmin_specialday_columns</spinner>
+        <deps>
+            <dep>clickandcollect_select_special_days_listing.clickandcollect_select_special_days_listing_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="clickandcollect_select_special_days_listing_data_source" component="Magestore_ClickAndCollectAdminUi/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">specialday_id</param>
+            </storageConfig>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <aclResource>Magestore_ClickAndCollectAdminUi::specialday</aclResource>
+        <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider"
+                      name="clickandcollect_select_special_days_listing_data_source">
+            <settings>
+                <requestFieldName>id</requestFieldName>
+                <primaryFieldName>specialday_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <listingToolbar name="listing_top">
+        <settings>
+            <sticky>true</sticky>
+        </settings>
+        <filters name="listing_filters"/>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+    <columns name="clickandcollectadmin_specialday_columns">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="editorConfig" xsi:type="array">
+                    <item name="selectProvider" xsi:type="string">clickandcollect_select_special_days_listing.clickandcollect_select_special_days_listing.clickandcollectadmin_specialday_columns.ids</item>
+                    <item name="enabled" xsi:type="boolean">true</item>
+                    <item name="indexField" xsi:type="string">specialday_id</item>
+                </item>
+            </item>
+        </argument>
+        <selectionsColumn name="ids" sortOrder="1" component="Magestore_ClickAndCollectAdminUi/js/grid/columns/multiselect">
+            <settings>
+                <indexField>specialday_id</indexField>
+                <preserveSelectionsOnFilter>true</preserveSelectionsOnFilter>
+                <visible>true</visible>
+            </settings>
+        </selectionsColumn>
+        <column name="specialday_name" sortOrder="10">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Name</label>
+                <sortable>true</sortable>
+            </settings>
+        </column>
+        <column name="store_status"
+                component="Magento_Ui/js/grid/columns/select"
+                sortOrder="20">
+            <settings>
+                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\OpenCloseStatus"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Store Status</label>
+                <sortable>true</sortable>
+            </settings>
+        </column>
+    </columns>
+</listing>

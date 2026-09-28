@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Widget:etc/widget.xsd">
+    <widget id="artm_product_slider"
+            class="ArtM\ProductSlider\Block\Slider"
+            is_email_compatible="false"
+            placeholder_image="Magento_Cms::images/widget_block.png">
+        <label translate="true">ArtM Product Slider</label>
+        <description translate="true">Render ArtM product slider by identifier</description>
+        <parameters>
+            <parameter name="slider_id" xsi:type="text" visible="true" required="false" sort_order="5">
+                <label translate="true">Slider ID</label>
+            </parameter>
+            <parameter name="identifier" xsi:type="text" visible="true" required="false" sort_order="10">
+                <label translate="true">Slider Identifier</label>
+            </parameter>
+            <parameter name="template" xsi:type="select" visible="true" required="true" sort_order="20">
+                <label translate="true">Template</label>
+                <options>
+                    <option name="default" value="ArtM_ProductSlider::slider/view.phtml" selected="true">
+                        <label translate="true">Default Slider Template</label>
+                    </option>
+                </options>
+            </parameter>
+        </parameters>
+    </widget>
+
+    <widget id="artm_product_slider_group"
+            class="ArtM\ProductSlider\Block\Group"
+            is_email_compatible="false"
+            placeholder_image="Magento_Cms::images/widget_block.png">
+        <label translate="true">ArtM Product Slider Group</label>
+        <description translate="true">Render ArtM product slider group by identifier or ID</description>
+        <parameters>
+            <parameter name="group_id" xsi:type="text" visible="true" required="false" sort_order="5">
+                <label translate="true">Group ID</label>
+            </parameter>
+            <parameter name="identifier" xsi:type="text" visible="true" required="false" sort_order="10">
+                <label translate="true">Group Identifier</label>
+            </parameter>
+            <parameter name="template" xsi:type="select" visible="true" required="true" sort_order="20">
+                <label translate="true">Template</label>
+                <options>
+                    <option name="default" value="ArtM_ProductSlider::group/view.phtml" selected="true">
+                        <label translate="true">Default Group Template</label>
+                    </option>
+                </options>
+            </parameter>
+        </parameters>
+    </widget>
+</widgets>

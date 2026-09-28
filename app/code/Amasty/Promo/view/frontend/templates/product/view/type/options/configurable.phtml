@@ -1,0 +1,30 @@
+<?php
+/**
+ * @author Amasty Team
+ * @copyright Copyright (c) Amasty (https://www.amasty.com)
+ * @package Free Gift Base for Magento 2
+ */
+/**
+ * @var $block Magento\ConfigurableProduct\Block\Product\View\Type\Configurable
+ * @var $escaper Magento\Framework\Escaper
+ */
+$_product    = $block->getProduct();
+$_attributes = $block->decorateArray($block->getAllowAttributes());
+?>
+<?php if ($_product->isSaleable() && count($_attributes)):?>
+    <?php foreach ($_attributes as $_attribute): ?>
+        <div class="field configurable required">
+            <label class="label" for="attribute<?= (int)$_attribute->getAttributeId() . "-" . $escaper->escapeHtml($_product->getId())?>">
+                <span><?= $escaper->escapeHtml($_attribute->getProductAttribute()->getStoreLabel()) ?></span>
+            </label>
+            <div class="control">
+                <select name="super_attribute[<?= (int)$_attribute->getAttributeId() ?>]"
+                        data-validate="{required:true}"
+                        id="attribute<?= $escaper->escapeHtml($_attribute->getAttributeId()) . "-" . $escaper->escapeHtml($_product->getId()) ?>"
+                        class="super-attribute-select">
+                    <option value=""><?= $escaper->escapeHtml(__('Choose an Option...')); ?></option>
+                </select>
+            </div>
+        </div>
+    <?php endforeach; ?>
+<?php endif;?>

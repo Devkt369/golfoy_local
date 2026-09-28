@@ -1,0 +1,355 @@
+<?php
+
+/** @var \Magento\Customer\Block\Account\Dashboard\Info $block */
+$customer = $block->getCustomer();
+$name = $block->escapeHtml($block->getName());
+$email = $block->escapeHtml($customer->getEmail());
+$billingId = $customer->getDefaultBilling(); // e.g. 26770
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$addressRepository = $objectManager->get(\Magento\Customer\Api\AddressRepositoryInterface::class);
+
+try {
+    $address = $addressRepository->getById($billingId);
+
+    // Safely get address fields
+    $company = $address->getCompany() ?: "";
+    $gst = $address->getVatId() ?: '';
+
+    $taxvat = $customer->getTaxvat();
+
+    $pan = $customer->getCustomAttribute('pan_number');
+    $panValue = $pan ? $block->escapeHtml($pan->getValue()) : '';
+} catch (\Exception $e) {
+    // Fallback defaults if something goes wrong
+    $company = "";
+    $taxvat = '';
+    $panValue = '';
+}
+
+$customerCode = 'NOTFOUND';
+?>
+<div class="block block-dashboard-info profile-wrapper">
+    <div class="profile-card">
+        <div class="profile-photo">
+            <div class="avatar">
+                <?= $block->escapeHtml(substr($name ?? '', 0, 1)) ?>
+                <i class="icon-user"></i>
+            </div>
+            <h3 class="profile-name"><?= $block->escapeHtml($name) ?>
+                <span class="btn-edit">
+                    <a href="<?= $block->escapeUrl($block->getUrl('customer/account/edit')) ?>">
+                        <img src="https://golfoy.com/media/partners/edit-info-grey.png" alt="account-edit-partners">
+                    </a>
+                </span>
+            </h3>
+
+        </div>
+
+        <div class="profile-info">
+            <!-- <div class="info-box">
+                <div>
+                    <span class="label">Name</span>
+                    <span class="value"><?= $name ?></span>
+                </div>
+            </div> -->
+            <div class="info-box">
+                <div>
+                    <span class="label">Email</span>
+                    <span class="value"><?= $email ?></span>
+                </div>
+            </div>
+            <?php if ($company !== ''): ?>
+                <div class="info-box">
+                    <div>
+                        <span class="label">Company</span>
+                        <span class="value"><?= $company ?></span>
+                    </div>
+                </div>
+            <?php endif; ?>
+            <?php if ($taxvat !== ''): ?>
+                <div class="info-box">
+                    <!-- <div class="hide">
+                    <span class="label">PAN NO.</span>
+                    <span class="value"><?= $panValue ?></span>
+                </div> -->
+                    <div>
+                        <span class="label">GST NO.</span>
+                        <span class="value"><?= $taxvat ?></span>
+                    </div>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<style>
+    .customer-account-top-wrapper {
+        display: flex;
+        align-items: flex-start;
+        gap: 40px;
+        margin-bottom: 30px;
+    }
+
+    .customer-account-top-wrapper .block-dashboard-info.profile-wrapper {
+        flex: 0 0 300px;
+    }
+
+    .customer-account-top-wrapper .block-dashboard-addresses {
+        flex: 1;
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .customer-account-top-wrapper .block-dashboard-addresses .box {
+        background: #f9fafb;
+        border: 1px solid #e6ebf1;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 20px;
+    }
+
+    @media (max-width: 991px) {
+        .customer-account-top-wrapper {
+            flex-direction: column;
+        }
+
+        .customer-account-top-wrapper .block-dashboard-info.profile-wrapper,
+        .customer-account-top-wrapper .block-dashboard-addresses {
+            flex: none;
+            width: 100%;
+        }
+    }
+
+    .btn-edit a img {
+        width: 20px;
+    }
+
+    .btn-edit {
+        background: transparent;
+    }
+
+    .btn-edit:hover {
+        background: transparent;
+    }
+
+    .profile-wrapper {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        background: #f7f9fb;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .profile-card {
+        width: 100%;
+        background: #fff;
+        border-radius: 16px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .profile-photo .avatar {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: #e8edf2;
+        margin: 0 auto 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        color: #6b7c8c;
+        padding: 7px 0 0 0;
+    }
+
+    .profile-name {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .btn-edit a {
+        display: inline-block;
+        font-size: 14px;
+        text-decoration: none;
+        transition: 0.2s;
+    }
+
+    span.btn-edit {
+        position: relative;
+        top: -2px;
+    }
+
+    .info-box {
+        display: flex;
+        justify-content: center;
+        background: #f6f6f6;
+        border: 1px solid #e6ebf1;
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-top: 20px;
+        font-size: 14px;
+    }
+
+    .info-box.single {
+        flex-direction: column;
+        text-align: left;
+    }
+
+    .label {
+        display: block;
+        font-weight: 600;
+        color: #55697a;
+    }
+
+    .value {
+        color: #1f2a37;
+    }
+
+    .profile-details {
+        flex: 1;
+        margin-top: 20px;
+    }
+
+    .profile-details h2 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 5px;
+        color: #1f2a37;
+    }
+
+    .profile-details p {
+        margin: 3px 0;
+        color: #4a5568;
+        font-size: 15px;
+    }
+
+    .profile-wrapper {
+        margin-top: 0px;
+    }
+</style>
+
+<style>
+    .customer-account-top-wrapper {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        /* helps with wrapping on smaller screens */
+    }
+
+    /* Profile card on the left */
+    .customer-account-top-wrapper .block-dashboard-info.profile-wrapper {
+        flex: 0 0 300px;
+        min-width: 300px;
+    }
+
+    /* Address book on the right */
+    .customer-account-top-wrapper .block-dashboard-addresses {
+        flex: 1;
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Address box styling */
+    .customer-account-top-wrapper .block-dashboard-addresses .box {
+        background: #f9fafb;
+        border: 1px solid #e6ebf1;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 20px;
+    }
+
+    /* -------------------------------------------- */
+    /* ✅ Responsive adjustments */
+    /* -------------------------------------------- */
+
+    /* Medium screens (tablets) */
+    @media (max-width: 1024px) {
+        .customer-account-top-wrapper {
+            gap: 0px;
+        }
+
+        .customer-account-top-wrapper .block-dashboard-info.profile-wrapper {
+            flex: 0 0 350px;
+        }
+    }
+
+    /* Small tablets and large phones */
+    @media (max-width: 768px) {
+        .customer-account-top-wrapper {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .customer-account-top-wrapper .block-dashboard-info.profile-wrapper,
+        .customer-account-top-wrapper .block-dashboard-addresses {
+            flex: none;
+            width: 100%;
+        }
+
+        .customer-account-top-wrapper .block-dashboard-addresses {
+            margin-top: 20px;
+        }
+    }
+
+    /* Small phones */
+    @media (max-width: 480px) {
+        .block-collapsible-nav {
+            top: 35px !important;
+        }
+
+        .profile-card {
+            padding: 18px;
+        }
+
+        .profile-photo .avatar {
+            width: 70px;
+            height: 70px;
+            font-size: 30px;
+        }
+
+        .profile-name {
+            font-size: 16px;
+        }
+
+        .btn-edit a {
+            font-size: 13px;
+            /* padding: 0 0 0 10px; */
+        }
+
+        .info-box {
+            flex-direction: column;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .customer-account-top-wrapper .block-dashboard-addresses {
+            padding: 0px !important;
+        }
+    }
+
+    .customer-account-top-wrapper .block-dashboard-addresses .box {
+        background: #ffffff !important;
+    }
+
+    @media only screen and (min-width: 768px) and (max-width: 1439px) {
+        .login-container div#signon_button {
+            top: 120px !important;
+        }
+    }
+
+    @media only screen and (min-width: 1439px) and (max-width: 1920px) {
+        .login-container div#signon_button {
+            top: 270px !important;
+        }
+    }
+</style>

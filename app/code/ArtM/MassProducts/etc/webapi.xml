@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/artm/product/load" method="POST">
+        <service class="ArtM\MassProducts\Api\ProductLoadInterface" method="load"/>
+        <resources>
+            <resource ref="ArtM_MassProducts::mass_upload_product"/>
+        </resources>
+    </route>
+    <route url="/V1/artm/product/save" method="POST">
+        <service class="ArtM\MassProducts\Api\ProductSaveInterface" method="save"/>
+        <resources>
+            <resource ref="ArtM_MassProducts::mass_upload_product"/>
+        </resources>
+    </route>
+
+    <route url="/V1/artm/product-image/set" method="POST">
+        <service class="ArtM\MassProducts\Api\ProductImageManagementInterface" method="setProductImage"/>
+        <resources>
+            <resource ref="ArtM_MassProducts::mass_upload_product"/>
+            <!-- <resource ref="anonymous"/> -->
+        </resources>
+    </route>
+</routes>

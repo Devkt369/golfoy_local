@@ -1,0 +1,791 @@
+<style>
+    table.trade_table {
+        width: 100%;
+        text-align: center;
+    }
+
+    select.tradein-select {
+        margin-bottom: 5px;
+    }
+
+    div#other-input-container input {
+        width: 100%;
+        padding: 5px;
+    }
+
+    td.created-at {
+        min-width: 80px;
+    }
+
+    select.tradein-select {
+        min-width: 100%;
+    }
+
+    button.trade_grid_action.submit_tradein_row {
+
+        display: block;
+        margin: auto;
+        width: 100%;
+        background: #5149436e;
+        color: black;
+        border: none;
+    }
+
+    .ref-id input {
+        width: 100%;
+    }
+
+    .amount-container input {
+        width: 100%;
+    }
+
+    .disables-comment input,
+    .ref input,
+    .amount input {
+        background-color: #f0f0f0;
+        color: #999999;
+        border: 1px solid #ccc;
+        cursor: not-allowed !important;
+        opacity: 1;
+        width: 100%;
+    }
+
+    button.update-status {
+        width: 100%;
+        margin-top: 5px;
+    }
+
+    input.ref-input,
+    select.tradein-select,
+    input.amount-input,
+    .disables-comment input,
+    .ref input,
+    .amount input {
+        padding: 5px;
+        min-width: 150px;
+        width: 100%;
+    }
+
+    input.ref-input td.status-column {
+        min-width: 180px;
+    }
+
+    td.payment-info-custom>div {
+        margin-bottom: 5px;
+    }
+
+    body.artmtradein-index-index tbody.trade_table_data tr:nth-child(even) td {
+        background-color: #f5f5f5 !important;
+    }
+
+    select.status_tradein_admin {
+        padding: 7px 0px;
+        width: 100%;
+        min-width: 100px;
+    }
+
+    .trade-search-email,
+    .trade-search-id {
+        display: inline;
+    }
+
+    tr.trade_tr {
+        font-size: 15px;
+        border-bottom: 1px solid #d6d6d6;
+        background-color: whitesmoke;
+    }
+
+    tr.trade_tr>th {
+        padding: 10px 5px;
+    }
+
+    tbody.trade_table_data>tr {
+        border-bottom: 1px solid #d6d6d6;
+    }
+
+    tr.trade_table_values>td {
+        padding: 5px;
+    }
+
+    .trade_table_data {
+        overflow-y: auto;
+    }
+
+    select.status_tradein_admin {
+        border: 0px;
+        background-color: transparent;
+    }
+
+    select.status_tradein_admin.editable {
+        border: 1px solid #cdcdcd;
+        color: black;
+        min-width: 110px;
+    }
+
+    .hide {
+        display: none;
+    }
+
+    select.status_tradein_admin {
+        border: 1px solid #c5babaeb;
+        text-transform: capitalize;
+    }
+
+    /* pagination */
+    .pagination {
+        text-align: right;
+        margin-top: 10px;
+        margin-bottom: 0px;
+    }
+
+    .pagination-button {
+        display: inline-block;
+        padding: 5px 10px;
+        text-decoration: none;
+        color: #000;
+        margin: 0 5px;
+        transition: background-color 0.3s;
+        font-weight: bold;
+        background: #e3e3e3;
+        border-color: #adadad;
+        color: #514943;
+        width: 4.4rem;
+        text-align: center;
+
+    }
+
+    .pagination-button.prev {
+        margin-right: 10px;
+    }
+
+    .pagination-button.next {
+        margin-left: 10px;
+    }
+
+    .pagination-button:hover {
+        background-color: #333;
+        color: #fff;
+    }
+
+    .pagination-button.active {
+        background-color: #333;
+        color: #fff;
+    }
+
+    .pagination_section {
+        display: flex;
+        justify-content: end;
+        align-items: center;
+    }
+
+    .go_page {
+        padding: 2.2px 5px;
+    }
+
+    span.trade_email_field,
+    span.trade_id_field {
+        border: 1px solid grey;
+        padding: 6.1px;
+    }
+
+    .trade_grid_action {
+        min-width: 107px;
+        margin-bottom: 5px;
+        background-color: transparent;
+        border: 0px;
+        color: black;
+        font-weight: 500;
+        font-size: 12px;
+    }
+
+    .trade_grid_action.submit_tradein_row {
+        background-color: white;
+        border: 1px solid black;
+    }
+
+
+    .trade-search-email>button,
+    .trade-search-id>button,
+    .page-input>button,
+    .pagination_section.pg_sec .page-input button {
+        height: 31px;
+        margin-top: 8px;
+        background-color: #514943;
+        color: white;
+        border: none;
+        line-height: 20px;
+        margin-right: 20px;
+    }
+
+    .trade-search-email>input,
+    .trade-search-id>input,
+    .page-input>input {
+        height: 30px;
+        margin-right: -1px;
+        margin-top: -30px !important;
+    }
+
+    .trade-search-email>label,
+    .trade-search-id>label {
+        margin-right: 10px;
+    }
+
+    .pagination_section.pg_sec .page-input button {
+        min-width: 10px;
+        padding: 0px 20px;
+    }
+
+    .trade_table_values td {
+        text-align: left;
+    }
+
+    .trade_table_values td .image_section_box>img:first-child {
+        width: 100%;
+    }
+
+    .image_section_box {
+        min-width: 100px;
+    }
+
+    .trade_table_values td .image_section_box>img {
+        width: 31%;
+        display: inline-block;
+        margin: 1%;
+        border: 1px solid #d1d1d1;
+        text-align: left;
+    }
+
+    td.image_section {
+        max-width: 200px;
+    }
+</style>
+
+
+<?php
+$block = $this->getLayout()->createBlock(\ArtM\TradeIn\Block\Adminhtml\Tradeform\Tradeform::class);
+/*
+$tradeInData = $block->getTradeInData();
+$searchEmail = isset($_GET['searchEmail']) ? $_GET['searchEmail'] : '';
+$searchAdId = isset($_GET['searchAdId']) ? $_GET['searchAdId'] : '';
+
+// new
+if (empty($searchEmail) && empty($searchAdId)) {
+    // Reset the search parameters to empty so that all data is displayed
+    $searchEmail = '';
+    $searchAdId = '';
+}
+// new end
+
+// Pagination start
+$pagesize = 20;
+$custid = '';
+$currpage = isset($_GET['currpage']) ? $_GET['currpage'] : 1;
+$orders = $block->getTradeInData($pagesize, $currpage, $custid, $searchEmail);
+
+$collectionsize = $orders->getSize();
+$paginationsize = (int)($collectionsize / $pagesize);
+$paginationsizerem = $collectionsize % $pagesize;
+
+
+if ($paginationsizerem > 0) {
+    $paginationsize = $paginationsize + 1;
+}
+
+// serach
+if (!empty($searchEmail)) {
+    $orders->addFieldToFilter('order', $searchEmail);
+}
+//addid
+if (!empty($searchAdId)) {
+    $orders->addFieldToFilter('order', $searchAdId);
+}
+
+*/
+
+
+
+$searchEmail = isset($_GET['searchEmail']) ? $_GET['searchEmail'] : '';
+$searchAdId = isset($_GET['searchAdId']) ? $_GET['searchAdId'] : '';
+
+$data['searchEmail'] = $searchEmail;
+$data['searchAdId'] = $searchAdId;
+$loginCustomerId = '';
+$pagesize = 20;
+$currpage = isset($_GET['currpage']) ? $_GET['currpage'] : 1;
+
+$tradeInData = $block->getTradeInData($currpage, $pagesize, $loginCustomerId, $data);
+
+$collectionsize = $tradeInData->getSize();
+$paginationsize = (int)($collectionsize / $pagesize);
+$paginationsizerem = $collectionsize % $pagesize;
+
+
+if ($paginationsizerem > 0) {
+    $paginationsize = $paginationsize + 1;
+}
+
+
+// serach section html code
+//echo "<div class='search_section'>";
+//echo "<label for='searchEmail'>Search by Email:</label>";
+//echo "<input type='text' id='searchEmail' name='searchEmail' value='" . htmlentities($searchEmail) . "' placeholder='Enter Email'>";
+//echo "<button onclick='searchByEmail()' class='search_button'>Search</button>";
+
+//echo "<label for='searchAdId'>Search by Ad ID:</label>";
+//echo "<input type='text' id='searchAdId' name='searchAdId' value='" . htmlentities($searchAdId) . "' placeholder='Enter Ad ID'>";
+//echo "<button onclick='searchByAdId()' class='search_button'>Search</button>";
+//echo "</div>";
+
+
+// new
+if (empty($searchEmail)) {
+    echo "<div class='trade-search-email'>";
+    echo "<label for='searchEmail'>Search by Email:</label>";
+    echo "<input type='text' id='searchEmail' name='searchEmail' value='" . htmlentities($searchEmail) . "' placeholder='Enter Email'>";
+    echo "<button onclick='searchByEmail()' class='search_button'>Search</button>";
+    echo "</div>";
+} else {
+    // Display the selected search query and the 'Clear' button to reset the search
+    echo "<div class='trade-search-email'>";
+    echo "<label>Search by Email:</label>";
+    echo "<span class='trade_email_field'>" . htmlentities($searchEmail) . "</span>";
+    echo "<button onclick='clearSearchEmail()' class='clear_button'>Clear</button>";
+    echo "</div>";
+}
+
+// Show search by Ad ID only if the searchAdId parameter is not present
+if (empty($searchAdId)) {
+    echo "<div class='trade-search-id'>";
+    echo "<label for='searchAdId'>Search by Ad ID:</label>";
+    echo "<input type='text' id='searchAdId' name='searchAdId' value='" . htmlentities($searchAdId) . "' placeholder='Enter Ad ID'>";
+    echo "<button onclick='searchByAdId()' class='search_button'>Search</button>";
+    echo "</div>";
+} else {
+    // Display the selected search query and the 'Clear' button to reset the search
+    echo "<div class='trade-search-id'>";
+    echo "<label>Search by Ad ID:</label>";
+    echo "<span class='trade_id_field'>" . htmlentities($searchAdId) . "</span>";
+    echo "<button onclick='clearSearchAdId()' class='clear_button'>Clear</button>";
+    echo "</div>";
+}
+
+//new end
+// pagination html code
+echo "<div class='pagination_section pg_sec'>";
+echo "<div class='pagination pg_sec'>";
+$startpage = max(1, $currpage - 4);
+//echo $startpage;
+$endpage = min($startpage + 5, $paginationsize);
+
+if ($currpage > 1) {
+    $prevpage = $currpage - 1;
+    echo "<a class='pagination-button prev' href='?currpage=" . $prevpage . "'>&lt;</a>";
+}
+
+for ($i = $startpage; $i <= $endpage; $i++) {
+    if ($i == $currpage) {
+        echo "<span class='pagination-button active'>" . $i . "</span>";
+    } else {
+        echo "<a class='pagination-button' href='?currpage=" . $i . "'>" . $i . "</a>";
+    }
+}
+
+if ($endpage < $paginationsize - 4) {
+    echo "<span class='pagination-dots'>...</span>";
+    echo "<a class='pagination-button' href='?currpage=" . $paginationsize . "'>" . $paginationsize . "</a>";
+}
+
+if ($currpage < $paginationsize) {
+    $nextpage = $currpage + 1;
+    echo "<a class='pagination-button next' href='?currpage=" . $nextpage . "'>&gt;</a>";
+}
+
+// pagination html code
+echo "</div>";
+echo "<div class='page-input'>";
+echo "<input type='text' id='pageInput' placeholder='Enter page number'>";
+echo "<button onclick='goToPage()' class='go_page'>Go</button>";
+echo "</div>";
+
+// Display the total number of pages
+echo "<div class='total-pages'>Total Pages: " . $paginationsize . "</div>";
+
+echo "</div>";
+
+// script for go button
+echo "<script>
+function goToPage() {
+    var pageInput = document.getElementById('pageInput');
+    var pageNumber = parseInt(pageInput.value);
+    if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= $paginationsize) {
+        window.location.href = '?currpage=' + pageNumber;
+    }
+}
+</script>";
+
+// search script
+echo "<script>
+function searchByEmail(){
+    var searchInput = document.getElementById('searchEmail');
+    var emailId = searchInput.value.trim();
+    if (emailId !== '') {
+        window.location.href = '?searchEmail=' + encodeURIComponent(emailId);
+    }
+}
+</script>";
+
+echo "<script>
+function searchByAdId(){
+    var searchInput = document.getElementById('searchAdId');
+    var addId = searchInput.value.trim();
+    if (addId !== '') {
+        window.location.href = '?searchAdId=' + encodeURIComponent(addId);
+    }
+}
+</script>";
+?>
+
+<!-- new -->
+<script>
+    function clearSearchEmail() {
+        window.location.href = '?searchEmail=';
+    }
+
+    function clearSearchAdId() {
+        window.location.href = '?searchAdId=';
+    }
+</script>
+<!-- new end -->
+
+<!-- pagination end -->
+
+<!-- here old code  -->
+<?php echo '<div class="trade_table_data admin__data-grid-wrap">' ?>
+<?php if (!empty($tradeInData)) : ?>
+
+    <table class="trade_table data-grid admin__data-grid">
+        <thead class="trade_thead">
+            <tr class="trade_tr">
+                <th>Trade Id</th>
+                <th>Add Id</th>
+                <th>Images</th>
+                <th class="status-column">Status</th>
+                <th>Customer Id</th>
+                <th>Email</th>
+                <th>Equipment</th>
+                <th>Brand</th>
+                <th>Model</th>
+                <th>Specification</th>
+                <th>Condition</th>
+                <th>Name</th>
+                <th>Contact Number</th>
+                <th>Created At</th>
+                <th>Payment method</th>
+                <!-- <th>Edit</th> -->
+
+
+                <!-- Add more table headers as needed -->
+            </tr>
+        </thead>
+        <tbody class="trade_table_data">
+
+            <?php
+            $i = 0;
+            foreach ($tradeInData as $item) : ?>
+                <tr class="trade_table_values trade_table_values_<?= $i ?>">
+                    <td>
+                        <span class="tradein_id"><?php echo $item->getTradeinId(); ?></span>
+                        <input type="text" class="tradein_id_input hide" value="<?php echo $item->getTradeinId(); ?>">
+                    </td>
+                    <td><?php echo $item->getAdId(); ?></td>
+                    <td class="image_section">
+                        <div class="image_section_box">
+                            <?php
+                            // Assuming getImages() returns the comma-separated string of image names
+                            $imageNames = $item->getImages();
+                            $imageUrls = explode(',', $imageNames);
+
+                            if (!empty($imageUrls)) {
+                                foreach ($imageUrls as $imageUrl) {
+                                    if (trim($imageUrl) == '') {
+                                        continue;
+                                    }
+                                    $imageUrl = $this->getBaseUrl() . 'pub/media/review_images/' . trim($imageUrl);
+                                    echo '<img src="' . $imageUrl . '" alt="Image">';
+                                }
+                            } else {
+                                echo 'No Image';
+                            }
+                            ?>
+                        </div>
+                    </td>
+
+                    <td class="status-column">
+                        <?php
+                        $status = $item->getStatus();
+                        ?>
+
+                        <select class="status_tradein_admin">
+                            <option value="<?= $status ?>"><?= $status ?></option>
+                            <option>Posted</option>
+                            <option>Reviewing</option>
+                            <option>Answered</option>
+                            <option>rejected</option>
+                        </select>
+                        <button type="submit" class="update-status" data-id="<?php echo $item->getTradeinId(); ?>" row_id="<?php echo $i; ?>" data-target-row="trade_table_values_<?php echo $i; ?>">Update</button>
+
+                    </td>
+                    <td><?php echo $item->getCustId(); ?></td>
+                    <td><?php echo $item->getEmail(); ?></td>
+                    <td><?php echo $item->getEquipment(); ?></td>
+                    <td><?php echo $item->getBrand(); ?></td>
+                    <td><?php echo $item->getModel(); ?></td>
+                    <td><?php echo $item->getSpecification(); ?></td>
+                    <td><?php echo $item->getCondition(); ?></td>
+                    <td><?php echo $item->getName(); ?></td>
+                    <td><?php echo $item->getContactNumber(); ?></td>
+                    <td class="created-at"><?php echo $item->getCreatedAt(); ?></td>
+                    <td class="payment-info-custom">
+                        <?php
+                        if ($item->getPaymentComment() != '') {
+
+                            $commentData = json_decode($item->getPaymentComment(), true); // decode as array
+                            if (is_array($commentData)) {
+                                echo '<div class="comment"><lable>Comment</lable></div><div class="disables-comment"><input disabled value="' . htmlspecialchars($commentData['payment_comment']) . '" placeholder="Payment Comment"></div>';
+                                echo '<div class="ref"><lable>Ref id</lable><input disabled value="' . htmlspecialchars($commentData['ref_id']) . '" placeholder="Ref ID"></div>';
+                                echo '<div class="amount"><lable>Amount</lable><input disabled value="' . htmlspecialchars($commentData['amount']) . '" placeholder="Amount"></div>';
+                            } elseif ($item->getPaymentComment() != '') {
+                                // Fallback for old plain string format
+                                echo '<div class="disabled"><input disabled value="' . htmlspecialchars($item->getPaymentComment()) . '"></div>';
+                            }
+                        } else {
+                            echo '<select onchange="handleOptionChange(this)"  class="tradein-select"  data-id=' . $item->getTradeinId() . '>
+                                        <option value="gift-card">Gift Card</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                    <div id="other-input-container" style="display: none; margin-top: 2px;"  data-id=' . $item->getTradeinId() . '>
+                                        <input class="other-input" placeholder="Enter details for Other" rows="3">
+                                    </div>';
+                            echo "<div class='ref-id'><input type='text' class='ref-input' placeholder='Ref Id'></div>";
+                            echo "<div class='amount-container'><input type='number' class='amount-input' placeholder='Amount'></div>";
+                        }
+
+                        ?>
+                        <div class="update-button-container">
+                            <button class="trade_grid_action submit_tradein_row" data-id="<?php echo $item->getTradeinId(); ?>" row_id="<?php echo $i; ?>" data-target-row="trade_table_values_<?php echo $i; ?>">Update</button>
+                        </div>
+                    </td>
+                    <!-- <td>
+                        <button class="trade_grid_action submit_tradein_row" data-id="<?php echo $item->getTradeinId(); ?>" row_id="<?php echo $i; ?>" data-target-row="trade_table_values_<?php echo $i; ?>">Update</button>
+                    </td> -->
+                </tr>
+
+            <?php
+                $i++;
+            endforeach;
+            ?>
+        </tbody>
+
+    </table>
+<?php else : ?>
+    <p>No trade-in data available.</p>
+<?php endif; ?>
+<!-- Your PHP code here -->
+<?php
+$block = $this->getLayout()->createBlock(\ArtM\TradeIn\Block\Adminhtml\Tradeform\Tradeform::class);
+//$tradeInData = $block->getTradeInData();
+?>
+
+<!-- jQuery -->
+
+<script>
+    function handleOptionChange(selectElement) {
+        const inputContainer = selectElement.parentElement.querySelector('#other-input-container');
+
+        if (selectElement.value === 'other') {
+            inputContainer.style.display = 'block';
+        } else {
+            inputContainer.style.display = 'none';
+        }
+    }
+    require(['jquery'], function(jQuery) {
+        jQuery(document).ready(function() {
+            jQuery('.submit_tradein_row').click(function() {
+                var curr_button = jQuery(this);
+
+
+                var row = curr_button.closest('tr');
+
+                var selectedOption = row.find('.tradein-select').val();
+                var paymentComment = (selectedOption === 'other') ?
+                    row.find('.other-input').val().trim() :
+                    "Gift card";
+
+                var refId = row.find('.ref-input').val().trim();
+                var amount = row.find('.amount-input').val().trim();
+
+                if (refId === '' || amount === '' || paymentComment === '') {
+                    const refInput = row.find('.ref-input');
+                    const amountInput = row.find('.amount-input');
+                    const otherInput = row.find('.other-input');
+
+                    if (refId === '') {
+                        refInput.css('border', '2px solid red');
+                    } else {
+                        refInput.css('border', '');
+                    }
+                    if (amount === '') {
+                        amountInput.css('border', '2px solid red');
+                    } else {
+                        amountInput.css('border', '');
+                    }
+                    if (otherInput === '') {
+                        otherInput.css('border', '2px solid red');
+                    } else {
+                        otherInput.css('border', '');
+                    }
+                    return;
+                }
+
+                curr_button.text('Updating');
+                var row_id = curr_button.attr('data-id');
+                var domain = window.location.hostname;
+                var url = "<?php echo $this->getBaseUrl(); ?>" + "tradein/index/adminajax";
+
+                jQuery.ajax({
+                    url: url,
+                    type: "POST",
+                    data: {
+                        id: row_id,
+                        payment_comment: paymentComment,
+                        ref_id: refId,
+                        amount: amount
+                    },
+                    dataType: 'json',
+                    showLoader: true,
+                    success: function(res) {
+                        // row.find('.tradein-select').remove();
+                        // row.find('div#other-input-container').remove();
+                        row.find('.ref-input').attr('disabled', 'disabled');
+                        row.find('.amount-input').attr('disabled', 'disabled');
+                        row.find('.tradein-select').attr('disabled', 'disabled');
+                        row.find('.other-input').attr('disabled', 'disabled');
+                        curr_button.text('Updated');
+                        // setTimeout(function(){
+                        //     curr_button.text('Update Again');
+                        // } , 1000);
+                    },
+                    error: function(xhr, status, error) {},
+                    complete: function() {}
+                });
+
+            });
+
+            jQuery('.update-status').click(function() {
+                var curr_button = jQuery(this);
+                curr_button.text('Updating');
+                var row = curr_button.closest('tr');
+
+                var data_target_row = jQuery(this).attr('data-target-row');
+                var status = jQuery('tr.' + data_target_row + '').find('.status_tradein_admin').val().toLowerCase();
+
+                var row_id = jQuery(this).attr('data-id');
+
+
+                var domain = window.location.hostname;
+                var url = "<?php echo $this->getBaseUrl(); ?>" + "tradein/index/updatestatus";
+
+                jQuery.ajax({
+                    url: url,
+                    type: "POST",
+                    data: 'status=' + status + '&id=' + row_id,
+                    dataType: 'json',
+                    showLoader: true,
+                    success: function(res) {
+                        curr_button.text('Updated');
+                        setTimeout(function() {
+                            curr_button.text('Update Again');
+                        }, 1000);
+                    },
+                    error: function(xhr, status, error) {},
+                    complete: function() {}
+                });
+
+            });
+            /*
+            // Function to update the displayed status value and store it in localStorage
+            function updateStatus(targetRow, statusValue) {
+                targetRow.find('.status_tradein_admin').hide();
+                targetRow.find('.status_tradein_admin').parent().append('<span class="selected_option">' + statusValue + '</span>');
+
+                // Store the submitted status value in localStorage for this specific row
+                const targetRowClass = targetRow.data('target-row');
+                localStorage.setItem('status_tradein_admin_value_' + targetRowClass, statusValue);
+            }
+
+            // On page load, retrieve the previously submitted status value from localStorage for each row
+            jQuery('.status_tradein_admin').each(function() {
+                const targetRowClass = jQuery(this).data('target-row');
+                const selectedOption = localStorage.getItem('status_tradein_admin_value_' + targetRowClass);
+                if (selectedOption) {
+                    updateStatus(jQuery(this).parent(), selectedOption);
+                } else {
+                    const defaultOption = jQuery(this).find('option:selected').text();
+                    jQuery(this).hide();
+                    jQuery(this).parent().append('<span class="selected_option">' + defaultOption + '</span>');
+                }
+            });
+
+            jQuery('.edit_tradein_row').on('click', function() {
+                const targetRowClass = jQuery(this).data('target-row');
+                const targetRow = jQuery('.' + targetRowClass);
+
+                // Enable the select dropdown (Status) and show all options
+                targetRow.find('.status_tradein_admin').show().prop('disabled', false).removeClass('submitted');
+                targetRow.find('.selected_option').remove();
+
+                targetRow.find('.submit_tradein_row, .cancel_tradein_row').removeClass('hide');
+                jQuery(this).addClass('hide');
+
+                // Disable the TradeinId input field and hide it
+                targetRow.find('.tradein_id_input').prop('disabled', true).hide();
+                // Show the TradeinId value as a non-editable span
+                targetRow.find('.tradein_id').show();
+            });
+
+            jQuery('.cancel_tradein_row').on('click', function() {
+                const targetRowClass = jQuery(this).data('target-row');
+                const targetRow = jQuery('.' + targetRowClass);
+
+                // Hide the select dropdown (Status) and show the previously submitted option
+                const selectedOption = targetRow.find('.status_tradein_admin').data('previous-value');
+                updateStatus(targetRow, selectedOption);
+
+                targetRow.find('.submit_tradein_row, .cancel_tradein_row').addClass('hide');
+                targetRow.find('.edit_tradein_row').removeClass('hide');
+            });
+
+            jQuery('.submit_tradein_row').on('click', function() {
+                const targetRowClass = jQuery(this).data('target-row');
+                const targetRow = jQuery('.' + targetRowClass);
+                const statusTradeinAdmin = targetRow.find('.status_tradein_admin');
+                const statusValue = statusTradeinAdmin.val().trim();
+
+                // Display the submitted Status value and store it in localStorage for this specific row
+                updateStatus(targetRow, statusValue);
+
+                // The rest of your code for submitting the data to the server via Ajax
+                // ...
+
+                targetRow.find('.status_tradein_admin').data('previous-value', statusValue); // Update the previous value
+
+                alert('Submitting Status: ' + statusValue);
+
+                targetRow.find('.submit_tradein_row, .cancel_tradein_row').addClass('hide');
+                targetRow.find('.edit_tradein_row').removeClass('hide');
+                
+            });
+            */
+        });
+    });
+</script>

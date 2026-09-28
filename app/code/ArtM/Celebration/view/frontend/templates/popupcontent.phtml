@@ -1,0 +1,1020 @@
+
+<style>
+     button#openPopup {
+    position: fixed;
+    bottom: 100px;
+    z-index: 1111;
+}
+</style>
+
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$customerSession = $objectManager->get('\Magento\Customer\Model\Session');
+$customerName = '';
+if($customerSession->isLoggedIn()){
+    $customer = $customerSession->getCustomer();
+    $customerName = $customer->getFirstname();
+}
+
+
+$diwali_quotes = array(
+    "May this Diwali bring joy to your life,\nFill your home with love and light,\nMay the candles burn bright and strong,\nAnd keep you happy all year long.",
+    
+    "Let the glow of Diwali lights,\nFill your heart with pure delight,\nMay the joy spread far and wide,\nBringing happiness to every side.",
+    
+    "Diwali is the time to shine,\nWith lamps and hearts aligned,\nMay you be blessed with love and cheer,\nAnd happiness stays all through the year.",
+    
+    "As the lights illuminate the sky,\nAnd the fireworks soar up high,\nMay Diwali’s warmth and love,\nSurround you like a treasure trove.",
+    
+    "May the festival of lights bring peace,\nAnd every sorrow find its release,\nDiwali shines its blessings bright,\nTo fill your life with endless light.",
+    
+    "Wishing you a Diwali full of love,\nShining like the stars above,\nMay your days be filled with grace,\nAnd joy light up every space.",
+    
+    "On this Diwali night so bright,\nMay happiness be your guiding light,\nLet success and love come your way,\nAnd brighten each and every day.",
+    
+    "As we light the lamps of gold,\nMay peace and joy unfold,\nLet this Diwali fill your heart,\nWith new beginnings and a fresh start.",
+    
+    "May the diya's glow bring light,\nAnd dispel darkness from your sight,\nOn this Diwali, we celebrate,\nWith love and joy that won’t abate.",
+    
+    "With every spark that lights the sky,\nLet worries fade and hopes rise high,\nWishing you a Diwali so grand,\nWith love, laughter, and joy at hand.",
+    
+    "May the joy of Diwali be sweet,\nLike the mithai we all eat,\nMay your heart be full of cheer,\nAnd happiness stay year after year.",
+    
+    "On this festival of shining light,\nMay your world be sunny and bright,\nLet love and peace around you flow,\nAnd fill your heart with a radiant glow.",
+    
+    "May Diwali’s blessings bring you peace,\nAnd all your troubles soon release,\nWith every spark that fills the air,\nLet joy be yours beyond compare.",
+    
+    "As the lights adorn every home,\nAnd the diyas and rangolis are shown,\nMay Diwali’s glow warm your heart,\nAnd bring love that won’t depart.",
+    
+    "May this Diwali light up your way,\nWith joy that brightens every day,\nLet laughter and love fill your heart,\nAnd bring you blessings from the start.",
+    
+    "Diwali’s light shines pure and bright,\nFilling our lives with warmth and light,\nMay peace and joy be your guide,\nAnd happiness stay by your side.",
+    
+    "May the lights of Diwali guide you through,\nAnd all your dreams and wishes come true,\nWith every lamp that shines so bright,\nMay your world be filled with light.",
+    
+    "As Diwali lights shine in the night,\nMay your future always be bright,\nWith love and joy that fill your days,\nAnd success that comes in every way.",
+    
+    "On this Diwali, as we celebrate,\nLet every moment be truly great,\nMay blessings of health and wealth stay,\nAnd fill your life in every way.",
+    
+    "May the light of Diwali fill your soul,\nAnd make your life complete and whole,\nMay you be blessed with love so true,\nAnd happiness that stays with you."
+);
+
+// Pick a random quote
+$random_quote = $diwali_quotes[array_rand($diwali_quotes)];
+
+// Fetch the 'diwali' parameter from the URL
+$diwaliValue = isset($_GET['diwali']) ? $_GET['diwali'] : null;
+$golfoyDiwaliCelebration = isset($_COOKIE['golfoy-diwali-celebration']) ? $_COOKIE['golfoy-diwali-celebration'] : null;
+
+if (is_numeric($diwaliValue) && !$customerSession->isLoggedIn()){
+    
+    // setcookie('theme-diwali', $diwaliValue, time() + 86400, '/'); 
+
+    $celebrationFactory = $objectManager->create('ArtM\Celebration\Model\CelebrationFactory');
+    $celebrationModel = $celebrationFactory->create();
+    $celebrationCollection = $celebrationModel->getCollection()
+        ->addFieldToFilter('param', $diwaliValue);
+    if ($celebrationCollection->getSize() ) {
+        $celebrationData = $celebrationCollection->getFirstItem();
+        $fromValue = $celebrationData->getData('from');
+        $toValue = $celebrationData->getData('to');
+        ?>
+            <div class="container celebration-popup_pop_content">
+                <!-- Modal -->
+                <div class="modal fade" id="diwali_celebration" role="dialog">
+                    <div class="modal-dialog">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-body">
+                            <button type="button" class="close" data-dismiss="modal"></button>
+                                <img src="https://staging-golfoy.hyperx.cloud/media/wysiwyg/diwali_card_with_crackers-3.jpg" />
+                                <div class="diwali-font diwali_body_content">
+                                    <div class="diwali_body_content_inside">
+                                        <div class="cel_sender celeb_sender">
+                                        <?= htmlspecialchars($fromValue); ?>
+                                        </div>
+                                        <div class="cel_sender celeb_send_text">wishes you </div>
+                                        <div class="celeb_wish_name">
+                                            <div class="celeb_wish_name_text1">Happy</div>
+                                            <div class="celeb_wish_name_text2"><span>D</span>iwali</div>
+                                        </div>
+                                        <div class="cel_rec celeb_receiver_name">
+                                        <?= htmlspecialchars($toValue); ?>
+                                        </div>
+                                        <div class="diwali_quote">
+                                            <?php 
+                                                echo nl2br($random_quote);
+                                            ?>
+                                        </div>
+                                        <div class="cta_create_card">
+                                            <span  class="close" data-dismiss="modal">
+                                                Send Your Own Greeting
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script>
+                require(['jquery'], function($) {
+                    $(document).ready(function() {
+                        setTimeout(function() {
+                            $('button#show-grettings').click();
+                            // alert('asdf');
+                        }, 2000);
+                    });
+                });
+
+            </script>
+        <?php
+    }
+}elseif(is_numeric($diwaliValue) && $customerSession->isLoggedIn()){
+    $celebrationFactory = $objectManager->create('ArtM\Celebration\Model\CelebrationFactory');
+    $celebrationModel = $celebrationFactory->create();
+    $celebrationCollection = $celebrationModel->getCollection()
+        ->addFieldToFilter('param', $diwaliValue);
+    if ($celebrationCollection->getSize() ) {
+        $celebrationData = $celebrationCollection->getFirstItem();
+        $fromValue = $celebrationData->getData('from');
+        $toValue = $celebrationData->getData('to');
+        ?>
+            <div class="container celebration-popup_pop_content">
+                <!-- Modal -->
+                <div class="modal fade" id="diwali_celebration" role="dialog">
+                    <div class="modal-dialog">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-body">
+                            <button type="button" class="close" data-dismiss="modal"></button>
+                                <img src="https://staging-golfoy.hyperx.cloud/media/wysiwyg/diwali_card_with_crackers-3.jpg" />
+                                <div class="diwali-font diwali_body_content">
+                                    <div class="diwali_body_content_inside">
+                                        <div class="cel_sender celeb_sender">
+                                        <?= htmlspecialchars($fromValue); ?>
+                                        </div>
+                                        <div class="cel_sender celeb_send_text">wishes you </div>
+                                        <div class="celeb_wish_name">
+                                            <div class="celeb_wish_name_text1">Happy</div>
+                                            <div class="celeb_wish_name_text2"><span>D</span>iwali</div>
+                                        </div>
+                                        <div class="cel_rec celeb_receiver_name">
+                                        <?= htmlspecialchars($toValue); ?>
+                                        </div>
+                                        <div class="diwali_quote">
+                                            <?php 
+                                                echo nl2br($random_quote);
+                                            ?>
+                                        </div>
+                                        <div class="cta_create_card">
+                                            <span  class="close" data-dismiss="modal">
+                                                Send Your Own Greeting
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script>
+                require(['jquery'], function($) {
+                    $(document).ready(function() {
+                        setTimeout(function() {
+                            $('button#show-grettings').click();
+                            // alert('asdf');
+                        }, 2000);
+                    });
+                });
+
+            </script>
+        <?php
+    }
+}elseif(!$diwaliValue && $customerSession->isLoggedIn() && !$golfoyDiwaliCelebration){
+
+    setcookie('golfoy-diwali-celebration', 'wecelebratediwali', time() + 86400, '/');
+        $fromValue = 'Golfoy';
+        // $customer = $customerSession->getCustomer();
+        $toValue = $customerName;
+        ?>
+            <div class="container celebration-popup_pop_content">
+                <!-- Modal -->
+                <div class="modal fade" id="diwali_celebration" role="dialog">
+                    <div class="modal-dialog">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-body">
+                            <button type="button" class="close" data-dismiss="modal"></button>
+                                <img src="https://staging-golfoy.hyperx.cloud/media/wysiwyg/diwali_card_with_crackers-3.jpg" />
+                                <div class="diwali-font diwali_body_content">
+                                    <div class="diwali_body_content_inside">
+                                        <div class="cel_sender celeb_sender">
+                                        <?= htmlspecialchars($fromValue); ?>
+                                        </div>
+                                        <div class="cel_sender celeb_send_text">wishes you </div>
+                                        <div class="celeb_wish_name">
+                                            <div class="celeb_wish_name_text1">Happy</div>
+                                            <div class="celeb_wish_name_text2"><span>D</span>iwali</div>
+                                        </div>
+                                        <div class="cel_rec celeb_receiver_name">
+                                        <?= htmlspecialchars($toValue); ?>
+                                        </div>
+                                        <div class="diwali_quote">
+                                            <?php 
+                                                echo nl2br($random_quote);
+                                            ?>
+                                        </div>
+                                        <div class="cta_create_card">
+                                            <span  class="close" data-dismiss="modal">
+                                                Send Your Own Greeting
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script>
+                require(['jquery'], function($) {
+                    $(document).ready(function() {
+                        // jQuery('button#show-grettings').click();
+                            setTimeout(function() {
+                                $('button#show-grettings').click();
+                                // alert('asdf');
+                            }, 2000);
+                    });
+                });
+
+            </script>
+        <?php
+}
+?>
+<!-- <button id="openPopup" class="celebration-popup">Open Form</button> -->
+<button type="button" class="btn btn-info btn-lg hide" style="display:none !important;"  data-toggle="modal" data-target="#diwali_celebration" id="celebration-popup"></button>
+
+<style>
+    div#create_celebCard .modal-dialog {
+        padding-top: unset !important;
+    }
+    button#show-grettings {
+        display: none !important;
+    }
+    .celebration-popup_createCard .diwali-font.diwali_body_content {
+        top: 160px;
+        margin-left: 100px;
+    }
+    div.celebration-popup_pop_content{
+        z-index: 111111;
+        position: relative;
+    }
+    .celebration-popup_pop_content .modal-body {
+        padding: 0px;
+        background-color: #26003e;
+    }
+    .celebration-popup_pop_content .modal-body button.close {
+        position: absolute;
+        z-index: 1;
+        top: 10px;
+        right: 10px;
+    }
+    .celebration-popup_pop_content button.close:after {
+        content: '\e616';
+        font-family: 'icons-blank-theme';
+        text-shadow: none;
+        color: #eac954;
+        font-size: 30px;
+        opacity: 1;
+    }
+    .celebration-popup_pop_content .modal-dialog {
+        padding-top: unset !important;
+        max-width: 670px;
+        width: 100%;
+    }
+    /* .celebration-popup_pop_content .modal-dialog {
+        padding-top: 290px !important;
+        max-width: 670px;
+        width: 100%;
+    } */
+    .modal-backdrop.fade.in {
+        z-index: 11111;
+    }
+    @media screen and (max-width:768px){
+        
+        div.celebration-popup_pop_content{
+            top: 60px;
+        }
+        .celebration-popup_pop_content .modal-dialog {
+            margin-top: 0px;
+        }
+    }
+    
+    .diwali-font {
+      font-family: "Nunito", sans-serif;
+      font-optical-sizing: auto;
+      font-style: normal;
+    }
+    
+    .diwali_body_content{
+        text-transform: uppercase;
+        position: absolute;
+        top: 0;
+        width: 50%;
+        margin-left: 25%;
+    }
+    .font-gradient , .diwali_body_content_inside *{
+        color: #fee2bb;
+        font-size: 72px;
+        background: -webkit-linear-gradient(#fee2bb, #efa539, #fee2bb);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .cel_sender.celeb_sender {
+    margin-top: 60px;
+    font-size: 30px;
+    font-family: 'spartan';
+    margin-left: 50px;
+}
+    .cel_sender.celeb_send_text {
+        font-size: 18px;
+        margin-left: 50px;
+        text-transform: lowercase;
+    }
+    .celeb_wish_name_text1 {
+        font-size: 31px !important;
+        margin-left: 152px;
+        margin-top: 20px;
+        letter-spacing: 15px;
+    }
+    .celeb_wish_name_text2 {
+        font-size: 60px !important;
+        margin-left: 75px;
+        margin-top: -64px;
+    }
+    .celeb_wish_name_text2 > span {
+        font-size: 100px !important;
+    }
+    .cel_rec.celeb_receiver_name {
+        width: 100%;
+        text-align: center;
+        font-size: 40px;
+    }
+    .diwali_quote {
+        font-family: "Charmonman", cursive;
+        text-transform: none;
+        font-size: 18px;
+        text-align: center;
+        margin-top: 30px;
+        font-weight: 700;
+        line-height: 34px;
+    }
+    .diwali_quote {
+        font-family: "Charmonman", cursive;
+        text-transform: none;
+        font-size: 18px;
+        text-align: center;
+        margin-top: 30px;
+        font-weight: 700;
+        line-height: 34px;
+        background: -webkit-linear-gradient(#fee2bb, #e5e3df, #fee2bb);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .cta_create_card span {
+        font-size: 13px;
+        text-transform: capitalize;
+        border: 1px solid #ebcd56;
+        padding: 7px 20px;
+        cursor: pointer;
+        float: none;
+        opacity: 1;
+        -webkit-background-clip: initial !important;
+        -webkit-text-fill-color: initial !important;
+        background: transparent !important;
+        color: #efa539;
+        text-shadow: none;
+    }
+.cta_create_card span:hover {
+    background: #efa539 !important;
+    opacity: 1;
+    color: #f1f1f1;
+}
+    .cta_create_card {
+        display: inline-block;
+        width: 100%;
+        text-align: center;
+        /* max-height: 29px; */
+        line-height: 20px;
+        margin-top: 35px;
+    }
+    @media screen and ( max-width:768px ){
+        .celeb_wish_name_text1 {
+            font-size: 16px !important;
+        }
+        .celeb_wish_name_text2 {
+            font-size: 42px !important;
+            margin-left: 90px;
+            margin-top: -50px;
+        }
+        .celeb_wish_name_text2 > span {
+            font-size: 80px !important;
+        }
+        .cel_rec.celeb_receiver_name {
+            font-size: 25px;
+        }
+        .diwali_quote {
+            font-size: 16px;
+        }
+    }
+    @media screen and ( max-width:600px ){
+        .cel_sender.celeb_sender {
+            margin-top: 25px;
+        }
+        .celeb_wish_name_text2 > span {
+            font-size: 65px !important;
+        }
+        .celeb_wish_name_text2 {
+            font-size: 42px !important;
+            margin-left: 65px;
+            margin-top: -36px;
+        }
+        .celeb_wish_name_text1 {
+            font-size: 18px !important;
+            margin-left: 119px;
+            margin-top: 20px;
+            letter-spacing: 13px;
+        }
+        .cel_rec.celeb_receiver_name {
+            width: 100%;
+            text-align: center;
+            font-size: 23px;
+            margin-top: 0px;
+        }
+        .diwali_quote {
+            font-family: "Charmonman", cursive;
+            text-transform: none;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 30px;
+            font-weight: 700;
+            line-height: 28px;
+        }
+        .cta_create_card span {
+            font-size: 12px;
+            text-transform: capitalize;
+            border: 1px solid #ebcd56;
+            padding: 5px 12px;
+            cursor: pointer;
+        }
+        
+    }
+    @media screen and ( max-width:500px ){
+        .cel_sender.celeb_sender {
+            margin-top: 20px;
+            font-size: 28px;
+            font-family: 'spartan';
+            margin-left: 10px;
+        }
+        .cel_sender.celeb_send_text {
+            font-size: 17px;
+            margin-left: 10px;
+            text-transform: lowercase;
+            margin-top: -9px;
+        }
+        .celeb_wish_name_text2 {
+            font-size: 39px !important;
+            margin-left: 35px;
+            margin-top: -39px;
+        }
+        .celeb_wish_name_text1 {
+            font-size: 19px !important;
+            margin-left: 85px;
+            margin-top: 20px;
+            letter-spacing: 11px;
+        }
+        .cel_rec.celeb_receiver_name {
+            font-size: 18px;
+        }
+        .diwali_quote {
+            font-size: 12px;
+            margin-top: 15px;
+        }
+        .cta_create_card {
+            margin-top: 5px;
+        }
+        
+    }
+    @media screen and ( max-width:400px ){
+        .cel_sender.celeb_sender {
+            margin-top: 25px;
+            font-size: 20px;
+            margin-left: 20px;
+        }
+        .cel_sender.celeb_send_text {
+            font-size: 15px;
+            margin-left: 25px;
+            text-transform: lowercase;
+            margin-top: -5px;
+        }
+        .celeb_wish_name_text2 > span {
+            font-size: 40px !important;
+        }
+        .celeb_wish_name_text2 {
+            font-size: 26px !important;
+            margin-left: 50px;
+            margin-top: -23px;
+        }
+        .celeb_wish_name_text1 {
+            font-size: 18px !important;
+            margin-left: 81px;
+            margin-top: 12px;
+            letter-spacing: 3px;
+        }
+        .cel_rec.celeb_receiver_name {
+            font-size: 19px;
+        }
+        .diwali_quote {
+            font-size: 10px;
+            line-height: 24px;
+        }
+        .cta_create_card {
+            margin-top: 5px;
+        }
+        .cta_create_card span {
+            font-size: 10px;
+            padding: 3px 8px;
+        }
+    }
+    
+    
+    .container.celebration-popup_pop_content.celebration-popup_createCard {
+        z-index: 1111111111;
+        position: relative;
+    }
+    .celebration-popup_createCard .modal-body {
+        padding: 0px;
+    }
+.diwali_body_content *:not(button){
+    background: -webkit-linear-gradient(#fee2bb, #efa539, #fee2bb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+p.helper_text {
+    font-size: 11px;
+    margin-top: 5px;
+    text-transform: none;
+    display: none;
+}
+.heading_form {
+    font-size: 23px;
+    text-transform: capitalize;
+    margin-bottom: 10px !important;
+    font-weight: 900;
+}
+    
+#create_celebCard button.grettings-created {
+    background-color: #ebcb52;
+    border: 1px solid #ebcb52 !important;
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: initial;
+    opacity: .9;
+}
+#create_celebCard button.grettings-created:hover {
+    /*border: 1px solid #e9ca55 !important;
+    color: #e9ca55 !important;
+    background-color: transparent;*/
+    opacity: 1;
+}
+div#create_celebCard input {
+    border-left: none;
+    border-top: none;
+    border-right: none;
+    border-bottom: 1px solid #ebcb52;
+    font-size: 17px;
+    text-transform: capitalize;
+    padding-left: 70px;
+    margin-top: -5px;
+}
+div#create_celebCard .form-group {
+    margin-top: 30px;
+}
+    .celebration-popup_pop_content .modal {
+    padding-top: 30px;
+}
+    p.createCardSubheading {
+    text-transform: none;
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: initial;
+    background: transparent !important;
+    color: #fab444;
+    margin-bottom: 0px !important;
+}
+    .diwali-font.diwali_body_content .heading_form {
+        margin-bottom: 0px !important;
+    }
+    div#create_celebCard .form-group {
+    margin-top: 10px;
+}
+
+div#create_celebCard .form-group label {
+    font-size: 16px;
+    margin-bottom: 0px;
+    top: 23px;
+    position: relative;
+}
+    div#create_celebCard input:focus {
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: initial;
+    background: none !important;
+    border: none !important;
+    border-bottom: 1px solid #ebcb52 !important;
+    color: #ebcb52;
+}
+    div#create_celebCard button.btn.btn-primary {
+    background-color: #ebcb52;
+    border: 1px solid #ebcb52 !important;
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: initial;
+    opacity: .9;
+    color: #6b5823;
+    font-weight: 800;
+}
+    p.card_ready_text {
+    text-transform: none;
+}
+    div#create_celebCard button.btn.btn-primary:before {
+    content: "\f1e0";
+    display: inline-block;
+    font: normal normal normal 14px / 1 FontAwesome;
+    margin-right: 10px;
+}
+    @media screen and ( max-width:600px ){
+        .celebration-popup_createCard .diwali-font.diwali_body_content {
+            top: 120px;
+            margin-left: 40px;
+        }
+        div#create_celebCard .diwali-font.diwali_body_content .heading_form {
+            font-size: 18px;
+        }
+        div#create_celebCard p.createCardSubheading {
+            font-size: 12px;
+        }
+        div#create_celebCard div#create_celebCard .form-group {
+            margin-top: 0px;
+        }
+        div#create_celebCard div#create_celebCard .form-group {
+            margin-top: 0px;
+            margin-bottom: 10px;
+        }
+        div#create_celebCard .celebration-popup_pop_content .modal {
+            padding-top: 100px;
+        }
+    }
+    @media screen and ( max-width:500px ){
+        .celebration-popup_createCard .diwali-font.diwali_body_content {
+            top: 0px;
+            margin-left: 0px;
+            width: 100%;
+            padding: 57px 30px 0px 30px;
+            height: 100%;
+            background-color: rgba(0, 0, 0, .3);
+        }
+        div#create_celebCard .diwali-font.diwali_body_content .heading_form {
+            font-size: 16px;
+        }
+        .celebration-popup_createCard .diwali-font.diwali_body_content {
+            top: 0px;
+            margin-left: 0px;
+            width: 100%;
+            padding: 175px 30px 0px 30px;
+            height: 100%;
+            /* background-color: rgba(192, 0, 85, .77); */
+            background-image: url(https://staging-golfoy.hyperx.cloud/media/wysiwyg/login_background.jpg);
+            background-size: auto 100%;
+            background-position: center;
+            height: 700px;
+            background-repeat: no-repeat;
+        }
+        .celebration-popup_createCard .modal-body > img {
+        opacity: 0;
+        }
+        div#create_celebCard .celebration-popup_pop_content .modal {
+            padding-top: 30px;
+        }
+    }
+    @media screen and ( max-width:400px ){
+        div#create_celebCard .form-group label {
+            font-size: 12px;
+        }
+        div#create_celebCard input {
+            font-size: 13px;
+        }
+        div#create_celebCard .form-group label {
+            top: 21px;
+        }
+        div#create_celebCard .form-group {
+            margin-bottom: 5px;
+        }
+        .celebration-popup_createCard .modal-body > img {
+            opacity: 0;
+        }
+        
+    }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Charmonman:wght@400;700&family=Corinthia&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
+<!--
+    font-family: "Charmonman", cursive;
+    font-family: "Nunito", sans-serif;
+-->
+    
+    
+<button type="button" class="btn btn-info btn-lg hide" id="create-grettings" data-toggle="modal" data-target="#create_celebCard">create_celebCard</button>
+<button type="button" class="btn btn-info btn-lg hide" id="show-grettings" data-toggle="modal" data-target="#diwali_celebration">show_celebCard</button>
+<!-- Trigger the modal with a button -->
+
+  <!-- Modal -->
+
+<div class="container celebration-popup_pop_content celebration-popup_createCard">
+  <div class="modal fade" id="create_celebCard" role="dialog">
+    <div class="modal-dialog">
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-body">
+            <button type="button" class="close" data-dismiss="modal"></button>
+            <img src="https://staging-golfoy.hyperx.cloud/media/wysiwyg/login_background.jpg" />
+            <div class="diwali-font diwali_body_content">
+                <div class="heading_form">Create Your Personalized Diwali Card</div>
+                <p class="createCardSubheading">Fill in the names for the sender and recipient to customize your greeting card.</p>
+                <form id="popupForm" autocomplete="off">
+                    <div class="form-group">
+                        <label for="to">To:</label>
+                        <input type="text" id="to" name="to" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="from">From:</label>
+                        <input type="text" id="from" name="from"  value="<?= htmlspecialchars($customerName); ?>" required>
+                    </div>
+                    <p class="card_ready_text"></p>
+                    <div class="unique_id hide"></div>
+                    <button type="submit" class="grettings-created">Generate My Diwali Card</button>
+                </form>
+            </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+  
+
+<script>    
+require(['jquery'], function($) {
+    $(document).ready(function() {
+        
+        $('.celebration-popup').click(function(){
+            $('#celebration-popup').click();
+        });
+        
+        $('.cta_create_card span').click(function(){
+            // $('#diwali_celebration').hide();
+            // $('#diwali_celebration').css('display','none');
+            $('button#create-grettings').click();
+        });
+        
+        
+        function openPopup() {
+            $('#popup').css('display', 'flex');
+            $('#popupForm')[0].reset();
+            $('#popup button[type="submit"]').show();
+            $('.unique_id').empty();
+            // $('.popup-container').empty();
+            $('.popup-container').remove();
+        }
+
+        $('#closePopup').click(closePopup);
+        $('a.close-btn').click(closePopup);
+        function closePopup() {
+            $('#popup').css('display', 'none');
+            $('.popup-container').hide();
+        }
+
+        $('#openPopup').click(openPopup);
+//        $('.celebration-popup').click(openPopup);
+        $('.diwali-container-outer').click(openPopup);
+        $('.create-own').click(openPopup);
+        
+        const toInput = $("#to");
+        const fromInput = $("#from");
+
+        function limitInput(input, maxLength) {
+            input.on('input', function() {
+                if ($(this).val().length > maxLength) {
+                    $(this).val($(this).val().substr(0, maxLength));
+                }
+            });
+        }
+
+        limitInput(toInput, 12);
+        limitInput(fromInput, 12);
+        
+
+        $('#popupForm').submit(function(e) {
+            e.preventDefault();
+            var baseUrl = window.BASE_URL;
+            $.ajax({
+                url: baseUrl+'celebration/submit/submit',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    console.log('Success:', response);
+                    // closePopup();
+                    $('#popup button[type="submit"]').hide();
+                    if (response.success) {
+                        var idElement = $('<div></div>').text('Response ID: ' + response.success);
+                        // $('.unique_id').append(idElement);
+
+                        // Create a share link button
+                        var baseUrl = window.BASE_URL; // Ensure BASE_URL is defined in your JS scope
+                        var shareUrl = baseUrl + '?diwali=' + response.success;
+                        $('form#popupForm .grettings-created').hide();
+                        var shareButton = $('<button></button>')
+                            .text('Share Your Greeting Card')
+                            .addClass('btn btn-primary')
+                            .attr('type', 'button')  // Define as a button element
+                            .on('click', function() {
+                                // Check if the browser supports the Web Share API
+                                if (navigator.share) {
+                                    navigator.share({
+                                        title: 'Check this out!',
+                                        text: 'Diwali Celebration Link',
+                                        url: shareUrl
+                                    }).then(function() {
+                                        console.log('Thanks for sharing!');
+                                    }).catch(function(err) {
+                                        console.error('Error sharing:', err);
+                                    });
+                                } else {
+                                    // Fallback for browsers that don't support the Web Share API
+                                    alert('Sharing is not supported on this browser.');
+                                }
+                            });
+                        $('.card_ready_text').text('Your Diwali Greeting Card is Ready!');
+                        $('.unique_id').append(shareButton);
+                        // Create "Create Other" button
+                        var createOtherButton = $('<button></button>')
+                            .text('Create Another Card')
+                            .addClass('btn btn-secondary')
+                            .attr('type', 'button')
+                            .on('click', function() {
+                                // Reset the form
+                                $('#popupForm')[0].reset();
+                                // Hide the success message and buttons
+                                $('.card_ready_text').text('');
+                                $('.unique_id').addClass('hide').empty();
+                                // Show the original submit button
+                                $('form#popupForm .grettings-created').show();
+                            });
+                        
+                        // Append the "Create Other" button after the share button
+                        $('.unique_id').append(createOtherButton);
+                        $('.unique_id').removeClass('hide');
+                    }
+                    // var idElement = $('<div></div>').text('Response ID: ' + response.success);
+                    // $('.unique_id').append(idElement);
+                    // $('.unique_id').removeClass('hide');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+    });
+});
+</script>
+
+<style>
+
+form#popupForm button.btn.btn-secondary {
+    background-color: #ebcb52;
+    border: 1px solid #ebcb52 !important;
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: initial;
+    opacity: .9;
+    color: #6b5823;
+    font-weight: 800;
+    margin-top: 10px;
+}
+.close-btn {
+    position: relative;
+    top: -122px;
+    left: 388px;
+    background-color: transparent;
+    font-size: 1.5rem;
+    color: #333;
+    cursor: pointer;
+    font-weight: bold;
+    transition: color 0.3s;
+    z-index: 9;
+}
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 9;
+}
+.popup-content {
+    background-color: #ffffff;
+    padding: 0px;
+    border-radius: 10px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+    position: relative;
+    text-align: center;
+    animation: fadeIn 0.5s ease-in-out;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+/* Form styling */
+.popup-content h2 {
+    font-family: 'Dancing Script', cursive;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.popup-content .form-group {
+    margin-bottom: 15px;
+}
+
+.popup-content label {
+    font-size: 1rem;
+    color: #333;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.popup-content input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 15px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.popup-content input[type="text"]:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Submit button */
+.popup-content button[type="submit"] {
+    background-color: #ff5501;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+.popup-content button[type="submit"]:hover {
+    background-color: #e94c00;
+}
+
+
+.close-btn:hover {
+    color: #ff5501;
+}
+
+button#create-grettings {
+    display: none !important;
+}
+/* Hide unique ID section initially */
+.hide {
+    display: none;
+}
+
+/* Fade-in animation for the popup */
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+    </style>

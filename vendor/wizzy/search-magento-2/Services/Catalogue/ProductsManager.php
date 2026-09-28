@@ -1,0 +1,229 @@
+<?php
+
+namespace Wizzy\Search\Services\Catalogue;
+
+use Magento\Catalog\Model\Product\Attribute\Source\Status;
+use Magento\Catalog\Model\Product\Visibility;
+use Magento\Catalog\Model\ProductRepository;
+use Magento\Framework\Api\FilterBuilder;
+use Magento\Framework\Api\Search\FilterGroup;
+use Magento\Framework\Api\Search\SearchCriteriaInterface;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
+use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
+use Wizzy\Search\Model\Indexer\Products;
+use DateTime;
+
+class ProductsManager
+{
+
+    private $productRepository;
+    private $searchCriteria;
+    private $filterGroup;
+    private $filterBuilder;
+    private $status;
+    private $visibility;
+    private $configurable;
+    private $productCollectionFactory;
+
+    const MAX_PRODUCTS_TO_FETCH = 10000;
+
+    public function __construct(
+        ProductRepository $productRepository,
+        SearchCriteriaInterface $searchCriteria,
+        FilterGroup $filterGroup,
+        FilterBuilder $filterBuilder,
+        Status $status,
+        Configurable $configurable,
+        Visibility $visibility,
+        CollectionFactory $productCollectionFactory
+    ) {
+        $this->productRepository = $productRepository;
+        $this->searchCriteria = $searchCriteria;
+        $this->filterGroup = $filterGroup;
+        $this->filterBuilder = $filterBuilder;
+        $this->status = $status;
+        $this->visibility = $visibility;
+        $this->configurable = $configurable;
+        $this->productCollectionFactory = $productCollectionFactory;
+    }
+
+    public function fetchAll($page, $storeId)
+    {
+        $products = $this->productCollectionFactory->create();
+        $products->addAttributeToSelect('id');
+        $products->addAttributeToFilter('status', ['in' => $this->status->getVisibleStatusIds()]);
+        $products->addStoreFilter($storeId);
+        $products->setPage($page, self::MAX_PRODUCTS_TO_FETCH);
+        return $products;
+    }
+
+    public function fetchAllByCategoryIds($page, $storeId, $categoryIDs)
+    {
+        $products = $this->productCollectionFactory->create();
+        $products->addAttributeToSelect('id');
+        $products->addAttributeToFilter('status', ['in' => $this->status->getVisibleStatusIds()]);
+        $products->addCategoriesFilter(['in' => $categoryIDs]);
+        $products->addStoreFilter($storeId);
+        $products->setPage($page, self::MAX_PRODUCTS_TO_FETCH);
+        return $products;
+    }
+
+    public function getAllProductIds($storeId)
+    {
+        $page = 1;
+        $productIds = [];
+
+        while (true) {
+            $products = $this->fetchAll($page, $storeId);
+            $products = $this->getProductIds($products);
+            $productIds = array_merge($productIds, $products);
+            $page++;
+            if (count($products) < self::MAX_PRODUCTS_TO_FETCH) {
+                break;
+            }
+        }
+
+        return $productIds;
+    }
+
+    public function getProductIds($products)
+    {
+        $productIds = [];
+
+        foreach ($products as $product) {
+            $productIds[] = $product->getId();
+        }
+
+        return $productIds;
+    }
+
+    public function getProductsByCategoryIds($categoryIDs, $storeId)
+    {
+        $page = 1;
+        $productIds = [];
+
+        while (true) {
+            $products = $this->fetchAllByCategoryIds($page, $storeId, $categoryIDs);
+            $products = $this->getProductIds($products);
+            $productIds = array_merge($productIds, $products);
+            $page++;
+            if (count($products) < self::MAX_PRODUCTS_TO_FETCH) {
+                break;
+            }
+        }
+
+        return $productIds;
+    }
+
+    /**
+     * Get parent product IDs of given children IDs.
+     *
+     * @param $IDs
+     * @return array
+     */
+    public function getParentProductIds($IDs)
+    {
+        return array_values(array_unique($this->configurable->getParentIdsByChild($IDs)));
+    }
+
+    public function getProductsByIds($IDs, $storeId)
+    {
+        $filters = [
+         $this->filterBuilder
+            ->setField('entity_id')
+            ->setConditionType('in')
+            ->setValue($IDs)
+            ->create(),
+         $this->filterBuilder
+            ->setField('store_id')
+            ->setConditionType('eq')
+            ->setValue($storeId)
+            ->create()
+        ];
+
+        $this->filterGroup->setFilters($filters);
+
+        $this->searchCriteria->setFilterGroups([$this->filterGroup]);
+        $products = $this->productRepository->getList($this->searchCriteria);
+        $products = $products->getItems();
+
+        return $products;
+    }
+
+    public function getProductsBySKUs($SKUs)
+    {
+        $allProducts = [];
+        $chunkSize = 2000;
+        $skuChunks = array_chunk($SKUs, $chunkSize);
+
+        foreach ($skuChunks as $skuChunk) {
+            $filters = [
+                $this->filterBuilder
+                    ->setField('sku')
+                    ->setConditionType('in')
+                    ->setValue($skuChunk)
+                    ->create(),
+            ];
+
+            $this->filterGroup->setFilters($filters);
+            $this->searchCriteria->setFilterGroups([$this->filterGroup]);
+
+            $result = $this->productRepository->getList($this->searchCriteria);
+            $items = $result->getItems();
+
+            foreach ($items as $product) {
+                $allProducts[] = $product;
+            }
+        }
+        return $allProducts;
+    }
+
+    public function getById($productId)
+    {
+        return $this->productRepository->getById($productId);
+    }
+
+    public function getProductsByAttribute($attributeCode, $storeId)
+    {
+        $products = $this->productCollectionFactory->create();
+
+        $products->addAttributeToSelect('id');
+        $products->addStoreFilter($storeId);
+        $products->addAttributeToFilter($attributeCode, [
+            'notnull' => true,
+        ]);
+
+        return $products;
+    }
+
+    public function getUpdatedSpecialPriceProductIds()
+    {
+        $startDate = (new DateTime())->format("Y-m-d");
+        $endDate = (new DateTime())->modify("-1 day")->format("Y-m-d");
+    
+        $page = 1;
+        $productIds = [];
+    
+        $collection = $this->productCollectionFactory->create();
+        $collection->addAttributeToSelect('special_from_date')
+                   ->addAttributeToSelect('special_to_date')
+                   ->addAttributeToFilter([
+                       ['attribute' => 'special_from_date', 'eq' => $startDate],
+                       ['attribute' => 'special_to_date', 'eq' => $endDate]
+                   ])
+                   ->setPageSize(self::MAX_PRODUCTS_TO_FETCH);
+    
+        while (true) {
+            $collection->setCurPage($page);
+            $pageProductIds = $collection->getAllIds();
+            $productIds = array_merge($productIds, $pageProductIds);
+            $page++;
+            
+            if (count($pageProductIds) < self:: MAX_PRODUCTS_TO_FETCH) {
+                break;
+            }
+        }
+    
+        return $productIds;
+    }
+}

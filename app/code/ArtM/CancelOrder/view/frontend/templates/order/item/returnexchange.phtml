@@ -1,0 +1,1752 @@
+<?php
+
+/**
+ * Item Wise Return / Exchange Popup
+ *
+ * Data passed in:
+ *   $block->getOrder()             → order object
+ *   $block->getItem()              → order item object
+ *   $block->getData('delivered_date') → e.g. "28 May 2026"
+ *
+ * Return vs Replacement is chosen by the customer inside the popup (tab toggle).
+ * The chosen value is written to the hidden field [return_cancel_status] before submit.
+ *
+ * Refund modes:
+ *   COD   → Golfoy Wallet | UPI | Bank Transfer  (bank shows saved accounts first)
+ *   Other → Golfoy Wallet | Same payment method (label = readable method name)
+ */
+
+$order              = $block->getOrder();
+$_item              = $block->getItem();
+$_itemDeliveredDate = $block->getData('delivered_date'); // "28 May 2026"
+// var_dump($_itemDeliveredDate);
+if (!$_itemDeliveredDate) {
+    return;
+}
+
+if (!$order || !$_item) {
+    return;
+}
+
+$itemId    = $_item->getItemId();
+$productId = $_item->getProductId();
+
+/* ── Resolve simple product ID for configurable ── */
+if ($_item->getProductType() == 'configurable') {
+    foreach ($order->getAllItems() as $orderItem) {
+        if ($orderItem->getParentItemId() == $_item->getItemId()) {
+            $productId = $orderItem->getProductId();
+            break;
+        }
+    }
+}
+
+/* ── Disable check (bundled / custom-option products) ── */
+if (!$block->returnExchangedisable($_item)) {
+    return;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EXISTING REQUEST CHECK
+   ═══════════════════════════════════════════════════════════ */
+$existingRequest = $block->getReturnExchangeStatus($order->getId(), $productId);
+
+if ($existingRequest) {
+    $reqType    = ucfirst($existingRequest['status']);
+    $reqCurrent = ucfirst(str_replace('_', ' ', $existingRequest['current_status']));
+?>
+    <div class="already-requested">
+        <span class="req-type-badge req-type-<?= strtolower($existingRequest['status']) ?>">
+            <?= __($reqType) ?>
+        </span>
+        <strong><?= __($reqCurrent) ?></strong>
+    </div>
+<?php
+    return;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PRODUCT POLICY ATTRIBUTES
+   ═══════════════════════════════════════════════════════════ */
+$_product          = $_item->getProduct();
+$isReturnable      = (bool) $_product->getData('returnable');
+$replacementPolicy = (int)  $_product->getData('replacement_policy');
+
+$replacementDays = 0;
+switch ($replacementPolicy) {
+    case 1399:
+        $replacementDays = 7;
+        break;
+    case 3690:
+        $replacementDays = 30;
+        break;
+    default:
+        $replacementDays = 0;
+        break;
+}
+$returnWindowDays = $isReturnable ? 7 : 0;
+
+/* ── Window calculator ── */
+$deliveredDate = \DateTime::createFromFormat('d M Y', $_itemDeliveredDate)
+    ?: new \DateTime($_itemDeliveredDate);
+
+$calcWindow = function ($days) use ($deliveredDate) {
+    if ($days <= 0 || !$deliveredDate) return false;
+    $close = (clone $deliveredDate)->modify("+{$days} days");
+    $diff  = (int)(new \DateTime('today'))->diff($close)->format('%r%a');
+    return ['closes_on' => $close->format('d M Y'), 'days_left' => $diff, 'open' => $diff > 0]; // was >= 0
+};
+
+$returnWindow      = $calcWindow($returnWindowDays);
+$replacementWindow = $calcWindow($replacementDays);
+
+$returnOpen      = $returnWindow      && $returnWindow['open'];
+$replacementOpen = $replacementWindow && $replacementWindow['open'];
+$anyWindowOpen   = $returnOpen || $replacementOpen;
+
+/* ═══════════════════════════════════════════════════════════
+   PAYMENT METHOD
+   ═══════════════════════════════════════════════════════════ */
+$payment           = $order->getPayment();
+$paymentmethodcode = $payment->getMethod();
+$isCOD             = ($paymentmethodcode === 'cashondelivery');
+
+$paymentMethodLabels = [
+    'razorpay'          => 'Razorpay (Online)',
+    'payu'              => 'PayU',
+    'ccavenue'          => 'CCAvenue',
+    'stripe_payments'   => 'Credit / Debit Card',
+    'paypal_express'    => 'PayPal',
+    'free'              => 'Free / Zero Value',
+];
+$paymentLabel = $paymentMethodLabels[$paymentmethodcode]
+    ?? ucwords(str_replace(['_', 'payment', 'method'], [' ', '', ''], $paymentmethodcode));
+
+/* ═══════════════════════════════════════════════════════════
+   SESSION & SAVED BANK / UPI ACCOUNTS
+   ═══════════════════════════════════════════════════════════ */
+$customerId     = $order->getCustomerId();
+$customerName   = $order->getCustomerName();
+$customerEmail  = $order->getCustomerEmail();
+$return_orderId = $order->getIncrementId();
+
+$bankAccounts = [];
+$upiAccounts  = [];
+
+if ($customerId) {
+    $bankAccounts = $block->getAccounts($customerId, 'refund_bank') ?: [];
+    $upiAccounts  = $block->getAccounts($customerId, 'refund_upi')  ?: [];
+}
+?>
+
+
+<!-- ══════════════════════════════════════════════════════
+     POLICY INFO STRIP  (always visible below the item)
+     ══════════════════════════════════════════════════════ -->
+
+<?php if ($returnWindow && !$returnWindow['open']) : ?>
+    <div class="re-policy-strip">
+        <div class="policy-row">
+            
+            <span class="re-policy-badge re-policy-closed">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polyline points="1 4 1 10 7 10" />
+                    <path d="M3.51 15a9 9 0 1 0 .49-3.85" />
+                </svg>
+                <div style="display: inline-block;"><?= __('Return window closed on') ?></div>
+                <div style="padding-left: 23px;"><?= $returnWindow['closes_on'] ?></div>
+            </span>
+        </div>
+    </div>
+<?php elseif ($replacementWindow && !$replacementWindow['open']) : ?>
+    <div class="re-policy-strip">
+        <div class="policy-row">
+            <span class="re-policy-badge re-policy-closed">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polyline points="1 4 1 10 7 10" />
+                    <path d="M3.51 15a9 9 0 1 0 .49-3.85" />
+                </svg>
+                <div style="display: inline-block;"><?= __('Replacement window closed on') ?></div>
+                <div style="padding-left: 23px;"><?= $replacementWindow['closes_on'] ?></div>
+            </span>
+        </div>
+    </div>
+<?php endif; ?>
+
+<?php if ($anyWindowOpen) : ?>
+
+    <!-- ══════════════════════════════════════════════════════
+     TRIGGER BUTTON
+     ══════════════════════════════════════════════════════ -->
+    <button type="button"
+        id="return-exchange-item-<?= $itemId ?>"
+        class="re-trigger-btn open-return-popup"
+        data-popup="popup-return-<?= $itemId ?>">
+        <?= __('Return / Exchange') ?>
+    </button>
+    <div class="re-policy-strip">
+        <?php if ($returnWindow) : ?>
+            <div class="policy-row">
+                <?php if ($returnWindow['open']) : ?>
+                    <span class="re-policy-badge re-policy-open">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <polyline points="1 4 1 10 7 10" />
+                            <path d="M3.51 15a9 9 0 1 0 .49-3.85" />
+                        </svg>
+                        <span class="return-txt"><?= __('Return window closes on ') ?></span>
+                        <div class="return-date-line"><?= __('%1 ( %2 days left)', $returnWindow['closes_on'], $returnWindow['days_left']) ?></div>
+                    </span>
+                <?php else : ?>
+                    <span class="re-policy-badge re-policy-closed">
+                        <div><?= __('Return window closed on') ?></div>
+                        <div><?= __('%1', $returnWindow['closes_on']) ?></div>
+                    </span>
+                <?php endif; ?>
+            </div>
+        <?php elseif ($replacementWindow) : ?>
+            <div class="policy-row">
+                <?php if ($replacementWindow['open']) : ?>
+                    <span class="re-policy-badge re-policy-open">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <polyline points="1 4 1 10 7 10" />
+                            <path d="M3.51 15a9 9 0 1 0 .49-3.85" />
+                        </svg>
+                        <div><?= __('Replacement window closes on') ?></div>
+                        <div><?= __('%1 ( %2 days left)', $replacementWindow['closes_on'], $replacementWindow['days_left']) ?></div>
+                    </span>
+                <?php else : ?>
+                    <span class="re-policy-badge re-policy-closed">
+                        <div><?= __('Replacement window closed on') ?></div>
+                        <div><?= __('%1', $replacementWindow['closes_on']) ?></div>
+                    </span>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════════════
+     POPUP OVERLAY
+     ══════════════════════════════════════════════════════ -->
+    <div id="popup-return-<?= $itemId ?>"
+        class="re-overlay"
+        style="display:none;"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="re-title-<?= $itemId ?>">
+
+        <div class="re-popup">
+
+            <!-- Header -->
+            <div class="re-header">
+                <h3 id="re-title-<?= $itemId ?>"><?= __('Return / Exchange Request') ?></h3>
+                <button type="button"
+                    class="re-close-btn"
+                    data-popup-close="popup-return-<?= $itemId ?>"
+                    aria-label="<?= __('Close') ?>">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Tab Toggle -->
+            <div class="re-tabs-wrap">
+                <div class="re-tabs">
+                    <?php if ($returnOpen) : ?>
+                        <button type="button"
+                            class="re-tab <?= !$replacementOpen ? 'active' : '' ?>"
+                            data-type="return"
+                            data-item="<?= $itemId ?>">
+                            <?= __('Return') ?>
+                        </button>
+                    <?php endif; ?>
+                    <?php if ($replacementOpen) : ?>
+                        <button type="button"
+                            class="re-tab <?= !$returnOpen ? 'active' : '' ?>"
+                            data-type="replace"
+                            data-item="<?= $itemId ?>">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <polyline points="17 1 21 5 17 9" />
+                                <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                                <polyline points="7 23 3 19 7 15" />
+                                <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+                            </svg>
+                            <?= __('Replacement / Exchange') ?>
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Tab note -->
+            <div class="re-tab-note" id="re_note_<?= $itemId ?>"></div>
+
+            <!-- Form -->
+            <form class="return_quest_form"
+                action="<?= $block->getUrl('cancelorder/index/submit') ?>"
+                id="cancelcustomform_<?= $itemId ?>"
+                method="post"
+                enctype="multipart/form-data">
+
+                <?= $block->getBlockHtml('formkey') ?>
+
+                <input type="hidden"
+                    name="return_cancel_status"
+                    id="return_cancel_status_<?= $itemId ?>"
+                    value="<?= $returnOpen ? 'return' : 'replace' ?>">
+
+                <!-- Two-column body -->
+                <div class="re-body">
+
+                    <!-- LEFT COLUMN -->
+                    <div class="re-col re-col-left">
+
+                        <!-- Product -->
+                        <div class="re-field-group">
+                            <span class="re-section-label"><?= __('Product') ?></span>
+                            <div class="re-product-pill">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                                    <line x1="3" y1="6" x2="21" y2="6" />
+                                    <path d="M16 10a4 4 0 0 1-8 0" />
+                                </svg>
+                                <input type="hidden" value="<?= $productId ?>" name="product_ids">
+                                <?= $block->escapeHtml($_item->getName()) ?>
+                            </div>
+                        </div>
+
+                        <!-- Reason -->
+                        <div class="re-field-group">
+                            <label class="re-field-label" for="firstreason_<?= $itemId ?>">
+                                <?= __('Reason') ?>
+                            </label>
+                            <select class="re-select customError"
+                                name="firstreson"
+                                id="firstreason_<?= $itemId ?>">
+                                <option value=""><?= __('Select reason') ?></option>
+                                <option value="0"><?= __('Size / Color issue') ?></option>
+                                <option value="1"><?= __('Did not like the product') ?></option>
+                                <option value="2"><?= __('Defective / Damaged product received') ?></option>
+                                <option value="3"><?= __('Wrong item shipped') ?></option>
+                                <option value="show"><?= __('Other') ?></option>
+                            </select>
+
+                            <select name="subreson"
+                                id="subfield_<?= $itemId ?>"
+                                class="re-select"
+                                style="display:none;margin-top:8px;">
+                                <option value="0"><?= __('Wrong color delivered') ?></option>
+                                <option value="1"><?= __('Different from what was ordered') ?></option>
+                                <option value="2"><?= __('Delivered wrong size') ?></option>
+                            </select>
+
+                            <div id="inputField_<?= $itemId ?>" style="display:none;margin-top:8px;">
+                                <textarea class="re-textarea"
+                                    name="return_reason"
+                                    id="return_reason_<?= $itemId ?>"
+                                    placeholder="<?= __('Describe the issue…') ?>"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Photo upload -->
+                        <div class="re-field-group">
+                            <label class="re-field-label">
+                                <?= __('Product photos') ?>
+                                <span class="re-field-hint"><?= __('(min. 2, max. 5)') ?></span>
+                            </label>
+                            <div class="re-drag-area review-form-container">
+                                <input type="file"
+                                    style="display:none !important;"
+                                    name="review_media[]"
+                                    class="review_media_input"
+                                    id="review_media_<?= $itemId ?>"
+                                    accept=".png,.jpg,.jpeg"
+                                    multiple="multiple" />
+                                <div class="re-drag-inner review-drag-area">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                        <polyline points="16 16 12 12 8 16" />
+                                        <line x1="12" y1="12" x2="12" y2="21" />
+                                        <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
+                                    </svg>
+
+                                </div>
+                                <p class="re-drag-text review-dragdrop"><?= __('Click or drag photos here') ?></p>
+                                <div class="re-media-error mage-error media_field_error" style="display:none;">
+                                    <?= __('You can upload minimum 2 and maximum 5 images.') ?>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- /.re-col-left -->
+
+                    <!-- RIGHT COLUMN -->
+                    <div class="re-col re-col-right">
+
+                        <!-- Refund section (hidden for replacement tab) -->
+                        <div class="re-field-group" id="refund_box_<?= $itemId ?>">
+                            <span class="re-section-label"><?= __('Refund method') ?></span>
+                            <div class="re-refund-list">
+
+                                <!-- 1. Golfoy Wallet (always) -->
+                                <div class="re-refund-option" id="re-refund-wallet-<?= $itemId ?>">
+                                    <label class="re-refund-label">
+                                        <input type="radio" checked name="refund_type"
+                                            value="refund_wallet"
+                                            id="wallet_<?= $itemId ?>"
+                                            class="re-radio">
+                                        <span class="re-refund-info">
+                                            <span class="re-refund-name"><?= __('Golfoy Wallet') ?></span>
+                                            <span class="re-refund-desc"><?= __('Instant credit to your account balance') ?></span>
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <?php if ($isCOD) : ?>
+
+                                    <!-- UPI -->
+                                    <div class="re-refund-option" id="re-refund-upi-<?= $itemId ?>">
+                                        <label class="re-refund-label">
+                                            <input type="radio"
+                                                name="refund_type"
+                                                value="refund_upi"
+                                                id="upi_<?= $itemId ?>"
+                                                class="re-radio">
+                                            <span class="re-refund-info">
+                                                <span class="re-refund-name"><?= __('UPI') ?></span>
+                                                <span class="re-refund-desc"><?= __('Refund to your UPI ID') ?></span>
+                                            </span>
+                                        </label>
+
+                                        <div id="refund_upi_content_<?= $itemId ?>" class="re-refund-expand" style="display:none;">
+
+                                            <?php if (count($upiAccounts)) : ?>
+                                                <?php foreach ($upiAccounts as $upi) : ?>
+                                                    <div class="re-saved-item">
+                                                        <label>
+                                                            <input type="radio"
+                                                                name="upi_refund_account_id"
+                                                                value="<?= $upi->getId() ?>">
+                                                            <?= $block->escapeHtml($upi->getDetails()) ?>
+                                                        </label>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+
+                                            <div class="re-saved-item">
+                                                <label>
+                                                    <input type="radio"
+                                                        name="upi_refund_account_id"
+                                                        value="0"
+                                                        checked>
+                                                    <?= __('Add new UPI ID') ?>
+                                                </label>
+                                            </div>
+
+                                            <div id="new_upi_fields_<?= $itemId ?>">
+                                                <input type="text"
+                                                    name="refund_upi_id"
+                                                    id="refund_upi_id_<?= $itemId ?>"
+                                                    placeholder="name@bank"
+                                                    class="re-input">
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <!-- Bank Transfer -->
+                                    <div class="re-refund-option" id="re-refund-bank-<?= $itemId ?>">
+                                        <label class="re-refund-label">
+                                            <input type="radio"
+                                                name="refund_type"
+                                                value="refund_bank"
+                                                id="bank_<?= $itemId ?>"
+                                                class="re-radio">
+                                            <span class="re-refund-info">
+                                                <span class="re-refund-name"><?= __('Bank Transfer') ?></span>
+                                                <span class="re-refund-desc"><?= __('2–5 business days') ?></span>
+                                            </span>
+                                        </label>
+
+                                        <div id="refund_bank_text_<?= $itemId ?>" class="re-refund-expand" style="display:none;">
+
+                                            <?php if (count($bankAccounts)) : ?>
+                                                <div class="re-saved-accounts-block">
+                                                    <?php $first = true; ?>
+                                                    <?php foreach ($bankAccounts as $_acc) : ?>
+                                                        <?php
+                                                        $parts    = explode('||', $_acc->getDetails());
+                                                        $accNum   = $parts[0] ?? '';
+                                                        $ifsc     = $parts[1] ?? '';
+                                                        $bankName = $parts[2] ?? '';
+                                                        $branch   = $parts[3] ?? '';
+                                                        $masked   = strlen($accNum) > 4
+                                                            ? str_repeat('*', strlen($accNum) - 4) . substr($accNum, -4)
+                                                            : $accNum;
+                                                        ?>
+                                                        <div class="re-saved-item">
+                                                            <label>
+                                                                <input type="radio"
+                                                                    name="bankrefund"
+                                                                    class="use-saved-bank"
+                                                                    data-item="<?= $itemId ?>"
+                                                                    data-accnum="<?= $block->escapeHtmlAttr($accNum) ?>"
+                                                                    data-ifsc="<?= $block->escapeHtmlAttr($ifsc) ?>"
+                                                                    data-bankname="<?= $block->escapeHtmlAttr($bankName) ?>"
+                                                                    data-branch="<?= $block->escapeHtmlAttr($branch) ?>"
+                                                                    value="<?= $_acc->getId() ?>"
+                                                                    <?= $first ? 'checked' : '' ?>>
+                                                                <?= $block->escapeHtml($bankName) ?> — •••• <?= $block->escapeHtml(substr($accNum, -4)) ?>
+                                                            </label>
+                                                        </div>
+                                                        <?php $first = false; ?>
+                                                    <?php endforeach; ?>
+
+                                                    <div class="re-saved-item">
+                                                        <label>
+                                                            <input type="radio"
+                                                                name="bankrefund"
+                                                                class="use-saved-bank"
+                                                                data-item="<?= $itemId ?>"
+                                                                value="0">
+                                                            <?= __('Add new account') ?>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <div class="re-new-bank-fields" id="new_bank_fields_<?= $itemId ?>"
+                                                <?= count($bankAccounts) ? 'style="display:none"' : '' ?>>
+                                                <div class="re-bank-grid">
+                                                    <input type="number"
+                                                        placeholder="<?= __('Account number') ?>"
+                                                        name="refund_bank_accnumber"
+                                                        id="refund_bank_accnumber_<?= $itemId ?>"
+                                                        class="re-input">
+                                                    <input type="password"
+                                                        placeholder="<?= __('Confirm account number') ?>"
+                                                        name="refund_bank_confirmaccnumber"
+                                                        id="refund_bank_confirmaccnumber_<?= $itemId ?>"
+                                                        class="re-input">
+                                                    <input type="text"
+                                                        maxlength="11"
+                                                        placeholder="<?= __('IFSC code') ?>"
+                                                        name="refund_bank_ifsccode"
+                                                        id="refund_bank_ifsccode_<?= $itemId ?>"
+                                                        class="re-input re-input-full">
+                                                </div>
+                                                <span id="ifscdetail_<?= $itemId ?>" class="re-ifsc-status"></span>
+                                            </div>
+
+                                            <input type="hidden" name="ifscverify" value="0" id="ifscverify_<?= $itemId ?>">
+                                            <input type="hidden" name="refund_bank_name" id="refund_bank_name_<?= $itemId ?>">
+                                            <input type="hidden" name="refund_bank_branch" id="refund_bank_branch_<?= $itemId ?>">
+
+                                        </div>
+                                    </div>
+
+                                <?php else : // Non-COD 
+                                ?>
+
+                                    <!-- Same payment method -->
+                                    <div class="re-refund-option" id="re-refund-original-<?= $itemId ?>">
+                                        <label class="re-refund-label">
+                                            <input type="radio" name="refund_type"
+                                                value="refund_original"
+                                                id="original_<?= $itemId ?>"
+                                                class="re-radio">
+                                            <span class="re-refund-info">
+                                                <span class="re-refund-name"><?= __('Back to %1', $paymentLabel) ?></span>
+                                                <span class="re-refund-desc"><?= __('Same as payment method used') ?></span>
+                                            </span>
+                                        </label>
+                                    </div>
+
+                                <?php endif; ?>
+
+                            </div>
+                        </div><!-- /#refund_box -->
+
+                        <!-- Replacement info (shown when replacement tab active) -->
+                        <div class="re-replace-info" id="re_replace_info_<?= $itemId ?>" style="display:none;">
+                            <div class="re-replace-info-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <rect x="1" y="3" width="15" height="13" />
+                                    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+                                    <circle cx="5.5" cy="18.5" r="2.5" />
+                                    <circle cx="18.5" cy="18.5" r="2.5" />
+                                </svg>
+                                <?= __('We will schedule a pickup within 2–3 business days.') ?>
+                            </div>
+                            <div class="re-replace-info-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <polyline points="17 1 21 5 17 9" />
+                                    <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                                    <polyline points="7 23 3 19 7 15" />
+                                    <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+                                </svg>
+                                <?= __('Replacement ships after we inspect the returned item.') ?>
+                            </div>
+                        </div>
+
+                        <!-- Hidden order fields -->
+                        <input type="hidden" value="<?= $order->getId() ?>" name="order_id">
+                        <input type="hidden" value="<?= $order->getState() ?>" name="order_state">
+                        <input type="hidden" value="<?= $order->getStatus() ?>" name="order_status">
+                        <input type="hidden" value="<?= $customerId ?>" name="customer_id">
+                        <input type="hidden" value="<?= $customerName ?>" name="customer_name">
+                        <input type="hidden" value="<?= $customerEmail ?>" name="customer_email">
+
+                    </div><!-- /.re-col-right -->
+
+                </div><!-- /.re-body -->
+                <!-- Consent -->
+                <div class="re-consent-box">
+                    <label class="re-consent-label">
+                        <input type="checkbox" id="return_consent_<?= $itemId ?>" class="re-checkbox">
+                        <?= __('I confirm the product is unused, in original packaging, and all tags are intact.') ?>
+                    </label>
+                </div>
+                <!-- Footer -->
+                <div class="re-footer">
+                    <div class="re-error error_return" style="color:red;"></div>
+                    <button type="submit"
+                        id="crosubmit_<?= $itemId ?>"
+                        class="re-submit-btn action primary">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                            <line x1="22" y1="2" x2="11" y2="13" />
+                            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                        </svg>
+                        <?= __('Submit Request') ?>
+                    </button>
+                </div>
+
+            </form>
+        </div><!-- /.re-popup -->
+    </div><!-- /.re-overlay -->
+
+<?php endif; // anyWindowOpen 
+?>
+
+
+<!-- ══════════════════════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════════════════════ -->
+<script>
+    require(['jquery'], function($) {
+
+        /*
+         * FIX: duplicate file-picker / double-event bug
+         * ─────────────────────────────────────────────
+         * This template renders once per order item, so on a multi-item page
+         * there are N copies of this <script>.  Every copy was registering
+         * the same delegated listeners on $(document), so with 3 items:
+         *   • 3 × 'click .re-drag-inner'  → .trigger('click') fires 3× → picker opens 3×
+         *   • 3 × 'change .review_media_input' → same file uploaded 3×
+         *
+         * Solution — two zones:
+         *
+         *  ZONE A  Item-specific listeners
+         *          Bound to unique IDs (#firstreason_123, #crosubmit_123 …).
+         *          Safe to re-register each render; use .off().on() to prevent
+         *          double-bind if require() somehow executes twice for same item.
+         *
+         *  ZONE B  Shared / class-selector listeners
+         *          Wrapped in  if (window._reSharedReady) return;
+         *          Registered exactly once for the whole page.
+         *          Derive the correct item scope at runtime from the event
+         *          target (data-item attr, closest form id, etc.) so they
+         *          work for every item without duplication.
+         */
+
+        /* ── Constants for this item ── */
+        var itemId = "<?= $itemId ?>";
+
+        /* ════════════════════════════════════════════════
+           ZONE A — ITEM-SPECIFIC (safe to repeat, unique IDs)
+           ════════════════════════════════════════════════ */
+
+        function syncRefundHighlight() {
+            $('#refund_box_' + itemId + ' .re-refund-option').each(function() {
+                $(this).toggleClass('re-refund-selected',
+                    $(this).find('input[type="radio"]').is(':checked'));
+            });
+        }
+
+        /* Reason dropdown */
+        $('#firstreason_' + itemId).off('change.re').on('change.re', function() {
+            var val = $(this).val();
+            if (val === 'show') {
+                $('#inputField_' + itemId).show();
+                $('#subfield_' + itemId).hide();
+            } else if (val === '0') {
+                $('#subfield_' + itemId).show();
+                $('#inputField_' + itemId).hide();
+            } else {
+                $('#inputField_' + itemId).hide();
+                $('#subfield_' + itemId).hide();
+            }
+        });
+
+        /* IFSC live lookup */
+        $('#refund_bank_ifsccode_' + itemId).off('keyup.re').on('keyup.re', function() {
+            var val = $(this).val().toUpperCase();
+            $(this).val(val);
+            $('#ifscdetail_' + itemId).html('').removeClass('re-ifsc-valid re-ifsc-invalid');
+            $('#ifscverify_' + itemId).val('0');
+            if (val.length === 11) {
+                $('#ifscdetail_' + itemId).html('<?= __('Verifying…') ?>');
+                $.ajax({
+                    url: 'https://ifsc.razorpay.com/' + val,
+                    type: 'GET',
+                    success: function(r) {
+                        $('#ifscverify_' + itemId).val('1');
+                        $('#refund_bank_name_' + itemId).val(r.BANK);
+                        $('#refund_bank_branch_' + itemId).val(r.BRANCH);
+                        $('#ifscdetail_' + itemId)
+                            .addClass('re-ifsc-valid')
+                            .html('&#10003; ' + r.BANK + ', ' + r.BRANCH);
+                    },
+                    error: function() {
+                        $('#ifscdetail_' + itemId)
+                            .addClass('re-ifsc-invalid')
+                            .html('<?= __('Invalid IFSC code') ?>');
+                    }
+                });
+            }
+        });
+
+        /* Submit validation */
+        $('#crosubmit_' + itemId).off('click.re').on('click.re', function(e) {
+            var $form = $('#cancelcustomform_' + itemId);
+            var $err = $form.find('.error_return');
+            $err.text('');
+
+            var type = $('#return_cancel_status_' + itemId).val();
+
+            if (type === 'return') {
+                var refund = $form.find('input[name="refund_type"]:checked').val();
+
+                if (refund === 'refund_bank') {
+                    var $newFields = $('#new_bank_fields_' + itemId);
+                    if ($newFields.is(':visible')) {
+                        var acc1 = $('#refund_bank_accnumber_' + itemId).val();
+                        var acc2 = $('#refund_bank_confirmaccnumber_' + itemId).val();
+                        if (!acc1) {
+                            $err.text('<?= __('Please enter account number.') ?>');
+                            e.preventDefault();
+                            return false;
+                        }
+                        if (acc1 !== acc2) {
+                            $err.text('<?= __('Account numbers do not match.') ?>');
+                            e.preventDefault();
+                            return false;
+                        }
+                        if ($('#ifscverify_' + itemId).val() !== '1') {
+                            $err.text('<?= __('Please enter a valid IFSC code.') ?>');
+                            e.preventDefault();
+                            return false;
+                        }
+                    }
+                }
+
+                if (refund === 'refund_upi') {
+                    var upi = $('#refund_upi_id_' + itemId).val().trim();
+                    var selectedUpiAcc = $form.find('input[name="upi_refund_account_id"]:checked').val();
+                    if (selectedUpiAcc == '0' && (!upi || upi.indexOf('@') === -1)) {
+                        $err.text('<?= __('Please enter a valid UPI ID.') ?>');
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+            }
+
+            if (!$('#return_consent_' + itemId).is(':checked')) {
+                $err.text('<?= __('Please confirm the product condition.') ?>');
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        /* Init highlight for this item */
+        syncRefundHighlight();
+
+        /* ════════════════════════════════════════════════
+           ZONE B — SHARED  (registered once for whole page)
+           ════════════════════════════════════════════════ */
+        if (window._reSharedReady) return;
+        window._reSharedReady = true;
+
+        /* ── Shared helper: activates a tab by item ID ── */
+        function activateTabForItem(iid) {
+            var $active = $('.re-tab[data-item="' + iid + '"].active');
+            if (!$active.length) $active = $('.re-tab[data-item="' + iid + '"]').first();
+            if (!$active.length) return;
+            applyTab(iid, $active.data('type'));
+        }
+
+        function applyTab(iid, type) {
+            var infoSvg = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' +
+                '<circle cx="12" cy="12" r="10"/>' +
+                '<line x1="12" y1="8" x2="12" y2="12"/>' +
+                '<line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+            $('.re-tab[data-item="' + iid + '"]').removeClass('active');
+            $('.re-tab[data-item="' + iid + '"][data-type="' + type + '"]').addClass('active');
+            $('#return_cancel_status_' + iid).val(type === 'replace' ? 'replacement' : 'return');
+            if (type === 'replace') {
+                $('#refund_box_' + iid).hide();
+                $('#re_replace_info_' + iid).show();
+                $('#re_note_' + iid).html(infoSvg + '<span><?= __('We will arrange a pickup and send a replacement.') ?></span>');
+            } else {
+                $('#refund_box_' + iid).show();
+                $('#re_replace_info_' + iid).hide();
+                $('#re_note_' + iid).html(infoSvg + '<span><?= __('Select your preferred refund method below.') ?></span>');
+            }
+        }
+
+        /* Popup open — reads item ID from the data-popup attribute suffix */
+        $(document).on('click.re', '.open-return-popup', function() {
+            var pid = $(this).data('popup'); // "popup-return-123"
+            var iid = pid.replace('popup-return-', ''); // "123"
+            activateTabForItem(iid);
+            $('#' + pid).show();
+            $('body').addClass('re-popup-open');
+        });
+
+        /* Popup close — X button */
+        $(document).on('click.re', '[data-popup-close]', function() {
+            $('#' + $(this).data('popup-close')).hide();
+            $('body').removeClass('re-popup-open');
+        });
+
+        /* Popup close — backdrop */
+        $(document).on('click.re', '.re-overlay', function(e) {
+            if ($(e.target).hasClass('re-overlay')) {
+                $(this).hide();
+                $('body').removeClass('re-popup-open');
+            }
+        });
+
+        /* Tab click — item ID comes from data-item */
+        $(document).on('click.re', '.re-tab', function() {
+            applyTab($(this).data('item'), $(this).data('type'));
+        });
+
+        /* Refund type radio — derive item ID from the parent form's id */
+        $(document).on('change.re', 'input[name="refund_type"]', function() {
+            var iid = $(this).closest('form').attr('id').replace('cancelcustomform_', '');
+            var val = $(this).val();
+            $('#refund_bank_text_' + iid).hide();
+            $('#refund_upi_content_' + iid).hide();
+            if (val === 'refund_bank') $('#refund_bank_text_' + iid).show();
+            if (val === 'refund_upi') $('#refund_upi_content_' + iid).show();
+            /* sync highlight for this item */
+            $('#refund_box_' + iid + ' .re-refund-option').each(function() {
+                $(this).toggleClass('re-refund-selected',
+                    $(this).find('input[type="radio"]').is(':checked'));
+            });
+        });
+
+        /* UPI saved-account selector — item ID from data-item on the radio */
+        $(document).on('change.re', 'input[name="upi_refund_account_id"]', function() {
+            var iid = $(this).closest('form').attr('id').replace('cancelcustomform_', '');
+            if ($(this).val() == '0') {
+                $('#new_upi_fields_' + iid).show();
+            } else {
+                $('#new_upi_fields_' + iid).hide();
+            }
+        });
+
+        /* Saved bank-account selector — already carries data-item */
+        $(document).on('change.re', '.use-saved-bank', function() {
+            var $t = $(this);
+            var iid = $t.data('item');
+            if ($t.val() === '0' || $t.data('accnum') === '') {
+                $('#new_bank_fields_' + iid).show();
+                $('#refund_bank_accnumber_' + iid).val('');
+                $('#refund_bank_confirmaccnumber_' + iid).val('');
+                $('#refund_bank_ifsccode_' + iid).val('');
+                $('#ifscdetail_' + iid).html('');
+                $('#ifscverify_' + iid).val('0');
+                $('#refund_bank_name_' + iid).val('');
+                $('#refund_bank_branch_' + iid).val('');
+            } else {
+                $('#new_bank_fields_' + iid).hide();
+                $('#refund_bank_accnumber_' + iid).val($t.data('accnum'));
+                $('#refund_bank_confirmaccnumber_' + iid).val($t.data('accnum'));
+                $('#refund_bank_ifsccode_' + iid).val($t.data('ifsc'));
+                $('#ifscverify_' + iid).val('1');
+                $('#refund_bank_name_' + iid).val($t.data('bankname'));
+                $('#refund_bank_branch_' + iid).val($t.data('branch'));
+            }
+        });
+
+        /* ── FILE UPLOAD — the source of the original bug ──
+         *
+         * Previously registered inside require() with no guard → N copies on
+         * document → one click on the drag area fired all N → file-picker
+         * opened N times.
+         *
+         * Now inside the _reSharedReady guard → registered exactly once.
+         * Each handler finds its scoped container via DOM traversal at
+         * runtime, so it always targets the correct item.
+         */
+        $('html').on('dragover.re drop.re', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        $(document).on('dragenter.re dragover.re', '.review-form-container .review-drag-area', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            $(this).addClass('re-drag-hover');
+        });
+
+        $(document).on('dragleave.re', '.review-form-container .review-drag-area', function() {
+            $(this).removeClass('re-drag-hover');
+        });
+
+        $(document).on('drop.re', '.review-form-container .review-drag-area', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            $(this).removeClass('re-drag-hover');
+            handleFiles(e.originalEvent.dataTransfer.files, $(this).closest('.review-form-container'));
+        });
+
+        /* KEY FIX ↓  one listener; scoped find targets only this item's input */
+        $(document).on('click.re', '.re-drag-area .re-drag-inner', function() {
+            $(this).closest('.re-drag-area').find('.review_media_input').trigger('click');
+        });
+
+        /* KEY FIX ↓  one listener; processes whichever item's input changed */
+        $(document).on('change.re', '.review_media_input', function() {
+            handleFiles($(this)[0].files, $(this).closest('.review-form-container'));
+            $(this).val('');
+        });
+
+        $(document).on('click.re', '.review-form-container .review-img-cross', function() {
+            var $el = $(this).parent('.review-resultimg');
+            var container = $(this).closest('.review-form-container');
+            /* Read order increment ID from the form, not from a PHP-inlined constant */
+            var oid = container.closest('form').find('input[name="order_id"]').val() || '';
+            $.ajax({
+                url: '/cancelorder/index/deleteajaxupload',
+                type: 'POST',
+                data: {
+                    path: 'return_image/' + oid + $(this).attr('rel')
+                },
+                dataType: 'json',
+                success: function() {
+                    $el.remove();
+                    container.find('.media_field_error').hide();
+                }
+            });
+        });
+
+        function handleFiles(files, container) {
+            var existing = container.find('.review-resultimg').length;
+            if (existing + files.length > 5) {
+                container.find('.media_field_error').show();
+                return;
+            }
+            container.find('.media_field_error').hide();
+            for (var i = 0; i < files.length; i++) {
+                var fd = new FormData();
+                fd.append('files[]', files[i]);
+                uploadFile(fd, container);
+            }
+        }
+
+        function uploadFile(fd, container) {
+            /* Read order increment ID from the form's own hidden field */
+            var oid = container.closest('form').find('input[name="order_id"]').val() || '';
+            $.ajax({
+                url: '/cancelorder/index/ajaxupload?orderid=' + oid,
+                type: 'POST',
+                cache: false,
+                contentType: false,
+                processData: false,
+                data: fd,
+                dataType: 'json',
+                success: function(res) {
+                    if (res.path) {
+                        var html = '<div class="review-resultimg">' +
+                            '<img src="/media/return_image/' + oid + res.path + '" alt="">' +
+                            '<div class="review-img-cross" rel="' + res.path + '">&#10006;</div>' +
+                            '<input type="hidden" name="review_media_files[]" value="' + res.path + '">' +
+                            '</div>';
+                        $(html).insertBefore(container.find('.re-drag-inner'));
+                    }
+                }
+            });
+        }
+
+    }); /* end require */
+</script>
+
+
+<!-- ══════════════════════════════════════════════════════
+     STYLES
+     ══════════════════════════════════════════════════════ -->
+<style>
+    span.re-policy-badge.re-policy-closed {
+        padding-left: 5px;
+        font-weight: 500;
+    }
+    .re-header button.re-close-btn {
+        border: unset !important;
+        width: unset !important;
+        min-width: unset;
+    }
+
+    button.re-tab.active {
+        border: 1px solid black !important;
+    }
+
+    /* ── Policy strip ── */
+    .return-exchange-button {
+        margin-top: 10px;
+    }
+
+    td.col.status-and-action {
+        text-align: center !important;
+    }
+
+    button.re-trigger-btn.open-return-popup {
+        width: 180px;
+        text-align: center;
+        margin: auto;
+    }
+
+    .return-policy-strip {
+        margin: 6px 0 0px;
+    }
+
+    .return-policy-strip .policy-open {
+        color: #555;
+        margin-top: 5px;
+        font-size: 11px;
+        text-align: center;
+    }
+
+    .return-policy-strip span.policy-open::before {
+        content: "\f0e2";
+        font: normal normal normal 14px / 1 FontAwesome;
+        margin-right: 6px;
+    }
+
+    span.return-date {
+        padding-left: 15px;
+    }
+
+    /* ── Overlay ── */
+    .re-popup-open .re-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 10, 15, 0.6);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+
+    /* ── Popup shell ── */
+    .re-popup {
+        width: 100%;
+        max-width: 740px;
+        background: #fff;
+        border-radius: 20px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .06);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .re-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 24px 14px;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .re-header h3 {
+        font-size: 15px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+        letter-spacing: -.01em;
+    }
+
+    .re-close-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 1px solid #e5e7eb;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #6b7280;
+        transition: .2s;
+        flex-shrink: 0;
+    }
+
+    .re-close-btn:hover {
+        background: #f3f4f6;
+        color: #111827;
+    }
+
+    /* ── Tabs ── */
+    .re-tabs-wrap {
+        padding: 14px 24px 0;
+    }
+
+    .re-tabs {
+        display: flex;
+        gap: 8px;
+        padding: 4px;
+    }
+
+    .re-tab {
+        flex: 1;
+        height: 38px;
+        border-radius: 9px;
+        border: none;
+        background: transparent;
+        font-size: 13px;
+        font-weight: 600;
+        color: #6b7280;
+        cursor: pointer;
+        transition: .2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .re-tab:hover {
+        color: #111827;
+    }
+
+    .re-tab.active {
+        background: #111827;
+        color: #fff;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, .15);
+    }
+
+    /* ── Tab note ── */
+    .re-tab-note {
+        margin: 10px 24px 0;
+        padding: 9px 14px;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 12px;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    /* ── Two-column body ── */
+    .re-body {
+        display: flex;
+        padding: 16px 24px 4px;
+        gap: 0;
+    }
+
+    .re-col {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .re-col-left {
+        padding-right: 16px;
+        border-right: 1px solid #f3f4f6;
+        width: 50%;
+    }
+
+    .re-col-right {
+        padding-left: 16px;
+        width: 50%;
+    }
+
+    /* ── Field groups ── */
+    .re-field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .re-section-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+        color: #9ca3af;
+    }
+
+    .re-field-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .re-field-hint {
+        font-weight: 400;
+        color: #9ca3af;
+        margin-left: 4px;
+    }
+
+    /* ── Product pill ── */
+    .re-product-pill {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 9px 5px;
+        font-size: 10px;
+        font-weight: 600;
+        color: #111827;
+        text-wrap: auto;
+    }
+
+    .re-product-pill svg {
+        flex-shrink: 0;
+        color: #9ca3af;
+    }
+
+    /* ── Select / inputs ── */
+    .re-select,
+    .re-input,
+    .re-textarea {
+        width: 100%;
+        height: 40px;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        padding: 0 12px;
+        font-size: 13px;
+        font-family: inherit;
+        background: #fff;
+        color: #111827;
+        appearance: none;
+        -webkit-appearance: none;
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+    .re-select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 32px;
+    }
+
+    .re-popup .review-drag-area {
+        float: unset;
+    }
+
+    .re-textarea {
+        height: 72px;
+        padding: 10px 12px;
+        resize: none;
+    }
+
+    .re-select:focus,
+    .re-input:focus,
+    .re-textarea:focus {
+        outline: none;
+        border-color: #111827;
+        box-shadow: 0 0 0 3px rgba(17, 24, 39, .06);
+    }
+
+    /* ── Drag area ── */
+    .re-drag-area {
+        position: relative;
+    }
+
+    .re-drag-inner {
+        height: 80px;
+        border: 1.5px dashed #d1d5db;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        cursor: pointer;
+        transition: .2s;
+        background: #fafafa;
+    }
+
+    .re-drag-inner:hover,
+    .re-drag-inner.re-drag-hover {
+        border-color: #111827;
+        background: #f4f4f4;
+    }
+
+    .re-drag-inner svg {
+        color: #9ca3af;
+    }
+
+    .re-drag-text {
+        font-size: 12px;
+        color: #9ca3af;
+        margin: 0;
+        padding-top: 10px;
+    }
+
+    .re-media-error {
+        font-size: 11px;
+        color: #dc2626;
+        margin-top: 4px;
+    }
+
+    /* ── Uploaded image thumbs ── */
+    .review-resultimg {
+        display: inline-block;
+        width: 56px;
+        height: 56px;
+        position: relative;
+        margin: 6px 6px 0 0;
+        vertical-align: top;
+    }
+
+    .review-resultimg img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        display: block;
+    }
+
+    .review-img-cross {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #ef4444;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 10px;
+        line-height: 1;
+    }
+
+    /* ── Refund options ── */
+    .re-refund-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+        max-width: 370px;
+    }
+
+
+    .re-refund-option {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 10px 14px;
+        cursor: pointer;
+        transition: border-color .2s, background .2s;
+    }
+
+    .re-refund-option:hover {
+        border-color: #9ca3af;
+    }
+
+    .re-refund-option.re-refund-selected {
+        border-color: #111827;
+    }
+
+    .re-refund-label {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        cursor: pointer;
+        margin: 0;
+        width: 100%;
+    }
+
+    .re-radio {
+        accent-color: #111827;
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .re-refund-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+    }
+
+    .re-refund-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .re-refund-desc {
+        font-size: 11px;
+        color: #9ca3af;
+    }
+
+    span.return-txt {
+        padding-left: 5px;
+        font-weight: 500;
+    }
+
+    .return-date-line {
+        padding-left: 23px;
+        font-weight: 500;
+    }
+
+    /* ── Refund expand area ── */
+    .re-refund-expand {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #f3f4f6;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .re-saved-item {
+        background: #f9fafb;
+        border: 1px solid #f3f4f6;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 12px;
+        color: #374151;
+    }
+
+    .re-saved-item label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        margin: 0;
+        font-size: 12px;
+    }
+
+    .re-saved-item input[type="radio"] {
+        accent-color: #111827;
+    }
+
+    .re-bank-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    .re-input-full {
+        grid-column: 1 / -1;
+    }
+
+    .re-bank-grid .re-input {
+        height: 36px;
+        font-size: 12px;
+    }
+
+    .re-ifsc-status {
+        font-size: 11px;
+        display: block;
+        margin-top: 2px;
+    }
+
+    .re-ifsc-valid {
+        color: #15803d;
+    }
+
+    .re-ifsc-invalid {
+        color: #dc2626;
+    }
+
+    /* ── Replacement info box ── */
+    .re-replace-info {
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .re-replace-info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        font-size: 12px;
+        color: #6b7280;
+        text-wrap: auto;
+        line-height: 1.5;
+    }
+
+    .re-replace-info-item svg {
+        flex-shrink: 0;
+        margin-top: 2px;
+        color: #9ca3af;
+    }
+
+    ._keyfocus *:focus,
+    input:not([disabled]):focus,
+    textarea:not([disabled]):focus,
+    select:not([disabled]):focus {
+        box-shadow: none !important;
+    }
+
+    /* ── Consent ── */
+    .re-consent-box {
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-top: 20px;
+        margin: 20px 20px 0px 20px;
+    }
+
+    .re-consent-label {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        cursor: pointer;
+        font-size: 11.5px;
+        color: #6b7280;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    body.account #maincontent input,
+    body.account #maincontent select {
+        font-size: 12px;
+    }
+
+    .re-checkbox {
+        accent-color: #111827;
+        width: 14px;
+        height: 14px;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    /* ── Footer ── */
+    .re-footer {
+        padding: 8px 24px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .re-error {
+        font-size: 12px;
+        text-align: center;
+        min-height: 16px;
+    }
+
+    .re-submit-btn {
+        width: 100%;
+        height: 46px;
+        border: none;
+        border-radius: 12px;
+        background: #111827;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: .01em;
+        cursor: pointer;
+        transition: background .2s, transform .1s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-family: inherit;
+    }
+
+    .re-submit-btn:hover {
+        background: #1f2937;
+    }
+
+    .re-submit-btn:active {
+        transform: scale(.99);
+    }
+
+    /* ── Prevent body scroll when popup open ── */
+    body.re-popup-open {
+        overflow: hidden;
+    }
+
+    /* ══════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════ */
+    @media (max-width: 768px) {
+        .re-product-pill svg {
+            width: 10px;
+            height: 10px;
+        }
+
+        body.account.re-popup-open ul.items.order-links,
+        .re-popup-open .block.block-order-details-view,
+        .re-popup-open .actions-toolbar-bottom,
+        .re-popup-open header.page-header,
+        .re-popup-open .wizzy-search-form,
+        .re-popup-open .block.block-collapsible-nav {
+            display: none;
+        }
+
+        .re-product-pill,
+        .re-tab-note {
+            padding: 9px 5px 6px;
+        }
+
+        .re-field-group input.re-radio,
+        .re-consent-box label.re-consent-label input.re-checkbox,
+        .re-saved-item input[type="radio"] {
+            width: 20px !important;
+            height: 10px !important;
+            margin: 0 !important;
+            min-height: 15px !important;
+        }
+
+        .re-refund-label {
+            align-items: center;
+        }
+
+        .re-popup {
+            border-radius: 16px;
+            max-height: 96vh;
+            overflow-y: auto;
+        }
+
+        .re-header {
+            padding: 14px 16px 0px 16px;
+        }
+
+        .re-header h3 {
+            font-size: 14px;
+        }
+
+        .re-tabs-wrap {
+            padding: 12px 16px 0;
+        }
+
+        .re-tab-note {
+            margin: 8px 16px 0;
+            font-size: 10px;
+        }
+
+        .re-body {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            padding: 14px 16px 4px;
+        }
+
+        .re-col-left {
+            width: 100%;
+            padding-right: 0;
+            border-right: none;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .re-col-right {
+            width: 100%;
+            padding-left: 0;
+        }
+
+        .re-refund-list {
+            max-width: 100%;
+        }
+
+        .re-refund-option {
+            width: 100%;
+            padding: 14px;
+        }
+
+        .re-footer {
+            padding: 8px 16px 16px;
+        }
+
+        .re-tabs {
+            border-radius: 10px;
+        }
+
+        .re-tab {
+            font-size: 12px;
+            height: 36px;
+        }
+
+        .re-bank-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .re-input-full {
+            grid-column: auto;
+        }
+
+        .re-trigger-btn {
+            font-size: 11px;
+            padding: 0 12px;
+            height: 32px;
+        }
+
+        .re-policy-badge {
+            font-size: 10px;
+        }
+
+        .re-submit-btn {
+            height: 42px;
+            font-size: 13px;
+        }
+
+        /* popup css */
+        .return-exchange-button .re-popup button {
+            height: 35px !important;
+            min-height: 40px !important;
+        }
+
+        .re-refund-name {
+            font-size: 10px;
+        }
+
+        .re-refund-desc,
+        .re-consent-label,
+        .re-drag-text,
+        .re-select {
+            font-size: 9px !important;
+        }
+
+        .re-tabs-wrap .status-and-action button {
+            font-size: 10px !important;
+        }
+
+        .re-consent-box {
+            margin: 10px 20px 0px 20px;
+        }
+
+    }
+
+    @media (max-width:400px) {
+        .re-popup {
+            max-height: 85vh;
+        }
+    }
+</style>

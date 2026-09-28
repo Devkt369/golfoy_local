@@ -1,0 +1,260 @@
+<?php
+declare(strict_types=1);
+
+namespace ArtM\LuxuryCategory\Plugin\Catalog\Model;
+
+use Magento\Catalog\Model\ResourceModel\Product\Collection;
+
+/**
+ * Fixes pagination for collections `LuxuryLayerProductCollectionPlugin`
+ * flagged, on stores using Elasticsearch/OpenSearch for catalog listing.
+ *
+ * The root problem: the search engine bakes the toolbar's own page/pageSize
+ * into its *own* query before it ever returns candidate ids to Magento —
+ * it only ever hands back one page's worth of ids for the *unfiltered*
+ * category, once, and locks that in permanently for the collection
+ * instance (`AbstractDb::$_isFiltersRendered` — a one-time gate). Our
+ * luxury id filter can only narrow within whatever that first search
+ * already returned; it can never recover matches outside that window.
+ *
+ * This is complicated further because something else in this store's
+ * stack (observed: the AJAX layered navigation module's toolbar plugin)
+ * calls `getSize()`/`getSelectCountSql()` *before* the product list block
+ * calls `load()` — meaning by the time a naive "widen pageSize only around
+ * load()" fix runs, the search has already executed once with the small,
+ * real page size. So the widening has to happen at the *first* thing that
+ * could possibly trigger a render, whichever that turns out to be.
+ *
+ * Strategy: the moment anything tries to read the size or load the items
+ * of a flagged collection, temporarily force a large page size (so the
+ * search engine returns every real candidate, not just one page's worth),
+ * and refuse to let any *other* code change the page size/current page
+ * back before that widened query actually executes — instead, capture
+ * whatever real value was requested and apply it only after loading
+ * completes, when the correctly-filtered full result set is sliced down
+ * to that real page in PHP.
+ */
+class LuxuryCollectionPaginationPlugin
+{
+    private const MAX_CANDIDATES = 500;
+    private const WIDENED_FLAG = 'artm_luxury_widened';
+    private const REAL_PAGE_SIZE_FLAG = 'artm_luxury_real_page_size';
+    private const REAL_CUR_PAGE_FLAG = 'artm_luxury_real_cur_page';
+    private const IN_PROGRESS_FLAG = 'artm_luxury_pagination_in_progress';
+    public const TRACE_FLAG = 'artm_luxury_pagination_trace';
+
+    /**
+     * @param Collection $subject
+     * @param int|string|null $size
+     * @return array{0: int|string|null}
+     */
+    public function beforeSetPageSize(Collection $subject, $size): array
+    {
+        $intercept = $this->shouldIntercept($subject);
+        $this->trace($subject, 'beforeSetPageSize', ['arg' => $size, 'intercept' => $intercept]);
+
+        if ($intercept) {
+            $this->ensureWidened($subject);
+            $subject->setFlag(self::REAL_PAGE_SIZE_FLAG, (int)$size);
+
+            return [self::MAX_CANDIDATES];
+        }
+
+        return [$size];
+    }
+
+    /**
+     * @param Collection $subject
+     * @param int|null $page
+     * @return array{0: int|null}
+     */
+    public function beforeSetCurPage(Collection $subject, $page): array
+    {
+        $intercept = $this->shouldIntercept($subject);
+        $this->trace($subject, 'beforeSetCurPage', ['arg' => $page, 'intercept' => $intercept]);
+
+        if ($intercept) {
+            $this->ensureWidened($subject);
+            $subject->setFlag(self::REAL_CUR_PAGE_FLAG, max(1, (int)$page));
+
+            return [1];
+        }
+
+        return [$page];
+    }
+
+    /**
+     * @param Collection $subject
+     * @param callable $proceed
+     * @return \Magento\Framework\DB\Select
+     */
+    public function aroundGetSelectCountSql(Collection $subject, callable $proceed)
+    {
+        if ($subject->getFlag(self::IN_PROGRESS_FLAG)) {
+            // Reentrant call while we're already handling this collection
+            // (whatever triggers it — confirmed this store's stack can
+            // re-enter in ways that are impractical to fully trace
+            // remotely) — pass straight through rather than risk an
+            // infinite loop. Worst case this one call sees the
+            // not-yet-widened state; the outer call still finishes
+            // correctly.
+            return $proceed();
+        }
+
+        $intercept = $this->shouldIntercept($subject);
+        $this->trace($subject, 'aroundGetSelectCountSql (before proceed)', [
+            'intercept' => $intercept,
+            'pageSize' => $subject->getPageSize(),
+            'curPage' => $subject->getCurPage(),
+            'isLoaded' => $subject->isLoaded(),
+        ]);
+
+        if (!$intercept) {
+            return $proceed();
+        }
+
+        $subject->setFlag(self::IN_PROGRESS_FLAG, true);
+        try {
+            $this->ensureWidened($subject);
+
+            return $proceed();
+        } finally {
+            $subject->setFlag(self::IN_PROGRESS_FLAG, false);
+        }
+    }
+
+    /**
+     * @param Collection $subject
+     * @param callable $proceed
+     * @param bool $printQuery
+     * @param bool $logQuery
+     * @return Collection
+     */
+    public function aroundLoad(Collection $subject, callable $proceed, $printQuery = false, $logQuery = false)
+    {
+        if ($subject->getFlag(self::IN_PROGRESS_FLAG)) {
+            // See aroundGetSelectCountSql — reentrant call, pass through.
+            return $proceed($printQuery, $logQuery);
+        }
+
+        $intercept = $this->shouldIntercept($subject);
+        $this->trace($subject, 'aroundLoad (before proceed)', [
+            'intercept' => $intercept,
+            'pageSize' => $subject->getPageSize(),
+            'curPage' => $subject->getCurPage(),
+            'isLoaded' => $subject->isLoaded(),
+        ]);
+
+        if (!$intercept) {
+            return $proceed($printQuery, $logQuery);
+        }
+
+        $subject->setFlag(self::IN_PROGRESS_FLAG, true);
+        try {
+            $this->ensureWidened($subject);
+
+            $result = $proceed($printQuery, $logQuery);
+
+            $this->trace($subject, 'aroundLoad (after proceed, before finalizePage)', [
+                'itemCount' => count($subject->getItems()),
+                'realPageSizeFlag' => $subject->getFlag(self::REAL_PAGE_SIZE_FLAG),
+                'realCurPageFlag' => $subject->getFlag(self::REAL_CUR_PAGE_FLAG),
+            ]);
+
+            $this->finalizePage($subject);
+
+            return $result;
+        } finally {
+            $subject->setFlag(self::IN_PROGRESS_FLAG, false);
+        }
+    }
+
+    /**
+     * Appends a trace entry to a collection flag so it can be inspected
+     * later (see Block\Debug::getPaginationTrace()) without needing log
+     * file access.
+     */
+    private function trace(Collection $subject, string $point, array $context): void
+    {
+        $entries = $subject->getFlag(self::TRACE_FLAG);
+        if (!is_array($entries)) {
+            $entries = [];
+        }
+
+        $entries[] = ['point' => $point] + $context;
+        $subject->setFlag(self::TRACE_FLAG, $entries);
+    }
+
+    private function shouldIntercept(Collection $subject): bool
+    {
+        return (bool)$subject->getFlag(LuxuryLayerProductCollectionPlugin::APPLIED_FLAG)
+            && !$subject->isLoaded();
+    }
+
+    /**
+     * Idempotent — only actually forces the large page size once per
+     * collection; safe to call from every hooked entry point.
+     */
+    private function ensureWidened(Collection $subject): void
+    {
+        if ($subject->getFlag(self::WIDENED_FLAG)) {
+            return;
+        }
+
+        $realPageSize = (int)$subject->getPageSize();
+        $realCurPage = max(1, (int)$subject->getCurPage());
+
+        $subject->setFlag(self::REAL_PAGE_SIZE_FLAG, $realPageSize);
+        $subject->setFlag(self::REAL_CUR_PAGE_FLAG, $realCurPage);
+        $subject->setFlag(self::WIDENED_FLAG, true);
+
+        if ($realPageSize > 0) {
+            // Set the underlying properties directly rather than calling
+            // setPageSize()/setCurPage() — those are the very methods this
+            // plugin intercepts, so calling them here would re-enter
+            // beforeSetPageSize()/beforeSetCurPage() and clobber the real
+            // values just captured above with these temporary ones.
+            $this->setProtectedProperty($subject, '_pageSize', self::MAX_CANDIDATES);
+            $this->setProtectedProperty($subject, '_curPage', 1);
+        }
+    }
+
+    /**
+     * Called once, right after the real (widened) load completes: slices
+     * the full, correctly-filtered result down to whatever page was
+     * actually requested, and restores the real page size/current page so
+     * every downstream consumer (toolbar, pager) sees normal values again.
+     */
+    private function finalizePage(Collection $subject): void
+    {
+        $realPageSize = (int)$subject->getFlag(self::REAL_PAGE_SIZE_FLAG);
+        $realCurPage = max(1, (int)$subject->getFlag(self::REAL_CUR_PAGE_FLAG));
+
+        if ($realPageSize <= 0) {
+            return;
+        }
+
+        $allItems = $subject->getItems();
+        $totalCount = count($allItems);
+        $offset = ($realCurPage - 1) * $realPageSize;
+        $pageItems = array_slice($allItems, $offset, $realPageSize, true);
+
+        $this->setProtectedProperty($subject, '_items', $pageItems);
+        $this->setProtectedProperty($subject, '_totalRecords', $totalCount);
+
+        // Direct property writes, not setPageSize()/setCurPage() — those
+        // are the very methods this plugin intercepts. Whether isLoaded()
+        // is reliably true at this exact point isn't worth depending on;
+        // writing the properties directly removes the ambiguity entirely
+        // and guarantees these restorations can never be re-intercepted.
+        $this->setProtectedProperty($subject, '_pageSize', $realPageSize);
+        $this->setProtectedProperty($subject, '_curPage', $realCurPage);
+    }
+
+    private function setProtectedProperty(Collection $collection, string $property, mixed $value): void
+    {
+        $reflection = new \ReflectionProperty($collection, $property);
+        $reflection->setAccessible(true);
+        $reflection->setValue($collection, $value);
+    }
+}

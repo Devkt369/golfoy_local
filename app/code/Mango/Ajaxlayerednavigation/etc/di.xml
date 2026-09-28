@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    
+    <!-- return ajax json results -->
+    <type name="Magento\Catalog\Controller\Category\View">
+        <plugin name="ajaxlayerednavigationCatalogController" type="Mango\Ajaxlayerednavigation\Controller\Plugin\Catalog\Category\View" sortOrder="1000" disabled="false" />
+    </type>
+    
+    <type name="Magento\CatalogSearch\Controller\Result\Index">
+        <plugin name="ajaxlayerednavigationCatalogSearchController" type="Mango\Ajaxlayerednavigation\Controller\Plugin\CatalogSearch\Result\Index" sortOrder="1000" disabled="false" />
+    </type>
+    
+    <type name="Magento\Catalog\Block\Product\ProductList\Toolbar">
+        <plugin name="ajaxlayerednavigationToolbar" type="Mango\Ajaxlayerednavigation\Block\Plugin\Catalog\Product\ProductList\Toolbar" sortOrder="1000" disabled="false" />
+    </type>
+    
+    <type name="Mango\Ajaxlayerednavigation\Block\Ajaxtoolbar">
+        <plugin name="ajaxlayerednavigationToolbar" type="Mango\Ajaxlayerednavigation\Block\Plugin\Catalog\Product\ProductList\Toolbar" sortOrder="1000" disabled="false" />
+    </type>
+    
+    <!-- remove init from toolbar, add it to footer script -->
+    <type name="Magento\Catalog\Block\Product\ListProduct">
+        <plugin name="ajaxlayerednavigationListProduct" type="Mango\Ajaxlayerednavigation\Block\Plugin\Catalog\Product\ListProduct" sortOrder="100" disabled="false" />
+    </type>
+    <type name="Magento\CatalogSearch\Block\SearchResult\ListProduct">
+        <plugin name="ajaxlayerednavigationListProduct" type="Mango\Ajaxlayerednavigation\Block\Plugin\Catalog\Product\ListProduct" sortOrder="100" disabled="false" />
+    </type>
+    <!-- add wrappers to blocks -->
+    <!-- this one is used also to override template -->
+    <type name="Magento\LayeredNavigation\Block\Navigation">
+        <plugin name="ajaxlayerednavigationNavigation" type="Mango\Ajaxlayerednavigation\Block\Plugin\LayeredNavigation\Navigation" sortOrder="1000" disabled="false" />
+    </type>
+    <type name="Magento\LayeredNavigation\Block\Navigation\Category">
+        <plugin name="ajaxlayerednavigationNavigation" type="Mango\Ajaxlayerednavigation\Block\Plugin\LayeredNavigation\Navigation" sortOrder="100" disabled="false" />
+    </type>
+    
+    <type name="Magento\LayeredNavigation\Block\Navigation\Search">
+        <plugin name="ajaxlayerednavigationNavigation" type="Mango\Ajaxlayerednavigation\Block\Plugin\LayeredNavigation\Navigation" sortOrder="100" disabled="false" />
+    </type>
+    <!-- override template -->
+    <type name="Magento\LayeredNavigation\Block\Navigation\State">
+        <plugin name="ajaxlayerednavigationState" type="Mango\Ajaxlayerednavigation\Block\Plugin\LayeredNavigation\Navigation\State" sortOrder="1000" disabled="false" />
+    </type>
+    <type name="Magento\LayeredNavigation\Block\Navigation\FilterRenderer">
+        <plugin name="ajaxlayerednavigationFilterRenderer" type="Mango\Ajaxlayerednavigation\Block\Plugin\LayeredNavigation\Navigation\FilterRenderer" sortOrder="1000" disabled="false" />
+    </type>
+    <type name="Magento\Swatches\Block\LayeredNavigation\RenderLayered">
+        <plugin name="ajaxlayerednavigationFilterRenderer" type="Mango\Ajaxlayerednavigation\Block\Plugin\Swatches\LayeredNavigation\RenderLayered" sortOrder="1000" disabled="false" />
+    </type>
+        
+    <!-- remove ajax parameters from url's so they don't affect navigation -->    
+    <type name="Magento\Framework\Url">
+        <plugin name="ajaxlayerednavigationUrl" type="Mango\Ajaxlayerednavigation\Plugin\Framework\Url" sortOrder="10" disabled="false" />
+    </type>
+    <type name="Magento\Framework\Url\QueryParamsResolver">
+        <plugin name="ajaxlayerednavigationQueryParamsResolver" type="Mango\Ajaxlayerednavigation\Plugin\Framework\Url\QueryParamsResolver" sortOrder="10" disabled="false" />
+    </type>
+    <!-- override filters - use catalogsearch models for filters -->
+    <type name="Magento\Catalog\Model\Layer\Filter\AbstractFilter">
+        <plugin name="ajaxlayerednavigationAbstractFilter" type="Mango\Ajaxlayerednavigation\Model\Plugin\Catalog\Layer\Filter\AbstractFilter" sortOrder="1000" disabled="false" />
+    </type>
+    <type name="Magento\Catalog\Model\Layer\Filter\Item">
+        <plugin name="ajaxlayerednavigationItem" type="Mango\Ajaxlayerednavigation\Model\Plugin\Catalog\Layer\Filter\Item" sortOrder="1000" disabled="false" />
+    </type>
+    
+    <!-- override aggregations for elasticsearch -->
+    <type name="Magento\Elasticsearch\SearchAdapter\Aggregation\Builder">
+        <plugin name="ajaxlayerednavigationElasticSearchAggregationBuilder" type="Mango\Ajaxlayerednavigation\Plugin\Elasticsearch\SearchAdapter\Aggregation\Builder" sortOrder="1000" disabled="false" />
+    </type>
+    
+    <!-- apply AND filter with elasticsearch enabled -->
+    <type name="Magento\Elasticsearch\SearchAdapter\Filter\Builder\Term">
+        <plugin name="ajaxlayerednavigationElasticSearchFilterBuilderTerm" type="Mango\Ajaxlayerednavigation\Plugin\Elasticsearch\SearchAdapter\Filter\Builder\Term" sortOrder="1000" disabled="false" />
+    </type>
+    
+    
+    
+    <!-- initialize variables for the plugin -->
+    <type name="Mango\Ajaxlayerednavigation\Plugin\Elasticsearch\SearchAdapter\Aggregation\Builder">
+        <arguments>
+            <argument name="dataProviderContainer" xsi:type="array">
+                <item name="catalogsearch_fulltext" xsi:type="object">Magento\Elasticsearch\SearchAdapter\Dynamic\DataProvider</item>
+            </argument>
+            <argument name="aggregationContainer" xsi:type="array">
+                <item name="termBucket" xsi:type="object">Magento\Elasticsearch\SearchAdapter\Aggregation\Builder\Term</item>
+                <item name="dynamicBucket" xsi:type="object">Magento\Elasticsearch\SearchAdapter\Aggregation\Builder\Dynamic</item>
+            </argument>
+        </arguments>
+    </type>
+    
+    
+    <virtualType name="categoryFilterList" type="Magento\Catalog\Model\Layer\FilterList">
+        <arguments>
+            <argument name="filters" xsi:type="array">
+                <item name="attribute" xsi:type="string">Mango\Ajaxlayerednavigation\Model\Layer\Filter\Attribute</item>
+                <item name="price" xsi:type="string">Mango\Ajaxlayerednavigation\Model\Layer\Filter\Price</item>
+                <item name="decimal" xsi:type="string">Mango\Ajaxlayerednavigation\Model\Layer\Filter\Price</item>
+                <item name="category" xsi:type="string">Mango\Ajaxlayerednavigation\Model\Layer\Filter\Category</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="searchFilterList" type="Magento\Catalog\Model\Layer\FilterList">
+        <arguments>
+            <argument name="filters" xsi:type="array">
+                <item name="attribute" xsi:type="string">Mango\Ajaxlayerednavigation\Model\Layer\Filter\Attribute</item>
+                <item name="price" xsi:type="string">Mango\Ajaxlayerednavigation\Model\Layer\Filter\Price</item>
+                <item name="decimal" xsi:type="string">Mango\Ajaxlayerednavigation\Model\Layer\Filter\Decimal</item>
+                <item name="category" xsi:type="string">Mango\Ajaxlayerednavigation\Model\Layer\Filter\Category</item>
+            </argument>
+        </arguments>
+    </virtualType>
+</config>

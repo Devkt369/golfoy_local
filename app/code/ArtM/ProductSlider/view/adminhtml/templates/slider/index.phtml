@@ -1,0 +1,186 @@
+<?php
+/** @var \ArtM\ProductSlider\Block\Adminhtml\Slider\Index $block */
+$items = $block->getItems();
+$filters = $block->getFilters();
+?>
+<div class="admin__page-section artm-ps-page">
+    <div class="admin__page-section-title artm-ps-header">
+        <span class="title">Manage Sliders</span>
+    </div>
+    <div class="admin__page-section-content artm-ps-content">
+        <div class="artm-ps-toolbar">
+            <a class="action-primary" href="<?= $block->escapeUrl($block->getAddUrl()) ?>"><span><?= $block->escapeHtml(__('Add New Slider')) ?></span></a>
+        </div>
+
+        <form method="get" action="<?= $block->escapeUrl($block->getFilterUrl()) ?>" class="artm-ps-filters">
+            <input type="text" name="q" value="<?= $block->escapeHtmlAttr($filters['q']) ?>" placeholder="<?= $block->escapeHtmlAttr(__('Search by name or identifier')) ?>" />
+            <select name="status">
+                <option value=""><?= $block->escapeHtml(__('All Status')) ?></option>
+                <option value="1" <?= $filters['status'] === '1' ? 'selected' : '' ?>><?= $block->escapeHtml(__('Enabled')) ?></option>
+                <option value="0" <?= $filters['status'] === '0' ? 'selected' : '' ?>><?= $block->escapeHtml(__('Disabled')) ?></option>
+            </select>
+            <select name="source_type">
+                <?php foreach ($block->getSourceTypeOptions() as $option): ?>
+                    <option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= $filters['source_type'] === (string)$option['value'] ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <select name="display_type">
+                <?php foreach ($block->getDisplayTypeOptions() as $option): ?>
+                    <option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= $filters['display_type'] === (string)$option['value'] ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <select name="store_view_ids">
+                <?php foreach ($block->getStoreViewOptions() as $option): ?>
+                    <option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= $filters['store_view_ids'] === (string)$option['value'] ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <button type="submit" class="action-default"><?= $block->escapeHtml(__('Search')) ?></button>
+        </form>
+
+        <form method="post" id="slider-mass-form">
+            <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>" />
+            <p class="artm-ps-mass">
+                <button type="submit" class="action-default" formaction="<?= $block->escapeUrl($block->getMassEnableUrl()) ?>"><?= $block->escapeHtml(__('Mass Enable')) ?></button>
+                <button type="submit" class="action-default" formaction="<?= $block->escapeUrl($block->getMassDisableUrl()) ?>"><?= $block->escapeHtml(__('Mass Disable')) ?></button>
+                <button type="submit" class="action-delete" formaction="<?= $block->escapeUrl($block->getMassDeleteUrl()) ?>" onclick="return confirm('<?= $block->escapeHtmlAttr(__('Delete selected sliders?')) ?>');"><?= $block->escapeHtml(__('Mass Delete')) ?></button>
+            </p>
+
+            <table class="data-grid artm-ps-grid" width="100%" cellpadding="6" cellspacing="0" border="1">
+                <thead>
+                <tr>
+                    <th><input type="checkbox" onclick="document.querySelectorAll('.slider-checkbox').forEach(cb => cb.checked = this.checked)" /></th>
+                    <th><?= $block->escapeHtml(__('ID')) ?></th>
+                    <th><?= $block->escapeHtml(__('Slider Name')) ?></th>
+                    <th><?= $block->escapeHtml(__('Identifier')) ?></th>
+                    <th><?= $block->escapeHtml(__('Store View')) ?></th>
+                    <th><?= $block->escapeHtml(__('Product Source')) ?></th>
+                    <th><?= $block->escapeHtml(__('Total Products')) ?></th>
+                    <th><?= $block->escapeHtml(__('Display Type')) ?></th>
+                    <th><?= $block->escapeHtml(__('Status')) ?></th>
+                    <th><?= $block->escapeHtml(__('Sort Order')) ?></th>
+                    <th><?= $block->escapeHtml(__('Updated At')) ?></th>
+                    <th><?= $block->escapeHtml(__('Created At')) ?></th>
+                    <th><?= $block->escapeHtml(__('Actions')) ?></th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php if (!$items): ?>
+                    <tr><td colspan="13"><?= $block->escapeHtml(__('No sliders found.')) ?></td></tr>
+                <?php else: ?>
+                    <?php foreach ($items as $item): ?>
+                        <tr>
+                            <td><input class="slider-checkbox" type="checkbox" name="selected[]" value="<?= (int)$item->getId() ?>" /></td>
+                            <td><?= (int)$item->getId() ?></td>
+                            <td><?= $block->escapeHtml((string)$item->getData('title')) ?></td>
+                            <td><?= $block->escapeHtml((string)$item->getData('identifier')) ?></td>
+                            <td><?= $block->escapeHtml($block->getStoreViewLabel((string)$item->getData('store_view_ids'))) ?></td>
+                            <td><?= $block->escapeHtml((string)$item->getData('source_type')) ?></td>
+                            <td><?= (int)$item->getData('total_products') ?></td>
+                            <td><?= $block->escapeHtml((string)$item->getData('display_type')) ?></td>
+                            <td><?= $block->escapeHtml($block->getStatusLabel((int)$item->getData('status'))) ?></td>
+                            <td><?= (int)$item->getData('sort_order') ?></td>
+                            <td><?= $block->escapeHtml((string)$item->getData('updated_at')) ?></td>
+                            <td><?= $block->escapeHtml((string)$item->getData('created_at')) ?></td>
+                            <td>
+                                <a href="<?= $block->escapeUrl($block->getEditUrl((int)$item->getId())) ?>"><?= $block->escapeHtml(__('Edit')) ?></a>
+                                |
+                                <a href="<?= $block->escapeUrl($block->getDuplicateUrl((int)$item->getId())) ?>"><?= $block->escapeHtml(__('Duplicate')) ?></a>
+                                |
+                                <a href="#"
+                                   class="artm-ps-embed-link"
+                                   data-embed-type="slider"
+                                   data-embed-identifier="<?= $block->escapeHtmlAttr((string)$item->getData('identifier')) ?>"
+                                   onclick="return false;"><?= $block->escapeHtml(__('Embed')) ?></a>
+                                |
+                                <a href="<?= $block->escapeUrl($block->getDeleteUrl((int)$item->getId())) ?>" onclick="return confirm('<?= $block->escapeHtmlAttr(__('Delete this slider?')) ?>');"><?= $block->escapeHtml(__('Delete')) ?></a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                </tbody>
+            </table>
+        </form>
+
+        <div id="artm-ps-embed-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9999;">
+            <div style="width:min(900px, 96vw); margin:40px auto; background:#fff; border-radius:8px; padding:16px; box-shadow:0 8px 24px rgba(0,0,0,0.2);">
+                <p style="display:flex; justify-content:space-between; align-items:center; margin:0 0 10px;">
+                    <strong id="artm-ps-embed-title"><?= $block->escapeHtml(__('Embed Code')) ?></strong>
+                    <button type="button" class="action-default" id="artm-ps-embed-close"><?= $block->escapeHtml(__('Close')) ?></button>
+                </p>
+                <p><label><strong><?= $block->escapeHtml(__('CMS Static Block')) ?></strong></label></p>
+                <textarea id="artm-ps-embed-static" rows="3" style="width:100%; font-family:monospace;" readonly></textarea>
+                <p><button type="button" class="action-default artm-ps-copy" data-target="artm-ps-embed-static"><?= $block->escapeHtml(__('Copy')) ?></button></p>
+                <p><label><strong><?= $block->escapeHtml(__('PHTML Template')) ?></strong></label></p>
+                <textarea id="artm-ps-embed-phtml" rows="4" style="width:100%; font-family:monospace;" readonly></textarea>
+                <p><button type="button" class="action-default artm-ps-copy" data-target="artm-ps-embed-phtml"><?= $block->escapeHtml(__('Copy')) ?></button></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var modal = document.getElementById('artm-ps-embed-modal');
+    var title = document.getElementById('artm-ps-embed-title');
+    var staticArea = document.getElementById('artm-ps-embed-static');
+    var phtmlArea = document.getElementById('artm-ps-embed-phtml');
+    var closeBtn = document.getElementById('artm-ps-embed-close');
+    if (!modal || !staticArea || !phtmlArea || !closeBtn) {
+        return;
+    }
+
+    function openModal(embedType, identifier) {
+        var safeIdentifier = String(identifier || '').trim();
+        if (!safeIdentifier) {
+            return;
+        }
+
+        var blockClass = embedType === 'group'
+            ? 'ArtM\\ProductSlider\\Block\\Group'
+            : 'ArtM\\ProductSlider\\Block\\Slider';
+        var template = embedType === 'group'
+            ? 'ArtM_ProductSlider::group/view.phtml'
+            : 'ArtM_ProductSlider::slider/view.phtml';
+        var label = embedType === 'group' ? 'Slider Group' : 'Slider';
+
+        title.textContent = label + ' Embed Code: ' + safeIdentifier;
+        staticArea.value = '{{block class="' + blockClass + '" identifier="' + safeIdentifier + '" template="' + template + '"}}';
+        phtmlArea.value = "<" + "?php echo $block->getLayout()->createBlock(" + blockClass + "::class)->setData('identifier', '" + safeIdentifier + "')->setTemplate('" + template + "')->toHtml(); ?" + ">";
+        modal.style.display = 'block';
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+    }
+
+    document.querySelectorAll('.artm-ps-embed-link').forEach(function (el) {
+        el.addEventListener('click', function () {
+            openModal(el.getAttribute('data-embed-type') || 'slider', el.getAttribute('data-embed-identifier') || '');
+        });
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.artm-ps-copy').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var targetId = btn.getAttribute('data-target');
+            var target = targetId ? document.getElementById(targetId) : null;
+            if (!target) {
+                return;
+            }
+
+            target.focus();
+            target.select();
+            try {
+                document.execCommand('copy');
+            } catch (e) {
+            }
+        });
+    });
+})();
+</script>

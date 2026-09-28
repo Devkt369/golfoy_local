@@ -1,0 +1,182 @@
+<style>
+    .not-found {
+        display: none;
+    }
+
+    .players_name {
+        font-weight: 700;
+        padding: 10px 0px;
+        text-align: center;
+        text-transform: capitalize;
+    }
+
+    .choose_players {
+        padding-top: 10px;
+        overflow: hidden;
+    }
+    .col-md-12.players-below-product-summary {
+        padding-left: 0px;
+    }
+
+    h3.choose_players_title {
+        color: #646464;
+        text-align: left;
+        text-transform: uppercase;
+        font-size: 14px;
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .players_div_sections {
+        margin-top: 20px;
+    }
+
+    .players_div_sections .row>div {
+        padding: 0px 4px;
+    }
+
+    .playersblock img {
+        border-radius: 5px;
+    }
+
+    .block-content.content.sparsh-auto-related-products-block {
+        display: inline-block;
+    }
+
+    .playersblock img {
+        height: auto;
+        width: 175px;
+    }
+
+    @media only screen and (max-width:1042px) and (min-width:991px) {
+        .players_div_sections .row>div {
+            padding: 0px;
+        }
+
+        .playersblock img {
+            height: auto;
+            width: 135px;
+        }
+    }
+
+    @media only screen and (max-width:768px) {
+        .playersblock img {
+            height: auto;
+            width: 95%;
+        }
+
+    }
+
+    @media only screen and (max-width:991px) {
+        .playersblock img {
+            height: auto;
+            width: 95%;
+        }
+    }
+    .slider-item {
+        flex: 1 1 calc(33.33% - 10px);
+        box-sizing: border-box;
+        text-align: center;
+        height: 200px;
+        max-width: calc(33.33% - 10px);
+    }
+</style>
+<?php
+/** @var $block \Magento\Catalog\Block\Product\View */
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$product = $block->getProduct();
+?>
+
+<div class="choose_players">
+    <?php if ($product): ?>
+        <?php
+        $categoryCollection = $product->getCategoryCollection();
+        $targetSubcategoryName = 'Choose by players';
+        $chosenSubcategoryIds = [];
+        $allSubcategoryIds = [];
+        $commonIds = [];
+        foreach ($categoryCollection as $category) {
+            foreach ($category->getChildrenCategories() as $subCategory) {
+                if ($subCategory->getName() === $targetSubcategoryName) {
+                    $chosenSubcategoryIds[] = $subCategory->getId();
+                }
+            }
+        }
+        if (!empty($chosenSubcategoryIds)) {
+            foreach ($chosenSubcategoryIds as $chosenSubcategoryId) {
+                $chosenCategory = $objectManager->create('\Magento\Catalog\Model\Category')->load($chosenSubcategoryId);
+                foreach ($chosenCategory->getChildrenCategories() as $subCategory) {
+                    $allSubcategoryIds[] = $subCategory->getId();
+                }
+            }
+            $categoryIds = $categoryCollection->getAllIds();
+            $commonIds = array_intersect($categoryIds, $allSubcategoryIds);
+        }
+        ?>
+
+        <?php if (!empty($commonIds)): ?>
+            <h3 class="choose_players_title">Player's choice</h3>
+            <div class="players_div_sections">
+                <div class="slider-container">
+                    <div class="slider-wrapper">
+                        <div class="slider">
+                            <?php foreach ($commonIds as $commonId): ?>
+                                <?php
+                                $commonCategory = $objectManager->create('\Magento\Catalog\Model\Category')->load($commonId);
+                                $imageUrl = $commonCategory->getImageUrl();
+                                ?>
+                                <div class="slider-item playersblock">
+                                    <?php if ($imageUrl): ?>
+                                        <a href="<?= $commonCategory->getUrl() ?>">
+                                            <img src="https://golfoy.com/<?= $imageUrl ?>" alt="<?= $commonCategory->getName() ?>">
+                                        </a>
+                                    <?php else: ?>
+                                        <span>No image available</span>
+                                    <?php endif; ?>
+                                    <div class="players_name"><a href="<?= $commonCategory->getUrl() ?>"><?= $commonCategory->getName() ?></a></div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php else: ?>
+            <div class="not-found">No common categories found.<style>.choose_players {display: none;}</style></div>
+        <?php endif; ?>
+
+    <?php else: ?>
+        <div>Product not found or not assigned to any category.</div>
+    <?php endif; ?>
+</div>
+
+<style>
+
+    .slider-container {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .slider-wrapper {
+        display: flex;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .slider-item img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    @media (max-width: 768px) {
+        .slider-item {
+            flex: 0 0 50%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .slider-item {
+            flex: 0 0 100%;
+        }
+    }
+</style>

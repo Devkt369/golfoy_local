@@ -1,0 +1,7 @@
+<?php /* Resource hints for third-party origins the theme depends on at render time (FontAwesome CDN, Facebook Pixel). Speeds up the DNS/TLS handshake before the actual request fires. */ ?>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="preconnect" href="https://connect.facebook.net" crossorigin>
+<link rel="dns-prefetch" href="https://connect.facebook.net">
+<?php /* Preload the body-text weight (Spartan Regular, 400) - the most-used weight for above-the-fold text across the theme */ ?>
+<link rel="preload" as="font" type="font/woff2" href="<?= $block->escapeUrl($block->getViewFileUrl('fonts/spartan/400_Spartan-Regular.woff2')) ?>" crossorigin>

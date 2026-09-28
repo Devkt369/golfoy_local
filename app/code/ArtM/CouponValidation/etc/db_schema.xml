@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+
+    <table name="artm_couponvalidation"
+           resource="default"
+           engine="innodb"
+           charset="utf8mb4"
+           collation="utf8mb4_unicode_ci"
+           comment="ArtM Coupon Validation Allocations">
+
+        <column xsi:type="int"
+                name="id"
+                unsigned="true"
+                nullable="false"
+                identity="true"
+                comment="Primary Key"/>
+
+        <column xsi:type="varchar"
+                name="coupon_code"
+                length="255"
+                nullable="false"
+                comment="Coupon Code"/>
+
+        <column xsi:type="int"
+                name="rule_id"
+                unsigned="true"
+                nullable="false"
+                comment="Cart Price Rule ID (salesrule.rule_id)"/>
+
+        <column xsi:type="datetime"
+                name="expiry_date"
+                nullable="false"
+                comment="Custom Expiry Date for this allocation"/>
+
+        <column xsi:type="smallint"
+                name="status"
+                unsigned="true"
+                nullable="false"
+                default="0"
+                comment="0=Allocated, 1=Used, 2=Expired, 3=Cancelled"/>
+
+        <column xsi:type="int"
+                name="order_id"
+                unsigned="true"
+                nullable="true"
+                comment="Magento Order Entity ID (set on order placement)"/>
+
+        <column xsi:type="timestamp"
+                name="created_at"
+                nullable="true"
+                default="CURRENT_TIMESTAMP"
+                comment="Created At"/>
+
+        <column xsi:type="timestamp"
+                name="updated_at"
+                nullable="true"
+                default="CURRENT_TIMESTAMP"
+                on_update="true"
+                comment="Updated At"/>
+
+        <!-- Primary Key -->
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+
+        <!-- Unique: one allocation per coupon_code -->
+        <constraint xsi:type="unique" referenceId="ARTM_COUPONVALIDATION_COUPON_CODE_UNQ">
+            <column name="coupon_code"/>
+        </constraint>
+
+        <!-- Index: filter/join by rule -->
+        <index referenceId="ARTM_COUPONVALIDATION_RULE_ID_IDX" indexType="btree">
+            <column name="rule_id"/>
+        </index>
+
+        <!-- Index: filter by status -->
+        <index referenceId="ARTM_COUPONVALIDATION_STATUS_IDX" indexType="btree">
+            <column name="status"/>
+        </index>
+
+    </table>
+
+</schema>

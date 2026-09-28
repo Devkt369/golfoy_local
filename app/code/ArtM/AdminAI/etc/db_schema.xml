@@ -1,0 +1,281 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="artm_adminai_chat_session" resource="default" engine="innodb" comment="ArtM AdminAI Chat Sessions">
+        <column xsi:type="int" name="session_id" nullable="false" identity="true" unsigned="true" comment="Session ID"/>
+        <column xsi:type="varchar" name="title" nullable="false" length="255" comment="Chat Title"/>
+        <column xsi:type="int" name="admin_user_id" nullable="true" unsigned="true" comment="Admin User ID"/>
+        <column xsi:type="varchar" name="admin_username" nullable="true" length="255" comment="Admin Username"/>
+        <column xsi:type="varchar" name="admin_name" nullable="true" length="255" comment="Admin Full Name"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="session_id"/>
+        </constraint>
+        <index referenceId="ARTM_ADMINAI_CHAT_SESSION_UPDATED_AT" indexType="btree">
+            <column name="updated_at"/>
+        </index>
+        <index referenceId="ARTM_ADMINAI_CHAT_SESSION_ADMIN_USER_ID" indexType="btree">
+            <column name="admin_user_id"/>
+        </index>
+    </table>
+
+    <table name="artm_adminai_chat_message" resource="default" engine="innodb" comment="ArtM AdminAI Chat Messages">
+        <column xsi:type="int" name="message_id" nullable="false" identity="true" unsigned="true" comment="Message ID"/>
+        <column xsi:type="int" name="session_id" nullable="false" unsigned="true" comment="Session ID"/>
+        <column xsi:type="varchar" name="role" nullable="false" length="32" comment="Role"/>
+        <column xsi:type="text" name="content" nullable="false" comment="Content"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="message_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="ARTM_ADMINAI_MSG_SESSION_ID_CHAT_SESSION_ID"
+                    table="artm_adminai_chat_message" column="session_id"
+                    referenceTable="artm_adminai_chat_session" referenceColumn="session_id"
+                    onDelete="CASCADE"/>
+        <index referenceId="ARTM_ADMINAI_CHAT_MESSAGE_SESSION_ID" indexType="btree">
+            <column name="session_id"/>
+        </index>
+        <index referenceId="ARTM_ADMINAI_CHAT_MESSAGE_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+
+    <table name="artm_adminai_intent_day_cache" resource="default" engine="innodb" comment="ArtM AdminAI Intent Day-wise Cache">
+        <column xsi:type="int" name="cache_id" nullable="false" identity="true" unsigned="true" comment="Cache ID"/>
+        <column xsi:type="varchar" name="intent_code" nullable="false" length="64" comment="Intent Code"/>
+        <column xsi:type="date" name="cache_date" nullable="false" comment="Cached Calendar Day"/>
+        <column xsi:type="varchar" name="param_hash" nullable="false" length="64" comment="MD5 hash of non-date params"/>
+        <column xsi:type="text" name="param_snapshot" nullable="true" comment="JSON snapshot of params for reference"/>
+        <column xsi:type="longtext" name="raw_data" nullable="false" comment="Per-day raw aggregatable JSON data"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="cache_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_ADMINAI_DAY_CACHE_UNIQUE">
+            <column name="intent_code"/>
+            <column name="cache_date"/>
+            <column name="param_hash"/>
+        </constraint>
+        <index referenceId="ARTM_ADMINAI_DAY_CACHE_INTENT_DATE" indexType="btree">
+            <column name="intent_code"/>
+            <column name="cache_date"/>
+        </index>
+        <index referenceId="ARTM_ADMINAI_DAY_CACHE_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+
+    <table name="artm_adminai_sales_aggregate_day" resource="default" engine="innodb" comment="ArtM AdminAI Sales Aggregate Day">
+        <column xsi:type="int" name="aggregate_id" nullable="false" identity="true" unsigned="true" comment="Aggregate ID"/>
+        <column xsi:type="date" name="aggregate_date" nullable="false" comment="Aggregate Date"/>
+        <column xsi:type="smallint" name="store_id" nullable="false" unsigned="true" default="0" comment="Store ID"/>
+        <column xsi:type="int" name="orders_count" nullable="false" unsigned="true" default="0" comment="Orders Count"/>
+        <column xsi:type="decimal" name="revenue_total" nullable="false" precision="12" scale="4" default="0.0000" comment="Revenue Total"/>
+        <column xsi:type="decimal" name="items_qty_total" nullable="false" precision="12" scale="4" default="0.0000" comment="Items Qty Total"/>
+        <column xsi:type="int" name="new_customers_count" nullable="false" unsigned="true" default="0" comment="New Customers Count"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="aggregate_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_ADMINAI_SALES_AGGR_DAY_UNQ_DATE_STORE">
+            <column name="aggregate_date"/>
+            <column name="store_id"/>
+        </constraint>
+        <index referenceId="ARTM_ADMINAI_SALES_AGGR_DAY_IDX_DATE" indexType="btree">
+            <column name="aggregate_date"/>
+        </index>
+        <index referenceId="ARTM_ADMINAI_SALES_AGGR_DAY_IDX_STORE" indexType="btree">
+            <column name="store_id"/>
+        </index>
+    </table>
+
+    <table name="artm_adminai_product_analytics_day" resource="default" engine="innodb" comment="ArtM AdminAI Product Analytics Day">
+        <column xsi:type="int" name="analytics_id" nullable="false" identity="true" unsigned="true" comment="Analytics ID"/>
+        <column xsi:type="date" name="aggregate_date" nullable="false" comment="Aggregate Date"/>
+        <column xsi:type="int" name="product_id" nullable="false" unsigned="true" comment="Product ID"/>
+        <column xsi:type="varchar" name="sku" nullable="false" length="64" comment="SKU"/>
+        <column xsi:type="smallint" name="store_id" nullable="false" unsigned="true" default="0" comment="Store ID"/>
+        <column xsi:type="decimal" name="qty_sold" nullable="false" precision="12" scale="4" default="0.0000" comment="Qty Sold"/>
+        <column xsi:type="decimal" name="revenue_total" nullable="false" precision="12" scale="4" default="0.0000" comment="Revenue Total"/>
+        <column xsi:type="decimal" name="stock_qty" nullable="false" precision="12" scale="4" default="0.0000" comment="Stock Qty"/>
+        <column xsi:type="decimal" name="days_of_stock" nullable="true" precision="10" scale="2" comment="Days Of Stock"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="analytics_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_ADMINAI_PROD_ANALYTICS_UNQ_DAY_PROD_STORE">
+            <column name="aggregate_date"/>
+            <column name="product_id"/>
+            <column name="store_id"/>
+        </constraint>
+        <index referenceId="ARTM_ADMINAI_PROD_ANALYTICS_IDX_DATE" indexType="btree">
+            <column name="aggregate_date"/>
+        </index>
+        <index referenceId="ARTM_ADMINAI_PROD_ANALYTICS_IDX_PRODUCT" indexType="btree">
+            <column name="product_id"/>
+        </index>
+        <index referenceId="ARTM_ADMINAI_PROD_ANALYTICS_IDX_SKU" indexType="btree">
+            <column name="sku"/>
+        </index>
+    </table>
+
+    <table name="artm_adminai_customer_analytics" resource="default" engine="innodb" comment="ArtM AdminAI Customer Analytics">
+        <column xsi:type="int" name="customer_analytics_id" nullable="false" identity="true" unsigned="true" comment="Customer Analytics ID"/>
+        <column xsi:type="int" name="customer_id" nullable="false" unsigned="true" comment="Customer ID"/>
+        <column xsi:type="smallint" name="store_id" nullable="false" unsigned="true" default="0" comment="Store ID"/>
+        <column xsi:type="datetime" name="last_order_at" nullable="true" comment="Last Order At"/>
+        <column xsi:type="int" name="orders_count_90d" nullable="false" unsigned="true" default="0" comment="Orders Count 90d"/>
+        <column xsi:type="decimal" name="revenue_90d" nullable="false" precision="12" scale="4" default="0.0000" comment="Revenue 90d"/>
+        <column xsi:type="decimal" name="avg_order_value_90d" nullable="false" precision="12" scale="4" default="0.0000" comment="Average Order Value 90d"/>
+        <column xsi:type="decimal" name="discount_ratio" nullable="true" precision="5" scale="2" comment="Discount Ratio"/>
+        <column xsi:type="int" name="days_since_last_order" nullable="true" unsigned="true" comment="Days Since Last Order"/>
+        <column xsi:type="decimal" name="risk_score" nullable="true" precision="5" scale="2" comment="Risk Score"/>
+        <column xsi:type="varchar" name="risk_level" nullable="true" length="16" comment="Risk Level"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="customer_analytics_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_ADMINAI_CUST_ANALYTICS_UNQ_CUST_STORE">
+            <column name="customer_id"/>
+            <column name="store_id"/>
+        </constraint>
+        <index referenceId="ARTM_ADMINAI_CUST_ANALYTICS_IDX_RISK_LEVEL" indexType="btree">
+            <column name="risk_level"/>
+        </index>
+        <index referenceId="ARTM_ADMINAI_CUST_ANALYTICS_IDX_LAST_ORDER" indexType="btree">
+            <column name="last_order_at"/>
+        </index>
+    </table>
+
+    <table name="artm_adminai_notification_queue" resource="default" engine="innodb" comment="ArtM AdminAI Notification Queue">
+        <column xsi:type="int" name="notification_id" nullable="false" identity="true" unsigned="true" comment="Notification ID"/>
+        <column xsi:type="varchar" name="notification_type" nullable="false" length="64" comment="Notification Type"/>
+        <column xsi:type="varchar" name="entity_type" nullable="false" length="32" comment="Entity Type"/>
+        <column xsi:type="int" name="entity_id" nullable="false" unsigned="true" default="0" comment="Entity ID"/>
+        <column xsi:type="varchar" name="severity" nullable="false" length="16" default="info" comment="Severity"/>
+        <column xsi:type="varchar" name="title" nullable="false" length="255" comment="Title"/>
+        <column xsi:type="text" name="payload" nullable="true" comment="Payload"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="16" default="new" comment="Status"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="processed_at" nullable="true" comment="Processed At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="notification_id"/>
+        </constraint>
+        <index referenceId="ARTM_ADMINAI_NOTIF_QUEUE_IDX_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+        <index referenceId="ARTM_ADMINAI_NOTIF_QUEUE_IDX_TYPE" indexType="btree">
+            <column name="notification_type"/>
+        </index>
+        <index referenceId="ARTM_ADMINAI_NOTIF_QUEUE_IDX_CREATED" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+
+    <table name="artm_adminai_analytics_cache" resource="default" engine="innodb" comment="ArtM AdminAI Analytics Cache">
+        <column xsi:type="int" name="cache_id" nullable="false" identity="true" unsigned="true" comment="Cache ID"/>
+        <column xsi:type="varchar" name="cache_key" nullable="false" length="190" comment="Cache Key"/>
+        <column xsi:type="varchar" name="intent_code" nullable="false" length="64" comment="Intent Code"/>
+        <column xsi:type="longtext" name="payload" nullable="false" comment="Cached Payload"/>
+        <column xsi:type="varchar" name="data_version" nullable="false" length="64" comment="Data Version"/>
+        <column xsi:type="datetime" name="expires_at" nullable="false" comment="Expires At"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="cache_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_ADMINAI_ANALYTICS_CACHE_UNQ_KEY">
+            <column name="cache_key"/>
+        </constraint>
+        <index referenceId="ARTM_ADMINAI_ANALYTICS_CACHE_IDX_INTENT" indexType="btree">
+            <column name="intent_code"/>
+        </index>
+        <index referenceId="ARTM_ADMINAI_ANALYTICS_CACHE_IDX_EXPIRES" indexType="btree">
+            <column name="expires_at"/>
+        </index>
+    </table>
+
+    <table name="artm_adminai_sync_state" resource="default" engine="innodb" comment="ArtM AdminAI Sync State">
+        <column xsi:type="varchar" name="sync_code" nullable="false" length="64" comment="Sync Code"/>
+        <column xsi:type="datetime" name="last_synced_at" nullable="true" comment="Last Synced At"/>
+        <column xsi:type="int" name="last_entity_id" nullable="true" unsigned="true" comment="Last Entity ID"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="16" default="idle" comment="Status"/>
+        <column xsi:type="varchar" name="message" nullable="true" length="255" comment="Message"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="sync_code"/>
+        </constraint>
+        <index referenceId="ARTM_ADMINAI_SYNC_STATE_IDX_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+        <index referenceId="ARTM_ADMINAI_SYNC_STATE_IDX_UPDATED" indexType="btree">
+            <column name="updated_at"/>
+        </index>
+    </table>
+
+    <table name="artm_adminai_query_cache" resource="default" engine="innodb" comment="ArtM AdminAI Query Cache">
+        <column xsi:type="int" name="cache_id" nullable="false" identity="true" unsigned="true" comment="Cache ID"/>
+        <column xsi:type="varchar" name="intent_code" nullable="false" length="100" comment="Intent Code"/>
+        <column xsi:type="varchar" name="parameter_hash" nullable="false" length="64" comment="Parameters MD5 Hash"/>
+        <column xsi:type="longtext" name="parameters_json" nullable="false" comment="Parameters JSON"/>
+        <column xsi:type="longtext" name="result_json" nullable="false" comment="Result JSON"/>
+        <column xsi:type="int" name="hit_count" nullable="false" unsigned="true" default="0" comment="Cache Hit Count"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="expires_at" nullable="false" comment="Expires At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="cache_id"/>
+        </constraint>
+        <index referenceId="ARTM_ADMINAI_QUERY_CACHE_INTENT_HASH" indexType="btree">
+            <column name="intent_code"/>
+            <column name="parameter_hash"/>
+        </index>
+        <index referenceId="ARTM_ADMINAI_QUERY_CACHE_EXPIRES" indexType="btree">
+            <column name="expires_at"/>
+        </index>
+    </table>
+
+    <table name="artm_adminai_chat_results" resource="default" engine="innodb" comment="ArtM AdminAI Chat Results">
+        <column xsi:type="int" name="result_id" nullable="false" identity="true" unsigned="true" comment="Result ID"/>
+        <column xsi:type="varchar" name="session_id" nullable="false" length="64" comment="Session ID"/>
+        <column xsi:type="varchar" name="intent_code" nullable="false" length="100" comment="Intent Code"/>
+        <column xsi:type="longtext" name="parameters_json" nullable="false" comment="Parameters JSON"/>
+        <column xsi:type="longtext" name="result_json" nullable="false" comment="Result JSON"/>
+        <column xsi:type="varchar" name="source" nullable="false" length="16" comment="Source"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="result_id"/>
+        </constraint>
+        <index referenceId="ARTM_ADMINAI_CHAT_RESULTS_SESSION" indexType="btree">
+            <column name="session_id"/>
+        </index>
+        <index referenceId="ARTM_ADMINAI_CHAT_RESULTS_INTENT" indexType="btree">
+            <column name="intent_code"/>
+        </index>
+        <index referenceId="ARTM_ADMINAI_CHAT_RESULTS_CREATED" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+
+    <table name="artm_adminai_customer_segments" resource="default" engine="innodb" comment="ArtM AdminAI Customer Segments">
+        <column xsi:type="int" name="segment_id" nullable="false" identity="true" unsigned="true" comment="Segment ID"/>
+        <column xsi:type="int" name="customer_id" nullable="false" unsigned="true" comment="Customer ID"/>
+        <column xsi:type="smallint" name="store_id" nullable="true" unsigned="true" comment="Store ID"/>
+        <column xsi:type="varchar" name="segment_code" nullable="false" length="64" comment="Segment Code"/>
+        <column xsi:type="decimal" name="segment_score" nullable="true" precision="5" scale="2" comment="Segment Score"/>
+        <column xsi:type="json" name="meta" nullable="true" comment="Segment Meta"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="segment_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_ADMINAI_CUST_SEG_UNQ_CUST_SEGMENT">
+            <column name="customer_id"/>
+            <column name="segment_code"/>
+        </constraint>
+        <index referenceId="ARTM_ADMINAI_CUST_SEG_IDX_CUSTOMER" indexType="btree">
+            <column name="customer_id"/>
+        </index>
+        <index referenceId="ARTM_ADMINAI_CUST_SEG_IDX_SEGMENT_CODE" indexType="btree">
+            <column name="segment_code"/>
+        </index>
+    </table>
+</schema>

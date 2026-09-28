@@ -1,0 +1,123 @@
+<?php
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $blogdata_object = $objectManager->create('\ArtM\BlogEsg\Helper\Data');
+  
+
+    $product = $block->getProduct();
+    $attributeSet = $objectManager->create('Magento\Eav\Api\AttributeSetRepositoryInterface');
+    $attributeSetRepository = $attributeSet->get($product->getAttributeSetId());
+    $attribute_set_name = $attributeSetRepository->getAttributeSetName();
+
+    $blogdata_data = $blogdata_object->getrow( strtolower($attribute_set_name) );
+    if( $blogdata_data ){
+        $attributesetname = $blogdata_data[0]['attributesetname'];
+        $bloglink = $blogdata_data[0]['bloglink'];
+        $uppertext = $blogdata_data[0]['uppertext'];
+        $bottomtext = $blogdata_data[0]['bottomtext'];
+    }else{
+        $attributesetname = '';
+        $bloglink = '';
+        $uppertext = '';
+        $bottomtext = '';
+    }
+
+?>
+<style>
+    span.load_blog {
+        font-weight: 700;
+        font-size: 12px;
+        cursor: pointer;
+    }
+    .loader_img img {
+        max-width: 100px;
+    }
+
+    .loader_img {
+        text-align: center;
+    }
+</style>
+
+<?php
+    if( $attributesetname == '' ){
+?>
+<style>
+    .blog_exist,
+    #tab-label-packaging-content-title,
+    div#tab-label-packaging-content, 
+    #packaging-content
+    {
+        display: none !important;
+    }
+    
+</style>
+<?php
+    }
+?>
+
+<?php
+    echo $static_block_content = $this->getLayout()->createBlock('Magento\Cms\Block\Block')->setBlockId('blogstyling')->toHtml();
+?>
+
+<?php
+
+    $static_block_content = $this->getLayout()->createBlock('Magento\Cms\Block\Block')->setBlockId($bloglink)->toHtml();
+    //$bloglink
+    
+    if( trim($static_block_content) != '' ){ 
+        // if static block then print else load by link
+        echo $static_block_content;    
+    }else{
+?>
+
+<div class="description_bottomtext blog_exist">
+    <span class="content_bottom_description"><?php echo $bottomtext; ?></span>
+    <span class="load_blog load_blog_content near_loaded_content" status="load">Read more>></span>
+</div>
+<div id="blog_content" class="blog_exist"></div>
+
+
+<script type="text/javascript">
+    require(['jquery', 'bootstrap'],function(jQuery){
+        jQuery(document).ready(function() {
+            jQuery('.load_blog').click(function(){
+                jQuery('.load_blog').hide();
+                
+                
+                if( jQuery(this).hasClass('near_loaded_content') ){
+                    
+                }else{
+                    jQuery('html, body').animate({
+                        scrollTop: jQuery("#tab-label-packaging-content-title").offset().top
+                    }, 2000);
+                }
+                
+                if( jQuery('#blog_content').hasClass('filled_content') ){
+                    //content is already filled, can not fill again
+                }else{
+                    
+                    var base_url = window.location.origin;
+                    jQuery('#blog_content').html("<div class='loader_img' style=''><img src='"+base_url+"/pub/media/loading.gif' /></div>");
+
+                    var link = '<?php echo $bloglink; ?>';
+                    
+                    jQuery.ajax({
+                        url: link,
+                        type: "get",
+                         success: function(response, status, xhr){
+                             var dataToday = jQuery(response).find('article#main').find('article.type-post').html();
+                             var adding_stylesheet = dataToday + '<link rel="stylesheet" id="golfoyblog-css" href="https://golfoy.com/blog/wp-content/themes/golfoyblog/style.css" type="text/css" media="all">';
+                             jQuery('#blog_content').html(dataToday);
+                             jQuery('#blog_content').addClass('filled_content');
+
+                          }
+                    });
+                }
+                
+            });
+        });
+    });
+</script>
+
+    <?php
+         }
+    ?>

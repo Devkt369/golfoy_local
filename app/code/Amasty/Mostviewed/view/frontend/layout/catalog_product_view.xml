@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @author Amasty Team
+ * @copyright Copyright (c) Amasty (https://www.amasty.com)
+ * @package Automatic Related Products for Magento 2
+ */-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="content.aside">
+            <block class="Amasty\Mostviewed\Block\Product\BundlePack" name="amasty.mostviewed.bundle.below" before="catalog.product.related"/>
+        </referenceBlock>
+        <referenceBlock name="product.info.details">
+            <block class="Amasty\Mostviewed\Block\Product\BundlePackTab" name="amasty.mostviewed.bundle.tab" group="detailed_info"/>
+        </referenceBlock>
+
+        <!-- <referenceBlock name="product.info.details">
+            <block class="Magento\Framework\View\Element\Template" name="amasty.mostviewed.bundle.tabbb" after="product.blogfaq" group="detailed_info" template="Amasty_Mostviewed::ggrid.phtml">
+                <arguments>
+                    <argument name="sort_order" xsi:type="string">20</argument>
+                </arguments>
+            </block>
+        </referenceBlock> -->
+        <!-- <referenceblock name="product.info.details"><block class="Amasty\Mostviewed\Block\Widget\Wrapper" name="amrelated_product_before_related_qcyWxaNWjk" template="Amasty_Mostviewed::content/grid.phtml" after="product.blogfaq" group="detailed_info"><arguments> <argument name="sort_order" xsi:type="string">20</argument></arguments><action method="setData"><argument name="name" xsi:type="string">position</argument><argument name="value" xsi:type="string">product_before_related</argument></action></block></referenceblock> -->
+    </body>
+</page>

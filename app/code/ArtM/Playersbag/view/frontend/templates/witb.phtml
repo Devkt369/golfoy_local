@@ -1,0 +1,358 @@
+<style>
+    .overlay {
+        top: 0;
+        left: 0;
+        pointer-events: none;
+    }
+
+    .players-bag-container h1 {
+        text-transform: uppercase;
+        font-size: 30px;
+        letter-spacing: -1px;
+        font-weight: 700;
+        text-align: center;
+/*
+        background-color: #ebebeb;
+        padding: 15px 5px 5px 5px;
+        border-radius: 5px;
+*/
+    }
+
+    .players-bag-container {
+        width: 100%;
+        max-width: 1280px;
+        margin: auto;
+    }
+
+    .wrapper {
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .card {
+        backdrop-filter: blur(5px);
+        min-width: 35vh;
+        transition: all .5s;
+        position: relative;
+    }
+
+    .card:hover {
+        transform: scale(1.05);
+    }
+
+    .glare {
+        transition: left 0.5s;
+    }
+
+    .witb_product_section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .witb_product_section img {
+        max-width: 100%;
+        border: 1px solid transparent;
+        border-radius: 5px;
+    }
+
+    .witb_product_section h3 {
+        font-size: 15px;
+        text-transform: capitalize;
+        margin: 11px 0px 7px 0px;
+        font-weight: 800;
+        color: #fff;
+        text-align: center;
+    }
+
+    .witb_product_section p>a {
+        color: grey;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .overlay {
+        width: 100vw;
+        height: 100vh;
+        position: absolute;
+    }
+
+    .card {
+        backdrop-filter: blur(5px);
+        min-width: 35vh;
+        height: 55vh;
+        box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.051) !important;
+    }
+
+    .glare-container {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .glare {
+        position: absolute;
+        left: 100%;
+        bottom: -50%;
+        width: 150%;
+        height: 150%;
+        background: rgb(255, 255, 255);
+        background: linear-gradient(90deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0) 20%);
+        transform: rotateZ(35deg);
+        pointer-events: none;
+        filter: blur(4px);
+    }
+
+    .card-0 {
+        background-color: rgba(0, 166, 255, 0.3);
+    }
+
+    .card-1 {
+        background-color: rgba(255, 59, 0, 0.37);
+    }
+
+    .card-2 {
+        background-color: rgba(255, 0, 0, 0.23);
+    }
+
+    .wrapper {
+        display: inline-block;
+        grid-template-columns: 1fr 1fr 1fr;
+        justify-items: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .witb_product_section img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .witb_product_section h3 {
+        margin: 10px 0 0;
+        text-align: center;
+        color: #fff;
+    }
+
+    .witb_product_section p {
+        text-align: center;
+    }
+
+    .witb_product_section a {
+        color: #fff;
+        text-decoration: none;
+    }
+
+    body.cms-shop-players-bag {
+        background: none;
+    }
+
+    body.cms-shop-players-bag .wrapper {
+        height: auto;
+    }
+
+    body.cms-shop-players-bag .breadcrumbs {
+        display: none;
+    }
+
+    body.cms-shop-players-bag .witb_product_section h3 {
+        font-size: 20px;
+        font-weight: bold;
+        text-transform: uppercase;
+        -webkit-background-clip: text;
+        color: #7d7d7d;
+    }
+
+    .witb_product_section p>a {
+        color: grey;
+        font-weight: 600;
+        text-decoration: none;
+        background-color: #ebebeb;
+        padding: 10px 20px 8px 20px;
+        border-radius: 50px;
+    }
+
+    .witb_product_section>p {
+        margin-top: 15px;
+    }
+
+    .card {
+        border-radius: 10px;
+        height: auto;
+        display: inline-block;
+        width: 32%;
+        min-width: 100px;
+        float: left;
+        margin-right: 1%;
+        margin-bottom: 10px;
+    }
+
+    .witb_pagination a.active {
+        font-weight: bold;
+        border-bottom: 2px solid red;
+    }
+
+    @media only screen and (max-width: 896px) {
+        body.cms-shop-players-bag .witb_product_section h3 {
+            font-size: 15px;
+        }
+        body.cms-shop-players-bag .witb_product_section h3 {
+            font-size: 12px;
+        }
+        .witb_product_section p>a {
+            color: grey;
+            font-weight: 600;
+            text-decoration: none;
+            background-color: #ebebeb;
+            padding: 6px 13px 6px 13px;
+            border-radius: 50px;
+            font-size: 11px;
+        }
+        .witb_product_section {
+            padding: 10px;
+        }
+    }
+
+    @media only screen and (max-width: 600px) {
+        .card {
+            width: 48%;
+            margin-right: 2%;
+        }
+    }
+    @media only screen and (max-width: 480px) {
+        .wrapper {
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .overlay {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .witb_product_section p>a {
+            font-size: 11px;
+        }
+
+        .cms-shop-players-bag .container {
+            padding-left: 4px;
+        }
+
+        .witb_product_section>p {
+            margin-top: 10px !important;
+        }
+
+        body.cms-shop-players-bag .witb_product_section h3 {
+            font-size: 14px !important;
+        }
+
+        .witb_product_section {
+            padding: 10px;
+        }
+
+        .card {
+            width: calc(50% - 10px);
+            margin-bottom: 20px;
+        }
+
+        .cms-shop-players-bag main#maincontent {
+            padding: 0px !important;
+        }
+    }
+</style>
+
+<?php
+$categoryId = 220; // ID of the category
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$category = $objectManager->create('Magento\Catalog\Model\Category')->load($categoryId);
+
+if ($category->getId()) {
+    $subcategories = $category->getChildrenCategories();
+
+    if ($subcategories && count($subcategories) > 0) {
+?>
+
+        <div class="players-bag-container">
+            <h1>players bag</h1>
+            <div class="overlay"></div>
+
+            <div class="wrapper">
+                <?php foreach ($subcategories as $subcategory) {
+                    $subcategory = $objectManager->create('Magento\Catalog\Model\Category')->load($subcategory->getId());
+                    $imageUrl = $subcategory->getImageUrl();
+                    $categoryName = $subcategory->getName();
+                    $categoryUrl = $subcategory->getUrl();
+                ?>
+
+                    <div class="card">
+                        <div class="glare-container">
+                            <div class="glare"></div>
+                            <div class="witb_product_section">
+                                <a href="<?php echo $categoryUrl; ?>">
+                                    <img src="<?php echo $imageUrl; ?>" alt="<?php echo $categoryName; ?>">
+                                </a>
+                                <h3><?php echo $categoryName; ?></h3>
+                                <p><a href="<?php echo $categoryUrl; ?>">View Player's Bag</a></p>
+                            </div>
+                        </div>
+                    </div>
+
+                <?php } ?>
+            </div>
+        </div>
+<?php
+    } else {
+        echo "No subcategories found.";
+    }
+} else {
+    echo "Category not found.";
+}
+?>
+<script>
+    var limits = 15.0;
+
+    document.querySelectorAll('.card').forEach(function(card) {
+        card.addEventListener('mousemove', function(e) {
+            var rect = e.target.getBoundingClientRect();
+            var x = e.clientX - rect.left; //x position within the element.
+            var y = e.clientY - rect.top; //y position within the element.
+            var offsetX = x / rect.width;
+            var offsetY = y / rect.height;
+
+            var rotateY = (offsetX) * (limits * 2) - limits;
+            var rotateX = (offsetY) * (limits * 2) - limits;
+
+            var shadowOffsetX = (offsetX) * 32 - 16;
+            var shadowOffsetY = (offsetY) * 32 - 16;
+
+            card.style.boxShadow =
+                (1 / 6) * -shadowOffsetX + "px " + (1 / 6) * -shadowOffsetY + "px 3px rgba(0, 0, 0, 0.051), " +
+                (2 / 6) * -shadowOffsetX + "px " + (2 / 6) * -shadowOffsetY + "px 7.2px rgba(0, 0, 0, 0.073), " +
+                (3 / 6) * -shadowOffsetX + "px " + (3 / 6) * -shadowOffsetY + "px 13.6px rgba(0, 0, 0, 0.09), " +
+                (4 / 6) * -shadowOffsetX + "px " + (4 / 6) * -shadowOffsetY + "px 24.3px rgba(0, 0, 0, 0.107), " +
+                (5 / 6) * -shadowOffsetX + "px " + (5 / 6) * -shadowOffsetY + "px 45.5px rgba(0, 0, 0, 0.129), " +
+                -shadowOffsetX + "px " + -shadowOffsetY + "px 109px rgba(0, 0, 0, 0.18)";
+
+            card.style.transform = "perspective(1000px) rotateX(" + -rotateX + "deg) rotateY(" + rotateY + "deg)";
+
+            var glarePos = rotateX + rotateY + 90;
+            card.querySelector('.glare').style.left = glarePos + "%";
+        });
+
+        card.addEventListener('mouseleave', function(e) {
+            card.style.boxShadow = "0px 0px 3px rgba(0, 0, 0, 0.051), 0px 0px 7.2px rgba(0, 0, 0, 0.073), 0px 0px 13.6px rgba(0, 0, 0, 0.09), 0px 0px 24.3px rgba(0, 0, 0, 0.107), 0px 0px 45.5px rgba(0, 0, 0, 0.129), 0px 0px 109px rgba(0, 0, 0, 0.18)";
+            card.style.transform = "scale(1.0)";
+            card.querySelector('.glare').style.left = "100%";
+        });
+    });
+</script>

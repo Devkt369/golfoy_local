@@ -1,0 +1,35 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="artm" translate="label" sortOrder="999">
+            <label>ArtM</label>
+        </tab>
+        <section id="querychat" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+            <label>Query/Chat Box</label>
+            <tab>artm</tab>
+            <resource>ArtM_QueryChatBox::config</resource>
+            <group id="query" translate="label" type="text" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Query Chatbox</label>
+                <field id="question_area" translate="label" type="textarea" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Query Type</label>
+                    <comment><![CDATA[Enter query seprated by || ]]></comment>
+                </field>
+                <field id="query_senton_email" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enter email for Received Query/ChatBox (Admin)</label>
+                    <comment><![CDATA[Admin E-mail]]></comment>
+                </field>
+                <field id="query_senton_expert" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enter email for Received Query/ChatBox (Expert)</label>
+                    <comment><![CDATA[Expert E-mail]]></comment>
+                </field>
+                <field id="query_senton_sms" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enter admin mobile number</label>
+                    <comment><![CDATA[Mobile number to Received Query TextSMS.]]></comment>
+                </field>
+                <field id="query_chat_box_open" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Popup Links Selector</label>
+                    <comment><![CDATA[Comma seprated.]]></comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

@@ -1,0 +1,141 @@
+<?php
+
+/** @var \ArtM\ProductSlider\Block\Slider $block */
+$slider = $block->getSliderData();
+
+$renderer = $block->getSliderRenderer();
+$payload = $slider ? $block->getInitialProductsPayload() : ['items' => [], 'page' => 1, 'total' => 0, 'has_more' => false, 'page_size' => 1];
+$displayType = (string)($slider['display_type'] ?? 'slider');
+$containerClasses = [
+    'artm-productslider',
+    'artm-productslider--' . $displayType,
+    $slider ? $renderer->getDeviceVisibilityClass($slider) : '',
+];
+$containerClasses = array_filter($containerClasses, static fn($v): bool => (string)$v !== '');
+$configJson = $slider ? $renderer->getJsConfig($slider, $block->getAjaxUrl()) : '{}';
+$initialCardsHtml = $slider ? $block->getCardsHtml((array)($payload['items'] ?? []), $slider) : '';
+$groupFallbackHtml = '';
+$debugHtml = '';
+if ($block->isDebugMode()) {
+    $debugHtml = '<div style="font-size:12px;background:#fffbe6;border:2px solid #e0c200;padding:10px;margin:10px 0;white-space:pre-wrap;font-family:monospace;">'
+        . 'DEBUG PRODUCT SLIDER' . "\n\n"
+        . $block->escapeHtml(var_export($block->getDebugData($payload), true))
+        . '</div>';
+}
+
+
+
+
+if (!$slider) {
+    $groupIdentifier = trim((string)$block->getRequest()->getParam('identifier', ''));
+    if ($groupIdentifier !== '') {
+        try {
+            $groupBlock = $block->getLayout()->createBlock(\ArtM\ProductSlider\Block\Group::class);
+            if ($groupBlock) {
+                $groupBlock->setData('identifier', $groupIdentifier);
+                $groupBlock->setTemplate('ArtM_ProductSlider::group/view.phtml');
+                $groupFallbackHtml = (string)$groupBlock->toHtml();
+            }
+        } catch (\Throwable) {
+            $groupFallbackHtml = '';
+        }
+    }
+}
+?>
+
+<?= /* @noEscape */ $debugHtml ?>
+
+<?php if (!$slider): ?>
+    <?php if ($groupFallbackHtml !== ''): ?>
+        <?= /* @noEscape */ $groupFallbackHtml ?>
+        <?php return; ?>
+    <?php endif; ?>
+
+    <script>
+    (function () {
+        try {
+            var raw = (window.location && window.location.search) ? window.location.search.replace(/^\?/, '') : '';
+            if (!raw || raw.indexOf('identifier=') !== -1) {
+                return;
+            }
+
+            var parts = raw.split('&').filter(function (v) { return v !== ''; });
+            if (!parts.length) {
+                return;
+            }
+
+            var token = parts[0];
+            if (token.indexOf('=') !== -1) {
+                return;
+            }
+
+            var identifier = decodeURIComponent(token || '').trim();
+            if (!identifier) {
+                return;
+            }
+
+            var rest = parts.slice(1).filter(function (v) { return v.indexOf('=') !== -1; });
+            var next = window.location.pathname + '?identifier=' + encodeURIComponent(identifier);
+            if (rest.length) {
+                next += '&' + rest.join('&');
+            }
+
+            window.location.replace(next);
+        } catch (e) {
+        }
+    })();
+    </script>
+    <!-- <div class="artm-productslider-debug artm-productslider-debug--warn">
+        <h4>Slider Group Not Rendered</h4>
+        <p>No visible slider or slider group matched this request.</p>
+    </div> -->
+    <?php return; ?>
+<?php endif; ?>
+
+<div class="<?= $block->escapeHtmlAttr(implode(' ', $containerClasses)) ?>"
+     data-role="artm-productslider"
+     data-display-type="<?= $block->escapeHtmlAttr($displayType) ?>"
+     data-initial-page="1"
+     data-total="<?= (int)($payload['total'] ?? 0) ?>"
+     data-has-more="<?= !empty($payload['has_more']) ? '1' : '0' ?>"
+     data-page-size="<?= (int)($payload['page_size'] ?? 1) ?>"
+     tabindex="0"
+     data-mage-init='{"ArtM_ProductSlider/js/slider": {"config": <?= /* @noEscape */ $configJson ?>}}'>
+
+    <?php
+    $buttonUrl = trim((string)$renderer->getButtonUrl($slider));
+    $buttonText = trim((string)($slider['button_text'] ?? ''));
+    ?>
+    <div class="artm-productslider__header">
+        <div class="artm-productslider__header-text">
+            <h3 class="artm-productslider__title"><?= $block->escapeHtml((string)($slider['title'] ?? '')) ?></h3>
+            <?php if (!empty($slider['sub_heading'])): ?>
+                <p class="artm-productslider__subtitle"><?= $block->escapeHtml((string)$slider['sub_heading']) ?></p>
+            <?php endif; ?>
+        </div>
+        <?php if ($buttonUrl !== ''): ?>
+            <a class="artm-productslider__view-all" href="<?= $block->escapeUrl($buttonUrl) ?>">
+                <?= $block->escapeHtml($buttonText !== '' ? $buttonText : __('View All')) ?>
+            </a>
+        <?php endif; ?>
+    </div>
+
+    <?php if ($displayType === 'slider'): ?>
+        <button class="artm-productslider__nav artm-productslider__nav--prev" type="button" data-role="prev" aria-label="Previous">
+            <span aria-hidden="true">&#8249;</span>
+        </button>
+        <button class="artm-productslider__nav artm-productslider__nav--next" type="button" data-role="next" aria-label="Next">
+            <span aria-hidden="true">&#8250;</span>
+        </button>
+    <?php endif; ?>
+
+    <div class="artm-productslider__viewport" data-role="viewport">
+        <div class="artm-productslider__track" data-role="track">
+            <?= /* @noEscape */ $initialCardsHtml ?>
+        </div>
+    </div>
+
+    <?php if ($displayType === 'slider'): ?>
+        <div class="artm-productslider__dots" data-role="dots" aria-label="Slider pagination"></div>
+    <?php endif; ?>
+</div>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">
+                artm_golfoysocial_post_listing.artm_golfoysocial_post_listing_data_source
+            </item>
+        </item>
+
+    </argument>
+
+    <settings>
+
+        <buttons>
+            <button name="add">
+                <url path="golfoysocial/post/newAction"/>
+                <class>primary</class>
+                <label translate="true">Add New Post</label>
+            </button>
+        </buttons>
+
+        <spinner>
+            posts_columns
+        </spinner>
+
+        <deps>
+            <dep>
+                artm_golfoysocial_post_listing.artm_golfoysocial_post_listing_data_source
+            </dep>
+        </deps>
+
+    </settings>
+
+    <dataSource name="artm_golfoysocial_post_listing_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">post_id</param>
+            </storageConfig>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <dataProvider class="ArtM\GolfoySocial\Ui\DataProvider\Post\ListingDataProvider"
+                      name="artm_golfoysocial_post_listing_data_source">
+            <settings>
+                <requestFieldName>post_id</requestFieldName>
+                <primaryFieldName>post_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <columns name="posts_columns">
+
+        <column name="post_id">
+
+            <settings>
+
+                <filter>textRange</filter>
+                <label translate="true">ID</label>
+                <sorting>desc</sorting>
+
+            </settings>
+
+        </column>
+
+        <column name="title">
+
+            <settings>
+
+                <filter>text</filter>
+                <label translate="true">Title</label>
+
+            </settings>
+
+        </column>
+
+        <column name="post_type">
+
+            <settings>
+
+                <filter>text</filter>
+                <label translate="true">Type</label>
+
+            </settings>
+
+        </column>
+
+        <column name="status">
+
+            <settings>
+
+                <filter>text</filter>
+                <label translate="true">Status</label>
+
+            </settings>
+
+        </column>
+
+        <column name="product_id">
+
+            <settings>
+
+                <filter>text</filter>
+                <label translate="true">Product ID</label>
+
+            </settings>
+
+        </column>
+
+        <column name="created_at">
+
+            <settings>
+
+                <filter>dateRange</filter>
+                <label translate="true">Created At</label>
+
+            </settings>
+
+        </column>
+
+        <column name="published_at">
+
+            <settings>
+
+                <filter>dateRange</filter>
+                <label translate="true">Published At</label>
+
+            </settings>
+
+        </column>
+
+    </columns>
+
+</listing>

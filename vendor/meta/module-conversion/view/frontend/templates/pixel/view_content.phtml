@@ -1,0 +1,46 @@
+<?php
+/**
+ * @var \Meta\Conversion\Block\Pixel\ViewContent $block
+ * @var $escaper \Magento\Framework\Escaper
+ */
+
+$trackerUrl = $block->getTrackerUrl();
+$contentData = $block->getContentData();
+
+if ($block->getFacebookPixelID()) {
+    ?>
+
+    <!-- Added the new component below to track server events -->
+    <script type="text/x-magento-init">
+        {
+            "*": {
+                "Meta_Conversion/js/metaPixelTracker" : {
+                    "url" : "<?= $escaper->escapeUrl($trackerUrl); ?>",
+                    "payload": <?= /* @noEscape */
+                    json_encode([
+                    "eventName" => $block->getEventToObserveName(),
+                    "productId" => $block->getProductId()
+                    ]) ?>,
+                    "browserEventData": <?= /* @noEscape */
+                    json_encode([
+                    'fbAgentVersion' => $block->getFacebookAgentVersion(),
+                    'fbPixelId' => $block->getFacebookPixelID(),
+                    'source' => $block->getSource(),
+                    'pluginVersion' => $block->getPluginVersion(),
+                    'track' => 'track',
+                    'event' => 'ViewContent',
+                    'payload' => [
+                        'content_type' => $block->getContentType(),
+                        'content_ids' => json_encode($contentData['content_ids']),
+                        'content_name' => $escaper->escapeUrl($block->getContentName()) ?? '',
+                        'contents' => json_encode($contentData['contents']),
+                        'content_category' => $block->getContentCategory() ?? '',
+                        'value' => $block->getValue() ?? '',
+                        'currency' => $block->getCurrency() ?? ''
+                    ]
+                    ]) ?>
+        }
+    }
+}
+    </script>
+<?php } ?>

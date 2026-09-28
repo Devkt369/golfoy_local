@@ -1,0 +1,102 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Magento\Catalog\Model\Product[] $items */
+/** @var array $slider */
+/** @var \ArtM\ProductSlider\ViewModel\SliderRenderer $renderer */
+/** @var \ArtM\ProductSlider\ViewModel\ProductCard $card */
+$items = (array)$block->getData('items');
+$slider = (array)$block->getData('slider');
+$renderer = $block->getData('renderer');
+$card = $block->getData('card_view_model');
+$components = $renderer ? $renderer->getOrderedComponents($slider) : ['image', 'product_name', 'price', 'add_to_cart'];
+$customCodes = $renderer ? $renderer->getCustomAttributeCodes($slider) : [];
+$imageRole = (string)($slider['image_role'] ?? 'small_image');
+$lazy = (int)($slider['lazy_load'] ?? 1) === 1;
+$componentSet = array_flip($components);
+?>
+<?php foreach ($items as $product): ?>
+    <?php if (!$product || !$product->getId()): continue; endif; ?>
+    <?php
+    $productUrl = $product->getProductUrl();
+    $name = $card->getDisplayName($product, (int)($slider['remove_brand_from_name'] ?? 0) === 1);
+    $finalPrice = $card->getFinalPrice($product);
+    $regularPrice = $card->getRegularPrice($product);
+    $discount = $card->getDiscountPercent($product);
+    $review = $card->getReviewSummary($product);
+    $customAttributes = $card->getCustomAttributes($product, $customCodes);
+    $shortDescriptionHtml = $card->getShortDescriptionHtml($product);
+    $image = $card->getImageUrl($product, $imageRole);
+    $hoverImage = $card->getHoverImageUrl($product);
+    ?>
+    <article class="artm-productcard" data-product-id="<?= (int)$product->getId() ?>">
+        <?php foreach ($components as $component): ?>
+            <?php if ($component === 'image' && $image !== ''): ?>
+                <a href="<?= $block->escapeUrl($productUrl) ?>" class="artm-productcard__image-wrap">
+                    <img class="artm-productcard__image" src="<?= $block->escapeUrl($image) ?>" alt="<?= $block->escapeHtmlAttr($name) ?>" <?= $lazy ? 'loading="lazy"' : '' ?> />
+                    <?php if (isset($componentSet['hover_image']) && $hoverImage !== ''): ?>
+                        <img class="artm-productcard__image artm-productcard__image--hover" src="<?= $block->escapeUrl($hoverImage) ?>" alt="<?= $block->escapeHtmlAttr($name) ?>" <?= $lazy ? 'loading="lazy"' : '' ?> />
+                    <?php endif; ?>
+                </a>
+            <?php elseif ($component === 'product_name'): ?>
+                <h4 class="artm-productcard__name"><a href="<?= $block->escapeUrl($productUrl) ?>"><?= $block->escapeHtml($name) ?></a></h4>
+            <?php elseif ($component === 'short_description' && $shortDescriptionHtml !== ''): ?>
+                <div class="artm-productcard__desc"><?= /* @noEscape */ $shortDescriptionHtml ?></div>
+            <?php elseif ($component === 'sku' && trim((string)$product->getSku()) !== ''): ?>
+                <p class="artm-productcard__meta">SKU: <?= $block->escapeHtml((string)$product->getSku()) ?></p>
+            <?php elseif ($component === 'price'): ?>
+                <?php $hasDiscount = $regularPrice > 0 && $finalPrice < $regularPrice; ?>
+                <p class="artm-productcard__price">
+                    <?php if ($hasDiscount): ?>
+                        <span class="artm-productcard__price-regular"><?= $block->escapeHtml($card->formatPrice($regularPrice)) ?></span>
+                        <span class="artm-productcard__price-final"><?= $block->escapeHtml($card->formatPrice($finalPrice)) ?></span>
+                        <?php if ($discount !== null && $discount > 0): ?>
+                            <span class="artm-productcard__price-off">(<?= (int)$discount ?>% OFF)</span>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <span class="artm-productcard__price-final"><?= $block->escapeHtml($card->formatPrice($finalPrice)) ?></span>
+                    <?php endif; ?>
+                </p>
+            <?php elseif ($component === 'special_price' && $regularPrice > 0 && $finalPrice < $regularPrice): ?>
+                <p class="artm-productcard__special-price"><?= $block->escapeHtml($card->formatPrice($finalPrice)) ?></p>
+            <?php elseif ($component === 'discount_percent' && $discount !== null && $discount > 0): ?>
+                <p class="artm-productcard__discount"><?= (int)$discount ?>% OFF</p>
+            <?php elseif ($component === 'rating' && (int)$review['rating_summary'] > 0): ?>
+                <p class="artm-productcard__meta">Rating: <?= (int)$review['rating_summary'] ?>%</p>
+            <?php elseif ($component === 'review_count' && (int)$review['reviews_count'] > 0): ?>
+                <p class="artm-productcard__meta">Reviews: <?= (int)$review['reviews_count'] ?></p>
+            <?php elseif ($component === 'stock_status'): ?>
+                <p class="artm-productcard__stock <?= $product->isSaleable() ? 'is-in' : 'is-out' ?>"><?= $block->escapeHtml($card->getStockLabel($product)) ?></p>
+            <?php elseif ($component === 'wishlist'): ?>
+                <button class="artm-productcard__link" type="button" data-role="wishlist" data-post='<?= $block->escapeHtmlAttr($card->getWishlistUrl($product)) ?>'>Wishlist</button>
+            <?php elseif ($component === 'compare'): ?>
+                <button class="artm-productcard__link" type="button" data-role="compare" data-post='<?= $block->escapeHtmlAttr($card->getComparePostData($product)) ?>'>Compare</button>
+            <?php elseif ($component === 'add_to_cart'): ?>
+                <form method="post" action="<?= $block->escapeUrl($card->getAddToCartUrl($product)) ?>" class="artm-productcard__form">
+                    <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($card->getFormKey()) ?>" />
+                    <input type="hidden" name="product" value="<?= (int)$product->getId() ?>" />
+                    <button type="submit" class="artm-productcard__cart">Add to Cart</button>
+                </form>
+            <?php elseif ($component === 'custom_attributes' && $customAttributes !== []): ?>
+                <ul class="artm-productcard__attrs">
+                    <?php foreach ($customAttributes as $attr): ?>
+                        <li><strong><?= $block->escapeHtml((string)$attr['label']) ?>:</strong> <?= $block->escapeHtml((string)$attr['value']) ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php elseif (str_starts_with($component, 'attr:')): ?>
+                <?php
+                $attrRow = $card->getCustomAttributes($product, [substr($component, 5)]);
+                $attrRow = $attrRow[0] ?? null;
+                ?>
+                <?php if ($attrRow !== null): ?>
+                    <p class="artm-productcard__meta artm-productcard__attr-value" data-attribute-code="<?= $block->escapeHtmlAttr(substr($component, 5)) ?>"><?= $block->escapeHtml((string)$attrRow['value']) ?></p>
+                <?php endif; ?>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    </article>
+<?php endforeach; ?>
+
+<style>
+a.artm-productslider__view-all{
+    text-align:right;
+}
+    </style>

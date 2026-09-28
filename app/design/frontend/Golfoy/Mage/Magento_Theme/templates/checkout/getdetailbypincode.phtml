@@ -1,0 +1,27 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$resourceConnection = $objectManager->get('\Magento\Framework\App\ResourceConnection');
+$connection = $resourceConnection->getConnection();
+$tableName = $resourceConnection->getTableName('artm_pincode_india');
+//$pincode = '135001'; // Your pincode here
+
+$pincode = $this->getRequest()->getParam('pincode');
+
+if ($pincode !== null) {
+    // Parameter 'pincode' is present in the URL
+//    echo "Parameter 'pincode' is present in the URL with value: $pincode";
+    $pincode = $this->getRequest()->getParam('pincode');
+    
+    $sql = "SELECT * FROM $tableName WHERE pincode = :pincode";
+    $data = $connection->fetchRow($sql, [':pincode' => $pincode]);
+    ?>
+    <div class="region_details">
+    <?php
+    if ($data): ?>
+        <p class="district">District: <span class="value"><?php echo $data['district']; ?></span></p>
+        <p class="state">State: <span class="value"><?php echo $data['state']; ?></span></p>
+    <?php endif; ?>
+<?php
+}
+?>
+

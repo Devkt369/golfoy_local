@@ -1,0 +1,1604 @@
+
+<style>
+    .success_order_page_left{
+        display: none;
+    }
+    .card_feedback {
+        border: 1px solid transparent;
+        text-align: center;
+        border-radius: 20px;
+        padding: 25px 0px 20px 0px !important;
+        background-color: white;
+        padding-top: 0px;
+        box-shadow: 0px 0px 12px -2px #e5e5e5;
+    }
+
+    .card_feedback_block {
+    padding: 0px;
+    border: 1px solid transparent;
+    max-width: 1000px;
+    margin: 0px auto;
+}
+
+    .feedback_section h1 {
+        font-size: 25px;
+    }
+
+    .feedback_section p {
+        font-size: 12px;
+        padding: 6px 40px 0px;
+    }
+
+    span.bold_text {
+        font-weight: 400;
+    }
+
+    .smiley_gallery {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* flex-wrap: wrap; */
+        margin-bottom: 0px;
+    }
+
+    .smiley_img_Sec {
+        width: 60px;
+        height: 100%;
+        margin: 0px 24px 0px 17px;
+    }
+    .smiley_img_Sec.selected {
+        filter: none !important;
+    }
+
+    .smiley_img_Sec img {
+        width: 100%;
+        cursor: pointer;
+        height: auto;
+    }
+
+    /* hover effect */
+    .smiley_img_Sec img {
+        filter: grayscale(100%);
+    }
+
+    .smiley_img_Sec img:hover,
+    .smiley_img_Sec img:focus,
+    .smiley_img_Sec img:active {
+        filter: grayscale(0%);
+    }
+
+    .smiley_img_Sec img:active {
+        filter: none;
+    }
+
+    button.submit_btn {
+        border: 1px solid transparent;
+        padding: 10px 50px;
+        border-radius: 15px;
+        font-weight: 600;
+    }
+
+    .form-group.smile_input {
+        padding: 10px;
+        margin: 0px 60px 0px;
+    }
+    
+    #exampleFormControlTextarea1 {
+        height: 150px; /* change this value to adjust the height */
+    }
+    p.rewardpoint_text {
+        margin-bottom: 30px;
+    }
+    .smile_input label {
+        display: inline-block !important;
+        width: 100% !important;
+        text-align: left !important;
+        color: #858585 !important;
+        font-weight: 500;
+        padding-left: 14px;
+        max-width: 650px;
+    }
+    textarea.form-control {
+        height: 150px;
+        max-width: 650px;
+    }
+    .smiley_gallery {
+        min-height: 105px;
+    }
+    .smiley_img_Sec img {
+        width: 80%;
+        transition: all .5s;
+        border-radius: 50%;
+    }
+    .smiley_img_Sec.selected img {
+        width: 100%;
+        transition: all .5s;
+        box-shadow: 7px 7px 7px 0px #cfcfcf;
+            
+        animation-name: emoji_move;
+        animation-duration: 2s;
+        animation-iteration-count: infinite;
+    }
+    @keyframes emoji_move {
+      5%   {
+        }
+      25%  {
+          margin-top: -20px;
+          
+          box-shadow: 7px 7px 12px 1px #cfcfcf;
+        }
+      70%  {
+          margin-top: -20px;
+          box-shadow: 7px 7px 12px 1px #cfcfcf;
+        }
+        85% {
+            margin-top: 0px;
+          box-shadow: 7px 7px 7px 0px #cfcfcf;
+            
+        }
+      100% {
+          margin-top: 0px;
+        }
+    }
+    .heading_success{
+        margin-left: 20px;
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin: auto;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-size: 30px;
+    }
+    .card_feedback_row{
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+    .feedback_section{
+        border-top: 0px solid #dfdfdf;
+        margin-top: 20px;
+    }
+    img.success_image {
+        display: block;
+        width: 100%;
+        max-width: 100px;
+        margin: 20px auto;
+    }
+    .max_word_limit {
+        font-size: 10px;
+        text-align: right;
+        padding-top: 5px;
+        max-width: 650px;
+        margin: auto;
+    }
+    .card_feedback_row hr {
+        border-color: #dfdfdf;
+        width: 80%;
+        margin: 30px auto;
+    }
+    .feedback_section h1 {
+        font-size: 20px;
+    }
+    
+    /* responsive styles */
+    @media (max-width: 768px) {
+        .feedback_section p {
+            font-size: 20px;
+            padding: 10px;
+        }
+        
+        .smiley_gallery {
+            margin-bottom: 20px;
+        }
+        
+        .smiley_img_Sec {
+            width: 50px;
+            margin: 0px 12px 10px 10px;
+        }
+        
+        button.submit_btn {
+            padding: 10px 30px;
+        }
+        
+        .form-group.smile_input {
+            padding: 10px;
+        }
+    }
+    .scroll_to_top {
+        display: none;
+    }
+    .thankyou_feedback_text {
+        font-weight: 600;
+    }
+    @media (max-width: 576px) {
+        .feedback_section h1 {
+            font-size: 17px !important;
+        }
+        
+        .feedback_section p {
+            font-size: 12px;
+            margin-bottom: 0px;
+            padding: 5px 10px 0px 5px;
+            line-height: 18px;
+        }
+        .feedback_section h1{
+            margin-top: 0px;
+        }
+        .smiley_gallery {
+            margin-bottom: 0px;
+        }
+        
+        .smiley_img_Sec {
+            width: 50px;
+            margin: 0px 5px 10px 5px;
+            display: inline-block;
+        }
+        
+        button.submit_btn {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        
+        .form-group.smile_input {
+            padding: 5px;
+        }
+        .card_feedback{
+            padding: 0px 0px 0px 0px;
+            box-shadow: none;
+            padding-top: 0px !important;
+        }
+        .form-group.smile_input{
+            margin: 0px 0px;
+        }
+        .card_feedback_block{
+            margin: -20px auto;
+            background-color: white;
+            box-shadow: none;
+            padding: 0px;
+            padding-left: 0px !important;
+            padding-right: 0px !important;
+            margin-top: -50px !important;
+        }
+        .btn_section {
+            margin-bottom: 10px;
+        }
+        h1.heading_success {
+            font-size: 18px;
+        }
+        img.success_image {
+            max-width: 65px !important;
+        }
+        p.order_number{
+            font-size: 12px;
+        }
+        p.order_number > a {
+            font-size: 13px;
+        }
+        p.recive_text, p.rewardpoint_text {
+            font-size: 11px;
+        }
+        .continue_button button {
+            font-size: 11px;
+        }
+        .card_feedback_row hr {
+            margin: 25px auto 25px;
+        }
+        .feedback_section h1 {
+            font-size: 18px;
+        }
+        .input_form_sec {
+            padding: 0px;
+        }
+        .smile_input label {
+            padding-left: 0px !important;
+        }
+        textarea.form-control {
+            height: 100px;
+        }
+        p.rewardpoint_text {
+            margin-bottom: 30px;
+            margin-top: 15px;
+        }
+        p.rewardpoint_text {
+            margin-bottom: 17px !important;
+        }
+    }
+</style>
+
+<?php
+    $order = $block->getOrder();
+    // echo '<pre>';
+    // print_r($order->getData());
+    $incrementId = $order->getIncrementId();
+    $orderId = $order->getId();
+    $base_url = $block->getBaseUrl();
+    if ($order) {
+//        $paymentMethod = $order->getPayment()->getMethodInstance()->getTitle();
+        $paymentMethodCode = $order->getPayment()->getMethod(); // Gets the payment method code
+
+        if( $paymentMethodCode == "cashondelivery" ){
+                $order->setStatus('sendoncod'); // Your custom status code
+                $order->setState('new'); // Your custom state code, make sure it matches Magento's state management
+                $order->save();
+            
+        }
+    }
+?>
+
+<div class="card_feedback_block">
+    
+    <div class="card_feedback">
+        <div class="row"><!-- text_section -->
+
+        <div class="row feedback_section_block">
+            <div class="feedback_section">
+                <h1>Did you enjoy shopping with us?</h1>
+                <p>We'd love to know your feedback. Tell us, did you enjoy shopping on <span class="bold_text">Golfoy ?</span></p>
+            </div>
+            <div class="col-md-12 smiley_gallery">
+                <div class="smiley_img_Sec">
+                    <img src="https://golfoy.com/media/wysiwyg/2023_homepage/emoji/very_bad.svg" alt="very_bad" rating="1">
+                </div>
+                <div class="smiley_img_Sec">
+                    <img src="https://golfoy.com/media/wysiwyg/2023_homepage/emoji/bad.svg" alt="bad" rating="2">
+                </div>
+                <div class="smiley_img_Sec">
+                    <img src="https://golfoy.com/media/wysiwyg/2023_homepage/emoji/neutral.svg" alt="neutral" rating="3">
+                </div>
+                <div class="smiley_img_Sec">
+                    <img src="https://golfoy.com/media/wysiwyg/2023_homepage/emoji/good.svg" alt="good" rating="4">
+                </div>
+                <div class="smiley_img_Sec">
+                    <img src="https://golfoy.com/media/wysiwyg/2023_homepage/emoji/excellent.svg" alt="excellent" rating="5">
+                </div>
+            </div>
+            <!-- input section -->  
+            <div class="col-md-12 input_form_sec" style="display: none;">
+                <div class="form-group smile_input">
+                    <input type="hidden" name="order_id" class="order_id" id="order_id" value="<?php echo $incrementId ?>" />
+                    <input type="hidden" name="order_rating" class="order_rating" id="order_rating"  />
+                    <label class="label" >Help us by writing comment (optional)</label>
+                    <textarea id="orderfeedback-textarea" maxlength="1000" class="form-control" rows="3" placeholder="Your feedback is extremely important to us in helping us improve and serve you better"></textarea>
+                    <div class="max_word_limit"><span>n</span> Character(s) Remaining</div>
+                </div>
+                <div class="btn_section continue_button"><button class="submit_btn" id="submit_orderfeedback">Submit</button></div> 
+            </div>
+        </div>
+<!-- start -->
+
+            <div class="col-md-12 card_feedback_row">
+                <p class="order_number" style="margin-bottom:0px;">
+                    Your order
+                    <!--Your order number is:-->
+                    <a href="<?php echo $base_url; ?>sales/order/view/order_id/<?php echo $order->getId(); ?>/" class="order-number"><strong><?php echo $incrementId; ?></strong></a>.
+                    has been received!
+                </p>
+                <h1 class="heading_success">
+                    <img class="success_image" src="https://golfoy.com/media/sales/download.gif">
+                </h1>
+                <p class="recive_text">
+                    You will receive an order confirmation E-mail &amp; SMS with details of your order and a link to track its progress.
+                </p>
+                <p class="rewardpoint_text">
+                    Use Cashback Money to get Upto 10% Off on your next order.View terms &amp; condition for more.
+                </p>
+
+                <div class="row order-feedback-column">
+                    <div class="progress_outer progress_outer_success">
+                        <div class="progress_custom">
+                            <div class="step steps">
+                                <div class="step-progress"></div>
+                                <div class="icon-wrapper">
+                                    <svg class="icon icon-checkmark" viewBox="0 0 32 32">
+                                        <path class="path1" d="M27 4l-15 15-7-7-5 5 12 12 20-20z"></path>
+                                    </svg>
+                                    <div class="step-text">ORDERED</div>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-progress"></div>
+                                <div class="icon-wrapper">
+                                    <svg class="icon icon-checkmark" viewBox="0 0 32 32">
+                                        <path class="path1" d="M27 4l-15 15-7-7-5 5 12 12 20-20z"></path>
+                                    </svg>
+                                    <div class="step-text">PACKED</div>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-progress"></div>
+                                <div class="icon-wrapper">
+                                    <svg class="icon icon-checkmark" viewBox="0 0 32 32">
+                                        <path class="path1" d="M27 4l-15 15-7-7-5 5 12 12 20-20z"></path>
+                                    </svg>
+                                    <div class="step-text">SHIPPED</div>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="icon-wrapper">
+                                    <svg class="icon icon-checkmark" viewBox="0 0 32 32">
+                                        <path class="path1" d="M27 4l-15 15-7-7-5 5 12 12 20-20z"></path>
+                                    </svg>
+                                    <div class="step-text">DELIVERED</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 order-details-column">
+                        <div class="details-content">
+                            <table class="data table table-totals">
+                                <caption class="table-caption">Order Summary</caption>
+                                <tbody>
+
+                                    <tr class="totals sub hide">
+                                        <th class="mark" scope="row">Cart Subtotal</th>
+                                        <td class="amount">
+                                            <span class="price" data-th="Cart Subtotal"><?php echo $order->getData('grand_total'); ?></span>
+                                        </td>
+                                    </tr>
+                                    <tr class="totals sub hide">
+                                        <th class="mark" scope="row">Cashback Discount</th>
+                                        <td class="amount">
+                                            <span class="price"><?php echo $order->getData('mp_reward_earn'); ?></span>
+                                        </td>
+                                    </tr>
+                                    <tr class="you-save hide" id="you-save">
+                                        <th class="mark" colspan="1"><span class="detailed">You Save</span></th>
+                                        <td class="amount"><span class="price mp-rw-highlight" style="font-weight: bold; font-size: 16px;"><?php echo $_COOKIE['total-save-summary'] ?? ''; ?></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <p class="you_save_line_success_page">You Saved Rs. <span class="bold"><?php echo $_COOKIE['total-save-summary'] ?? ''; ?></span> on this order &amp; Earned <span class="bold"><?php echo $order->getData('mp_reward_earn'); ?> Points</span>. You can redeem these points in your next order.</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 delivery-note">
+
+                        <div class="detailed_heading_outer">
+                            <div class=" detailed_heading_text"><span class="">Delivery note</span></div>
+                        </div>
+                        <div class="deliver-note-form">
+                            <form action="" method="" class="my-form" id="delivery-note">
+                                <!-- <label for="inputField">Enter something:</label> -->
+                                <textarea id="inputField" name="inputField" rows="5" placeholder="Enter your text here"></textarea>
+                                <p class="delivery_instruction">Write delivery instruction (optional) <span>Max Characters: 100</span></p>
+                                <button id="delivery-notes" value="Submit" rel="<?php echo $incrementId ?>">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="continue_button">
+                    <button type="button" class="btn btn-warning bt-lg action primary" title="Continue Shopping" onclick="window.location='https://golfoy.com/'"><span><span>Continue Shopping</span></span></button>
+                </div>
+            </div>
+<!-- end -->
+        </div>
+        
+    </div>
+</div>
+    <script>
+        require(['jquery'], function (jQuery) {
+            jQuery(document).ready(function () {
+                jQuery('.smiley_img_Sec img').click(function () {
+                    jQuery('.order_rating').val( jQuery(this).attr("rating") );
+//                    alert('f');
+                    
+                    
+                    var $this = jQuery(this); // cache jQuery object for performance
+                    var isColored = $this.css('filter') === 'none'; // check if image is already colored
+                    
+                    jQuery('.smiley_img_Sec').removeClass('selected');
+                    jQuery(this).parent().addClass('selected');
+                    
+                    jQuery('.smiley_img_Sec img').css('filter', 'grayscale(100%)');
+                    $this.css('filter', 'none'); // toggle image color
+//                    $this.css('filter', isColored ? 'grayscale(100%)' : 'none'); // toggle image color
+                    
+                    if (isColored) {
+//                        jQuery('.input_form_sec').slideUp(); // hide the textarea
+                    } else {
+                        jQuery('.input_form_sec').slideDown(); // show the textarea
+                    }
+                    
+                    var margin_above_smileys = jQuery('.feedback_section_block').offset().top;
+                    var window_width = jQuery(window).outerHeight();
+                    var smiley_div_height = jQuery('.feedback_section_block').outerHeight() + 270;
+                    var scroll_up_to = margin_above_smileys - (window_width - smiley_div_height);
+                    
+                    if(scroll_up_to > 0){
+                        scroll_up_to = 270;
+                    }
+                    console.log(scroll_up_to);
+                        jQuery('html, body').animate({
+                            scrollTop: scroll_up_to
+                        }, 800);
+                });
+                
+                var maxLength = jQuery('#orderfeedback-textarea').attr('maxlength');
+                jQuery('.max_word_limit span').text(maxLength);
+                jQuery('#orderfeedback-textarea').keyup(function() {
+                    var textlen = maxLength - jQuery(this).val().length;
+                    jQuery('.max_word_limit span').text(textlen);
+                });
+
+                jQuery(document).on('keyup', '#delivery-note #inputField', function() {
+                    var textlen = jQuery(this).val().length;
+                    if (textlen > 0) {
+                        jQuery('button#delivery-notes').css({
+                            'color': 'black',
+                            'background': '#e60023'
+                        });
+                    } else {
+                        jQuery('button#delivery-notes').css({
+                            'color': 'grey',
+                            'background': '#e3e3e3'
+                        });
+                    }
+                });
+
+                jQuery('#delivery-notes').click(function(e) {
+                    e.preventDefault();
+                    
+                    var orderid = jQuery(this).attr('rel'); // Assuming 'rel' contains the order ID
+                    var deliveryNote = jQuery('#delivery-note #inputField').val();
+                    var url = "<?php echo $base_url; ?>orderfeedback/submit/index";
+                                        
+                    if (deliveryNote.length > 0) {
+                        jQuery.ajax({
+                            url: url,
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                deliveryNote: deliveryNote,
+                                orderid: orderid
+                            },
+                            complete: function(response) {
+                                jQuery('textarea#inputField').hide();
+                                jQuery('div.deliver-note-form').html("<div class='thankyou_feedback_text'>Thank you for your feedback.</div>");
+                            }
+                        });
+                    } else {
+                        // alert('input first');
+                    }
+                });
+                
+                
+                
+                jQuery('#submit_orderfeedback').click(function(e){
+                    jQuery(this).css("opacity" , ".4");
+                    
+                    var error_message = '' ;
+                    var order_id = jQuery('#order_id').val();
+                    var rating = jQuery('#order_rating').val();
+                    var review = jQuery('#orderfeedback-textarea').val();
+                    if(rating == ''){
+                        error_message = "Rating is empty";
+                    }
+                    
+                    
+                    if(error_message == '' ){
+                        //no error, now send sms
+                        var url = "<?php echo $base_url; ?>orderfeedback/submit/index";
+//                        var url = "https://mage.golfoy.com/orderfeedback/submit/index?rating=3&review=review_test&orderid=1000072101";
+//                        orderfeedback/submit/index
+                        
+                        jQuery.ajax({
+                            url: url,
+                            type: 'POST',
+                            dataType: 'json',
+                            data: {
+                                rating: rating,
+                                review: review,
+                                orderid: order_id
+                            },
+                            complete: function(response) {
+                                console.log('Success.');
+                                jQuery('.feedback_section').hide();
+                                jQuery('.smiley_gallery').hide();
+                                jQuery('.input_form_sec').html("<div class='thankyou_feedback_text'>Thank you for your valuable feedback.</div>");
+                                
+                                 jQuery('html, body').animate({
+                                    scrollTop: 0
+                                }, 800);
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+    
+
+
+   
+<script type="text/javascript">
+    require(['jquery'], function(jQuery) {
+        jQuery(document).ready(function() {
+            var steps = jQuery(".steps");
+            console.dir(steps);
+
+            setTimeout(function() {
+                steps.each(function(index) {
+                    var _t = jQuery(this);
+                    setTimeout(function() {
+                        _t.addClass('done');
+                    }, 1250 * index * 1.5);
+                });
+            }, 500);
+        });
+    });
+</script>
+
+<style>
+    button#delivery-notes {
+        background: #e3e3e3 !important;
+        border: transparent;
+        color: white;
+        display: block;
+        padding: 6px 20px;
+        border-radius: 5px;
+        float: right;
+        font-weight: 600;
+        text-align: right !important;
+        text-transform: uppercase;
+        font-size: 13px;
+    }
+    .success_order_page_left {
+        display: none;
+    }
+
+    table.data.table.table-totals>* {
+        font-size: 12px;
+    }
+
+    .outer-order-details {
+        text-align: left;
+        margin-bottom: 10px;
+    }
+
+    .details-content {
+        border-radius: 5px;
+    }
+
+    .deliver-note-form textarea#inputField {
+        margin: 0px;
+        height: 65px;
+    }
+
+    table.data.table.table-totals th {
+        font-weight: 500;
+    }
+
+    table.data.table.table-totals tr.grand.totals {
+        border-top: 1px solid #d5d5d5;
+    }
+
+    .col-sm-6.order-details-column {
+        border-right: 1px solid #ededed;
+        padding: 20px;
+        float: left;
+    }
+
+    .col-sm-6.delivery-note {
+        padding: 20px;
+        float: right;
+    }
+    .col-sm-6{
+        width: 50%;
+    }
+    a.order-number strong {
+        color: #e60023;
+    }
+
+    .details-content button.close-btn {
+        display: none;
+    }
+
+    .deliver-note-form {
+        margin-top: 0px;
+    }
+
+    .order-close-btn:hover {
+        background-color: transparent;
+    }
+
+    .row.feedback_section_block {
+        background-color: white;
+        bottom: 0;
+        width: 100%;
+        z-index: 1;
+        left: 0;
+        border-bottom: 2px solid #f3f3f3;
+        margin-bottom: 30px;
+    }
+
+    .order-close-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: transparent;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    span.view-details {
+        display: none;
+    }
+
+    .table.data.table.table-totals .table>thead>tr>th,
+    .table.data.table.table-totals .table>tbody>tr>th,
+    .table.data.table.table-totals .table>tfoot>tr>th,
+    .table.data.table.table-totals .table>thead>tr>td,
+    .table.data.table.table-totals .table>tbody>tr>td,
+    .table.data.table.table-totals .table>tfoot>tr>td {
+        padding: 8px 30px;
+    }
+
+    span.order-details,
+    .delivery-note p {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 14px;
+        text-align: left;
+    }
+
+    .row.order-feedback-column {
+        margin: 30px 40px 10px;
+    }
+
+    .continue_button {
+        border-top: 1px solid #ededed;
+        padding-top: 20px;
+    }
+
+    .deliver-note-form input[type="submit"] {
+        background: #e3e3e3 !important;
+        border: transparent;
+        color: white;
+        display: block;
+        padding: 6px 20px;
+        border-radius: 5px;
+        float: right;
+        font-weight: 600;
+        text-align: right !important;
+        text-transform: uppercase;
+        font-size: 13px;
+    }
+
+
+    .my-form input[type="textarea"] {
+        margin-right: 10px;
+    }
+
+    .card_feedback {
+        border: 1px solid transparent;
+        text-align: center;
+        border-radius: 20px;
+        padding: 25px 0px 20px 0px !important;
+        background-color: white;
+        padding-top: 0px;
+        box-shadow: 0px 0px 12px -2px #e5e5e5;
+    }
+
+    .card_feedback_block {
+        padding: 0px;
+        border: 1px solid transparent;
+        max-width: 1000px;
+        margin: 0px auto;
+    }
+
+    .feedback_section h1 {
+        font-size: 25px;
+    }
+
+    .feedback_section p {
+        font-size: 12px;
+        padding: 6px 40px 0px;
+    }
+
+    span.bold_text {
+        font-weight: 400;
+    }
+
+    .smiley_gallery {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* flex-wrap: wrap; */
+        margin-bottom: 0px;
+    }
+
+    .smiley_img_Sec {
+        width: 60px;
+        height: 100%;
+        margin: 0px 24px 0px 17px;
+    }
+
+    .smiley_img_Sec.selected {
+        filter: none !important;
+    }
+
+    .smiley_img_Sec img {
+        width: 100%;
+        cursor: pointer;
+        height: auto;
+    }
+
+    /* hover effect */
+    .smiley_img_Sec img {
+        filter: grayscale(100%);
+    }
+
+    .smiley_img_Sec img:hover,
+    .smiley_img_Sec img:focus,
+    .smiley_img_Sec img:active {
+        filter: grayscale(0%);
+    }
+
+    .smiley_img_Sec img:active {
+        filter: none;
+    }
+
+    button.submit_btn {
+        border: 1px solid transparent;
+        padding: 10px 50px;
+        border-radius: 15px;
+        font-weight: 600;
+    }
+
+    .form-group.smile_input {
+        padding: 10px;
+        margin: 0px 60px 0px;
+    }
+
+    #exampleFormControlTextarea1 {
+        height: 150px;
+        /* change this value to adjust the height */
+    }
+
+    p.rewardpoint_text {
+        margin-bottom: 30px;
+    }
+
+    .smile_input label {
+        display: inline-block !important;
+        width: 100% !important;
+        text-align: left !important;
+        color: #858585 !important;
+        font-weight: 500;
+        padding-left: 14px;
+        max-width: 650px;
+    }
+
+    textarea.form-control {
+        height: 150px;
+        max-width: 650px;
+    }
+
+    .smiley_gallery {
+        min-height: 105px;
+    }
+
+    .smiley_img_Sec img {
+        width: 80%;
+        transition: all .5s;
+        border-radius: 50%;
+    }
+
+    .smiley_img_Sec.selected img {
+        width: 100%;
+        transition: all .5s;
+        box-shadow: 7px 7px 7px 0px #cfcfcf;
+
+        animation-name: emoji_move;
+        animation-duration: 2s;
+        animation-iteration-count: infinite;
+    }
+
+    @keyframes emoji_move {
+        5% {}
+
+        25% {
+            margin-top: -20px;
+
+            box-shadow: 7px 7px 12px 1px #cfcfcf;
+        }
+
+        70% {
+            margin-top: -20px;
+            box-shadow: 7px 7px 12px 1px #cfcfcf;
+        }
+
+        85% {
+            margin-top: 0px;
+            box-shadow: 7px 7px 7px 0px #cfcfcf;
+
+        }
+
+        100% {
+            margin-top: 0px;
+        }
+    }
+
+    .heading_success {
+        margin-left: 20px;
+        display: block;
+        width: 100%;
+        text-align: center;
+        margin: auto;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-size: 30px;
+    }
+
+    .card_feedback_row {
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
+    .feedback_section {
+        border-top: 0px solid #dfdfdf;
+        margin-top: 20px;
+    }
+
+    img.success_image {
+        display: block;
+        width: 100%;
+        max-width: 100px;
+        margin: 20px auto;
+    }
+
+    .max_word_limit {
+        font-size: 10px;
+        text-align: right;
+        padding-top: 5px;
+        max-width: 650px;
+        margin: auto;
+    }
+
+    .card_feedback_row hr {
+        border-color: #dfdfdf;
+        width: 80%;
+        margin: 30px auto;
+    }
+
+    .feedback_section h1 {
+        font-size: 20px;
+    }
+
+    .detailed_heading_text span {
+        font-size: 11px;
+    }
+
+    .progress_outer_success {
+        margin-bottom: 30px;
+    }
+
+    .progress_outer_success .progress_outer {
+        border: 1px solid red;
+        width: 100%;
+        height: 50px;
+    }
+
+    .progress_outer_success .icon {
+        display: inline-block;
+        width: 1.5em;
+        height: 1.5em;
+        fill: none;
+    }
+
+    .progress_outer_success .hidden {
+        display: none;
+    }
+
+    .progress_outer_success .progress_custom {
+        display: flex;
+        width: 100%;
+        position: relative;
+        top: 30px;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin: 0 0 0 10%;
+    }
+
+    .progress_outer_success .step {
+        flex-grow: 1;
+        position: relative;
+        text-align: left;
+    }
+
+    .progress_outer_success .step-progress {
+        width: 100%;
+        height: 0.25em;
+        background: #dddddd;
+    }
+
+    .progress_outer_success .icon-wrapper {
+        text-align: center;
+        display: inline-block;
+    }
+
+    .progress_outer_success .step.done .step-progress:after {
+        position: absolute;
+        content: '';
+        height: 0.25em;
+        width: 0;
+        background-color: #656565;
+        animation: growLine 1s linear forwards;
+        left: 0;
+    }
+
+    .progress_outer_success .icon-checkmark {
+        position: absolute;
+        top: -10px;
+        left: -0.125em;
+        border: 0.125em solid #dddddd;
+        background: #dddddd;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        padding: 0.125em;
+        border-radius: 50%;
+        transition: all 0.25s linear;
+    }
+
+    .progress_outer_success .step.done .icon-checkmark {
+        background: #656565;
+        border-color: #656565;
+    }
+
+    .progress_outer_success .icon-checkmark .path1 {
+        stroke: #aaa;
+        stroke-width: 4;
+        stroke-linecap: square;
+        stroke-dasharray: 1000;
+        stroke-dashoffset: 1000;
+        fill: empty;
+    }
+
+    .progress_outer_success .step.done .icon-checkmark .path1 {
+        animation: dash 5s linear forwards;
+        stroke: white;
+    }
+
+    .progress_outer_success .step-text {
+        position: relative;
+        margin-left: -50%;
+        letter-spacing: 1px;
+        font-weight: 400;
+        color: #aaa;
+        margin-top: 13px;
+        opacity: 1;
+        font-size: 9px;
+        padding-top: 0px !important;
+    }
+
+    .progress_outer_success .step.done .step-text {
+        color: #656565;
+        animation: dropText 0.5s linear forwards;
+    }
+
+    @keyframes dash {
+        to {
+            stroke-dashoffset: 0;
+        }
+    }
+
+    @keyframes growLine {
+        to {
+            width: 100%;
+        }
+    }
+
+    @keyframes dropText {
+        to {
+            padding-top: 1em;
+            opacity: 1;
+        }
+    }
+
+    p.you_save_line_success_page {
+        background-color: #0db163;
+        padding: 10px;
+        border-radius: 5px;
+        color: white;
+        font-size: 14px;
+        text-align: left;
+        font-style: italic;
+        font-weight: 500;
+        word-break: auto-phrase;
+    }
+
+    p.you_save_line_success_page>span.bold {
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .scroll_to_top {
+        display: none;
+    }
+
+    .thankyou_feedback_text {
+        font-weight: 600;
+    }
+
+    .order-feedback-column table th,
+    .order-feedback-column table td {
+        padding: 5px !important;
+    }
+
+    .order-feedback-column table {
+        margin-bottom: 0px;
+    }
+
+    .deliver-note-form textarea#inputField {
+        margin: 0px;
+        height: 65px;
+        margin-bottom: 2px;
+        border: 1px solid #e1e1e1;
+    }
+
+    .detailed_heading_text {
+        font-weight: 600;
+        color: #5d5d5d;
+        background-color: #ebebeb;
+        text-align: left;
+        padding: 7px 10px 7px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        text-transform: uppercase;
+    }
+
+    .order-feedback-column table td {
+        text-align: right;
+    }
+
+    table.data.table.table-totals th.mark span.detailed {
+        font-size: 15px;
+        color: #e60023;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    p.delivery_instruction {
+        font-size: 10px;
+        color: #898989;
+        text-transform: math-auto;
+        font-weight: 500;
+    }
+
+    /* responsive styles */
+    @media (max-width: 768px) {
+        .feedback_section p {
+            font-size: 20px;
+            padding: 10px;
+        }
+
+        .smiley_gallery {
+            margin-bottom: 20px;
+        }
+
+        .smiley_img_Sec {
+            width: 50px;
+            margin: 0px 12px 10px 10px;
+        }
+
+        button.submit_btn {
+            padding: 10px 30px;
+        }
+
+        .form-group.smile_input {
+            padding: 10px;
+        }
+    }
+
+
+    @media only screen and (max-width:767px) {
+        button#delivery-notes{
+            text-align: center !important;
+            font-weight: 700;
+            display: block;
+            float: none;
+            font-size: 11px;
+            padding: 10px 10px 6px;
+            width: 100%;
+            margin: auto auto auto 0px;
+        }
+
+        .deliver-note-form textarea#inputField {
+            margin: 0px 0px 5px 0px;
+        }
+
+        .continue_button {
+            border-top: none;
+        }
+
+        .smiley_img_Sec img {
+            width: 75%;
+        }
+
+        .smiley_img_Sec {
+            width: 45px;
+        }
+
+        .outer-order-details {
+            margin-bottom: 5px;
+        }
+
+        .order-details-sec {
+            display: flex;
+            justify-content: space-between;
+            margin: 0px 5px;
+            border-radius: 10px;
+            background-color: #f1f1f1;
+        }
+
+        span.order-details {
+            width: 100%;
+            display: block;
+        }
+
+        .col-sm-6.delivery-note {
+            padding: 0px;
+        }
+
+        .deliver-note-form input[type="submit"] {
+            text-align: center !important;
+        }
+
+        .row.order-feedback-column {
+            margin: 0px;
+        }
+
+        .col-sm-6.order-details-column {
+            border-right: none;
+            padding: 10px 0px;
+        }
+
+        span.view-details {
+            display: block;
+        }
+
+        .details-content button.close-btn {
+            display: block;
+        }
+
+        .order-details-column,
+        .delivery-note {
+            width: 100%;
+            position: relative;
+        }
+
+        span.order-details {
+            font-size: 14px;
+            margin: 0 5px;
+            background-color: #f1f1f1;
+            padding: 10px 10px 10px 10px;
+            border-radius: 10px;
+            font-weight: 700;
+            text-align: left;
+
+        }
+
+        table.data.table.table-totals tr td {
+            padding: 0px;
+        }
+
+        .delivery-note p {
+            font-size: 9px;
+            margin: 0px 0px;
+            padding: 0px 10px 10px 0px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .order-details-column {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        table.data.table.table-totals {
+            margin-top: 25px;
+        }
+
+        span.estimated-price.view-details:after {
+            content: '\e608' !important;
+            font-family: 'icons-blank-theme';
+            float: right;
+            position: absolute;
+            right: 0px;
+            font-size: 30px;
+            margin-top: -12px;
+        }
+
+        .outer-estimate:after {
+            content: "View Details";
+            float: right;
+            position: relative !important;
+            font-size: 10px;
+            margin-top: 23px;
+            font-weight: 500;
+            right: -88px;
+            position: absolute;
+            text-decoration: underline;
+        }
+
+        .order-details-column .view-details {
+            display: inline;
+            text-align: right;
+            color: black;
+            cursor: pointer;
+            padding: 5px 20px;
+            float: right;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 1px;
+        }
+
+
+        .order-close-btn {
+            font-size: 16px;
+            top: 0px;
+            right: -10px;
+        }
+
+        .order-details-column.active .details-content {
+            display: block;
+            animation: slide-left 0.3s forwards;
+        }
+
+        @keyframes slide-left {
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        .delivery-note .my-form {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .delivery-note input[type="text"] {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .delivery-note input[type="submit"] {
+            width: 100%;
+            max-width: 166px;
+            text-align: center !important;
+            margin: 30px auto 0px;
+            font-weight: 700;
+            display: block;
+            float: none;
+            font-size: 11px;
+        }
+
+        p.you_save_line_success_page {
+            font-size: 11px;
+        }
+
+        p.you_save_line_success_page>span.bold {
+            font-size: 14px;
+        }
+
+        .view-details {
+            cursor: pointer;
+            color: blue;
+        }
+
+
+        table.data.table.table-totals tr.grand.totals {
+            border-top: 1px solid #d1d1d1;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .feedback_section {
+            margin-top: 30px;
+        }
+
+        .feedback_section h1 {
+            font-size: 14px !important;
+        }
+
+        .feedback_section p {
+            font-size: 12px;
+            margin-bottom: 0px;
+            padding: 5px 10px 0px 5px;
+            line-height: 18px;
+        }
+
+        .feedback_section h1 {
+            margin-top: 0px;
+        }
+
+        .smiley_gallery {
+            margin-bottom: 0px;
+        }
+
+        .smiley_img_Sec {
+            width: 50px;
+            margin: 0px 5px 10px 5px;
+            display: inline-block;
+        }
+
+        button.submit_btn {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+
+        .form-group.smile_input {
+            padding: 5px;
+        }
+
+        .card_feedback {
+            padding: 0px 0px 0px 0px;
+            box-shadow: none;
+            padding-top: 0px !important;
+        }
+
+        .form-group.smile_input {
+            margin: 0px 0px;
+        }
+
+        .card_feedback_block {
+            margin: -20px auto;
+            background-color: white;
+            box-shadow: none;
+            padding: 0px;
+            padding-left: 0px !important;
+            padding-right: 0px !important;
+            margin-top: -50px !important;
+        }
+
+        .btn_section {
+            margin-bottom: 10px;
+        }
+
+        h1.heading_success {
+            font-size: 18px;
+        }
+
+        img.success_image {
+            max-width: 50px !important;
+        }
+
+        p.order_number {
+            font-size: 12px;
+        }
+
+        p.order_number>a {
+            font-size: 13px;
+        }
+
+        p.recive_text,
+        p.rewardpoint_text {
+            font-size: 11px;
+        }
+
+        .continue_button button {
+            font-size: 11px;
+        }
+
+        .card_feedback_row hr {
+            margin: 25px auto 25px;
+        }
+
+        .feedback_section h1 {
+            font-size: 18px;
+        }
+
+        .input_form_sec {
+            padding: 0px;
+        }
+
+        .smile_input label {
+            padding-left: 0px !important;
+        }
+
+        textarea.form-control {
+            height: 100px;
+        }
+
+        p.rewardpoint_text {
+            margin-bottom: 30px;
+            margin-top: 15px;
+        }
+
+        p.rewardpoint_text {
+            margin-bottom: 17px !important;
+        }
+        .feedback_section h1 {
+            margin-bottom: 0px;
+        }
+        .smiley_gallery {
+            min-height: 65px;
+        }
+        .smiley_img_Sec img {
+            width: 60%;
+        }
+        .order-feedback-column {
+            border-top: 1px solid #e3e3e3;
+            padding-top: 20px;
+        }
+        table.data.table.table-totals {
+            margin-top: 0px;
+        }
+        .delivery-note {
+            border: 1px solid #e4e4e4;
+            border-radius: 5px;
+        }
+        .deliver-note-form {
+            padding: 0px 10px 10px;
+        }
+        .delivery-note input[type="submit"] {
+            margin: 10px auto 10px;
+            padding: 10px 10px 6px;
+            width: 100%;
+            margin: auto auto auto 0px;
+            
+        }
+        .continue_button {
+            border-top: none;
+            text-align: center;
+        }
+    }
+</style>
+<?php
+
+$orderCurrency      = $order->getBaseCurrencyCode();
+$orderGrandTotal    = $order->getBaseGrandTotal();
+$orderShippingTotal = $order->getBaseShippingAmount();
+$orderTax           = $order->getBaseTaxAmount();
+$orderItems         = $order->getAllVisibleItems();
+
+$orderGrandTotal = number_format($orderGrandTotal, 2, '.', '');
+$orderTax = number_format($orderTax, 2, '.', '');
+$orderShippingTotal = number_format($orderShippingTotal, 2, '.', '');
+$couponCode = $order->getCouponCode() ?: '';
+?>
+
+<script>
+    window.dataLayer = window.dataLayer || [];
+    dataLayer.push({ ecommerce: null });
+    dataLayer.push({
+        event: "purchase",
+        "ecommerce": {
+            "transaction_id": "<?php echo $order->getIncrementId(); ?>",
+            "value": "<?php echo $orderGrandTotal; ?>",
+            "tax": "<?php echo $orderTax; ?>",
+            "shipping": "<?php echo $orderShippingTotal; ?>",
+            "currency": "INR",
+            "coupon": "<?php echo $couponCode; ?>",
+            "items": [
+                <?php 
+                $productData = [];
+                foreach ($orderItems as $item) {
+                    if ($item->getParentItemId()) continue; 
+                    $productData[] = [
+                        "item_name"     => $item->getName(),
+                        "item_id"       => $item->getSku(),
+                        "price"         => number_format($item->getBasePrice(), 2, ".", ""),
+                        "affiliation"   => "Golfoy.com",
+                        "quantity"      => (int)$item->getQtyOrdered(), 
+                    ];
+                }
+                echo json_encode($productData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                ?>
+            ]
+        }
+    });
+</script>

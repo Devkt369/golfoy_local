@@ -1,0 +1,3096 @@
+
+
+<script type="text/javascript">
+    require(['react', 'react-dom', 'jquery'], function(React, ReactDOM, $) {
+        const {
+            useState,
+            useEffect,
+            useRef
+        } = React;
+        const attributeCache = new Map(); // Global cache for attributes
+        const pendingQueries = new Map(); // Track pending GraphQL queries to avoid duplicates
+        
+        function ProductList( {url} ) {
+            const [products, setProducts] = useState([]);
+            const [filters, setFilters] = useState({});
+            const [availableFilters, setAvailableFilters] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [filterload, setFilterload] = useState(true);
+            const [sortBy, setSortBy] = useState("position")
+            const [sortOrder, setSortOrder] = useState("ASC")
+            const [currentPage, setCurrentPage] = React.useState(1); // Default to page 1
+            const [totalPages, setTotalPages] = useState(1)
+            const [totalProducts, setTotalProducts] = useState(0)
+            const [itemsPerPage, setItemsPerPage] = React.useState(24);
+            const [productCountElement, setProductCountElement] = React.useState(null);
+            const [category_description, setCategory_description] = React.useState([]);
+            
+            const [page_size, setPage_size] = useState( itemsPerPage )
+            const [total_count, setTotal_count] = useState(1)
+            const maxVisiblePages = 5
+            const [visiblePages, setVisiblePages] = React.useState([]);
+            const [isFetchingFilters, setIsFetchingFilters] = useState(false);
+            const [selectedSort, setSelectedSort] = useState("position");
+            const [attributeLabels, setAttributeLabels] = useState({}); // Store labels separately
+            const [showOptions, setShowOptions] = React.useState(false);
+
+            const [fetchingProducts, setFetchingProducts] = useState(false); // Track if filters are ready
+            const [subcategoriesontop, setSubcategoriesontop] = useState(false); // Track if filters are ready
+            const [brandpage, setBrandpage] = useState(false); // Track if filters are ready
+            const [categoryId, setCategoryId] = useState(null); // Cache category ID
+            const isFetchingRef = useRef(false); // Prevent duplicate fetches
+            const categoryIdRef = useRef(null); // Cache category ID across renders
+            
+            const SWATCH_BASE_PATH = `${window.location.origin}/media/attribute/swatch/swatch_image/30x20`;
+
+
+            
+            const activeFilters = ["Brand", "Shirt Size", "SIZE"];
+            window.getCategoryIdFromURL = async function (skipStateUpdate = false) {
+               //console.log("called getCategoryIdFromURL ");
+                let urlPath = window.location.pathname.replace(/^\//, '').replace('.html', '');
+
+                const fragmentId = window.location.hash?.replace('#', '');
+                const isNumericId = /^\d+$/.test(fragmentId);
+                const idFromFragment = isNumericId ? fragmentId : null;
+
+                // Check if category ID, meta title, and category name are already cached
+                let cacheKey = idFromFragment ? `categoryId_id_${idFromFragment}` : `categoryId_${urlPath}`;
+                let cachedCategoryId = sessionStorage.getItem(cacheKey);
+                let cachedMetaTitle = sessionStorage.getItem(`metaTitle_${cacheKey}`);
+                let cachedCategoryName = sessionStorage.getItem(`categoryName_${cacheKey}`);
+                let cachedCategoryImage = sessionStorage.getItem(`categoryImage_${cacheKey}`);
+
+                // If meta title is cached, set it as the page title
+                if (cachedMetaTitle) {
+                    document.title = cachedMetaTitle;
+                }
+
+                // Function to update the body class
+                function updateBodyClass(isPlayersBag) {
+                    if (isPlayersBag) {
+                        document.body.classList.add("page-layout-playersbag");
+                    } else {
+                        document.body.classList.remove("page-layout-playersbag");
+                    }
+                }
+
+                // ✅ If cached data exists, use it
+                /*if (cachedCategoryId && cachedMetaTitle && cachedCategoryName) {
+                    console.log(`✅ Returning cached Category ID: ${cachedCategoryId}`);
+
+                    let isPlayersBag = cachedCategoryName === "Choose by players";
+                    updateBodyClass(isPlayersBag);
+
+                    if (isPlayersBag) {
+                        console.log("🎯 Cached category is 'Choose by players' - Fetching players category data.");
+                        fetchPlayersCategoryData(cachedCategoryId, cachedCategoryImage);
+                    }
+
+                    return cachedCategoryId;
+                }*/
+
+                try {
+                    let query = '';
+                    if (idFromFragment) {
+                        query = `{
+                            category(id: ${idFromFragment}) {
+                                id
+                                meta_title
+                                description
+                                subcategoriesontop
+                                categoryheading
+                                name
+                                breadcrumbs {
+                                    category_name
+                                }
+                            }
+                        }`;
+                    } else {
+                        query = `{
+                            categoryList(filters: { url_path: { eq: "${urlPath}" } }) {
+                                id
+                                meta_title
+                                image
+                                description  
+                                subcategoriesontop
+                                categoryheading
+                                name
+                                breadcrumbs {
+                                    category_name
+                                }
+                            }
+                        }`;
+                    }
+//                    console.log(query);
+                    
+                    let response = await fetch('/graphql', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query })
+                    });
+                    
+                    let data = await response.json();
+//                    console.log(data);
+
+                    if (data.errors || (idFromFragment && !data?.data?.category) || (!idFromFragment && !data?.data?.categoryList?.length)) {
+                        console.error('❌ GraphQL error or category not found:', data.errors);
+                        updateBodyClass(false);
+                        return cachedCategoryId || "1";
+                    }
+                                        
+                    let category = idFromFragment ? data.data.category : data.data.categoryList[0];
+                    let categoryId = category.id || cachedCategoryId || "1";
+                    let metaTitle = category.meta_title || category.name ;
+                    let categoryName = category.breadcrumbs?.length ? category.breadcrumbs[category.breadcrumbs.length - 1].category_name : "Unknown Category";
+                    let categoryImage = category.description || "";
+                                        
+                    //changing heading of category page
+                    const headingEl = document.querySelector('.category-view > .category_top_block > .category_name');
+                    if (headingEl) {
+                        headingEl.textContent = category.categoryheading || category.name;
+                        headingEl.classList.remove('flickering');
+                    }
+                                        
+                    const shouldShowSubcats = category.subcategoriesontop === 1 || category.subcategoriesontop === true;
+                    const div = document.getElementById("subcategories_and_data");
+                    
+                    // Only update state if not skipping
+                    if (!skipStateUpdate) {
+                        if (div) {
+                            div.style.display = shouldShowSubcats ? "block" : "none";
+                        }
+                        setSubcategoriesontop(shouldShowSubcats);
+                    }
+
+                    let isPlayersBag = categoryName === "Choose by players";
+                    updateBodyClass(isPlayersBag);
+                    if (isPlayersBag) {
+                        console.log("🎯 Category is 'Choose by players' - Fetching players category data.");
+                        fetchPlayersCategoryData(categoryId, categoryImage);
+                    }
+
+                    // Cache the data
+                    sessionStorage.setItem(cacheKey, categoryId);
+                    sessionStorage.setItem(`metaTitle_${cacheKey}`, metaTitle);
+                    sessionStorage.setItem(`categoryName_${cacheKey}`, categoryName);
+                    sessionStorage.setItem(`categoryImage_${cacheKey}`, categoryImage);
+
+                    document.title = metaTitle;
+                    return categoryId;
+
+                } catch (error) {
+                    console.error('❌ Error fetching category data:', error);
+                    updateBodyClass(false);
+                    return cachedCategoryId || "1";
+                }
+            }
+
+
+            function fetchPlayersCategoryData(categoryId, imageUrl) {
+                console.log(`📸 Fetching player category data for Category ID: ${categoryId} with image: ${imageUrl}`);
+
+                let subcategoriesContainer = document.getElementById("main_category_image");
+
+                // Extract actual image path from <p> tags if present
+                let parser = new DOMParser();
+                let doc = parser.parseFromString(imageUrl, "text/html");
+                let extractedUrl = doc.body.textContent.trim(); // Removes <p> tags and trims extra spaces
+
+                // Get the current base URL dynamically
+                let baseUrl = window.location.origin;
+
+                // Build the full image URL dynamically
+                let fullImageUrl = `${baseUrl}/media/${extractedUrl}`;
+
+                if (subcategoriesContainer) {
+                    subcategoriesContainer.innerHTML = `<img src="${fullImageUrl}" alt="Category Image" style="width: 100%; height: auto; margin-bottom: 20px;">`;
+                } else {
+                    console.error("❌ #subcategories_and_data container not found!");
+                }
+            }
+
+
+
+
+
+            /*function Pagination({ totalPages, currentPage, handlePageChange }) {
+                return React.createElement('div', { className: 'toolbar-bottom' },
+                    React.createElement('div', { className: 'pages' },
+                        React.createElement('ul', { className: 'items pages-items' },
+                            Array.from({ length: totalPages }, (_, i) => i + 1).map((page) =>
+                                React.createElement('li', {
+                                    key: page,
+                                    className: `item ${page === currentPage ? 'current' : ''}`
+                                },
+                                    React.createElement('a', {
+                                        className: `page ${page === currentPage ? 'current' : ''}`,
+                                        onClick: () => handlePageChange(page)
+                                    }, page)
+                                )
+                            )
+                        )
+                    )
+                );
+            }*/
+            
+            async function getAttributeLabel(attributeCode, attributeValue) {
+                // Check cache first
+                if (attributeLabels[attributeCode]?.[attributeValue]) {
+                    return attributeLabels[attributeCode][attributeValue];
+                }
+
+                // If not in cache and value is numeric, fetch from GraphQL
+                if (attributeValue && !isNaN(attributeValue)) {
+                    const cacheKey = `${attributeCode}_${attributeValue}`;
+                    
+                    // Check memory cache
+                    if (attributeCache.has(cacheKey)) {
+                        return attributeCache.get(cacheKey);
+                    }
+
+                    // Check if already fetching this attribute code
+                    if (pendingQueries.has(attributeCode)) {
+                        return pendingQueries.get(attributeCode).then(() => {
+                            return attributeCache.get(cacheKey) || attributeValue;
+                        });
+                    }
+                    
+                    // Start fetching
+                    const fetchPromise = (async () => {
+                        try {
+                            const query = `{
+                                customAttributeMetadata(attributes: [{attribute_code: "${attributeCode}", entity_type: "catalog_product"}]) {
+                                    items {
+                                        attribute_code
+                                        attribute_options {
+                                            value
+                                            label
+                                        }
+                                    }
+                                }
+                            }`;
+
+                            const response = await fetch('/graphql', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ query })
+                            });
+
+                            const data = await response.json();
+                            const attributeData = data?.data?.customAttributeMetadata?.items?.[0];
+                            
+                            if (attributeData?.attribute_options) {
+                                // Cache all options at once
+                                attributeData.attribute_options.forEach(opt => {
+                                    const key = `${attributeCode}_${opt.value}`;
+                                    attributeCache.set(key, opt.label);
+                                });
+                            }
+                        } catch (error) {
+                            console.error(`Error fetching ${attributeCode}:`, error);
+                        } finally {
+                            pendingQueries.delete(attributeCode);
+                        }
+                    })();
+                    
+                    pendingQueries.set(attributeCode, fetchPromise);
+                    await fetchPromise;
+                    
+                    return attributeCache.get(cacheKey) || attributeValue;
+                }
+
+                return attributeValue;
+            }
+            
+            // ✅ Component for displaying attribute labels
+            const ProductAttribute = ({
+                attributeCode,
+                attributeValue
+            }) => {
+
+                const [label, setLabel] = useState(null);
+                const [isLoading, setIsLoading] = useState(true);
+                
+                useEffect(() => {
+                    if (!attributeValue) {
+                        setIsLoading(false);
+                        setLabel(null);
+                        return;
+                    }
+                    
+                    setIsLoading(true);
+                    getAttributeLabel(attributeCode, attributeValue).then((fetchedLabel) => {
+                        // Only show label if it's not a number (i.e., we got the actual label)
+                        if (fetchedLabel && isNaN(fetchedLabel)) {
+                            setLabel(fetchedLabel);
+                        } else {
+                            setLabel(null); // Hide if it's still a number
+                        }
+                        setIsLoading(false);
+                    }).catch(error => {
+                        setIsLoading(false);
+                        setLabel(null);
+                    });
+                }, [attributeCode, attributeValue]);
+
+                // Don't render if loading or no valid label
+                if (isLoading || !label) return null;
+
+                return React.createElement("div", {
+                    className: `attribute_${attributeCode} ${attributeCode}_name`
+                }, label);
+            };
+            const CleanedProductname = ({
+                attributeCode,
+                attributeValue,
+                productname
+            }) => {
+                const [label, setLabel] = useState("Loading...");
+                const [cleanedName, setCleanedName] = useState(productname);
+
+                useEffect(() => {
+                    getAttributeLabel(attributeCode, attributeValue).then((brandLabel) => {
+                        setLabel(brandLabel);
+
+                        // Remove brand label from product name if it exists
+                        if (brandLabel) {
+                            const regex = new RegExp(`^${brandLabel}\\s*`, 'i'); // Case-insensitive match
+                            setCleanedName(productname.replace(regex, "").trim());
+                        }
+                    });
+                }, [attributeCode, attributeValue, productname]);
+
+                return React.createElement("div", {
+                    className: `attribute_${attributeCode} cleaned_product_name`
+                }, cleanedName);
+            };
+        
+        
+            const DeferredComponent = ({ children }) => {
+                const [shouldRender, setShouldRender] = useState(false);
+
+                useEffect(() => {
+                    // Use requestIdleCallback if available, otherwise fallback to setTimeout
+                    const load = () => setShouldRender(true);
+                    if ('requestIdleCallback' in window) {
+                        requestIdleCallback(load);
+                    } else {
+                        setTimeout(load, 100); // Fallback: slight delay
+                    }
+                }, []);
+
+                return shouldRender ? children : null;
+            };
+
+        
+        
+            const SizeRollComponent = ({ productId, className }) => {
+                const [sizeRoll, setSizeRoll] = useState(null);
+
+                useEffect(() => {
+                    const fetchSizeRoll = async () => {
+                        try {
+                            const response = await fetch("/graphql", { // Direct Magento GraphQL endpoint
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    query: `
+                                        {
+                                            getAvailableSizeRollValue(productId: ${productId}) {
+                                                available_size_roll_value
+                                            }
+                                        }
+                                    `
+                                })
+                            });
+
+                            const result = await response.json();
+                            if (result.data?.getAvailableSizeRollValue?.available_size_roll_value) {
+                                setSizeRoll(result.data.getAvailableSizeRollValue.available_size_roll_value);
+                            }
+                        } catch (error) {
+                            console.error("Error fetching size roll:", error);
+                        }
+                    };
+
+                    fetchSizeRoll();
+                }, [productId]);
+
+                if (!sizeRoll) return null; // Do not render anything if size is not available
+
+                // Format the size roll value (replace "to" with a styled span)
+                const formattedSizeRoll = sizeRoll.replace(/\bto\b/g, '<span style="font-size: 10px; text-transform: lowercase;">to</span>');
+
+                return React.createElement(
+                    "div",
+                    { className: `sizerolldiv_container ${className || ""}`, id: `ajax-sizeroll-${productId}` },
+                    React.createElement("div", { className: "sizerolldiv_label" },
+                        "Sizes: ",
+                        React.createElement("span", { className: "sizerolldiv", dangerouslySetInnerHTML: { __html: formattedSizeRoll } })
+                    )
+                );
+            };
+
+
+           const AttributeValueComponent = ({ product, className }) => {
+            //for size roll
+            // console.log(`AttributeValueComponent called for Product ID: ${product.id}, Attribute Set ID: ${product.attribute_set_id}`);
+
+            // Attribute mapping based on attribute_set_id
+            const attributeMapping = {
+                9: "feel",                  // Ball Attribute Set ID → feel
+                12: "driver_flight_bias",    // Drivers Attribute Set ID → driver_flight_bias
+                38: "balance_putter"         // Putter Attribute Set ID → balance_putter
+            };
+
+            // Get the attribute code from the mapping
+            const attributeCode = attributeMapping[product.attribute_set_id];
+
+            if (!attributeCode) {
+                // console.warn(`No attribute mapping found for attribute_set_id: ${product.attribute_set_id}`);
+                return null; 
+            }
+
+            // Get the attribute value dynamically
+            const attributeValue = product[attributeCode];
+
+            if (!attributeValue) {
+//                console.warn(`No value found for attribute "${attributeCode}" in product ID ${product.id}`);
+                return null;
+            }
+
+            return React.createElement(
+                "div",
+                { className: `catalog_attributes_value ${className}` },
+                React.createElement(
+                    "div",
+                    { className: "attr_label_and_value" },
+                    React.createElement("div", { className: "attr_label" }, attributeCode.charAt(0).toUpperCase() + attributeCode.slice(1)), // Label capitalized
+                    " : ",
+                    React.createElement("div", { className: "attr_value" },
+                        React.createElement(ProductAttribute, {
+                            attributeCode: attributeCode,
+                            attributeValue: attributeValue,
+                        })
+                    )
+                ),
+                React.createElement("br")
+            );
+        };
+
+
+
+
+
+            // ✅ Component for Express Delivery
+            const ExpressDelivery = ({
+                attributeCode,
+                attributeValue
+            }) => {
+                const [label, setLabel] = useState(null);
+                useEffect(() => {
+                    const fetchLabel = async () => {
+                        const result = await getAttributeLabel(attributeCode, attributeValue);
+                        setLabel(result);
+                    };
+                    fetchLabel();
+                }, [attributeCode, attributeValue]);
+                if (label === "Yes") {
+                    return React.createElement("div", {
+                        className: "express_icon"
+                    }, React.createElement("img", {
+                        src: "https://golfoy.com/media/Express-Delivery.svg",
+                        alt: "Express Delivery",
+                        style: {
+                            width: "130px"
+                        }
+                    }), React.createElement("div", {
+                        className: 'hide express_text'
+                    }, "Express Delivery"));
+                }
+                return null; // Don't render anything if label is not "Yes"
+            };
+            const formatPrice = (value) => {
+                return value.toLocaleString("en-IN"); // Formats as Indian number system (e.g., 1,23,456)
+            };
+
+            async function fetchProducts() {
+//                console.log("called fetchProducts");
+                
+                if (isFetchingRef.current) {
+                    console.log("⏭️ Skipping duplicate fetchProducts call");
+                    return;
+                }
+                
+                isFetchingRef.current = true;
+                setFetchingProducts(true);
+                setLoading(true);
+
+                const startTime = performance.now();
+                
+                // Get category ID - use cached or fetch
+                let catId = categoryIdRef.current;
+                if (!catId) {
+                    // Fast path: check for category ID in hash first
+                    const fragmentId = window.location.hash?.replace('#', '');
+                    const isNumericId = /^\d+$/.test(fragmentId);
+                    if (isNumericId) {
+                        catId = fragmentId;
+                        categoryIdRef.current = catId;
+                        setCategoryId(catId);
+                        // Fetch metadata in background (skip state updates to avoid interference)
+                        getCategoryIdFromURL(true).then(id => {
+                            if (id !== catId) {
+                                categoryIdRef.current = id;
+                                setCategoryId(id);
+                            }
+                        }).catch(err => console.error('Background category fetch error:', err));
+                    } else {
+                        catId = await getCategoryIdFromURL();
+                        if (!categoryIdRef.current) {
+                            categoryIdRef.current = catId;
+                            setCategoryId(catId);
+                        }
+                    }
+                }
+
+                let filterConditions = Object.keys(filters)
+                    .map(filterKey => {
+                        let values = filters[filterKey].map(v => `\"${v}\"`).join(',');
+                        return `${filterKey}: { in: [${values}] }`;
+                    })
+                    .join(',');
+
+                let categoryFilter = `category_id: { eq: \"${catId}\" }`;
+                let filtersQuery = filterConditions ? `, ${filterConditions}` : '';
+
+                let query = `{
+                    products(
+                        filter: { ${categoryFilter}${filtersQuery} },
+                        sort: { ${sortBy}: ${sortOrder} },
+                        currentPage: ${currentPage},
+                        pageSize: ${itemsPerPage}
+                    ) {
+                        items {
+                            id
+                            sku
+                            name
+                            url_key
+                            brand
+                            express_shipping
+                            can_print
+                            newarrivals
+                            review_count
+                            attribute_set_id
+                            feel
+                            rating_summary
+                            waterproof
+                            waterrepel
+                            bestseller
+                            clearance_sale
+                            attribute_set_id
+                            similar_attribute_label
+                            color
+                            used_clubs_grade
+                            related_products {
+                                id
+                                color
+                                image {
+                                    url
+                                    label
+                                }
+                              }
+                            image {
+                                url
+                                label
+                            }
+                            price_range {
+                                minimum_price {
+                                    regular_price { value currency }
+                                    final_price { value currency }
+                                    discount { amount_off percent_off }
+                                }
+                                maximum_price {
+                                    regular_price { value currency }
+                                    final_price { value currency }
+                                }
+                            }
+                            price_tiers {
+                                quantity
+                                final_price { value currency }
+                            }
+                        }
+                        total_count
+                        page_info { total_pages }
+                    }
+                }`;
+
+                console.log(`fetchProducts GraphQL starting (Time: ${performance.now() - startTime} ms)`);
+
+                fetch('/graphql', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
+                })
+                .then(response => response.json())
+                .then(async data => {
+                    console.log(`✅ Data received. Updating UI... (Time: ${performance.now() - startTime} ms)`);
+                    const products = data.data.products.items;
+                    
+                    // Batch prefetch all unique attribute values
+                    const uniqueBrands = [...new Set(products.map(p => p.brand).filter(b => b && !isNaN(b)))];
+                    if (uniqueBrands.length > 0 && !attributeCache.has(`brand_${uniqueBrands[0]}`)) {
+                        getAttributeLabel('brand', uniqueBrands[0]); // Triggers batch fetch for all brand options
+                    }
+                    
+                    setProducts(products);
+                    setTotalPages(data.data.products.page_info.total_pages);
+                    setTotalProducts(data.data.products.total_count);
+                    setPage_size(itemsPerPage);
+                    setTotal_count(data.data.products.total_count);
+
+                    setLoading(false);
+                })
+                .catch(error => {
+                    console.error('Error fetching products:', error);
+                    setLoading(false);
+                })
+                .finally(() => {
+                    setFetchingProducts(false);
+                    isFetchingRef.current = false;
+                });
+            }
+
+
+
+            const fetchFilters = async () => {
+              fetchCategoryHierarchy();
+
+              try {
+                setFilterload(true);
+                const catId = categoryIdRef.current || await getCategoryIdFromURL();
+                if (!categoryIdRef.current) {
+                    categoryIdRef.current = catId;
+                    setCategoryId(catId);
+                }
+                if (!catId) {
+                  console.error("❌ Category ID is null or undefined!");
+                  setFilterload(false);
+                  return;
+                }
+
+                const query = `{
+                  products(filter: { category_id: { eq: "${catId}" } }) {
+                    aggregations(filter: { category: { includeDirectChildrenOnly: true } }) {
+                      attribute_code
+                      label
+                      options {
+                        label
+                        value
+                        count
+                        swatch_data {
+                          value
+                          type
+                        }
+                      }
+                    }
+                  }
+                }`;
+
+                const response = await fetch('/graphql', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ query }),
+                });
+
+                const data = await response.json();
+                const filters = data.data.products.aggregations;
+
+                setAvailableFilters(filters);
+                setAttributeLabels(createLabelMap(filters));
+
+                // 🍪 Parse chosen size from cookie
+                const cookieMatch = document.cookie.match(/(?:^|; )chosenShoeSize=([^;]*)/);
+                let chosenShoeSize = null;
+                if (cookieMatch) {
+                  try {
+                    chosenShoeSize = JSON.parse(decodeURIComponent(cookieMatch[1]));
+                  } catch {}
+                }
+
+                const chosenSizeDiv = document.getElementById('choosen_sizes');
+                const shoeSizeAttr = filters.find(f => f.attribute_code === 'shoe_size');
+
+                // Handle #choosen_sizes visibility & message
+                const pathname = window.location.pathname.split('?')[0].split('#')[0];
+
+
+
+                if (chosenSizeDiv) {
+                    if (!pathname.endsWith('/shoes.html')) {
+                        chosenSizeDiv.classList.add('hide');
+                    }else{
+                      if (!shoeSizeAttr) {
+                            chosenSizeDiv.classList.add('hide');
+                      } else {
+                            chosenSizeDiv.classList.remove('hide');
+
+                        const infoText = chosenSizeDiv.querySelector('p');
+                        if (infoText && chosenShoeSize?.value) {
+                          const chosenValue = String(chosenShoeSize.value).trim();
+
+                          const found = shoeSizeAttr.options.some(opt => {
+                            const optValue = String(opt.value).trim();
+                            return optValue === chosenValue;
+                          });
+
+                          console.log("✅ Found size match by value:", found);
+
+                          setTimeout(() => {
+                            infoText.textContent = found
+                              ? `Your chosen size is`
+                              : `Cannot find size.`;
+
+                            console.log("✅ Forced override after delay");
+                          }, 100);
+                        }
+                      }
+                    }
+                }
+
+                // ✅ Only apply the cookie-filtered size if we're on shoes.html
+                if (shoeSizeAttr && window.location.pathname.endsWith('/shoes.html')) {
+                  setFilters(prev => {
+                    const newFilters = { ...prev };
+                    if (chosenShoeSize?.value) {
+                      const match = shoeSizeAttr.options.find(opt => opt.value === chosenShoeSize.value);
+                      if (match) {
+                        newFilters.shoe_size = [chosenShoeSize.value];
+                      } else {
+                        delete newFilters.shoe_size;
+                      }
+                    } else {
+                      delete newFilters.shoe_size;
+                    }
+                    return newFilters;
+                  });
+                }
+
+              } catch (error) {
+                console.error("❌ Error fetching filters:", error);
+              } finally {
+                setFilterload(false);
+              }
+            };
+
+
+
+            useEffect(() => {
+              const interval = setInterval(() => {
+                const currentCookie = document.cookie.match(/(?:^|; )chosenShoeSize=([^;]*)/);
+                const stored = currentCookie ? decodeURIComponent(currentCookie[1]) : null;
+                if (stored !== window._prevChosenSizeCookie) {
+                  window._prevChosenSizeCookie = stored;
+                  fetchFilters(); // Trigger filter refresh on cookie change
+                }
+              }, 1000); // poll every second
+
+              return () => clearInterval(interval);
+            }, []);
+
+
+
+
+
+            const createLabelMap = (filters) => {
+                const labelMap = {};
+
+                filters.forEach(filter => {
+                    labelMap[filter.attribute_code] = {};
+
+                    filter.options.forEach(option => {
+                        labelMap[filter.attribute_code][option.value] = option.label;
+                    });
+                });
+
+                return labelMap;
+            };
+
+            async function fetchCategoryHierarchy() {
+
+                const useCache = true; // 🔁 Toggle this to enable/disable caching
+                const categoryUrlKey = window.location.pathname.replace(/^\//, '').replace('.html', '');
+                const fragmentId = window.location.hash.replace('#', '');
+                const isNumericId = /^\d+$/.test(fragmentId);
+                const idFromFragment = isNumericId ? fragmentId : null;
+
+                showLoadingEffect();
+
+                try {
+                    let query = '';
+                    if (idFromFragment) {
+                        query = `{
+                            category(id: ${idFromFragment}) {
+                                id
+                                subcategoriesontop
+                                categoryheading
+                                name
+                                children {
+                                    id
+                                    name
+                                    url_path
+                                    children {
+                                        id
+                                        name
+                                        url_path
+                                        products(pageSize: 1) {
+                                            items {
+                                                small_image {
+                                                    url
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }`;
+                    } else {
+                        query = `{
+                            categoryList(filters: { url_path: { eq: "${categoryUrlKey}" } }) {
+                                id
+                                subcategoriesontop
+                                categoryheading
+                                name
+                                children {
+                                    id
+                                    name
+                                    url_path
+                                    children {
+                                        id
+                                        name
+                                        url_path
+                                        products(pageSize: 1) {
+                                            items {
+                                                small_image {
+                                                    url
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }`;
+                    }
+
+                    const cacheKey = `categoryHierarchyCache_${btoa(query)}`;
+                    let data = null;
+
+                    if (useCache && localStorage.getItem(cacheKey)) {
+                        data = JSON.parse(localStorage.getItem(cacheKey));
+                    } else {
+                       // console.log("🌐 Fetching category hierarchy from API");
+                        const response = await fetch('/graphql', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ query })
+                        });
+
+                        data = await response.json();
+                        if (useCache) {
+                            localStorage.setItem(cacheKey, JSON.stringify(data));
+                           // console.log("✅ Cached category hierarchy");
+                        }
+                    }
+
+                    const categoryData = idFromFragment ? data.data.category : data.data.categoryList?.[0];
+
+                    if (!categoryData) {
+                        console.warn("⚠️ No category data found.");
+                        clearCategoryHierarchy();
+                        return;
+                    }
+
+                    if (categoryData.subcategoriesontop === 1 || categoryData.subcategoriesontop === true) {
+                        renderCategoryHierarchy(categoryData);
+                    } else {
+                        clearCategoryHierarchy();
+                    }
+
+                } catch (error) {
+                    console.error("❌ Error fetching category hierarchy:", error);
+                    clearCategoryHierarchy();
+                }
+            }
+
+
+
+            function renderCategoryHierarchy(categoryData) {
+
+                if (!categoryData) {
+
+                    clearCategoryHierarchy();
+                    return;
+                }
+
+
+                let subcategories = [];
+                let firstSubcategory = categoryData.children?.[0];
+
+                if (!firstSubcategory) {
+
+                } 
+
+                if (firstSubcategory && firstSubcategory.children && firstSubcategory.children.length > 0) {
+
+                    subcategories = firstSubcategory.children
+                        .map((subcategory, index) => {
+                            const productImage = subcategory.products?.items?.[0]?.small_image?.url;
+                            const subcategoryUrl = `/${subcategory.url_path}.html`;
+
+                            if (!productImage) {
+
+                                return null;
+                            }
+
+
+                            return React.createElement("div", {
+                                className: "subcategory_top_category col-md-2 col-sm-4 col-xs-6 blocks_inside_js",
+                                key: subcategory.id
+                            },
+                                React.createElement("a", { className: "link react-comp", href: subcategoryUrl },
+                                    React.createElement("div", { className: "image_prd_of_cat" },
+                                        React.createElement("img", {
+                                            width: 90,
+                                            height: 90,
+                                            alt: "category icon",
+                                            src: productImage
+                                        })
+                                    ),
+                                    React.createElement("div", { className: "subcat_name_of_category" }, subcategory.name)
+                                )
+                            );
+                        })
+                        .filter(Boolean); // Removes null values (i.e., skipped ones)
+                } else {
+
+                }
+
+                const subcategoriesContainer = React.createElement("div", {
+                    className: "subcategories_of_category row outer_width_js",
+                    style: { width: "100%" }
+                },
+                    React.createElement("div", { className: "col-xs-12" },
+                        React.createElement("div", {
+                            className: "col-xs-12 inner_width_js",
+                            style: { margin: "0 auto" }
+                        }, subcategories)
+                    )
+                );
+
+            
+                ReactDOM.render(subcategoriesContainer, document.getElementById("subcategories_and_data"));
+            }
+
+
+
+
+            // Function to clear the div when no data is found
+            function clearCategoryHierarchy() {
+                const container = document.getElementById("subcategories_and_data");
+                if (container) {
+                    Array.from(container.children).forEach(child => {
+                        child.classList.add('hide');
+                    });
+                }
+            }
+
+
+            // Function to show flickering effect while loading
+            function showLoadingEffect() {
+
+
+                let flickeringContent = React.createElement("div", { className: "category-view" },
+                    React.createElement("div", { className: "subcategories_of_category row outer_width_js", style: { width: "100%" } },
+                        React.createElement("div", { className: "col-xs-12" },
+                            React.createElement("div", { className: "col-xs-12 inner_width_js", style: { margin: "0 auto" } },
+                                Array.from({ length: 6 }).map((_, index) =>
+                                    React.createElement("div", { className: "subcategory_top_category col-md-2 col-sm-4 col-xs-6 blocks_inside_js", key: index },
+                                        React.createElement("div", { className: "flickering", style: { borderRadius: "50%", maxWidth: "100px", margin: "auto" } },
+                                            React.createElement("div", { className: "image_prd_of_cat" })
+                                        ),
+                                        React.createElement("div", { className: "flickering" },
+                                            React.createElement("div", { className: "subcat_name_of_category" })
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                );
+
+                ReactDOM.render(flickeringContent, document.getElementById("subcategories_and_data"));
+            }
+
+
+
+
+
+            function handleFilterChange(event, attributeCode) {
+                setCurrentPage(1);
+
+                const { value, checked } = event.target;
+                const parentElement = event.target.closest('.swatch-option-label'); // Find parent
+
+                if (parentElement) {
+                    if (checked) {
+                        parentElement.classList.add('active-filter');
+                    } else {
+                        parentElement.classList.remove('active-filter');
+                    }
+                }
+               // console.log("setFilters 1");
+                setFilters(prevFilters => {
+                    let newFilters = { ...prevFilters };
+
+                    if (!newFilters[attributeCode]) {
+                        newFilters[attributeCode] = [];
+                    }
+
+                    if (checked) {
+                        newFilters[attributeCode].push(value);
+                    } else {
+                        newFilters[attributeCode] = newFilters[attributeCode].filter(v => v !== value);
+                        if (newFilters[attributeCode].length === 0) {
+                            delete newFilters[attributeCode];
+                        }
+                    }
+
+                    return newFilters;
+                });
+            }
+
+
+            function removeFilter(attributeCode, value) {
+
+               // console.log("setFilters 2");
+
+                setFilters(prevFilters => {
+                    let newFilters = {
+                        ...prevFilters
+                    };
+                    newFilters[attributeCode] = newFilters[attributeCode].filter(v => v !== value);
+                    if (newFilters[attributeCode].length === 0) {
+                        delete newFilters[attributeCode];
+                    }
+                    return newFilters;
+                });
+            }
+
+            function clearAllFilters() {
+                
+                document.querySelectorAll('.swatch-option-label').forEach(label => {
+                    label.classList.remove('active-filter');
+                });
+
+
+                // console.log("setFilters 3");
+                setFilters({});
+            }
+
+            function handleSortChange(event) {
+                const newSort = event.target.value;
+                setSelectedSort(newSort); // Update select value based on user choice
+                setCurrentPage(1);
+
+                if (newSort === "price-asc") {
+                    setSortBy("price");
+                    setSortOrder("ASC");
+                } else if (newSort === "price-desc") {
+                    setSortBy("price");
+                    setSortOrder("DESC");
+                } else if (newSort === "crecommend") {
+                    setSortBy("crecommend");
+                    setSortOrder("DESC");
+                } else {
+                    setSortBy(newSort);
+                    setSortOrder("ASC");
+                }
+
+            }
+
+            /*function handlePageChange(newPage) {
+                if (newPage !== currentPage) {
+                    //console.log("Changing to page:", newPage);
+                    setCurrentPage(newPage);
+//                    fetchProducts();
+                }
+            }*/
+            const handlePageChange = (page) => {
+               // console.log("changing current page to : " + currentPage);
+                if (page >= 1 && page <= totalPages) {
+                    setCurrentPage(page);
+                }
+                setTimeout(() => {
+                    const element = document.querySelector("#ajaxlist-reload-product_list");
+                    if (element) {
+                        const offsetTop = element.getBoundingClientRect().top + window.scrollY;
+                        window.scrollTo({
+                            top: offsetTop - 200, // Scrolls 100px below the element
+                            behavior: "smooth" // Smooth scrolling effect
+                        });
+                    }
+                }, 100);
+            };
+
+
+            useEffect(() => {
+                setSortBy("position");
+                setSelectedSort("position");
+                clearAllFilters();
+                fetchFilters();
+                setCurrentPage(1);
+
+                
+            
+                const searchInput = document.querySelector("input#search");
+                if (searchInput && searchInput.value) {
+                    searchInput.value = "";
+                }
+
+                // **✅ Re-show the hidden divs**
+                setTimeout(() => {
+                    const mainDivs = document.querySelectorAll("main#maincontent");
+                    mainDivs.forEach(div => {
+                        div.style.display = "block";
+                    });
+                    const wizzyContainer = document.querySelector(".wizzy-result-container");
+                    if (wizzyContainer) {
+                        wizzyContainer.style.display = "none";
+                    }
+                    
+                    
+                }, 100); // Small timeout to ensure the DOM updates
+                
+                const pathname = window.location.pathname.split('?')[0].split('#')[0];
+                  if (!pathname.endsWith('/shoes.html')) {
+                    const popupCookie = document.cookie.match(/(?:^|; )sizePopupShown=([^;]*)/);
+                    const alreadyShown = popupCookie && popupCookie[1] === "1";
+
+                    if (!alreadyShown) {
+                         setTimeout(() => {
+                            const changeBtn = document.querySelector(".changeBtn");
+                            const chooseBtn = document.querySelector(".chooseBtn");
+
+                            const buttonToClick = changeBtn || chooseBtn;
+
+                            if (buttonToClick) {
+                                buttonToClick.click();
+
+                                // 🍪 Set cookie to expire in 3 days
+                                const date = new Date();
+                                date.setTime(date.getTime() + (3 * 24 * 60 * 60 * 1000)); // 3 days
+                                document.cookie = `sizePopupShown=1; expires=${date.toUTCString()}; path=/`;
+
+                                //console.log("✅ Clicked size selector button and set cookie");
+                            } else {
+                                //console.warn("⚠️ No size selector button (.changeBtn or .chooseBtn) found");
+                            }
+                        }, 10000); // Delay for 5 seconds
+                    } else {
+                        //console.log("🛑 Skipping popup - already shown in last 3 days");
+                    }
+                }
+            }, [url]); // Runs when the URL changes
+
+            
+            useEffect(() => {
+                // Reset category ID cache when URL changes
+                categoryIdRef.current = null;
+                setCategoryId(null);
+            }, [url]);
+
+
+            useEffect(() => {
+                  if (!availableFilters || availableFilters.length === 0) return;
+
+                const availableAttrCodes = availableFilters?.map(f => f.attribute_code) || [];
+                //console.log("🧩 Available filter attributes:", availableAttrCodes);
+
+                const hashIndex = window.location.href.indexOf('#');
+                let searchParams = '';
+
+                if (hashIndex !== -1) {
+                  const hashPart = window.location.href.substring(hashIndex);
+                  const queryIndex = hashPart.indexOf('?');
+                  if (queryIndex !== -1) {
+                    searchParams = hashPart.substring(queryIndex); // gets ?param=value&...
+                    //console.log("🔍 Found query in hash:", searchParams);
+                  }
+                }
+
+                if (!searchParams) {
+                  searchParams = window.location.search;
+                  //console.log("📍 Using standard search params:", searchParams);
+                }
+
+                if (searchParams) {
+                  const params = new URLSearchParams(searchParams);
+                  const newFilters = {};
+
+                  //console.log("🔎 Checking each param...");
+
+                  params.forEach((value, key) => {
+                    const isValidFilter = availableAttrCodes.includes(key);
+                    //console.log(`🔸 Param: ${key} → Valid Filter?`, isValidFilter);
+
+                    if (isValidFilter) {
+                      newFilters[key] = value.split(',');
+                      //console.log(`✅ Applying filter: ${key} =`, newFilters[key]);
+                    } else {
+                      //console.log(`⛔ Ignored non-filter param: ${key}`);
+                    }
+                  });
+
+                  if (Object.keys(newFilters).length > 0) {
+                    //console.log("🎯 setFilters with:", newFilters);
+                    setFilters(() => {
+                      let formattedFilters = {};
+                      Object.keys(newFilters).forEach(attributeCode => {
+                        formattedFilters[attributeCode] = newFilters[attributeCode]; 
+                      });
+                      return formattedFilters;
+                    });
+                  } else {
+                    //console.log("⚠️ No valid filters to set.");
+                  }
+                }   
+            }, [availableFilters]); // Runs when the URL changes
+
+
+            useEffect(() => {
+                
+                const mainContent = document.querySelector("main#maincontent");
+
+                if (mainContent && getComputedStyle(mainContent).display === "none") {
+                    mainContent.style.display = "block";
+                }
+
+            }, []); // Single array with all dependencies
+                
+            useEffect(() => {
+                
+               const fetchData = async () => {
+                    setIsFetchingFilters(true);
+//                    await fetchFilters();  // Ensure filters are fully fetched before proceeding
+                    setIsFetchingFilters(false);
+                    fetchProducts();  // Fetch products only after filters are set
+                };
+
+                fetchData(); 
+            }, [sortBy, sortOrder, currentPage, itemsPerPage]); // Removed 'url' - filters effect handles URL changes
+                
+                
+                useEffect(() => {
+                    console.log("subcategoriesontop changed to ", subcategoriesontop);
+                    const subcatElement = document.getElementById("subcategories_and_data");
+
+                    if (subcategoriesontop) {
+                        // fetch category data
+                        fetchCategoryHierarchy();
+                        if (subcatElement) subcatElement.style.display = "block";
+                    } else {
+                        if (subcatElement) subcatElement.style.display = "none";
+                    }
+                }, [subcategoriesontop]);
+
+            
+                
+            useEffect(() => {
+              if (!isFetchingFilters) {
+                    const timeout = setTimeout(() => {
+                        fetchProducts();
+                    }, 50); // Reduced delay for faster response
+
+                    return () => clearTimeout(timeout);
+                }
+            }, [filters]);
+                
+                
+                
+                
+            
+            useEffect(() => {
+                 const sidebar = document.querySelector(".sidebar.sidebar-main");
+                 const narrow_by_list = document.querySelector("div#narrow-by-list");
+                if (sidebar) {
+                    if (loading) {
+                        sidebar.style.pointerEvents = "none";
+                        narrow_by_list.style.opacity = "0.5";
+                        sidebar.style.cursor = "not-allowed";
+                    } else {
+                        sidebar.style.pointerEvents = "auto";
+                        narrow_by_list.style.opacity = "1";
+                        sidebar.style.cursor = "default";
+                    }
+                }
+                if(loading || filterload){
+                    document.body.classList.add("loading");
+                }else{
+                    document.body.classList.remove("loading");
+                }
+            }, [loading, filterload]);
+                
+                
+            useEffect(() => {
+
+                let startPage = Math.max(1, currentPage - 2);
+                let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+                if (endPage - startPage + 1 < maxVisiblePages) {
+                    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                }
+
+                const length = Math.max(0, endPage - startPage + 1);
+                const pagesArray = [...Array(length)].map((_, i) => startPage + i);
+
+                setVisiblePages(pagesArray);
+
+            }, [currentPage, total_count, page_size]);        
+
+                
+                
+                
+                
+            const handleLimitChange = (event) => {
+                let newValue = parseInt(event.target.value, 10);
+
+                // Ensure value is between 24 and 120
+                if (newValue >= 24 && newValue <= 120) {
+                    setItemsPerPage(newValue);
+                }
+            };
+                
+             /*   const subcategories_and_data = (n) => {
+                    let categoryTopBlock = React.createElement("div", {
+                        className: "flickering category_top_block",
+                        style: {
+                            height: "40px",
+                            maxWidth: "300px",
+                            margin: "auto",
+                            marginTop: "30px",
+                            marginBottom: "30px"
+                        }
+                    });
+
+                    let subcategories = Array.from({ length: n }).map((_, index) => 
+                        React.createElement("div", { className: "subcategory_top_category col-md-2 col-sm-4 col-xs-6 blocks_inside_js", key: index },
+                            React.createElement("div", {
+                                className: "flickering",
+                                style: {
+                                    borderRadius: "50%",
+                                    maxWidth: "100px",
+                                    margin: "auto"
+                                }
+                            }, React.createElement("div", { className: "image_prd_of_cat" })),
+                            React.createElement("div", { className: "flickering" },
+                                React.createElement("div", { className: "subcat_name_of_category" })
+                            )
+                        )
+                    );
+
+                    let subcategoriesContainer = React.createElement("div", { className: "subcategories_of_category row outer_width_js", style: { width: "100%" } },
+                        React.createElement("div", { className: "col-xs-12" },
+                            React.createElement("div", { className: "col-xs-12 inner_width_js", style: { margin: "0 auto" } },
+                                subcategories
+                            )
+                        )
+                    );
+
+                    return React.createElement("div", { className: "category-view" }, categoryTopBlock, subcategoriesContainer);
+};*/
+
+
+            const loadingFilters  = (n) => 
+                Array.from({ length: n }).map((_, index) =>
+                    React.createElement(
+                        "div",
+                        { className: "border-line-up", key: index },
+                        React.createElement(
+                            "div",
+                            { className: "filter-options-item active" },
+                            React.createElement("div", {
+                                className: "flickering",
+                                style: { marginBottom: "20px" }
+                            }),
+                            React.createElement(
+                                "div",
+                                { "data-role": "content", className: "filter-options-content" },
+                                React.createElement(
+                                    "div",
+                                    { className: "swatch-attribute swatch-layered brand" },
+                                    Array.from({ length: 5 }).map((_, idx) =>
+                                        React.createElement(
+                                            React.Fragment,
+                                            { key: idx },
+                                            React.createElement("div", {
+                                                className: "flickering",
+                                                style: { height: "20px", width: "50%" }
+                                            }),
+                                            React.createElement("br")
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                );
+            
+            const loadingProducts = React.createElement(
+                "div",
+                { className: "products wrapper grid products-grid" },
+                React.createElement(
+                    "ol",
+                    { className: "products list items product-items" },
+                    Array.from({ length: 8 }).map((_, index) =>
+                        React.createElement(
+                            "li",
+                            { key: index, className: "item product product-item" },
+                            React.createElement(
+                                "div",
+                                { className: "product-item-info" },
+                                React.createElement("div", { className: "image_flickering flickering" }),
+                                React.createElement(
+                                    "div",
+                                    { className: "product details product-item-details" },
+                                    React.createElement("div", {
+                                        className: "flickering",
+                                        style: { width: "45%", marginBottom: "10px", height: "20px" }
+                                    }),
+                                    React.createElement("div", {
+                                        className: "flickering",
+                                        style: { width: "65%", marginBottom: "10px", height: "20px" }
+                                    }),
+                                    React.createElement("div", {
+                                        className: "flickering",
+                                        style: { height: "20px" }
+                                    })
+                                )
+                            )
+                        )
+                    )
+                )
+            );
+
+
+
+
+            const PrintTagComponent = ({ sku, productId, attributeSetId }) => {
+                const [label, setLabel] = React.useState(null);
+
+                React.useEffect(() => {
+                    const fetchPrintPrice = async () => {
+                        //console.log(`🔍 Checking productId=${productId}, sku=${sku}, attrSet=${attributeSetId}`);
+
+                        const query = `
+                        {
+                          products(filter: {sku: {eq: "${sku}"}}) {
+                            items {
+                              ... on CustomizableProductInterface {
+                                options {
+                                  title
+                                  ... on CustomizableFieldOption {
+                                    value {
+                                      price
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }`;
+
+                        try {
+                            const response = await fetch("/graphql", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ query })
+                            });
+
+                            const result = await response.json();
+                            const options = result?.data?.products?.items?.[0]?.options || [];
+
+                            //console.log(`📦 Options for productId=${productId}:`, options);
+
+                            const isFree = options.some(opt =>
+                                /print|engrave/i.test(opt.title) && opt.value?.price === 0
+                            );
+
+                            let computedLabel = null;
+
+                            if ([27, 38, 35, 71, 37, 28, 36].includes(attributeSetId)) {
+                                computedLabel = isFree ? "Free Engrave" : "Custom Engrave";
+                            } else {
+                                computedLabel = isFree ? "Free Print" : "Custom Print";
+                            }
+
+
+                            if (computedLabel) {
+                                //console.log(`✅ ${computedLabel} detected for productId=${productId}`);
+                                setLabel(computedLabel);
+                            } else {
+                                //console.log(`⏭️ Skipped productId=${productId} due to unmatched attributeSetId`);
+                            }
+
+                        } catch (error) {
+                            //console.error(`🚫 Error fetching print/engrave data for productId=${productId}`, error);
+                        }
+                    };
+
+                    fetchPrintPrice();
+                }, [sku]);
+
+                if (!label) return null; // No tag for unsupported attribute sets
+
+                return React.createElement("div", {
+                    className: "tag tag-print",
+                    style: { float: "right" }
+                },
+                    React.createElement("i", {
+                        className: "fa fa-pencil-square-o",
+                        "aria-hidden": "true"
+                    }),
+                    ` ${label}`
+                );
+            };
+
+            
+            const SizeSelector = () => {
+              const { useState, useEffect, useRef } = React;
+
+              const getCookie = (name) => {
+                const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+                if (match) {
+                  try {
+                    return JSON.parse(decodeURIComponent(match[2]));
+                  } catch {
+                    return null;
+                  }
+                }
+                return null;
+              };
+
+              const setCookie = (name, value, days) => {
+                const expires = new Date(Date.now() + days * 864e5).toUTCString();
+                document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+              };
+
+              const deleteCookie = (name) => {
+                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+              };
+
+              let initialSize = getCookie('chosenShoeSize');
+              if (typeof initialSize === 'string' || !initialSize?.label) initialSize = null;
+
+              const [chosenSize, setChosenSize] = useState(initialSize);
+              const [popupVisible, setPopupVisible] = useState(false);
+              const [sizes, setSizes] = useState([]);
+              const [loading, setLoading] = useState(false);
+              const [error, setError] = useState(null);
+              const cachedSizes = useRef(null);
+
+              const openPopup = () => {
+                setPopupVisible(true);
+
+                const CACHE_KEY = 'shoeSizeOptionsCache';
+                const CACHE_DURATION_MS = 3600 * 1000;
+                const now = Date.now();
+                const cachedData = localStorage.getItem(CACHE_KEY);
+
+                if (cachedData) {
+                  try {
+                    const parsed = JSON.parse(cachedData);
+                    if (now - parsed.timestamp < CACHE_DURATION_MS) {
+                      cachedSizes.current = parsed.data;
+                      setSizes(parsed.data);
+                      return;
+                    } else {
+                      localStorage.removeItem(CACHE_KEY);
+                    }
+                  } catch {
+                    localStorage.removeItem(CACHE_KEY);
+                  }
+                }
+
+                setLoading(true);
+                setError(null);
+                const query = `
+                {
+                  products(filter: {}) {
+                    aggregations {
+                      attribute_code
+                      options {
+                        label
+                        value
+                      }
+                    }
+                  }
+                }
+                `;
+
+                fetch('/graphql', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ query }),
+                })
+                  .then((res) => res.json())
+                  .then((result) => {
+                    try {
+                      const aggs = result.data.products.aggregations || [];
+                      const shoeSizeAgg = aggs.find((agg) => agg.attribute_code === 'shoe_size');
+                      if (shoeSizeAgg && shoeSizeAgg.options) {
+                        cachedSizes.current = shoeSizeAgg.options;
+                        setSizes(shoeSizeAgg.options);
+                        localStorage.setItem(
+                          CACHE_KEY,
+                          JSON.stringify({ timestamp: now, data: shoeSizeAgg.options })
+                        );
+                      } else {
+                        setError('No shoe sizes found.');
+                      }
+                    } catch {
+                      setError('Error parsing sizes.');
+                    }
+                    setLoading(false);
+                  })
+                  .catch(() => {
+                    setError('Failed to fetch shoe sizes.');
+                    setLoading(false);
+                  });
+              };
+
+              const chooseSize = (size) => {
+                const selected = { label: size.label, value: size.value };
+                setCookie('chosenShoeSize', JSON.stringify(selected), 1);
+                setChosenSize(selected);
+                setPopupVisible(false);
+                window._prevChosenSizeCookie = JSON.stringify(selected);
+                if (typeof fetchFilters === 'function') {
+                  fetchFilters();
+                }
+              };
+
+              const removeSize = () => {
+                deleteCookie('chosenShoeSize');
+                setChosenSize(null);
+                window._prevChosenSizeCookie = null;
+                if (typeof fetchFilters === 'function') {
+//                  fetchFilters();
+                    clearAllFilters();
+                }
+              };
+
+              const closePopup = () => {
+                setPopupVisible(false);
+              };
+
+              const overlayStyle = {
+                display: popupVisible ? 'flex' : 'none',
+                
+              };
+
+              return React.createElement(
+                'div',
+                { className: 'size-selector-wrapper' },
+                [
+                  React.createElement(
+                    'div',
+                    { key: 'modalOverlay', style: overlayStyle, className : "modaloverlay_size_outerbox" },
+                    React.createElement(
+                      'div',
+                      { className : "modaloverlay_size_innerbox"},
+                      [
+                        React.createElement(
+                          'button',
+                          { key: 'closeBtn', className:"closebtn", onClick: closePopup },
+                          '×'
+                        ),
+                        React.createElement('h3', { key: 'title' }, 'Choose your shoe size'),
+                        loading && React.createElement('p', { key: 'loading' }, 'Loading sizes...'),
+                        error && React.createElement('p', { key: 'error', style: { color: 'red' } }, error),
+                        React.createElement(
+                          'div',
+                          { key: 'sizesContainer' },
+                          sizes.map((size) =>
+                            React.createElement(
+                              'button',
+                              {
+                                key: size.value,
+                                onClick: () => chooseSize(size),
+                              },
+                              size.label
+                            )
+                          )
+                        ),
+                      ]
+                    )
+                  ),
+                  chosenSize?.label
+                    ? React.createElement(
+                        'div',
+                        { key: 'chosenInfo', className: 'buttons_and_info' },
+                        [
+                          React.createElement(
+                            'div',
+                            { key: 'size_text_outer', className: 'size_text_outer' },
+                            [
+                              React.createElement('p', { key: 'size_text' }, 'Your shoe size is'),
+                              React.createElement('p', { className: 'size_text_value' }, `${chosenSize.label}`),
+                            ]
+                          ),
+                          React.createElement(
+                            'div',
+                            { key: 'changeBtn', className: 'changeBtn', onClick: openPopup },
+                            'Change'
+                          ),
+                          React.createElement(
+                            'div',
+                            { key: 'removeBtn', className: 'removeBtn', onClick: removeSize },
+                            'View all Sizes instead?'
+                          ),
+                        ]
+                      )
+                    : React.createElement(
+                        'div',
+                        { key: 'chooseBtn', className: 'chooseBtn', onClick: openPopup },
+                        'Choose your shoe size'
+                      ),
+                ]
+              );
+            };
+
+
+            React.useEffect(() => {
+              const pathname = window.location.pathname.split('?')[0].split('#')[0];
+//                console.log("useeffect for calling SizeSelector");
+             
+
+              const container = document.getElementById('choosen_sizes');
+              if (container) {
+                ReactDOM.render(React.createElement(SizeSelector), container);
+//                console.log("✅ SizeSelector rendered in #choosen_sizes");
+              } else {
+                console.warn("⚠️ #choosen_sizes not found");
+              }
+            }, []);
+
+            return (
+                
+                React.createElement('div', {
+                    className: 'columns'
+                }, 
+                React.createElement('div', {
+                    id : "main_category_image"
+                }, ''),
+               
+
+                React.createElement('div', { className: 'category-view' },
+                    // First child: Top block with heading
+                    React.createElement('div', { className: 'category_top_block' },
+                        React.createElement('h1', { className: 'flickering category_name' }, '') // You can replace 'Clubs' dynamically
+                    ),
+                    // Second child: Subcategories container
+                     React.createElement('div', {
+                        id : "subcategories_and_data",
+                        className: "category-view"
+                    }, "" )
+                ),
+
+
+
+                React.createElement('div', {
+                    id : "breadcrumbs"
+                    
+                }, ''),
+                React.createElement('div', {
+                    className: 'sidebar sidebar-main'
+                }, React.createElement('div', {
+                    id: 'ajaxlist-reload-layered-navigation'
+                }, 
+                
+                React.createElement('div', {
+                    id : "choosen_sizes",
+                    className : "hide"
+                }, ''),
+                React.createElement('div', {
+                    className: 'block filter collapsible-filters',
+                    id: 'layered-filter-block'
+                }, React.createElement('div', {
+                    className: 'block-content filter-content'
+                },
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+              
+                                   
+                                   
+                                   
+            Object.keys(filters).some(key => filters[key].length > 0) && (
+        React.createElement(
+            'div',
+            { className: '' },
+            React.createElement(
+                'div',
+                { className: 'filter-current', id: 'layered-navigation-state', 'data-collapsible': 'true', role: 'tablist' },
+                React.createElement(
+                    'strong',
+                    { className: 'block-subtitle filter-current-subtitle' },
+                    'Filtered'
+                ),
+                React.createElement(
+                    'ol',
+                    { className: 'items filter-ol-list' },
+                    Object.entries(filters).flatMap(([key, values]) => {
+                        const filter = availableFilters.find(f => f.attribute_code === key);
+                        return values.length > 0 ? [
+                            React.createElement(
+                                'li',
+                                { key: `${key}-label`, className: `item-label ${key}-status-label` },
+                                React.createElement('span', { className: 'filter-label' }, filter?.label || key) // Use the label if found, otherwise fallback to key
+                            ),
+                            ...values.map(value => {
+                                const optionLabel = filter?.options.find(opt => opt.value === value)?.label || value; // Get the option label
+                                return React.createElement(
+                                    'li',
+                                    { key: `${key}-${value}`, className: 'item' },
+                                    React.createElement(
+                                        'a',
+                                        {
+                                            title: `Remove ${filter?.label || key} ${optionLabel}`,
+                                            onClick: (e) => {
+                                                e.preventDefault(); // Prevent page refresh
+                                                removeFilter(key, value);
+                                            }
+                                        },
+                                        React.createElement('span', null, 'Remove This Item')
+                                    ),
+                                    ` ${optionLabel}` // Show the label instead of value
+                                );
+                            })
+                        ] : [];
+                    })
+                )
+            ),
+            React.createElement(
+                'div',
+                { className: 'block-actions filter-actions' },
+                React.createElement(
+                    'span',
+                                {
+                                    onClick: (e) => {
+                                        e.preventDefault(); // Prevent page refresh
+                                        // Trigger removeBtn click if present
+                                        const removeBtn = document.querySelector('.removeBtn');
+                                        if (removeBtn) {
+                                            removeBtn.click();
+                                        }
+                                        clearAllFilters();
+                                    }
+                                },
+                    React.createElement('span', null, 'Clear All')
+                )
+            )
+        )
+    ),
+                                   
+            /* React.createElement('div', {
+                className: 'filter-section'
+            },
+            // **Selected Filters Section**
+            Object.keys(filters).length > 0 && 
+            React.createElement('div', {
+                className: 'selected-filters'
+            }, React.createElement('h4', null, 'Selected Filters'), React.createElement('ul', {
+                className: 'selected-filter-list'
+            }, Object.entries(filters).flatMap(([key, values]) => values.map(value => React.createElement('li', {
+                key: `${key}-${value}`,
+                className: 'selected-filter'
+            }, `${key}: ${value}`, React.createElement('button', {
+                className: 'remove-filter',
+                onClick: () => removeFilter(key, value)
+            }, '✖'))))), React.createElement('button', {
+                className: 'clear-all-filters',
+                onClick: clearAllFilters
+            }, 'Clear All')), ),*/
+                     
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+                                   
+            React.createElement("strong", {
+                role: "heading",
+                "aria-level": "2",
+                className: "block-subtitle filter-subtitle",
+                id: "filters"
+            }, "Filters"),
+            React.createElement("div", {
+                className: "filter_heading visible-xs close"
+            }, "Filters"),
+            React.createElement("div", {
+                className: "filter_toggler visible-xs"
+            }, "Filters"),         
+                                   
+            React.createElement('div', {
+                className: 'filter-options',
+                id: 'narrow-by-list'
+            }, 
+            React.createElement(
+                "div",
+                {
+                    className: "filter_heading_popup filter_toggler visible-xs"
+                },
+                "Filters"
+            ),
+            filterload ? loadingFilters(3) : availableFilters.map(filter => filter.label !== "Category" ? 
+
+            React.createElement('div', {
+                className: `filter-options-item ${activeFilters.includes(filter.label) ? 'active' : ''} filter_${filter.attribute_code}`,
+                key: filter.attribute_code
+            }, React.createElement('div', {
+                className: 'filter-options-title '
+            }, filter.label), React.createElement('div', {
+                className: 'filter-options-content'
+            }, React.createElement('div', {
+                key: filter.attribute_code,
+                className: 'swatch-attribute swatch-layered brand'
+            }, 
+
+
+
+           React.createElement(
+            'div',
+            {
+                key: filter.attribute_code,
+                className: 'swatch-attribute-options clearfix filter-items-list'
+            },
+            filter.options.map(option => {
+                // Function to sanitize label
+                const sanitizeLabel = (label) => 
+                    label.replace(/[^a-zA-Z\s]/g, '_') // Replace special chars & numbers with '_'
+                         .replace(/\s+/g, '').toLowerCase(); // Remove spaces
+
+                const sanitizedLabel = sanitizeLabel(option.label);
+
+
+                const SWATCH_BASE_PATH = `${window.location.origin}/media/attribute/swatch/swatch_image/30x20`;
+
+                const isImageSwatch = option.swatch_data && option.swatch_data.type === "ImageSwatchData";
+                const imageUrl = isImageSwatch ? `${SWATCH_BASE_PATH}${option.swatch_data.value}` : null;
+
+
+                return React.createElement(
+                    'label',
+                    {
+                        key: option.value,
+                        className: `swatch-option-label ${filters[filter.attribute_code]?.includes(option.value) ? 'active-filter' : ''}`,
+                        style: {
+                            alignItems: 'center',
+                            cursor: 'pointer'
+                        }
+                    },
+                    React.createElement('input', {
+                        type: 'checkbox',
+                        value: option.value,
+                        checked: filters[filter.attribute_code]?.includes(option.value) || false,
+                        onChange: (e) => handleFilterChange(e, filter.attribute_code),
+                        className: 'swatch-option-checkbox'
+                    }),
+                    isImageSwatch
+                        ? React.createElement('img', {
+                            src: imageUrl,
+                            alt: option.label,
+                            className: 'swatch-option-image'
+                        })
+                        : React.createElement('span', {
+                            className: 'swatch-option text',
+                            style: {
+                                marginLeft: '8px'
+                            }
+                        }, `${option.label} (${option.count})`)
+                );
+            })
+        )
+
+
+
+
+            ))) : null),
+        // 👇 apply-bar still at the end
+            React.createElement(
+                "div",
+                { className: "apply-bar" },
+                React.createElement(
+                    "div",
+                    {
+                        className: "close-icon-category filter_toggler filter-cross-btn visible-xs apply-bar-btn"
+                    },
+                    "Apply Filters"
+                )
+            ))
+
+            )))), React.createElement('div', {
+                className: 'column main'
+            }, React.createElement('div', {
+                className: 'product-list',
+                id: 'ajaxlist-reload-product_list'
+            },
+
+            
+            React.createElement(
+                'div',
+                { className: 'toolbar toolbar-products' },
+                
+
+
+                React.createElement(
+                    'p',
+                    { className: 'toolbar-amount', id: 'toolbar-amount' },
+                    'Items ',
+                    React.createElement('span', { className: 'current_page' }, (currentPage - 1) * page_size + 1 ),
+                    '-',
+                    React.createElement('span', { className: 'page_size' }, Math.min(currentPage * page_size, total_count) ),
+                    ' of ',
+                    React.createElement('span', { className: 'total_count' }, total_count),
+                ),
+
+                React.createElement(
+                    'div',
+                    { className: 'toolbar-sorter sorter' },
+                    React.createElement('label', { className: 'sorter-label', htmlFor: 'react_sorter' }, 'Sort By'),
+                    React.createElement(
+                        'select',
+                        {
+                            id: 'sorter',
+                            className: 'sorter-options',
+                            onChange: handleSortChange,
+                            value: selectedSort
+                        },
+                        React.createElement('option', { value: 'crecommend'}, 'Recommend'),
+                        React.createElement('option', { value: 'position'}, 'Position'),
+                        React.createElement('option', { value: 'name' }, 'Product Name'),
+                        React.createElement('option', { value: 'price-asc' }, 'Price Low to High'),
+                        React.createElement('option', { value: 'price-desc' }, 'Price High to Low')
+                    )
+                )
+            ),
+
+
+
+            loading ? loadingProducts : products.length > 0 ? React.createElement('div', {
+                className: 'products wrapper grid products-grid'
+            }, React.createElement("ol", {
+                className: "products list items product-items"
+            }, products.map((product) => React.createElement("li", {
+                className: `item product product-item product-${product.id}`,
+                key: product.id
+            }, React.createElement("div", {
+                    className: "product-item-info",
+                    "data-container": "product-grid"
+                },
+                 product.used_clubs_grade === 4773 && React.createElement("div", { className: "star-ratings excellent" },
+                    React.createElement("i", { className: "fa fa-star" }),
+                    React.createElement("i", { className: "fa fa-star" }),
+                    React.createElement("i", { className: "fa fa-star" }),
+                    React.createElement("i", { className: "fa fa-star" }),
+                    React.createElement("i", { className: "fa fa-star" }),
+                    React.createElement("p", null, "Excellent")
+                ),
+
+                product.used_clubs_grade === 4774 && React.createElement("div", { className: "star-ratings very-good" },
+                    React.createElement("i", { className: "fa fa-star" }),
+                    React.createElement("i", { className: "fa fa-star" }),
+                    React.createElement("i", { className: "fa fa-star" }),
+                    React.createElement("i", { className: "fa fa-star" }),
+                    React.createElement("i", { className: "fa fa-star-half-o", "aria-hidden": "true" }),
+                    React.createElement("p", null, "very-good")
+                ),
+
+                product.used_clubs_grade === 4782 && React.createElement("div", { className: "star-ratings good" },
+                    React.createElement("i", { className: "fa fa-star" }),
+                    React.createElement("i", { className: "fa fa-star" }),
+                    React.createElement("i", { className: "fa fa-star" }),
+                    React.createElement("i", { className: "fa fa-star-half-o", "aria-hidden": "true" }),
+                    React.createElement("i", { className: "fa fa-star-o" }),
+                    React.createElement("p", null, "good")
+                ),
+
+                product.used_clubs_grade === 4775 && React.createElement("div", { className: "star-ratings average" },
+                    React.createElement("i", { className: "fa fa-star" }),
+                    React.createElement("i", { className: "fa fa-star" }),
+                    React.createElement("i", { className: "fa fa-star-half-o", "aria-hidden": "true" }),
+                    React.createElement("i", { className: "fa fa-star-o" }),
+                    React.createElement("i", { className: "fa fa-star-o" }),
+                    React.createElement("p", null, "average")
+                ),
+                (product.can_print === 1 || product.newarrivals === 1) && React.createElement("div", {
+                    className: "tags"
+                }, 
+
+
+                (product.newarrivals === 1 || product.best_seller === 1 || product.clearance_sale === 1) &&
+                    React.createElement("div", {
+                        className: "tagouter",
+                        style: { float: "left" }
+                    },
+                        product.newarrivals === 1 &&
+                        React.createElement("div", {
+                            className: "tag tag-newarrivals"
+                        }, "New Arrival"),
+
+                        product.best_seller === 1 &&
+                        React.createElement("div", {
+                            className: "tag tag-bs"
+                        },
+                            React.createElement("i", {
+                                className: "fa fa-star",
+                                "aria-hidden": "true"
+                            }),
+                            " Best Seller"
+                        ),
+
+                        product.clearance_sale === 1 &&
+                        React.createElement("div", {
+                            className: "tag tag-clearance"
+                        }, "Clearance")
+                    ),
+
+
+                
+                product.can_print === 1 && React.createElement(
+                    DeferredComponent,
+                    null,
+                    React.createElement(PrintTagComponent, {
+                        sku: product.sku,
+                        productId: product.id,
+                        attributeSetId: product.attribute_set_id
+                    })
+                )),
+                // Product Image
+                React.createElement("a", {
+                    href: `/${product.url_key}.html`,
+                    className: "product photo product-item-photo",
+                    title: product.name,
+                }, React.createElement("span", {
+                    className: `product-image-container product-image-container-${product.id}`,
+                    style: {
+                        width: "320px"
+                    }
+                }, React.createElement("span", {
+                    className: "product-image-wrapper",
+                    style: {
+                        paddingBottom: "125%"
+                    }
+                }, React.createElement("img", {
+                    src: product.image?.url || product.small_image?.url, // Use `image.url` or fallback to `small_image.url`
+                    className: "product-image-photo category_page_full_image animation_div",
+                    alt: product.name,
+                    width: "320",
+                    height: "400",
+                    loading: "lazy",
+                })))),
+
+
+           // Rating Block (Only if rating is available)
+product.rating_summary > 0 &&
+    React.createElement("div", { className: "rating_block" },
+        React.createElement("div", { className: "customratinghtml star_back" },
+            React.createElement("div", { className: "customratinghtml star_back" },
+                React.createElement("span", {
+                    style: { fontSize: "20px", color: "#F0C808" }
+                }, "★"),
+                `${Math.round((product.rating_summary / 20) * 10) / 10}/5`,
+                React.createElement("div", { className: "people_rate" },
+                    `${product.review_count || 0} `,
+                    React.createElement("span", { className: "total_rev" },
+                        `Review${(product.review_count || 0) > 1 ? "s" : ""}`
+                    )
+                )
+            )
+        ),
+    ),
+    (product.waterproof === 1 || product.waterrepel === 1) &&
+    React.createElement("div", { className: "water_tags" },
+        product.waterproof === 1 &&
+        React.createElement("div", { className: "waterproof_label" },
+            React.createElement("span", { className: "waterproof_img" },
+                React.createElement("img", {
+                    src: "https://golfoy.com/media/wysiwyg/flayers/Water-proof-new.svg",
+                    alt: "Waterproof"
+                })
+            )
+        ),
+        product.waterrepel === 1 &&
+        React.createElement("div", { className: "waterrepel_label" },
+            React.createElement("span", { className: "waterrepel_img" },
+                React.createElement("img", {
+                    src: "https://golfoy.com/media/wysiwyg/flayers/Water-repellent-new.svg",
+                    alt: "Water Repellent"
+                })
+            )
+        )
+    ),
+
+                    
+                    
+                // Product Details
+                React.createElement("div", {
+                        className: "product details product-item-details"
+                    }, 
+                React.createElement(
+  "div",
+  { className: "swatch_block" },
+  product.similar_attribute_label &&
+    product.similar_attribute_label.includes("-") &&
+    product.related_products?.length > 0
+    ? [product, ...product.related_products].map((related) => {
+        const attributeCode = product.similar_attribute_label.split("-")[1];
+        const value = related[attributeCode];
+
+        const filterAttr = availableFilters?.find(f => f.attribute_code === attributeCode);
+        const swatchOption = filterAttr?.options?.find(opt => String(opt.value) === String(value));
+
+        const swatchLabel = swatchOption?.label;
+        const swatchData = swatchOption?.swatch_data;
+
+        let content = swatchLabel;
+
+        // ✅ Grab product image from related product or main product
+        const productImageUrl = related.image?.url || "";
+
+        if (swatchData) {
+          if (
+            swatchData.type === "ImageSwatchData" || 
+            swatchData.type === 2
+          ) {
+            // 🖼️ Image swatch with extra product image info
+            content = React.createElement("img", {
+              src: `${SWATCH_BASE_PATH}${swatchData.value}`,
+              alt: swatchLabel,
+              className: "swatch_img",
+              "data-product_img_url": productImageUrl // ✅ Custom attribute
+            });
+          } else if (swatchData.type === 1) {
+            // 🎨 Color swatch
+            content = React.createElement("div", {
+              style: {
+                backgroundColor: swatchData.value,
+                width: "24px",
+                height: "24px",
+                borderRadius: "50%",
+                border: "1px solid #ccc"
+              },
+              title: swatchLabel,
+              className: "swatch_img",
+              "data-product_img_url": productImageUrl // ✅ Custom attribute even for color
+            });
+          }
+        }
+
+        return React.createElement(
+          "div",
+          {
+            className: "swatch",
+            key: related.sku || `current-${value}`,
+            title: swatchLabel || value
+          },
+          content
+        );
+      })
+    : null
+),
+
+    
+                    React.createElement(ProductAttribute, {
+                        attributeCode: "brand",
+                        attributeValue: product.brand
+                    }),
+                    // Product Name
+                    React.createElement("strong", {
+                        className: "product name product-item-name"
+                    }, 
+                    React.createElement("a", {
+                        className: "product-item-link",
+                        title: product.name,
+                        href: `/${product.url_key}.html`,
+                    },
+                                       
+                        React.createElement(CleanedProductname, {
+                            attributeCode: "brand",
+                            attributeValue: product.brand,
+                            productname: product.name
+                        })
+                    ) 
+                    ),
+                    // Price Section
+                    React.createElement("div", {
+                        className: "price_html_category_page configurable_product"
+                    }, React.createElement("div", {
+                            className: "price-box price-final_price"
+                        },
+                        // Discounted Price Structure
+                        product.price_range.minimum_price.regular_price.value > product.price_range.minimum_price.final_price.value ? [
+                            React.createElement("span", {
+                                className: "old-price",
+                                key: "old-price"
+                            }, React.createElement("span", {
+                                className: "price"
+                            }, product.price_range.minimum_price.regular_price.currency === "INR" ? "₹" : product.price_range.minimum_price.regular_price.currency, " ", formatPrice(product.price_range.minimum_price.regular_price.value))),
+                            React.createElement("div", {
+                                className: "break_here",
+                                key: "break_here"
+                            }),
+                            React.createElement("span", {
+                                className: "special-price",
+                                key: "special-price"
+                            }, React.createElement("span", {
+                                className: "price"
+                            }, product.price_range.minimum_price.final_price.currency === "INR" ? "₹" : product.price_range.minimum_price.final_price.currency, " ", formatPrice(product.price_range.minimum_price.final_price.value))),
+                            // You Save Section
+                            React.createElement("div", {
+                                className: "you-save-statement"
+                            }, React.createElement("span", {
+                                className: "label_special_price_custom yousave_price_label"
+                            }, "You save:"), React.createElement("span", {
+                                className: "yousave_price"
+                            }, React.createElement("span", null, product.price_range.minimum_price.regular_price.currency === "INR" ? "₹" : product.price_range.minimum_price.regular_price.currency, " ", formatPrice(product.price_range.minimum_price.regular_price.value - product.price_range.minimum_price.final_price.value)), React.createElement("span", null, ` ( ${Math.round((product.price_range.minimum_price.regular_price.value - product.price_range.minimum_price.final_price.value) / product.price_range.minimum_price.regular_price.value * 100)}% OFF)`))),
+                        ] : // Non-Discounted Price Structure
+                        React.createElement("div", {
+                            className: "price_html_category_page",
+                            key: "price_html"
+                        }, React.createElement("div", {
+                            className: "price-box price-final_price"
+                        }, React.createElement("span", {
+                            className: "price-container price-final_price tax weee"
+                        }, React.createElement("span", {
+                            className: "price-wrapper "
+                        }, React.createElement("span", {
+                            className: "price"
+                        }, product.price_range.minimum_price.final_price.currency === "INR" ? "₹" : product.price_range.minimum_price.final_price.currency, " ", formatPrice(product.price_range.minimum_price.final_price.value)))))))),
+                    // Tier Price (Only if available)
+                    product.price_tiers?.length > 0 && React.createElement("div", {
+                            className: "tier_price_category_page"
+                        }, "Buy ", product.price_tiers[0].quantity, // Show actual quantity from tier
+                        " for ", React.createElement("strong", null, product.price_tiers[0].final_price.currency === "INR" ? "₹" : product.price_tiers[0].final_price.currency, " ", formatPrice(product.price_tiers[0].final_price.value) // Total tier price for all items
+                        ), " each and save ",
+                        Math.round(
+                            ((product.price_range.minimum_price.final_price.value - product.price_tiers[0].final_price.value) / product.price_range.minimum_price.final_price.value) * 100), // Discount percentage rounded to nearest whole number
+                        "% more")),
+                // Express Delivery Icon (Static for all products)
+
+                React.createElement(
+                    DeferredComponent,
+                    null,
+                    React.createElement(SizeRollComponent, { productId: product.id })
+                ),
+                
+                React.createElement(AttributeValueComponent, {
+                    product: product, // Pass the whole product object
+                    className: "custom_class"
+                }),
+
+                React.createElement(ExpressDelivery, {
+                    attributeCode: "express_shipping",
+                    attributeValue: product.express_shipping
+                }),
+
+                ))))) : React.createElement('p', null, 'No products found.'),
+               React.createElement(
+                'div',
+                { className: 'toolbar toolbar-products' },
+                React.createElement(
+                    'div',
+                    { className: 'pages' },
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    React.createElement(
+                    'ul',
+                    { className: 'items pages-items', 'aria-labelledby': 'paging-label' },
+
+                    // Prev Button
+                    currentPage > 1 &&
+                        React.createElement(
+                            'li',
+                            { className: 'item pages-item-prev' },
+                            React.createElement(
+                                'a',
+                                {
+                                    className: 'action previous',
+                                    onClick: (e) => {
+                                        e.preventDefault();
+                                        handlePageChange(currentPage - 1);
+                                    }
+                                },
+                                React.createElement('span', null, 'Previous')
+                            )
+                        ),
+
+                    // Page Numbers
+                    visiblePages.map((page) =>
+                        React.createElement(
+                            'li',
+                            { className: `item ${page === currentPage ? 'current' : ''}`, key: page },
+                            page === currentPage
+                                ? React.createElement(
+                                      'strong',
+                                      { className: 'page' },
+                                      React.createElement('span', null, page)
+                                  )
+                                : React.createElement(
+                                      'a',
+                                      {
+                                          className: 'page',
+                                          onClick: (e) => {
+                                              e.preventDefault();
+                                              handlePageChange(page);
+                                          }
+                                      },
+                                      React.createElement('span', null, page)
+                                  )
+                        )
+                    ),
+
+                    // Next Button
+                    currentPage < totalPages &&
+                        React.createElement(
+                            'li',
+                            { className: 'item pages-item-next' },
+                            React.createElement(
+                                'a',
+                                {
+                                    className: 'action next',
+                                    onClick: (e) => {
+                                        e.preventDefault();
+                                        handlePageChange(currentPage + 1);
+                                    }
+                                },
+                                React.createElement('span', null, 'Next')
+                            )
+                        )
+                )
+                    
+                    
+                    
+                    
+                    
+                ),
+                // Limiter Section
+                React.createElement(
+                    'div',
+                    { className: 'field limiter' },
+                    React.createElement(
+                        'label',
+                        { className: 'label', htmlFor: 'limiter' },
+                        React.createElement('span', null, 'Show')
+                    ),
+                    React.createElement(
+                        'div',
+                        { className: 'control' },
+                        React.createElement(
+                            'select',
+                            {
+                                id: 'limiter',
+                                className: 'limiter-options',
+                                onChange: handleLimitChange // Added event handler
+                            },
+                            [24, 36, 48, 60, 90, 120].map((value) =>
+                                React.createElement(
+                                    'option',
+                                    { value: value, key: value, selected: value === itemsPerPage },
+                                    value
+                                )
+                            )
+                        )
+                    ),
+                    React.createElement('span', { className: 'limiter-text' }, 'per page')
+                ),
+                    React.createElement('div', { className: 'category-description' }, "category_description")
+            )
+                
+                )))
+            );
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function fetchBreadcrumbs(url) {
+    //console.log("🔍 Starting fetchBreadcrumbs for:", url);
+
+    return fetch('/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            query: `{
+                route(url: "${url}") {
+                    ... on CategoryInterface {
+                        id
+                        name
+                        description
+                        breadcrumbs {
+                            category_id
+                            category_name
+                            category_url_path
+                        }
+                        topproducts
+                    }
+                }
+            }`
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+//        console.log("📥 Category route response:", data);
+
+        let route = data.data?.route;
+        if (!route) {
+            //console.warn("⚠️ No route found for URL:", url);
+            return [];
+        }
+
+        let breadcrumbs = route.breadcrumbs || [];
+        let currentPageName = route.name || document.title.split(" - ")[0] || "Current Page";
+        let description = route.description || "";
+        const DescriptionContainer = document.querySelector(".category-description");
+
+        // Handle [top_products]
+        if (description.includes('[top_products]') && route.topproducts) {
+            const rawIds = route.topproducts;
+            const productIds = rawIds.split(',').map(id => parseInt(id.trim(), 10));
+
+            //console.log("🧩 Found [top_products] with IDs:", productIds);
+            let query = `{
+                        topProducts(product_ids: [${productIds.join(',')}]) {
+                            name
+                            price
+                            url
+                        }
+                    }`;
+            //console.log(query);
+            return fetch('/graphql', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query: `{
+                        topProducts(product_ids: [${productIds.join(',')}]) {
+                            name
+                            price
+                            url
+                        }
+                    }`
+                })
+            })
+            .then(res => res.json())
+            .then(prodData => {
+                //console.log("📦 Product data fetched:", prodData);
+
+                const items = prodData?.data?.topProducts || [];
+
+                if (items.length === 0) {
+                    //console.warn("⚠️ No matching products found for IDs:", productIds);
+                }
+
+                const listHTML = `
+                    <div class="">
+                        <table><tbody>
+                            <tr><th>Serial No.</th><th>Golf ${route.name}</th><th>Our Special Price</th></tr>
+                            ${items.map((item, index) => `
+                                <tr>
+                                    <td> ${index + 1} </td>
+                                    <td> <a href="${item.url}">${item.name}</a> </td>
+                                    <td> ${item.price} </td>
+                                </tr>
+                            `).join('')}
+                        </tbody></table>
+                    </div>
+                `;
+
+                description = description.replace('[top_products]', listHTML);
+                if (DescriptionContainer) {
+                    DescriptionContainer.innerHTML = description;
+                }
+
+                breadcrumbs.unshift({ category_name: "Home", category_url_path: "/" });
+                breadcrumbs.push({ category_name: currentPageName, category_url_path: url });
+
+                return breadcrumbs;
+            })
+            .catch(error => {
+                console.error("❌ Error fetching product list:", error);
+                if (DescriptionContainer) {
+                    DescriptionContainer.innerHTML = description.replace('[top_products]', '<p>Error loading top products.</p>');
+                }
+                return breadcrumbs;
+            });
+        }
+
+        // No shortcode, just render
+//        console.log("ℹ️ No [top_products] shortcode found. Rendering normal description.");
+        if (DescriptionContainer) {
+            DescriptionContainer.innerHTML = description;
+        }
+
+        breadcrumbs.unshift({ category_name: "Home", category_url_path: "/" });
+        breadcrumbs.push({ category_name: currentPageName, category_url_path: url });
+
+        return breadcrumbs;
+    })
+    .catch(error => {
+        console.error("❌ Error in fetchBreadcrumbs:", error);
+        return [];
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        function renderBreadcrumbs(breadcrumbs) {
+            const breadcrumbsContainer = document.querySelector("#breadcrumbs");
+            if (!breadcrumbsContainer) return;
+
+            let breadcrumbHtml = `
+                <div class="breadcrumbs">
+                    <ul class="items">
+                        ${breadcrumbs.map((crumb, index) =>
+                            index === breadcrumbs.length - 1
+                                ? `<li class="item"><strong>${crumb.category_name}</strong></li>` // Last item (current page)
+                                : `<li class="item">
+                                    <a class="react-comp" href="${crumb.category_url_path === '/' ? '/' : `/${crumb.category_url_path}.html`}" 
+                                       title="${crumb.category_name}">
+                                        ${crumb.category_name}
+                                    </a>
+                                   </li>`
+                        ).join("")}
+                    </ul>
+                </div>
+            `;
+
+
+            breadcrumbsContainer.innerHTML = breadcrumbHtml;
+        }
+
+                            
+                            
+        function CmsPage({ content }) {
+            //console.log("✅ Rendering CmsPage (CMS Page)");
+            return React.createElement("div", { dangerouslySetInnerHTML: { __html: content } });
+        }
+
+        
+      function fetchPageType(url) {
+        const startTime = performance.now(); // Start timing
+
+        if (url === '/') {
+            url = "/homepage-desktop";
+            document.body.classList.add("homepage");
+            document.body.classList.add("cms-home");
+        }else{
+            document.body.classList.remove("homepage");
+            document.body.classList.remove("cms-home");
+        }
+
+//        console.log("URL changed to " , url);
+
+        const cacheKey = `pageType_${url}`;
+        const cachedData = localStorage.getItem(cacheKey);
+
+        /*if (cachedData) {
+            console.log(`🗄️ Using cached data for: ${url} (Time: ${(performance.now() - startTime).toFixed(2)} ms)`);
+            return Promise.resolve(JSON.parse(cachedData));
+        }*/
+
+//        console.log(`🔍 Fetching page type for: ${url} (Time: 0 ms)`);
+
+           const query = `{
+                route(url: "${url}") {
+                    type
+                    relative_url
+                }
+            }`;
+
+            //console.log('📤 Sending GraphQL Query:', query);
+
+            return fetch('/graphql', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const fetchTime = performance.now() - startTime;
+
+                //console.log(`📥 Received GraphQL response (Time: ${fetchTime.toFixed(2)} ms):`, data);
+
+                return data.data?.route || null;
+            })
+            .catch(error => {
+                console.error(`❌ Error fetching page type (Time: ${(performance.now() - startTime).toFixed(2)} ms):`, error);
+                return null;
+            });
+
+
+    }
+
+
+        function fetchCmsPageContent(url) {
+            // Adjust homepage URL based on screen size 
+            /*if (url === '/') {
+                const isMobile = window.innerWidth <= 768;
+                url = isMobile ? '/homepage-mobile' : '/homepage-desktop';
+                console.log("📱 Adjusted homepage URL:", url);
+            }*/
+
+            console.log("Called fetchCmsPageContent - URL is " , url);
+            console.log("🔍 Fetching CMS content for:", url);
+            return fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    const mainContent = $(html).find("#maincontent").html();
+                    //console.log("📥 Fetched CMS Content:", mainContent);
+                    return mainContent || "<p>Content not available</p>";
+                })
+                .catch(error => {
+                    console.error("❌ Error fetching CMS page content:", error);
+                    return "<p>Error loading content</p>";
+                });
+        }
+
+        function CheckIfBrandPage(url) {
+            console.log("in function CheckIfBrandPage, URL is", url);
+            if (!url) return Promise.resolve(false); // Always return a Promise
+
+            const urlPath = url.replace(/^\//, '').replace('.html', '');
+            const fragmentId = url.includes('#') ? url.split('#')[1] : null;
+            const isNumericId = /^\d+$/.test(fragmentId);
+            const idFromFragment = isNumericId ? fragmentId : null;
+
+            let query = '';
+
+            if (idFromFragment) {
+                query = `{
+                    category(id: ${idFromFragment}) {
+                        page_layout
+                    }
+                }`;
+            } else {
+                query = `{
+                    categoryList(filters: { url_path: { eq: "${urlPath}" } }) {
+                        page_layout
+                    }
+                }`;
+            }
+
+            //console.log(query);
+
+            return fetch('/graphql', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query })
+            })
+            .then(response => response.json())
+            .then(data => {
+                //console.log(data);
+                let layout = null;
+
+                if (idFromFragment && data?.data?.category) {
+                    layout = data.data.category.page_layout;
+                } else if (!idFromFragment && data?.data?.categoryList?.[0]) {
+                    layout = data.data.categoryList[0].page_layout;
+                }
+
+                return layout === 'brandpagelayout';
+            })
+            .catch(error => {
+                console.error('❌ Error in CheckIfBrandPage:', error);
+                return false;
+            });
+        }
+
+        function renderContentForUrl(url, isFirstLoad = false) {
+            
+            const prevBaseUrl = window.location.origin + window.location.pathname;
+        //    console.log("Called renderContentForUrl - URL is " , url);
+        //     const startTime = performance.now();
+        //     console.log(`start renderContentForUrl (Time: ${performance.now() - startTime} ms)`);
+
+            fetchPageType(url).then(route => {
+                if (!route) {
+                    console.log("⚠️ Unknown route, skipping content replacement.");
+                    return; // Do nothing if the route is unknown
+                }
+//                console.log("route.type is ", route.type );
+                if(route.type === "CATEGORY" || route.type === "CMS_PAGE" ){
+                    
+
+                    document.body.classList.remove("CATEGORY");
+                    document.body.classList.remove("CMS_PAGE");
+                    document.body.classList.remove("page-layout-brandpagelayout");
+                    
+                    document.body.classList.remove("page-layout-2columns-left");
+                    document.body.classList.add(route.type);
+
+
+
+                    if (route.type === "CATEGORY") {
+                        
+                        const subcatElement = document.getElementById("subcategories_and_data");
+                        if (subcatElement) subcatElement.style.display = "none";
+
+                        //console.log("Entered category page, URL is", url);
+
+                        let layout = '';
+                        CheckIfBrandPage(url).then(isBrandPage => {
+
+                            if (isBrandPage) {
+                                 console.log("✅ This is a brand page layout");
+
+                                // Call function from another script (if already loaded)
+                                if (typeof window.callBrandpage === 'function') {
+                                    
+                                    //console.log("script 1 - Calling callBrandpage");
+                                    window.callBrandpage(url);
+                                    //console.log("script 1 - called callBrandpage");
+                                    
+                                    document.body.classList.remove("page-layout-2columns-left");
+                                    document.body.classList.add("page-layout-brandpagelayout");
+                                }else{
+                                    
+                                    //console.log("script 1 - function was not found");
+                                }
+                                //  else {
+                                //     console.warn('callBrandpage not ready, retrying...');
+                                //     let retryCount = 0;
+                                //     const retry = setInterval(() => {
+                                //         if (typeof window.callBrandpage === 'function') {
+                                //             clearInterval(retry);
+                                //             window.callBrandpage(url);
+                                //         }
+                                //         retryCount++;
+                                //         if (retryCount > 10) clearInterval(retry); // Max 10 tries
+                                //     }, 100);
+                                // }
+
+                                return; // Stop further code
+                            } else {
+                            }
+                        });
+
+
+
+
+
+
+                        // console.log("reached here to render content");
+                        fetchBreadcrumbs(url).then(renderBreadcrumbs)
+                        document.body.classList.add("page-layout-2columns-left");
+                        document.body.classList.add("catalog-category-view");
+                        document.body.classList.add("full_width");
+
+                        //console.log("✅ Detected CATEGORY page, rendering ProductList.");
+
+                        ReactDOM.render(
+                            React.createElement(ProductList, { url: url }),
+                            document.querySelector("#maincontent")
+                        );
+
+
+                        if (!isFirstLoad) history.pushState(null, "", url);
+
+                    }else{
+
+                        document.body.classList.remove("catalog-category-view");
+                        document.body.classList.remove("page-layout-2columns-left");
+                        document.body.classList.remove("full_width");
+                        document.body.classList.remove("cms-home");
+                    }
+
+                    if (route.type === "CMS_PAGE") {
+
+                        document.body.classList.add("loading");
+                        fetchBreadcrumbs(url).then(renderBreadcrumbs);
+
+                        fetchCmsPageContent(url).then(content => {
+                            //console.log("✅ Detected CMS_PAGE, rendering CmsPage.");
+                            ReactDOM.render(React.createElement(CmsPage, { content }), document.querySelector("#maincontent"));
+                            document.body.classList.remove("loading");
+                            if (!isFirstLoad) history.pushState(null, "", url);
+                        });
+                    } 
+
+                //console.log("scrolling to top before");
+                 const nextBaseUrl = new URL(url, window.location.origin).origin + new URL(url, window.location.origin).pathname;
+
+                    if (prevBaseUrl !== nextBaseUrl) {
+                        //console.log("scrolling to top before");
+                        window.scrollTo({
+                            top: 0,
+                            behavior: "smooth"
+                        });
+                        //console.log("scrolling to top after");
+                    }
+                //console.log("scrolling to top after");
+                
+                }else {
+                    
+                    document.body.classList.remove("loading");
+                    //console.log("⚠️ Other page type detected. Allowing normal navigation.");
+                    if (!isFirstLoad) {
+                        window.location.href = url; // Redirect only when clicked
+                    }
+                }
+            });
+
+            //console.log(`end renderContentForUrl (Time: ${performance.now() - startTime} ms)`);
+        }
+        function handleNavigation(event) {
+            const clickedLi = event.target.closest("li.level0.category-item.level-top.parent.ui-menu-item");
+
+            if (window.innerWidth < 768 && clickedLi) {
+                const childUl = clickedLi.querySelector("ul");
+                const childa = clickedLi.querySelector("a");
+
+                /*if (childUl) {
+                    console.log("entered");
+                    if (childUl.classList.contains("collapsed")) {
+                        childUl.classList.remove("collapsed");
+                        childUl.classList.add("expanded");
+                        childa.classList.remove("collapsed");
+                        childa.classList.add("expanded");
+                    } else if (childUl.classList.contains("expanded")) {
+                        childUl.classList.remove("expanded");
+                        childUl.classList.add("collapsed");
+                        childa.classList.remove("expanded");
+                        childa.classList.add("collapsed");
+                    } else {
+                        childUl.classList.add("expanded");
+                        childa.classList.add("expanded");
+                    }
+                }else{
+
+                console.log("exit");
+}*/
+
+                // Check if the clicked anchor is anywhere inside the <ul>
+                const clickedAnchor = event.target.closest("li.level0.category-item.level-top.parent.ui-menu-item ul a.ui-menu-item");
+
+                if (clickedAnchor) {
+                    // Trigger the toggle nav button
+                    const toggleNavButton = document.querySelector('span[data-action="toggle-nav"]');
+                    if (toggleNavButton) {
+                        toggleNavButton.click();
+                    }
+                }
+
+//                return;
+            }
+
+            const startTime = performance.now(); // Start timing when function is called
+            //console.log(`Start handleNavigation (Time: 0 ms)`);
+
+            const target = event.target.closest("li.ui-menu-item.all-category,li.ui-menu-item.all-category a, a.react-comp, a.ui-menu-item-wrapper, a.logo"); 
+
+            if (!target) return; // Ignore clicks outside <a> or without the class
+
+            event.preventDefault(); // Prevent default navigation
+
+            const relHref = target.getAttribute("rel-href");
+            const targetUrl = (relHref || target.getAttribute("href")).replace(window.location.origin, "");
+
+
+            if (!targetUrl.startsWith("/") || targetUrl === window.location.pathname) {
+                return; // Ignore external links or same-page clicks
+            }
+
+            fetchPageType(targetUrl).then(route => {
+                const fetchTime = performance.now() - startTime; // Time taken for fetchPageType()
+                //console.log(`fetchPageType completed (Time: ${fetchTime.toFixed(2)} ms)`);
+
+                if (!route || (route.type !== "CATEGORY" && route.type !== "CMS_PAGE")) {
+                    window.location.href = targetUrl; // Normal redirect if not CATEGORY or CMS
+                } else {
+                    const renderStartTime = performance.now(); // Start render timing
+                    //console.log(`Start renderContentForUrl (Time: ${fetchTime.toFixed(2)} ms)`);
+
+                    
+                    //console.log("calling renderContentForUrl - URL is " , targetUrl);
+
+                    renderContentForUrl(targetUrl, false); // Load dynamically
+
+                    const renderEndTime = performance.now();
+                    //console.log(`End renderContentForUrl (Time: ${(renderEndTime - startTime).toFixed(2)} ms)`);
+                }
+            }).catch(error => {
+                console.error("Error fetching page type:", error);
+            });
+
+            //console.log(`End handleNavigation (Time: ${(performance.now() - startTime).toFixed(2)} ms)`);
+        }
+
+
+
+        // Initial page load check
+        const currentUrl = window.location.pathname.replace(window.location.origin, "");
+        //console.log("🔄 Checking current page type on load:", currentUrl);
+        renderContentForUrl(currentUrl, true);
+
+        // Listen for navigation clicks
+        document.addEventListener("click", handleNavigation);
+
+        // Handle browser back/forward navigation
+        window.addEventListener("popstate", () => {
+            //console.log("🔄 Browser navigation detected, reloading content for:", window.location.pathname);
+            renderContentForUrl(window.location.pathname, true);
+        });
+});
+</script>

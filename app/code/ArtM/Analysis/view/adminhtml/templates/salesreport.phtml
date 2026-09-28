@@ -1,0 +1,196 @@
+<style>
+    .form-container {
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        border-radius: 5px;
+        width: 300px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    input {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 12px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    button {
+        background-color: #4caf50;
+        color: #fff;
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    li.download-list {
+        background-color: #ffffff;
+        color: #303030;
+        padding: 1rem 1rem;
+        list-style: none;
+    }
+
+    .form-container {
+        width: 100%;
+    }
+
+    /* Pagination Styles */
+    .pagination {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .pagination a {
+        display: inline-block;
+        padding: 8px 12px;
+        margin: 0 4px;
+        border: 1px solid #ccc;
+        text-decoration: none;
+        color: #333;
+        border-radius: 4px;
+    }
+
+    .pagination a:hover {
+        background-color: #f5f5f5;
+    }
+
+    .pagination .current {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .pagination .disabled {
+        pointer-events: none;
+        color: #ccc;
+        border-color: #ccc;
+    }
+
+    /* Next and Previous Button Styles */
+    .pagination .prev-next {
+        font-weight: bold;
+    }
+
+    .pagination .prev-next:hover {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .file-container {
+        padding-left: 100px;
+    }
+
+    .file-container a {
+        padding-left: 30px;
+    }
+</style>
+<!-- php list of sale report -->
+<?php
+
+$salesData = $block->getSalesDate();
+
+?>
+<?php
+$helper = $this->helper('ArtM\Analysis\Helper\Data');
+
+// Get all files in the directory
+$directoryList = $helper->getFilesInDirectory();
+
+// Sort the file list in descending order
+arsort($directoryList);
+
+// Define the number of items per page
+$itemsPerPage = 10;
+
+// Get the current page from the URL parameter (default to 1 if not set)
+$current_page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+
+// Use array_slice to extract a portion of the file list based on the current page
+$currentPageFiles = array_slice($directoryList, ($current_page - 1) * $itemsPerPage, $itemsPerPage);
+
+// Calculate the starting number for the current page
+$startNumber = ($current_page - 1) * $itemsPerPage + 1;
+
+$i = $startNumber;
+
+// Calculate total pages
+$totalPages = ceil(count($directoryList) / $itemsPerPage);
+?>
+
+<!-- Total Pages Information -->
+<div class="total-pages-info">
+    Total Pages: <?php echo $totalPages; ?>
+</div>
+<div class="total-record">
+    Total Record : <?php echo count($directoryList); ?>
+</div>
+
+<!-- Pagination Links -->
+<div class="pagination">
+    <?php
+
+        $pagesPerBlock = 10;
+
+        $startPage = floor(($current_page - 1) / $pagesPerBlock) * $pagesPerBlock + 1;
+        $endPage = min($startPage + $pagesPerBlock - 1, $totalPages);
+
+        // Previous Button
+        if ($startPage > 1) {
+            echo '<a href="?page=' . ($startPage - 1) . '">Previous</a>';
+        }
+
+        for ($page = $startPage; $page <= $endPage; $page++) {
+            echo '<a href="?page=' . $page . '"' . ($page == $current_page ? ' class="current"' : '') . '>' . $page . '</a>';
+        }
+
+        // Next Button
+        if ($endPage < $totalPages) {
+            echo '<a href="?page=' . ($endPage + 1) . '">Next</a>';
+        }
+    ?>
+</div>
+
+<h2>Sales Report</h2>
+<div class="row">
+    <div class="col-m-4">
+        <div class="form-container">
+            <form id="dateForm" action="<?= $this->getCrrRequestSaveAdminUrl(); ?>" method="post" enctype="multipart/form-data">
+                <?php echo $block->getBlockHtml('formkey') ?>
+                <label for="startDate">Start Date:</label>
+                <input type="date" id="startDate" name="startDate" required>
+                <label for="endDate">End Date:</label>
+                <input type="date" id="endDate" name="endDate" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-m-8">
+        <div class="file-container">
+            <h3>File List:</h3>
+            <ul class="files-list">
+                <?php foreach ($currentPageFiles as $fileName) : ?>
+                    <li class="download-list" id="file-<?php echo $i; ?>">
+                        <?php                        
+                        echo '<span id="filename-' . $i . '">' . $i . ' => ' . $fileName . '</span>'; ?>
+                        <a href="<?php echo $block->getUrl('analysis/data/download', ['filepath' => $fileName]); ?>" target="_blank" id="download-link-<?php echo $i; ?>">
+                            Download File
+                        </a>
+                    </li>
+                    <?php $i++; ?>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    </div>
+</div>

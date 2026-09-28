@@ -1,0 +1,640 @@
+<?php
+
+namespace ArtM\SSO\Helper;
+
+use Magento\Framework\App\Helper\Context;
+use Magento\Framework\App\Helper\AbstractHelper;
+use Magento\Customer\Model\Customer;
+use Magento\Customer\Model\CustomerFactory;
+use Magento\Customer\Model\Session;
+use Magento\Framework\Controller\ResultFactory;
+use Magento\Customer\Model\AccountManagementFactory;
+use Magento\Framework\Encryption\EncryptorInterface;
+use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Customer\Api\Data\CustomerInterface;
+use ArtM\SSO\Model\SendotpFactory;
+use ArtM\SSO\Model\GetkeysFactory;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Eav\Model\Config;
+use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerCollectionFactory;
+use Magento\Customer\Api\AddressRepositoryInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\Api\FilterBuilder;
+use Magento\Customer\Model\ResourceModel\Grid\Collection as GridCollection;
+use Meetanshi\Sms\Helper\Data as  MeetanshiSMSHelper;
+use Magento\Framework\Event\ManagerInterface as EventManager;
+use Magento\Framework\Mail\Template\TransportBuilder;
+use Psr\Log\LoggerInterface;
+use Magento\Store\Model\ScopeInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Store\Model\StoreManagerInterface;
+
+class Data extends AbstractHelper
+{
+
+    const SEND_OTP_ON_EMAIL = 'custom/general_email/sso_email';
+    const ENABLE_PARTNERS_REGISTRATION_STATUS = 'custom/general/new_customer_registration_status';
+    /**
+     * EventManager variable
+     *
+     * @var [EventManager]
+     */
+    protected $eventManager;
+    
+    /**
+     * @var CustomerFactory
+     */
+    protected $customerFactory;
+
+    /**
+     * Meetnashi helper send otp
+     *
+     * @var int
+     */
+    protected $MeetanshiSMSHelper;
+
+    /**
+     * @var Config
+     */
+    private $eavConfig;
+
+    /**
+     * @var Customer
+     */
+    protected $customerModel;
+
+    /**
+     * @var Session
+     */
+    protected $customerSession;
+
+    /**
+     * @var EncryptorInterface
+     */
+    protected $encryptor;
+
+    /**
+     * @var AccountManagement
+     */
+    protected $AccountManagement;
+
+    /**
+     * Undocumented variable
+     *
+     * @var CustomerRepositoryInterface
+     */
+    protected $customerRepository;
+
+    
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
+     * @var ScopeConfigInterface
+     */
+    protected $scopeConfig;
+
+    /**
+     * Undocumented variable
+     *
+     * @var SendotpFactory
+     */
+    protected $sendOtpModel;
+    protected $transportBuilder;
+    /**
+     * Undocumented variable
+     *
+     * @var GetkeysFactory
+     */
+    protected $getkeys;
+    protected $resultFactory;
+    protected $accountManagementFactory;
+    protected $_customerInterface;
+    protected $_sendOtpModel;
+    protected $_getkeys;
+    protected $customerCollectionFactory;
+    protected $searchCriteriaBuilder;
+    protected $filterBuilder;
+    protected $customeraddressRepository;
+    protected $customerGridCollection;
+    protected $storeManager;
+
+    public function __construct(
+        Context $context,
+        Customer $customerModel,
+        ResultFactory $resultFactory,
+        Session $customerSession,
+        EncryptorInterface $encryptor,
+        AccountManagementFactory $accountManagementFactory,
+        CustomerRepositoryInterface $customerRepository,
+        CustomerInterface $customerInterface,
+        SendotpFactory $sendOtpModel,
+        GetkeysFactory $getkeys,
+        CustomerFactory $customerFactory,
+        Config $eavConfig, 
+        CustomerCollectionFactory $customerCollectionFactory,
+        AddressRepositoryInterface $customeraddressRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        FilterBuilder $filterBuilder,
+        GridCollection $customerGridCollection,
+        MeetanshiSMSHelper $MeetanshiSMSHelper,
+        ScopeConfigInterface $scopeConfig,
+        EventManager $eventManager,
+        LoggerInterface $logger,
+        TransportBuilder $transportBuilder,
+        StoreManagerInterface $storeManager
+    ){
+        parent::__construct($context);
+        $this->customerModel = $customerModel;
+        $this->resultFactory = $resultFactory;
+        $this->customerSession = $customerSession;
+        $this->encryptor = $encryptor;
+        $this->transportBuilder = $transportBuilder;
+        $this->accountManagementFactory = $accountManagementFactory;
+        $this->customerRepository = $customerRepository;
+        $this->_customerInterface = $customerInterface;
+        $this->_sendOtpModel = $sendOtpModel;
+        $this->_getkeys = $getkeys;
+        $this->customerFactory = $customerFactory;
+        $this->eavConfig = $eavConfig;
+        $this->customerCollectionFactory = $customerCollectionFactory;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->customeraddressRepository = $customeraddressRepository;
+        $this->filterBuilder = $filterBuilder;
+        $this->customerGridCollection = $customerGridCollection;
+        $this->MeetanshiSMSHelper = $MeetanshiSMSHelper;
+        $this->eventManager = $eventManager;
+        $this->logger = $logger;
+        $this->scopeConfig = $scopeConfig;
+        $this->storeManager = $storeManager;
+    }
+
+
+    /**
+     * Account created by email and phone number
+     *
+     * @param [email] [phone] $postData
+     * @param [constant] $websiteID
+     * @return void
+     */
+    public function createAccount($postData,$websiteID){
+
+        $customer = $this->customerFactory->create();
+        $customer->setWebsiteId($websiteID);
+
+        // $this->eavConfig->getAttribute('customer', 'firstname')
+        // ->setData('is_required', false)
+        // ->save();
+
+        $this->eavConfig->getAttribute('customer', 'lastname')
+        ->setData('is_required', false)
+        ->save();
+
+        $customer->setData('firstname', $postData['name']);
+        $customer->setData('email', $postData['email']);
+        $customer->setData('phone_number', $postData['phone']);
+        $customer->setData('password', $postData['password']);
+        $customerSaved = $customer->save();
+        if($customerSaved){
+            if($websiteID == 5){
+                $customer->sendNewAccountEmail();
+            }
+            $this->eventManager->dispatch(
+                'customer_register_success',
+                ['customer' => $customerSaved]
+            );
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public function getCurrentWebsiteId()
+    {
+        return $this->storeManager->getWebsite()->getId();
+    }
+
+    
+    /**
+     * Load customer by mobile number and set a new password.
+     *
+     * @param string $mobileNumber
+     * @param string $newPassword
+     * @return bool
+     */
+    public function updateCustomerPasswordByMobileNumber($phoneNumber , $newPassword , $website_id = null){
+        try {
+            $website_id = $website_id ?? $this->getCurrentWebsiteId();
+            $customerData = $this->customerModel->getCollection()
+                ->addAttributeToFilter('phone_number', $phoneNumber)
+                ->addFieldToFilter('website_id', $website_id)
+                ->getFirstItem();
+
+            if (!$customerData->getId()) {
+                return false;
+            }
+
+            $customer = $this->customerFactory->create()->load($customerData->getId());
+            $customer->setPassword($newPassword);
+            $customer->save();
+            return true;
+        } catch (NoSuchEntityException $e) {
+            return false;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * To check existing customer phone_number   O!w8OOt&5RP8
+     *
+     * @param [phone_number] $username
+     * @return boolean
+     */
+    public function isMobileNumberRegistered($userPhone)
+    {
+        try {
+            $customerCollection = $this->customerModel->getCollection()
+                ->addAttributeToFilter('phone_number', $userPhone)
+                ->addFieldToFilter('website_id', $this->getCurrentWebsiteId());
+            
+                if(count($customerCollection) > 0){
+                    foreach($customerCollection as $collection){
+                        if($collection->getId()){
+                            return $customerCollection->getData();
+                        }
+                    }
+                }
+                // else{
+                //     $customerEmail = $this->getCustomerPhoneNumberByAddress($userPhone);
+                //     if($customerEmail){
+                //         $customer = $this->customerModel->setWebsiteId(1)->loadByEmail($customerEmail);
+                //         return $customer->getData();
+                //     }else{
+                //         return false;
+                //     }
+                // }
+        } catch (NoSuchEntityException $e) {
+            return false;
+        } catch (\Exception $e) {
+            return false;
+        }
+        
+        return false;
+    }
+
+    public function getCustomerPhoneNumberByAddress(string $phone){
+        try{
+            $customerGridCollection = $this->customerGridCollection->addFieldToFilter('billing_telephone', $phone);
+            foreach ($customerGridCollection as $customer) {
+                return $customer->getEmail();
+            }
+        }catch(\Exception $e){
+            return false;
+        }
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $username
+     * @return boolean
+     */
+    public function isEmailRegistered($username)
+    {
+        try {
+            $customer = $this->customerModel->setWebsiteId($this->getStoreId())->loadByEmail($username); // Replace 1 with the appropriate website ID
+            if ($customer->getId()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (\Exception $e) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    public function isMobileNumberRegisteredOnThisEmail($email , $phoneNumber){
+        if($this->isEmailRegistered($email)){
+            if($this->isPhoneNumberAvailable($email)){
+                $this->addCustomerPhoneNumber($phoneNumber , $email);
+                return 'set_phone_number';
+            }else{
+                return false;
+            }
+        }else{
+            return 'email_not_registered';
+        }
+    }
+
+    function validateUsername($username) 
+    {
+        if (filter_var($username, FILTER_VALIDATE_EMAIL)) {
+            if($this->isEmailRegistered($username)){
+                return true;
+            }
+        }
+        if(ctype_digit($username)){
+            if (strlen($username) < 11 && strlen($username) > 9 ) {
+                if($this->isAvailableMobileNumber($username)){
+                    return true;
+                }
+            }else{
+                return false;
+            }
+        }
+        return false;
+    }
+
+    
+    public function isPhoneNumberAvailable($username){
+        $attributeCode = 'phone_number';
+        $customerCollection = $this->customerCollectionFactory->create()
+            ->addAttributeToFilter($attributeCode, ['null' => true])
+            ->addFieldToFilter('email', ['eq' => $username])
+            ->addFieldToFilter('website_id', $this->getCurrentWebsiteId());
+        if($this->getCurrentWebsiteId() != 1){
+           return false;
+        }
+        if($customerCollection->getSize() > 0 ){
+            return $customerCollection->getData();
+        }else{
+            return false;
+        }
+        return false;
+    }
+
+
+    public function getCustomerName($username){
+
+    }
+    
+
+    public function customerLoginByEmail($username , $password){
+        try {
+            $customer = $this->customerModel->setWebsiteId($this->getStoreId())->loadByEmail($username);
+            $accountManagement = $this->accountManagementFactory->create();
+            $isValidPassword = $accountManagement->authenticate($username, $password);
+            if ($isValidPassword) {
+                return $customer; 
+            }else{
+                return false;
+            }
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    public function customerLoginByNumber($username , $password){
+        try {
+
+            $customer = $this->customerModel->getCollection()
+            ->addAttributeToFilter('phone_number', $username);
+            
+            foreach ($customer as $customers) {
+                $email = $customers->getEmail();
+                $id = $customers->getId();
+            }
+        
+            $customer = $this->customerModel->setWebsiteId(1)->loadByEmail($email);
+
+            $accountManagement = $this->accountManagementFactory->create();
+            $isValidPassword = $accountManagement->authenticate($email, $password);
+            if ($isValidPassword) {
+                if($this->customerSession->setCustomerAsLoggedIn($customer)){
+                    return true; 
+                }
+            }else{
+                return false;
+            }
+        }catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    public function isAvailableMobileNumber($username){
+        $customerCollection = $this->customerModel->getCollection()
+            ->addAttributeToFilter('phone_number', $username)
+            ->addFieldToFilter('website_id', $this->getCurrentWebsiteId()); // Add website filter
+
+        if ($customerCollection->getSize() > 0) {
+            return $customerCollection->getData();
+        } else {
+            return false;
+        }
+    }
+
+
+    public function sendOTP($number){
+        date_default_timezone_set("Asia/Kolkata");
+        $date = date('Y-m-d H:i:s');
+        $model = $this->_sendOtpModel->create();
+        
+        if( $this->isAvailableMobileNumber($number) ){
+            $otp = rand(111111,999999);
+            $customerFound = $this->_sendOtpModel->create()->getCollection()->addFieldToFilter('phonenumber', $number);
+            if(count($customerFound) > 0){
+                $model = $customerFound->getFirstItem();
+                $model->setData("otp", $otp);
+                $model->setData("sent_at", $date);
+                $model->save();
+                $sent_otp = 'yes';
+                return $this->sendSms($sent_otp , $number , $otp);
+            }else{
+                $model->addData([
+                    "phonenumber" => $number,
+                    "sent_at" => $date,
+                    "otp" => $otp
+                ]);
+                $saveData = $model->save();   
+                $sent_otp = 'yes';        
+                return $this->sendSms($sent_otp , $number , $otp);     
+            }
+            
+        }else{
+            // $model = $this->_sendOtpModel->create();
+            $partnersRegisterationStatus = $this->scopeConfig->getValue(
+                self::ENABLE_PARTNERS_REGISTRATION_STATUS,
+                ScopeInterface::SCOPE_STORE,
+                $this->getStoreId()
+            );
+            if(!$partnersRegisterationStatus){
+                return false;
+            }
+
+            $otp = rand(111111,999999);
+
+            $customerFound = $this->_sendOtpModel->create()->getCollection()->addFieldToFilter('phonenumber', $number);
+
+            if(count($customerFound) > 0){
+
+                $model = $customerFound->getFirstItem();
+
+                $model->setData("otp", $otp);
+                $model->setData("sent_at", $date);
+                $model->save();
+
+            }else{
+                $model->addData([
+                    "customer_id" => '',
+                    "phonenumber" => $number,
+                    "sent_at" => $date,
+                    "otp" => $otp
+                ]);
+                $saveData = $model->save(); 
+                // $this->sendSms($sent_otp , $number , $otp);  
+            }
+            $sent_otp = 'yes';    
+            return "enter_email ,".$this->sendSms($sent_otp , $number , $otp);
+        }
+    }
+
+
+    public function validateOTP($customer_otp,$number){
+        date_default_timezone_set("Asia/Kolkata");   //India time (GMT+5:30)
+        $date = date('Y-m-d H:i:s');
+        
+        $otp = array();
+        $customerFound = $this->_sendOtpModel->create()->getCollection()->addFieldToFilter('phonenumber', $number);
+        foreach ($customerFound as $value) {
+            $otp[] = $value->getData(); 
+        }
+        $modelTime = $otp['0']['sent_at'];
+        // print_r($otp);die;
+        $modelOtp = $otp['0']['otp'];
+        $modelNumber = $otp['0']['phonenumber'];
+        $modelCustomer = $otp['0']['customer_id'];
+        
+        $currentTimestamp = time();
+        // OTP expired in 2.5 minutes
+        $otp_valid_for = 300;
+        if($number == $modelNumber && $modelOtp == $customer_otp){
+            $modelTime = strtotime($modelTime);
+            $timeDifference = $currentTimestamp - $modelTime;
+            if($timeDifference <= $otp_valid_for){
+                if($modelCustomer >= 0){
+                    try{
+                        foreach ($customerFound as $customerOTPData){
+                            $customerOTPData->delete();
+                        }
+                    }catch(\Exception $e){
+    
+                    }
+                    return 'true';
+                }else{
+                    try{
+                        foreach ($customerFound as $customerOTPData){
+                            $customerOTPData->delete();
+                        }
+                    }catch(\Exception $e){
+    
+                    }
+                    return 'false';
+                }
+            }else{
+                $response = "OTP_EXPIRED";
+                return $response;
+            }
+        }else{
+            $response = "OTP_NOT_VALIDE";
+            return $response;
+        }
+        $response = "OTP_NOT_VALIDE";
+        return $response;
+    }
+
+    
+    public function addCustomerPhoneNumber($phoneNumber , $email){
+        try{
+            $customer = $this->customerModel->setWebsiteId($this->getStoreId())->loadByEmail($email);
+            $customer->setData('phone_number', $phoneNumber);
+            $customer->save();
+            return $customer;
+        }catch(\e){
+            return false;
+        }
+        return false;
+    }
+
+    public function customerLogin($number){
+        $customer = $this->customerModel->getCollection()->addAttributeToFilter('phone_number', $number);
+        
+        foreach ($customer as $customers) {
+            $email = $customers->getEmail();
+        }
+    
+        $customer = $this->customerModel->setWebsiteId($this->getStoreId())->loadByEmail($email);
+        $this->customerSession->setCustomerAsLoggedIn($customer);
+        $resultRedirect = $this->resultRedirectFactory->create();
+        $resultRedirect->setPath('*/*/*'); // Set the path to the same controller and action
+
+        return $resultRedirect;
+        //return true;
+
+    }
+
+    public function sentOtpOnEmail($customerEmail, $customerName, $OTP){
+        $templateVars = [];
+        $sendorName = 'Golfoy.com';
+        $sendorEmail = 'contact@golfoy.com';
+        if($customerEmail != '' || $OTP != ''){
+                $templateVars = [
+                'cname' => $customerName,
+                'otp'   => $OTP
+            ];          
+            
+            try {
+                $this->transportBuilder
+                    ->setTemplateIdentifier(19)
+                    ->setTemplateOptions(['area' => \Magento\Framework\App\Area::AREA_FRONTEND, 'store' => $this->getStoreId()])
+                    ->setTemplateVars($templateVars)
+                    ->setFrom(['name' => $sendorName, 'email' => $sendorEmail])
+                    ->addTo([$customerEmail]);
+            
+                $transport = $this->transportBuilder->getTransport();
+                $transport->sendMessage();
+            
+            } catch (\Magento\Framework\Exception\MailException $e) {
+                $this->logger->error('MailException: ' . $e->getMessage());
+            } catch (\Exception $e) {
+                $this->logger->error('Email Send Error: ' . $e->getMessage());
+            }
+        }
+        return true;
+    }
+
+    public function isEnableEmailOtp(){
+        return $this->scopeConfig->getValue(self::SEND_OTP_ON_EMAIL, ScopeInterface::SCOPE_STORE);
+    }
+
+    public function sendSms($sent_otp , $number , $otp){
+
+        $OTPSent = $this->MeetanshiSMSHelper->sendOTPText($otp, $number);
+        $customerData = $this->isMobileNumberRegistered($number);
+        if(!empty($customerData) && $this->isEnableEmailOtp()){
+            $this->sentOtpOnEmail($customerData['0']['email'], $customerData['0']['firstname'], $otp);
+        }
+        return $OTPSent; //$this->MeetanshiSMSHelper->sendOTPText($otp, $number);
+    }
+
+    public function getStoreId(){
+        return $this->storeManager->getStore()->getId();
+    }
+
+    public function getPartnersAccountRegistrationStatus(){
+        $partnersRegisterationStatus = $this->scopeConfig->getValue(
+            self::ENABLE_PARTNERS_REGISTRATION_STATUS,
+            ScopeInterface::SCOPE_STORE,
+            $this->getStoreId()
+        );
+        if(!$partnersRegisterationStatus){
+            return false;
+        }
+        return true;
+    }
+}
+?>

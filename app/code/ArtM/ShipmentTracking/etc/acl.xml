@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+	<acl>
+		<resources>
+			<resource id="Magento_Backend::admin">
+				<resource id="ArtM_ShipmentTracking::shipment_tracking"
+                          title="ArtM Shipment Tracking"
+                          sortOrder="100">
+					<resource id="ArtM_ShipmentTracking::shipment_logs"
+                              title="Shipment Logs"
+                              sortOrder="10"/>
+					<resource id="ArtM_ShipmentTracking::partner_management"
+                              title="Partner Management"
+                              sortOrder="20"/>
+					<resource id="ArtM_ShipmentTracking::tracking_status"
+                              title="Tracking Status Mappings"
+                              sortOrder="30"/>
+				</resource>
+			</resource>
+		</resources>
+	</acl>
+</config>

@@ -1,0 +1,74 @@
+<?php /** @var \Sparsh\AutoRelatedProducts\Block\ProductList\AutoRelated $block */ ?>
+<?php
+return;
+if ($block->getData('ruleId')) {
+    ?><div id="sparsh-auto-related-products-custom-<?=$block->getData('ruleId');?>"></div><?php
+}
+$arr = [27 => 104, 28 => [122, 599, 600, 598, 657, 684, 867, 878, 639, 601, 602, 345, 937], 29 => 108, 
+30 => 206, 31 => 105, 32 => 895, 33 => 868, 34 => 879, 35 => [6, 922, 923, 21], 36 => [8,80], 37 => [7, 618],
+38 => [99, 142], 39 => [143, 101], 40 => 193, 41 => [254, 198, 893,160,10,193,16], 1 => [202, 881, 882, 883, 884, 885],
+42 => [448, 36, 153], 43 => [149, 182, 211], 44 => [450, 260, 344], 45 =>[619, 30, 349, 348, 347, 346, 98, 97, 96, 79, 39],
+46 => [604, 605, 606, 607, 609, 610, 608, 611, 778, 61, 81, 576, 575, 577, 579, 580, 678, 64, 591, 829, 593, 594, 592, 595, 596, 62, 950, 65, 1011, 1014],
+47 => [28, 134, 621, 135, 136, 137, 805, 871, 872, 873, 874, 875, 953, 967, 968, 29, 43, 89, 637],
+48 => [95, 956, 957, 958, 1017, 116, 118, 581, 119, 120, 121, 152, 140, 141, 150, 255, 233, 935, 960, 1009, 1010, 1013],
+49 => [ 149, 584, 585, 949]];
+//$arr = [ 149, 584, 585, 949];
+$newarr = [];
+foreach($arr as $v){
+     if(is_array($v)){
+        foreach($v as $vv){
+            $newarr[] = $vv;
+        }
+     }else{
+        $newarr[] = $v;
+     }
+}
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+ $product = $objectManager->create('Magento\Catalog\Block\Product\View')->getProduct(); 
+ $result =[];
+ if($product){
+ $categoriesm = $product->getCategoryIds(); 
+ //print_r($newarr);
+ //print_r($categoriesm);
+ $result = array_intersect($categoriesm, $newarr);
+ }
+if(!empty($result)){
+?>
+<div id = "csparsh-auto-related-products-after-related">
+<div id="csparsh-inner" class="block-content content sparsh-auto-related-products-block">
+    <h3>Customers who bought this item also viewed:</h3>
+    <div class="products wrapper grid products-grid">
+        <ol id="sparsh-auto-related-products-slider-49" class="products list items product-items ">
+        <?php for($i=1;$i<6;$i++){   ?>
+            <li class="item product product-item">
+                <div class="product-item-info">
+                <span class="product-image-container animation_div" style="width: 152px;">
+                <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                </span> </span>
+                <div class="product details product-item-details">
+                    <p class ="animation_div" style="width:100%;height:15px;"></p>
+                    <p class ="animation_div" style="width:50%;height:15px;"></p> 
+                    <p class ="animation_div" style="width:40%;height:15px;"></p> 
+                    <p class ="animation_div" style="width:60%;height:15px;"></p> 
+               </div></div>                
+            </li>
+            <?php } ?>  
+        </ol>
+     </div>
+</div>
+</div>  
+
+<script type="text/x-magento-init">
+{
+    "*": {
+        "autorelatedAjaxLoad": {
+            "baseUrl": "<?= $block->escapeHtml($block->getBaseUrl()) ?>",
+            "type": "<?= $block->escapeHtml($block->getData('rule_type')) ?>",
+            "id": "<?= $block->escapeHtml($block->getItemId()) ?>",
+            "rule_id": "<?= $block->escapeHtml($block->getData('ruleId')) ?>"
+        }
+    }
+}
+</script>
+<?php } ?>

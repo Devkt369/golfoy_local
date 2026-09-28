@@ -1,0 +1,53 @@
+<?php
+/**
+ * @var \ArtM\AdblockAtrr\Block\CategoryAdBlock $block
+ */
+$adBlockHtml = $block->getAdBlockHtml();
+
+$position = $block->getPosition();
+?>
+<?php if ($adBlockHtml !== '' && $position > 0) : ?>
+    <div id="artm-category-adblock-source" style="display: none;">
+        <li class="item product product-item adblock-product-item">
+            <?= /* @noEscape */ $adBlockHtml ?>
+        </li>
+    </div>
+    <script>
+        require(['jquery'], function ($) {
+            'use strict';
+
+            var adHtml = <?= json_encode($adBlockHtml) ?>;
+            var position = <?= (int)$position ?>;
+
+            function moveCategoryAdBlock() {
+
+                var list = $('.products.list.items.product-items').first();
+
+                if (!list.length) {
+                    return;
+                }
+
+                // Already inserted?
+                if (list.find('.adblock-product-item').length) {
+                    return;
+                }
+
+                var products = list.children('li.product-item:not(.adblock-product-item)');
+
+                var ad = $('<li class="item product product-item adblock-product-item">' + adHtml + '</li>').css({overflow: 'hidden'});
+                
+                if (products.length >= position) {
+                    ad.insertBefore(products.eq(position - 1));
+                } else {
+                    ad.appendTo(list);
+                }
+            }
+
+            
+            $(document).on('contentUpdated ajaxComplete', function () {
+                moveCategoryAdBlock();
+            });
+
+        });
+    </script>
+<?php endif; ?>

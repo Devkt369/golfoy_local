@@ -1,0 +1,27 @@
+<?php /* @var \Magestore\WebposPerformanceAdminUi\Block\Adminhtml\ActionRanking\RankingList $block */?>
+<h5 class="rank-list-title"><?= /* @noEscape */ __('POS Action Rank'); ?></h5>
+<p class="rank-list-subtitle"><?= /* @noEscape */ __('Slowest Response Time (seconds)'); ?></p>
+<div class="rank-list-component">
+    <ol class="bar-list">
+        <?php  foreach ($block->getActionCollection() as $action): ?>
+            <li class="is-clickable bar-item" id="<?= /* @noEscape */ $action->getActionCode() ?>"
+                onclick="selectAction('<?= /* @noEscape */ $action->getActionCode() ?>')">
+                <div class="bar-item-info <?=  /* @noEscape */ $action->getAveragePeriod() > 2 ? 'slow' : 'normal'?>">
+                    <div class="bar-item-info-label">
+                        <span class="bar-item-info-label__text">
+                            <?= /* @noEscape */ $block->getActionLabel($action->getActionCode()); ?>
+                        </span>
+                    </div>
+                    <div class="bar-item-info__value">
+                        <?= /* @noEscape */ $action->getAveragePeriod(); ?>
+                    </div>
+                </div>
+            </li>
+        <?php endforeach; ?>
+    </ol>
+</div>
+<div class="rank-list-show-table-link">
+    <a href="<?= /* @noEscape */ $block->getAllActionResponseTable();?>">
+        <?= /* @noEscape */ __('See all performance log table'); ?>
+    </a>
+</div>

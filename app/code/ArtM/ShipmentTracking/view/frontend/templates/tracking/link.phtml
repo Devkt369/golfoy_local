@@ -1,0 +1,207 @@
+<?php
+
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+?>
+<?php /** @var $block \Magento\Shipping\Block\Tracking\Link */ ?>
+<?php $order = $block->getOrder() ?>
+<a href="#"
+    class="action track iframe-popup sss"
+    title="<?= $block->escapeHtmlAttr($block->getLabel()) ?>"
+    data-window-url="<?= $block->escapeUrl($block->getWindowUrl($order)) ?>">
+    <span><?= $block->escapeHtml($block->getLabel()) ?></span>
+</a>
+
+<div id="track-order-modal" style="display:none;">
+    <div class="track-order-loader" style="text-align:center; padding: 40px;">
+        <img src="<?= $block->getViewFileUrl('images/loader-2.gif') ?>" alt="Loading tracking info..." />
+        <p><?= $block->escapeHtml(__('Loading tracking info...')) ?></p>
+    </div>
+    <iframe id="track-order-iframe" src="" width="100%" height="500" frameborder="0" style="display:none;"></iframe>
+</div>
+
+<script>
+    require([
+        'jquery',
+        'Magento_Ui/js/modal/modal'
+    ], function($, modal) {
+        $(document).ready(function() {
+            var options = {
+                type: 'popup',
+                responsive: true,
+                innerScroll: false,
+                title: '<?= $block->escapeHtml($block->getLabel()) ?>',
+                buttons: [],
+                modalClass: 'track-order-popup',
+                closed: function() {
+                    $('#track-order-iframe').attr('src', '').hide();
+                    $('.track-order-loader').show();
+                }
+            };
+
+            var popup = modal(options, $('#track-order-modal'));
+
+            $(document).on('click', '.iframe-popup', function(e) {
+                e.preventDefault();
+                var url = $(this).data('window-url');
+
+                $('#track-order-modal').modal('openModal'); // Open modal immediately with loader
+                $('.track-order-loader').show();
+                $('#track-order-iframe').css('height', '420px').hide();
+
+                $('#track-order-iframe').off('load').on('load', function() {
+                    var $iframe = $(this);
+                    var viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+                    var isMobile = window.matchMedia('(max-width: 767px)').matches;
+                    var maxIframeHeight = Math.round(viewportHeight * (isMobile ? 0.86 : 0.65));
+                    var minIframeHeight = 260;
+
+                    try {
+                        var doc = this.contentWindow.document;
+                        var body = doc.body;
+                        var html = doc.documentElement;
+                        var contentHeight = Math.max(
+                            body ? body.scrollHeight : 0,
+                            body ? body.offsetHeight : 0,
+                            html ? html.clientHeight : 0,
+                            html ? html.scrollHeight : 0,
+                            html ? html.offsetHeight : 0
+                        );
+
+                        var finalHeight = isMobile ?
+                            Math.max(viewportHeight - 92, minIframeHeight) :
+                            Math.min(Math.max(contentHeight, minIframeHeight), maxIframeHeight);
+                        $iframe.css('height', finalHeight + 'px');
+                    } catch (error) {
+                        $iframe.css('height', maxIframeHeight + 'px');
+                    }
+
+                    $('.track-order-loader').hide();
+                    $iframe.show(); // Show iframe only after content loaded
+                }).attr('src', url);
+            });
+        });
+    });
+</script>
+
+<style>
+    /* Mobile First - Base styles for all devices */
+    .track-order-popup .modal-inner-wrap {
+        width: 95%;
+        max-width: 95%;
+        height: auto;
+        min-height: auto;
+        max-height: 80vh;
+        overflow: hidden;
+    }
+
+    /* Tablets - 768px and up */
+    @media (min-width: 768px) {
+        .track-order-popup .modal-inner-wrap {
+            width: 80%;
+            max-width: 560px;
+            height: auto;
+            min-height: auto;
+            max-height: 72vh;
+        }
+    }
+
+    /* Small Desktop - 1024px and up */
+    @media (min-width: 1024px) {
+        .track-order-popup .modal-inner-wrap {
+            width: 520px;
+            max-width: 80%;
+            height: auto;
+            min-height: auto;
+            max-height: 70vh;
+        }
+    }
+
+    /* Large Desktop - 1920px and up */
+    @media (min-width: 1920px) {
+        .track-order-popup .modal-inner-wrap {
+            width: 550px;
+            max-width: 75%;
+            height: auto;
+            min-height: auto;
+            max-height: 68vh;
+        }
+    }
+
+    .track-order-popup .modal-content {
+        padding: 0 !important;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden !important;
+    }
+
+    .track-order-loader {
+        flex-shrink: 0;
+    }
+
+    #track-order-iframe {
+        display: block !important;
+        border: 0;
+        width: 100% !important;
+        height: 420px;
+        max-height: 65vh;
+    }
+
+    .modal-popup.modal-slide .modal-inner-wrap[class] {
+        background-color: white;
+    }
+
+    .track-order-popup .modal-content {
+        padding: 0 !important;
+    }
+
+    .modal-popup .modal-title {
+        font-size: 17px;
+        font-weight: 600;
+    }
+
+    @media only screen and (max-width:767px) {
+
+        .track-order-popup.modal-popup,
+        .track-order-popup.modal-popup._show {
+            padding: 0 !important;
+        }
+
+        aside.modal-popup.track-order-popup.modal-slide._inner-scroll._show {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        .modal-popup.modal-slide {
+            left: 0;
+        }
+
+        .modal-popup.modal-slide._inner-scroll .modal-inner-wrap {
+            width: 100vw;
+            max-width: 100vw;
+            height: 100dvh;
+            max-height: 100dvh;
+            margin: 0;
+            border-radius: 0;
+        }
+
+        .track-order-popup .modal-content {
+            height: calc(100dvh - 56px);
+            min-height: calc(100dvh - 56px);
+            overflow: hidden !important;
+        }
+
+        #track-order-iframe {
+            height: calc(100dvh - 92px) !important;
+            max-height: calc(100dvh - 92px) !important;
+        }
+
+        .modal-popup.modal-slide .modal-inner-wrap {
+            max-height: 100vh;
+            max-width: 100%;
+        }
+    }
+</style>

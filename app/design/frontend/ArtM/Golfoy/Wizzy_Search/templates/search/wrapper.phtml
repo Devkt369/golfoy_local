@@ -1,0 +1,140 @@
+<?php
+$configs = $block->getConfigs();
+$addMoveToTopWidget = $configs['search']['configs']['pagination']['moveToTopWidget']['add'];
+?>
+<script type="text/template" id="wizzy-search-wrapper">
+    <?= $block->getBlockHtml('formkey'); ?>
+    {{#hasFacets}}
+        <a href="#" class="wizzy-filters-mobile-entry {{^sort}}only-filters{{/sort}}">Filters</a>
+    {{/hasFacets}}
+    
+    {{#hasFacets}}
+    <div class="custom_toolbar_category_page">
+
+        <!-- FILTER BUTTON -->
+        <div class="filter_heading visible-xs close wizzy-filters-mobile-entry">
+            <div class="filter_svg_icon filter_sort_icon">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" width="300" height="300"><g width="100%" height="100%" transform="matrix(1,0,0,1,0,0)"><g><linearGradient id="Settings_00000075861288888784205750000000478932812083334023_" gradientUnits="userSpaceOnUse" x1="0" y1="256" x2="512" y2="256"><stop offset="0" style="" stop-color="rgb(157, 214, 252)"></stop><stop offset="0.0056" style="" stop-color="rgb(157, 214, 252)"></stop><stop offset="1" style="" stop-color="rgb(209, 127, 247)"></stop></linearGradient><path id="Settings" style="stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10;" d="M20,96h80 M180,96h312 M140,56c-22.091,0-40,17.909-40,40s17.909,40,40,40s40-17.909,40-40S162.091,56,140,56z M20,256h312M412,256h80 M372,216c-22.091,0-40,17.909-40,40s17.909,40,40,40s40-17.909,40-40S394.091,216,372,216z M20,416h80 M180,416h312M140,376c-22.091,0-40,17.909-40,40s17.909,40,40,40s40-17.909,40-40S162.091,376,140,376z" fill="none" fill-opacity="1" stroke="#000000ff" stroke-opacity="1" data-original-stroke-color="#000000ff" stroke-width="20" data-original-stroke-width="40"></path></g></g></svg>
+            </div>
+            <div class="filter_heading_text filter_sort_text">
+                Filters
+            </div>
+        </div>
+
+        <!-- SORT BUTTON -->
+        <div class="sorting_overlay visible-xs wizzy-sort-mobile-entry">
+            <div class="sort_svg_icon filter_sort_icon">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" id="Layer_1" height="300" viewBox="0 0 512 512" width="300" data-name="Layer 1" version="1.1"><g width="100%" height="100%" transform="matrix(1,0,0,1,0,0)"><path d="m213.708 12v488a12 12 0 0 1 -20.485 8.485l-114.054-114.053a12 12 0 0 1 16.971-16.971l93.568 93.568v-459.029a12 12 0 0 1 24 0zm219.123 105.568-114.054-114.053a12 12 0 0 0 -20.485 8.485v488a12 12 0 0 0 24 0v-459.029l93.568 93.568a12 12 0 0 0 16.971-16.971z" fill="#000000" fill-opacity="1" data-original-color="#000000ff" stroke="none" stroke-opacity="1"></path></g></svg>
+            </div>
+            <div class="sort_heading_text filter_sort_text">
+                Sort
+            </div>
+        </div>
+
+    </div>
+    {{/hasFacets}}
+   <div class="wizzy-search-wrapper {{#inOnCategoryPage}}wizzy-category-page{{/inOnCategoryPage}}
+        {{#hasFacets}}has-facets{{/hasFacets}}
+        {{#hasLeftFacets}}has-left-facets{{/hasLeftFacets}}
+        {{#hasTopFacets}}has-top-facets{{/hasTopFacets}}">
+
+      <div class="wizzy-search-summary-wrapper">
+         {{#summary}}
+            {{{summary}}}
+         {{/summary}}
+      </div>
+
+      <div class="wizzy-search-results-wrapper">
+          {{#hasFacets}}
+                <a href="#" class="wizzy-filters-mobile-entry {{^sort}}only-filters{{/sort}}">Filters</a>
+          {{/hasFacets}}
+
+         {{#hasLeftFacets}}
+             <div class="wizzy-search-filters-left">
+
+                 <div class="wizzy-filters-bg"></div>
+                 <div class="wizzy-filters-close-btn"></div>
+                 <div class="wizzy-filters-header">
+                     <p class="header-title">Filters</p>
+                     {{#hasFilters}}
+                        <a href="#" class="wizzy-filters-clear-all">Clear All</a>
+                     {{/hasFilters}}
+                 </div>
+
+                 <div class="wizzy-search-filters-left-wrapper">
+                    <div class="filter_heading_popup">Filters</div>
+                     {{#leftFacets}}
+                        {{{html}}}
+                     {{/leftFacets}}
+
+                     <div class="wizzy-search-filters-left-mobile-extra">
+                     </div><!-- ending of wizzy-search-filters-left-mobile-extra -->
+                     <div class="apply-bar">
+                        <div class="close-icon-category filter_toggler filter-cross-btn visible-xs apply-bar-btn">
+                            Show Results
+                        </div>
+                        <div class="clear_all_button visible-xs">
+                            <div class="filter-cross-btn">
+                                {{#hasFilters}}
+                                    <a href="#" class="wizzy-filters-clear-all filter-clear action_click filter-clear action_click"><span>Clear All</span></a>
+                                {{/hasFilters}}
+                                <!-- <a href="#" class="filter-clear action_click" target="layered-navigation-filter-clear"><span>Clear All</span></a> -->
+                            </div>
+                        </div>                        
+                    </div>
+                 </div>
+
+             </div><!-- ending of wizzy-search-filters-->
+          {{/hasLeftFacets}}
+
+         <div class="wizzy-search-results-container">
+
+            <div class="wizzy-search-filters-top">
+
+               <div class="search-filters-top-wrapper">
+                   <div class="wizzy-search-filters-list-top">
+                       {{#topFacets}}
+                            {{{html}}}
+                       {{/topFacets}}
+
+                   </div><!-- ending of wizzy-search-filters-list-top -->
+
+                   <div class="wizzy-search-sort-wrapper">
+                       {{#sort}}
+                            {{{sort}}}
+                       {{/sort}}
+                   </div><!-- ending of wizzy-search-sort-wrapper -->
+               </div><!-- ending of search-filters-top-wrapper-->
+
+                <div class="filters-list-top-values-wrapper">
+
+                </div><!-- ending of filters-list-top-values-wrapper -->
+
+                <div class="wizzy-selected-filters">
+                    {{{selectedFacets}}}
+                </div><!-- ending of wizzy-selected-filters -->
+
+            </div><!-- ending of wizzy-search-filters-->
+
+            <div class="wizzy-search-results">
+                {{{ products }}}
+            </div><!-- ending of wizzy-search-filters-->
+
+             <div class="wizzy-search-pagination">
+                 {{{ pagination }}}
+             </div>
+
+         </div><!-- ending of wizzy-search-results-->
+
+      </div><!-- ending of wizzy-search-results-container -->
+   </div><!-- ending of wizzy-search-wrapper-->
+
+    <?php if ($addMoveToTopWidget) {  ?>
+        <div class="wizzy-scroll-to-top-wrapper">
+            <div class="wizzy-scroll-to-top-button">
+
+            </div><!-- ending of wizzy-scroll-to-top-button -->
+        </div><!-- ending of wizzy-scroll-to-top-wrapper -->
+    <?php } ?>
+
+</script>

@@ -1,0 +1,550 @@
+<style>
+    :root {
+        --box-w: 96px;
+        --box-h: 110px;
+        --radius: 12px;
+        --gap: 18px;
+        --anim-ms: 420ms;
+    }
+
+    .giveway-container {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #000;
+        color: #fff;
+    }
+
+
+    section.giveaway-terms p {
+        font-size: 17px;
+        line-height: 20px;
+    }
+
+    section.giveaway-terms h3 {
+        font-size: 30px;
+        font-weight: 600;
+        margin-bottom: 40px;
+    }
+
+    p.winner-annouced {
+        font-size: 18px;
+
+    }
+
+    .titleist-product-slider .header_link_product_slider a {
+        display: none !important;
+    }
+
+    .countdown-label {
+        margin-top: 8px;
+        font-size: 14px;
+        letter-spacing: 2px;
+        background: linear-gradient(180deg, #FFD700, #000000);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .glowing-light-text {
+        font-size: 45px;
+        margin-top: 60px;
+        font-weight: bold;
+        color: #fff;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+
+        /* soft subtle glow */
+        text-shadow:
+            0 0 4px #fff,
+            0 0 10px rgba(255, 255, 255, 0.6);
+
+        /* glowing animation */
+        animation: glowPulse 2s infinite alternate;
+    }
+
+    @keyframes glowPulse {
+        0% {
+            text-shadow:
+                0 0 4px #fff,
+                0 0 10px rgba(255, 255, 255, 0.6);
+        }
+
+        50% {
+            text-shadow:
+                0 0 8px #fff,
+                0 0 20px rgba(255, 255, 255, 0.9);
+        }
+
+        100% {
+            text-shadow:
+                0 0 4px #fff,
+                0 0 10px rgba(255, 255, 255, 0.6);
+        }
+    }
+
+    /* Banner Section */
+    .giveaway-banner {
+        text-align: center;
+        position: relative;
+        background: #000;
+    }
+
+    .giveaway-banner img {
+        max-width: 300px;
+        margin: 20px auto;
+        display: block;
+    }
+
+    .giveaway-heading {
+        font-size: 42px;
+        font-weight: bold;
+        margin: 20px 0;
+    }
+
+    /* Product Section */
+    .giveaway-products {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 100px;
+        padding: 60px 20px 40px 20px;
+    }
+
+    .giveaway-products img {
+        max-width: 380px;
+    }
+
+    /* How to Enter */
+    .giveaway-steps {
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .giveaway-steps h2 {
+        font-size: 35px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .giveaway-steps ul {
+        list-style: none;
+        padding: 0;
+        display: inline-block;
+        text-align: left;
+        margin-top: 30px;
+    }
+
+    .giveaway-steps li {
+        font-size: 18px;
+        margin-bottom: 12px;
+        position: relative;
+        padding-left: 35px;
+    }
+
+    .giveaway-steps li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 3px;
+        width: 23px;
+        height: 20px;
+        background: url("https://golfoy.com/media/wysiwyg/2025/titleist/check_mark.png") no-repeat center center;
+        background-size: contain;
+    }
+
+    /* Countdown Section */
+    /* Countdown Section */
+    .giveaway-countdown {
+        text-align: center;
+        font-family: Arial, sans-serif;
+        color: #fff;
+    }
+
+    .countdown-box {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin: 20px 0;
+    }
+
+    .countdown-item {
+        text-align: center;
+    }
+
+    .countdown-field span {
+        background-color: black;
+        box-shadow: rgb(179 179 179 / 21%) 0px 1px 0px, rgb(193 193 193 / 19%) 0px 0px 8px;
+    }
+
+    .countdown-field {
+        display: inline-block;
+        background: #242424 !important;
+        /* inner panel */
+        color: #ddd;
+        font-size: 70px;
+        font-weight: bold;
+        padding: 25px;
+        border-radius: 12px;
+        position: relative;
+        font-family: "Arial Black", "Helvetica Neue", sans-serif;
+
+        /* outer frame effect */
+        box-shadow:
+            inset 0 2px 4px rgba(255, 255, 255, 0.08),
+            inset 0 -2px 4px rgba(0, 0, 0, 0.6),
+            4px 6px 10px rgba(0, 0, 0, 0.8);
+        background-image: linear-gradient(#1a1a1a, #000);
+
+    }
+
+    /* middle divider */
+    .countdown-item span::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Shop Now */
+    a.giveaway-btn {
+        text-align: center;
+        margin: auto;
+        display: block;
+        width: 185px;
+        background: #ff0000;
+        color: #fff;
+        padding: 14px 40px;
+        margin-top: 60px;
+        font-size: 18px;
+        font-weight: 500;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background 0.3s;
+    }
+
+    .giveaway-btn:hover {
+        background: #cc0000;
+    }
+
+    /* Terms Section */
+    .giveaway-terms {
+        text-align: center;
+        padding: 40px 20px;
+        background: #111;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    /* Footer Icons */
+    .giveaway-footer {
+        text-align: center;
+        padding: 30px 20px;
+        background: #fff;
+        color: #000;
+    }
+
+    .giveaway-footer-icons {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-bottom: 20px;
+    }
+
+    .giveaway-footer-icons div {
+        text-align: center;
+        font-size: 14px;
+    }
+
+    .giveaway-footer p {
+        margin: 8px 0;
+        font-size: 13px;
+    }
+
+    video.desktop-mobile {
+        display: none;
+    }
+
+    section.giveaway-countdown h2 {
+        font-size: 21px;
+    }
+
+    .product_slider_container span.product-image-wrapper img,
+    .product_slider_container span.product-image-wrapper {
+        mix-blend-mode: unset !important;
+    }
+
+    .slider_html_here.container-fluid.shoe.container.data_landing_page.titleist-offer .product-item-info .brand_name,
+    .slider_html_here.container-fluid.shoe.container.data_landing_page.titleist-offer .product-item-info strong.product.name.product-item-name a,
+    .slider_html_here.container-fluid.shoe.container.data_landing_page.titleist-offer span.old-price span,
+    .slider_html_here.container-fluid.shoe.container.data_landing_page.titleist-offer .product_slider_container .yousave_price_label,
+    .slider_html_here.container-fluid.shoe.container.data_landing_page.titleist-offer .product_slider_container span.yousave_price>span:first-child {
+        color: white !important;
+    }
+
+    .product_slider_container .slider_arrows {
+        position: absolute !important;
+    }
+
+    .product_slider_container .slider_arrows>.right_arrow:after,
+    .product_slider_container .slider_arrows>.left_arrow:before {
+        width: 59px;
+        border-radius: 50%;
+        font-size: 59px;
+        color: white !important;
+        border: none;
+    }
+
+    .product_slider_container .slider_arrows>div {
+        background-color: transparent !important;
+    }
+
+    .giveaway-terms ul {
+        list-style-type: disc;
+        display: inline-block;
+        text-align: left;
+        margin: 0 auto;
+        padding-left: 0;
+        list-style-position: inside;
+    }
+
+    .giveaway-terms li {
+        text-align: center;
+        margin-bottom: 8px;
+        line-height: 1.5;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .cms-titleist-sm10-giveaway-contest main#maincontent {
+            padding-left: 0px !important;
+            padding-right: 0px !important;
+        }
+
+        .product_slider_container .slider_arrows>.right_arrow:after,
+        .product_slider_container .slider_arrows>.left_arrow:before {
+
+            color: black !important;
+            background: white;
+            border-radius: 0;
+            box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+            width: 40px;
+            font-size: 40px;
+            height: 40px;
+            line-height: 40px;
+        }
+
+        .giveaway-terms li {
+            margin-bottom: 15px !important;
+            font-size: 13px;
+        }
+
+        a.giveaway-btn {
+            margin-top: 30px;
+        }
+
+        .titleist-product-slider .slider_html.container-fluid {
+            padding: 0px;
+        }
+
+        .giveway-container p {
+            color: #ffffffde;
+            font-size: 19px;
+        }
+
+        .countdown-field {
+            font-size: 30px;
+            padding: 20px;
+        }
+
+        section.giveaway-terms h3 {
+            font-size: 21px;
+        }
+
+        .cms-landing-testing main#maincontent {
+            padding: 0px !important;
+        }
+
+        section.giveaway-terms p {
+            font-size: 12px;
+        }
+
+        .giveaway-terms {
+            padding: 30px 10px;
+        }
+
+        .countdown-label {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .glowing-light-text {
+            font-size: 32px;
+        }
+
+        .giveaway-products img {
+            max-width: 160px;
+        }
+
+        .giveaway-products {
+            gap: 40px;
+        }
+
+        .countdown-box {
+            gap: 10px;
+        }
+
+        .giveaway-countdown {
+            padding: 40px 0px;
+        }
+
+        video.desktop-web {
+            display: none;
+        }
+
+        video.desktop-mobile {
+            display: block;
+            width: 100%;
+        }
+
+    }
+
+    .titleist-product-slider .product_content_product_slider_before_list {
+        padding-left: 10px;
+    }
+
+    .titleist-product-slider .product_slider_container ol.products.list.items.product-items>li:first-child {
+        padding-left: 5px !important;
+    }
+</style>
+<div class="giveway-container"><!-- Banner Section -->
+    <section class="giveaway-banner">
+        <video
+            id="video-desktop"
+            class="desktop-web"
+            autoplay
+            loop
+            muted
+            playsinline
+            webkit-playsinline
+            preload="metadata">
+            <source src="https://golfoy.com/media/wysiwyg/2025/titleist/test3.mp4" type="video/mp4">
+        </video>
+
+        <video
+            id="video-mobile"
+            class="desktop-mobile"
+            autoplay
+            loop
+            muted
+            playsinline
+            webkit-playsinline
+            preload="metadata">
+            <source src="https://golfoy.com/media/wysiwyg/2025/titleist/hero-giveaway-mob-comp.mp4" type="video/mp4">
+        </video>
+
+        <p class="glowing-light-text">GET A CHANCE TO WIN A VOKEY WEDGE</p>
+    </section>
+
+    <!-- Products -->
+    <section class="giveaway-products"><img
+            src="https://golfoy.com/media/wysiwyg/2025/titleist/pro-v1-ball-giveaway.png" alt="pro-v1-ball" loading="lazy"> <img
+            src="https://golfoy.com/media/wysiwyg/2025/titleist/pro-v1x-ball-giveaway.png" alt="pro-v1x-ball" loading="lazy"></section>
+    <!-- How to Enter -->
+    <section class="giveaway-steps">
+        <h2>HOW TO ENTER</h2>
+        <ul>
+            <li>Buy Pro V1 or Pro V1x (one dozen).</li>
+            <li>Get 1 entry for every dozen you purchase(max 3 entries per order).</li>
+            <li>More entries = more chances to win a Titleist Wedge.</li>
+        </ul>
+    </section>
+    <!-- product-slider --> <!-- p-slider -->
+    <div class="titleist-product-slider">
+        <?php
+        echo $this->getLayout()->createBlock(\Magento\Framework\View\Element\Template::class)
+            ->setTemplate('Magento_Theme::html/product_slider.phtml')
+            ->setData('cat_id', '1763')
+            ->setData('heading', 'Buy Now')
+            ->setData('num_prds', 12)
+            ->setData('cssclass', 'shoe container data_landing_page titleist-offer')
+            ->toHtml();
+        ?>
+        <a class="giveaway-btn react-comp" href="https://golfoy.com/golf-balls/all-brands-golf-balls/titleist/by-type/2025-pro-v1-v1x.html">Explore All</a>
+    </div>
+
+    <!-- Countdown -->
+    <section class="giveaway-countdown">
+        <h2>OFFER ENDS</h2>
+        <div id="countdown" class="countdown-box">
+            <div class="countdown-item">
+                <div class="days countdown-field"><span id="days">00</span></div>
+                <div class="countdown-label">DAYS</div>
+            </div>
+            <div class="countdown-item">
+                <div class="hours countdown-field"><span id="hours">00</span></div>
+                <div class="countdown-label">HOURS</div>
+            </div>
+            <div class="countdown-item">
+                <div class="minutes countdown-field"><span id="minutes">00</span></div>
+                <div class="countdown-label">MINUTES</div>
+            </div>
+            <div class="countdown-item">
+                <div class="seconds countdown-field"><span id="seconds">00</span></div>
+                <div class="countdown-label">SECONDS</div>
+            </div>
+        </div>
+        <p>Winner will be announced on <strong>17th Dec</strong></p>
+    </section>
+    <!-- Terms -->
+    <section class="giveaway-terms">
+        <h3>Terms &amp; Conditions</h3>
+        <ul>
+            <li>The prize is non-transferable and cannot be exchanged for cash or any other monetary consideration.</li>
+            <li>This promotion is open to all customers who place an order for Titleist Pro V1 / Pro V1x products
+                between 19th November to 15th December 2025 (“Promotional Period”).</li>
+            <li>Each Titleist Pro V1 or Pro V1x dozen purchased during the Promotional Period will constitute one (1)
+                entry into the giveaway, subject to a maximum of three (3) entries per order.</li>
+            <li>One winner will be selected at random from the pool of eligible entries following the conclusion of the
+                Promotional Period.</li>
+            <li>The winner will be announced on 17th December 2025.</li>
+            <li>The promoter reserves the right to verify the eligibility of entries and to amend, suspend, or withdraw
+                the promotion at any time without prior notice, if circumstances beyond its control make this
+                unavoidable.</li>
+            <li>By participating in this promotion, customers are deemed to have accepted and agreed to be bound by
+                these Terms &amp; Conditions.</li>
+        </ul>
+    </section>
+</div>
+<!-- Countdown Script -->
+<script>
+    window.addEventListener("load", function() {
+        // Set offer end date
+        const endDate = new Date("Dec 15, 2025 23:59:59").getTime();
+
+        const countdown = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = endDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Format with leading zeros
+            document.getElementById("days").innerText = String(days).padStart(2, "0");
+            document.getElementById("hours").innerText = String(hours).padStart(2, "0");
+            document.getElementById("minutes").innerText = String(minutes).padStart(2, "0");
+            document.getElementById("seconds").innerText = String(seconds).padStart(2, "0");
+
+            if (distance < 0) {
+                clearInterval(countdown);
+                document.getElementById("countdown").innerHTML = "OFFER ENDED";
+            }
+        }, 1000);
+    });
+</script>
+

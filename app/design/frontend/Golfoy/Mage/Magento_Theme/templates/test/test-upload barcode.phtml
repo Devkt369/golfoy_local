@@ -1,0 +1,273 @@
+<style>
+    tr.even {
+        background-color: #e4e4e4;
+    }
+    table {
+        font-size: 10px;
+    }
+</style>
+
+<div class="container">
+    <form action="" method="get">
+        From: <input type="date" name="from" placeholder="from" />
+        <br>
+        To: <input type="date" name="to" placeholder="to" />
+        <input type="submit" />
+    </form>
+</div>
+<?php
+    $from = ($this->getRequest()->getParam('from') == '') ? ' ' : $this->getRequest()->getParam('from');
+    $to = ($this->getRequest()->getParam('to') == '') ? ' ' : $this->getRequest()->getParam('to');
+
+
+    if( trim($from) == '' && trim($to) == '' ){
+    ?>
+    <?php
+    }else{
+?>
+<table border="1">
+    <tr>
+        <th>Order Date</th>
+        <th>Order status</th>
+        <th>Order id</th>
+        <th>Original Price	</th>
+        <th>Price	</th>
+        <th>Qty	</th>
+        <th>Subtotal	</th>
+        <th>Tax Amount	</th>
+        <th>Tax Percent	</th>
+        <th>Discount Amount	</th>
+        <th>Row Total</th>
+        <th>Ordered MRP (Mrp * total ordered value)</th>
+        <th>Invoiced MRP (Mrp * total invoiced value)</th>
+        <th>Invoiced MRP (Mrp * total refunded value)</th>
+        <th>Invoiced MRP (Mrp * total canceled value)</th>
+        <th>Actual Row ordered (Actual value * ordered qty)</th>
+        <th>Actual Row invoiced (Actual value * invoiced qty)</th>
+        <th>Actual Row invoiced (Actual value * refunded qty)</th>
+        <th>Actual Row invoiced (Actual value * canceled qty)</th>
+    </tr>
+    
+    
+<?php
+    
+    $order_data_minus = '';
+//        $from = $this->getRequest()->getParam('from');
+//        $to = $this->getRequest()->getParam('to');
+        $_objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $order_config = $_objectManager->get('\Magento\Sales\Model\ResourceModel\Order\CollectionFactory');
+        $orderinstance = $_objectManager->create('Magento\Sales\Model\Order');
+        $orderfactory = $_objectManager->create('Magento\Sales\Model\OrderFactory');
+        $objectproduct = $_objectManager->create('Magento\Catalog\Model\Product');
+        
+        $attributeSet = $_objectManager->create('Magento\Eav\Api\AttributeSetRepositoryInterface');
+
+    
+//        \Magento\Sales\Model\Order $orderInstance
+//        $this->order_instance = $orderInstance;
+//        $orderinstance = $this->order_instance->loadByIncrementId($orderId);
+    
+//        $from = -$from;
+//        $to = -$to;
+    
+        $return_array = array();
+        date_default_timezone_set("Asia/Calcutta");   //India time (GMT+5:30)
+        $date = date('Y-m-d H:i:s' );
+        
+        $searchcritiria_array = array('complete' , 'closed');
+      /*  echo $from_date = date('Y-m-d  H:i:s', strtotime($date. ''.$from.' days'));
+        echo "<br>";
+        echo $to_date = date('Y-m-d H:i:s', strtotime($date. ''.$to.' days'));
+        echo "<br><br><br>";*/
+    
+        
+        $ordercollection = $order_config->create()
+            ->addFieldToSelect('*')
+            ->addFieldToFilter('created_at', array('gteq' => $from))
+            ->addFieldToFilter('created_at', array('lteq' => $to))
+//            ->addAttributeToFilter('state', array('in' => $searchcritiria_array ))
+            ->setOrder('created_at','ASC');
+        
+        
+        if ($ordercollection->getTotalCount() > 0) {
+            $orders = $ordercollection->getItems();
+            $i = 0;
+            $total_orders = 0;
+            $evenodd = 'odd';
+            
+            $original_price = 0;
+            $subtotal = 0;
+            $tax_amount = 0;
+            $discount_amount = 0;
+            $row_total = 0;
+            $rewardpoints_earn = 0;
+            $rewardpoints_spend = 0;
+            
+            
+            
+                
+            $total_ordered_value_total = 0;
+            $total_invoiced_value_total = 0;
+            $total_refunded_value_total = 0;
+            $total_canceled_value_total = 0;
+            
+            $actual_row_ordered_total = 0;
+            $actual_row_invoiced_total = 0;
+            $actual_row_refunded_total = 0;
+            $actual_row_canceled_total = 0;
+                                
+                                
+            foreach ($orders as $item) {
+                $orderItems = 0;
+                if($i > 10){
+//                    break;
+                }
+                $curr_order_id = $item->getIncrementId();
+                
+                $order = $orderinstance->loadByIncrementId($curr_order_id);
+                $getStatusLabel = $order->getStatusLabel();
+                $getCreatedAt = $order->getCreatedAt();
+                $orderItems = $order->getAllItems();
+                
+                $orderItemscount = count($orderItems);
+                $rows=0;
+                if($evenodd == 'even'){
+                    $evenodd = 'odd';
+                }else if($evenodd == 'odd'){
+                    $evenodd = 'even';
+                } 
+                
+                foreach ($orderItems as $item) {
+                    $prd_ids = '';
+                        $prd_ids = $item->getProductId();
+                        $prd_original_price = $item->getOriginalPrice();
+                        $prd_price = $item->getPrice();
+                        $taxamount = $item->getTaxAmount();
+                        $priceincltax = $item->getPriceInclTax();
+                        /*
+                        if($item['qty_canceled'] > 0){
+                            continue;
+                        }*/
+                        if($item['qty_invoiced'] == 0){
+                            continue;
+                        }
+                        if($item['qty_ordered'] == 0){
+                            continue;
+                        }
+                        /*if($item['qty_refunded'] > 0){
+                            continue;
+                        }*/
+                        
+                    
+                        if( $item->getParentItemId() == '' ){
+                            
+                            $original_price = $original_price + $item['original_price'];
+                            $subtotal = $subtotal + $item['row_total'];
+                            $tax_amount = $tax_amount + $item['tax_amount'];
+                            $discount_amount = $discount_amount + $item['discount_amount'];
+                            $row_total = $row_total + $item['row_total_incl_tax'];
+                            $rewardpoints_earn = $rewardpoints_earn + $item['mp_reward_earn'];
+                            $rewardpoints_spend = $rewardpoints_spend + $item['mp_reward_spent'];
+                            echo "<tr class='".$evenodd."'>";
+                            echo "<td>".$getCreatedAt."</td>";
+                            echo "<td>".$getStatusLabel."</td>";
+                            echo "<td>".$curr_order_id."</td>";
+                         
+                            echo "<td>".$item['original_price']."</td>";
+                            echo "<td>".$item['price']."</td>";
+                            echo "<td>";
+                            echo "<div>qty_canceled:".$item['qty_canceled']."</div><div>qty_invoiced:".$item['qty_invoiced']."</div><div>qty_ordered:".$item['qty_ordered']."</div><div>qty_refunded:".$item['qty_refunded']."</div><div>qty_shipped:".$item['qty_shipped']."</div>";
+                            echo "</td>";
+                            echo "<td>".$item['row_total']."</td>";
+                            echo "<td>".$item['tax_amount']."</td>";
+                            echo "<td>".$item['tax_percent']."</td>";
+                            echo "<td>".$item['discount_amount']."</td>";
+                            echo "<td>".$item['row_total_incl_tax']."</td>";
+                            
+                            
+                            $total_ordered_value = $item['original_price'] * $item['qty_ordered'];
+                            $total_invoiced_value = $item['original_price'] * $item['qty_invoiced'];
+                            $total_refunded_value = $item['original_price'] * $item['qty_refunded'];
+                            $total_canceled_value = $item['original_price'] * $item['qty_canceled'];
+                            
+                            if( ($total_ordered_value - $total_invoiced_value) != $total_canceled_value){
+                                $order_data_minus = $order_data_minus ."<br>Orderid:-". $curr_order_id;
+                            }
+                            
+                            $single_actual_price_x = $item['row_total_incl_tax']/$item['qty_ordered'];
+                            $actual_row_ordered = $single_actual_price_x * $item['qty_ordered'];
+                            $actual_row_invoiced = $single_actual_price_x * $item['qty_invoiced'];
+                            $actual_row_refunded = $single_actual_price_x * $item['qty_refunded'];
+                            $actual_row_canceled = $single_actual_price_x * $item['qty_canceled'];
+                                
+                            $total_ordered_value_total = $total_ordered_value_total + $total_ordered_value;
+                            $total_invoiced_value_total = $total_invoiced_value_total + $total_invoiced_value;
+                            $total_refunded_value_total = $total_refunded_value_total + $total_refunded_value;
+                            $total_canceled_value_total = $total_canceled_value_total + $total_canceled_value;
+                            
+                            $actual_row_ordered_total = $actual_row_ordered_total + $actual_row_ordered;
+                            $actual_row_invoiced_total = $actual_row_invoiced_total + $actual_row_invoiced;
+                            $actual_row_refunded_total = $actual_row_refunded_total + $actual_row_refunded;
+                            $actual_row_canceled_total = $actual_row_canceled_total + $actual_row_canceled;
+                                
+                            echo "<td>".$total_ordered_value."</td>";
+                            echo "<td>".$total_invoiced_value."</td>";
+                            echo "<td>".$total_refunded_value."</td>";
+                            echo "<td>".$total_canceled_value."</td>";
+                            
+                            echo "<td>".$actual_row_ordered."</td>";
+                            echo "<td>".$actual_row_invoiced."</td>";
+                            echo "<td>".$actual_row_refunded."</td>";
+                            echo "<td>".$actual_row_canceled."</td>";
+                            
+                            
+                            
+                            echo "</tr>";
+                        }
+                        
+                }
+                
+                
+//                if( $balls_in_order > 0 ){
+                    
+//                }
+                
+                $i++;
+                
+            }
+        }else{
+//            echo "order collection not found";
+            return false;
+        }
+?>
+</table>
+<table border="1">
+    <tr>
+        <th>total_ordered_value_total</th>
+        <th>total_invoiced_value_total</th>
+        <th>total_refunded_value_total</th>
+        <th>$total_canceled_value_total</th>
+        <th>actual_row_ordered_total</th>
+        <th>actual_row_invoiced_total</th>
+        <th>actual_row_refunded_total</th>
+        <th>actual_row_canceled_total</th>
+        <th>Error data</th>
+    </tr>
+    <tr>
+        <td><?php echo $total_ordered_value_total; ?></td>
+        <td><?php echo $total_invoiced_value_total; ?></td>
+        <td><?php echo $total_refunded_value_total; ?></td>
+        <td><?php echo $total_canceled_value_total; ?></td>
+        <td><?php echo $actual_row_ordered_total; ?></td>
+        <td><?php echo $actual_row_invoiced_total; ?></td>
+        <td><?php echo $actual_row_refunded_total; ?></td>
+        <td><?php echo $actual_row_canceled_total; ?></td>
+        <td><?php echo $order_data_minus; ?></td>
+        
+    </tr>
+<?php
+    }
+?>
+</table>
+<?php
+?>

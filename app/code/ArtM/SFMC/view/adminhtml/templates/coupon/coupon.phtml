@@ -1,0 +1,193 @@
+<div class="container">
+    <form action="<?php echo $block->getUrl('sfmc/index/coupon'); ?>" method="post">
+        <?php echo $block->getBlockHtml('formkey') ?>
+        <div class="form-group">
+            <label for="input1">True Coupon Code</label>
+            <input type="text" id="code" name="coupon-true" placeholder="Enter True Coupon">
+        </div>
+
+        <div class="form-group">
+            <label for="input2">False Coupon Code</label>
+            <input type="text" id="status" name="coupon-false" placeholder="Enter False Coupon">
+        </div>
+
+        <button type="submit" class="submit-btn">Submit</button>
+    </form>
+</div>
+
+<?php
+$couponData = $block->getCouponData();
+
+// Pagination settings
+$recordsPerPage = 20;
+$totalRecords = count($couponData);
+$totalPages = ceil($totalRecords / $recordsPerPage);
+
+// Get current page or set a default page if not set
+$currentpage = isset($_GET['page']) ? $_GET['page'] : 1;
+
+// Calculate the starting and ending page numbers for display
+$startPage = max(1, $currentpage - 2);
+$endPage = min($totalPages, $startPage + 4);
+?>
+
+<br><br><br><br><br><br>
+<!-- Display pagination links with next and previous buttons -->
+<div class="pagination coupon-pagination">
+    <div class="pagination-list">
+        <div class="page-info">
+            Total Pages: <?php echo $totalPages; ?>
+        </div>
+        <div class="pagination-items">
+            <?php
+            // Display previous button
+            $prevPage = $currentpage - 1;
+            if ($prevPage > 0) {
+                echo "<a href='" . $block->getUrl('sfmc/index/coupon') . "?page=$prevPage'>&laquo; Previous</a> ";
+            }
+
+            // Display page numbers with active class for the current page
+            for ($i = $startPage; $i <= $endPage; $i++) {
+                $activeClass = ($i == $currentpage) ? 'active' : '';
+                echo "<a class='$activeClass' href='" . $block->getUrl('sfmc/index/coupon') . "?page=$i'>$i</a> ";
+            }
+
+            // Display next button
+            $nextPage = $currentpage + 1;
+            if ($nextPage <= $totalPages) {
+                echo "<a href='" . $block->getUrl('sfmc/index/coupon') . "?page=$nextPage'>Next &raquo;</a>";
+            }
+            ?>
+        </div>
+    </div>
+    <div class="page-input">
+        <form action="<?php echo $block->getUrl('sfmc/index/coupon'); ?>" method="get">
+            <label for="pageInput">Go to Page:</label>
+            <input type="text" id="pageInput" name="page" placeholder="Enter page number">
+            <button type="submit">Go</button>
+        </form>
+    </div>
+</div>
+
+<h2>Coupon Data Table</h2>
+
+<table class="coupon-sync-data">
+    <thead>
+        <tr>
+            <th>Coupon Code</th>
+            <th>Coupon Status</th>
+            <th>Response</th>
+            <th>Last Update</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        // Calculate the starting record for the current page
+        $startRecord = ($currentpage - 1) * $recordsPerPage;
+
+        // Display records for the current page
+        for ($i = $startRecord; $i < min($startRecord + $recordsPerPage, $totalRecords); $i++) :
+            $coupon = $couponData[$i];
+        ?>
+            <tr>
+                <td><?php echo $coupon['coupon_code']; ?></td>
+                <td><?php echo $coupon['coupon_status']; ?></td>
+                <td><?php echo $coupon['response']; ?></td>
+                <td><?php echo $coupon['last_update']; ?></td>
+            </tr>
+        <?php endfor; ?>
+    </tbody>
+</table>
+<?php
+?>
+
+<style>
+    table.coupon-sync-data {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .coupon-sync-data th,
+    td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    .coupon-sync-data th {
+        background-color: #f2f2f2;
+    }
+
+    .coupon-pagination {
+        margin: 20px 0px;
+        justify-content: space-between;
+        align-items: center;
+        display: flex;
+    }
+
+    .pagination-list {
+        display: flex;
+        align-items: center;
+    }
+
+    .pagination.coupon-pagination input#pageInput {
+        padding: 6px
+    }
+
+    .coupon-pagination a {
+        padding: 8px;
+        text-decoration: none;
+        background-color: #f2f2f2;
+        color: #333;
+        border: 1px solid #ddd;
+        margin-right: 5px;
+    }
+
+    .coupon-pagination a:hover {
+        background-color: #ddd;
+    }
+
+    /* New styles for the active class */
+    .coupon-pagination a.active {
+        background-color: #4caf50;
+        color: #fff;
+        border-color: #4caf50;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+    }
+
+    .pagination-items {
+        margin-left: 10px;
+    }
+
+    .form-group input {
+        width: 50%;
+        padding: 8px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .submit-btn {
+        background-color: #4caf50;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .submit-btn:hover {
+        background-color: #45a049;
+    }
+</style>

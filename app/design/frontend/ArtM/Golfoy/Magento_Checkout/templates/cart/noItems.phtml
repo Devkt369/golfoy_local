@@ -1,0 +1,59 @@
+<?php
+/**
+ * Copyright © Magento, Inc.
+ * See COPYING.txt for license details.
+ *
+ * @var \Magento\Checkout\Block\Cart $block
+ */
+?>
+
+<div class="container">
+    <div class="cart-empty empty-class-update">
+
+        <?= $block->getChildHtml('checkout_cart_empty_widget') ?>
+
+        <p class="empty-cart-title">
+            <?= $block->escapeHtml(__('MY BAG')) ?>
+        </p>
+
+        <div class="empty-cart-image">
+            <img
+                src="<?= $block->escapeUrl('https://golfoy.com/media/shopping-bags.svg') ?>"
+                alt="<?= $block->escapeHtml(__('Empty shopping bag')) ?>"
+                loading="lazy"
+            />
+        </div>
+
+        <p class="empty-text-block-first">
+            <?= $block->escapeHtml(__('Your bag is empty')) ?>
+        </p>
+
+        <p class="empty-text-block-second">
+            <?= $block->escapeHtml(__('Let’s fill it up shall we?')) ?>
+        </p>
+
+        <p class="shop-now-anchor">
+            <?= __(
+                '<a href="%1" class="shop-now-cart-button">Shop Now</a>',
+                $block->escapeUrl($block->getContinueShoppingUrl())
+            ) ?>
+        </p>
+
+        <?= $block->getChildHtml('shopping.cart.table.after') ?>
+
+    </div>
+</div>
+
+<style>
+    .row.cart_callout {
+        display: none;
+    }
+</style>
+
+<script type="text/x-magento-init">
+{
+    "*": {
+        "Magento_Checkout/js/empty-cart": {}
+    }
+}
+</script>

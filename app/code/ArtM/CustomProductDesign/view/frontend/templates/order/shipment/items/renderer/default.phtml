@@ -1,0 +1,654 @@
+<?php
+
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var  $block \Magento\Sales\Block\Order\Item\Renderer\DefaultRenderer */
+$_item = $block->getItem();
+?>
+<script>
+    // require([
+    //     'jquery',
+    //     'Magento_Ui/js/modal/modal'
+    // ], function ($, modal) {
+    //     'use strict';
+
+    //     window.openCustomizationPopup = function(url) {
+    //         if (!window.customizationPopup) {
+    //             var options = {
+    //                 type: 'popup',
+    //                 responsive: true,
+    //                 innerScroll: true,
+    //                 title: $.mage.__('Customization Details'),
+    //                 modalClass: 'customization-popup-modal',
+    //                 buttons: [{
+    //                     text: $.mage.__('Close'),
+    //                     class: 'action secondary',
+    //                     click: function () {
+    //                         this.closeModal();
+    //                     }
+    //                 }]
+    //             };
+
+    //             window.customizationPopup = $('<div/>').modal(options);
+    //         }
+
+    //         $.get(url, function(response) {
+    //             window.customizationPopup.html(response).trigger('contentUpdated');
+    //             window.customizationPopup.modal('openModal');
+    //         });
+    //     };
+    // });
+    require(['jquery'], function($) {
+        window.openCustomizationPopup = function(url) {
+            $.get(url, function(response) {
+                $('#customization-popup-content').html(response);
+                $('#customization-popup').fadeIn();
+            });
+        };
+        $('#customization-popup-close').on('click', function() {
+            $('#customization-popup').fadeOut();
+            $('#customization-popup-content').html('');
+        });
+        // Optional: close when clicking outside modal
+        $('#customization-popup').on('click', function(e) {
+            if (e.target === this) {
+                $('#customization-popup').fadeOut();
+                $('#customization-popup-content').html('');
+            }
+        });
+    });
+</script>
+
+<style>
+    .customization-details {
+        padding: 20px;
+    }
+
+    .customization-details h2 {
+        margin-bottom: 20px;
+        font-size: 24px;
+    }
+
+    .customization-area {
+        margin-bottom: 30px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 20px;
+    }
+
+    .customization-area:last-child {
+        border-bottom: none;
+    }
+
+    .customization-area h3 {
+        margin-bottom: 15px;
+        font-size: 18px;
+    }
+
+    .customization-image {
+        margin: 15px 0;
+    }
+
+    .customization-image img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .customization-text {
+        margin-top: 10px;
+    }
+
+    .modal-popup .modal-title {
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 10px;
+    }
+
+    .modal-popup .modal-content {
+        padding: 20px;
+    }
+</style>
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+
+$chelper = $objectManager->get('ArtM\Common\Helper\Data');
+
+$_item = $block->getItem();
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+
+try {
+    $productModel = $objectManager->create('\Magento\Catalog\Model\ProductRepository');
+    $product = $productModel->get($_item->getSku());
+} catch (\Magento\Framework\Exception\NoSuchEntityException $e) {
+    $product = null;
+}
+?>
+<?php $_order = $block->getItem()->getOrderItem()->getOrder() ?>
+<tr id="order-item-row-<?= (int) $_item->getId() ?>">
+    <td class="col name" data-th="<?= $block->escapeHtml(__('Product Name')) ?>">
+        <div class="product-details">
+            <span><img src="/media/catalog/product<?= $product ? $product->getSmallImage() : "placeholder/default/golfoy-watermark_2.png" ?>" width="120px"></span>
+            <div style="display: flex; flex-direction: column;">
+                <strong class="product name product-item-name"><?= $block->escapeHtml($_item->getName()) ?></strong>
+                <?php if ($_options = $block->getItemOptions()): ?>
+                    <div class="item-options">
+                        <?php foreach ($_options as $_option): ?>
+                            <dt><?= $block->escapeHtml($_option['label']) ?></dt>
+                            <?php if (!$block->getPrintStatus()): ?>
+                                <?php $_formatedOptionValue = $block->getFormatedOptionValue($_option) ?>
+                                <dd<?= (isset($_formatedOptionValue['full_view']) ? ' class="tooltip wrapper"' : '') ?>>
+                                    <!--  custom print/image  -->
+                                    <?php $formatedval = $_formatedOptionValue['value'] ;
+                                                        if(strpos($formatedval, 'customprint/') !== false){
+                                                        $toshow = $chelper->optionImage($formatedval); 
+                                                        echo $toshow;
+                                                    }else{?>
+                                                        <?= $block->escapeHtml($_formatedOptionValue['value'], ['a']) ?>
+                                                        <?php }  ?>
+
+                                    <!--  custom print/image  -->
+                                    <?php if (isset($_formatedOptionValue['full_view'])): ?>
+                                        <div class="tooltip content">
+                                            <dl class="item options">
+                                                <dt><?= $block->escapeHtml($_option['label']) ?></dt>
+                                                <dd><?= $block->escapeHtml($_formatedOptionValue['full_view']) ?></dd>
+                                            </dl>
+                                        </div>
+                                    <?php endif; ?>
+                                </dd>
+                            <?php else: ?>
+                                <dd> <?php if(strpos($_option['value'], 'customprint/') !== false){
+                                        $toshow = $chelper->optionImagetext($_option['value']); 
+                                        echo "<dd> $toshow </dd>";
+                                    }else{ ?>
+                                    <?= $block->escapeHtml($_option['print_value'] ?? $_option['value']) ?>                    
+                            </dd>
+                            <?php }endif; ?>
+                        <?php endforeach; ?>
+
+                    </div>
+                <?php endif; ?>
+                <?php $addInfoBlock = $block->getProductAdditionalInformationBlock(); ?>
+                <?php if ($addInfoBlock): ?>
+                    <?= $addInfoBlock->setItem($_item->getOrderItem())->toHtml() ?>
+                <?php endif; ?>
+                <?= $block->escapeHtml($_item->getDescription()) ?>
+            </div>
+        </div>
+
+        <div class="mobile-order-card">
+            <div class="mobile-product-top">
+                <div class="mobile-product-image">
+                    <img src="/media/catalog/product<?= $product ? $product->getSmallImage() : "placeholder/default/golfoy-watermark_2.png" ?>" alt="">
+                </div>
+
+                <div class="product-details-mobile">
+                    <div class="mobile-product-info">
+                        <h3><?= $block->escapeHtml($_item->getName()) ?></h3>
+
+                        <?php if ($_options = $block->getItemOptions()): ?>
+                            <?php foreach ($_options as $_option): ?>
+                                <div class="mobile-option">
+                                    <span><?= $block->escapeHtml($_option['label']) ?></span> :
+                                    <strong><?= $block->escapeHtml($_option['value']) ?></strong>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="mobile-meta-row">
+                        <div class="mobile-meta-item">
+                            <span>SKU</span>
+                            <strong><?= $block->prepareSku($block->getSku()) ?></strong>
+                        </div>
+
+                        <div class="mobile-meta-item">
+                            <span>Qty</span>
+                            <strong><?= (int) $_item->getQty() ?></strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </td>
+    <td class="col sku" data-th="<?= $block->escapeHtml(__('SKU')) ?>">
+        <?= /* @noEscape */ $block->prepareSku($block->getSku()) ?>
+    </td>
+    <td class="col qty" data-th="<?= $block->escapeHtml(__('Qty')) ?>"><?= (int) $_item->getQty() ?></td>
+</tr>
+
+
+<div id="customization-popup" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:99999;overflow: scroll;">
+    <div style="background:#fff;margin:40px auto;padding:20px;width:90vw;max-width:600px;border-radius:8px;position:relative;">
+        <span id="customization-popup-close" style="position:absolute;top:10px;right:10px;cursor:pointer;font-size:22px;">&times;</span>
+        <div id="customization-popup-content"></div>
+    </div>
+</div>
+
+<style>
+    .table-order-items {
+        table-layout: auto;
+    }
+
+    body.account ul.items.order-links {
+        border-bottom: 1px solid #e4e0e0b5;
+        background-color: white;
+    }
+
+    table.data.table.table-order-items.invoice tfoot>tr:last-child {
+        border-bottom: none;
+    }
+
+    body.account .table-wrapper th {
+        font-size: 12px;
+        color: #000;
+        font-weight: 600;
+    }
+
+    .items.order-links .nav.item.current::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -3px;
+        width: 150px;
+        height: 3px;
+        background: #111;
+        border-radius: 20px;
+    }
+
+    .items.order-links .nav.item:nth-child(2) a::after {
+        content: "↓";
+        font-size: 16px;
+        margin-left: 12px;
+        color: black;
+        font-weight: 900;
+        position: relative;
+        top: -1px;
+    }
+
+    body.account ul.items.order-links>li.current {
+        border: none;
+        position: relative;
+        margin: 0;
+    }
+
+    .shipment-number {
+        font-size: 16px !important;
+        font-weight: 500;
+    }
+
+    .order-left h1 {
+        font-size: 20px;
+    }
+
+    .order-meta {
+        font-size: 11px;
+        font-weight: 500;
+        align-items: center;
+    }
+
+    .order-status {
+        margin: 0px;
+        padding: 4px 30px;
+        font-size: 9px;
+        margin-left: 10px;
+    }
+
+    .order-meta span.order-status.status-closed {
+        background-color: #fa97974a;
+        color: red;
+        border: 1px solid #fcbfbf;
+    }
+
+    span.order-status.status-delivered,
+    span.shipment-status.sss {
+        color: green;
+        border: 1px solid #0080004d;
+        background: #00800024;
+    }
+
+    .shipment-status {
+        border-radius: 5px !important;
+    }
+
+    body.account #maincontent a.action {
+        background-color: white !important;
+    }
+
+    body.account #maincontent .custom-order-header .order-actions a.action {
+        padding: 13px 10px !important;
+    }
+
+    body.account ul.items.order-links>li a {
+        font-size: 14px;
+        font-weight: 600;
+        color: #575757;
+    }
+
+    .custom-order-header {
+        border-bottom: 0px !important;
+    }
+
+    span.shipment-status.sss {
+        font-size: 10px;
+    }
+
+    .order-details-items {
+        border: 1px solid #d1d1d16e;
+        border-radius: 5px;
+        margin-top: 0px;
+        border-top: 0px;
+    }
+
+    .shipment-header-left {
+        width: 100%;
+    }
+
+    .order-title {
+        flex-wrap: wrap;
+    }
+
+    .product-details {
+        display: flex;
+        gap: 20px;
+    }
+
+    .product-details>span {
+        width: 110px;
+        min-width: 110px;
+        height: 120px;
+        border-radius: 5px;
+        overflow: hidden;
+        background: #f7f7f7;
+        border: 1px solid #efefef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-details>span img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        mix-blend-mode: darken;
+        display: block;
+    }
+
+    .product.name.product-item-name {
+        display: block;
+        font-size: 12px;
+        line-height: 1.4;
+        font-weight: 600;
+        color: black;
+        margin: 0;
+        max-width: 500px;
+        text-wrap: auto;
+    }
+
+    .item-options {
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .item-options a {
+        display: inline-block;
+        margin-bottom: 10px;
+        font-size: 12px;
+    }
+
+    .option-row {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 0;
+    }
+
+    body.account .table-wrapper td,
+    body.account .block.block-gift-card .block-content td {
+        vertical-align: top;
+    }
+
+    .item-options .option-row+.option-row::before {
+        content: "•";
+        color: #8b8b8b;
+        font-size: 11px;
+        line-height: 1;
+        margin-right: 3px;
+    }
+
+    .option-row p {
+        margin: 0;
+        font-size: 11px;
+        font-weight: 500;
+        color: #555;
+    }
+
+    .option-row span {
+        display: inline-flex;
+        align-items: center;
+        font-size: 11px;
+        font-weight: 500;
+        color: black;
+    }
+
+    table.data.table.table-order-items.shipment tbody tr td {
+        padding: 30px 15px;
+    }
+
+    .mobile-order-card {
+        display: none;
+    }
+
+    table.data.table.table-order-items.invoice tfoot>tr {
+        border-bottom: 1px solid #ececec;
+    }
+
+    body.account .order-details-items.shipments .table-wrapper {
+        padding: 0px;
+    }
+
+    .table-wrapper.order-items-shipment thead tr th {
+        background-color: white !important;
+        padding: 15px;
+    }
+
+    .shipment-track-action {
+        padding: 0px 10px;
+
+    }
+
+    .items.order-links {
+        display: flex;
+        align-items: center;
+        gap: 70px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+    }
+
+    body.account .table-wrapper tfoot td {
+        padding: 10px !important;
+    }
+
+    @media (max-width:767px) {
+        .shipment-track-action {
+            text-align: right;
+        }
+
+        .shipment-track-action a {
+            padding: 10px 11px 7px 11px !important;
+            height: 40px;
+            max-width: 170px;
+            text-transform: initial;
+
+        }
+
+        .detail-item {
+            gap: 10px;
+        }
+
+        .detail-icon i {
+            font-size: 14px !important;
+        }
+
+        .detail-item .label {
+            font-size: 10px !important;
+        }
+
+        .shipment-track-action a span {
+            font-weight: 600;
+            color: #555 !important;
+            font-size: 11px !important;
+            text-align: center;
+        }
+
+        body.account .order-details-items .table-wrapper {
+            padding: 0px 0px 30px 0px !important;
+            border-bottom: 1px solid #e5e5e5;
+            margin-bottom: 0px;
+            border-radius: 0px;
+        }
+
+        table.data.table.table-order-items.shipment tbody tr {
+            border-bottom: 0px !important;
+        }
+
+        tr.subtotal_excl {
+            padding-bottom: 10px !important;
+        }
+
+        td.col.sku,
+        td.col.qty {
+            display: none !important;
+        }
+
+        .table-wrapper .table:not(.cart):not(.totals):not(.table-comparison)>tbody>tr td {
+            padding: 14px 14px 10px 14px !important;
+        }
+
+        .product-details {
+            display: grid !important;
+            grid-template-columns: 86px minmax(0, 1fr);
+            align-items: start !important;
+            column-gap: 5px !important;
+            row-gap: 8px !important;
+            padding: 20px 14px 20px 14px;
+        }
+
+        .detail-items-block {
+            gap: 10px;
+        }
+
+        .product-details>span {
+            width: 80px !important;
+            min-width: 80px !important;
+            height: 80px !important;
+            border-radius: 8px !important;
+            border: 1px solid #ececec !important;
+            background: #f8f8f8 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            overflow: hidden !important;
+        }
+
+        .product-details>span img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+        }
+
+        .product.name.product-item-name {
+            margin: 0 0 6px !important;
+            font-size: 11px !important;
+            line-height: 1.4 !important;
+            font-weight: 600 !important;
+            color: #1f2937 !important;
+        }
+
+        .option-row {
+            margin-bottom: 3px !important;
+            gap: 4px !important;
+        }
+
+        .option-row p {
+            font-size: 10px !important;
+            line-height: 1.35 !important;
+            color: #5f6368 !important;
+        }
+
+        .option-row span {
+            font-size: 10px !important;
+            line-height: 1.35 !important;
+            color: black !important;
+        }
+
+        .mobile-order-card {
+            display: none !important;
+        }
+
+        .mobile-product-top {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 0px;
+        }
+
+        .mobile-product-image img {
+            width: 90px;
+            display: block;
+            border: 1px solid #efefef;
+            border-radius: 5px;
+        }
+
+        .mobile-product-info {
+            flex: 1;
+        }
+
+        .mobile-product-info h3 {
+            margin: 0 0 10px;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .mobile-option {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .mobile-meta-row {
+            display: flex;
+            gap: 30px;
+            margin-top: 15px;
+        }
+
+        .mobile-meta-item {
+            flex: 1;
+        }
+
+        .mobile-meta-item span {
+            display: block;
+            color: #888;
+            font-size: 10px;
+            margin-bottom: 4px;
+        }
+
+        .product-details-mobile strong {
+            font-weight: 500;
+        }
+
+        .table-wrapper .table:not(.cart):not(.totals):not(.table-comparison)>tbody>tr td {
+            padding: 0px !important;
+        }
+
+        table.data.table.table-order-items.shipment td.col.name[data-th="Product Name"]::before {
+            display: none !important;
+        }
+    }
+</style>

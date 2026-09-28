@@ -1,0 +1,204 @@
+<style>
+    table.address-details {
+        margin-bottom: 20px;
+    }
+    table.address-details tr > td:first-child {
+        width: 250px;
+    }
+</style>
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$customerCollection = $objectManager->create('Magento\Customer\Model\ResourceModel\Customer\Collection')
+    ->addAttributeToSelect(['firstname', 'lastname', 'dob', 'telephone', 'addresses'])
+    ->addFieldToFilter('entity_id', ['gteq' => 1]) // Start customer ID
+    ->addFieldToFilter('entity_id', ['lteq' => 50000]); // End customer ID
+//    ->setPageSize(10000);
+
+        /*
+if ($customerCollection->getSize() > 0):
+?>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Serial number</th>
+            <th>Id</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Date of Birth</th>
+            <th>Telephone</th>
+            <th>
+                Street Address:
+            </th>    
+            <th>
+                City
+            </th>    
+            <th>
+                Postcode
+            </th>    
+            <th>
+                Region
+            </th>    
+            <th>
+                Telephone
+            </th>  
+        </tr>
+    </thead>
+    <tbody>
+        <?php 
+            $i = 1;
+            foreach ($customerCollection as $customer){
+                $count_address = count( $customer->getAddresses() );
+                    
+                if($count_address > 0){
+                    
+                    $j = 0;
+                    foreach ($customer->getAddresses() as $address){
+            ?>
+                        <tr>
+                        <?php
+                            if($j == 0 ){
+                            //to get all address//remove 1. break on line 85 and php code in rowspan from line 62 to 68 
+                        ?>
+                            <td rowspan="<?php //echo $count_address; ?>"><?php echo $i; ?></td>
+                            <td rowspan="<?php //echo $count_address; ?>"><?php echo $customer->getId(); ?></td>
+                            <td rowspan="<?php //echo $count_address; ?>"><?php echo $customer->getFirstname(); ?></td>
+                            <td rowspan="<?php //echo $count_address; ?>"><?php echo $customer->getLastname(); ?></td>
+                            <td rowspan="<?php //echo $count_address; ?>"><?php echo $customer->getEmail(); ?></td>
+                            <td rowspan="<?php //echo $count_address; ?>"><?php echo $customer->getDob(); ?></td>
+                            <td rowspan="<?php //echo $count_address; ?>"><?php echo $customer->getTelephone(); ?></td>
+                        <?php 
+                            }
+                        ?>
+                            <td><?php echo implode(", ", $address->getStreet()); ?></td>
+
+                            <td><?php echo $address->getCity(); ?></td>
+
+                            <td><?php echo $address->getPostcode(); ?></td>
+
+                            <td><?php echo $address->getRegion(); ?></td>
+
+                            <td><?php echo $address->getTelephone(); ?></td>
+                        </tr>
+            <?php 
+                        
+                        //to get all address//remove 1. break on line 85 and php code in rowspan from line 62 to 68
+                        break;
+                        $j++;
+                    }
+                }else{
+            ?>
+                    <tr>
+                            <td rowspan="<?php //echo $count_address; ?>"><?php echo $i; ?></td>
+                            <td rowspan="<?php //echo $count_address; ?>"><?php echo $customer->getId(); ?></td>
+                            <td rowspan="<?php //echo $count_address; ?>"><?php echo $customer->getFirstname(); ?></td>
+                            <td rowspan="<?php //echo $count_address; ?>"><?php echo $customer->getLastname(); ?></td>
+                            <td rowspan="<?php //echo $count_address; ?>"><?php echo $customer->getEmail(); ?></td>
+                            <td rowspan="<?php //echo $count_address; ?>"><?php echo $customer->getDob(); ?></td>
+                            <td rowspan="<?php //echo $count_address; ?>"><?php echo $customer->getTelephone(); ?></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+<?php
+                }
+            ?>
+                    <!--<tr>
+                        <td><?php echo $i; ?></td>
+                        <td><?php echo $customer->getId(); ?></td>
+                        <td><?php echo $customer->getFirstname(); ?></td>
+                        <td><?php echo $customer->getLastname(); ?></td>
+                        <td><?php echo $customer->getEmail(); ?></td>
+                        <td><?php echo $customer->getDob(); ?></td>
+                        <td><?php echo $customer->getTelephone(); ?></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>-->
+        <?php 
+            $i++;
+            }
+        ?>
+    </tbody>
+</table>
+<?php
+else:
+    echo "No customers found.";
+endif;
+            */
+?>
+<?php 
+
+            
+    $customer_collection = array();
+    if ($customerCollection->getSize() > 0){
+        foreach ($customerCollection as $customer){
+            $array_to_push = array();
+            $count_address = count( $customer->getAddresses() );
+            $getStreet = '';
+            $getCity = '';
+            $getPostcode = '';
+            $getRegion = '';
+            $getTelephone = '';
+                
+            
+            //getting info
+            $getId = $customer->getId();
+            $getFirstname = $customer->getFirstname();
+            $getLastname = $customer->getLastname();
+            $getEmail = $customer->getEmail();
+            $getDob = $customer->getDob();
+            $getTelephone = $customer->getTelephone();
+            
+            if($count_address > 0){
+                foreach ($customer->getAddresses() as $address){
+                    $getStreet = $address->getStreet();
+//                    echo print_r($getStreet)."<br>"; 
+                    
+                    $getStreet = implode(' ', $getStreet);
+//                    echo $getStreet."<br>";
+                    
+                    $getCity = $address->getCity();
+//                    echo $getCity."<br>"; 
+                    
+                    $getPostcode = $address->getPostcode();
+//                    echo $getPostcode."<br>"; 
+                    
+                    $getRegion = $address->getRegion();
+//                    echo $getRegion."<br>"; 
+                    
+                    $getTelephone = $address->getTelephone();
+//                    echo $getTelephone."<br>"; 
+                    
+                    break;
+                }
+                
+            }
+                
+            $array_to_push = array($getId, $getFirstname, $getLastname, $getEmail, $getDob, $getTelephone, $getStreet, $getCity, $getPostcode, $getRegion, $getTelephone);
+//            print_r($array_to_push);
+//            echo '<br><br><br><br>';
+            array_push($customer_collection, $array_to_push);
+        }
+    }
+
+        // Define the CSV data
+
+        // Set the HTTP response headers for CSV download
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="example.csv"');
+
+        // Create a file pointer and output CSV data to the browser
+        $fp = fopen('php://output', 'w');
+
+        foreach ($customer_collection as $row) {
+            fputcsv($fp, $row);
+        }
+
+        fclose($fp);
+?>
+

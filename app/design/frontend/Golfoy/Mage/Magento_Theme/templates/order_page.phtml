@@ -1,0 +1,170 @@
+<div class="card_feedback_block">
+    <div class="card_feedback">
+        <div class="row">
+            <div class="row feedback_section_block " id="feedbackSection">
+                <button class="order-close-btn" onclick="hideFeedbackSection()" title="close">✖</button>
+                <div class="feedback_section">
+                    <h1>Did you enjoy shopping with us?</h1>
+                    <p>We'd love to know your feedback. Tell us, did you enjoy shopping on <span class="bold_text">Golfoy ?</span></p>
+                </div>
+                <div class="col-md-12 smiley_gallery">
+                    <div class="smiley_img_Sec">
+                        <img src="https://golfoy.com/media/wysiwyg/2023_homepage/emoji/very_bad.svg" alt="very_bad" rating="1">
+                    </div>
+                    <div class="smiley_img_Sec">
+                        <img src="https://golfoy.com/media/wysiwyg/2023_homepage/emoji/bad.svg" alt="bad" rating="2">
+                    </div>
+                    <div class="smiley_img_Sec">
+                        <img src="https://golfoy.com/media/wysiwyg/2023_homepage/emoji/neutral.svg" alt="neutral" rating="3">
+                    </div>
+                    <div class="smiley_img_Sec">
+                        <img src="https://golfoy.com/media/wysiwyg/2023_homepage/emoji/good.svg" alt="good" rating="4">
+                    </div>
+                    <div class="smiley_img_Sec">
+                        <img src="https://golfoy.com/media/wysiwyg/2023_homepage/emoji/excellent.svg" alt="excellent" rating="5">
+                    </div>
+                </div>
+
+                <div class="col-md-12 input_form_sec" style="display: none;">
+                    <div class="form-group smile_input">
+                        <input type="hidden" name="order_id" class="order_id" id="order_id" value="1000098109">
+                        <input type="hidden" name="order_rating" class="order_rating" id="order_rating">
+                        <label class="label">Help us by writing comment (optional)</label>
+                        <textarea id="orderfeedback-textarea" maxlength="1000" class="form-control" rows="3" placeholder="Your feedback is extremely important to us in helping us improve and serve you better"></textarea>
+                        <div class="max_word_limit"><span>1000</span> Character(s) Remaining</div>
+                    </div>
+                    <div class="btn_section continue_button"><button class="submit_btn" id="submit_orderfeedback">Submit</button></div>
+                </div>
+            </div>
+
+            <div class="col-md-12 card_feedback_row">
+                <p class="order_number" style="margin-bottom:0px;">
+                    Your order
+                    <a href="https://golfoy.com/sales/order/view/order_id/106051/" class="order-number"><strong>1000098109</strong></a>.
+                    has been received!
+                </p>
+                <h1 class="heading_success">
+                    <img class="success_image" src="https://golfoy.com/media/sales/download.gif">
+                </h1>
+                <p class="recive_text">
+                    You will receive an order confirmation E-mail &amp; SMS with details of your order and a link to track its progress.
+                </p>
+                <p class="rewardpoint_text">
+                    Use Cashback Money to get Upto 10% Off on your next order.View terms &amp; condition for more.
+                </p>
+
+                <div class="row order-feedback-column">
+                    <div class="progress_outer progress_outer_success">
+                        <div class="progress_custom">
+                            <div class="step steps">
+                                <div class="step-progress"></div>
+                                <div class="icon-wrapper">
+                                    <svg class="icon icon-checkmark" viewBox="0 0 32 32">
+                                        <path class="path1" d="M27 4l-15 15-7-7-5 5 12 12 20-20z"></path>
+                                    </svg>
+                                    <div class="step-text">ORDERED</div>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-progress"></div>
+                                <div class="icon-wrapper">
+                                    <svg class="icon icon-checkmark" viewBox="0 0 32 32">
+                                        <path class="path1" d="M27 4l-15 15-7-7-5 5 12 12 20-20z"></path>
+                                    </svg>
+                                    <div class="step-text">PACKED</div>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-progress"></div>
+                                <div class="icon-wrapper">
+                                    <svg class="icon icon-checkmark" viewBox="0 0 32 32">
+                                        <path class="path1" d="M27 4l-15 15-7-7-5 5 12 12 20-20z"></path>
+                                    </svg>
+                                    <div class="step-text">SHIPPED</div>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="icon-wrapper">
+                                    <svg class="icon icon-checkmark" viewBox="0 0 32 32">
+                                        <path class="path1" d="M27 4l-15 15-7-7-5 5 12 12 20-20z"></path>
+                                    </svg>
+                                    <div class="step-text">DELIVERED</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 order-details-column">
+                        <div class="details-content">
+                            <table class="data table table-totals">
+                                <caption class="table-caption" data-bind="i18n: 'Order Summary'">Order Summary</caption>
+                                <tbody>
+
+                                    <tr class="totals sub hide">
+                                        <th data-bind="i18n: title" class="mark" scope="row">Cart Subtotal</th>
+                                        <td class="amount">
+                                            <span class="price" data-bind="text: getValueInclTax(), attr: {'data-th': title}" data-th="Cart Subtotal">₹ 4,495</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="totals sub hide">
+                                        <th class="mark" scope="row" data-bind="text: getEarning().title">Cashback Discount</th>
+                                        <td class="amount">
+                                            <span class="price" data-bind="html: getEarningValue()">115 points</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="you-save hide" id="you-save">
+                                        <th class="mark" colspan="1"><span class="detailed">You Save</span></th>
+                                        <td class="amount"><span class="price mp-rw-highlight" style="font-weight: bold; font-size: 16px;">₹ 2,610</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <p class="you_save_line_success_page">Yous Saved Rs. <span class="bold">Rs.2610</span> on this order &amp; Earned <span class="bold">115 Points</span>. You can redeem these points in your next order.</p>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 delivery-note">
+
+                        <div class="detailed_heading_outer">
+                            <div class=" detailed_heading_text"><span class="">Delivery note</span></div>
+                        </div>
+                        <div class="deliver-note-form">
+                            <form action="/submit" method="post" class="my-form">
+                                <textarea id="inputField" name="inputField" rows="5" placeholder="Enter your text here"></textarea>
+                                <p class="delivery_instruction">Write delivery instruction (optional) <span>Max Characters: 100</span></p>
+                                <input type="submit" value="Submit">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="continue_button">
+                    <button type="button" class="btn btn-warning bt-lg" title="Continue Shopping" onclick="window.location='https://golfoy.com/'"><span><span>Continue Shopping</span></span></button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    require(['jquery'], function(jQuery) {
+        jQuery(document).ready(function() {
+            var steps = jQuery(".steps");
+            console.dir(steps);
+
+            setTimeout(function() {
+                steps.each(function(index) {
+                    var _t = jQuery(this);
+                    setTimeout(function() {
+                        _t.addClass('done');
+                    }, 1250 * index * 1.5);
+                });
+            }, 500);
+        });
+    });
+</script>

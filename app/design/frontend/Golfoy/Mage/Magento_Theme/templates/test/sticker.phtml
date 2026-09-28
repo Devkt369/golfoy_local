@@ -1,0 +1,253 @@
+<style>
+    .customer_sticker_inside {
+        /*display: inline-block;
+        width: 100%;
+        height: 100%;
+        border: 1px dashed black;
+        float: left;
+        font-size: 12px;
+        display: grid;
+        place-items: center;
+        justify-items: stretch;
+        align-content: center;
+        align-items: baseline;
+        justify-content: space-around;
+        padding: .3in;*/
+        
+        
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+        border: 1px dashed black;
+        /* padding: 0.35in; */
+        /* border-radius: 5px; */
+        float: left;
+        font-size: 18px;
+        display: inline-block;
+        width: 443px;
+        /* place-items: center; */
+        /* align-items: stretch; */
+        /* justify-content: space-between; */
+        padding: 0.3in 1in 1.3in 1in;
+        /* justify-items: start; */
+        align-content: center;
+        font-weight: 600;
+        transform: rotate(-90deg);
+    }
+    span.cust_name {
+        font-weight: 700;
+    }
+    .a_for_sheet {
+        height: 10.11in;
+        border: 1px solid black;
+        width: 100%;
+        padding-top: 10px;
+        padding-left: 10px;
+        text-align: left;
+    }
+    header.page-header, .sections.nav-sections, .breadcrumbs, footer.page-footer{
+        display: none;
+    }
+    .customer_sticker_inside span {
+        width: 100%;
+        display: inline-block;
+    }
+    main#maincontent {
+        max-width: 1280px;
+        padding-left: 15px;
+        padding-right: 15px;
+        padding: 0px !important;
+        margin-left: 0px;
+    }
+    .customer_sticker {
+        width: 100%;
+        height: 5in;
+        /* margin: auto; */
+        /* margin-top: 350px; */
+        /* transform: rotate(-90deg); */
+        border: 1px solid;
+        padding-left: 170px;
+    }
+    .column.main {
+        width: 11in !important;
+    }
+    span.cust_name {
+        font-weight: 700;
+        font-size: 21px;
+    }
+    span.del_text {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+    .numbering > span {
+        border: 1px solid black;
+        padding: 2px 9px;
+    }
+</style>
+<?php
+// Retrieve customer collection
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+
+
+$customerModel = $objectManager->create('Magento\Customer\Model\Customer');
+$customerCollection = $objectManager->create('Magento\Customer\Model\ResourceModel\Customer\Collection')
+    ->addAttributeToSelect("*");
+//    ->setPageSize(1000); 
+//    ->addFieldToFilter('entity_id', ['gteq' => 1])
+//    ->addFieldToFilter('entity_id', ['lteq' => 5000]);
+//    ->setPageSize(120); 
+
+
+// Set page size to 50
+//$customerCollection->setPageSize(50);
+
+// Filter customers by city (replace "YourCity" with the desired city)
+//$customerCollection->addAttributeToFilter('city', ['like' => '%YourCity%']);
+
+//echo "<br>Customer size is: ". $customerCollection->getSize()."<br><br><br>";
+// Loop through the customer collection
+$phone_list = array();
+$i = 0;
+
+echo "<div class='a_for_sheet'>";
+foreach ($customerCollection as $customer) {
+    
+    // Get customer name
+    $customerName = $customer->getName();
+
+    $customerAddress = $customer->getPrimaryBillingAddress();
+//    echo $customer->getId()."<br>";
+    // Get customer address
+    if ($customerAddress) {
+        if( strtolower($customerAddress->getCity()) == 'noida' ){
+            
+        }else if( strtolower($customerAddress->getCity()) == 'greater noida' ){
+            
+        }else if( strtolower($customerAddress->getCity()) == 'noida3' ){
+            
+        }else if( strtolower($customerAddress->getCity()) == 'noida' ){
+            
+        }else if( strtolower($customerAddress->getCity()) == 'greater noida' ){
+            
+        }else if( strtolower($customerAddress->getCity()) == 'geater noida' ){
+            
+        }else if( strtolower($customerAddress->getCity()) == 'sector 78 noida' ){
+            
+        }else if( strtolower($customerAddress->getCity()) == 'noida extention' ){
+            
+        }else if( strtolower($customerAddress->getCity()) == 'greater noida,' ){
+            
+        }else if( strtolower($customerAddress->getCity()) == 'greater noida' ){
+            
+        }else if( strtolower($customerAddress->getCity()) == 'greater noida, gautam buddh nagar' ){
+            
+        }else if( strtolower($customerAddress->getCity()) == 'noida , up' ){
+            
+        }else if( strtolower($customerAddress->getCity()) == 'greater noida west' ){
+            
+        }else if( strtolower($customerAddress->getCity()) == 'greator noida' ){
+            
+        }else if( strtolower($customerAddress->getCity()) == 'greaternoida' ){
+            
+        }else if( strtolower($customerAddress->getCity()) == 'grater noida' ){
+            
+        }else{
+            continue;
+        }
+        /*
+noida
+greater noida
+noida3
+noida
+greater noida
+geater noida
+sector 78 noida
+noida extention
+greater noida,
+greater noida
+greater noida, gautam buddh nagar
+noida , up
+greater noida west
+greator noida
+greaternoida
+grater noida
+        */
+        /*if (strpos($customerAddress->getCity(), 'noida' ) !== false) {
+//            echo "String contains the substring";
+        } else {
+            continue;
+        }*/
+        
+        $telephone = $customerAddress->getTelephone();
+        
+        if ( in_array( $telephone, $phone_list ) ) {
+            continue;
+        }else{
+            $phone_list[] = $telephone;
+        }
+//        if($i%5 == 0){
+            echo "</div>";
+            echo "<div class='a_for_sheet'>";
+//        } 
+    }
+    
+    if ($customerAddress) {
+            
+        // Get complete address
+        $completeAddress = $customerAddress->getStreetFull() . ', ' . $customerAddress->getCity() . ', ' . $customerAddress->getRegion() . ', ' . $customerAddress->getPostcode();
+        
+        // Get phone number
+        $phoneNumber = $customerAddress->getTelephone();
+
+        // Output customer data
+        echo "<div class='customer_sticker ".$i."'>";
+//        echo "Address: $completeAddress<br>";
+//        echo "Phone Number: $phoneNumber<br><br>";
+        
+        echo "<div class='customer_sticker_inside'>";
+        echo '<span class="del_text">Delivery Address: </span>';
+        echo "<span class='cust_name'>".strtoupper($customerName)."</span>";
+        echo implode(", ", $customerAddress->getStreet())."<br>";
+        
+        echo $customerAddress->getCity().",&nbsp;";
+        echo $customerAddress->getPostcode()."<br>";
+        
+        echo $customerAddress->getRegion()."<br>";
+        echo $customerAddress->getTelephone()."<br>";
+        echo "</div>";
+        echo "</div>";
+        echo '<div class="numbering">
+<span>1</span>
+<span>2</span>
+<span>3</span>
+<span>4</span>
+<span>5</span>
+<span>6</span>
+<span>7</span>
+<span>8</span>
+<span>9</span>
+<span>10</span>
+<span>11</span>
+<span>12</span>
+<span>13</span>
+<span>14</span>
+<span>15</span><span>1</span>
+<span>16</span>
+<span>17</span>
+<span>18</span>
+<span>19</span>
+<span>20</span>
+<span>21</span>
+<span>22</span>
+<span>23</span>
+<span>24</span>
+<span>25</span>
+<span>26</span>
+</div>';
+        $i++;
+    }
+}
+echo "<div>";
+echo "<br>Count: ".count($phone_list);

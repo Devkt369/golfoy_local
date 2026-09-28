@@ -1,0 +1,349 @@
+<style>
+    .slider-images-tour .slider_arrows .right_arrow:after {
+        height: 125px !important;
+        width: 44px !important;
+    }
+
+    .slider-images-tour .right_arrow {
+        position: absolute;
+        right: 0px;
+        margin-top: 117px !important;
+        display: inline-block;
+        float: left;
+    }
+
+    .slider-images-tour .left_arrow {
+        position: absolute;
+        left: 0px;
+        margin-top: 117px !important;
+        display: inline-block;
+        float: left;
+    }
+
+    .slider-images-tour .slider_arrows .left_arrow:before {
+        height: 125px !important;
+        width: 44px !important;
+    }
+
+    .slider-images-tour .slider_arrows .right_arrow:after {
+        content: "";
+        background: url(http://golfoy.com/pub/media/right-arrow.svg) !important;
+        background-repeat: no-repeat !important;
+        display: block;
+        background-size: contain !important;
+    }
+
+    .slider-images-tour .slider_arrows .left_arrow:before {
+        content: "";
+        background: url(http://golfoy.com/pub/media/left-arrow.svg) !important;
+        background-repeat: no-repeat !important;
+        display: block;
+        background-size: contain !important;
+    }
+
+    .slider-images-tour .slider_arrows {
+        left: -60px;
+        width: calc(100% + 120px) !important;
+    }
+
+    .slider-images-tour .slider_arrows>div {
+        opacity: 1 !important;
+        transition: opacity .3s ease;
+    }
+
+    .slider-images-tour .slider_arrows {
+        position: relative;
+        z-index: 111;
+        width: 100%;
+        margin-top: 0;
+        height: 0;
+        left: 0;
+        float: left;
+    }
+
+    ol#sliderWrapper {
+        overflow-x: scroll;
+        white-space: nowrap;
+        cursor: grab;
+        padding: 0;
+        width: auto !important;
+        scrollbar-width: none;
+    }
+
+    button.next-slide:after {
+        content: '\e608';
+    }
+
+    .slider-images-tour>div>button {
+        font-size: 50px;
+        padding: 10px 0px;
+    }
+
+    button.prev-slide:after {
+        content: '\e617';
+    }
+
+    button.next-slide:after,
+    button.prev-slide:after {
+        font-family: 'icons-blank-theme';
+        text-shadow: 1px 0px #696969;
+        color: white;
+    }
+
+    .slider-header p {
+        padding: 0px 16px;
+
+    }
+
+    .slider-images-tour {
+        padding: 16px 12px;
+    }
+
+    .team-slider .slider-item {
+        margin: 0px;
+        padding-right: 20px;
+    }
+
+    .team-slider>div {
+        display: inline-block;
+        width: 100%;
+    }
+
+    .slider-header {
+        text-align: left;
+    }
+
+    .team-slider .slider-item p {
+        border-radius: 0px 0px 5px 5px;
+        color: black;
+        background-color: #f6f6f6;
+        padding: 20px 0px 20px;
+        overflow: hidden;
+    }
+
+    .team-slider .slider-item img {
+        border-radius: 5px 5px 0px 0px;
+        overflow: hidden;
+    }
+
+    .slider-item p {
+        text-transform: uppercase;
+        font-size: 13px;
+        font-weight: 700;
+        padding-top: 10px;
+    }
+
+    .team-slider {
+        text-align: center;
+        max-width: 1170px;
+        padding: 20px 7px;
+        margin: auto;
+    }
+
+    .slider-images-tour {
+        height: 400px;
+    }
+
+    .golfoy_player-logo {
+        font-size: 24px;
+        height: 48px;
+        width: 180px;
+        font-weight: 700;
+        margin-top: 25px;
+        display: inline-block;
+    }
+
+    .slider-header p {
+        font-weight: 600;
+        padding-bottom: 10px;
+        padding-top: 5px;
+    }
+
+    .slider-images-tour .slider-container {
+        position: relative;
+        align-items: center;
+    }
+
+    .slider-images-tour .slider-container {
+        top: 0px;
+    }
+
+    a.slider-wrapper-child {
+        display: inline-block;
+    }
+
+    .slider-item {
+        width: 280px;
+        flex-shrink: 0;
+        margin: 0 10px;
+    }
+
+    .slider-images-tour .slider-container button {
+        position: absolute;
+        top: 5%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        font-weight: 300;
+        font-family: monospace;
+        transition: all 0.3s ease;
+        background: transparent;
+    }
+
+    .prev-slide {
+        left: 0px;
+    }
+
+    .next-slide {
+        right: 0px;
+    }
+
+    .slider-footer {
+        margin-top: 30px;
+    }
+
+    .slider_arrows {
+        cursor: pointer;
+    }
+
+    @media only screen and (max-width:768px) {
+        .slider-images-tour .slider-container {
+            top: 180px !important;
+        }
+
+        .team-slider .slider-footer button.explore-btn.action.primary {
+            font-size: 1rem;
+        }
+
+        .slider-images-tour {
+            height: auto;
+        }
+
+        .team-slider .heading_golfoy_left h2 {
+            text-align: center;
+        }
+
+        .team-slider .slider-item p {
+            font-size: 1rem;
+
+        }
+
+        .slider-header p {
+            font-size: 12px;
+            padding-top: 5px;
+            text-align: center;
+        }
+
+        .slider-images-tour .slider_arrows {
+            margin-top: -15px;
+        }
+
+        .slider-item {
+            width: 150px;
+        }
+
+        .slider-images-tour .slider-container button {
+            position: absolute;
+            margin-top: 80px !important;
+            top: 0px;
+        }
+
+        .team-slider {
+            padding: 0px;
+        }
+
+        .slider-images-tour .slider-container {
+            position: relative;
+        }
+
+        .slider-wrapper {
+            white-space: nowrap;
+            overflow: hidden;
+            scrollbar-width: none;
+            overflow-x: scroll;
+        }
+
+    }
+
+    @media only screen and (max-width:690px) {
+        .slider-images-tour .slider-container {
+            top: 0px !important;
+        }
+    }
+</style>
+<script>
+    require(["jquery", "bootstrap"], function(jQuery) {
+        jQuery(document).ready(function() {
+
+        });
+    });
+</script>
+
+<?php
+
+
+$categoryId = 220;
+$cacheKey = 'players_bag_slider_' . $categoryId;
+$cacheLifetime = 24 * 60 * 60; // Use the cookie lifetime for the cache as well.
+$cache = \Magento\Framework\App\ObjectManager::getInstance()->get(\Magento\Framework\App\CacheInterface::class);
+
+if ($cachedHtml = $cache->load($cacheKey)) {
+    echo $cachedHtml;
+
+    return;
+} else {
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $category = $objectManager->create('Magento\Catalog\Model\Category')->load($categoryId);
+
+    if ($category->getId()) {
+        $subcategories = $category->getChildrenCategories();
+
+        if ($subcategories && count($subcategories) > 0) {
+            ob_start();
+?>
+            <div class="team-slider">
+                <div class="slider-header">
+                    <div class="col-xs-12 header-left">
+                        <div class="heading_golfoy_left">
+                            <h2>Players Bag</h2>
+                            <p>Equipment Chosen by Tour Players</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="slider-images-tour">
+                    <div class="slider-container">
+                        <button class="prev-slide left_arrow"></button>
+                        <ol class="slider-wrapper products list items product-itemss" id="sliderWrapper">
+                            <?php foreach ($subcategories as $subcategory) {
+                                $subcategory = $objectManager->create('Magento\Catalog\Model\Category')->load($subcategory->getId());
+
+                            ?>
+                                <a href="<?php echo $subcategory->getUrl() . '#' . $subcategory->getId(); ?>" class="react-comp slider-wrapper-child">
+                                    <div class="slider-item">
+                                        <img src="http://golfoy.com<?php echo $subcategory->getImageUrl(); ?>" loading="lazy" alt="<?php echo $subcategory->getName(); ?>">
+                                        <p><?php echo $subcategory->getName(); ?></p>
+                                    </div>
+                                </a>
+                            <?php } ?>
+                        </ol>
+                        <button class="next-slide right_arrow"></button>
+                    </div>
+                    <div class="slider-footer">
+                        <a class="react-comp" href="http://golfoy.com/shop-players-bag"><button class="explore-btn action primary">EXPLORE TOUR PLAYERS</button></a>
+                    </div>
+                </div>
+            </div>
+<?php
+            $html = ob_get_clean();
+            $scriptString = <<<JS
+                localStorage.removeItem('playersBag');
+                localStorage.setItem("playersBag", `$html`);
+            JS;
+            setcookie('playersBag', '', time() - 3600, '/');
+            setcookie('playersBag', 'HTML', time() + (24 * 60 * 60), '/');
+            echo $secureRenderer->renderTag('script', ['defer'], $scriptString, false);
+            $cache->save($html, $cacheKey, ['catalog_category_view'], $cacheLifetime);
+            echo $html;
+        }
+    }
+}
+?>

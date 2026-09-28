@@ -1,0 +1,254 @@
+<?php ?>
+<script defer="defer">
+    require(['jquery'], function($) {
+        if (window.wizzyConfig.events !== null && window.wizzyConfig.events !== undefined) {
+            wizzyInit();
+        } else {
+            window.onWizzyLoaded = [];
+            window.onWizzyLoaded.push(function() {
+                wizzyInit();
+            });
+        }
+
+        function wizzyInit() {
+
+            window.wizzyConfig.events.registerEvent(
+                window.wizzyConfig.events.allowedEvents.BEFORE_AUTOCOMPLETE_EXECUTED,
+                function(payload) {
+                    payload.facets = [{
+                        "key": "categories",
+                        "label": "Category",
+                        "position": "left",
+                        "order": 0
+                    }, {
+                        "key": "brands",
+                        "label": "Brand",
+                        "position": "left",
+                        "order": 1
+                    }];
+                    return payload;
+                }
+            );
+
+            window.wizzyConfig.events.registerEvent(
+                window.wizzyConfig.events.allowedEvents.BEFORE_AUTOCOMPLETE_RENDER,
+                function(payload) {
+
+                    if (!payload.payload || !payload.payload.products) {
+                        return payload;
+                    }
+
+                    // Check for brands
+                    var brandNames = [];
+                    if (payload.payload.brands && payload.payload.products.facets) {
+                        var facets = payload.payload.products.facets;
+
+                        facets.forEach((facet) => {
+                            if (facet.key == "brands") {
+                                var facetBrands = facet.data;
+                                facetBrands.forEach((facetBrand) => {
+                                    brandNames.push(facetBrand.label);
+                                });
+                            }
+                        });
+
+                        var brands = payload.payload.brands;
+                        var filteredBrands = brands.filter(brand => brandNames.includes(brand.value));
+                        payload.payload.brands = filteredBrands;
+                    }
+
+                    // Check for categories
+                    var categoryNames = [];
+                    if (payload.payload.categories && payload.payload.products.facets) {
+                        var facets = payload.payload.products.facets;
+
+                        facets.forEach((facet) => {
+                            if (facet.key == "categories") {
+                                var facetCategories = facet.data;
+                                facetCategories.forEach((facetCategory) => {
+                                    categoryNames.push(facetCategory.label);
+                                });
+                            }
+                        });
+                        var categories = payload.payload.categories;
+                        var filteredCategories = categories.filter(category => categoryNames.includes(category.value));
+                        payload.payload.categories = filteredCategories;
+                    }
+
+                    // Check for categories
+                    if (payload.payload.others) {
+                        var otherSuggestions = payload.payload.others;
+                        var filteredOtherSuggestions = otherSuggestions.filter(otherSuggestion => categoryNames.includes(otherSuggestion.value));
+                        filteredOtherSuggestions = otherSuggestions.filter(otherSuggestion => brandNames.includes(otherSuggestion.value));
+                        payload.payload.others = filteredOtherSuggestions;
+                    }
+                    console.log(payload);
+                    return payload;
+                }
+            );
+
+            // new code wizzy 17-05-24 
+
+
+            window.wizzyConfig.events.registerEvent(
+                window.wizzyConfig.events.allowedEvents.BEFORE_INIT,
+                function(payload) {
+                    window.wizzyConfig.search.configs.facets.leftFacets.mobileCollapsible = true;
+                    return payload;
+                });
+            window.wizzyConfig.events.registerEvent(
+                window.wizzyConfig.events.allowedEvents.BEFORE_RENDER_RESULTS,
+                function(payload) {
+                    const facets = payload.response.payload.facets;
+                    facets.forEach((facet) => {
+                        if (facet.key == "colors") {
+                            const facetItem = facet.data;
+                            facetItem.forEach((item) => {
+                                if (typeof item.data.swatch !== "undefined" && item.data
+                                    .swatch !== null) {
+                                    item.data.swatch.value =
+                                        "https://golfoy.com/media/attribute/swatch/swatch_image/30x20" +
+                                        item.data.swatch.value;
+                                }
+                            });
+                        }
+                    });
+                    return payload;
+                });
+
+            window.wizzyConfig.events.registerEvent(
+                window.wizzyConfig.events.allowedEvents.BEFORE_AUTOCOMPLETE_EXECUTED,
+                function(payload) {
+                    payload.minLastWordLength = 2;
+                    return payload;
+                });
+            window.wizzyConfig.events.registerEvent(window.wizzyConfig.events.allowedEvents.BEFORE_SEARCH_EXECUTED,
+                function(payload) {
+                    payload.minLastWordLength = 2;
+                    return payload;
+                });
+
+
+            window.wizzyConfig.events.registerEvent(
+                window.wizzyConfig.events.allowedEvents.AFTER_PRODUCTS_TRANSFORMED,
+                function(products) {
+                    products.forEach((product) => {
+                        var swatches = product.swatches;
+                        if (swatches) {
+                            swatches.forEach((swatch) => {
+                                if (swatch.key == "colors") {
+                                    var colorValues = swatch.values;
+                                    colorValues.forEach((colorValue) => {
+                                        colorValue.isURLSwatch = true;
+                                        colorValue.swatchValue =
+                                            "https://golfoy.com/media/attribute/swatch/swatch_image/30x20" +
+                                            colorValue.swatchValue;
+                                    });
+                                }
+                            });
+                        }
+                        if (product.brand) {
+                            product.name = product.name.replace(new RegExp(product.brand, 'gi'), '')
+                                .trim();
+                        }
+                        if (product.price) {
+                            product.price = parseInt(product.price.replace(/,/g, ""));
+                            product.price = product.price.toLocaleString();
+                        }
+                        if (product.sellingPrice) {
+                            product.sellingPrice = parseInt(product.sellingPrice.replace(/,/g, ""));
+                            product.sellingPrice = product.sellingPrice.toLocaleString();
+                        }
+                        if (product.discount) {
+                            product.discount = parseInt(product.discount.replace(/,/g, ""));
+                            product.discount = product.discount.toLocaleString();
+                        }
+
+                        var attributes = product.attributes;
+
+                        attributes.forEach((attribute) => {
+                            var value = attribute.values[0].value[0];
+
+                            if (attribute.id === "bestseller" && value !== undefined && value !== null && value !== '' && value !== '0' && value !== 'false' && value !== 'No') {
+                                product.isBestSeller = true;
+                            }
+
+                            if (attribute.id === "newarrivals" && value !== undefined && value !== null && value !== '' && value !== '0' && value !== 'false' && value !== 'No') {
+                                product.isNewArrival = true;
+                            }
+
+                            if (attribute.id === "clearance_sale" && value !== undefined && value !== null && value !== '' && value !== '0' && value !== 'false' && value !== 'No') {
+                                product.isLowestPrice = true;
+                            }
+
+                            if (attribute.id === "can_print" && value !== undefined && value !== null && value !== '' && value !== '0' && value !== 'false' && value !== 'No') {
+                                product.iscustomPrint = true;
+                            }
+
+                            if (attribute.id === "waterproof" && value !== undefined && value !== null && value !== '' && value !== '0' && value !== 'false' && value !== 'No') {
+                                product.isWaterProof = true;
+                            }
+
+                            if (attribute.id === "waterrepel" && value !== undefined && value !== null && value !== '' && value !== '0' && value !== 'false' && value !== 'No') {
+                                product.isWaterRepel = true;
+                            }
+
+                            if (attribute.id === "limitedstock" && value !== undefined && value !== null && value !== '' && value !== '0' && value !== 'false' && value !== 'No') {
+                                product.isLimitedStock = true;
+                            }
+
+                            if (attribute.id === "playerschoice" && value !== undefined && value !== null && value !== '' && value !== '0' && value !== 'false' && value !== 'No') {
+                                product.isPlayersChoice = true;
+                            }
+                        });
+
+                    });
+
+                    setTimeout(function() {
+                        let viewMoreButton = document.querySelector(".wizzy-autocomplete-top-products-view-more");
+
+                        if (viewMoreButton) {
+                            viewMoreButton.addEventListener("click", function(e) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                e.stopImmediatePropagation();
+                                let form = document.querySelector('.form.minisearch');
+
+                                if (form) {
+                                    form.setAttribute("action", window.location.origin + "/search");
+                                    form.submit();
+                                }
+                            });
+                        }
+                    }, 500);
+                    var btn = jQuery(".wizzy-autocomplete-top-products-view-more");
+                    jQuery(btn).click(function(e) {
+                        e.preventDefault();
+                        var form = jQuery("#search_mini_form");
+                        // Set the form action here and submit the form
+                        jQuery(form).submit();
+                    })
+
+                    return products;
+                });
+
+            window.wizzyConfig.events.registerEvent(
+                window.wizzyConfig.events.allowedEvents.PRODUCTS_RESULTS_RENDERED,
+                function(payload) {
+                    var backButton = document.querySelector('.wizzy-search-back');
+                    backButton.click();
+                    return payload;
+                }
+            );
+
+
+        }
+
+    });
+</script>
+<style>
+    li.wizzy-facet-list-item[data-term="1"],
+    li.wizzy-facet-list-item[data-term="0"] {
+        display: none !important;
+    }
+</style>

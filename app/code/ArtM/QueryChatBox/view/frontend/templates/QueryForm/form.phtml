@@ -1,0 +1,289 @@
+<?php
+// print_r($block->getCustomerDetails());
+$customerDetails = $block->getCustomerDetails();
+$imageURL = $block->getImageUrl('chatbox.png');
+$flag = true;
+$blockStatus = '';
+$chatBoxOpenSelector = '';
+if (!$customerDetails) {
+    $flag = false;
+    $cemail = '';
+    $cname = '';
+    $cnumber = '';
+    $cid = '';
+} else {
+    $cemail = $customerDetails['0'];
+    $cname = $customerDetails['1'];
+    $cnumber = $customerDetails['2'];
+    $cid = $customerDetails['3'];
+}
+
+$blockStatus = $block->isBlockUser($cemail);
+
+$queryType = explode('||', $block->getQueryTypeConfig('querychat/query/question_area'));
+$chatBoxOpenSelector = $block->getQueryTypeConfig('querychat/query/query_chat_box_open');
+$htmlOutput = '';
+
+foreach ($queryType as $index => $query) {
+    $htmlOutput .= '<div class="checkboxes">';
+    $htmlOutput .= '<label><input type="checkbox" id="checkbox' . ($index + 1) . '" name="query_type[]" value="' . $block->escapeHtml($query) . '">' . $block->escapeHtml($query) . '</label>';
+    $htmlOutput .= '</div>';
+}
+?>
+
+<div id="chatbox-icon" class="chatbox-icon">
+    <!-- <div class='cross-chat-box'></div> -->
+    <!-- <button class="query-btn">Open for queries</button> -->
+    <!-- <img src="<?php //echo $imageURL; ?>" alt="Chatbox Icon"> -->
+</div>
+
+<div id="chatbox-form" class="chatbox-form" style="display: none;">
+    <!-- <div class="block-user-status" style="display: none;">Please Contact Customer Care.</div> -->
+    <!-- <div class='cross-chat-box-form'>✖</div>     -->
+    <div id="success-message">✔️  Thanks for reaching out to Golfoy for Expert Advice. One of our experts will review your query and get back to you shortly</div>
+    <form action="" method="post" class='query-chatbox'>
+        <fieldset>
+            <legend>Query Form </legend>
+            <span class="query-close-button"></span>
+            <div class="query-content">
+                <p>Have any questions about improving your golf swing, choosing the right gear, or anything else related to your game? Submit your query here, and our team of experts will guide you to improve your skills and make the most out of every round!</p>
+                <div class="chat_heading">
+                    You want to ask question related to...
+                </div>
+            </div>
+            <?php echo $htmlOutput; ?>
+            <div class="input-container">
+                <input type="text" placeholder="Choose an option" class="text-input" disabled />
+                <button class="send-button">
+                </button>
+            </div>
+            <div id="additional-info" style="display: none;">
+                <button class='revert-type'></button>
+
+                <div class="chat_heading_border">Our expert will contact you on below information.</div>
+                <label for="name">Name:</label>
+                <input type="text" id="name" value="<?= $block->escapeHtml(__($cname)) ?>" name="name">
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" value="<?= $block->escapeHtml(__($cemail)) ?>" name="email">
+
+                <label for="phone_number">Phone Number:</label>
+                <input type="number" id="phone_number" value="<?= $block->escapeHtml(__($cnumber)) ?>" name="phone_number">
+
+                <label for="query">Your Query:</label>
+                <textarea id="query" name="query"></textarea>
+                <p class="remainingcharacter">
+                    <span class="remainingchar"></span>
+                    Character(s) Remaining
+                </p>
+                <button type="submit">Submit</button>
+            </div>
+        </fieldset>
+    </form>
+</div>
+
+
+<script>
+    require(['jquery'], function($) {
+        $(document).ready(function() {
+
+            var max_length = 240;
+
+            var len = max_length - $('#query').val().length;
+            $('.remainingchar').text(len);
+
+            $('#query').keyup(function() {
+                var len = max_length - $(this).val().length;
+                $('.remainingchar').text(len);
+            });
+
+            //----To hide the chatbox on click of X----// 
+            document.querySelector('.query-close-button').addEventListener('click', function() {
+                document.querySelector('.chatbox-form').style.display = 'none';
+                document.querySelector('.chatbox-icon').classList.remove('visible');
+                document.getElementById('query').value = '';
+                $('.remainingchar').text(len);
+            });
+
+            $('#query').on('input paste', function() {
+                var query = $(this).val();
+                setTimeout(function() {
+                    query = query.replace(/[^a-zA-Z0-9\s,.!?]/g, '');
+                    if (query.length > 240) {
+                        query = query.substring(0, 240);
+                    }
+                    $('#query').val(query);
+                }, 100);
+            });
+
+            var customerSession = '<?php echo $flag; ?>';
+            var blockStatus = '<?php echo $blockStatus; ?>';
+            var chatboxSelector = '<?php echo $chatBoxOpenSelector; ?>';
+
+            $(chatboxSelector).click(function() {
+                $('#chatbox-icon').trigger('click');
+            });
+
+            $('#chatbox-icon').click(function() {
+                if (customerSession == false) {
+                    $('.hidden-sm.hidden-xs.authorization-link.signin_signout.sso').trigger('click');
+                    return;
+                }
+
+                if (blockStatus == true) {
+                    $('#chatbox-form').empty();
+                    $('div#chatbox-form').show();
+                    $('#chatbox-form').append('<div class="block-user-status">Please Contact Customer Care.</div>');
+                    $('div.block-user-status').show();
+                    setTimeout(function() {
+                        $('#chatbox-form').fadeOut();
+                    }, 4000);
+                    return;
+                }
+
+                if ($(this).hasClass('visible')) {
+                    $(this).removeClass('visible');
+                    $('.query-chatbox').trigger("reset");
+                    $('textarea#query').trigger("reset");
+                    $('input[type="checkbox"]').prop('checked', false);
+                    $('div#chatbox-form').hide();
+                    $('form.query-chatbox').hide();
+                    $('div#success-message').hide();
+                } else {
+                    $('.error-message').remove();
+                    $(this).addClass('visible');
+                    $('input[type="checkbox"]').prop('checked', false);
+                    $('#additional-info').hide();
+                    $('.checkboxes').show();
+                    $('form.query-chatbox').show();
+                    $('div#chatbox-form').show();
+                    $('.query-content').show();
+                    $('.input-container').show();
+                    $('.chatbox-form legend').text('Query Form');
+                }
+
+                // $('#chatbox-form').toggle();
+            });
+            // }else{
+            //     $('.account_icon_header.header_icon.customer-not-logged-in').trigger('click');
+            // }
+
+            $('#name').on('input', function() {
+                var name = $(this).val();
+                $(this).val(name.replace(/[^a-zA-Z\s]/g, ''));
+            });
+
+            $('#phone_number').on('input', function() {
+                var phoneNumber = $(this).val();
+                phoneNumber = phoneNumber.replace(/[^0-9]/g, '');
+                if (phoneNumber.length > 0 && phoneNumber[0] <= 5) {
+                    phoneNumber = '';
+                }
+                if (phoneNumber.length > 10) {
+                    phoneNumber = phoneNumber.substring(0, 10);
+                }
+                $(this).val(phoneNumber);
+            });
+
+            $('.revert-type').click(function(e) {
+                e.preventDefault();
+                $('input[type="checkbox"]').prop('checked', false);
+                $('#additional-info').hide();
+                $('.checkboxes').show();
+                $('.query-content').show();
+                $('.input-container').show();
+                $('.chatbox-form legend').text('Query Form');
+                $('textarea#query').trigger("reset");
+            });
+
+            $('input[type="checkbox"]').click(function() {
+                if ($('input[type="checkbox"]:checked').length > 0) {
+                    const labelValue = $(this).parent('label').text();
+                    $('.chatbox-form legend').text(labelValue);
+                    $('#additional-info').show();
+                    $('.checkboxes').hide();
+                    $('.query-content').hide();
+                    $('.input-container').hide();
+                    $('legend').text(labelValue);
+                } else {
+                    $('.checkboxes').show();
+                    $('.query-content').show();
+                    $('.input-container').show();
+                    $('#additional-info').hide();
+                }
+            });
+
+
+
+            $('#chatbox-form').submit(function(e) {
+                e.preventDefault();
+                var isValid = true;
+                var name = $('#name').val().trim();
+                var email = $('#email').val().trim();
+                var query = $('#query').val().trim();
+                var phone_number = $('#phone_number').val().trim();
+                $('.error-message').remove();
+                if (name === '') {
+                    $('#name').after('<p class="error-message">Name is required.</p>');
+                    isValid = false;
+                }
+                if (email === '') {
+                    $('#email').after('<p class="error-message">Email is required.</p>');
+                    isValid = false;
+                }
+                if (query === '') {
+                    $('#query').after('<p class="error-message">Query is required.</p>');
+                    isValid = false;
+                }
+                if (phone_number === '' || phone_number.length !== 10) {
+                    $('#phone_number').after('<p class="error-message">Phone number is required.</p>');
+                    isValid = false;
+                }
+                if (isValid === false) {
+                    return;
+                }
+
+                // Collect form data
+                var formData = {
+                    name: $('#name').val(),
+                    email: $('#email').val(),
+                    customer_email: '<?php echo $cemail; ?>',
+                    customer_name: '<?php echo $cname; ?>',
+                    cid: '<?php echo $cid; ?>',
+                    phone_number: $('#phone_number').val(),
+                    query: $('#query').val(),
+                    query_type: $('#chatbox-form legend').text()
+                };
+
+                // Send AJAX request
+                const baseURL = window.BASE_URL;
+                $.ajax({
+                    url: baseURL + 'querychatbox/chatbox/submit',
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+
+                            $('#additional-info').hide();
+                            $('form.query-chatbox').hide();
+                            $('#success-message').fadeIn();
+                            $('#chatbox-form')[0].reset();
+                            $('.checkboxes').show();
+                            $('.chatbox-form legend').text('Query Form');
+                            $('#chatbox-icon').removeClass('visible');
+                            $('div#chatbox-form').hide();
+                            $('form.query-chatbox').hide();
+                            $('div#success-message').hide();
+                        } else {
+                            // alert(response.message);
+                        }
+                    },
+                    error: function() {
+                        // alert('There was an error submitting your query. Please try again.');
+                    }
+                });
+            });
+        });
+    });
+</script>

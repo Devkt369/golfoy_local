@@ -1,0 +1,13 @@
+type EstimateDeliveryOutput {
+    dispatch_days: Int
+    delivery_days: Int
+    total_days: Int
+    estimated_delivery_date: String
+    source_code: String
+    group: String
+    express_shipping: Boolean
+}
+
+type Query {
+    estimateDelivery(sku: String!): EstimateDeliveryOutput @resolver(class: "ArtM\\EstimateDelivery\\Model\\Resolver\\EstimateDelivery")
+}

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">artm_shipment_partner_form.artm_shipment_partner_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Partner Details</item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+    </argument>
+
+    <settings>
+        <buttons>
+            <button name="back" class="ArtM\ShipmentTracking\Block\Adminhtml\Partner\Edit\BackButton"/>
+            <button name="delete" class="ArtM\ShipmentTracking\Block\Adminhtml\Partner\Edit\DeleteButton"/>
+            <button name="save" class="ArtM\ShipmentTracking\Block\Adminhtml\Partner\Edit\SaveButton"/>
+        </buttons>
+        <namespace>artm_shipment_partner_form</namespace>
+        <dataScope>data</dataScope>
+        <deps>
+            <dep>artm_shipment_partner_form.artm_shipment_partner_form_data_source</dep>
+        </deps>
+    </settings>
+
+    <dataSource name="artm_shipment_partner_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <settings>
+            <submitUrl path="*/*/save"/>
+        </settings>
+        <dataProvider class="ArtM\ShipmentTracking\Ui\DataProvider\PartnerDataProvider"
+                      name="artm_shipment_partner_form_data_source">
+            <settings>
+                <requestFieldName>partner_id</requestFieldName>
+                <primaryFieldName>partner_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <fieldset name="partner_details">
+        <settings>
+            <label translate="true">Partner Details</label>
+        </settings>
+
+        <field name="partner_id" formElement="hidden">
+            <settings>
+                <dataType>text</dataType>
+                <dataScope>partner_id</dataScope>
+            </settings>
+        </field>
+
+        <field name="partner_name" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Partner Name</label>
+                <dataScope>partner_name</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+
+        <field name="is_active" formElement="select">
+            <settings>
+                <dataType>select</dataType>
+                <label translate="true">Status</label>
+                <dataScope>is_active</dataScope>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="ArtM\ShipmentTracking\Ui\Component\Listing\Column\PartnerStatusOptions"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="api_url" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">API URL</label>
+                <dataScope>api_url</dataScope>
+            </settings>
+        </field>
+
+        <field name="username" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Username</label>
+                <dataScope>username</dataScope>
+            </settings>
+        </field>
+
+        <field name="auth_type" formElement="select">
+            <settings>
+                <dataType>select</dataType>
+                <label translate="true">Token / Auth Type</label>
+                <dataScope>auth_type</dataScope>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="ArtM\ShipmentTracking\Ui\Component\Listing\Column\AuthTypeOptions"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="token" formElement="textarea">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Token / API Secret</label>
+                <dataScope>token</dataScope>
+            </settings>
+        </field>
+
+        <field name="last_sync_at" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <label translate="true">Last Sync</label>
+                <dataScope>last_sync_at</dataScope>
+                <notice translate="true">Use YYYY-MM-DD HH:MM:SS. This can later be updated by cron/API fetch.</notice>
+            </settings>
+        </field>
+    </fieldset>
+</form>

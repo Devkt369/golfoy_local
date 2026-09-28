@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="clickandcollect_specialday" resource="default" engine="innodb" comment="Click And Collect Special Day">
+        <column xsi:type="int" name="specialday_id" unsigned="true" nullable="false" identity="true"
+                comment="Special Day Id"/>
+        <column xsi:type="varchar" name="specialday_name" length="255" nullable="true" comment="Special Day Name"/>
+        <column xsi:type="tinyint" name="store_status" padding="2" unsigned="true" nullable="true" comment="Store Status"/>
+        <column xsi:type="smallint" name="repeat" padding="4" unsigned="true" nullable="true" comment="Repeat"/>
+        <column xsi:type="date" name="date_from" comment="Date From" />
+        <column xsi:type="date" name="date_to" comment="Date To" />
+        <column xsi:type="varchar" name="time_open" length="5" nullable="true" comment="Time Open"/>
+        <column xsi:type="varchar" name="time_close" length="5" nullable="true" comment="Time Close"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="specialday_id"/>
+        </constraint>
+    </table>
+
+    <table name="clickandcollect_schedule" resource="default" engine="innodb" comment="Click And Collect Schedule">
+        <column xsi:type="int" name="schedule_id" unsigned="true" nullable="false" identity="true"
+                comment="Schedule Id"/>
+        <column xsi:type="varchar" name="schedule_name" length="255" nullable="true" comment="Schedule Name"/>
+        <column xsi:type="tinyint" name="monday_status" padding="2" unsigned="true" nullable="true" comment="Monday Status"/>
+        <column xsi:type="tinyint" name="tuesday_status" padding="2" unsigned="true" nullable="true" comment="Tuesday Status"/>
+        <column xsi:type="tinyint" name="wednesday_status" padding="2" unsigned="true" nullable="true" comment="Wednesday Status"/>
+        <column xsi:type="tinyint" name="thursday_status" padding="2" unsigned="true" nullable="true" comment="Thursday Status"/>
+        <column xsi:type="tinyint" name="friday_status" padding="2" unsigned="true" nullable="true" comment="Friday Status"/>
+        <column xsi:type="tinyint" name="saturday_status" padding="2" unsigned="true" nullable="true" comment="Saturday Status"/>
+        <column xsi:type="tinyint" name="sunday_status" padding="2" unsigned="true" nullable="true" comment="Sunday Status"/>
+        <column xsi:type="varchar" name="monday_open" length="5" nullable="true" comment="Monday Open"/>
+        <column xsi:type="varchar" name="tuesday_open" length="5" nullable="true" comment="Tuesday Open"/>
+        <column xsi:type="varchar" name="wednesday_open" length="5" nullable="true" comment="Wednesday Open"/>
+        <column xsi:type="varchar" name="thursday_open" length="5" nullable="true" comment="Thursday Open"/>
+        <column xsi:type="varchar" name="friday_open" length="5" nullable="true" comment="Friday Open"/>
+        <column xsi:type="varchar" name="saturday_open" length="5" nullable="true" comment="Saturday Open"/>
+        <column xsi:type="varchar" name="sunday_open" length="5" nullable="true" comment="Sunday Open"/>
+        <column xsi:type="varchar" name="monday_close" length="5" nullable="true" comment="Monday Close"/>
+        <column xsi:type="varchar" name="tuesday_close" length="5" nullable="true" comment="Tuesday Close"/>
+        <column xsi:type="varchar" name="wednesday_close" length="5" nullable="true" comment="Wednesday Close"/>
+        <column xsi:type="varchar" name="thursday_close" length="5" nullable="true" comment="Thursday Close"/>
+        <column xsi:type="varchar" name="friday_close" length="5" nullable="true" comment="Friday Close"/>
+        <column xsi:type="varchar" name="saturday_close" length="5" nullable="true" comment="Saturday Close"/>
+        <column xsi:type="varchar" name="sunday_close" length="5" nullable="true" comment="Sunday Close"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="schedule_id"/>
+        </constraint>
+    </table>
+
+    <table name="clickandcollect_package" resource="default" engine="innodb" comment="Click And Collect Package">
+        <column xsi:type="int" name="package_id" unsigned="true" nullable="false" identity="true"
+                comment="Package Id"/>
+        <column xsi:type="int" name="order_id" unsigned="true" nullable="true" comment="Order Id"/>
+        <column xsi:type="int" name="location_id" unsigned="true" nullable="false" comment="Location Id"/>
+        <column xsi:type="varchar" name="status" length="32" nullable="false" comment="Status" default="ready_to_pick"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="package_id"/>
+        </constraint>
+    </table>
+
+    <table name="clickandcollect_package_item" resource="default" engine="innodb" comment="Click And Collect Package Item">
+        <column xsi:type="int" name="package_item_id" unsigned="true" nullable="false" identity="true"
+                comment="Package Item Id"/>
+        <column xsi:type="int" name="package_id" unsigned="true" nullable="false" comment="Package Id"/>
+        <column xsi:type="int" name="item_id" unsigned="true" nullable="false" comment="Order Item Id"/>
+        <column xsi:type="int" name="parent_item_id" unsigned="true" nullable="true" comment="Order Parent Item Id"/>
+        <column xsi:type="int" name="product_id" unsigned="true" nullable="false" comment="Product Id"/>
+        <column xsi:type="varchar" name="product_sku" length="255" nullable="false"
+                comment="Product SKU" default=""/>
+        <column xsi:type="varchar" name="product_name" length="255" nullable="false"
+                comment="Product Name" default=""/>
+        <column xsi:type="decimal" name="packed_qty" scale="4" precision="12" comment="Packed Qty"
+                unsigned="false" nullable="false" default="0"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="package_item_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="CLICKANDCOLLECT_PACKAGE_ID_CLICKANDCOLLECT_PACKAGE_PACKAGE_ID"
+                    table="clickandcollect_package_item" column="package_id" referenceTable="clickandcollect_package"
+                    referenceColumn="package_id" onDelete="CASCADE"/>
+    </table>
+
+    <table name="clickandcollect_location_specialday" resource="default" engine="innodb" comment="Click And Collect Location Special Day">
+        <column xsi:type="int" name="link_id" unsigned="true" nullable="false" identity="true" comment="Link Id"/>
+        <column xsi:type="int" name="location_id" padding="10" unsigned="true" nullable="false" comment="Location Id"/>
+        <column xsi:type="int" name="specialday_id" unsigned="true" nullable="false" comment="Special Day"/>
+        <constraint xsi:type="foreign" referenceId="CLICKANDCOLLECT_LOCATION_SPECIALDAY_SPECIALDAY_ID_CLICKANDCOLLECT_SPECIALDAY_SPECIALDAY_ID"
+                    table="clickandcollect_location_specialday" column="specialday_id" referenceTable="clickandcollect_specialday"
+                    referenceColumn="specialday_id" onDelete="CASCADE"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="link_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="CLICKANDCOLLECT_LOCATION_SPECIALDAY_LOCATION_ID_SPECIALDAY_ID">
+            <column name="location_id"/>
+            <column name="specialday_id"/>
+        </constraint>
+    </table>
+
+    <table name="sales_order" resource="sales" engine="innodb" comment="Sales Flat Order">
+        <column xsi:type="int" name="location_pickup_id" padding="10" unsigned="true" nullable="true" comment="Location Pickup Id"/>
+        <column xsi:type="datetime" name="pickup_date_time" nullable="true" comment="Pickup Date Time"/>
+        <column xsi:type="date" name="pickup_date_only" nullable="true" comment="Pickup Date Only"/>
+        <column xsi:type="varchar" name="pickup_status" length="32" nullable="true" comment="Pickup Status"/>
+        <column xsi:type="date" name="ready_pick_date" nullable="true" comment="Ready Pick Date"/>
+    </table>
+
+    <table name="quote_address" resource="checkout" engine="innodb" comment="Sales Flat Quote Address">
+        <column xsi:type="int" name="location_pickup_id" padding="10" unsigned="true" nullable="true" comment="Location Pickup Id"/>
+        <column xsi:type="datetime" name="pickup_date_time" nullable="true" comment="Pickup Date Time"/>
+        <column xsi:type="date" name="pickup_date_only" nullable="true" comment="Pickup Date Only"/>
+    </table>
+</schema>

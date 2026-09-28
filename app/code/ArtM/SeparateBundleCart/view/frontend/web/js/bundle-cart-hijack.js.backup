@@ -1,0 +1,314 @@
+/**
+ * ArtM SeparateBundleCart - Simple Button Hijack
+ * Prevents bundle product submission when attribute is set
+ */
+
+define([
+    'jquery',
+    'mage/url',
+    'Magento_Customer/js/customer-data'
+], function ($, urlBuilder, customerData) {
+    'use strict';
+
+    return function (config) {
+        
+        $(document).ready(function () {
+            
+            // Only run on product pages with add-to-cart forms
+            var productId = $('input[name="product"]').val();
+            var addToCartForms = $('form[data-role="tocart-form"], #product_addtocart_form');
+            
+            if (!productId || addToCartForms.length === 0) {
+                // Not a product page or no add-to-cart forms, exit silently
+                return;
+            }
+            
+            //console.log('ArtM SeparateBundleCart: Product page detected');
+            
+            // Additional check: only proceed if we're on a product detail page
+            if (!$('.product-info-main').length && !$('.product.info.detailed').length) {
+                // Not a product detail page
+                return;
+            }
+            
+            // Check product info
+            $.ajax({
+                url: urlBuilder.build('artm_separatebundlecart/debug/productinfo'),
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    product_id: productId,
+                    form_key: $('input[name="form_key"]').val()
+                },
+                success: function(response) {
+                    //console.log('Product response:', response);
+                    
+                    if (response.product_type === 'bundle' && 
+                        (response.add_product_separate == 1 || response.add_product_separate === 'Yes')) {
+                        
+                        //console.log('HIJACKING BUNDLE PRODUCT BUTTONS');
+                        hijackButtons(response);
+                    }
+                }
+            });
+            
+            function hijackButtons(productInfo) {
+                // Find ONLY the add to cart buttons and forms (more specific selectors)
+                var forms = $('form[data-role="tocart-form"], #product_addtocart_form');
+                var buttons = forms.find('button[type="submit"], input[type="submit"]').filter('[title*="Add"], .action.tocart, #product-addtocart-button');
+                
+                //console.log('Found forms:', forms.length);
+                //console.log('Found specific add-to-cart buttons:', buttons.length);
+                
+                // Store original handlers before overriding
+                var originalData = {};
+                
+                // Only hijack specific add-to-cart forms, be more surgical
+                forms.each(function(index) {
+                    var form = $(this);
+                    // Store original submit handler
+                    originalData['form_' + index] = form.data('events');
+                    
+                    // Override submit with our handler, but only for this specific case
+                    form.off('submit.artm').on('submit.artm', function(e) {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        processInstead();
+                        return false;
+                    });
+                });
+                
+                // Only hijack specific add-to-cart buttons
+                buttons.each(function(index) {
+                    var button = $(this);
+                    // Store original click handler
+                    originalData['button_' + index] = button.data('events');
+                    
+                    button.off('click.artm').on('click.artm', function(e) {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        processInstead();
+                        return false;
+                    });
+                });
+                
+                function processInstead() {
+                    //console.log('HIJACKED! Bundle product with add_product_separate=Yes detected. Processing individual products via AJAX instead of normal submission.');
+                    
+                    // Get form data
+                    var form = $('form[data-role="tocart-form"], #product_addtocart_form').first();
+                    
+                    var bundleOptions = {};
+                    form.find('select[name^="bundle_option"], input[name^="bundle_option"]:checked').each(function() {
+                        var name = $(this).attr('name');
+                        var value = $(this).val();
+                        var match = name.match(/bundle_option\[(\d+)\]/);
+                        if (match) {
+                            bundleOptions[match[1]] = bundleOptions[match[1]] || [];
+                            bundleOptions[match[1]].push(value);
+                        }
+                    });
+                    
+                    var bundleOptionQty = {};
+                    form.find('input[name^="bundle_option_qty"]').each(function() {
+                        var name = $(this).attr('name');
+                        var value = $(this).val();
+                        var match = name.match(/bundle_option_qty\[(\d+)\]/);
+                        if (match) {
+                            bundleOptionQty[match[1]] = value;
+                        }
+                    });
+                    
+                    //console.log('Bundle options:', bundleOptions);
+                    
+                    // Prepare AJAX data
+                    var ajaxUrl = urlBuilder.build('artm_separatebundlecart/ajax/addtocart');
+                    var formKey = form.find('input[name="form_key"]').val() || $.cookie('form_key') || window.FORM_KEY;
+                    
+                    var ajaxData = {
+                        product_id: productId,
+                        bundle_options: bundleOptions,
+                        bundle_option_qty: bundleOptionQty,
+                        qty: form.find('input[name="qty"]').val() || 1,
+                        form_key: formKey
+                    };
+                    
+                    if (!formKey) {
+                        console.error('Form key not found! This will cause CSRF validation failure.');
+                        showErrorMessage({
+                            message: 'Security token not found. Please refresh the page and try again.',
+                            error_type: 'csrf_error'
+                        });
+                        return false;
+                    }
+                    
+                    console.log('Debug: Making AJAX request:', {
+                        url: ajaxUrl,
+                        data: ajaxData,
+                        bundleOptionsCount: Object.keys(bundleOptions).length,
+                        formKey: ajaxData.form_key,
+                        method: 'POST',
+                        dataType: 'json'
+                    });
+                    
+                    // First test if routing works at all
+                    console.log('Step 1: Testing routing...');
+                    var testUrl = ajaxUrl.replace('/addtocart', '/test');
+                    
+                    $.ajax({
+                        url: testUrl,
+                        type: 'GET',
+                        timeout: 5000
+                    }).done(function(data) { 
+                        console.log('✓ Routing works! Test response:', data); 
+                        
+                        // Now try the actual AJAX request
+                        console.log('Step 2: Attempting actual AJAX request...');
+                        proceedWithAjax();
+                        
+                    }).fail(function(xhr) { 
+                        console.error('✗ Routing failed:', xhr.status, xhr.responseText);
+                        showErrorMessage({
+                            message: 'Module routing not working. Status: ' + xhr.status,
+                            error_type: 'routing_error'
+                        });
+                        return false;
+                    });
+                    
+                    function proceedWithAjax() {
+                        // Process via AJAX
+                        $.ajax({
+                        url: ajaxUrl,
+                        type: 'POST',
+                        dataType: 'json',
+                        data: ajaxData,
+                        timeout: 30000, // 30 seconds timeout
+                        success: function(response) {
+                            //console.log('AJAX success:', response);
+                            if (response.success) {
+                                //console.log('SUCCESS! Added individual products:', response.message);
+                                //console.log('Products added count:', response.count);
+                                
+                                // Update minicart counter and sections
+                                updateMinicart();
+                                
+                                // Try to trigger Magento's add to cart success event
+                                $('body').trigger('catalogCategoryAddToCartRedirect', [urlBuilder.build('checkout/cart/'), response]);
+                                
+                                // Alternative: try to show a simple success message
+                                showSuccessMessage(response);
+                            } else {
+                                //console.error('Error adding products:', response.message);
+                                
+                                // Show error message for stock issues
+                                showErrorMessage(response);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('AJAX Error occurred:', {
+                                status: status,
+                                error: error,
+                                responseText: xhr.responseText,
+                                statusCode: xhr.status,
+                                url: urlBuilder.build('artm_separatebundlecart/ajax/addtocart')
+                            });
+                            
+                            var errorMessage = 'Network error occurred while adding products to cart. Please try again.';
+                            
+                            // Try to get more specific error info
+                            if (xhr.status === 404) {
+                                errorMessage = 'Add to cart URL not found (404). Please check module configuration.';
+                            } else if (xhr.status === 500) {
+                                errorMessage = 'Server error occurred (500). Please check server logs.';
+                            } else if (xhr.status === 0) {
+                                errorMessage = 'Network connection failed. Please check your internet connection.';
+                            }
+                            
+                            // Show specific AJAX error
+                            showErrorMessage({
+                                message: errorMessage + ' (Status: ' + xhr.status + ')',
+                                error_type: 'ajax_error',
+                                debug_info: {
+                                    status: xhr.status,
+                                    error: error,
+                                    url: urlBuilder.build('artm_separatebundlecart/ajax/addtocart')
+                                }
+                            });
+                        });
+                    }
+                }
+            }
+            
+            // Function to update minicart after AJAX cart addition
+            function updateMinicart() {
+                //console.log('Updating minicart sections');
+                
+                // Reload cart section data from server
+                customerData.reload(['cart'], false);
+                
+                // Also trigger cart update event for other components
+                $('body').trigger('processStart');
+                
+                // Force refresh of customer sections after a short delay
+                setTimeout(function() {
+                    customerData.invalidate(['cart']);
+                    customerData.reload(['cart'], false);
+                    $('body').trigger('processStop');
+                    //console.log('Minicart update completed');
+                }, 500);
+            }
+            
+            // Simple success message function
+            function showSuccessMessage(response) {
+                // Create a more descriptive notification
+                var message = 'Added ' + response.count + ' items to cart';
+                if (response.product_count && response.product_count !== response.count) {
+                    message = 'Added ' + response.count + ' items (' + response.product_count + ' different products) to cart';
+                }
+                
+                // Try to use Magento's message system if available
+                if (typeof window.checkoutConfig !== 'undefined' && window.require) {
+                    require(['Magento_Ui/js/model/messageList'], function(messageList) {
+                        messageList.addSuccessMessage({message: message});
+                    });
+                } else {
+                    // Fallback: create a simple success div
+                    var successDiv = $('<div class="message-success success message" style="position: fixed;top: 20px;right: 20px;z-index: 9999;padding: 15px;background: rgb(26 87 28);color: white;border-radius: 5px;/* display: none; */font-size: 12px;font-weight: 600;">'+
+                        message +
+                        '</div>');
+
+                    $('body').append(successDiv);
+                    
+                    // Auto remove after 5 seconds
+                    setTimeout(function() {
+                        successDiv.fadeOut();
+                    }, 5000);
+                }
+            }
+            
+            // Error message function
+            function showErrorMessage(response) {
+                var message = response.message || 'An error occurred while adding products to cart.';
+                
+                // Try to use Magento's message system for errors
+                if (typeof window.checkoutConfig !== 'undefined' && window.require) {
+                    require(['Magento_Ui/js/model/messageList'], function(messageList) {
+                        messageList.addErrorMessage({message: message});
+                    });
+                } else {
+                    // Fallback: create a simple error div
+                    var errorDiv = $('<div class="message-error error message" style="position: fixed; top: 20px; right: 20px; z-index: 9999; padding: 13px 15px 10px 38px; background: rgb(255 221 221); color: #e60023 !important; border-radius: 5px; font-size: 12px; font-weight: 600; /* display: none; */ border: 1px solid #e60023;">' +
+                        message +
+                        '</div>');
+                        
+                    $('body').append(errorDiv);
+                    
+                    // Auto remove after 8 seconds (longer for error messages)
+                    setTimeout(function() {
+                        errorDiv.fadeOut();
+                    }, 8000);
+                }
+            }
+        });
+    };
+});

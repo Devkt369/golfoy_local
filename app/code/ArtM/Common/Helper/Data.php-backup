@@ -1,0 +1,171 @@
+<?php
+namespace ArtM\Common\Helper;
+
+class Data extends \Magento\Framework\App\Helper\AbstractHelper
+{
+    public function __construct(
+        \Magento\Framework\App\Helper\Context $context,
+        \Magento\Checkout\Model\Cart $cart
+    )
+    {
+        $this->Cart = $cart;
+
+    }
+    
+    public function getHtmlSidebarProfile($initial , $name , $point_balamce_html, $signin_detail_html){
+        
+        
+        $html = '<div class="sign_in_banner_sidebar container_signin">
+                    <div class="sign_in_banner_sidebar_inside">
+                        <div class="sign_in_banner_sidebar_left">
+                            <div class="name_initial_box">
+                                <div class="name_initial_box_inside">
+                                    '.$initial.'
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sign_in_banner_sidebar_right">
+                            <div class="name_box">
+                                <h3 class="name_box_heading">
+                                    '.$name.'
+                                </h3>
+                            </div>
+                            <div class="reward_point">
+                                <h3 class="reward_point_inside">
+                                    '.$point_balamce_html.'
+                                </h3>
+                            </div>
+                            <div class="detail_section">
+                                <div class="detail_section_inside">
+                                    '.$signin_detail_html.'
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>';
+        return $html;
+            
+    }
+    
+    
+    public function CheckIfCustomPrintInCart(){
+        $itemsCollection = $this->Cart->getQuote()->getItemsCollection();
+        $v = $this->Cart->getQuote()->getAllVisibleItems();
+
+        $p = $this->Cart->getItems();
+
+        $a= $this->Cart->getQuote()->getAllItems();
+        $codoption = 1;
+        foreach($v as $item) {
+            
+            // echo 'ID: '.$item->getProductId().'<br />';
+            // echo 'Name: '.$item->getName().'<br />';
+            // echo 'Sku: '.$item->getSku().'<br />';
+            // echo 'Quantity: '.$item->getQty().'<br />';
+            // echo 'Price: '.$item->getPrice().'<br />';
+            // echo "<br />";   
+            $options = $item->getProduct()->getTypeInstance(true)->getOrderOptions($item->getProduct());
+
+           // print_r($options);
+            // if (in_array('Custom Text (Printed On Pocket)', $options)){
+
+            //     $codoption=0;
+            // }
+
+            // if(($options['label'] =='Custom Text (Printed On Pocket)')||($options['label'] =='Custom Text (Printed On Divison)'))
+            // {
+            //     echo "Cod False ";
+            //     $codoption=false;
+            // }
+            // $customOptions = $options['options'];
+            $arcod = array();
+            //echo count($options)."numbers";
+            //print_r($arcod);
+            $tarry=0;
+            $larrys = count($options);
+
+            foreach ($options as $val) 
+                {
+
+                        if(is_array($val)){
+
+                        foreach($val as $deepval)
+                        {
+
+
+                            if(is_array($deepval))
+                            {  
+                               // echo "<hr/>"; 
+                               // print_r($deepval);
+                                if(array_key_exists('print_value', $deepval)){
+                                   // echo "printable hai  <br/> <hr/>";
+                                    $codoption = 0;
+                                }
+                                // foreach($deepval as $k=>$dval)
+                                // {
+                                //     if(array_key_exists('print_value', $deepval)){
+                                //         echo "ander printable hai <br/>";
+                                //     }
+
+                                //     // if($dval=='Custom Text (Printed On Divison)'){
+                                //     //     echo "its c print in umbrella";
+                                //     //     $codoption = 0;
+                                //     // }
+                                //     // else if($dval=='Custom Text (Printed On Pocket)'){
+                                //     //     echo "its c print in bag";
+                                //     //     $codoption = 0;
+                                //     // }
+                                //     // else if($dval=='Custom Text (Printed On Ball)'){
+                                //     //     echo "its c print in ball";
+                                //     //     $codoption = 0;
+                                //     // }
+
+                                // }
+                            }
+                        }
+
+                    }
+
+                    $tarry = $tarry+1;
+                }
+        }
+//        echo $codoption;
+        if ($codoption==0){
+            echo "COD will not be available for custom option";
+//            return true;
+        }
+//        return false;
+        
+        
+        // $paymentHelper = $objectManager->get('Magento\Payment\Helper\Data');
+        // $allPaymentMethods = $paymentHelper->getPaymentMethods();
+        // $allPaymentMethodsArray = $paymentHelper->getPaymentMethodList();
+
+        // var_dump($allPaymentMethodsArray);
+        // var_dump($allPaymentMethods);
+
+        // $paymentConfig = $objectManager->get('Magento\Payment\Model\Config');
+        // $activePaymentMethods = $paymentConfig->getActiveMethods();
+
+        // var_dump(array_keys($activePaymentMethods));
+
+        // $orderPaymentCollection = $objectManager->get('\Magento\Sales\Model\ResourceModel\Order\Payment\Collection');
+        // $orderPaymentCollection->getSelect()->group('method');
+        // $paymentMethods[] = array('value' => '', 'label' => 'Any');
+        // foreach ($orderPaymentCollection as $col) { 
+        //     $paymentMethods[] = array('value' => $col->getMethod(), 'label' => $col->getAdditionalInformation());       } 
+
+        //     //print_r($paymentMethods);
+
+        //     foreach($paymentMethods as $kpm=>$kval)
+        //     {
+        //         if ($kpm== "cashondelivery") {
+        //             unset($kval[$kpm]);
+        //         }
+        //         //echo $kval;
+        //     }
+        // print_r($paymentMethods);
+
+        
+    }
+}

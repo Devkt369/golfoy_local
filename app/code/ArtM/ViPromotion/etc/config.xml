@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <vipromotion>
+            <general>
+                <enabled>1</enabled>
+                <target_customer_group>5</target_customer_group>
+            </general>
+            <logo>
+                <logo_url>https://example.com/media/vip-logo.png</logo_url>
+            </logo>
+            <initial_image>
+                <initial_image_url>https://example.com/media/vip-avatar.png</initial_image_url>
+            </initial_image>
+            <popup>
+                <enabled>1</enabled>
+                <title>Special VIP Offer!</title>
+                <content><![CDATA[
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <img src="{{media url='vipromotion/Popup.png'}}" alt="VIP Offer" style="max-width: 100%; height: auto;" />
+                    </div>
+                    <h3>Welcome to your exclusive VIP benefits!</h3>
+                    <p>As a valued VIP member, you have access to:</p>
+                    <ul>
+                        <li>Special pricing on all products</li>
+                        <li>Early access to new collections</li>
+                        <li>Exclusive promotions and offers</li>
+                        <li>Priority customer support</li>
+                    </ul>
+                    <p>Thank you for your loyalty!</p>
+                ]]></content>
+            </popup>
+            <banner>
+                <enabled>1</enabled>
+                <content><![CDATA[
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 20px;">
+                        <h2 style="margin: 0 0 10px 0;">🎉 VIP Member Benefits Active!</h2>
+                        <p style="margin: 0;">Enjoy exclusive pricing, early access, and special promotions as our valued VIP member.</p>
+                    </div>
+                ]]></content>
+            </banner>
+        </vipromotion>
+    </default>
+</config>

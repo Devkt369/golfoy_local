@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+
+    <!--
+        POST /V1/artm/product-image/set
+        Body: { "sku": "SKU123", "imagePath": "/absolute/path/to/image.jpg" }
+    -->
+    <route url="/V1/artm/product-image/set" method="POST">
+        <service class="ArtM\ProductImageApi\Api\ProductImageManagementInterface" method="setProductImage"/>
+        <resources>
+            <resource ref="Magento_Catalog::products"/>
+        </resources>
+    </route>
+
+</routes>

@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+
+<!--
+  ~ Copyright © 2018 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="webpos" translate="label" sortOrder="1000" type="text" showInDefault="1" showInWebsite="0" showInStore="0">
+            <group id="pointy_integration" translate="label" sortOrder="130" type="text" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Pointy Integration</label>
+                <field id="enabled" translate="label" sortOrder="10" type="select" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Enable Pointy</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="client_auth_key" translate="label" sortOrder="20" type="text" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Client Key</label>
+                    <validate>required-entry</validate>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                </field>
+                <field id="sandbox_mode" translate="label" sortOrder="30" type="select" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Sandbox Mode</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="manufacturer_barcode_attribute" translate="label" sortOrder="40" type="select" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Manufacturer Barcode Attribute</label>
+                    <validate>required-entry</validate>
+                    <source_model>Magestore\WebposPointy\Model\Source\Adminhtml\Product\ManufacturerBarcodeAttribute</source_model>
+                    <depends>
+                        <field id="enabled">1</field>
+                    </depends>
+                    <comment><![CDATA[Pointy only support the merchant who has manufacturer barcode. Make sure that you have manufacturer barcode data before using Pointy.]]></comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

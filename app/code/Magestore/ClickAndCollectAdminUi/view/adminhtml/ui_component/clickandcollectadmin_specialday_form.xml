@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">clickandcollectadmin_specialday_form.clickandcollectadmin_specialday_form_data_source
+            </item>
+        </item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+        <item name="childrenFromMeta" xsi:type="boolean">true</item>
+        <item name="reverseMetadataMerge" xsi:type="boolean">true</item>
+    </argument>
+    <settings>
+        <buttons>
+            <button name="back">
+                <url path="*/*/index"/>
+                <class>back</class>
+                <label translate="true">Back</label>
+            </button>
+            <button name="save" >
+                <class>save primary</class>
+                <label translate="true">Save</label>
+            </button>
+        </buttons>
+        <label translate="true">Special Day</label>
+        <dataScope>data</dataScope>
+        <namespace>clickandcollectadmin_specialday_form</namespace>
+        <deps>
+            <dep>clickandcollectadmin_specialday_form.clickandcollectadmin_specialday_form_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="clickandcollectadmin_specialday_form_data_source" component="Magento_Ui/js/form/provider">
+        <settings>
+            <submitUrl path="*/*/save"/>
+        </settings>
+        <dataProvider class="Magestore\ClickAndCollectAdminUi\Ui\DataProvider\SpecialDay\Form\SpecialDay"
+                      name="clickandcollectadmin_specialday_form_data_source">
+            <settings>
+                <requestFieldName>specialday_id</requestFieldName>
+                <primaryFieldName>specialday_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <fieldset name="general_information">
+        <settings>
+            <label translate="true">General Information</label>
+            <dataScope>general_information</dataScope>
+            <collapsible>false</collapsible>
+        </settings>
+        <field name="specialday_name" formElement="input">
+            <settings>
+                <dataType>text</dataType>
+                <dataScope>specialday_name</dataScope>
+                <label translate="true">Name</label>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+        <field name="repeat" formElement="select">
+            <settings>
+                <label translate="true">Repeat</label>
+                <dataType>text</dataType>
+                <dataScope>repeat</dataScope>
+                <required>true</required>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+                <switcherConfig>
+                    <rules>
+                        <rule name="0">
+                            <value>0</value>
+                            <actions>
+                                <action name="0">
+                                    <target>clickandcollectadmin_specialday_form.clickandcollectadmin_specialday_form.general_information.date_from_none</target>
+                                    <callback>show</callback>
+                                </action>
+                                <action name="1">
+                                    <target>clickandcollectadmin_specialday_form.clickandcollectadmin_specialday_form.general_information.date_from_yearly</target>
+                                    <callback>hide</callback>
+                                </action>
+                                <action name="2">
+                                    <target>clickandcollectadmin_specialday_form.clickandcollectadmin_specialday_form.general_information.date_to_none</target>
+                                    <callback>show</callback>
+                                </action>
+                                <action name="3">
+                                    <target>clickandcollectadmin_specialday_form.clickandcollectadmin_specialday_form.general_information.date_to_yearly</target>
+                                    <callback>hide</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                        <rule name="1">
+                            <value>1</value>
+                            <actions>
+                                <action name="0">
+                                    <target>clickandcollectadmin_specialday_form.clickandcollectadmin_specialday_form.general_information.date_from_none</target>
+                                    <callback>hide</callback>
+                                </action>
+                                <action name="1">
+                                    <target>clickandcollectadmin_specialday_form.clickandcollectadmin_specialday_form.general_information.date_from_yearly</target>
+                                    <callback>show</callback>
+                                </action>
+                                <action name="2">
+                                    <target>clickandcollectadmin_specialday_form.clickandcollectadmin_specialday_form.general_information.date_to_none</target>
+                                    <callback>hide</callback>
+                                </action>
+                                <action name="3">
+                                    <target>clickandcollectadmin_specialday_form.clickandcollectadmin_specialday_form.general_information.date_to_yearly</target>
+                                    <callback>show</callback>
+                                </action>
+                            </actions>
+                        </rule>
+                    </rules>
+                    <enabled>true</enabled>
+                </switcherConfig>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Magestore\ClickAndCollectAdminUi\Model\Source\SpecialDay\Repeat"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <field name="date_from_none"
+               component="Magestore_ClickAndCollectAdminUi/js/form/element/special-day-date"
+               formElement="date">
+            <settings>
+                <required>true</required>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-date" xsi:type="boolean">true</rule>
+                </validation>
+                <dataType>date</dataType>
+                <label translate="true">From</label>
+                <dataScope>date_from</dataScope>
+                <imports>
+                    <link name="dateValue">${ $.provider }:data.general_information.date_from</link>
+                </imports>
+            </settings>
+            <formElements>
+                <date>
+                    <settings>
+                        <options>
+                            <option name="customDateFormat" xsi:type="string">MM/dd/yy</option>
+                        </options>
+                    </settings>
+                </date>
+            </formElements>
+        </field>
+        <field name="date_from_yearly"
+               component="Magestore_ClickAndCollectAdminUi/js/form/element/special-day-date"
+               formElement="date">
+            <settings>
+                <required>true</required>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-date" xsi:type="boolean">true</rule>
+                </validation>
+                <dataType>date</dataType>
+                <label translate="true">From</label>
+                <dataScope>date_from</dataScope>
+                <imports>
+                    <link name="dateValue">${ $.provider }:data.general_information.date_from</link>
+                </imports>
+            </settings>
+            <formElements>
+                <date>
+                    <settings>
+                        <options>
+                            <option name="customDateFormat" xsi:type="string">MM/dd</option>
+                        </options>
+                    </settings>
+                </date>
+            </formElements>
+        </field>
+        <field name="date_to_none"
+               component="Magestore_ClickAndCollectAdminUi/js/form/element/special-day-date"
+               formElement="date">
+            <settings>
+                <required>true</required>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-date" xsi:type="boolean">true</rule>
+                </validation>
+                <dataType>date</dataType>
+                <label translate="true">To</label>
+                <dataScope>date_to</dataScope>
+                <imports>
+                    <link name="dateValue">${ $.provider }:data.general_information.date_to</link>
+                </imports>
+            </settings>
+            <formElements>
+                <date>
+                    <settings>
+                        <options>
+                            <option name="customDateFormat" xsi:type="string">MM/dd/yy</option>
+                        </options>
+                    </settings>
+                </date>
+            </formElements>
+        </field>
+        <field name="date_to_yearly"
+               component="Magestore_ClickAndCollectAdminUi/js/form/element/special-day-date"
+               formElement="date">
+            <settings>
+                <required>true</required>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                    <rule name="validate-date" xsi:type="boolean">true</rule>
+                </validation>
+                <dataType>date</dataType>
+                <label translate="true">To</label>
+                <dataScope>date_to</dataScope>
+                <imports>
+                    <link name="dateValue">${ $.provider }:data.general_information.date_to</link>
+                </imports>
+            </settings>
+            <formElements>
+                <date>
+                    <settings>
+                        <options>
+                            <option name="customDateFormat" xsi:type="string">MM/dd</option>
+                        </options>
+                    </settings>
+                </date>
+            </formElements>
+        </field>
+        <field name="store_status" formElement="select">
+            <settings>
+                <label translate="true">Store Status</label>
+                <dataType>text</dataType>
+                <dataScope>store_status</dataScope>
+                <required>true</required>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+                <switcherConfig>
+                    <rules>
+                        <rule name="0">
+                            <value>0</value>
+                            <actions>
+                                <action name="0">
+                                    <target>clickandcollectadmin_specialday_form.clickandcollectadmin_specialday_form.general_information.time_open_group</target>
+                                    <callback>visible</callback>
+                                    <params>
+                                        <param name="0" xsi:type="boolean">false</param>
+                                    </params>
+                                </action>
+                                <action name="1">
+                                    <target>clickandcollectadmin_specialday_form.clickandcollectadmin_specialday_form.general_information.time_close_group</target>
+                                    <callback>visible</callback>
+                                    <params>
+                                        <param name="0" xsi:type="boolean">false</param>
+                                    </params>
+                                </action>
+                            </actions>
+                        </rule>
+                        <rule name="1">
+                            <value>1</value>
+                            <actions>
+                                <action name="0">
+                                    <target>clickandcollectadmin_specialday_form.clickandcollectadmin_specialday_form.general_information.time_open_group</target>
+                                    <callback>visible</callback>
+                                    <params>
+                                        <param name="0" xsi:type="boolean">true</param>
+                                    </params>
+                                </action>
+                                <action name="1">
+                                    <target>clickandcollectadmin_specialday_form.clickandcollectadmin_specialday_form.general_information.time_close_group</target>
+                                    <callback>visible</callback>
+                                    <params>
+                                        <param name="0" xsi:type="boolean">true</param>
+                                    </params>
+                                </action>
+                            </actions>
+                        </rule>
+                    </rules>
+                    <enabled>true</enabled>
+                </switcherConfig>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\OpenCloseStatus"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+        <container name="time_open_group" component="Magento_Ui/js/form/components/group">
+            <argument name="data" xsi:type="array">
+                <item name="type" xsi:type="string">group</item>
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Opening Hour</item>
+                    <item name="required" xsi:type="boolean">true</item>
+                    <item name="validateWholeGroup" xsi:type="boolean">true</item>
+                    <item name="dataScope" xsi:type="string">time_open_group</item>
+                    <item name="additionalClasses" xsi:type="array">
+                        <item name="admin__field-group-date-time" xsi:type="boolean">true</item>
+                        <item name="admin__control-grouped-date" xsi:type="boolean">true</item>
+                    </item>
+                    <item name="breakLine" xsi:type="boolean">false</item>
+                </item>
+            </argument>
+            <field name="time_open_hour" formElement="select">
+                <settings>
+                    <additionalClasses>
+                        <class name="admin__field-date-time-hour">true</class>
+                        <class name="admin__field-date">true</class>
+                    </additionalClasses>
+                    <dataType>text</dataType>
+                    <labelVisible>false</labelVisible>
+                </settings>
+                <formElements>
+                    <select>
+                        <settings>
+                            <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Hours"/>
+                        </settings>
+                    </select>
+                </formElements>
+            </field>
+            <field name="time_open_min" formElement="select">
+                <settings>
+                    <additionalClasses>
+                        <class name="admin__field-date-time-min">true</class>
+                        <class name="admin__field-date">true</class>
+                    </additionalClasses>
+                    <dataType>text</dataType>
+                    <label>:</label>
+                </settings>
+                <formElements>
+                    <select>
+                        <settings>
+                            <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Minutes"/>
+                        </settings>
+                    </select>
+                </formElements>
+            </field>
+        </container>
+        <container name="time_close_group" component="Magento_Ui/js/form/components/group">
+            <argument name="data" xsi:type="array">
+                <item name="type" xsi:type="string">group</item>
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Closing Time</item>
+                    <item name="required" xsi:type="boolean">true</item>
+                    <item name="validateWholeGroup" xsi:type="boolean">true</item>
+                    <item name="dataScope" xsi:type="string">time_close_group</item>
+                    <item name="additionalClasses" xsi:type="array">
+                        <item name="admin__field-group-date-time" xsi:type="boolean">true</item>
+                        <item name="admin__control-grouped-date" xsi:type="boolean">true</item>
+                    </item>
+                    <item name="breakLine" xsi:type="boolean">false</item>
+                </item>
+            </argument>
+            <field name="time_close_hour" formElement="select">
+                <settings>
+                    <additionalClasses>
+                        <class name="admin__field-date-time-hour">true</class>
+                        <class name="admin__field-date">true</class>
+                    </additionalClasses>
+                    <dataType>text</dataType>
+                    <labelVisible>false</labelVisible>
+                </settings>
+                <formElements>
+                    <select>
+                        <settings>
+                            <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Hours"/>
+                        </settings>
+                    </select>
+                </formElements>
+            </field>
+            <field name="time_close_min" formElement="select">
+                <settings>
+                    <additionalClasses>
+                        <class name="admin__field-date-time-min">true</class>
+                        <class name="admin__field-date">true</class>
+                    </additionalClasses>
+                    <dataType>text</dataType>
+                    <label>:</label>
+                </settings>
+                <formElements>
+                    <select>
+                        <settings>
+                            <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\Minutes"/>
+                        </settings>
+                    </select>
+                </formElements>
+            </field>
+        </container>
+    </fieldset>
+</form>

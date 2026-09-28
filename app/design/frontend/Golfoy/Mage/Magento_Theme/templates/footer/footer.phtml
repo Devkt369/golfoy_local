@@ -1,0 +1,488 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+$base_url = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
+
+$customerSession = $objectManager->get('Magento\Customer\Model\Session');
+
+if ($customerSession->isLoggedIn()) {
+?>
+    <style>
+        div#checkout-shipping-method-load,
+        .checkout-shipping-method>.step-title {
+            display: none;
+        }
+    </style>
+
+<?php
+} else {
+?>
+    <style>
+        div#checkout-shipping-method-load,
+        .checkout-shipping-method>.step-title,
+        div#checkout-step-shipping_method {
+            display: none;
+        }
+    </style>
+<?php
+}
+?>
+<script type="text/javascript">
+    (function(e, t, o, n, p, r, i) {
+        e.visitorGlobalObjectAlias = n;
+        e[e.visitorGlobalObjectAlias] = e[e.visitorGlobalObjectAlias] || function() {
+            (e[e.visitorGlobalObjectAlias].q = e[e.visitorGlobalObjectAlias].q || []).push(arguments)
+        };
+        e[e.visitorGlobalObjectAlias].l = (new Date).getTime();
+        r = t.createElement("script");
+        r.src = o;
+        r.async = true;
+        i = t.getElementsByTagName("script")[0];
+        i.parentNode.insertBefore(r, i)
+    })(window, document, "https://diffuser-cdn.app-us1.com/diffuser/diffuser.js", "vgo");
+    vgo('setAccount', '251725579');
+    vgo('setTrackByDefault', true);
+
+    vgo('process');
+</script>
+
+<?php
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$CommonHelper = $objectManager->get('ArtM\Common\Helper\Data');
+
+?>
+<div class="">
+    <?php
+    echo $this->getLayout()
+        ->createBlock('Magento\Cms\Block\Block')
+        ->setBlockId('footer_category_icon')
+        ->toHtml();
+    ?>
+</div>
+
+
+<div class="container-fluid footer_container">
+    <div class="why-golfoy">
+        <button class="why-golfoy-btn">Why<img alt="golfoy icon" loading="lazy" src='<?php echo $block->getViewFileUrl('images/header_and_footer_assets/Golfoy-logo-icons.svg'); ?>' />
+        </button>
+    </div>
+    <div class="container custom_container footer_container_bottom">
+        <div class="footer_top_icons_box row">
+            <div class="footer_top_icons col-md-12 col-sm-12 col-xs-12">
+                <div class="row">
+                    <div class="col-sm-12 col-sm-12 col-xs-12 right_tags">
+                        <div class="right_tags_footer_inside row">
+                            <div class="col-sm-2 col-xs-4 right_tags_footer_inside_column">
+                                <div class="right_tags_footer_inside_single_tag">
+                                    <div class="footer-svg-icons">
+                                        <span class="img_right_tag_footer">
+                                            <a href="#"><img alt="Best Price Guarantee" loading="lazy" src='<?php echo $block->getViewFileUrl('images/header_and_footer_assets/100-originall-icon.svg'); ?>' />
+                                            </a>
+                                        </span>
+                                    </div>
+                                    <div class="footer-tcon-title"><a href="#"> <span class="icon-footer-svg">100% Original</span></a></div>
+                                </div>
+                            </div>
+                            <div class="col-sm-2 col-xs-4 right_tags_footer_inside_column">
+                                <div class="right_tags_footer_inside_single_tag">
+                                    <div class="footer-svg-icons">
+                                        <span class="img_right_tag_footer">
+                                            <a href="#"><img alt="Free Shipping" loading="lazy" src='<?php echo $block->getViewFileUrl('images/header_and_footer_assets/free-shipping-icon.svg'); ?>' />
+                                            </a>
+                                        </span>
+                                    </div>
+                                    <div class="footer-tcon-title">
+                                        <a href="#"><span class="icon-footer-svg">Free Shipping</span></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-2 col-xs-4 right_tags_footer_inside_column">
+                                <div class="right_tags_footer_inside_single_tag">
+                                    <div class="footer-svg-icons">
+                                        <span class="img_right_tag_footer react-comp">
+                                            <a href="<?php echo $base_url; ?>best-price-guarantee"> <img alt="Quality Assured" loading="lazy" src='<?php echo $block->getViewFileUrl('images/header_and_footer_assets/best-price-guarantee-icon.svg'); ?>' />
+                                            </a>
+                                        </span>
+                                    </div>
+                                    <div class="footer-tcon-title react-comp">
+                                        <a href="<?php echo $base_url; ?>best-price-guarantee"><span class="icon-footer-svg">Best Price Guarantee</span></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-2 col-xs-4 right_tags_footer_inside_column">
+                                <div class="right_tags_footer_inside_single_tag">
+                                    <div class="footer-svg-icons">
+                                        <span class="img_right_tag_footer react-comp">
+                                            <a href="<?php echo $base_url; ?>no-cost-emi"><img alt="Quality Assured" loading="lazy" src='<?php echo $block->getViewFileUrl('images/header_and_footer_assets/no-cost-emi-icon.svg'); ?>' />
+                                            </a>
+                                        </span>
+                                    </div>
+                                    <div class="footer-tcon-title react-comp">
+                                        <a href="<?php echo $base_url; ?>no-cost-emi"><span class="icon-footer-svg">No Cost EMI</span></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-2 col-xs-4 right_tags_footer_inside_column">
+                                <div class="right_tags_footer_inside_single_tag">
+                                    <div class="footer-svg-icons">
+                                        <span class="img_right_tag_footer react-comp">
+                                            <a href="<?php echo $base_url; ?>return-policy"><img alt="Quality Assured" loading="lazy" src='<?php echo $block->getViewFileUrl('images/header_and_footer_assets/easy-returns-icon.svg'); ?>' />
+                                            </a>
+                                        </span>
+                                    </div>
+                                    <div class="footer-tcon-title react-comp">
+                                        <a href="<?php echo $base_url; ?>return-policy"><span class="icon-footer-svg">Easy Returns</span></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-2 col-xs-4 right_tags_footer_inside_column">
+                                <div class="right_tags_footer_inside_single_tag">
+                                    <div class="footer-svg-icons">
+                                        <span class="img_right_tag_footer react-comp">
+                                            <a href="<?php echo $base_url; ?>return-policy#replacement-section">
+                                                <img id="quality-assured" alt="Quality Assured" loading="lazy" src='<?php echo $block->getViewFileUrl('images/header_and_footer_assets/easy-exchange-icon.svg'); ?>' />
+                                            </a> </span>
+                                    </div>
+                                    <div class="footer-tcon-title react-comp">
+                                        <a href="<?php echo $base_url; ?>return-policy#replacement-section"><span class="icon-footer-svg">Easy Exchange</span></a>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-3 col-sm-4 col-xs-12 follow_us">
+                <div class="row">
+                    <div class="col-sm-12 col-xs-12 follow_us_heading">
+                        Follow us on
+                    </div>
+                    <div class="col-sm-12 col-xs-12 follow_us_icons">
+                        <div class="row">
+                            <div class="col-sm-3 col-md-3 col-xs-3 footer_icon_main_box youtube_footer">
+                                <a href="https://www.youtube.com/channel/UCS-FWZbmzky0PDYd6bB4bBw">
+                                    <img alt="youtube" loading="lazy" src='<?php echo $block->getViewFileUrl('images/header_and_footer_assets/youtube-icon.svg'); ?>' />
+                                </a>
+                            </div>
+                            <div class="col-sm-3 col-md-3 col-xs-3 footer_icon_main_box twitter_footer">
+                                <a href="https://twitter.com/golfoytv">
+                                    <img alt="twitter" loading="lazy" src='<?php echo $block->getViewFileUrl('images/header_and_footer_assets/twitter-icon.svg'); ?>' />
+                                </a>
+                            </div>
+                            <div class="col-sm-3 col-md-3 col-xs-3 footer_icon_main_box facebook_footer">
+                                <a href="https://www.facebook.com/golfoyTV/">
+                                    <img alt="facebook" loading="lazy" src='<?php echo $block->getViewFileUrl('images/header_and_footer_assets/facebook-icon.svg'); ?>' />
+                                </a>
+                            </div>
+                            <div class="col-sm-3 col-md-3 col-xs-3 footer_icon_main_box insta_footer">
+                                <a href="https://www.instagram.com/golfoytv/">
+                                    <img alt="instagram" loading="lazy" src='<?php echo $block->getViewFileUrl('images/header_and_footer_assets/instagram-icon.svg'); ?>' />
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-lg-9 col-sm-8 col-xs-12 footer_bottom_content_box ">
+                <div class="footer_bottom_content col-xs-12">
+                    <div class="row">
+                        <!-- <div class="col-sm-4 col-xs-12 newsletter_bottom_box">
+                        <?php echo $block->getChildHtml('subscribe_custom'); ?>
+                    </div> -->
+                        <div class="col-sm-12 col-xs-12 accounts_links">
+                            <div class="row account_links_footer">
+                                <!-- <div class="col-sm-4 col-xs-12 my_account">
+                                <ul class="footer_list">
+                                    <li class="footer_heading active">
+                                        <h4>MY ACCOUNT</h4>
+                                        <span class="arrow"></span>
+                                    </li>
+                                    <?php
+                                    if (!$customerSession->isLoggedIn()) {
+                                        echo '<li><a href="' . $base_url . 'customer/account/login/">Sign in/Register</a></li>';
+                                    }
+                                    ?>
+                                    <li><a href="<?php echo $base_url; ?>sales/order/history/">Orders</a></li>
+                                    <li><a href="<?php echo $base_url; ?>wishlist/">Wishlist</a></li>
+                                    <li><a href="<?php echo $base_url; ?>customer/rewards/">Wallet</a></li>
+                                </ul>
+                            </div> -->
+                                <div class="col-sm-4 col-xs-12 company">
+                                    <ul class="footer_list">
+                                        <li class="footer_heading active">
+                                            <h4>COMPANY</h4>
+                                            <span class="arrow"></span>
+                                        </li>
+                                        <li><a class="react-comp" href="<?php echo $base_url; ?>about-golfoy">About Us</a></li>
+                                        <li><a class="react-comp" href="<?php echo $base_url; ?>contact">Contact Us</a></li>
+                                    </ul>
+                                </div>
+                                <div class="col-sm-4 col-xs-12 customer_service">
+                                    <ul class="footer_list">
+                                        <li class="footer_heading active">
+                                            <h4>CUSTOMER SERVICE</h4>
+                                            <span class="arrow"></span>
+                                        </li>
+                                        <li><a class="react-comp" href="<?php echo $base_url; ?>frequently-asked-questions">FAQ's</a></li>
+                                        <li><a class="react-comp" href="<?php echo $base_url; ?>privacy-policy-cookie-restriction-mode">Privacy Policy</a></li>
+                                        <li><a class="react-comp" href="<?php echo $base_url; ?>terms-and-conditions">Terms &amp; Conditions</a></li>
+                                        <li><a class="react-comp" href="<?php echo $base_url; ?>return-policy">Delivery/Returns</a></li>
+                                        <!-- <li><a href="<?php echo $base_url; ?>tradein">Tradein</a></li> -->
+
+                                    </ul>
+                                </div>
+                                <div class="col-sm-4 col-xs-12 company">
+                                    <ul class="footer_list">
+                                        <li class="footer_heading active">
+                                            <h4>USEFUL LINKS</h4>
+                                            <span class="arrow"></span>
+                                        </li>
+                                        <li><a class="react-comp" href="<?php echo $base_url; ?>e-gift-card">Gift Cards</a></li>
+                                        <li><a class="react-comp" href="<?php echo $base_url; ?>terms-and-conditions#points_program">Reward Point Program</a></li>
+                                        <li><a class="react-comp" href="<?php echo $base_url; ?>tradein">Trade In</a></li>
+                                        <li><a class="react-comp" href="<?php echo $base_url; ?>request_bulk_purchase">Bulk Orders</a></li>
+                                        <li><a class="react-comp" href="<?php echo $base_url; ?>partner-with-us">Become A Dealer</a></li>
+                                        <li><a class="react-comp" href="<?php echo $base_url; ?>blog/">Blog</a></li>
+                                        <li><a class="react-comp" href="<?php echo $base_url; ?>html-sitemap">Sitemap</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row copyright_outside_block">
+            <div class="col-sm-6 col-md-2 col-xs-12 ssl-icons-block">
+                <div class="ssl-icon">
+                    <img alt="Quality Assured" loading="lazy" src="<?php echo $base_url; ?>media/wysiwyg/2024/SSL-Encryption.svg" />
+                    <p>100% Secure <br>256 Bit Encrypted</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-8 col-xs-12 copyright">
+                <div class="copyright_text">
+                    <span>
+                        KTS Ventures © 2012-<?= date('Y'); ?>
+                    </span>
+                    <span>
+                        Golfoy.com | All Rights Reserved
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-2 col-xs-12">
+            </div>
+            <div class="artmais-logo col-xs-12">
+                <!-- <span>powered by</span><a href="https://artamis.in/"><img src="http://staging-golfoy.hyperx.cloud/media/logo/ARTAMIS-LOGO.png" alt="artamis-logo"></a> -->
+            </div>
+        </div>
+    </div>
+</div>
+<div class="footer_copyright_box row">
+    <div class="footer_copyright col-xs-12">
+        <div class="row">
+            <!-- <div class="col-sm-push-6 col-sm-6 col-xs-12 secured_payments">
+                        <div class="text_secure_payment">
+                            Secure payment by
+                        </div>
+                        <div class="secure_payment_icons">
+                            <div class="secure_payment_icons_single ">
+                                <img alt="mastercard" loading="lazy" src='<?php echo $block->getViewFileUrl('images/header_and_footer_assets/Group 329.svg'); ?>' />
+                            </div>
+                            <div class="secure_payment_icons_single">
+                                <img alt="visa" loading="lazy" src='<?php echo $block->getViewFileUrl('images/header_and_footer_assets/Icon simple-visa.svg'); ?>' />
+                            </div>
+                            <div class="secure_payment_icons_single">
+                                <img alt="American Express" loading="lazy" src='<?php echo $block->getViewFileUrl('images/header_and_footer_assets/Group 327.svg'); ?>' />
+                            </div>
+                            <div class="secure_payment_icons_single">
+                                <img alt="upi" loading="lazy" src='<?php echo $block->getViewFileUrl('images/header_and_footer_assets/Group 328.svg'); ?>' />
+                            </div>
+                            <div class="secure_payment_icons_single">
+                                <img alt="wallet" loading="lazy" src='<?php echo $block->getViewFileUrl('images/header_and_footer_assets/Icon ionic-ios-wallet.svg'); ?>' />
+                            </div>
+                        </div>
+                    </div> -->
+        </div>
+    </div>
+</div>
+</div>
+<style>
+    .artmais-logo img {
+        width: 100%;
+        max-width: 60px;
+        padding-left: 7px;
+    }
+
+    .artmais-logo {
+        text-align: center;
+        margin-top: 10px;
+        margin-top: 5px;
+    }
+
+    .artmais-logo span {
+        color: #646464;
+        font-size: 12px;
+    }
+
+    .copyright_text {
+        margin-top: 0px;
+    }
+
+    .ssl-icons-block {
+        padding-top: 0px;
+    }
+
+    .artmais-logo {
+        margin-top: 0px;
+        float: left;
+    }
+
+    .copyright {
+        padding: 17px 0px 0px;
+    }
+
+    @media only screen and (max-width:768px) {
+        .ssl-icons-block {
+            padding-top: 0px;
+        }
+
+        .copyright {
+            padding: 4px;
+            display: inline-block;
+            float: right;
+            width: auto;
+        }
+
+        .artmais-logo span {
+            font-size: 10px;
+        }
+    }
+
+    /* #artm-form-success-message.has-success-icon::before {
+        content: "";
+        display: block;
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 12px;
+        background-image: url("/media/wysiwyg/success1.jpg") !important; 
+       background-repeat: no-repeat;
+        background-size: contain;
+        background-position: center;
+  }  */
+</style>
+
+<script>
+    require(["jquery", "bootstrap"], function(jQuery) {
+        jQuery(document).ready(function() {
+
+            function createIframe(videoSrc, source) {
+                let iframeSrc;
+                if (source === "youtube") {
+                    const videoId = videoSrc.split(/(?:v=|\/shorts\/|\?si=)/)[1];
+                    iframeSrc = videoSrc.includes('/shorts/') ?
+                        `https://www.youtube.com/embed/${videoId}?autoplay=1&muted=1&playsinline=1&controls=1&modestbranding=1&rel=0` :
+                        `https://www.youtube.com/embed/${videoId}?autoplay=1&muted=1&playsinline=1&controls=1&rel=0`;
+                } else {
+                    iframeSrc = `${videoSrc}?&playsinline=1controls=1`; // Add controls for non-YouTube sources
+                }
+
+                return `<iframe src="${iframeSrc}" id="yourIframeId" frameborder="0" allow="autoplay; fullscreen"></iframe>`;
+            }
+
+            // Function to get video groups based on video source
+            function getVideoGroups(group) {
+                let videoGroups = [];
+                jQuery(`.video-trigger[group='${group}']`).each(function() {
+                    videoGroups.push(jQuery(this).attr('video-src'));
+                });
+                return videoGroups;
+            }
+
+            // Function to display video groups as thumbnails
+            function displayVideoGroups(videoGroups) {
+                const thumbnails = videoGroups.map(videoGroup => {
+                    let thumbnailSrc;
+                    if (videoGroup.includes('youtube.com')) {
+                        const videoId = videoGroup.split(/(?:v=|\/shorts\/|\?si=)/)[1];
+                        thumbnailSrc = `https://img.youtube.com/vi/${videoId}/0.jpg`;
+                    } else {
+                        const videoFileName = videoGroup.split('/').pop().split('.')[0];
+                        thumbnailSrc = `http://golfoy.com/media/wysiwyg/2024/thumbnails/${videoFileName}.jpg`;
+                    }
+                    return `<img src="${thumbnailSrc}" class="video-thumbnail" data-video-src="${videoGroup}">`;
+                });
+                jQuery("#exampleCustomModal .video-groups").html(thumbnails.join(""));
+                jQuery("#exampleCustomModal .video-groups").html(thumbnails.join(""));
+            }
+
+            // Show the modal and load video groups when the trigger div is clicked
+            jQuery(".video-trigger").click(function() {
+                const videoSrc = jQuery(this).attr("video-src");
+                const videoTitle = jQuery(this).attr("video-title");
+                const source = jQuery(this).attr("source");
+                const group = jQuery(this).attr("group");
+                const iframe = createIframe(videoSrc, source);
+
+                jQuery("#exampleCustomModal .custom-modal-title").text(videoTitle);
+                jQuery("#exampleCustomModal .video-container").html(iframe);
+                const videoGroups = getVideoGroups(group);
+                displayVideoGroups(videoGroups);
+
+                if (group === "short_videos") {
+                    jQuery("#exampleCustomModal").addClass("short-video-modal");
+                } else {
+                    jQuery("#exampleCustomModal").removeClass("short-video-modal");
+                }
+
+                jQuery("#exampleCustomModal").css('display', 'block');
+                jQuery("body").addClass("custom-videos");
+            });
+
+            // Handle click on video thumbnail
+            jQuery(document).on("click", ".video-thumbnail", function() {
+                const videoSrc = jQuery(this).data("video-src");
+                const source = videoSrc.includes('youtube.com') ? "youtube" : "local";
+                const iframe = createIframe(videoSrc, source);
+
+                jQuery(".video-container").html(iframe);
+            });
+
+            // Hide the modal when the close button is clicked
+            jQuery(".close, #closeCustomModal").click(function() {
+                jQuery("#exampleCustomModal").css('display', 'none');
+                jQuery("#exampleCustomModal .video-container").html('');
+                jQuery("body").removeClass("custom-videos");
+                jQuery("#exampleCustomModal").removeClass("short-video-modal"); // Ensure class is removed when closing the modal
+            });
+
+            // Close the modal when clicking outside the modal content
+            jQuery(window).click(function(event) {
+                if (jQuery(event.target).hasClass('custom-modal')) {
+                    jQuery("#exampleCustomModal").css('display', 'none');
+                    jQuery("#exampleCustomModal .video-container").html('');
+                    jQuery("body").removeClass("custom-videos");
+                    jQuery("#exampleCustomModal").removeClass("short-video-modal"); // Ensure class is removed when closing the modal
+                }
+            });
+
+        });
+    });
+
+    require(["jquery"], function($) {
+        // ✅ Check repeatedly until element exists
+        var checkSuccessMsg = setInterval(function() {
+            var $successMsg = $("#artm-form-success-message");
+            if ($successMsg.length) {
+                console.log('found in url partner');
+                $successMsg.addClass("has-success-icon");
+                clearInterval(checkSuccessMsg); // stop once found
+            }
+        }, 300); // interval in ms (adjust if needed)
+
+    });
+</script>

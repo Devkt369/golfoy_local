@@ -1,0 +1,21 @@
+<?php
+$reviewCount   = (int)$block->getReviewsCount();
+$ratingPercent = (float)$block->getRatingSummary();
+
+if ($reviewCount === 0 || $ratingPercent <= 0) {
+    return;
+}
+
+$ratingOutOfFive = round(($ratingPercent / 100) * 5, 1);
+?>
+
+<div class="custom-rating">
+    <span class="single-star">★</span>
+    <span class="rating-text">
+        <?= $block->escapeHtml($ratingOutOfFive) ?>/5
+    </span>
+    <span class="review-count">
+        <?= $block->escapeHtml($reviewCount) ?>
+        <?= $reviewCount === 1 ? __('Review') : __('Reviews') ?>
+    </span>
+</div>

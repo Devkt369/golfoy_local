@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+
+    <body>
+        <!-- <referenceContainer name="product.info.options.wrapper">
+            <block class="Magento\Catalog\Block\Product\View"
+                   name="custom_test_block"
+                   template="ArtM_CustomProductDesign::custom_print.phtml"
+                   after="-" />
+        </referenceContainer> -->
+        <referenceContainer name="custom.print">
+            <container name="custom.print.content"
+                    htmlTag="div"
+                    htmlClass="customize-print-content"
+                    after="-">
+
+                <block class="Magento\Catalog\Block\Product\View"
+                    name="custom_t_block"
+                    template="ArtM_CustomProductDesign::custom_print.phtml"/>
+
+            </container>
+        </referenceContainer>
+    </body>
+</page>

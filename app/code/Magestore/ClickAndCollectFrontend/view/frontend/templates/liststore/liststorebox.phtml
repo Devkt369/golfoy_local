@@ -1,0 +1,199 @@
+<?php
+
+/**
+ * Copyright © Magestore. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var \Magestore\ClickAndCollectFrontend\Block\ListStore\ListStoreBox $block */
+?>
+<div data-mage-init='{"Magestore_ClickAndCollectFrontend/js/direction": {}}'
+     class="option-direction custom-popup col-xs-12"
+     style="display: none;padding: 0;">
+    <ul class="vertical text-center">
+        <li class="travel car active" data-traveling="DRIVING"><span>A</span></li>
+        <li class="travel bus" data-traveling="TRANSIT"><span>A</span></li>
+        <li class="travel walk" data-traveling="WALKING"><span>A</span></li>
+        <li class="travel bicycle" data-traveling="BICYCLING"><span>A</span></li>
+    </ul>
+    <div id="directions-tool" class="col-xs-12 directions-tool">
+        <div class="widget-directions-searchbox-handle">
+            <div class="widget-directions-icon waypoint-handle"><label for="origin">A</label></div>
+            <div class="widget-directions-icon waypoint-to"><label for="origin">C</label></div>
+            <div class="widget-directions-icon waypoint-bullet"><label for="origin">B</label></div>
+        </div>
+        <div class="form-inputs">
+            <input class="form-control origin originA start" type="text" name="originA" isStart="true"
+                   autocomplete="off">
+            <input class="form-control origin originB end" readonly="true" type="text" name="originB" autocomplete="off"
+                   value="">
+        </div>
+        <div class="widget-directions-right-overlay">
+            <button type="button" onclick="" class="swap-locations"
+                    title="<?= /* @noEscape */ __('Swap locations A-B') ?>">
+                <?= /* @noEscape */ __('Swap locations A-B') ?>
+            </button>
+        </div>
+        <div class="directions-panel"></div>
+    </div>
+    <div class="box-input col-xs-12">
+        <button class="get-direction action primary pull-right" id="get_direction"
+                title="<?= /* @noEscape */ __('Get Directions') ?>"
+                type="submit">
+            <span><?= /* @noEscape */ __('Go') ?></span>
+        </button>
+    </div>
+</div>
+<div class="list-store-box col-sm-4 col-xs-12 pull-left">
+    <div class="page-title">
+        <h2 class="title"><span class="glyphicon glyphicon-align-justify"
+                                aria-hidden="true"></span><span><?= /* @noEscape */ __('Store list') ?></span><span
+                class="number-store pull-right"></span></h2>
+    </div>
+    <div class="list-store col-xs-12">
+        <script type="text/javascript">
+            var defaultStoreIcon = "<?= /* @noEscape */
+                $block->getViewFileUrl('Magestore_ClickAndCollectFrontend::images/map_with_pin.png') ?>"
+        </script>
+        <ul class="list-store-container disable-ul"
+            data-mage-init='{
+                "Magestore_ClickAndCollectFrontend/js/liststore": {
+                    "defaultStoreIcon": "<?= /* @noEscape */
+                        $block->getViewFileUrl('Magestore_ClickAndCollectFrontend::images/map_with_pin.png') ?>",
+                    "mediaUrlImage": "<?= /* @noEscape */ $block->getMediaUrlImage() ?>",
+                    "distanceUnit": "<?= /* @noEscape */ $block->getHelperData()->getDistanceUnit() ?>"
+                }
+            }'>
+        </ul>
+    </div>
+    <div id="pagination-list"
+         class="pagination-list pagination-wrapper text-center col-full"
+         data-mage-init='{
+            "Magestore_ClickAndCollectFrontend/js/pagination": {
+
+            }
+         }'
+    >
+    </div>
+</div>
+<script id="popup-store-template" class="popup-store-template" type="text/x-magento-template">
+    <div class="popup-store store-item store-<%- data.location_id %>"
+         title="<%- data.name %>"
+         data-store-id="<%- data.location_id %>"
+         data-store-index="<%- data.index %>"
+         data-latitude="<%- data.latitude %>"
+         data-longitude="<%- data.longitude %>"
+         data-address="<%- data.address %>"
+    >
+        <div class="store-content">
+            <div class="col-sm-12 col-xs-12 col-md-12 col-lg-12 tag-content">
+                <h4><%- data.name %> <span class="distance">
+                        <% if(data.distance) { %>(<%- data.distanceText %>)<% } %>
+                    </span></h4>
+                <?php if ($block->getHelperData()->getConfigEnableClickAndCollect()): ?>
+                    <% if(Number(data.is_allow_pickup)) { %>
+                    <p class="clickandcollect-title">
+                        <?= /* @noEscape */ __('Click & Collect | Buy online, collect at store') ?>
+                    </p>
+                    <% } %>
+                <?php endif; ?>
+                <p class="address-store"><%- data.address %></p>
+                <p class="telephone-store"><%- data.telephone %></p>
+                <p>
+                    <span class="btn-link more-info">
+                        <a target="_blank" class="title-store" href="<%- data.viewDetailUrl %>">
+                            <?= /* @noEscape */ __('More Info') ?>
+                        </a>
+                    </span>
+                    <span class="btn-link direction"><?= /* @noEscape */ __('Direction') ?></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</script>
+<script id="store-template" class="store-template" type="text/x-magento-template">
+    <li class="show-tag-li store-item store-<%- data.location_id %>"
+        title="<%- data.name %>"
+        data-store-id="<%- data.location_id %>"
+        data-store-index="<%- data.index %>"
+        data-latitude="<%- data.latitude %>"
+        data-longitude="<%- data.longitude %>"
+        data-address="<%- data.address %>"
+    >
+        <div class="">
+            <div class="col-sm-9 col-md-10 col-xs-11 col-lg-11 tag-content">
+                <h4><%- data.name %> <span class="distance">
+                        <% if(data.distance) { %>(<%- data.distanceText %>)<% } %>
+                    </span></h4>
+                <?php if ($block->getHelperData()->getConfigEnableClickAndCollect()): ?>
+                <% if(Number(data.is_allow_pickup)) { %>
+                <p class="clickandcollect-title">
+                    <?= /* @noEscape */ __('Click & Collect | Buy online, collect at store') ?>
+                </p>
+                <% } %>
+                <?php endif; ?>
+                <p class="address-store"><%- data.address %></p>
+                <p class="telephone-store"><%- data.telephone %></p>
+                <p class="clickandcollect-today-status"><%- data.todayStatusInfo %></p>
+                <% if(data.scheduleInfo) { %>
+                <div class="container-fluid schedule-container hide">
+                    <p class="clickandcollect-title"><?= /* @noEscape */ __('Our opening hours...') ?></p>
+                    <div class="col-xs-6">
+                        <% for (var i = 0; i < 4; i++) { %>
+                        <div class="row">
+                            <div class="container-fluid day-container">
+                                <div class="col-xs-3"><%- data.scheduleInfo[i].label %></div>
+                                <div class="col-xs-9"><%- data.scheduleInfo[i].workingHour %></div>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                    <div class="col-xs-6">
+                        <% for (var i = 4; i < 7 ; i++) { %>
+                        <div class="row">
+                            <div class="container-fluid day-container">
+                                <div class="col-xs-3"><%- data.scheduleInfo[i].label %></div>
+                                <div class="col-xs-9"><%- data.scheduleInfo[i].workingHour %></div>
+                            </div>
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+                <% } %>
+                <p>
+                    <span class="btn-link more-info">
+                        <a target="_blank" class="title-store" href="<%- data.viewDetailUrl %>">
+                            <?= /* @noEscape */ __('More Info') ?>
+                        </a>
+                    </span>
+                    <span class="btn-link direction"><?= /* @noEscape */ __('Direction') ?></span>
+                </p>
+            </div>
+            <div class="col-sm-1 col-md-1 col-xs-1 col-lg-1 arrow-icon">
+                <span class="glyphicon glyphicon-menu-down"></span>
+            </div>
+        </div>
+    </li>
+</script>
+
+<script id="pagination-template" class="store-template" type="text/x-magento-template">
+    <ul class="pagination">
+        <li data-first-page="1"
+            class="page-item <% if (data.curPage == 1) { %>disabled<% } %>"
+        ><span>&laquo;</span></li>
+        <% if (data.curPage > 1) { %>
+            <li data-page-id="<%- data.curPage - 1 %>"  class="page-item"><a><?= /* @noEscape */ __('Prev') ?></a></li>
+        <% } %>
+        <% for (var page = data.minPage; page <= data.maxPage; ++page) { %>
+            <li class="page-item <% if (page == data.curPage) { %>active<% } %>"
+                data-page-id="<%- page %>"
+            ><a><%- page %></a></li>
+        <% } %>
+        <% if (data.curPage < data.totalPage) { %>
+            <li data-page-id="<%- data.curPage + 1 %>" class="page-item"><a><?= /* @noEscape */ __('Next') ?></a></li>
+        <% } %>
+        <li data-last-page="<%- data.totalPage %>"
+            class="page-item <% if (data.curPage == data.totalPage) { %>disabled<% } %>"
+        ><a>&raquo;</a></li>
+    </ul>
+</script>

@@ -1,0 +1,289 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+$formAction = $block->getUrl('request_bulk_purchase/upload/index'); // Controller URL
+?>
+
+<div id="bulk-upload-modal" style="display:none;">
+    
+</div>
+<script>
+require(['jquery', 'Magento_Ui/js/modal/modal'], function ($, modal) {
+    $(document).ready(function () {
+
+        // 1. INITIALIZE THE MODAL WIDGET ONCE
+        var modalOptions = {
+            type: 'popup',
+            responsive: true,
+            innerScroll: true,
+            title: 'Upload a Bulk Order',
+            buttons: false,
+            opened: function () {
+                initDragDrop();
+            }
+        };
+        var bulkModal = modal(modalOptions, $('#bulk-upload-modal'));
+
+        // 2. DEFINE THE MODAL'S CONTENT WHEN THE TRIGGER BUTTON IS CLICKED
+        $('#bulk-upload').on('click', function () {
+            var modalContent = `
+                <div class="bulk-order-upload">
+                    <h2>Upload a bulk order</h2>
+                    
+                    <div class="bulk-step">
+                        <strong>Step 1: Prepare your order</strong>
+                        <p>Download the CSV template, add your SKUs and quantities, and save the file.</p>
+                        <a href="<?= $block->getViewFileUrl('ArtM_BulkOrder::template/bulk_order_template.csv') ?>" 
+                           class="bulk-download-template" 
+                           download="bulk_order_template.csv">
+                           Download Template
+                        </a>
+                    </div>
+                    
+                    <div class="bulk-step">
+                        <strong>Step 2: Upload your order</strong>
+                        <p>Drag your saved order file to the box below or click to select the file.</p>
+                        
+                        <form id="bulkOrderForm" enctype="multipart/form-data" method="post" action="<?= $formAction ?>">
+                            <?= $block->getBlockHtml('formkey') ?>
+
+                            <div id="drop-area" class="bulk-drop-area">
+                                <p><strong>Drag your order here to upload it</strong></p>
+                                <p>or <u>click</u> to select a file</p>
+                            </div>
+                            <input type="file" name="bulk_file" id="bulk_file" accept=".csv" style="display:none;" />
+
+                            <div id="file-info"></div>
+                            
+                            <button type="submit" class="bulk-upload-btn">Upload File</button>
+                        </form>
+                        
+                        <div id="uploadResult"></div>
+                    </div>
+                </div>
+            `;
+            $('#bulk-upload-modal').html(modalContent);
+            bulkModal.openModal();
+        });
+
+        function initDragDrop() {
+            var $dropArea = $('#drop-area');
+            var $fileInput = $('#bulk_file');
+
+            // prevent browser default behavior
+            $(document).on('dragover drop', function (e) {
+                e.preventDefault();
+            });
+
+            $dropArea
+                .off() // avoid duplicate binding
+                .on('dragover', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    $(this).addClass('drag-over');
+                })
+                .on('dragleave', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    $(this).removeClass('drag-over');
+                })
+                .on('drop', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    $(this).removeClass('drag-over');
+
+                    var files = e.originalEvent.dataTransfer.files;
+                    if (files.length == 1) {
+                        $fileInput[0].files = files;
+                        displayFileInfo(files[0]);
+                    }else{
+                        alert('Please upload only one file at a time.');
+                    }
+                })
+
+            $fileInput.on('change', function () {
+                if (this.files.length > 0) {
+                    displayFileInfo(this.files[0]);
+                }
+            });
+        }
+            setTimeout(function() {
+                initDragDrop();
+            }, 2000);
+
+        // Helper function to display file details
+        function displayFileInfo(file) {
+            $('.file-not-upload').remove();
+            $('.bulk-order-error').remove();
+            
+            if (!file) return;
+            var fileName = file.name;
+            var fileSize = (file.size / 1024).toFixed(2); // Size in KB
+            jQuery('#file-info').html(
+                '<p>File selected: <strong>' + fileName + '</strong> (' + fileSize + ' KB)</p>' +
+                '<button type="button" id="clear-file" class="action-secondary">Remove File</button>'
+            );
+        }
+
+        // Handle clicking the drop area to open file dialog
+        $(document).on('click', '#drop-area', function () {
+            $('#bulk_file').click();
+        });
+
+        // Handle file selection via the file input
+        $(document).on('change', '#bulk_file', function (e) {
+            displayFileInfo(e.target.files[0]);
+        });
+      
+
+        // Handle "Remove File" button click
+        $(document).on('click', '#clear-file', function () {
+            $('#bulk_file').val(''); 
+            $('#file-info').html(''); 
+        });
+
+        // Handle AJAX form submission
+        $(document).on('submit', '#bulkOrderForm', function (e) {
+            e.preventDefault();
+            
+            if (!$('#bulk_file')[0].files.length) {
+                $('.file-not-upload').remove();
+                jQuery("div#drop-area").before("<div class='file-not-upload' style='color:red;'>Please select a file to upload*</div>");
+                $('#drop-area').addClass('required');
+                setTimeout(function () {
+                    $('#drop-area').removeClass('required');
+                }, 500);
+                return;
+            }
+
+            var form = $(this);
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: formData,
+                processData: false, 
+                contentType: false, 
+                showLoader: true,
+                success: function (response) {
+                    // console.log(response);
+                    var successMessage = response.message || 'Your file has been uploaded successfully. We will process your order shortly.';
+
+                    if (response.success) {
+                        var successHtml = `
+                            <div class="bulk-order-upload" style="text-align: center; padding: 40px 20px;">
+                                <h3 style="color:green;">Thank You!</h3>
+                                <p>${successMessage}</p>
+                            </div>
+                        `;
+                        $('#bulk-upload-modal').html(successHtml);
+                    } else {
+                        var errorMessage = response.error || 'Something went wrong while uploading the file.';
+                        var errorHtml = `
+                            <div class="bulk-order-error">
+                                <span style="color:red;">Upload Failed: </span>
+                                <span>${errorMessage}</span>
+                            </div>
+                        `;
+                        $('button.bulk-upload-btn').after(errorHtml);
+                    }
+                },
+                error: function (xhr) {
+                    $(".bulk-order-upload").remove();
+                    var errorMessage = 'An unknown error occurred. Please try again.';
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMessage = xhr.responseJSON.error;
+                    }
+                    var errorHtml = `
+                        <div class="bulk-order-upload" style="text-align: center; padding: 40px 20px;">
+                            <h3 style="color:red;">Upload Failed</h3>
+                            <p>${errorMessage}</p>
+                        </div>
+                    `;
+                    $('#bulk-upload-modal').html(errorHtml);
+                }
+            });
+        });
+    });
+});
+</script>
+
+<style>
+div#drop-area.required {
+    border-color: red;
+    animation: blink-border 0.2s step-end infinite;
+}
+
+/* Blinking animation */
+@keyframes blink-border {
+    50% {
+        border-color: transparent;
+    }
+}
+
+body > .loading-mask {
+    z-index: 99999;
+}
+
+.bulk-order-upload {
+    border: 1px solid #ccc;
+    padding: 20px;
+    max-width: 600px;
+    background: #fff;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+}
+
+.bulk-cancel-btn {
+    float: right;
+    background: none;
+    border: 1px solid red;
+    color: red;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.bulk-step {
+    margin: 20px 0;
+}
+
+.bulk-download-template,
+.bulk-upload-btn {
+    background-color: #d90429;
+    color: #fff;
+    padding: 10px 15px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+    margin-top: 10px;
+}
+.bulk-download-template:hover,
+.bulk-upload-btn:hover {
+    background-color: #d90429;
+    color: #fff;
+}
+.bulk-download-template:focus,
+.bulk-upload-btn:focus {
+    background-color: #d90429;
+    color: #fff;
+}
+
+
+.bulk-drop-area {
+    border: 2px dashed #aaa;
+    padding: 40px;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    background: #f9f9f9;
+}
+
+#bulk_file {
+    margin-top: 10px;
+}
+#drop-area.drag-over {
+    border-color: #3498db;
+    background-color: rgba(52, 152, 219, 0.1);
+}
+</style>

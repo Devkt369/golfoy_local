@@ -1,0 +1,1120 @@
+.artm-pagegroups-app {
+    --pg-bg: #f6f8fb;
+    --pg-surface: #ffffff;
+    --pg-surface-alt: #f9fbfd;
+    --pg-border: #d8e0ea;
+    --pg-border-strong: #bcc9d8;
+    --pg-text: #1f2937;
+    --pg-muted: #66758a;
+    --pg-accent: #0f6cbd;
+    --pg-accent-soft: #e8f3fc;
+    --pg-danger: #c62828;
+    --pg-shadow: 0 10px 30px rgba(15, 34, 58, 0.08);
+    color: var(--pg-text);
+    height: calc(100vh - 120px);
+    min-height: 640px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.artm-pagegroups-app * {
+    box-sizing: border-box;
+}
+
+.artm-pagegroups-app .pg-app-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 360px) minmax(420px, 1fr);
+    gap: 20px;
+    align-items: stretch;
+    height: 100%;
+    min-height: 0;
+}
+
+.artm-pagegroups-app .pg-panel {
+    min-height: 0;
+    border: 1px solid var(--pg-border);
+    border-radius: 18px;
+    background: var(--pg-surface);
+    box-shadow: var(--pg-shadow);
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.artm-pagegroups-app .pg-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--pg-border);
+    background: var(--pg-surface-alt);
+    flex: 0 0 auto;
+}
+
+.artm-pagegroups-app .pg-panel-head-left {
+    flex: 1 1 auto;
+}
+
+.artm-pagegroups-app .pg-panel-head h2 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.artm-pagegroups-app .pg-panel-head span {
+    display: block;
+    color: var(--pg-muted);
+    font-size: 12px;
+}
+
+.artm-pagegroups-app .pg-panel-head button {
+    flex-shrink: 0;
+}
+
+.artm-pagegroups-app .pg-panel-body {
+    padding: 16px;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.artm-pagegroups-app .pg-cards,
+.artm-pagegroups-app .pg-group-cards {
+    display: grid;
+    gap: 14px;
+}
+
+.artm-pagegroups-app .pg-card,
+.artm-pagegroups-app .pg-group-card {
+    border: 1px solid var(--pg-border);
+    border-radius: 14px;
+    background: #fff;
+    padding: 14px 16px;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.artm-pagegroups-app .pg-card {
+    cursor: pointer;
+}
+
+.artm-pagegroups-app .pg-card:hover,
+.artm-pagegroups-app .pg-group-card:hover {
+    border-color: var(--pg-border-strong);
+    box-shadow: 0 8px 24px rgba(15, 34, 58, 0.08);
+    transform: translateY(-1px);
+}
+
+.artm-pagegroups-app .pg-card.active {
+    border-color: var(--pg-accent);
+    background: var(--pg-accent-soft);
+    box-shadow: 0 10px 24px rgba(15, 108, 189, 0.14);
+}
+
+.artm-pagegroups-app .pg-card h3,
+.artm-pagegroups-app .pg-group-top strong {
+    margin: 0 0 8px;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.artm-pagegroups-app .pg-card p,
+.artm-pagegroups-app .pg-group-meta {
+    margin: 0 0 8px;
+    color: var(--pg-muted);
+    font-size: 13px;
+}
+
+.artm-pagegroups-app .pg-card p:last-of-type,
+.artm-pagegroups-app .pg-group-meta:last-child {
+    margin-bottom: 0;
+}
+
+.artm-pagegroups-app .pg-card-actions,
+.artm-pagegroups-app .pg-modal-actions,
+.artm-pagegroups-app .pg-groups-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.artm-pagegroups-app .pg-card-actions {
+    margin-top: 12px;
+}
+
+.artm-pagegroups-app .pg-card-actions button,
+.artm-pagegroups-app .pg-group-delete,
+.artm-pagegroups-app .pg-modal-actions button {
+    min-height: 34px;
+    padding: 0 14px;
+    border: 1px solid var(--pg-border-strong);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--pg-text);
+    cursor: pointer;
+}
+
+.artm-pagegroups-app .pg-card-actions button:hover,
+.artm-pagegroups-app .pg-group-delete:hover,
+.artm-pagegroups-app .pg-modal-actions button:hover {
+    border-color: var(--pg-accent);
+}
+
+.artm-pagegroups-app .pg-group-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.artm-pagegroups-app .pg-group-card {
+    position: relative;
+    cursor: move;
+}
+
+.artm-pagegroups-app .pg-group-card::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 26px;
+    height: 4px;
+    border-radius: 999px;
+    background: repeating-linear-gradient(
+        90deg,
+        #c8d3df 0,
+        #c8d3df 4px,
+        transparent 4px,
+        transparent 8px
+    );
+}
+
+.artm-pagegroups-app .pg-group-meta label,
+.artm-pagegroups-app .pg-modal-inner label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--pg-muted);
+}
+
+.artm-pagegroups-app .pg-group-icon-picker,
+.artm-pagegroups-app .pg-modal-inner input,
+.artm-pagegroups-app .pg-modal-inner select {
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid var(--pg-border-strong);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--pg-text);
+}
+
+/* Group image grid ---------------------------------------------------- */
+.artm-pagegroups-app .pg-group-image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.artm-pagegroups-app .pg-group-attrs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+    margin-bottom: 8px;
+    padding: 8px;
+    border: 1px solid var(--pg-border);
+    border-radius: 10px;
+    background: #fbfdff;
+    overflow-x: auto;
+}
+
+.artm-pagegroups-app .pg-group-attrs-row,
+.artm-pagegroups-app .pg-group-card-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.artm-pagegroups-app .pg-group-attrs-row {
+    margin-bottom: 0;
+    flex: 0 0 auto;
+}
+
+.artm-pagegroups-app .pg-attr-unified-input {
+    min-height: 30px;
+    border: 1px solid var(--pg-border-strong);
+    border-radius: 8px;
+    padding: 0 10px;
+    width: 250px;
+    max-width: 250px;
+    flex: 0 0 250px;
+    font-size: 12px;
+}
+
+.artm-pagegroups-app .pg-group-attr-apply {
+    min-height: 30px;
+    padding: 0 10px;
+    border: 1px solid var(--pg-border-strong);
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.artm-pagegroups-app .pg-group-attr-chips {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 6px;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.artm-pagegroups-app .pg-group-attr-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--pg-border-strong);
+    background: #fff;
+    font-size: 12px;
+}
+
+.artm-pagegroups-app .pg-group-attr-chip button {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: var(--pg-danger);
+    padding: 0;
+    line-height: 1;
+}
+
+.artm-pagegroups-app .pg-group-attr-empty,
+.artm-pagegroups-app .pg-group-attr-empty-inline {
+    color: var(--pg-muted);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.artm-pagegroups-app .pg-group-img-item {
+    position: relative;
+    border-radius: 10px;
+    overflow: visible;
+    border: 1px solid var(--pg-border);
+    background: #f4f7fb;
+}
+
+.artm-pagegroups-app .pg-group-img-thumb {
+    display: block;
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+}
+
+.artm-pagegroups-app .pg-group-img-item-hidden .pg-group-img-thumb {
+    opacity: 0.4;
+}
+
+.artm-pagegroups-app .pg-hidden-indicator {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    background: rgba(18, 25, 35, 0.72);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+}
+
+.artm-pagegroups-app .pg-hidden-indicator svg {
+    width: 14px;
+    height: 14px;
+}
+
+.artm-pagegroups-app .pg-img-badge {
+    position: absolute;
+    left: 6px;
+    top: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 20px;
+    padding: 0 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 20px;
+    background: #eef2f7;
+    color: #2f3b4b;
+    border: 1px solid #d4dde8;
+    z-index: 2;
+}
+
+.artm-pagegroups-app .pg-badge-always {
+    background: #e9f8ef;
+    border-color: #bfe8ce;
+    color: #1f6b39;
+}
+
+.artm-pagegroups-app .pg-badge-scheduled {
+    background: #fff8dc;
+    border-color: #ffe8a3;
+    color: #8c6800;
+}
+
+.artm-pagegroups-app .pg-badge-hidden {
+    background: #fdeceb;
+    border-color: #f5beb9;
+    color: #9f1f1a;
+}
+
+.artm-pagegroups-app .pg-badge-active-range {
+    background: #eef4ff;
+    border-color: #c8dbff;
+    color: #184f9e;
+}
+
+.artm-pagegroups-app .pg-group-img-actions {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    bottom: 126px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: all 0.16s ease;
+    z-index: 2;
+}
+
+.artm-pagegroups-app .pg-group-img-item:hover .pg-group-img-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.artm-pagegroups-app .pg-group-img-actions button {
+    min-height: 26px;
+    padding: 0 6px;
+    border: 1px solid rgba(20, 30, 45, 0.15);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.92);
+    color: #243247;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.artm-pagegroups-app .pg-group-img-actions button svg {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 13px;
+}
+
+.artm-pagegroups-app .pg-group-img-actions button:hover {
+    border-color: var(--pg-accent);
+    color: var(--pg-accent);
+}
+
+.artm-pagegroups-app .pg-group-image-attrs {
+    padding: 8px;
+    display: grid;
+    gap: 4px;
+}
+
+.artm-pagegroups-app .pg-group-image-attrs label {
+    font-size: 11px;
+    color: var(--pg-muted);
+}
+
+.artm-pagegroups-app .pg-group-image-attrs input {
+    min-height: 30px;
+    border: 1px solid var(--pg-border-strong);
+    border-radius: 6px;
+    padding: 0 8px;
+    font-size: 12px;
+    background: #fff;
+}
+
+.artm-pagegroups-app .pg-group-img-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    font-size: 11px;
+    line-height: 22px;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.artm-pagegroups-app .pg-group-img-item:hover .pg-group-img-remove {
+    opacity: 1;
+}
+
+.artm-pagegroups-app .pg-image-visibility-modal {
+    width: min(760px, 100%);
+}
+
+.artm-pagegroups-app .pg-image-vis-preview {
+    margin: 0 0 12px;
+    padding: 8px;
+    border: 1px solid var(--pg-border);
+    border-radius: 10px;
+    background: #fbfdff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.artm-pagegroups-app .pg-image-vis-preview img {
+    max-width: min(320px, 100%);
+    max-height: 170px;
+    border-radius: 8px;
+    object-fit: contain;
+    border: 1px solid var(--pg-border);
+}
+
+.artm-pagegroups-app .pg-visibility-options {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 0;
+    margin-bottom: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.artm-pagegroups-app .pg-visibility-options label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+    padding: 2px 8px;
+    border: 0;
+    border-right: 1px solid var(--pg-border-strong);
+    border-radius: 0;
+    background: transparent;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--pg-text);
+    text-transform: none;
+    letter-spacing: normal;
+    cursor: pointer;
+}
+
+.artm-pagegroups-app .pg-visibility-options label:last-child {
+    border-right: 0;
+}
+
+.artm-pagegroups-app .pg-visibility-options input[type="radio"] {
+    margin: 0;
+    width: 14px;
+    height: 14px;
+    accent-color: var(--pg-accent);
+}
+
+.artm-pagegroups-app .pg-option-with-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.artm-pagegroups-app .pg-option-with-icon svg {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 13px;
+}
+
+.artm-pagegroups-app .pg-visibility-dates {
+    padding: 12px;
+    border: 1px solid var(--pg-border);
+    border-radius: 10px;
+    background: #fafcff;
+}
+
+.artm-pagegroups-app .pg-visibility-note {
+    margin: 8px 0 0;
+    color: var(--pg-muted);
+    font-size: 12px;
+}
+
+.artm-pagegroups-app .pg-image-preview-modal {
+    width: min(760px, 100%);
+}
+
+.artm-pagegroups-app .pg-image-preview-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-height: 70vh;
+    overflow: auto;
+    border: 1px solid var(--pg-border);
+    border-radius: 12px;
+    background: #f2f6fb;
+    padding: 10px;
+}
+
+.artm-pagegroups-app .pg-image-preview-wrap img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+}
+
+.artm-pagegroups-app .pg-group-img-empty {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 72px;
+    border: 1px dashed var(--pg-border-strong);
+    border-radius: 10px;
+    background: #fbfcfe;
+    color: var(--pg-muted);
+    font-size: 13px;
+}
+
+.artm-pagegroups-app .pg-group-card-footer {
+    padding-top: 10px;
+    border-top: 1px solid var(--pg-border);
+    flex-wrap: wrap;
+}
+
+.artm-pagegroups-app .pg-group-media-btn,
+.artm-pagegroups-app .pg-group-save-meta,
+.artm-pagegroups-app .pg-group-embed-btn,
+.artm-pagegroups-app #pg-media-close,
+.artm-pagegroups-app .pg-media-toggle-select,
+.artm-pagegroups-app .pg-media-delete,
+.artm-pagegroups-app .pg-breadcrumb-link {
+    min-height: 34px;
+    padding: 0 14px;
+    border: 1px solid var(--pg-border-strong);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--pg-text);
+    cursor: pointer;
+}
+
+.artm-pagegroups-app .pg-group-media-btn {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.artm-pagegroups-app #pg-media-close {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 16px;
+    line-height: 36px;
+    text-align: center;
+}
+
+.artm-pagegroups-app .pg-btn-icon:hover {
+    background: #fee2e2;
+    border-color: var(--pg-danger);
+    color: var(--pg-danger);
+}
+
+.artm-pagegroups-app .pg-media-toggle-select {
+    background: rgba(255,255,255,0.9) !important;
+}
+
+.artm-pagegroups-app .pg-media-toggle-select.selected {
+    background: var(--pg-accent-soft) !important;
+    border-color: var(--pg-accent) !important;
+    color: var(--pg-accent) !important;
+}
+
+.artm-pagegroups-app .pg-media-file-selected {
+    border-color: var(--pg-accent) !important;
+    box-shadow: 0 0 0 2px rgba(15, 108, 189, 0.25);
+}
+
+/* Create folder row inside folders section ----------------------------- */
+.artm-pagegroups-app .pg-create-folder {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.artm-pagegroups-app .pg-create-folder input {
+    flex: 1 1 auto;
+    min-height: 36px;
+    padding: 6px 10px;
+    border: 1px solid var(--pg-border-strong);
+    border-radius: 8px;
+    font-size: 12px;
+    background: #fff;
+}
+
+.artm-pagegroups-app .pg-create-folder button {
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 0 12px;
+    font-size: 12px;
+}
+
+/* Media footer ------------------------------------------------------- */
+.artm-pagegroups-app .pg-media-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--pg-border);
+}
+
+.artm-pagegroups-app .pg-media-footer-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.artm-pagegroups-app #pg-footer-count {
+    font-size: 13px;
+    color: var(--pg-muted);
+}
+
+.artm-pagegroups-app #pg-media-add-selected:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.artm-pagegroups-app .pg-sel-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--pg-accent);
+    margin-left: 8px;
+}
+
+.artm-pagegroups-app .pg-media-browser {
+    width: min(1440px, calc(100vw - 80px));
+    min-width: 1280px;
+}
+
+.artm-pagegroups-app .pg-media-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.artm-pagegroups-app .pg-media-header h3 {
+    margin: 0;
+    font-size: 20px;
+    flex: 1 1 auto;
+}
+
+.artm-pagegroups-app .pg-breadcrumbs {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--pg-border);
+}
+
+.artm-pagegroups-app .pg-breadcrumbs {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.artm-pagegroups-app .pg-breadcrumb-link {
+    min-height: 30px;
+    padding: 0 10px;
+    background: var(--pg-surface-alt);
+}
+
+.artm-pagegroups-app .pg-breadcrumb-sep {
+    color: var(--pg-muted);
+    font-size: 12px;
+}
+
+.artm-pagegroups-app .pg-media-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.artm-pagegroups-app .pg-media-section-head h4 {
+    margin: 0;
+    flex: 1 1 auto;
+}
+
+.artm-pagegroups-app .pg-upload-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: 1px solid var(--pg-border-strong);
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+}
+
+.artm-pagegroups-app .pg-upload-label:hover {
+    border-color: var(--pg-accent);
+    background: var(--pg-accent-soft);
+}
+
+.artm-pagegroups-app .pg-upload-label input {
+    display: none;
+}
+
+.artm-pagegroups-app .pg-upload-label svg {
+    width: 14px;
+    height: 14px;
+    color: var(--pg-accent);
+}
+
+.artm-pagegroups-app .pg-media-columns {
+    display: grid;
+    grid-template-columns: minmax(200px, 280px) 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.artm-pagegroups-app .pg-media-section {
+    min-height: 300px;
+    padding: 14px;
+    border: 1px solid var(--pg-border);
+    border-radius: 12px;
+    background: #fbfdff;
+}
+
+.artm-pagegroups-app .pg-media-section h4 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.artm-pagegroups-app .pg-media-section-folders {
+    min-width: 220px;
+    max-width: 280px;
+}
+
+.artm-pagegroups-app .pg-media-section-files {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.artm-pagegroups-app .pg-media-folder-list {
+    display: grid;
+    gap: 6px;
+}
+
+.artm-pagegroups-app .pg-media-folder {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 40px;
+    padding: 0 10px;
+    border: 1px solid var(--pg-border);
+    border-radius: 8px;
+    background: #fff;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-size: 13px;
+}
+
+.artm-pagegroups-app .pg-media-folder:hover {
+    border-color: var(--pg-accent);
+    background: var(--pg-accent-soft);
+    box-shadow: 0 2px 8px rgba(15, 108, 189, 0.1);
+}
+
+.artm-pagegroups-app .pg-media-folder-icon {
+    flex-shrink: 0;
+    color: var(--pg-accent);
+    font-size: 16px;
+}
+
+.artm-pagegroups-app .pg-media-folder-name {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+}
+
+.artm-pagegroups-app .pg-media-file-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+}
+
+.artm-pagegroups-app .pg-media-file {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--pg-border);
+    border-radius: 12px;
+    background: #fff;
+    aspect-ratio: 1;
+    transition: all 0.15s ease;
+}
+
+.artm-pagegroups-app .pg-media-file:hover {
+    border-color: var(--pg-border-strong);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.artm-pagegroups-app .pg-media-thumb-wrap {
+    width: 100%;
+    height: 100%;
+    background: #edf3f8;
+}
+
+.artm-pagegroups-app .pg-media-thumb {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.artm-pagegroups-app .pg-media-file-actions {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    gap: 4px;
+    padding: 6px;
+    background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.artm-pagegroups-app .pg-media-file:hover .pg-media-file-actions {
+    opacity: 1;
+}
+
+.artm-pagegroups-app .pg-media-file-actions button {
+    flex: 1 1 auto;
+    min-height: 28px !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.9) !important;
+    color: var(--pg-text) !important;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 28px;
+    text-align: center;
+}
+
+.artm-pagegroups-app .pg-media-empty {
+    margin: 0;
+    color: var(--pg-muted);
+    font-size: 13px;
+}
+
+.artm-pagegroups-app .pg-groups-header {
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--pg-border);
+}
+
+.artm-pagegroups-app .pg-groups-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.artm-pagegroups-app .pg-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    padding: 40px 24px;
+    background: rgba(16, 24, 40, 0.42);
+}
+
+.artm-pagegroups-app .pg-modal-inner {
+    width: min(520px, 100%);
+    margin: 0 auto;
+    padding: 22px;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+}
+
+.artm-pagegroups-app .pg-modal-inner h3 {
+    margin: 0 0 16px;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.artm-pagegroups-app .pg-modal-inner input,
+.artm-pagegroups-app .pg-modal-inner select {
+    margin-bottom: 14px;
+}
+
+.artm-pagegroups-app .pg-modal-actions {
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.artm-pagegroups-app .pg-group-delete {
+    color: var(--pg-danger);
+}
+
+.artm-pagegroups-app .ui-sortable-helper {
+    box-shadow: 0 16px 36px rgba(15, 34, 58, 0.18);
+    transform: rotate(1deg);
+}
+
+.artm-pagegroups-app .ui-sortable-placeholder {
+    visibility: visible !important;
+    min-height: 110px;
+    border: 2px dashed var(--pg-border-strong);
+    border-radius: 14px;
+    background: #f7fbff;
+}
+
+@media (max-width: 1100px) {
+    .artm-pagegroups-app .pg-app-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    .artm-pagegroups-app .pg-panel {
+        min-height: auto;
+        height: auto;
+    }
+
+    .artm-pagegroups-app {
+        height: auto;
+        min-height: 0;
+        overflow: visible;
+    }
+
+    .artm-pagegroups-app .pg-panel-body {
+        overflow: visible;
+    }
+}
+
+/* Wide-modal scroll helper ------------------------------------------- */
+.artm-pagegroups-app .pg-modal {
+    overflow-y: auto;
+}
+
+.artm-pagegroups-app .pg-modal-inner.pg-media-browser {
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+}
+
+@media (max-width: 1400px) {
+    .artm-pagegroups-app .pg-media-browser {
+        min-width: unset;
+        width: 100%;
+    }
+}
+
+@media (max-width: 767px) {
+    .artm-pagegroups-app .pg-app-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .artm-pagegroups-app .pg-card-actions,
+    .artm-pagegroups-app .pg-modal-actions,
+    .artm-pagegroups-app .pg-groups-header {
+        flex-wrap: wrap;
+    }
+
+    .artm-pagegroups-app .pg-modal {
+        padding: 20px 12px;
+    }
+
+    .artm-pagegroups-app .pg-media-header,
+    .artm-pagegroups-app .pg-media-footer,
+    .artm-pagegroups-app .pg-media-file-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .artm-pagegroups-app .pg-media-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .artm-pagegroups-app .pg-create-folder {
+        max-width: 100%;
+    }
+}
+
+.artm-pagegroups-app .pg-group-top-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+    position: relative;
+    z-index: 3;
+}
+
+.artm-pagegroups-app .pg-group-toggle {
+    min-height: 34px;
+    padding: 0 12px;
+    border: 1px solid var(--pg-border-strong);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--pg-text);
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.artm-pagegroups-app .pg-group-toggle:hover {
+    border-color: var(--pg-accent);
+    color: var(--pg-accent);
+}
+
+.artm-pagegroups-app .pg-group-card.is-collapsed .pg-group-attrs,
+.artm-pagegroups-app .pg-group-card.is-collapsed .pg-group-image-grid,
+.artm-pagegroups-app .pg-group-card.is-collapsed .pg-group-card-footer {
+    display: none;
+}

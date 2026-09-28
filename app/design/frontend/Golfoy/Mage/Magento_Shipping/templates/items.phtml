@@ -1,0 +1,119 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+//phpcs:disable Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace
+//phpcs:disable Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore
+//phpcs:disable Magento2.Templates.ThisInTemplate.FoundThis
+//phpcs:disable Magento2.Files.LineLength.MaxExceeded
+?>
+<?php /** @var  $block \Magento\Shipping\Block\Items */ ?>
+<?php  $_order = $block->getOrder() ?>
+<div class="actions-toolbar">
+    <a href="<?= $block->escapeUrl($block->getPrintAllShipmentsUrl($_order)) ?>"
+       class="action print"
+       target="_blank"
+       rel="noopener">
+        <span><?= $block->escapeHtml(__('Print All Shipments')) ?></span>
+    </a>
+</div>
+<?php foreach ($_order->getShipmentsCollection() as $_shipment) : ?>
+    <div class="order-title">
+        <strong><?= $block->escapeHtml(__('Shipment #')) ?><?= $block->escapeHtml($_shipment->getIncrementId()) ?></strong>
+        <a href="<?= $block->escapeUrl($block->getPrintShipmentUrl($_shipment)) ?>"
+           class="action print"
+           target="_blank"
+           rel="noopener">
+            <span><?= $block->escapeHtml(__('Print Shipment')) ?></span>
+        </a> 
+    </div>
+    <?php $tracks = $_shipment->getTracksCollection(); ?>
+    <?php  if ($tracks->count()) : ?>        
+        <div class="order-tracking" id="my-tracking-table-<?= (int) $_shipment->getId() ?>">
+            <div class="tracking-title" style="font-weight:bold;">
+                <?= $block->escapeHtml(__('Tracking Number(s):')) ?>
+            </div>
+            <div class="tracking-content">
+                <?php
+                $i = 1;
+                $_size = $tracks->count();?>
+                
+                <?php foreach ($tracks as $track) : 
+                  //  echo "<pre>";print_r($track->getData()); echo "</pre>";
+                ?>
+                    <div class="shipment_tracking_info">
+                        
+                        <table class="table_shipping_tracking">
+                            <tr class="shipping_tracking_top_block">
+                                <td>
+                                    <div class="track_title"><?php echo $track['title']; ?></div>
+                                    <div class="track_carrier_code hide"><?php echo $track['carrier_code']; ?></div>
+                                </td>
+                                <td>
+                                    <div class="track_link_button">
+                                    <?php  
+                                    $title = strtolower(trim($track['title']));
+                                        if($track['carrier_code'] == 'delhivery'){
+                                            echo '<a href= "https://www.delhivery.com/track/package/'.$track['track_number'].'" class="action" target="blank">Track</a>';
+                                        }elseif($track['carrier_code'] == 'custom' &&  $title == 'dtdc' ){
+                                            echo '<a href= "https://www.dtdc.in/tracking/shipment-tracking.asp" class="action" target="blank"> Go to Website </a>';
+                                        }else{
+                                            echo '<a href= "javascript:void()" class="action"> Tracking ID</a>';
+                                           
+                                        }
+                                    ?>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <div class="shipping_tracking_bottom_block">
+                                        <div type="text" id="<?php echo $track['track_number']; ?>" class="tracking_number">
+                                            <div>
+                                                <?php echo $track['track_number']; ?> 
+                                            </div>
+                                            <div onclick="copyText(<?php echo $track['track_number']; ?>);">Copy</div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                    </div> 
+                    <?php $i++;
+                endforeach; ?>
+            </div>
+        </div>
+    <?php  endif; ?>
+    <script>
+        function copyText(text) {
+          /* Copy the text inside the text field */
+          navigator.clipboard.writeText(text);
+
+          /* Alert the copied text */
+          alert("Copied Tracking Number");
+        }
+    </script>
+    <div class="table-wrapper order-items-shipment">
+        <table class="data table table-order-items shipment" id="my-shipment-table-<?= (int) $_shipment->getId() ?>">
+            <caption class="table-caption"><?= $block->escapeHtml(__('Items Shipped')) ?></caption>
+            <thead>
+                <tr>
+                    <th class="col name"><?= $block->escapeHtml(__('Product Name')) ?></th>
+                    <th class="col sku"><?= $block->escapeHtml(__('SKU')) ?></th>
+                    <th class="col qty"><?= $block->escapeHtml(__('Qty Shipped')) ?></th>
+                </tr>
+            </thead>
+            <?php $_items = $_shipment->getAllItems(); ?>
+            <?php foreach ($_items as $_item) : ?>
+                <?php if (!$_item->getOrderItem()->getParentItem()) : ?>
+                    <tbody>
+                        <?= $block->getItemHtml($_item) ?>
+                    </tbody>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </table>
+    </div>
+    <?= $block->getCommentsHtml($_shipment) ?>
+<?php endforeach; ?>

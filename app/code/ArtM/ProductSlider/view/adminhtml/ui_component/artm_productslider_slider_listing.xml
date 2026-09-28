@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">artm_productslider_slider_listing.artm_productslider_slider_listing_data_source</item>
+        </item>
+        <item name="spinner" xsi:type="string">artm_productslider_slider_columns</item>
+    </argument>
+
+    <settings>
+        <spinner>artm_productslider_slider_columns</spinner>
+        <buttons>
+            <button name="add">
+                <url path="*/*/new"/>
+                <class>primary</class>
+                <label translate="true">Add Slider</label>
+            </button>
+        </buttons>
+        <deps>
+            <dep>artm_productslider_slider_listing.artm_productslider_slider_listing_data_source</dep>
+        </deps>
+    </settings>
+
+    <dataSource name="artm_productslider_slider_listing_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">slider_id</param>
+            </storageConfig>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <aclResource>ArtM_ProductSlider::manage_sliders</aclResource>
+        <dataProvider class="ArtM\ProductSlider\Ui\DataProvider\Slider\ListingDataProvider"
+                      name="artm_productslider_slider_listing_data_source">
+            <settings>
+                <requestFieldName>id</requestFieldName>
+                <primaryFieldName>slider_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+    <listingToolbar name="listing_top">
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <massaction name="listing_massaction">
+            <action name="enable">
+                <settings>
+                    <type>enable</type>
+                    <label translate="true">Enable</label>
+                    <url path="artm_productslider/slider/massenable"/>
+                </settings>
+            </action>
+            <action name="disable">
+                <settings>
+                    <type>disable</type>
+                    <label translate="true">Disable</label>
+                    <url path="artm_productslider/slider/massdisable"/>
+                </settings>
+            </action>
+            <action name="delete">
+                <settings>
+                    <type>delete</type>
+                    <label translate="true">Delete</label>
+                    <url path="artm_productslider/slider/massdelete"/>
+                    <confirm>
+                        <title translate="true">Delete selected sliders</title>
+                        <message translate="true">Are you sure you want to delete selected sliders?</message>
+                    </confirm>
+                </settings>
+            </action>
+        </massaction>
+        <filters name="listing_filters"/>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+
+    <columns name="artm_productslider_slider_columns">
+        <column name="slider_id" sortOrder="10">
+            <settings>
+                <label translate="true">ID</label>
+                <sorting>asc</sorting>
+                <filter>textRange</filter>
+            </settings>
+        </column>
+        <column name="title" sortOrder="20">
+            <settings>
+                <label translate="true">Title</label>
+                <filter>text</filter>
+            </settings>
+        </column>
+        <column name="identifier" sortOrder="30">
+            <settings>
+                <label translate="true">Identifier</label>
+                <filter>text</filter>
+            </settings>
+        </column>
+        <column name="status" sortOrder="40">
+            <settings>
+                <label translate="true">Status</label>
+                <filter>select</filter>
+                <options class="ArtM\ProductSlider\Model\Source\Status"/>
+            </settings>
+        </column>
+        <column name="sort_order" sortOrder="50">
+            <settings>
+                <label translate="true">Sort Order</label>
+                <filter>textRange</filter>
+            </settings>
+        </column>
+        <actionsColumn name="actions" class="ArtM\ProductSlider\Ui\Component\Listing\Column\SliderActions" sortOrder="100">
+            <settings>
+                <indexField>slider_id</indexField>
+                <label translate="true">Actions</label>
+            </settings>
+        </actionsColumn>
+    </columns>
+</listing>

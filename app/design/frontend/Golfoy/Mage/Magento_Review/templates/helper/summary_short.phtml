@@ -1,0 +1,24 @@
+<?php
+$reviewCount   = (int)$block->getReviewsCount();
+$ratingPercent = (float)$block->getRatingSummary();
+
+// ⛔ If no reviews OR no rating → show nothing
+if ($reviewCount === 0 || $ratingPercent <= 0) {
+    return;
+}
+
+// Convert % to 5 scale
+$ratingOutOfFive = round(($ratingPercent / 100) * 5, 1);
+?>
+
+<div class="customratinghtml star_back">
+    <span style="font-size: 20px; color: #F0C808;">&starf;</span>
+    <?= $block->escapeHtml($ratingOutOfFive) ?>/5
+
+    <div class="people_rate">
+        <?= $block->escapeHtml($reviewCount) ?>
+        <span class="total_rev">
+            <?= $reviewCount === 1 ? __('Review') : __('Reviews') ?>
+        </span>
+    </div>
+</div>

@@ -1,0 +1,119 @@
+<?php
+    if( $_product = $block->getProduct() ){
+        $productid = $_product->getId();
+        
+        
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $prd_id_for_tier_price = $productid;
+        echo "<div class='custom_code'>";
+        if( $_product->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE){
+//                                echo "product is configurable";
+//                                echo $_product->getName()."-";
+//                                echo $_product->getId(); 
+
+            $_configChild = $_product->getTypeInstance()->getUsedProductIds($_product);
+            $getChildId = array();
+            $first_id = '';
+            foreach ($_configChild as $child){
+                $getChildId[] = $child;
+            }
+            echo "<div class='simple_prd_array hide'>";
+            print_r($getChildId);
+            echo "</div>";
+            try{
+                $first_id = $getChildId[0];                                
+                $prd_id_for_tier_price = $first_id;
+    
+                $product_first_simple = $objectManager->create('Magento\Catalog\Model\Product')->load($first_id);
+    
+                $sku = $product_first_simple->getSku()."<br>";
+    
+    
+                $regular_price = $product_first_simple->getPrice();
+                $finalPriceAmt = $product_first_simple->getPriceInfo()->getPrice('final_price')->getValue();
+                if( (int)$finalPriceAmt == (int)$regular_price){
+                    echo '<label>MRP: </label>';
+                    $class= 'mrp_here';
+                }else{
+                    $class= '';
+                }
+                echo "<div class='price_html_category_page configurable_product ".$class."'>";
+                echo $block->getProductPrice($product_first_simple);
+                echo "</div>";
+            }catch(\Exception $e){
+                // return;
+            }
+
+?>
+<style>
+    /*.product-info-main > .product-info-price > .price-box {
+        display: none;
+    }*/
+    .custom_code,
+    .custom_code span.old-price, 
+    .custom_code span.special-price{
+        display:none;
+    }
+    .catalog-product-view .custom_code .price-box.price-final_price {
+        margin-top: 0px;
+    }
+
+</style>
+<?php
+        }else{
+            
+        }
+/*
+        $product_obj = $objectManager->create('Magento\Catalog\Model\Product')->load($prd_id_for_tier_price);                
+        $tier_price = $product_obj->getTierPrice();
+        $mrp = $product_obj->getPrice();
+        if(count($tier_price) > 0){
+            foreach($tier_price as $pirces){
+//                                        var_dump( $pirces );
+
+                $tier_qty = (int)$pirces['price_qty'];
+                $tier_price = (int)$pirces['website_price'];
+
+
+                $save_percentage = ceil(100 - ((100 / $mrp) * $tier_price));
+                echo "<div class='tier_price_category_page'>Buy ".$tier_qty." for <strong>₹".$tier_price."</strong> each and save <strong>".$save_percentage."% more</strong></div>";
+
+            }
+        }*/
+        echo "</div>";
+
+    }
+?>
+<?php
+
+use Magento\Framework\App\State;
+use Magento\Store\Model\App\Emulation;
+use Magento\Store\Model\StoreManagerInterface;
+$product = $block->getProduct();
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$storeManager = $objectManager->get(StoreManagerInterface::class);
+$appEmulation = $objectManager->get(Emulation::class);
+$mainStoreId = 1;
+
+try {
+    $emulationInfo = $appEmulation->startEnvironmentEmulation($mainStoreId);
+    $productRepository = $objectManager->get(\Magento\Catalog\Api\ProductRepositoryInterface::class);
+    $mainStoreProduct = $productRepository->getById($product->getId(), false, $mainStoreId);
+    $finalPriceOtherStore = $mainStoreProduct->getFinalPrice();
+    $regularPriceOtherStore = $mainStoreProduct->getPrice();
+    $priceHelperOtherStore = $objectManager->get(\Magento\Framework\Pricing\Helper\Data::class);
+    $appEmulation->stopEnvironmentEmulation($emulationInfo);
+}catch (\Exception $e) {
+    // echo 'Error fetching price from main store: ' . $e->getMessage();
+}
+
+
+
+echo '<div class="selling-price"><span>Our Selling Price: </span>' . $priceHelperOtherStore->currency($finalPriceOtherStore, true, false) . '</div>';
+// if ($finalPriceOtherStore < $regularPriceOtherStore) {
+// } else {
+//     echo '<div class="selling-price">Our Selling Price: ' . $priceHelperOtherStore->currency($regularPriceOtherStore, true, false) . '</div>';
+// }
+?>
+
+<!-- <div class="inclsv_text">Inclusive of all taxes</div> -->

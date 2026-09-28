@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../lib/internal/Magento/Framework/ObjectManager/etc/config.xsd">
+    <preference type="ArtM\Optimization\Block\Product\ListProduct" for="Magento\Catalog\Block\Product\ListProduct"/>
+    <preference for="ArtM\Optimization\Api\ProductCacheRepositoryInterface" type="ArtM\Optimization\Model\ProductCacheRepository" />
+    <type name="ArtM\Optimization\Model\ResourceModel\ProductCache">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">artm_product_cache</argument>
+            <argument name="idFieldName" xsi:type="string">id</argument>
+        </arguments>
+    </type>
+</config>

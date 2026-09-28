@@ -1,0 +1,89 @@
+<?php
+declare(strict_types=1);
+
+namespace ArtM\LuxuryCategory\Plugin\Catalog\Model;
+
+use Magento\Catalog\Model\ResourceModel\Product\Collection;
+use Magento\Framework\DB\Select;
+
+/**
+ * Re-applies the `entity_id IN (...)` luxury restriction on every
+ * `getSelect()` call for a collection `LuxuryLayerProductCollectionPlugin`
+ * flagged.
+ *
+ * Why this exists: on this store's search-engine-backed (Elasticsearch)
+ * category collection, adding the restriction once via `addIdFilter()` (or
+ * `addAttributeToFilter`) gets silently discarded — the collection resets
+ * and rebuilds its internal `Select` while rendering the search engine's
+ * own filters (`AbstractDb::_reset()` calls `getSelect()->reset()`,
+ * wiping any previously added WHERE conditions), and that reset happens
+ * *after* our filter was added. Rather than chase the exact call that
+ * triggers the reset, this re-adds the condition every single time
+ * anything — our own code or Magento's internals — asks for the Select,
+ * so it cannot be missing by the time the query actually executes.
+ *
+ * IMPORTANT: `getSelect()` can legitimately be called a very large number
+ * of times within one request (confirmed: Elasticsearch aggregation/
+ * facet-count building calls it repeatedly) — so this must not blindly
+ * re-add the WHERE clause unconditionally every time; that previously
+ * caused unbounded query growth (dozens of duplicate multi-KB `IN (...)`
+ * clauses) and an out-of-memory crash. Instead, a SQL comment marker is
+ * used to detect whether the current WHERE already contains our
+ * condition, and it's only appended when that marker is absent — which is
+ * true exactly once per "generation" of the Select (i.e. once right after
+ * each reset, however many times a reset happens).
+ *
+ * Registered on the base `Product\Collection` (not the Fulltext subclass)
+ * so it applies to whichever concrete class the store actually resolves
+ * at runtime; the flag check means it's a no-op for every other product
+ * collection in the application.
+ */
+class LuxuryCollectionSelectPlugin
+{
+    private const MARKER = 'artm_luxury_filter_marker';
+
+    /**
+     * @param Collection $subject
+     * @param Select $result
+     * @return Select
+     */
+    public function afterGetSelect(Collection $subject, Select $result): Select
+    {
+        if (!$subject->getFlag(LuxuryLayerProductCollectionPlugin::APPLIED_FLAG)) {
+            return $result;
+        }
+
+        $ids = $subject->getFlag(LuxuryLayerProductCollectionPlugin::IDS_FLAG);
+        if (!is_array($ids)) {
+            return $result;
+        }
+
+        if ($this->alreadyApplied($result)) {
+            return $result;
+        }
+
+        if ($ids === []) {
+            $result->where('1 = 0 /* ' . self::MARKER . ' */');
+        } else {
+            $result->where('e.entity_id IN (?) /* ' . self::MARKER . ' */', $ids);
+        }
+
+        return $result;
+    }
+
+    private function alreadyApplied(Select $select): bool
+    {
+        $whereParts = $select->getPart(Select::WHERE);
+        if (!is_array($whereParts) || $whereParts === []) {
+            return false;
+        }
+
+        foreach ($whereParts as $part) {
+            if (str_contains((string)$part, self::MARKER)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}

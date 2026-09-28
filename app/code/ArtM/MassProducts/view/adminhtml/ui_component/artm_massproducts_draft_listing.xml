@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">artm_massproducts_draft_listing.artm_massproducts_draft_listing_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <spinner>columns</spinner>
+        <deps>
+            <dep>artm_massproducts_draft_listing.artm_massproducts_draft_listing_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="artm_massproducts_draft_listing_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">entity_id</param>
+            </storageConfig>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <aclResource>ArtM_MassProducts::mass_upload_product</aclResource>
+        <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider" name="artm_massproducts_draft_listing_data_source">
+            <settings>
+                <requestFieldName>id</requestFieldName>
+                <primaryFieldName>entity_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <listingToolbar name="listing_top">
+        <filters name="listing_filters"/>
+        <massaction name="listing_massaction">
+            <action name="delete_draft">
+                <settings>
+                    <type>delete_draft</type>
+                    <label translate="true">Delete Draft</label>
+                    <url path="massproducts/draft/massDelete"/>
+                    <confirm>
+                        <title translate="true">Delete Drafts</title>
+                        <message translate="true">Are you sure you want to delete selected drafts?</message>
+                    </confirm>
+                </settings>
+            </action>
+            <action name="move_to_queue">
+                <settings>
+                    <type>move_to_queue</type>
+                    <label translate="true">Move To Queue</label>
+                    <url path="massproducts/draft/massMoveToQueue"/>
+                </settings>
+            </action>
+        </massaction>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+    <columns name="columns">
+        <selectionsColumn name="ids">
+            <settings>
+                <indexField>entity_id</indexField>
+            </settings>
+        </selectionsColumn>
+        <column name="sku" sortOrder="10">
+            <settings><label translate="true">SKU</label><filter>text</filter></settings>
+        </column>
+        <column name="product_name" sortOrder="20">
+            <settings><label translate="true">Product Name</label><filter>text</filter></settings>
+        </column>
+        <column name="attribute_set" sortOrder="30">
+            <settings><label translate="true">Attribute Set</label><filter>text</filter></settings>
+        </column>
+        <column name="product_type" sortOrder="40">
+            <settings><label translate="true">Product Type</label><filter>text</filter></settings>
+        </column>
+        <column name="operation_type" class="ArtM\MassProducts\Ui\Component\Listing\Column\OperationTypeBadge" sortOrder="50">
+            <settings>
+                <label translate="true">Operation Type</label>
+                <filter>select</filter>
+                <options class="ArtM\MassProducts\Model\Config\Source\OperationTypeOptions"/>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+            </settings>
+        </column>
+        <column name="status" sortOrder="60">
+            <settings>
+                <label translate="true">Status</label>
+                <filter>select</filter>
+                <options class="ArtM\MassProducts\Model\Config\Source\DraftStatusOptions"/>
+            </settings>
+        </column>
+        <column name="missing_attributes_count" sortOrder="70">
+            <settings><label translate="true">Missing Attributes Count</label><filter>textRange</filter></settings>
+        </column>
+        <column name="updated_at" class="Magento\Ui\Component\Listing\Columns\Date" sortOrder="80">
+            <settings><label translate="true">Updated At</label><filter>dateRange</filter><dataType>date</dataType></settings>
+        </column>
+        <actionsColumn name="actions" class="ArtM\MassProducts\Ui\Component\Listing\Column\DraftActions" sortOrder="90">
+            <settings>
+                <indexField>entity_id</indexField>
+                <label translate="true">Actions</label>
+            </settings>
+        </actionsColumn>
+    </columns>
+</listing>

@@ -1,0 +1,727 @@
+<?php
+
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+//phpcs:disable Squiz.ControlStructures.ControlSignature.NewlineAfterOpenBrace
+//phpcs:disable Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore
+//phpcs:disable Magento2.Templates.ThisInTemplate.FoundThis
+//phpcs:disable Magento2.Files.LineLength.MaxExceeded
+?>
+<?php /** @var  $block \Magento\Shipping\Block\Items */ ?>
+<?php $_order = $block->getOrder() ?>
+
+<?php foreach ($_order->getShipmentsCollection() as $_shipment) : ?>
+
+    <?php
+    $tracks = $_shipment->getTracksCollection();
+
+    // echo '<pre>';
+    // print_r($tracks->getData('tracking_status'));die;
+
+    $firstTrack = $tracks->getFirstItem();
+
+    $trackingStatus = $firstTrack->getData('tracking_status');
+    $deliveredAt = $firstTrack->getData('delivered_at');
+
+
+    $trackingNumber = '';
+    foreach ($tracks as $track) {
+        $trackingNumber = $track->getTrackNumber() ?: $track->getNumber();
+        break; // first tracking number only
+    }
+
+    $shipDate = $_shipment->getCreatedAt()
+        ? date('d M Y', strtotime($_shipment->getCreatedAt()))
+        : '';
+    ?>
+
+
+    <div class="order-title">
+        <div class="shipment-header-left">
+            <strong class="shipment-number">
+                <?= $block->escapeHtml(__('Shipment #')) ?>
+                <?= $block->escapeHtml($_shipment->getIncrementId()) ?>
+            </strong>
+
+            <?php if ($trackingStatus && $_order->getStatus() !== 'canceled' && $_order->getStatus() !== 'closed') : ?>
+                <span class="shipment-status sss">
+                    <?= $block->escapeHtml($trackingStatus) ?>
+                </span>
+            <?php endif; ?>
+        </div>
+
+        <div class="detail-items-block">
+
+            <div class="detail-item">
+                <div class="detail-icon"><i class="fa fa-suitcase" aria-hidden="true"></i></div>
+                <div class="details-content">
+                    <div class="label"><?= $block->escapeHtml(__('Courier Partner')) ?></div>
+                    <div class="value">
+                        <?= $tracks->count() ? $block->escapeHtml($tracks->getFirstItem()->getTitle()) : '-' ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-icon"><i class="fa fa-barcode" aria-hidden="true"></i>
+                </div>
+                <div class="details-content">
+                    <div class="label"><?= $block->escapeHtml(__('AWB Number')) ?></div>
+                    <div class="value">
+                        <?= $block->escapeHtml($trackingNumber) ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-icon"><i class="fa fa-calendar-minus-o" aria-hidden="true"></i>
+                </div>
+                <div class="details-content">
+                    <div class="label"><?= $block->escapeHtml(__('Shipped On')) ?></div>
+                    <div class="value">
+                        <?= $block->escapeHtml($shipDate) ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="table-wrapper order-items-shipment">
+        <table class="data table table-order-items shipment" id="my-shipment-table-<?= (int) $_shipment->getId() ?>">
+            <caption class="table-caption"><?= $block->escapeHtml(__('Items Shipped')) ?></caption>
+            <thead>
+                <tr>
+                    <th class="col name"><?= $block->escapeHtml(__('Product')) ?></th>
+                    <th class="col sku"><?= $block->escapeHtml(__('SKU')) ?></th>
+                    <th class="col qty"><?= $block->escapeHtml(__('Qty Shipped')) ?></th>
+                </tr>
+            </thead>
+            <?php $_items = $_shipment->getAllItems(); ?>
+            <?php foreach ($_items as $_item) : ?>
+                <?php if (!$_item->getOrderItem()->getParentItem()) : ?>
+                    <tbody>
+                        <?= $block->getItemHtml($_item) ?>
+                    </tbody>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </table>
+        <?= $block->getLayout()
+            ->createBlock(\ArtM\ShipmentTracking\Block\ShipmentTimeline::class)
+            ->setTemplate('ArtM_ShipmentTracking::order/shipment/timeline.phtml')
+            ->setData('shipment', $_shipment)
+            ->toHtml();
+        ?>
+    </div>
+    <?= $block->getCommentsHtml($_shipment) ?>
+<?php endforeach; ?>
+
+
+<div id="track-order-modal" style="display:none;">
+    <div class="track-order-loader" style="text-align:center; padding: 40px;">
+        <img src="<?= $block->getViewFileUrl('images/loader-2.gif') ?>" alt="Loading tracking info..." />
+        <p><?= $block->escapeHtml(__('Loading tracking info...')) ?></p>
+    </div>
+    <iframe id="track-order-iframe" src="" width="100%" height="500" frameborder="0" style="display:none;"></iframe>
+</div>
+
+<script>
+    require([
+        'jquery',
+        'Magento_Ui/js/modal/modal'
+    ], function($, modal) {
+        $(document).ready(function() {
+            var options = {
+                type: 'popup',
+                responsive: true,
+                innerScroll: false,
+                title: '<?= $block->escapeHtml($block->getLabel()) ?>',
+                buttons: [],
+                modalClass: 'track-order-popup',
+                closed: function() {
+                    $('#track-order-iframe').attr('src', '').hide();
+                    $('.track-order-loader').show();
+                }
+            };
+
+            var popup = modal(options, $('#track-order-modal'));
+
+            $(document).on('click', '.iframe-popup', function(e) {
+                e.preventDefault();
+                var url = $(this).data('window-url');
+
+                $('#track-order-modal').modal('openModal'); // Open modal immediately with loader
+                $('.track-order-loader').show();
+                $('#track-order-iframe').css('height', '420px').hide();
+
+                $('#track-order-iframe').off('load').on('load', function() {
+                    var $iframe = $(this);
+                    var viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+                    var isMobile = window.matchMedia('(max-width: 767px)').matches;
+                    var maxIframeHeight = Math.round(viewportHeight * (isMobile ? 0.86 : 0.65));
+                    var minIframeHeight = 260;
+
+                    try {
+                        var doc = this.contentWindow.document;
+                        var body = doc.body;
+                        var html = doc.documentElement;
+                        var contentHeight = Math.max(
+                            body ? body.scrollHeight : 0,
+                            body ? body.offsetHeight : 0,
+                            html ? html.clientHeight : 0,
+                            html ? html.scrollHeight : 0,
+                            html ? html.offsetHeight : 0
+                        );
+
+                        var finalHeight = isMobile ?
+                            Math.max(viewportHeight - 92, minIframeHeight) :
+                            Math.min(Math.max(contentHeight, minIframeHeight), maxIframeHeight);
+                        $iframe.css('height', finalHeight + 'px');
+                    } catch (error) {
+                        $iframe.css('height', maxIframeHeight + 'px');
+                    }
+
+                    $('.track-order-loader').hide();
+                    $iframe.show(); // Show iframe only after content loaded
+                }).attr('src', url);
+            });
+        });
+    });
+</script>
+<style>
+    .track-shipment-popup .modal-inner-wrap {
+        width: 420px;
+        max-width: 95%;
+    }
+
+    .track-shipment-popup .modal-content {
+        padding: 0;
+    }
+
+    #track-shipment-iframe {
+        display: block;
+        border: 0;
+    }
+
+    .order-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        background: #fff;
+        border-bottom: 1px solid #e5e5e5;
+        margin-bottom: 0px;
+        gap: 25px;
+    }
+
+    .detail-item .label {
+        font-weight: 500;
+        font-size: 12px;
+    }
+
+    .detail-item .value {
+        font-weight: 600;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .shipment-header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .shipment-number {
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .shipment-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        background: #e8f1ff;
+        color: #3b82f6;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 20px;
+        text-transform: uppercase;
+    }
+
+    .shipment-header-right {
+        font-size: 14px;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .detail-icon i {
+        font-size: 20px;
+    }
+
+    body.account .table-wrapper {
+        background-color: white;
+    }
+
+    body.account .table-wrapper th {
+        font-size: 12px;
+    }
+
+    .table-wrapper.order-items-shipment table.data.table.table-order-items.shipment thead {
+        border-bottom: 1px solid #e3e3e3;
+    }
+
+    table.data.table.table-order-items.shipment td.col.name span img {
+        border: 1px solid #efefef;
+    }
+
+    table.data.table.table-order-items.shipment .item.options dt::after {
+        content: ":";
+    }
+
+    table.data.table.table-order-items.shipment tbody tr {
+        border-bottom: 1px solid #efefef;
+    }
+
+    .block.block-order-details-view,
+    .order-details-items.shipments .actions-toolbar {
+        display: none;
+    }
+
+    body.account #maincontent .actions-toolbar-bottom .secondary a.action.back {
+        background: #f5f5f5 !important;
+        border: none !important;
+        padding: 13px 30px 13px 50px !important;
+    }
+
+    body.account .actions-toolbar-bottom .secondary a.action.back:before {
+        content: "\f060" !important;
+        font: normal normal normal 14px / 1 FontAwesome;
+    }
+
+    .detail-items-block {
+        display: flex;
+        gap: 90px;
+    }
+
+    .shipment-track-action {
+        margin-top: 30px;
+        border-bottom: 2px solid #e5e5e5;
+        padding-bottom: 30px;
+    }
+
+    body.account.sales-order-shipment #maincontent .table-wrapper.order-items-shipment .shipment-track-action a.action.primary.iframe-popup {
+        padding: 12px 25px !important;
+        border: 1px solid #cbcbcb;
+    }
+
+    body.account.sales-order-shipment #maincontent .table-wrapper.order-items-shipment .shipment-track-action a.action.primary.iframe-popup span {
+        font-size: 12px;
+        text-transform: capitalize;
+        font-weight: 600;
+        font-family: 'Spartan';
+    }
+
+    @media (max-width: 768px) {
+        .order-title {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 20px !important;
+        }
+
+        .shipment-number {
+            font-size: 18px;
+        }
+
+        .shipment-header-right {
+            font-size: 13px;
+        }
+
+        .custom-order-header .order-actions a.action.secondary.invoice-download,
+        .custom-order-header .order-actions a.action.secondary.contact-support {
+            display: none !important;
+        }
+    }
+
+    @media (max-width:768px) {
+
+        body.account .table-wrapper tr {
+            background-color: white !important;
+            padding: 0px;
+            margin-bottom: 0px;
+        }
+
+        .order-left h1 {
+            margin: 5px 0px 0px 6px;
+            font-size: 17px;
+            font-weight: 500;
+            position: relative;
+            margin-right: 11px;
+        }
+
+        .order-meta {
+            display: flex;
+            align-items: center;
+        }
+
+        .order-meta>span {
+            position: relative;
+            padding: 0 7px;
+        }
+
+        .order-status {
+            background: #eef6e9;
+            color: #5e7f4c;
+            padding: 5px 17px !important;
+            border-radius: 30px;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .order-status {
+            margin-left: 0px;
+        }
+
+        .price {
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        body.account strong.box-title * {
+            font-size: 12px !important;
+        }
+
+        body.account .box-content * {
+            font-size: 10px;
+        }
+
+        .box.box-order-shipping-address strong.box-title span:before {
+            font-size: 1.7rem;
+            margin-right: 10px;
+            margin-left: 5px;
+        }
+
+        .order-actions {
+            display: none;
+        }
+
+        .items.order-links {
+            gap: 20px;
+        }
+
+        body.account ul.items.order-links>li {
+            padding: 15px 10px;
+        }
+
+        .items.order-links .nav.item a,
+        .items.order-links .nav.item strong {
+            font-size: 12px;
+        }
+
+        .items.order-links .nav.item.current::after {
+            content: "" !important;
+            display: block !important;
+            position: absolute !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: -5px !important;
+            width: 100% !important;
+            height: 2px !important;
+            background: #111 !important;
+            border-radius: 20px;
+            z-index: 2;
+        }
+
+        ul.items.order-links li.nav.item.current {
+            background-color: white !important;
+        }
+
+        .order-details-items .order-title>strong {
+            font-size: 1.1rem !important;
+        }
+
+        .order-title {
+            padding: 15px 10px;
+        }
+
+        body.account #maincontent a.action {
+            font-size: 9px !important;
+            margin-left: 5px;
+            padding: 10px 13px 7px 13px !important;
+        }
+
+        .invoice-date strong {
+            display: none;
+        }
+
+        .invoice-date {
+            font-weight: 500;
+            float: unset !important;
+            margin: 0px !important;
+            margin-left: 5px !important;
+        }
+
+        table#my-orders-table tbody tr td.col.name::before {
+            display: none;
+        }
+
+        .table-wrapper.table-order-items.invoice td.col.name[data-th="Product"]::before {
+            display: none !important;
+        }
+
+        .custom-order-header {
+            padding: 24px 0px 0px 0px;
+        }
+
+        .shipment-header-left {
+            justify-content: space-between;
+        }
+
+        .shipment-number {
+            font-size: 14px !important;
+        }
+
+        span.shipment-status.sss {
+            font-size: 9px;
+            padding: 4px 22px;
+        }
+
+        .detail-items-block {
+            gap: 10px;
+        }
+
+        .detail-item {
+            gap: 13px;
+            align-items: start;
+        }
+
+        .detail-item .label {
+            font-size: 11px;
+        }
+
+        .detail-icon i {
+            font-size: 18px;
+        }
+
+        .detail-item .value {
+            font-size: 10px;
+        }
+
+        .table-wrapper.table-order-items.invoice td.col.name[data-th="Product"]::before {
+            display: none !important;
+        }
+
+        body.account .table-wrapper {
+            padding: 0px 0px 1px !important;
+        }
+
+        .table-wrapper.order-items-shipment table.data.table.table-order-items.shipment thead {
+            border-bottom: none;
+        }
+    }
+
+    /* tracking popup */
+    /* ==========================================
+   TIMELINE WRAPPER
+========================================== */
+    .page.tracking {
+        border: 10px solid red !important;
+    }
+
+    .tracking-container .timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+
+    /* ==========================================
+   EACH TIMELINE ITEM
+========================================== */
+
+    .tracking-container .timeline-item {
+        position: relative;
+        padding-left: 60px;
+        padding-bottom: 35px;
+        margin-left: 10px;
+    }
+
+    /* Vertical Line */
+
+    .tracking-container .timeline-item::before {
+        content: "";
+        position: absolute;
+        left: 15px;
+        top: 18px;
+        width: 2px;
+        height: calc(100% + 20px);
+        background: #d8d8d8;
+    }
+
+    /* Last item line remove */
+
+    .tracking-container .timeline-item:last-child::before {
+        display: none;
+    }
+
+    /* ==========================================
+   DEFAULT CIRCLE
+========================================== */
+
+    .tracking-container .timeline-item::after {
+        content: "";
+        position: absolute;
+        left: 4px;
+        top: 0;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #fff;
+        border: 2px solid #cfcfcf;
+        z-index: 2;
+    }
+
+    /* ==========================================
+   COMPLETED STEPS
+========================================== */
+
+    .tracking-container .timeline-item:not(.active)::after {
+        background: #000;
+        border-color: #000;
+        box-shadow: inset 0 0 0 4px #000;
+    }
+
+    /* White Tick */
+
+    .tracking-container .timeline-item:not(.active)::before {
+        background: #000;
+    }
+
+    /* ==========================================
+   CURRENT STEP
+========================================== */
+
+    .tracking-container .timeline-item.active::after {
+        background: #000;
+        border: 6px solid #dff0d8;
+        box-shadow: 0 0 0 4px #dff0d8;
+    }
+
+    /* ==========================================
+   STATUS TEXT
+========================================== */
+
+    .timeline-status {
+        font-size: 18px;
+        font-weight: 600;
+        color: #222;
+        line-height: 1.4;
+    }
+
+    /* Location */
+
+    .timeline-location {
+        font-size: 14px;
+        color: #666;
+        margin-top: 5px;
+    }
+
+    /* Date */
+
+    .timeline-date {
+        font-size: 14px;
+        color: #8c8c8c;
+        margin-top: 5px;
+    }
+
+    /* ==========================================
+   CURRENT BADGE
+========================================== */
+
+    .timeline-item .badge {
+        display: inline-block;
+        margin-left: 10px;
+        background: #e8f5e9;
+        color: #2e7d32;
+        border-radius: 20px;
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    /* ==========================================
+   TRACKING HISTORY TITLE
+========================================== */
+
+    .timeline-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 25px;
+        color: #222;
+    }
+
+    /* ==========================================
+   OPTIONAL CARD LOOK
+========================================== */
+
+    .tracking-container {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, .08);
+    }
+
+    body.account.sales-order-shipment .modal-popup .modal-inner-wrap {
+        width: 30% !important;
+    }
+
+    iframe#track-order-iframe {
+        height: 720px !important;
+    }
+
+    body.account.sales-order-shipment .modal-popup .modal-header {
+        top: 0px;
+        position: absolute;
+        right: 0;
+    }
+
+    body.account.sales-order-shipment .modal-popup .modal-content {
+        padding: 0px;
+    }
+
+    body.account.sales-order-shipment .page-wrapper {
+        background-color: white;
+    }
+
+    @media (max-width:767px) {
+        body.account.sales-order-shipment .modal-popup .modal-inner-wrap {
+            width: 100% !important;
+            height: 100vh;
+            max-height: 100vh;
+        }
+
+        body.account.sales-order-shipment .modal-popup.modal-slide {
+            left: 0;
+        }
+
+        iframe#track-order-iframe {
+            height: 100vh !important;
+        }
+
+        body.account.sales-order-shipment .modal-popup .modal-content {
+            padding: 10px;
+        }
+
+        body.account.sales-order-shipment .modal-popup .modal-header {
+            top: 15px;
+            right: 0;
+        }
+    }
+</style>

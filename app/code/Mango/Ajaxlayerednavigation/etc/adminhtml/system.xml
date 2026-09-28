@@ -1,0 +1,306 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../Config/etc/system_file.xsd">
+    <system>
+        <section id="ajaxlist" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>mangoextensions-config mango-ajaxlist-config</class>
+            <label><![CDATA[Ajax Layered Navigation]]></label>
+            <tab>catalog</tab>
+            <!-- resource tag name which we have to defined in the acl.xml -->
+            <resource>Mango_Ajaxlayerednavigation::config_ajaxlist</resource>
+            <group id="general" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Ajax Layered Navigation - General Options</label>
+                <comment><![CDATA[ If a feature stops working after the ajax loading of contects is executed, this means the scripts needs to be reinitialized<br/>
+                    Use
+                ]]></comment>
+                <field id="show_no_count" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show filters no-count</label>
+                    <comment>Show filter options even when count=0.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="show_hidden_categories" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show hidden categories</label>
+                    <comment>Show subcategories even when they are not included in navigation menu</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                
+                <field id="category_tree_parent" translate="label" type="select" sortOrder="25" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Display category in tree</label>
+                    <comment><![CDATA[Display current category as the tree root.]]></comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>                
+
+                
+                <field id="use_priceslider" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Use Price Slider</label>
+                    <comment>Display price slider instead of price ranges</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="step" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Round Step Value</label>
+                    <comment>Round prices to a multiple of X.</comment>
+                    <validate>validate-number</validate>
+                    <depends>
+                        <field id="use_priceslider">1</field>
+                    </depends>
+                </field>
+                <field id="priceslider_search_fields" translate="label" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show search fields</label>
+                    <comment>Display input fields and a search button to enter price filters</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="use_priceslider">1</field>
+                    </depends>
+                </field>
+                <field id="priceslider_use_minimum_value" translate="label" type="select" sortOrder="55" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Use Minimum Value</label>
+                    <comment><![CDATA[<b>Yes</b>: Use minimum value based on the products collection. <br/><b>No</b>: Minimum slider value is zero.]]></comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="use_priceslider">1</field>
+                    </depends>
+                </field>
+                <field id="use_category_price_step" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Use category price slider step</label>
+                    <comment>Use category attribute: Display Settings > Layered Navigation Price Step</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="use_priceslider">1</field>
+                    </depends>
+                </field>
+                
+                
+                
+                <field id="heading" translate="label" type="label" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Multiple Sliders Settings</label>
+                </field>
+                
+                
+                <field id="sliders_enable" translate="label" type="select" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Multiple Sliders</label>
+                    <comment><![CDATA[Convert numeric and dropdown/multiselect attributes into sliders]]></comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                
+                <field id="sliders_configuration" translate="label" type="textarea" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Filters Configuration</label>
+                    <comment><![CDATA[Semicolon separated values in multiple lines( attribute_name;step_value;unit ). These attributes have to be of the type "price" or "decimal"]]></comment>
+                    <depends>
+                        <field id="sliders_enable">1</field>
+                    </depends>
+                </field>
+
+                                                
+                <field id="sliders_use_minimum_value" translate="label" type="select" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Use Minimum Value</label>
+                    <comment><![CDATA[Yes: Use minimum value based on the products collection. No: Minimum slider value is zero.]]></comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="sliders_enable">1</field>
+                    </depends>
+                </field>
+                
+                <field id="sliders_search_fields" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show Search Fields</label>
+                    <comment><![CDATA[Display input fields and a search button to enter slider ranges for numeric filters]]></comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="sliders_enable">1</field>
+                    </depends>
+                </field>
+
+                <field id="attribute_sliders_configuration" translate="label" type="multiselect" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sliders for select/multiselect attributes</label>
+                    <comment><![CDATA[Select attributes]]></comment>
+                    <source_model>Mango\Ajaxlayerednavigation\Model\Config\Source\Sliders\Filterableattributes</source_model>
+                    <depends>
+                        <field id="sliders_enable">1</field>
+                    </depends>
+                </field>
+                
+                
+            </group>
+            <group id="infinite_scroll" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Infinite Scroll</label>
+                <comment><![CDATA[Load more products on the same category or search results page as the customer scrolls down the page]]></comment>
+                <field id="enable" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="auto_trigger" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Auto Trigger</label>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                    <comment><![CDATA[Show button to load next page or load next page as user scrolls down the page.]]></comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="padding" translate="label" type="text" sortOrder="30" showInDefault="30" showInWebsite="1" showInStore="1">
+                    <label>Padding</label>
+                    <depends>
+                        <field id="enable">1</field>
+                        <field id="auto_trigger">1</field>
+                    </depends>
+                    <validate>validate-not-negative-number</validate>
+                    <comment><![CDATA[The distance from the bottom of the scrollable content at which to trigger the loading of the next set of content. This only applies when autoTrigger is set to true.]]></comment>
+                </field>
+                <field id="auto_trigger_until" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Auto Trigger Until</label>
+                    <depends>
+                        <field id="enable">1</field>
+                        <field id="auto_trigger">1</field>
+                    </depends>
+                    <validate>validate-not-negative-number</validate>
+                    <comment><![CDATA[Set to an integer great than 0 to turn off autoTrigger of paging after the specified number of pages.]]></comment>
+                </field>
+                
+                <field id="button_text" translate="label" type="text" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Button Text</label>
+                    <depends>
+                        <field id="enable">1</field>
+                        <!--field id="auto_trigger">0</field-->
+                    </depends>
+                    <comment><![CDATA[Default text:  "Load more products..."]]></comment>
+                </field>
+                
+                <field id="css_class" translate="label" type="text" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>CSS class</label>
+                    <depends>
+                        <field id="enable">1</field>
+                        <!--field id="auto_trigger">0</field-->
+                    </depends>
+                    <comment><![CDATA[Button CSS class, default: "action primary"]]></comment>
+                </field>
+                
+                <field id="button_alignment" translate="label" type="select" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Button Aligment</label>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                    <comment><![CDATA[Button alignment, accepted values: left, right or center.]]></comment>
+                    <source_model>Mango\Ajaxlayerednavigation\Model\Config\Source\Alignment</source_model>
+                </field>
+                
+            </group>
+            <group id="frontend" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Frontend Options</label>
+                <comment><![CDATA[ ]]></comment>
+                <field id="urlhandler" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Url Change Handler Event</label>
+                    <comment><![CDATA[
+                            <b>Hashchange.js</b>: To enable bookmarkable #hash history via a cross-browser HTML5 window.onhashchange event, URL's will appear as:<br/> <i>yoursite.com/category.html<b  style="color:red;">#</b>filter1=value1&filter2=value2</i>.<br/><br/>
+                            <b>History.js</b>: Supports the HTML5 History/State APIs. Works with most modern browsers. Degrades to hash# URL's with older browsers.  URL's will appear as<br> <i>yoursite.com/category.html<b  style="color:red;">?</b>filter1=value1&filter2=value2</i>.<br/><br/>
+                        ]]>
+                    </comment>
+                    <source_model>Mango\Ajaxlayerednavigation\Model\Config\Source\Urlhandler</source_model>
+                </field>
+                <field id="hide_state" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Hide State Block</label>
+                    <comment>Hide the list of selected values that appears before the filters</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                
+                <field id="and_filter" translate="label" type="multiselect" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label><![CDATA["<b>AND</b>" filter]]></label>
+                    <comment><![CDATA[Applies to dropdown/multiselect filters, values for selected attributes will be filtered using the "AND" condition. e.g. : black AND brown ( products must fulfill both conditions ) instead of black OR brown ( products that fulfill any of these conditions ) ]]></comment>
+                    <source_model>Mango\Ajaxlayerednavigation\Model\Config\Source\Attributes\Multiselect</source_model>
+                </field>                
+                
+                <field id="hide_attributes" translate="label" type="multiselect" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Hide Attributes</label>
+                    <comment><![CDATA[Select items to hide in the layered navigation, you can use this to hide attributes per website or store view.<br><b style="color:red;">Important:</b> All other settings will be ignored if an attribute is hidden from the layered navigation using this option.]]></comment>
+                    <source_model>Mango\Ajaxlayerednavigation\Model\Config\Source\Attributes</source_model>
+                </field>
+                <field id="tooltips" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show Tooltips</label>
+                    <comment>Show tooltips next to the filters titles.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="tooltips_configuration" translate="label" type="textarea" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Tooltips Configuration</label>
+                    <comment><![CDATA[Enter comma separated values:<br/>
+                    attribute_code_1,cms_block_id_1<br/>
+                    attribute_code_2,cms_block_id_2<br/>
+                    ]]></comment>
+                    <depends>
+                        <field id="tooltips">1</field>
+                    </depends>
+                </field>
+                <field id="collapse" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Expand-Collapse Filters</label>
+                    <comment>Users should click on the filter title to expand. If a filter item is active it will be expanded when the page loads.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="expand_filters" translate="label" type="multiselect" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Expand by default</label>
+                    <comment><![CDATA[These attributes expanded by default on the layered navigation block. e.g.:  color,price,size ]]></comment>
+                    <source_model>Mango\Ajaxlayerednavigation\Model\Config\Source\Attributes</source_model>
+                    <depends>
+                        <field id="collapse">1</field>
+                    </depends>
+                </field>
+                <field id="select_all" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show uncheck all</label>
+                    <comment>Show a an extra item in the list to uncheck all selected filters. Works only with multi-select attribute filters.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                
+                <field id="list_max_height" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>List max height ( in pixels ).</label>
+                    <comment>If the list is taller than X, a vertical scrollbar will appear.</comment>
+                    <validate>validate-number</validate>
+                </field>
+                <field id="horizontal_mode" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Horizontal Filters</label>
+                    <comment>Show selected filters above the products list and keep the left layered navigation.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="horizontal_filters" translate="label" type="multiselect" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Filters on horizontal layered navigation block</label>
+                    <comment><![CDATA[These attributes will appear above the products list and will be removed from the left layered navigation block ]]></comment>
+                    <source_model>Mango\Ajaxlayerednavigation\Model\Config\Source\Attributes</source_model>
+                    <depends>
+                        <field id="horizontal_mode">1</field>
+                    </depends>
+                </field>
+                <field id="horizontal_only" translate="label" type="select" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Horizontal Layered Navigation</label>
+                    <comment>Show filters above the products list only and remove the left layered navigation.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <depends>
+                        <field id="horizontal_mode">0</field>
+                    </depends>
+
+                </field>
+                
+                <field id="grouped_filters" translate="label" type="textarea" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Group Filters</label>
+                    <comment><![CDATA[Display group filters:<br/>
+                    Filter Title A:attribute_code_1,attribute_code_2,attribute_code_3<br/>
+                    Filter Title B:attribute_code_4,attribute_code_5,attribute_code_6<br/>
+                    ]]></comment>
+                </field>
+                
+
+                
+            </group>
+            <!--group id="ajaxcompare" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Ajax Add To Compare</label>
+                <comment><![CDATA[ If a feature stops working after the ajax loading of contects is executed, this means the scripts needs to be reinitialized<br/>
+                    Use
+                ]]></comment>
+                <field id="enable" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable</label>
+                    <comment>Use AJAX to add and remove products to the compare list sidebar.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="reload_block" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Reload block</label>
+                    <comment>Sidebar block name in layout. Default: catalog.compare.sidebar</comment>
+                    <depends>
+                        <field id="enable">1</field>
+                    </depends>
+                </field>
+            </group-->
+        </section>
+    </system>
+</config>

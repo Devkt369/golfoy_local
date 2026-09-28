@@ -1,0 +1,15 @@
+<!--
+/**
+ * Copyright © 2020 Magestore. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<!--@subject {{trans "Unsynchronized POS's Order"}} @-->
+<!--@vars {
+"var incrementId":"Increment Id",
+"var url":"Link to unsynced pos order view page"
+} @-->
+
+{{template config_path="design/email/header_template"}}
+<p>{{trans "Order #%incrementId is unable to be synchronized from POS to Magento. Please click <a href=\"%url\">here</a> to check." incrementId=$incrementId url=$url |raw}}</p>
+{{template config_path="design/email/footer_template"}}

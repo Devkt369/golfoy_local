@@ -1,0 +1,46 @@
+<?php
+/**
+ * @author Amasty Team
+ * @copyright Copyright (c) Amasty (https://www.amasty.com)
+ * @package Free Gift Base for Magento 2
+ */
+/** @var \Amasty\Promo\Block\Banner $block */
+/** @var \Amasty\Promo\Model\Rule $rule */
+/** @var \Magento\Framework\Escaper $escaper */
+?>
+<?php foreach ($block->getValidRules() as $rule):?>
+    <?php if ($block->isShowGiftImages($rule)):?>
+        <ul class="ampromo-gift">
+            <?php /** @var \Magento\Catalog\Model\Product $product */?>
+            <?php foreach ($block->getProducts($rule) as $product): ?>
+                <?php
+                $product->getAttributeRawValue($product->getId(), $block->getAttributeHeader(), 1);
+                $id = uniqid("ampromo-gift-img-");
+                ?>
+                <li class="ampromo-gift-item">
+                    <a class="product-image" href="<?= $escaper->escapeUrl($product->getProductUrl())?>">
+                        <img class="ampromo-banner-<?= $escaper->escapeHtml($block->getPosition())?>-img"
+                             id="<?= /**@no-escape*/$id;?>"
+                             alt="<?= $escaper->escapeHtml('Product Image') ?>"
+                             width="<?= (float)$block->getWidth();?>"
+                             height="<?= (float)$block->getHeight();?>"
+                             src="<?= $escaper->escapeUrl($block->getImageForProduct($product));?>"/>
+                        <?php if ($block->isShowGiftName($rule)): ?>
+                            <div class="ampromo-product-name">
+                                <?= $escaper->escapeHtml($block->getNameForProduct($product)); ?>
+                            </div>
+                        <?php endif; ?>
+                        <div id="<?= /**@no-escape*/$id;?>-data" style="display: none;">
+                            <div class="ampromo-product-name">
+                                <?= $escaper->escapeHtml($block->getNameForProduct($product));?>
+                            </div>
+                            <div class="ampromo-short-description">
+                                <?= $escaper->escapeHtml($block->getDescriptionForProduct($product));?>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    <?php endif; ?>
+<?php endforeach; ?>

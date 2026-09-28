@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+
+    <argument name="data" xsi:type="array">
+
+        <item name="js_config" xsi:type="array">
+
+            <item name="provider" xsi:type="string">
+                artm_golfoysocial_post_form.artm_golfoysocial_post_form_data_source
+            </item>
+
+        </item>
+
+        <item name="label" xsi:type="string" translate="true">
+            Golfoy Social Post
+        </item>
+
+    </argument>
+
+
+    <settings>
+
+        <buttons>
+
+            <button name="save">
+                <url path="golfoysocial/post/save"/>
+                <class>primary</class>
+                <label translate="true">Save Post</label>
+            </button>
+
+            <button name="back">
+                <url path="golfoysocial/post/index"/>
+                <label translate="true">Back</label>
+            </button>
+
+        </buttons>
+
+        <namespace>
+            artm_golfoysocial_post_form
+        </namespace>
+
+        <dataScope>
+            data
+        </dataScope>
+
+        <deps>
+            <dep>artm_golfoysocial_post_form.artm_golfoysocial_post_form_data_source</dep>
+        </deps>
+
+    </settings>
+
+
+    <dataSource name="artm_golfoysocial_post_form_data_source">
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+        <settings>
+            <submitUrl path="golfoysocial/post/save"/>
+        </settings>
+        <dataProvider class="ArtM\GolfoySocial\Ui\DataProvider\Post\FormDataProvider"
+                      name="artm_golfoysocial_post_form_data_source">
+            <settings>
+                <requestFieldName>post_id</requestFieldName>
+                <primaryFieldName>post_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+
+
+    <fieldset name="post">
+
+        <settings>
+
+            <collapsible>false</collapsible>
+
+            <label translate="true">
+                Post Information
+            </label>
+
+        </settings>
+
+
+        <field name="title">
+
+            <argument name="data" xsi:type="array">
+
+                <item name="config" xsi:type="array">
+
+                    <item name="dataType" xsi:type="string">
+                        text
+                    </item>
+
+                    <item name="formElement" xsi:type="string">
+                        input
+                    </item>
+
+                    <item name="label" xsi:type="string" translate="true">
+                        Title
+                    </item>
+
+                    <item name="dataScope" xsi:type="string">
+                        title
+                    </item>
+
+                    <item name="sortOrder" xsi:type="number">
+                        10
+                    </item>
+
+                    <item name="validation" xsi:type="array">
+
+                        <item name="required-entry" xsi:type="boolean">
+                            true
+                        </item>
+
+                    </item>
+
+                </item>
+
+            </argument>
+
+        </field>
+
+
+        <field name="caption">
+
+            <argument name="data" xsi:type="array">
+
+                <item name="config" xsi:type="array">
+
+                    <item name="dataType" xsi:type="string">
+                        text
+                    </item>
+
+                    <item name="formElement" xsi:type="string">
+                        textarea
+                    </item>
+
+                    <item name="label" xsi:type="string" translate="true">
+                        Caption
+                    </item>
+
+                    <item name="dataScope" xsi:type="string">
+                        caption
+                    </item>
+
+                    <item name="sortOrder" xsi:type="number">
+                        20
+                    </item>
+
+                    <item name="validation" xsi:type="array">
+
+                        <item name="required-entry" xsi:type="boolean">
+                            true
+                        </item>
+
+                    </item>
+
+                </item>
+
+            </argument>
+
+        </field>
+
+
+        <field name="post_type">
+
+            <argument name="data" xsi:type="array">
+
+                <item name="options" xsi:type="array">
+
+                    <item name="image" xsi:type="array">
+
+                        <item name="value" xsi:type="string">
+                            image
+                        </item>
+
+                        <item name="label" xsi:type="string" translate="true">
+                            Image
+                        </item>
+
+                    </item>
+
+                    <item name="video" xsi:type="array">
+
+                        <item name="value" xsi:type="string">
+                            video
+                        </item>
+
+                        <item name="label" xsi:type="string" translate="true">
+                            Video
+                        </item>
+
+                    </item>
+
+                </item>
+
+                <item name="config" xsi:type="array">
+
+                    <item name="dataType" xsi:type="string">
+                        text
+                    </item>
+
+                    <item name="formElement" xsi:type="string">
+                        select
+                    </item>
+
+                    <item name="label" xsi:type="string" translate="true">
+                        Post Type
+                    </item>
+
+                    <item name="dataScope" xsi:type="string">
+                        post_type
+                    </item>
+
+                    <item name="sortOrder" xsi:type="number">
+                        30
+                    </item>
+
+                    <item name="default" xsi:type="string">
+                        image
+                    </item>
+
+                </item>
+
+            </argument>
+
+        </field>
+
+
+        <field name="product_id">
+
+            <argument name="data" xsi:type="array">
+
+                <item name="config" xsi:type="array">
+
+                    <item name="dataType" xsi:type="string">
+                        number
+                    </item>
+
+                    <item name="formElement" xsi:type="string">
+                        input
+                    </item>
+
+                    <item name="label" xsi:type="string" translate="true">
+                        Product ID
+                    </item>
+
+                    <item name="dataScope" xsi:type="string">
+                        product_id
+                    </item>
+
+                    <item name="sortOrder" xsi:type="number">
+                        40
+                    </item>
+
+                </item>
+
+            </argument>
+
+        </field>
+
+
+        <field name="status">
+
+            <argument name="data" xsi:type="array">
+
+                <item name="options" xsi:type="array">
+
+                    <item name="draft" xsi:type="array">
+
+                        <item name="value" xsi:type="string">
+                            draft
+                        </item>
+
+                        <item name="label" xsi:type="string" translate="true">
+                            Draft
+                        </item>
+
+                    </item>
+
+                    <item name="published" xsi:type="array">
+
+                        <item name="value" xsi:type="string">
+                            published
+                        </item>
+
+                        <item name="label" xsi:type="string" translate="true">
+                            Published
+                        </item>
+
+                    </item>
+
+                </item>
+
+                <item name="config" xsi:type="array">
+
+                    <item name="dataType" xsi:type="string">
+                        text
+                    </item>
+
+                    <item name="formElement" xsi:type="string">
+                        select
+                    </item>
+
+                    <item name="label" xsi:type="string" translate="true">
+                        Status
+                    </item>
+
+                    <item name="dataScope" xsi:type="string">
+                        status
+                    </item>
+
+                    <item name="sortOrder" xsi:type="number">
+                        50
+                    </item>
+
+                    <item name="default" xsi:type="string">
+                        draft
+                    </item>
+
+                </item>
+
+            </argument>
+
+        </field>
+
+    </fieldset>
+
+</form>

@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="artm" translate="label" sortOrder="200">
+            <label>ArtM</label>
+        </tab>
+        <section id="msi_priority" translate="label" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Vinculum Sync</label>
+            <tab>artm</tab>
+            <resource>ArtM_MsiPriority::configuration</resource>
+            <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>POS Order sync to Vinculum</label>
+                <field id="sync_enabled" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable POS Sync</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="pos_start_date" translate="label comment" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Start Date</label>
+                    <comment>Date when POS orders begin appearing in the system. Format: YYYY-MM-DD</comment>
+                    <validate>required-entry validate-date</validate>
+                    <frontend_model>ArtM\MsiPriority\Model\System\Config\Form\Field\Disable</frontend_model>
+                </field>
+                <field id="select_brands" translate="label comment" type="multiselect" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Select Brands (Optional)</label>
+                    <comment>Multi-select dropdown for choosing product brands. If no brands selected, all orders will appear. If brands are selected, only orders with products from selected brands will appear in unsynced orders.</comment>
+                    <source_model>ArtM\MsiPriority\Model\Config\Source\BrandOptions</source_model>
+                    <can_be_empty>1</can_be_empty>
+                </field>
+                <field id="api_endpoint" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>API Endpoint</label>
+                </field>
+                <field id="api_key" translate="label" type="password" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>API Key</label>
+                </field>
+                <field id="api_owner" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>API Owner</label>
+                </field>
+            </group>
+
+            <group id="generalproductcreate" translate="label"
+                   sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Product Create on Vinculum</label>
+                <field id="enabled" translate="label" type="select"
+                       sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Sync</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="sync_brands" translate="label comment" type="multiselect"
+                       sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sync Brands</label>
+                    <comment>If one or more brands are selected, only those products are synced and mapped.</comment>
+                    <source_model>ArtM\MsiPriority\Model\Config\Source\BrandOptions</source_model>
+                    <can_be_empty>1</can_be_empty>
+                </field>
+                <field id="channel_code" translate="label comment" type="text"
+                       sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Channel Code</label>
+                    <comment>Used for SKU channel mapping API payload.</comment>
+                </field>
+
+                <field id="base_url" translate="label comment" type="text"
+                       sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Base URL</label>
+                    <comment>Example: https://golfoy.vineretail.com</comment>
+                </field>
+                <field id="api_owner" translate="label" type="text"
+                       sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>API Owner</label>
+                </field>
+                <field id="api_key" translate="label" type="obscure"
+                       sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>API Key</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="timeout" translate="label comment" type="text"
+                       sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Timeout (seconds)</label>
+                    <comment>HTTP timeout for Vinculum API calls. Default 30.</comment>
+                    <validate>validate-number validate-zero-or-greater</validate>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

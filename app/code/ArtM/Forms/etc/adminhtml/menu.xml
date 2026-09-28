@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="ArtM_Forms::forms"
+             title="Forms Grid"
+             module="ArtM_Forms"
+             sortOrder="100"
+             parent="Magento_Backend::content"
+             action="artm_forms/forms/index"
+             resource="ArtM_Forms::forms"/>
+        <add id="ArtM_Forms::submissions"
+             title="All Form Submissions"
+             module="ArtM_Forms"
+             sortOrder="30"
+             parent="Magento_Backend::content"
+             action="artm_forms/submissions/index"
+             resource="ArtM_Forms::forms"/>
+    </menu>
+</config>

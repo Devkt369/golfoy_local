@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <!-- Add popup to all pages -->
+        <referenceContainer name="after.body.start">
+            <block class="ArtM\ViPromotion\Block\Popup" name="vipromotion.popup" template="ArtM_ViPromotion::popup.phtml" />
+            <!-- <block class="Magento\Theme\Block\Html\Header\Logo" name="header.vip.logo" template="ArtM_ViPromotion::logo.phtml" /> -->
+        </referenceContainer>
+        <referenceBlock name="logo">
+            <action method="setTemplate">
+                <argument name="template" xsi:type="string">ArtM_ViPromotion::logo.phtml</argument>
+            </action>
+        </referenceBlock>
+    </body>
+</page>

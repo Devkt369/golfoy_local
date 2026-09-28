@@ -1,0 +1,56 @@
+<?php /* @var \Magestore\WebposPerformanceAdminUi\Block\Adminhtml\PosRanking $block */?>
+<main class="page-content">
+    <div class="page-columns">
+        <div class="admin__old">
+            <div id="container" class="main-col">
+                <div class="admin__data-grid-outer-wrap">
+                    <div class="header-chart">
+                        <?= /* @noEscape */ $block->getChildHtml('date.range');?>
+                    </div>
+                    <div id="rank-list" class="BarChart" style="width: 30%; float: left">
+                        <h5 class="rank-list-title"><?= /* @noEscape */ __('POS Rank'); ?></h5>
+                        <p class="rank-list-subtitle"><?= /* @noEscape */ __('Slowest Response Score'); ?></p>
+                        <div class="rank-list-component">
+                            <ol class="bar-list" onscroll="loadMore(this)">
+                                <?= /* @noEscape */ $block->getChildHtml('pos.list');?>
+                            </ol>
+                        </div>
+                        <div class="rank-list-show-table-link">
+                            <a href="<?= /* @noEscape */ $block->getAllActionResponseTable();?>">
+                                <?= /* @noEscape */ __('See all performance log table'); ?>
+                            </a>
+                        </div>
+                    </div>
+                    <div id="action-detail" style="width: 70%; float: left">
+                        <div id="action-info">
+                            <?= /* @noEscape */ $block->getChildHtml('pos.detail');?>
+                        </div>
+                        <div id="graph-action" style="display: none">
+                            <div id="pos_overview_by_action" class="rank-detailed-header-title">
+                                <?= /* @noEscape */ __('Action Response Time'); ?>
+                            </div>
+                            <canvas id="canvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    require(
+        [
+            'jquery',
+            'Magestore_WebposPerformanceAdminUi/js/performance/by_pos'
+        ], function ($, performanceByPos) {
+            $(document).ready(function () {
+                performanceByPos(
+                    '<?= /* @noEscape */ $block->getReloadListUrl(); ?>',
+                    '<?= /* @noEscape */ $block->getReloadDetailUrl(); ?>',
+                    '<?= /* @noEscape */ $block->getLoadMoreUrl(); ?>'
+                );
+            });
+        }
+    );
+</script>

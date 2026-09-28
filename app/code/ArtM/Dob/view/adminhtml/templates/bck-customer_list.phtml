@@ -1,0 +1,249 @@
+<style>
+    .customer_dob_list td,th{
+        border-bottom:1px solid #d6d6d6;
+        padding:5px;
+        padding-left:20px;
+        text-align:left;
+    }
+    .main_heading{
+        text-align:center !important;
+    }
+
+    .customer_dob_list{
+        width:100%;
+    }
+    .customer_dob_list thead tr:first-child {
+        background-color: whitesmoke;
+    }
+
+
+
+</style>
+
+
+<?php
+
+
+    function date_compare($element1, $element2) {
+        $datetime1 = strtotime($element1[3]);
+        $datetime2 = strtotime($element2[3]);
+
+        $monthDay1 = date('md', $datetime1);
+        $monthDay2 = date('md', $datetime2);
+
+        if ($monthDay1 == $monthDay2) {
+            return 0;
+        }
+
+        return ($monthDay1 < $monthDay2) ? -1 : 1;
+    }
+
+    $recent=array();
+    $birthday=array();
+    $upcoming=array();
+    
+    $allData = array();
+    $backdays =  date('Y-m-d', strtotime("-20 days"));
+    $nextdate = date('Y-m-d', strtotime("+20 days"));
+
+   // echo $backdays.'-'.$nextdate;
+    
+    $currentDate = date('Y-m-d');
+   // echo 'Next 20 days '.$nextdate;
+   // echo 'Current  days '.$currentDate;
+    //echo 'Back20  days '.$backdays;
+
+    //$today = new DateTime('now');
+    // echo  $today->format('Y-m-d H:i:s');
+    $allCustomers = $block->getCustomerData();
+
+    //echo "allCustomers: ".$allCustomers->count();
+    foreach($allCustomers as $customer){  
+
+        $date = $customer->getDob();  
+        $id = $customer->getId();  
+          // echo $date.'<br>';
+         //  echo $id.'<br>';
+            $todaymnt = date('m',strtotime(date('Y-m-d')));
+            $usrmnt = date('m',strtotime($date));
+            
+            /* ------Month and Day---- */
+           // $todaymd = date('m-d',strtotime(date('Y-m-d')));
+           // $usrmd = date('m-d',strtotime($date));
+
+            /* -------Month and Day----- */
+
+            $cday = date('d',strtotime(date('Y-m-d')));
+            $usrday = date('d',strtotime($date));
+
+            //User's Age Calculate
+            $from = new DateTime($date);
+            $to   = new DateTime('today');
+            $age = $from->diff($to)->y;
+        
+            $dob = $customer->getDob();
+            $dateTime = new DateTime($dob);
+            $formattedDate = $dateTime->format('F j, Y');
+            $allData[]=[$customer->getId(),$customer->getName(),$customer->getEmail() , $formattedDate ,$age];
+            //echo $age;
+            
+        /* ---------------------Current date birthday------------------------ */
+        
+            if($usrday==$cday && $usrmnt==$todaymnt){
+                $dob = $customer->getDob();
+                $dateTime = new DateTime($dob);
+                $formattedDate = $dateTime->format('F j, Y');
+                $birthday[]= [$customer->getId(),$customer->getName(),$customer->getEmail() , $formattedDate ,$age];
+            }
+        /* ---------------------Current date birthday------------------------ */
+        /* ---------------------Upcoming Birthdays------------------------ */
+           
+            $today = new DateTime();
+            $currnDt =  $today->format('Y-m-d'); //07-07-23
+
+            $next_twenty = new DateTime('now');
+            $fresh_twnty = $next_twenty->modify('+10 days');
+            $newDate =  $fresh_twnty->format('Y-m-d');
+           
+            $year = date('Y');
+            $myMonthDay = date('m-d', strtotime($date));
+            
+            $usrDate = $year . '-' . $myMonthDay;
+        
+            //echo $newDate.'----'.$currnDt;
+               
+            if($usrDate>$currnDt && $usrDate<=$newDate){
+                $dob = $customer->getDob();
+                $dateTime = new DateTime($dob);
+                $formattedDate = $dateTime->format('F j, Y');
+                $upcoming[]= [ $customer->getId(),$customer->getName(),$customer->getEmail() , $formattedDate ,$age];
+            }
+
+    /* -----------------------------Upcoming Birthdays--------------------------- */
+
+    /* ---------------------------Recent Birthdays------------------------ */
+            $old_twenty = new DateTime('now');
+            $oldnew_twnty = $old_twenty->modify('-5 days');
+            $newoldDate =  $oldnew_twnty->format('Y-m-d');
+        
+            if($usrDate<$currnDt && $usrDate >= $newoldDate){
+                $dob = $customer->getDob();
+                $dateTime = new DateTime($dob);
+                $formattedDate = $dateTime->format('F j, Y');
+                $recent[]= [ $customer->getId(),$customer->getName(),$customer->getEmail() , $formattedDate ,$age];
+            }
+           
+    /* -------------------------Recent Birthdays------------------------ */  
+
+    }
+   /* -------------------------------Recent Birthday's------------------------- */
+//    echo "<div class='dob_list_container'>";
+//    echo "<div class='dob_list_row'>";
+//    echo "<div class='dob_list_row_inside'>";
+//    echo "<div class='dob_list_row_inside_box'>";
+//    echo "<div class='recent_birthday'>";
+        
+    echo '<table class="customer_dob_list">
+    <thead>
+            <tr>
+                <th colspan="5" class="main_heading">Recent Birthday</th>
+            </tr>
+        <tr>
+            <th>Customer ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Date of Birth</th>
+            <th>Age</th>
+        </tr>
+    </thead><tbody>';
+    if(isset($recent) && !empty($recent)){
+        usort($recent, 'date_compare');
+//        print_r($recent);
+        foreach($recent as $key=> $oldbdy){
+            //echo $key.'--'.$oldbdy;
+            echo '<tr>';
+            foreach($oldbdy as $item){
+                echo '<td class="'.$key.'">'.$item.'</td>';
+            }  
+        
+            echo '</tr>';
+        }
+    }else{
+        echo '<td colspan="5" style="text-align:center"> No recent birthday list available !</td>';
+        echo '</tr>';
+    }
+    echo '</tbody></table>'; 
+
+/* -------------------------------Recent Birthday's------------------------- */
+
+/* -------------------------------Today Birthday's------------------------- */
+
+
+
+    echo '<table class="customer_dob_list">
+        <thead>
+        <tr>
+             <th colspan="5" class="main_heading">Today\'s Birthday</th>
+        </tr>
+            <tr>
+                <th>Customer ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Date of Birth</th>
+                <th>Age</th>
+            </tr>
+        </thead></tbody>';
+
+    if(isset($birthday) && !empty($birthday)){
+        foreach($birthday as $key=>$todayBirthday){
+            //echo '<tr><td>'.$key.'</td>';
+            foreach($todayBirthday as $value){
+                echo '<td>'.$value.'</td>';
+            }
+        
+            echo '</tr>';
+        }
+    }else{
+        echo '<td colspan="5" style="text-align:center"> No user have birthday today!</td>';
+        echo '</tr>';
+    }
+    echo '</tbody></table>';
+
+/* -------------------------------Today  Birthday's------------------------- */
+
+/* -------------------------------Upcoming Birthday's------------------------- */
+
+
+    echo '<table class="customer_dob_list">
+        <thead>
+            <tr><th colspan="5" class="main_heading">Coming Soon</th></tr>
+            <tr>
+                <th>Customer ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Date of Birth</th>
+                <th>Age</th>
+            </tr>
+        </thead><tbody>';
+       
+          
+        // Sort the array 
+    if(isset($upcoming) && !empty($upcoming)){
+        usort($upcoming, 'date_compare');
+        
+        foreach($upcoming as $key=>$comingBdy){
+            echo '<tr>';
+            foreach($comingBdy as $value){
+                echo '<td>'.$value.'</td>';
+            }
+        }
+
+        echo '</tr>';
+    }else{
+        echo '<td colspan="5" style="text-align:center"> No upcoming birthday data available!</td>';
+        echo '</tr>';
+    }
+    echo '</tbody></table>';
+    //echo'<pre>';print_r($upcoming);
+//    echo "</div></div></div></div>";
+?>

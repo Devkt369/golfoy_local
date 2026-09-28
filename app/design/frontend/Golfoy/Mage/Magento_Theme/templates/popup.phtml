@@ -1,0 +1,74 @@
+<!-- Video Thumbnails -->
+<!-- <div class="video-thumbnails hide">
+    <div video-src="https://www.youtube.com/watch?v=2FURfIE22Us" video-title="YouTube Video 1" source="youtube" class="video-trigger" group="youtube_video">
+        <img src="https://img.youtube.com/vi/2FURfIE22Us/0.jpg" alt="YouTube Video 1 Thumbnail">
+    </div>
+    <div video-src="https://mage.golfoy.com/media/wysiwyg/2024/video/putting_mat.mp4" video-title="Local Video 3" source="local" class="video-trigger" group="local_memory">
+        <img src="https://mage.golfoy.com/media/wysiwyg/2024/thumbnails/putting_mat.jpg" alt="Local Video 3 Thumbnail">
+    </div>
+    <div video-src="https://youtube.com/shorts/ztBy5CmLeRg?si=RCLdJdynx99Z1w08" video-title="Short Video 4" source="youtube" class="video-trigger" group="short_videos">
+        <img src="https://img.youtube.com/vi/ztBy5CmLeRg/0.jpg" alt="Short Video 4 Thumbnail">
+    </div>
+</div> -->
+
+<!-- Custom Modal Structure -->
+<div class="custom-modal" id="exampleCustomModal" tabindex="-1" role="dialog">
+    <div class="custom-modal-dialog" role="document">
+        <div class="custom-modal-content">
+            <div class="custom-modal-header">
+                <h5 class="custom-modal-title">Custom Modal Title</h5>
+                <button type="button" class="close" aria-label="Close">
+                    <span aria-hidden="true"><button type="button" class="close" data-dismiss="modal">×</button></span>
+                </button>
+            </div>
+            <div class="custom-modal-body">
+                <div class="video-container"></div>
+                <div class="video-groups-container">
+                    <div class="video-groups"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom CSS to mimic Bootstrap modal styles */
+
+    .custom-modal.short-video-modal {
+        padding-top: 5px !important;
+        background: rgb(0 0 0 / 84%);
+    }
+
+    .video-trigger.video-heading {
+        color: #e60023;
+        font-weight: 600;
+        text-transform: capitalize;
+        padding: 10px 0px;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    .youtube-videos:before {
+        content: "\f16a";
+        font: normal normal normal 14px / 1 FontAwesome;
+        font-size: 16px;
+
+    }
+
+    .short-videos::before {
+        content: "\f03d";
+        font: normal normal normal 14px / 1 FontAwesome;
+        font-size: 16px;
+    }
+
+    .local-video::before {
+        content: "\f1c8";
+        font: normal normal normal 14px / 1 FontAwesome;
+        font-size: 16px;
+    }
+
+    .short-video-modal .video-groups {
+        width: auto !important;
+        overflow: auto !important;
+    }
+</style>

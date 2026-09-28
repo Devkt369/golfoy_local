@@ -1,0 +1,78 @@
+<?php
+$statusLabels = [
+    '1' => 'Open',
+    '2' => 'Awaiting',
+    '3' => 'Resolved',
+    '4' => 'Not Valid',
+    '5' => 'Asign with Expert'
+];
+
+$queryData = $block->getQueryData($block->getRequest()->getParam('id'));
+$queryAssign = '';
+$ExpertOptions = $block->getExpertOptions();
+foreach($ExpertOptions as $assignPerson){
+    if(isset($queryData['query_assign'])){
+        if($assignPerson['value'] == $queryData['query_assign']){
+           $queryAssign = $assignPerson['label'];
+        }
+    }
+}
+if ($queryData): ?>
+    <style>
+        .query-details {
+            background-color: #f5f5f5;
+            padding: 20px;
+            /* margin: 20px auto;
+            max-width: 600px; */
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .query-details h2 {
+            text-align: center;
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .query-details p {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.6;
+        }
+        .query-details p strong {
+            display: inline-block;
+            width: 150px;
+            font-weight: 600;
+        }
+        .query-details .highlight {
+            color: #007bff;
+            font-weight: 600;
+        }
+        body.account.querychatbox-chatbox-queryview li.nav.item.query\/chatbox a {
+            background: grey;
+            color: white;
+        }
+    </style>
+
+    <div class="query-details">
+        <h2>Query Details</h2>
+        <p><strong>Query Id:</strong> <?php echo htmlspecialchars($queryData['query_id']); ?></p>
+        <p><strong>Name:</strong> <?php echo htmlspecialchars($queryData['name']); ?></p>
+        <p><strong>Email:</strong> <?php echo htmlspecialchars($queryData['email']); ?></p>
+        <p><strong>Phone Number:</strong> <?php echo htmlspecialchars($queryData['phone_number']); ?></p>
+        <p><strong>Query Type:</strong> <?php echo htmlspecialchars($queryData['query_type']); ?></p>
+        <p><strong>Query:</strong> <?php echo htmlspecialchars($queryData['query']); ?></p>
+        <p><strong>Status:</strong> <?php echo $statusLabels[$queryData['status']]; ?></p>
+        <?php if (!empty($queryAssign)) : ?>
+            <p><strong>Assigned To:</strong> <?php echo htmlspecialchars($queryAssign); ?></p>
+        <?php endif; ?>
+        <?php if ($queryData['last_update'] !== '0000-00-00 00:00:00'): ?>
+            <p><strong>Last Update:</strong> <?php echo htmlspecialchars($queryData['last_update']); ?></p>
+        <?php endif; ?>
+        <?php if (!empty($queryData['response_result'])) : ?>
+            <p><strong>Response:</strong> <span class="highlight"><?php echo htmlspecialchars($queryData['response_result']); ?></span></p>
+        <?php endif; ?>    
+    </div>
+
+<?php else: ?>
+    <p>No query data found.</p>
+<?php endif; ?>

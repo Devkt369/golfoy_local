@@ -1,0 +1,69 @@
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<div class="shipping-address-item" css="'selected-item' : isSelected() , 'not-selected-item':!isSelected()">
+    <div class="user_data">
+        <div class="name">
+            <span class="firstname">
+                <text args="address().prefix"></text> <text args="address().firstname"></text> 
+                <text args="address().middlename"></text>
+            </span>
+
+            <span class="lastname">
+                <text args="address().lastname"></text> <text args="address().suffix"></text>
+            </span>
+        </div>
+        <div class="address_entity">
+            <span class="street">
+                <text args="_.values(address().street).join(', ')"></text>
+            </span>
+            <span class="city">
+                <text args="address().city "></text>
+            </span>
+            <span class="region">
+                <span text="address().region"></span>
+            </span>
+            <span class="postcode">
+                <text args="address().postcode"></text>
+            </span>
+            <span class="country">
+                <text args="getCountryName(address().countryId)"></text>
+            </span>
+            <span class="phone_number">
+                <a if="address().telephone" attr="'href': 'tel:' + address().telephone" text="address().telephone"></a>
+            </span>
+        </div>
+        <div class="other_data">
+            <span class="gst_number">
+                <if args="address().vatId">
+                   <text args="address().vatId"></text>
+                </if>
+            </span>
+            <span class="company">
+                <if args="address().company">
+                    <text args="address().company"></text>
+                </if>
+            </span>
+            <span class="other_attributes">
+                <each args="data: address().customAttributes, as: 'element'">
+                    <text args="$parent.getCustomAttributeLabel(element)"></text>
+                    
+                </each>
+            </span>
+        </div>
+    </div>
+    <div class="action buttons">
+        <button visible="address().isEditable()" type="button"
+                class="action edit-address-link"
+                click="editAddress">
+            <span translate="'Edit'"></span>
+        </button>
+
+        <button type="button" click="selectAddress" class="action action-select-shipping-item">
+            <span translate="'Ship Here'"></span>
+        </button>
+    </div>
+</div>

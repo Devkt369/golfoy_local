@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="ArtM_OrderFeedback::css/orderservey.css"/>
+    </head>
+    <body>
+        <referenceBlock name="page.main.title" remove="true"/>
+        <referenceContainer name="content">
+            <block class="ArtM\OrderFeedback\Block\Submit" name="checkout.success.feedback" after="order.details.success" template="ArtM_OrderFeedback::success/feedback.phtml" cacheable="false">
+                <container name="order.success.additional.info" label="Order Success Additional Info"/>
+            </block>
+             <block class="ArtM\OrderFeedback\Block\Submit" name="checkout.success.nps_calculator" after="checkout.success.feedback" template="ArtM_OrderFeedback::nps_calculator.phtml" cacheable="false"/>
+        </referenceContainer>
+    </body>
+</page>
+                                                                                                                                                                                               

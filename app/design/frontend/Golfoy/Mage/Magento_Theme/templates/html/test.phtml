@@ -1,0 +1,353 @@
+<style>
+    body#html-body .row.polo-brand-container {
+        background-color: whitesmoke;
+        padding: 30px !important;
+        display: flex;
+        align-items: center;
+        margin: 30px 14px 50px 14px !important;
+    }
+
+    .row.polo-brand-container h2 {
+        font-size: 26px;
+        margin-top: 0px;
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: black;
+        font-family: "headpro";
+    }
+
+    .row.polo-brand-container p {
+        color: black;
+        margin-bottom: 5px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .polo-product-grids-block p {
+        text-transform: unset;
+    }
+
+    .polo-new-container {
+        overflow: hidden;
+        width: 100%;
+        position: relative;
+        padding: 30px 0px 40px 0px;
+    }
+
+    .polo-product-grids-block h4 {
+        text-transform: uppercase;
+        font-size: 13px;
+        font-weight: bold;
+        color: black;
+        margin-top: 20px !important;
+    }
+
+    .polo-product-grids-block.active h4 {
+        margin-top: 0px !important;
+    }
+
+    #polo-new-scrollContainer {
+        display: flex;
+        transition: transform 0.5s ease;
+        will-change: transform;
+        position: relative;
+    }
+
+    .polo-product-grids-block {
+        flex: 0 0 33.3333%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+        padding: 0 20px;
+        transition: transform 0.5s ease;
+        position: relative;
+    }
+
+    .polo-product-grids-block.active {
+        transform: scale(1.2);
+        z-index: 10;
+    }
+
+    .polo-product-grids-block img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        display: block;
+        transition: transform 0.5s ease;
+    }
+
+    .polo-product-grids-block.active img {
+        transform: scale(1);
+        margin: 25px 0px;
+    }
+
+    .polo-product-grids-block h4,
+    .polo-product-grids-block p {
+        margin: 5px 0 0 0;
+        text-align: center;
+    }
+
+    .polo-new-scroll-btn {
+        position: absolute;
+        top: 45%;
+        transform: translateY(-50%);
+        background-color: #ffffffb0;
+        border: none;
+        width: 35px;
+        height: 35px;
+        cursor: pointer;
+        border-radius: 50% !important;
+        font-size: 18px;
+        z-index: 9999;
+        box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+    }
+
+    .polo-new-prev-btn {
+        left: 10px;
+    }
+
+    .slider-new-next-btn {
+        right: 10px;
+    }
+
+    .polo-new-item {
+        overflow: hidden;
+    }
+
+    .polo-product-grids-block p {
+        font-weight: 500 !important;
+        margin-top: 5px !important;
+        font-size: 12px !important;
+    }
+
+    /* Tablet (768px - 1024px) */
+    @media (max-width: 1024px) and (min-width: 768px) {
+        .row.polo-brand-container {
+            flex-direction: column;
+            padding: 20px !important;
+            margin: 20px 10px 40px 10px !important;
+        }
+
+        .row.polo-brand-container .col-sm-3,
+        .row.polo-brand-container .col-sm-9 {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .polo-product-grids-block {
+            flex: 0 0 50%;
+            padding: 0 10px;
+        }
+
+        .polo-product-grids-block h4 {
+            font-size: 17px;
+        }
+
+        .polo-product-grids-block p {
+            font-size: 11px;
+        }
+    }
+
+    /* Mobile (up to 767px) */
+    @media (max-width: 767px) {
+        .row.polo-brand-container {
+            flex-direction: column;
+            padding: 15px !important;
+            margin: 15px 5px 30px 5px !important;
+        }
+
+        .row.polo-brand-container p,
+        .row.polo-brand-container h2 {
+            text-align: center;
+        }
+
+        .row.polo-brand-container .col-sm-3,
+        .row.polo-brand-container .col-sm-9 {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .polo-product-grids-block {
+            flex: 0 0 80%;
+            padding: 0 5px;
+        }
+
+        .polo-product-grids-block h4 {
+            font-size: 18px;
+        }
+
+        .polo-product-grids-block p {
+            font-size: 10px;
+        }
+
+        .polo-new-scroll-btn {
+            width: 30px;
+            height: 30px;
+            padding: 0px;
+            font-size: 16px;
+        }
+    }
+
+    @media only screen and (max-width: 480px) {
+        body#html-body .row.polo-brand-container {
+            padding: 30px 10px !important;
+        }
+    }
+</style>
+
+<div class="row polo-brand-container">
+    <div class="col-sm-3">
+        <p>Featured</p>
+        <h2>Polo Collection</h2>
+    </div>
+    <div class="col-sm-9">
+        <button class="polo-new-scroll-btn polo-new-prev-btn">&#10094;</button>
+        <div class="polo-new-container">
+            <div class="slider-new-scroll-container" id="polo-new-scrollContainer">
+                <div class="polo-product-grids-block">
+                    <div class="polo-new-item">
+                        <a href="#"><img src="https://staging-golfoy.hyperx.cloud/media/wysiwyg/2025/landing-page/footjoy-polo.jpg" alt="Footjoy"></a>
+                    </div>
+                    <h4>Footjoy</h4>
+                    <p>Speckle Collection</p>
+                </div>
+                <div class="polo-product-grids-block">
+                    <div class="polo-new-item">
+                        <a href="#"><img src="https://staging-golfoy.hyperx.cloud/media/wysiwyg/2025/landing-page/jlindeberg-kv-polo.jpg" alt="JLindeberg"></a>
+                    </div>
+                    <h4>JLindeberg</h4>
+                    <p>KV Collection</p>
+                </div>
+                <div class="polo-product-grids-block">
+                    <div class="polo-new-item">
+                        <a href="#"><img src="https://staging-golfoy.hyperx.cloud/media/wysiwyg/2025/landing-page/vipergolf-polo.jpg" alt="Viper Golf"></a>
+                    </div>
+                    <h4>Viper Golf</h4>
+                    <p>Classic Polo</p>
+                </div>
+                <div class="polo-product-grids-block">
+                    <div class="polo-new-item">
+                        <a href="#"><img src="https://staging-golfoy.hyperx.cloud/media/wysiwyg/2025/landing-page/ping-polo.jpg" alt="Ping"></a>
+                    </div>
+                    <h4>Ping</h4>
+                    <p>Lindum Collection</p>
+                </div>
+                <div class="polo-product-grids-block">
+                    <div class="polo-new-item">
+                        <a href="#"><img src="https://staging-golfoy.hyperx.cloud/media/wysiwyg/2025/landing-page/jacknicklaus-polo.jpg" alt="Jack Nicklaus"></a>
+                    </div>
+                    <h4>Jack Nicklaus</h4>
+                    <p>Printed Collection</p>
+                </div>
+            </div>
+        </div>
+        <button class="polo-new-scroll-btn slider-new-next-btn">&#10095;</button>
+    </div>
+</div>
+
+
+
+<script>
+    require(['jquery'], function($) {
+        function initSlider() {
+            const $container = $('#polo-new-scrollContainer');
+            if (!$container.length) return;
+
+            let centerIndex = 1;
+            let isAnimating = false;
+
+            function getItems() {
+                const $items = $container.children();
+                return $items.length ? $items.toArray() : [];
+            }
+
+            function updateActive(animate = true) {
+                const $items = getItems();
+                if (!$items.length || !$items[centerIndex]) return;
+
+                $($items).removeClass('active');
+                $($items[centerIndex]).addClass('active');
+
+                // Calculate slide using item width (works with flex)
+                const itemWidth = $($items[0]).outerWidth(true);
+                const containerWidth = $container.outerWidth() || 0;
+                const scrollPos = centerIndex * itemWidth - (containerWidth - itemWidth) / 2;
+
+                $container.css({
+                    'transition': animate ? 'transform 0.5s ease' : 'none',
+                    'transform': 'translateX(' + (-scrollPos) + 'px)'
+                });
+            }
+
+            function shiftNext() {
+                if (isAnimating) return;
+                isAnimating = true;
+
+                const $items = getItems();
+                if (!$items.length) {
+                    isAnimating = false;
+                    return;
+                }
+
+                centerIndex++;
+                if (centerIndex >= $items.length) centerIndex = 0;
+
+                updateActive(true);
+
+                setTimeout(() => {
+                    isAnimating = false;
+                }, 500); // match CSS transition
+            }
+
+            function shiftPrev() {
+                if (isAnimating) return;
+                isAnimating = true;
+
+                const $items = getItems();
+                if (!$items.length) {
+                    isAnimating = false;
+                    return;
+                }
+
+                centerIndex--;
+                if (centerIndex < 0) centerIndex = $items.length - 1;
+
+                updateActive(true);
+
+                setTimeout(() => {
+                    isAnimating = false;
+                }, 500);
+            }
+
+            // Delegated click events with isolation
+            $(document).on('click', '.slider-new-next-btn', function(e) {
+                e.stopImmediatePropagation();
+                shiftNext();
+            });
+
+            $(document).on('click', '.polo-new-prev-btn', function(e) {
+                e.stopImmediatePropagation();
+                shiftPrev();
+            });
+
+            updateActive(false);
+
+            $(window).on('resize', function() {
+                requestAnimationFrame(() => updateActive(false));
+            });
+        }
+
+        // Wait until container AND children exist
+        const sliderInterval = setInterval(function() {
+            const $container = $('#polo-new-scrollContainer');
+            if ($container.length && $container.children().length) {
+                clearInterval(sliderInterval);
+                initSlider();
+            }
+        }, 100);
+    });
+</script>

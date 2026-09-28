@@ -1,0 +1,353 @@
+type Query {
+    locations (
+        filter: LocationAttributeFilterInput @doc(description: "Identifies which location attributes to search for and return."),
+        stockId: Int = 0 @doc(description: "Filter the location by website stock id. The default value is no filter."),
+        pageSize: Int = 20 @doc(description: "Specifies the maximum number of results to return at once. This attribute is optional."),
+        currentPage: Int = 1 @doc(description: "Specifies which page of results to return. The default value is 1."),
+        sort: LocationAttributeSortInput @doc(description: "Specifies which attributes to sort on, and whether to return the results in ascending or descending order.")
+    ): Locations
+    @resolver(class: "Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\Locations") @doc(description: "The locations query searches for locations that match the criteria specified in the search and filter attributes.") @cache(cacheIdentity: "Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\Locations\\Identity")
+
+    sortedLocationByDistance (
+        address: String! @doc(description: "Address to find the location near by in the radius."),
+        radius: Float! @doc(description: "Radius to find"),
+        stockId: Int = 0 @doc(description: "Filter the location by website stock id. The default value is no filter.")
+    ): LocationsByDistance @resolver(class: "Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\GetSortLocationByDistance") @doc(description: "The locations query searches for locations that match the criteria specified in the search.")
+
+    productInfoOnStores (
+        productSku: String! @doc(description: "Product SKU"),
+        currentAddress: String @doc(description: "Current Address")
+    ): ProductInfoOnStoresOutput @resolver(class: "Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\ProductInfoOnStores") @doc(description: "Get product's information on stores.")
+
+    orderList (
+        filter: OrdersFilterInput @doc(description: "Defines the filter to use for searching customer orders"),
+        currentPage: Int = 1 @doc(description: "Specifies which page of results to return. The default value is 1"),
+        pageSize: Int = 20 @doc(description: "Specifies the maximum number of results to return at once. The default value is 20"),
+        sort: OrdersSortInput @doc(description: "Specifies which attributes to sort on, and whether to return the results in ascending or descending order.")
+    ): OrderList @resolver(class: "Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\OrderList") @cache(cacheable: false)
+
+    getProductsInfoOnStore (
+        storeId: Int @doc(description: "Location Id want to get product in this."),
+        search: String @doc(description: "Performs a full-text search using the specified key words."),
+        filter: ProductFilterInput @doc(description: "Identifies which product attributes to search for and return."),
+        pageSize: Int = 20 @doc(description: "Specifies the maximum number of results to return at once. This attribute is optional."),
+        currentPage: Int = 1 @doc(description: "Specifies which page of results to return. The default value is 1."),
+        sort: ProductSortInput @doc(description: "Specifies which attributes to sort on, and whether to return the results in ascending or descending order.")
+    ): Products
+    @resolver(class: "Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\GetProductsInfoOnStore") @doc(description: "The products query searches for products that match the criteria specified in the search and filter attributes.") @cache(cacheIdentity: "Magento\\CatalogGraphQl\\Model\\Resolver\\Product\\Identity")
+
+    getTotalNeedToPackToday (
+        locationId: Int! @doc (description: "Location Id want to get.")
+    ) : TotalCountSummaryOutput
+    @resolver(class: "Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\Summary\\GetTotalNeedToPackToday") @doc(description: "Get total ready to pack today.")
+
+    getTotalReadyToPickOrder (
+        locationId: Int! @doc (description: "Location Id want to get.")
+    ) : TotalCountSummaryOutput
+    @resolver(class: "Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\Summary\\GetTotalReadyToPick") @doc(description: "Get total ready to pick order.")
+
+    getTotalPendingOrder (
+        locationId: Int! @doc (description: "Location Id want to get.")
+    ) : TotalCountSummaryOutput
+    @resolver(class: "Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\Summary\\GetTotalPending") @doc(description: "Get total pending order.")
+
+    getTotalProcessingOrder (
+        locationId: Int! @doc (description: "Location Id want to get.")
+    ) : TotalCountSummaryOutput
+    @resolver(class: "Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\Summary\\GetTotalProcessing") @doc(description: "Get total processing order.")
+
+    getTotalDeliveredThisWeek (
+            locationId: Int! @doc (description: "Location Id want to get.")
+        ) : TotalCountSummaryOutput
+    @resolver(class: "Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\Summary\\GetTotalDeliveredThisWeek") @doc(description: "Get total processing order.")
+}
+
+type Mutation {
+    saveOrderPickupPackage (input: PickupPackageInput!): PickupPackageOutput @resolver(class: "\\Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\PickupPackage\\CreateOrderPickupPackage") @doc(description:"Create order pickup package")
+    cancelOrderPickupPackage (input: PickupPackageActionInput!): PickupPackageOutput @resolver(class: "\\Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\PickupPackage\\CancelOrderPickupPackage") @doc(description:"Cancel pickup package of order")
+    deliverOrderPickupPackage (input: PickupPackageActionInput!): PickupPackageOutput @resolver(class: "\\Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\PickupPackage\\DeliverOrderPickupPackage") @doc(description:"Deliver pickup package of order")
+
+    saveOrderReadyPickDate (input: ReadyPickDateInput!): ReadyPickDateOutput
+    @resolver(class: "\\Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\Orders\\SaveOrderReadyPickDateResolver") @doc(description:"Save order's ready pick date")
+}
+
+input OrdersFilterInput @doc(description: "Identifies the filter to use for filtering orders.") {
+    id: FilterTypeInput @doc(description: "Filters by order id.")
+    number: FilterTypeInput @doc(description: "Filters by The order number")
+    order_date: FilterTypeInput @doc(description: "Filters by The date the order was placed")
+    status: FilterTypeInput @doc(description: "Filters by The current status of the order")
+    shipping_method: FilterTypeInput @doc(description: "Filters by The delivery method for the order")
+    location_pickup_id: FilterTypeInput @doc(description: "Filters by The Location pickup id")
+    staff_id: FilterTypeInput @doc(description: "Filters by The Staff id")
+    store_id: FilterTypeInput @doc(description: "Filters by The Store id")
+}
+
+input OrdersSortInput @doc(description: "OrdersSortInput specifies the attribute to use for sorting search results and indicates whether the results are sorted in ascending or descending order.") {
+    id: SortEnum @doc(description: "Sort by order id.")
+    number: SortEnum @doc(description: "Sort by The order number")
+    order_date: SortEnum @doc(description: "Sort by The date the order was placed")
+    status: SortEnum @doc(description: "Sort by The current status of the order")
+    shipping_method: SortEnum @doc(description: "Sort by The delivery method for the order")
+    location_pickup_id: SortEnum @doc(description: "Sort by The Location pickup id")
+    staff_id: SortEnum @doc(description: "Sort by The Staff id")
+    store_id: SortEnum @doc(description: "Sort by The Store id")
+}
+
+
+type PackageClickAndCollect @doc(description:"Package Click And Collect") {
+    package_id: Int @doc(description: "Package id.")
+    order_id: Int @doc(description: "Order id.")
+    status: String @doc(description: "Status.")
+}
+
+type OrderList {
+    items: [CustomerOrder] @doc(description: "Array of orders"),
+    page_info: SearchResultPageInfo @doc(description: "An object that includes the current_page, page_info, and page_size values specified in the query")
+    total_count: Int @doc(description: "The total count of customer orders")
+}
+
+extend type CustomerOrder {
+    location_pickup_id: Int @doc(description: "The Location pickup id")
+    staff_id: Int @doc(description: "Staff id")
+    packages: [PackageClickAndCollect]
+}
+
+
+type LocationsByDistance @doc(description:"Result of query getSortLocationByDistance") {
+    items: [LocationWithDistance] @doc(description: "comment for items[LocationWithDistance].")
+    total_count: Int,
+    address_latitude: Float,
+    address_longitude: Float
+}
+
+type Schedule @doc(description: "Store's schedule") {
+    schedule_id: Int @doc(description: "Schedule ID")
+    schedule_name: String @doc(description: "Schedule name")
+    monday_status: Int @doc(description: "Store's status on monday")
+    tuesday_status: Int @doc(description: "Store's status on tuesday")
+    wednesday_status: Int @doc(description: "Store's status on wednesday")
+    thursday_status: Int @doc(description: "Store's status on thursday")
+    friday_status: Int @doc(description: "Store's status on friday")
+    saturday_status: Int @doc(description: "Store's status on saturday")
+    sunday_status: Int @doc(description: "Store's status on sunday")
+    monday_open: String @doc(description: "Store's opening hour on monday")
+    tuesday_open: String @doc(description: "Store's opening hour on tuesday")
+    wednesday_open: String @doc(description: "Store's opening hour on wednesday")
+    thursday_open: String @doc(description: "Store's opening hour on thursday")
+    friday_open: String @doc(description: "Store's opening hour on friday")
+    saturday_open: String @doc(description: "Store's opening hour on saturday")
+    sunday_open: String @doc(description: "Store's opening hour on sunday")
+    monday_close: String @doc(description: "Store's closing hour on monday")
+    tuesday_close: String @doc(description: "Store's closing hour on tuesday")
+    wednesday_close: String @doc(description: "Store's closing hour on wednesday")
+    thursday_close: String @doc(description: "Store's closing hour on thursday")
+    friday_close: String @doc(description: "Store's closing hour on friday")
+    saturday_close: String @doc(description: "Store's closing hour on monday")
+    sunday_close: String @doc(description: "Store's closing hour on sunday")
+}
+
+type SpecialDay @doc(description: "Store's special day") {
+    specialday_id: Int @doc(description: "Special day ID")
+    specialday_name: String @doc(description: "Special day's name")
+    store_status: Int @doc(description: "Store's status")
+    repeat: Int @doc(description: "Repeat")
+    date_from: String @doc(description: "Special day's start date")
+    date_to: String @doc(description: "Special day's end date")
+    time_open: String @doc(description: "Store's openning time")
+    time_close: String @doc(description: "Store's closing time")
+}
+
+interface LocationInterface @typeResolver(class: "Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\LocationTypeResolver") {
+    location_id: Int @doc(description: "The ID number assigned to the location.")
+    name: String @doc(description: "The name of this location (store).")
+    description: String @doc(description: "The description of this location (store).")
+    telephone: String @doc(description: "The telephone of this location (store).")
+    email: String @doc(description: "The email of this location (store).")
+    street: String @doc(description: "The street of this location (store).")
+    city: String @doc(description: "The city of this location (store).")
+    region: String @doc(description: "The region of this location (store).")
+    region_id: Int @doc(description: "The region id of this location (store).")
+    country_id: String @doc(description: "The country id of this location (store).")
+    postcode: String @doc(description: "The postcode of this location (store).")
+    country: String @doc(description: "The country of this location (store).")
+    stock_id: Int @doc(description: "The stock id of this location (store).")
+    use_config_receipt_header: Int @doc(description: "The use config receipt header of this location (store).")
+    receipt_header: String @doc(description: "The receipt header of this location (store).")
+    use_config_receipt_footer: Int @doc(description: "The use config receipt footer of this location (store).")
+    receipt_footer: String @doc(description: "The receipt footer of this location (store).")
+    store_id: Int @doc(description: "The store id of this location (store).")
+    is_allow_pickup: Int @doc(description: "The is allow pickup of this location (store).")
+    latitude: Float @doc(description: "The latitude of this location (store).")
+    longitude: Float @doc(description: "The longitude of this location (store).")
+    schedule_id: Int @doc(description: "The schedule id of this location (store).")
+    schedule: Schedule @resolver(class: "Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\Locations\\ScheduleResolver") @doc(description: "The schedule of this location")
+    special_days: [SpecialDay] @resolver(class: "Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\Locations\\SpecialDaysResolver") @doc(description: "The special days of this location"),
+    timezone: String @resolver(class: "Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\Locations\\TimezoneResolver") @doc(description: "The time zone of this location"),
+}
+
+type Location implements LocationInterface @doc(description:"Location") {
+
+}
+
+type LocationWithDistance implements LocationInterface @doc(description:"Location With Distance to current address") {
+    distance: Float @doc(description: "Distance to address")
+}
+
+input LocationAttributeFilterInput @doc(description: "LocationAttributeFilterInput defines the filters to be used in the search. A filter contains at least one attribute, a comparison operator, and the value that is being searched for.") {
+    location_id: FilterTypeInput @doc(description: "Filter by location ID")
+    name: FilterTypeInput @doc(description: "Filter by name.")
+    description: FilterTypeInput @doc(description: "Filter by description.")
+    telephone: FilterTypeInput @doc(description: "Filter by telephone.")
+    email: FilterTypeInput @doc(description: "Filter by email.")
+    street: FilterTypeInput @doc(description: "Filter by street.")
+    city: FilterTypeInput @doc(description: "Filter by city.")
+    region: FilterTypeInput @doc(description: "Filter by region.")
+    region_id: FilterTypeInput @doc(description: "Filter by region id.")
+    country_id: FilterTypeInput @doc(description: "Filter by country id.")
+    postcode: FilterTypeInput @doc(description: "Filter by postcode.")
+    country: FilterTypeInput @doc(description: "Filter by country.")
+    stock_id: FilterTypeInput @doc(description: "Filter by stock id.")
+    use_config_receipt_header: FilterTypeInput @doc(description: "Filter by use_config_receipt_header.")
+    receipt_header: FilterTypeInput @doc(description: "Filter by receipt header.")
+    use_config_receipt_footer: FilterTypeInput @doc(description: "Filter by use_config_receipt_footer.")
+    receipt_footer: FilterTypeInput @doc(description: "Filter by receipt footer.")
+    store_id: FilterTypeInput @doc(description: "Filter by store id.")
+    is_allow_pickup: FilterTypeInput @doc(description: "Filter by config is_allow_pickup.")
+    latitude: FilterTypeInput @doc(description: "Filter by latitude.")
+    longitude: FilterTypeInput @doc(description: "Filter by longitude.")
+    schedule_id: FilterTypeInput @doc(description: "Filter by schedule id.")
+}
+
+input LocationAttributeSortInput @doc(description: "LocationAttributeSortInput specifies the attribute to use for sorting search results and indicates whether the results are sorted in ascending or descending order.") {
+    location_id: SortEnum @doc(description: "Sort by the search location_id.")
+    name: SortEnum @doc(description: "Sort by the search name (default).")
+    description: SortEnum @doc(description: "Sort by the search description.")
+    telephone: SortEnum @doc(description: "Sort by the search telephone.")
+    email: SortEnum @doc(description: "Sort by the search email.")
+    street: SortEnum @doc(description: "Sort by the search street.")
+    city: SortEnum @doc(description: "Sort by the search city.")
+    region: SortEnum @doc(description: "Sort by the search region.")
+    region_id: SortEnum @doc(description: "Sort by the search region_id.")
+    country_id: SortEnum @doc(description: "Sort by the search country_id.")
+    postcode: SortEnum @doc(description: "Sort by the search postcode.")
+    country: SortEnum @doc(description: "Sort by the search country.")
+    stock_id: SortEnum @doc(description: "Sort by the search stock_id.")
+    use_config_receipt_header: SortEnum @doc(description: "Sort by the search use_config_receipt_header.")
+    receipt_header: SortEnum @doc(description: "Sort by the search receipt_header.")
+    use_config_receipt_footer: SortEnum @doc(description: "Sort by the search use_config_receipt_footer.")
+    receipt_footer: SortEnum @doc(description: "Sort by the search receipt_footer.")
+    store_id: SortEnum @doc(description: "Sort by the search store_id.")
+    is_allow_pickup: SortEnum @doc(description: "Sort by the search is_allow_pickup.")
+    latitude: SortEnum @doc(description: "Sort by the search latitude.")
+    longitude: SortEnum @doc(description: "Sort by the search longitude.")
+    schedule_id: SortEnum @doc(description: "Sort by the search schedule_id.")
+}
+
+type Locations @doc(description: "Locations") {
+    items: [Location] @doc(description: "An array of locations that match the specified search criteria.")
+    page_info: SearchResultPageInfo @doc(description: "An object that includes the page_info and currentPage values specified in the query.")
+    total_count: Int @doc(description: "The number of locations.")
+}
+
+interface ProductInterface {
+    stock_info: ProductStockInfo @doc(description: "Stock Info of the product") @resolver(class: "Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\Stock\\StockProductProvider")
+}
+
+type ProductStockInfo {
+    item_id: Int @doc(description: "Item id")
+    product_id: Int @doc(description: "Product id")
+    stock_id: Int @doc(description: "Stock id")
+    qty: Float @doc(description: "Stock Qty")
+    is_qty_decimal: Boolean @doc(description: "Is Qty Decimal")
+    show_default_notification_message: Boolean @doc(description: "Show Default Notification Message")
+    use_config_min_qty: Boolean @doc(description: "Use Config Min Qty")
+    min_qty: Float @doc(description: "Min Qty")
+    use_config_min_sale_qty: Boolean @doc(description: "use Config Min Sale Qty")
+    min_sale_qty: Float @doc(description: "Min Sale Qty")
+    use_config_max_sale_qty: Boolean @doc(description: "Use Config Max Sale Qty")
+    max_sale_qty: Float @doc(description: "Max Sale Qty")
+    use_config_backorders: Boolean @doc(description: "Use Config BackOrder")
+    backorders: Int @doc(description: "BackOrder")
+    use_config_notify_stock_qty: Boolean @doc(description: "Use Config Notify Stock Qty")
+    notify_stock_qty: Float @doc(description: "Notify Stock Qty")
+    use_config_qty_increments: Boolean @doc(description: "Use Config Qty Increments")
+    qty_increments: Float @doc(description: "Qty Increments")
+    use_config_enable_qty_inc: Boolean @doc(description: "Use Config Enable Qty Inc")
+    enable_qty_increments: Boolean @doc(description: "Enable Qty Increments")
+    use_config_manage_stock: Boolean @doc(description: "Use Config Manage Stock")
+    manage_stock: Boolean @doc(description: "Manage Stock")
+    is_in_stock: Boolean @doc(description: "Is in Stock")
+    low_stock_date: String @doc(description: "Low Stock Date")
+    is_decimal_divided: Boolean @doc(description: "Is decimal divided")
+    stock_status_changed_auto: Int @doc(description: "Stock Status Changed Auto")
+}
+
+input PickupPackageInput @doc(description:"Input of mutation saveOrderPickupPackage") {
+    package_id: Int @doc(description: "ID of package.")
+    order_id: Int! @doc(description: "ID of order which package is belong to.")
+    status: String @doc(description: "Status of package.")
+    location_id: Int! @doc(description: "Id of location creating package.")
+}
+
+input PickupPackageActionInput @doc(description:"Input of mutation processOrderPickupPackage") {
+    package_id: Int! @doc(description: "ID of package.")
+    location_id: Int! @doc(description: "Id of location creating package.")
+}
+
+type PickupPackageOutput {
+    package: PickupPackage!
+}
+
+type PickupPackage @doc(description:"Type PickupPackage includes fields of object ClickAndCollectOrderPickupPackage") {
+    package_id: Int @doc(description: "ID of package.")
+    order_id: Int @doc(description: "ID of order which package is belong to.")
+    location_id: Int @doc(description: "ID of Location which package is belong to.")
+    status: String @doc(description: "Status of package.")
+}
+
+type ProductStore @doc(description: "Product's store infomation") {
+    location: LocationWithDistance! @doc(description: "Location information with distance.")
+    saleable_qty: Float @doc(description: "Product's saleable quantity")
+    stock_status: ProductStockStatus @doc(description: "Stock status of the product") @resolver(class: "Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\Stock\\ProductStockStatusType")
+}
+
+type ProductInfoOnStoresOutput @doc(description: "Product information on stores output") {
+    items: [ProductStore] @doc(description: "An array of product's stores.")
+}
+
+type TotalCountSummaryOutput {
+    total: Int!
+}
+
+input ReadyPickDateInput @doc(description:"Input of mutation save order ready pick date") {
+    order_id: Int! @doc(description: "Order's ID")
+    ready_pick_date: String! @doc(description: "Ready pick date value")
+}
+
+type ReadyPickDateOutput {
+    result: Boolean!
+}
+
+extend input ShippingAddressInput {
+    location_pickup_id: Int @doc(description: "The id of Pickup Location which will be used for Click and collect.")
+    pickup_date_time: String @doc(description: "The pickup date time which will be used for Click and collect.")
+    pickup_date_only: String @doc(description: "The pickup date which will be used for Click and collect.")
+}
+
+extend type ShippingCartAddress {
+    location_pickup_id: Int @resolver(class: "\\Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\ShippingAddress\\LocationPickupId") @doc(description: "The id of Pickup Location which will be used for Click and collect.")
+    pickup_date_time: String @resolver(class: "\\Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\ShippingAddress\\PickupDateTime") @doc(description: "The pickup date time which will be used for Click and collect.")
+    pickup_date_only: String @resolver(class: "\\Magestore\\ClickAndCollectGraphQl\\Model\\Resolver\\ShippingAddress\\PickupDateOnly") @doc(description: "The pickup date which will be used for Click and collect.")
+}
+
+
+type StoreConfig {
+    magestore_click_and_collect_general_allow_to_choose_collect_data_and_time: String @doc(description: "Click and collect allow to choose date and time")
+    magestore_click_and_collect_general_search_radius: String @doc(description: "Click and collect search radius")
+    magestore_click_and_collect_general_show_store_list_on_frontend: String @doc(description: "Click and collect show store list on frontend")
+    magento_carrier_clickandcollect_active: String @doc(description: "Click and collect active")
+    magento_carrier_clickandcollect_title: String @doc(description: "Click and collect title")
+    magento_carrier_clickandcollect_method_name: String @doc(description: "Click and collect method name")
+    magento_carrier_clickandcollect_price: String @doc(description: "Click and collect price")
+    magento_carrier_clickandcollect_displayed_error_message: String @doc(description: "Click and collect display error message")
+}

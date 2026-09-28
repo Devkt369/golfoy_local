@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="product.info.price">
+            <block class="Magento\Catalog\Block\Product\View"
+                   name="product_expert_advice"
+                   after="estimation.delivery.module"
+                   template="ArtM_Expertlist::catalog/product/view/expert_advice.phtml"/>
+        </referenceContainer>
+        <referenceBlock name="product.info.details">
+            <block class="Magento\Catalog\Block\Product\View" name="tab_expert_advice" template="ArtM_Expertlist::catalog/product/view/tabs/expert_advice.phtml" group="detailed_info" before="-" >
+                <arguments>
+                    <argument translate="true" name="title" xsi:type="string">Expert Review</argument>
+                    <argument name="sort_order" xsi:type="string">200</argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+    </body>
+</page>

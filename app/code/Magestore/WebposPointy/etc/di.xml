@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2016 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+-->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Magestore\WebposPointy\Api\PointyConfigManagementInterface" type="Magestore\WebposPointy\Model\PointyConfigManagement" />
+    <preference for="Magestore\WebposPointy\Api\PointyManagementInterface" type="Magestore\WebposPointy\Model\PointyManagement" />
+    <preference for="Magestore\WebposPointy\Api\PointyConnectorInterface" type="Magestore\WebposPointy\Model\PointyConnector" />
+    <preference for="Magestore\WebposPointy\Api\PointySignupLocationPrepareDataInterface" type="Magestore\WebposPointy\Model\PointySignupLocationPrepareData" />
+    <preference for="Magestore\WebposPointy\Api\PointySignupLocationValidationInterface" type="Magestore\WebposPointy\Model\PointySignupLocationValidation" />
+    <preference for="Magestore\WebposPointy\Api\SubmitSalesPrepareDataInterface" type="Magestore\WebposPointy\Model\SubmitSalesPrepareData" />
+    <preference for="Magestore\WebposPointy\Api\SubmitInventoryPrepareDataInterface" type="Magestore\WebposPointy\Model\SubmitInventoryPrepareData" />
+    <preference for="Magestore\WebposPointy\Api\AttributeDataProviderInterface" type="Magestore\WebposPointy\Model\AttributeDataProvider" />
+
+    <!-- Magestore logger -->
+    <type name="Magestore\WebposPointy\Log\Handler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="Magestore\WebposPointy\Log\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">magestore-pointy-logger</argument>
+            <argument name="handlers"  xsi:type="array">
+                <item name="system" xsi:type="object">Magestore\WebposPointy\Log\Handler</item>
+            </argument>
+        </arguments>
+    </type>
+    <!-- End: Magestore logger -->
+
+    <!-- Plugin add pos_location_id to invoice -->
+    <type name="Magento\Sales\Model\Convert\Order">
+        <plugin name="magestore_add_location_id_to_invoice" type="Magestore\WebposPointy\Plugin\Sales\Model\Convert\Order" sortOrder="1" disabled="false"/>
+    </type>
+    <!-- End: Plugin add pos_location_id to invoice -->
+</config>

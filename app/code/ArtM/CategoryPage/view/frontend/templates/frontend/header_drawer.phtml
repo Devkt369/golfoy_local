@@ -1,0 +1,438 @@
+<?php
+
+/** @var \ArtM\CategoryPage\Block\Frontend\Page $block */
+?>
+
+<!-- Category Drawer Trigger (mobile only) -->
+<button class="artm-cat-drawer-trigger" type="button" aria-label="Shop by Category">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <line x1="3" y1="12" x2="21" y2="12" />
+        <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+    <span>Categories</span>
+</button>
+
+<!-- Overlay -->
+<div class="artm-cat-overlay" id="artm-cat-overlay"></div>
+
+<!-- Sliding Drawer -->
+<div class="artm-cat-drawer" id="artm-cat-drawer" aria-hidden="true">
+    <button class="artm-cat-drawer-close in-profile" id="artm-cat-drawer-close" type="button" aria-label="Close">&times;</button>
+    <div class="customer-profile customer-profile--sidebar" id="customer-profile">
+        <div class="customer-profile__container">
+            <div class="customer-profile__avatar">
+                <div class="customer-profile__avatar-initial" data-customer-initial="">
+                    G
+                </div>
+            </div>
+
+            <div class="customer-profile__content">
+
+                <div class="customer-profile__name">
+                    <h3 class="customer-profile__name-text" data-customer-name="">
+                        Guest
+                    </h3>
+                </div>
+
+                <!-- Logged Out Points Message -->
+                <div class="customer-profile__rewards" data-customer-container="logged-out">
+                    Login to see Point Balance
+                </div>
+                <!-- Logged In Points Value -->
+                <div class="customer-profile__rewards" data-customer-points="" data-customer-container="logged-in" style="display:none;">
+                    <!-- Filled by JS -->
+                </div>
+
+                <div class="customer-profile__actions" id="customer-actions">
+                    <!-- Logged Out Actions -->
+                    <div class="account-text-sidebar signon_popup_opener" data-customer-container="logged-out">
+                        <a href="https://staging-golfoy.hyperx.cloud/customer/account/login/" class="login-link customer-profile__auth-link">Login</a>
+                        <span class="circle"></span>
+                        <a href="https://staging-golfoy.hyperx.cloud/customer/account/create/" class="signup-link customer-profile__auth-link">Sign up</a>
+                    </div>
+                    <!-- Logged In Actions -->
+                    <div data-customer-container="logged-in" style="display:none;">
+                        <a class="customer-profile__account-link" href="https://staging-golfoy.hyperx.cloud/customer/account/">View Details »</a>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="logout_button_sidebar" id="logout-button" data-customer-logout-button="">
+                <a class="header_account_link" href="https://staging-golfoy.hyperx.cloud/customer/account/logout/">
+                    Log out </a>
+            </div>
+        </div>
+    </div>
+    <!-- Drawer Header removed — close button moved into customer profile -->
+
+    <!--
+        Same root structure as page.phtml so that category-showcase.js works identically.
+        The JS finds [data-role="sidebar"] and [data-role="content"] inside this root element.
+    -->
+    <div id="artm-categorypage-drawer"
+        class="artm-categorypage-shell artm-cat-drawer-body"
+        data-page-config='<?= $block->escapeHtmlAttr($block->getPageConfigJson()) ?>'>
+
+        <aside class="artm-sidebar" data-role="sidebar"></aside>
+        <section class="artm-main">
+            <div class="artm-content" data-role="content">
+                <div class="artm-loading">Select a category to browse.</div>
+            </div>
+        </section>
+
+    </div>
+
+</div>
+
+
+<style>
+    /* ── Trigger Button ──────────────────────────────────── */
+    .artm-cat-drawer-trigger {
+        display: none;
+        align-items: center;
+        gap: 6px;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        color: inherit;
+        padding: 6px 10px;
+        white-space: nowrap;
+    }
+
+    @media (max-width: 767px) {
+        .artm-cat-drawer-trigger {
+            display: flex;
+        }
+    }
+
+    /* ── Overlay ─────────────────────────────────────────── */
+    .artm-cat-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 9998;
+    }
+
+    .artm-cat-overlay.is-open {
+        display: block;
+    }
+
+    /* ── Drawer ──────────────────────────────────────────── */
+    .artm-cat-drawer {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100vw;
+        height: -webkit-fill-available;
+        min-height: 100vh;
+        max-height: 100vh;
+        z-index: 9999;
+        background: #fff;
+        transform: translateX(-100%);
+        transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        padding-top: constant(safe-area-inset-top, 12px);
+        padding-top: env(safe-area-inset-top, 12px);
+        padding-bottom: constant(safe-area-inset-bottom, 20px);
+        padding-bottom: env(safe-area-inset-bottom, 20px);
+    }
+
+    .artm-cat-drawer.is-open {
+        transform: translateX(0);
+    }
+
+    body.artm-cat-drawer-open {
+        overflow: hidden !important;
+        height: 100% !important;
+        position: fixed !important;
+        width: 100% !important;
+    }
+
+    /* ── Drawer Header ───────────────────────────────────── */
+    .artm-cat-drawer-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        border-bottom: 1px solid #ededed;
+        font-weight: 700;
+        font-size: 15px;
+        flex-shrink: 0;
+        background: #fff;
+    }
+
+    .artm-cat-drawer-close {
+        background: none;
+        border: none;
+        font-size: 26px;
+        cursor: pointer;
+        line-height: 1;
+        color: #333;
+        padding: 5px 10px;
+        text-align: right;
+    }
+
+    /* ── Drawer Body: same grid as page.phtml ────────────── */
+    .artm-cat-drawer-body {
+        flex: 1 !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        display: grid !important;
+        grid-template-columns: 90px minmax(0, 1fr) !important;
+        gap: 0 !important;
+        align-items: start !important;
+        padding-bottom: calc(30px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    .customer-profile__container {
+        position: relative;
+    }
+
+    /* ── Sidebar inside drawer ───────────────────────────── */
+    #artm-categorypage-drawer .artm-sidebar {
+        position: relative !important;
+        top: 0 !important;
+        min-height: 0 !important;
+        max-height: 100% !important;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+        border-right: 1px solid #f0f2f5;
+        background: #f0f2f5;
+        padding: 0 0 calc(20px + env(safe-area-inset-bottom, 0px)) 0;
+        border-radius: 0;
+    }
+
+    #artm-categorypage-drawer .artm-sidebar::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* ── Main/content inside drawer ─────────────────────── */
+    #artm-categorypage-drawer .artm-main {
+        overflow-y: auto;
+        min-height: 0;
+        max-height: 100%;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+        padding: 0 12px calc(36px + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* ── Sidebar items (compact, icon+label stacked) ─────── */
+    #artm-categorypage-drawer .artm-sidebar-item {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 2px !important;
+        padding: 10px 4px !important;
+        text-align: center !important;
+        border-bottom: 1px solid rgba(220, 222, 224, 1) !important;
+        border-radius: 0 !important;
+    }
+
+    #artm-categorypage-drawer .artm-sidebar-item img,
+    #artm-categorypage-drawer .artm-sidebar-item>div:first-child,
+    #artm-categorypage-drawer .artm-sidebar-item>div:first-child * {
+        width: 44px !important;
+        height: 44px !important;
+        border-radius: 10px !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    #artm-categorypage-drawer .artm-sidebar-item img {
+        object-fit: contain !important;
+    }
+
+    #artm-categorypage-drawer .artm-sidebar-item>div>div:first-child {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        line-height: 1.15 !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        color: rgba(116, 138, 176, 1) !important;
+        margin-top: 4px !important;
+    }
+
+    #artm-categorypage-drawer .artm-sidebar-item>div>div:last-child {
+        display: none !important;
+    }
+
+    #artm-categorypage-drawer .artm-sidebar-item.is-active {
+        background: white !important;
+        border: none !important;
+    }
+
+    /* ── Card grid ───────────────────────────────────────── */
+    #artm-categorypage-drawer .artm-card-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    #artm-categorypage-drawer .artm-card {
+        border-radius: 5px;
+    }
+
+    #artm-categorypage-drawer .artm-card-label {
+        padding: 6px 8px;
+        font-size: 10px;
+        line-height: 1.55;
+        text-align: center;
+    }
+
+    /* ── Banner ──────────────────────────────────────────── */
+    #artm-categorypage-drawer .artm-banner {
+        min-height: 120px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+</style>
+
+<script>
+    require(['jquery', 'ArtM_CategoryPage/js/category-showcase'], function($, initShowcase) {
+        var $root = $('#artm-categorypage-drawer');
+        var trigger = document.querySelector('.artm-cat-drawer-trigger');
+        var drawer = document.getElementById('artm-cat-drawer');
+        var overlay = document.getElementById('artm-cat-overlay');
+        var closeBtn = document.getElementById('artm-cat-drawer-close');
+        var initialised = false;
+
+        function openDrawer() {
+            drawer.classList.add('is-open');
+            overlay.classList.add('is-open');
+            document.body.classList.add('artm-cat-drawer-open');
+            drawer.setAttribute('aria-hidden', 'false');
+            if (!initialised) {
+                initialised = true;
+                var config = JSON.parse($root.attr('data-page-config') || '{}');
+                // Don't auto-select a category; let the user tap one first
+                config.initialCategoryId = 0;
+                initShowcase($root, config);
+            }
+        }
+
+        function closeDrawer() {
+            drawer.classList.remove('is-open');
+            overlay.classList.remove('is-open');
+            document.body.classList.remove('artm-cat-drawer-open');
+            drawer.setAttribute('aria-hidden', 'true');
+        }
+
+        if (trigger) trigger.addEventListener('click', openDrawer);
+        if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+        if (overlay) overlay.addEventListener('click', closeDrawer);
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeDrawer();
+        });
+    });
+</script>
+<style>
+    @media (max-width:767px) {
+        #artm-categorypage-drawer .artm-sidebar-item {
+            background: #f8fafc;
+        }
+
+        .customer-profile {
+            padding: 0px 10px 10px 10px;
+            margin-top: 48px;
+        }
+
+        div#logout-button {
+            width: 100%;
+            max-width: 75px;
+            margin: 0px auto;
+            margin-left: auto;
+            margin-right: 0;
+            padding: 0px;
+        }
+
+        a.header_account_link {
+            text-transform: capitalize;
+            border-radius: 5px;
+            font-size: 11px !important;
+            padding: 7px 0px;
+        }
+
+        /* position the close button above the profile block */
+        .customer-profile__container {
+            position: relative;
+        }
+
+        .artm-cat-drawer-close.in-profile {
+            position: absolute;
+            top: calc(env(safe-area-inset-top, 12px) + 8px);
+            right: 14px;
+            z-index: 5;
+            border: none;
+            font-size: 26px;
+            cursor: pointer;
+            line-height: 1;
+            color: #333;
+            padding: 0;
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button.artm-cat-drawer-trigger:hover {
+            background-color: transparent;
+            border: none;
+        }
+
+        a:-webkit-any-link:focus-visible {
+            outline-offset: 0px;
+        }
+
+        :focus-visible,
+        a:focus {
+            outline: 0px !important;
+        }
+
+        div#customer-profile .customer-profile__container {
+            align-items: flex-end;
+        }
+
+        button.artm-cat-drawer-trigger::before {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-size: 28px;
+            line-height: inherit;
+            color: black;
+            content: '\e609';
+            font-family: 'icons-blank-theme';
+            vertical-align: middle;
+            display: inline-block;
+            font-weight: normal;
+            overflow: hidden;
+            speak: none;
+            background: white;
+            position: relative;
+            text-align: center;
+            left: 5px;
+        }
+
+        .nav-toggle:before,
+        button.artm-cat-drawer-trigger svg,
+        button.artm-cat-drawer-trigger span {
+            display: none;
+        }
+
+        button.artm-cat-drawer-trigger {
+            padding: 0px;
+            height: auto;
+            position: absolute;
+        }
+    }
+</style>

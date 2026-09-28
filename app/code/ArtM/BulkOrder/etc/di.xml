@@ -1,0 +1,29 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../lib/internal/Magento/Framework/ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="artm_partnersbulkcsv_data_source" xsi:type="string">ArtM\BulkOrder\Model\ResourceModel\PartnersBulkorder\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="ArtM\BulkOrder\Model\ResourceModel\PartnersBulkorder\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">artm_bulkorder_partner</argument>
+            <argument name="resourceModel" xsi:type="string">ArtM\BulkOrder\Model\ResourceModel\PartnersBulkorder</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="artm_bulkorder_data_source" xsi:type="string">ArtM\BulkOrder\Model\ResourceModel\Bulkorder\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="ArtM\BulkOrder\Model\ResourceModel\Bulkorder\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">artm_bulkorder</argument>
+            <argument name="resourceModel" xsi:type="string">ArtM\BulkOrder\Model\ResourceModel\Bulkorder</argument>
+        </arguments>
+    </virtualType>
+</config>

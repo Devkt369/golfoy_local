@@ -1,0 +1,66 @@
+<?php
+    $converted = $block->getData('converted') ?? [];
+    $failed = $block->getData('failed') ?? [];
+?>
+<div class="order-convert-summary">
+    <h1>Order Conversion Summary</h1>
+    <?php if (empty($converted) && empty($failed)): ?>
+        <p>No orders found in processing state.</p>
+    <?php else: ?>
+        <table class="data table" style="width:100%; border-collapse:collapse;">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Increment ID</th>
+                    <th>Status</th>
+                    <th>Error Message</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php $i = 1; ?>
+            <?php foreach ($converted as $id): ?>
+                <tr>
+                    <td><?= $i++ ?></td>
+                    <td><?= $id ?></td>
+                    <td style="color:green;font-weight:bold;">&#10004; Success</td>
+                    <td>-</td>
+                </tr>
+            <?php endforeach; ?>
+            <?php foreach ($failed as $fail): ?>
+                <tr>
+                    <td><?= $i++ ?></td>
+                    <td><?= $fail['increment_id'] ?></td>
+                    <td style="color:red;font-weight:bold;">&#10006; Failed</td>
+                    <td><?= $fail['error'] ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+        <div style="margin-top:20px;">
+            <b>Total Converted:</b> <span style="color:green;"><?= count($converted) ?></span> |
+            <b>Failed:</b> <span style="color:red;"><?= count($failed) ?></span>
+        </div>
+    <?php endif; ?>
+</div>
+
+<style>
+    .order-convert-summary {
+        background: #fff;
+        padding: 20px;
+        margin: 20px auto;
+        max-width: 900px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-radius: 8px;
+    }
+    .order-convert-summary h1 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .order-convert-summary table th {
+        background: #007bff;
+        color: #fff;
+    }
+    .order-convert-summary table, th, td {
+        border: 1px solid #ccc;
+    }
+</style>

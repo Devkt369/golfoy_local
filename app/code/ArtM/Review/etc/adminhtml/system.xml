@@ -1,0 +1,60 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+	<system>
+		<tab id="artm" translate="label" sortOrder="999">
+			<label>artm</label>
+		</tab>
+		<section id="review" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+			<label>review</label>
+			<tab>artm</tab>
+			<resource>ArtM_Review::config_artm_review</resource>
+			<group id="general" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+				<label>general</label>
+				<field id="module" type="select" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>module</label>
+					<comment/>
+					<source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+				</field>
+				<field id="from_days_default_30" type="text" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>from_days_default_30</label>
+					<comment/>
+				</field>
+				<field id="to_days_default_60" type="text" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>to_days_default_60</label>
+					<comment/>
+				</field>
+				<field id="comments_for_5_star" type="textarea" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>comments_for_5_star</label>
+					<comment/>
+				</field>
+				<field id="comments_for_4_star" type="textarea" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>comments_for_4_star</label>
+					<comment/>
+				</field>
+				<field id="comments_for_3_star" type="textarea" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>comments_for_3_star</label>
+					<comment/>
+				</field>
+				<field id="comments_for_2_star" type="textarea" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>comments_for_2_star</label>
+					<comment/>
+				</field>
+				<field id="comments_for_1_star" type="textarea" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>comments_for_1_star</label>
+					<comment/>
+				</field>
+			</group>
+			<group id="automated_emails" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+				<label>Automated Emails</label>
+				<field id="email_from_days" type="text" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>from days default 30</label>
+					<comment/>
+				</field>
+				<field id="email_to_days" type="text" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>to days default 60</label>
+					<comment/>
+				</field>
+				</group>
+		</section>
+	</system>
+</config>

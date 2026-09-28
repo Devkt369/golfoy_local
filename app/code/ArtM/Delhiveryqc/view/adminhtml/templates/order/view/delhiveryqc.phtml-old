@@ -1,0 +1,597 @@
+<style>
+    .single_prd {
+        width: 100%;
+        display: inline-block;
+    }
+
+    .single_prd > div {
+        display: inline-block;
+        float: left;
+    }
+    .form_content-order_feedback input {
+        margin: 8px 0px;
+        width: 60px;
+    }
+    .single_prd > div.left_container {
+        width: calc(100% - 300px);
+    }
+    .single_prd > div.middle_container {
+        width: 100px;
+        padding: 0px 10px;
+        display: none;
+    }
+    .single_prd > div.right_container {
+        width: 290px;
+    }
+    .single_prd:first-child {
+        border-top: 1px solid #ededed;
+    }
+
+    .single_prd {
+        width: 100%;
+        display: inline-block;
+        border-bottom: 1px solid #ededed;
+        padding: 10px;
+    }
+    button.add_prd_to_qc_button {
+        background-color: #7b7b7b;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 8px 15px 10px;
+        opacity: 1;
+        margin-top: 20px;
+    }
+    .button_add_to_qc {
+        text-align: right;
+    }
+    #delhiveryqc_submition > div > div {
+        display: inline-block;
+    }
+    .products_details > div {
+        width: 100%;
+        display: inline-block;
+    }
+    form#delhiveryqc_submition {
+        border: 1px solid #dddddd;
+        padding: 10px;
+    }
+    .submit_qc {
+        text-align: right;
+    }
+    .submit_qc_button.disable {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    .hide{ 
+        display: none;
+    }
+    .products_details_single_prd {
+        border-bottom: 1px solid lightgrey;
+        padding: 10px 0px;
+        border-top: 1px solid lightgrey;
+        margin-top: 3px;
+    }
+
+    .products_details_single_prd > br {
+        display: none;
+    }
+    .products_details_single_prd > input {
+        display: inline-block;
+        width: auto;
+        /* border: 1px solid red; */
+    }
+    .order_details > div input {
+        width: 95%;
+    }
+
+    .order_details > div {
+        display: inline-block;
+        min-width: 114px;
+    }
+    .single_prd > div.right_container .add_button > * {
+        display: inline-block;
+        float: right;
+    }
+    .single_prd > div.right_container .add_button > input {
+        margin-top: 8px;
+        width: 50px;
+        height: 23px;
+        cursor: pointer;
+    }
+    .products_details_single_prd > div input {
+        width: 95%;
+    }
+    .products_details_single_prd > div {
+        display: inline-block;
+        min-width: 125px;
+    }
+    form#delhiveryqc_submition legend.admin__legend {
+        margin-bottom: 10px;
+        margin-top: 0px;
+    }
+    .order_details, .products_details {
+        margin-bottom: 30px;
+    }
+    .single_prd table {
+        border-top: 1px solid #d7d7d7;
+        text-align: left;
+        padding: 10px;
+    }
+    tr.question_orderdetails_row:last-child {
+        border-top: 1px solid #eaeaea;
+    }
+    tr.question_orderdetails_row {
+        height: 35px;
+        border-top: 1px solid #eaeaea;
+    }
+    .single_prd {
+        border: 1px solid #cdcdcd !important;
+        margin-bottom: 10px;
+    }
+    tr.question_orderdetails_row.active_row {
+        background-color: #e9e9e9;
+        color: black;
+    }
+    tr.question_orderdetails_row td, .single_prd table th {
+        padding: 0px 8px;
+        line-height: 15px;
+        font-size: 13px;
+    }
+    tr.question_orderdetails_row {
+        cursor: pointer;
+    }
+    .non-pointer_row{
+        opacity: .3;
+        pointer-events: none;
+    }
+    .single_prd .product_name {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    .single_prd .product_sku {
+        font-size: 12px;
+        margin-bottom: 5px;
+    }
+    .single_prd legend.admin__legend {
+        margin-bottom: 5px;
+        margin-top: 20px;
+    }
+    .single_prd table td input, .single_prd table td textarea, .single_prd table td select {
+        width: 100%;
+    }
+    td.question_orderdetails div:after {
+        height: 20px;
+        width: 20px;
+        border: 1px solid #676767;
+        display: inline-block;
+        content: ' ';
+    }
+    td.question_orderdetails.active_row div:after {
+        background-color: #676767;
+    }
+    .single_prd table th h6 {
+        margin-bottom: 0px;
+        font-size: 10px;
+        font-weight: 500;
+    }
+
+    .single_prd table th {
+        vertical-align: baseline;
+    }
+    .add_button > div {
+        width: 100%;
+        text-align: right;
+    }
+    
+</style>
+<?php    
+    $objectManager =  \Magento\Framework\App\ObjectManager::getInstance();
+    $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+    
+    $helper = $objectManager->get('ArtM\Delhiveryqc\Helper\Data');
+    $store = $storeManager->getStore();
+    $baseUrl = $store->getBaseUrl();
+
+    $order_id = $this->getRequest()->getParam('order_id');
+
+
+//    echo "calling package id here<br>";
+    $result = $helper->GetProductsDataByPackageId(5647510001061);
+//    print_r($result);
+
+?>
+
+
+
+
+<section class="admin__page-section order_feedback">
+    <div class="admin__page-section-title">
+        <span class="title">Quality Check</span>
+    </div>
+    <div class="admin__page-section-content">
+        <div class="box box-order_feedback">
+            <div class="box-content">
+                <div class="form_content-order_feedback">
+                    <div class="box box-order_feedback">
+                        <div class="Shipping address hide" style="display:none">
+                            <div class="quality_check">
+                                <div class="label">quality_check</div>
+                                <div class="value"><?php echo "true"; ?></div>
+                            </div>
+                            <div class="order">
+                                <div class="label">order</div>
+                                <div class="value"><?php echo "Order_id"; ?></div>
+                            </div>
+                            <div class="phone">
+                                <div class="label">phone</div>
+                                <div class="value"><?php echo "phone"; ?></div>
+                            </div>
+                            <div class="products_desc">
+                                <div class="label">products_desc</div>
+                                <div class="value"><?php echo "products_desc"; ?></div>
+                            </div>
+                            <div class="name">
+                                <div class="label">name</div>
+                                <div class="value"><?php echo "name"; ?></div>
+                            </div>
+                            <div class="country">
+                                <div class="label">country</div>
+                                <div class="value"><?php echo "country"; ?></div>
+                            </div>
+                            <div class="order_date">
+                                <div class="label">order_date</div>
+                                <div class="value"><?php echo "order_date"; ?></div>
+                            </div>
+                            <div class="total_amount">
+                                <div class="label">total_amount</div>
+                                <div class="value"><?php echo "total_amount"; ?></div>
+                            </div>
+                            <div class="add">
+                                <div class="label">add</div>
+                                <div class="value"><?php echo "add"; ?></div>
+                            </div>
+                            <div class="pin">
+                                <div class="label">pin</div>
+                                <div class="value"><?php echo "pin"; ?></div>
+                            </div>
+                            <div class="quantity">
+                                <div class="label">quantity</div>
+                                <div class="value"><?php echo "quantity"; ?></div>
+                            </div>
+                            <div class="payment_mode">
+                                <div class="label">payment_mode</div>
+                                <div class="value"><?php echo "payment_mode"; ?></div>
+                            </div>
+                            <div class="state">
+                                <div class="label">state</div>
+                                <div class="value"><?php echo "state"; ?></div>
+                            </div>
+                            <div class="city">
+                                <div class="label">city</div>
+                                <div class="value"><?php echo "city"; ?></div>
+                            </div>
+                        </div>          
+                        
+                        
+                        
+                        <div class="product_selection">
+                        <?php
+                            $orderdetails = $this->GetOrderDetails($order_id);
+//                            echo "Order Detais<br>";
+//                            print_r($orderdetails);
+//                            echo "<br><br>";
+//                            echo "Product Details";
+//                            echo "<br><br><br>";
+                            $ProductDetails = $this->GetProductDetails($order_id);
+                            $question_table = 1;
+                            
+                            foreach($ProductDetails as $prd){
+//                                print_r($prd);
+//                                    echo "false here";
+                        ?>
+                                    <div class="single_prd">
+                                        <div class="left_container">
+                                            <div class="prd_info">
+                                                <div class="product_name">
+                                                    <?php echo $prd['name']; ?>
+                                                </div>
+                                                <div class="product_sku">
+                                                    <?php echo $prd['sku']; ?>
+                                                </div>
+                                                <div class="product_orderedqty">
+                                                    <?php echo "Ordered QTY: ".$prd['qtyordered']; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="middle_container hide">
+                                            <div class="prd_qty">
+                                                <div class="product_qty">
+                                                    <input type="number" class="qty_to_qc_frontend" max="<?php echo (int)$prd['qtyordered']; ?>" value="<?php echo $prd['qtyordered']; ?>" step="1" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="right_container">
+                                            <div class="prd_add_to_qc">
+                                                <div class="add_button">
+                                                    <?php
+                                
+                                                        
+                                
+                                                        $can_show_response = $helper->CanShow( $orderdetails['incrementid'], $prd['prd_id'] );
+//                                                        echo "<br>can_show_response: ".print_r($can_show_response)."-";
+                                
+                                                        if( $helper->GetReturnReason( $order_id, $prd['prd_id'] ) == false ){
+                                                            echo "<div class='error_msg'>Return Reason not found</div>";
+                                                        }else if( $can_show_response['message'] != '' ){
+                                                            echo "<div class='error_msg'>".$can_show_response['message']."</div>";
+                                                        }else{
+                                                    ?>      
+                                                            <input type="checkbox" id="<?php echo $prd['sku']; ?>" class="select_qc_checkbox" question_table="question_table_<?php echo $question_table; ?>" />
+                                                    <?php 
+                                                        }
+                                                    ?>
+                                                    <div class="all_info_to_submit">
+                                                        <input type="number" name="qty_to_qc" value="<?php echo (int)$prd['qtyordered']; ?>" max="<?php echo (int)$prd['qtyordered']; ?>" />
+                                                        <input class="" type="hidden" name="name" value="<?php echo $prd['name']; ?>" />
+                                                        <input class="" type="hidden" name="sku" value="<?php echo $prd['sku']; ?>" />
+                                                        <input class="" type="hidden" name="attribute_set" value="<?php echo $helper->GetAttributeSetName( $prd['prd_id'] ); ?>" />
+
+                                                        <input class="" type="hidden" name="images" value="<?php echo $helper->GetImages( $prd['prd_id'] ); ?>" />
+                                                        <input class="" type="hidden" name="return_reason" value="<?php echo $helper->GetReturnReason( $order_id, $prd['prd_id'] ); ?>" />
+                                                        <input class="" type="hidden" name="brand" value="<?php echo $helper->GetBrand( $prd['prd_id'] ); ?>" />
+                                                        <input class="" type="hidden" name="price" value="<?php echo (int)$prd['price']; ?>" />
+                                                        <input class="" type="hidden" name="id" value="<?php echo $prd['prd_id']; ?>" />
+                                                        <input class="question_data" type="hidden" name="question_data" value="null now" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                            
+                        <?php
+                                    $question_arr = $helper->GetQuestions();
+                                    if( $question_arr != false ){
+                                        
+                                        //print_r($question_arr);
+                                        echo '<legend class="admin__legend"><span>Select Question</span></legend>';
+                                            
+                                        echo "<table id='question_table_".$question_table."'>";
+                                        echo "<tr><th></th><th>Question</th><th>Options<br><h6>(Enter all options with comma seperated)</h6></th><th>Value</th><th>Required</th><th>Type</th></tr>";
+                                        foreach($question_arr as $questions){
+                                            echo "<tr class='question_orderdetails_row'>";
+                                            
+                                                echo "<td class='question_orderdetails'><div class=''></div></td>";
+                                                echo "<td><input type='text' name='question' value='".$questions['questions_id']."' /></td>";
+                                                echo "<td><input type='text' name='options' value='".$questions['options']."' /></td>";
+                                                echo "<td><input type='text' name='value' value='".$questions['value']."' /></td>";
+                                            
+//                                                echo "<td>".$questions['options']."</td>";
+//                                                echo "<td><input type='text' value='".$questions['value']."' /></td>";
+//                                                echo "<td>".$questions['required']."</td>";
+                                            
+                                                echo "<td><select name='required'>";
+                                                    echo "<option value='true'>true</option>";
+                                                    echo "<option value='false'>false</option>";
+                                                echo "</select></td>";
+                                            
+                                                
+                                                echo "<td><select name='type'>";
+                                                    echo "<option value='".$questions['type']."' >".$questions['type']."</option>";
+                                                    echo "<option value='true'>multi</option>";
+                                                    echo "<option value='false'>varchar</option>";
+                                                echo "</select></td>";
+                                            
+//                                                echo "<td><input type='text' name='type' value='".$questions['type']."' /></td>";
+//                                                echo "<td>".$questions['type']."</td>";
+                                            
+                                            echo "</tr>";
+                                        }
+                                        echo "</table>";
+                                    }
+                        ?>
+                                </div>
+                        <?php
+                                $question_table = $question_table + 1;
+                            }
+                        ?>  
+                            
+                        </div>
+                        <div class="selected_prd hide">
+                            <form action="post">
+                                <div class="summary">
+                                    
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <form id="delhiveryqc_submition" action="<?php echo $this->GetQcFormAction(); ?>" method="post" enctype="multipart/form-data">
+                            <?php echo $block->getBlockHtml('formkey') ?>
+                            <div class="order_details">
+                                <legend class="admin__legend"><span>Order Details</span></legend>
+                                <div>
+                                    <div class="label">Incrementid</div>
+                                    <input type="text" value="<?php echo $orderdetails['incrementid'] ?>" name="incrementid" /><br>
+                                </div>
+                                <div>
+                                    <div class="label">Create date</div>
+                                    <input type="text" value="<?php echo $orderdetails['createdat'] ?>" name="createdat" /><br>
+                                </div>
+                                <div>
+                                    <div class="label">Telephone</div>
+                                    <input type="text" value="<?php echo $orderdetails['telephone'] ?>" name="telephone" /><br>
+                                </div>
+                                <div>
+                                    <div class="label">Name</div>
+                                    <input type="text" value="<?php echo $orderdetails['name'] ?>" name="name" /><br>
+                                </div>
+                                <div>
+                                    <div class="label">Country</div>
+                                    <input type="text" value="<?php echo $helper->GetCountryCode( $orderdetails['country'] ); ?>" name="country" />
+                                    <br>
+                                </div>
+                                <div>
+                                    <div class="label">Street</div>
+                                    <input type="text" value="<?php echo $orderdetails['street'] ?>" name="street" /><br>
+                                </div>
+                                <div>
+                                    <div class="label">Postcode</div>
+                                    <input type="text" value="<?php echo $orderdetails['postcode'] ?>" name="postcode" /><br>
+                                </div>
+                                <div>
+                                    <div class="label">City</div>
+                                    <input type="text" value="<?php echo $orderdetails['city'] ?>" name="city" /><br>
+                                </div>
+                                <div>
+                                    <div class="label">Region</div>
+                                    <input type="text" value="<?php echo $orderdetails['region'] ?>" name="region" /><br>
+                                </div>
+                                <div>
+                                    <div class="label">Payment Mode</div>
+                                    <input type="text" value="<?php echo $orderdetails['payment_mode'] ?>" name="payment_mode" /><br>
+                                </div>
+                                <div>
+                                    <div class="label">Product Description</div>
+                                    <input type="text" name="product_description" id="order_details_prd_description" /><br>
+                                </div>
+                                <div>
+                                    <div class="label">Total Amount</div>
+                                    <input type="text" name="total_amount" id="order_details_prd_amount" /><br>
+                                </div>
+                                <div>
+                                    <div class="label">Qty</div>
+                                    <input type="text" name="qty" id="order_details_prd_qty" /><br>
+                                </div>
+                            </div>
+                            
+                            <legend class="admin__legend"><span>Product Detail</span></legend>
+                            <div class="products_details">
+                                <p>Please select Products</p>
+                            </div>
+                            
+                            <div class="submit_qc">
+                                <div class="submit_qc">
+                                    <button type="submit" class="submit_qc_button disable" id="submit_qc_button">Please Choose Products</button>
+<!--                                    <input type="submit" value="Submit" />-->
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section> 
+
+
+<?php 
+//    $helper->CreateQcOrder();
+?>
+
+
+<script type="text/javascript">
+    require(['jquery'], function(jQuery) {
+        jQuery('.prd_add_to_qc input[type="checkbox"]').click(function() {
+            jQuery('#delhiveryqc_submition').children('.products_details').html('');
+              
+            var checkboxContainer = jQuery(this).closest('.single_prd');
+            var i = 1;
+            var button_value = 0;
+            var prd_decription = '';
+            var qty_to_qc = 0;
+            var price = 0;
+            
+            
+            jQuery('.single_prd').each(function() {
+                var checkbox = jQuery(this).find('.add_button').find('input[type="checkbox"]');
+                
+                if (checkbox.is(':checked')) {
+//                    jQuery(this).siblings('.all_info_to_submit').children('input').attr('disable');
+                    
+                    var curr_table_id = jQuery(checkbox).attr('question_table');
+                    
+                    var data = '';
+                    jQuery("#"+curr_table_id+" ").find('tr.question_orderdetails_row.active_row').each(function(){
+                        data = data + "{";
+                        
+                            data = data + '"question":"' + jQuery(this).find('input[name="question"]').val() + '",';
+                            data = data + '"options":"' + jQuery(this).find('input[name="options"]').val() + '",';
+                            data = data + '"value":"' + jQuery(this).find('input[name="value"]').val() + '",';
+                            data = data + '"required":"' + jQuery(this).find('select[name="required"]').val() + '",';
+                            data = data + '"type":"' + jQuery(this).find('select[name="type"]').val() + '"';
+                        
+                        data = data + "}";
+//                        alert(data);
+                    });
+//                    alert(data);
+                        jQuery(checkbox).siblings('.all_info_to_submit').children('.question_data').val( data );
+//                    jQuery(checkbox).addclass('hbvfeew');
+                    
+                    
+                    var html ='';
+                    
+                    jQuery(checkbox).siblings('.all_info_to_submit').children('input').each(function(){
+                        var name = jQuery(this).attr('name');
+                        var value = jQuery(this).attr('value');
+                        var value = jQuery(this).val();
+                        
+                        if(name == 'question_data'){
+                            value = data;
+                        }
+                        
+                        html = html + "<div class='single_prd_details'>";
+//                        product-"+ i + " " 
+                        html = html + "<div>" + name + "</div><input type='text' name='product["+i+"]["+name+"]' value='"+value+"' /><br>";
+                        html = html + "</div>";
+                        
+                        if(name == 'name'){
+                            prd_decription = prd_decription + value + ' | ';
+                        }
+                        if(name == 'qty_to_qc'){
+                            
+                            qty_to_qc = parseInt(qty_to_qc) + parseInt( jQuery(this).val() );
+//                            qty_to_qc = parseInt(qty_to_qc) + parseInt(value);
+                        }
+                        if(name == 'price'){
+                            price = parseInt(price) + ( parseInt(value) * parseInt(qty_to_qc) );
+                        }
+                        
+                    });   
+                    
+                    jQuery('#delhiveryqc_submition').children('.products_details').append("<div class='products_details_single_prd'>" + html + "</div>");
+                    i++;
+                    
+                    button_value = 1;
+                    
+                    jQuery(checkbox).siblings().addClass('non-pointer_row');
+                    jQuery(checkbox).parent().parent().parent().siblings().addClass('non-pointer_row');
+                    
+                    
+                }else{
+                    jQuery(checkbox).siblings().removeClass('non-pointer_row');
+                    jQuery(checkbox).parent().parent().parent().siblings().removeClass('non-pointer_row');
+                }
+            });
+            if( button_value == 0){
+                var text = "Please Choose Products";
+                jQuery('#submit_qc_button').addClass("disable");
+                
+            }else if( button_value == 1){
+                var text = 'Submit QC';
+                jQuery('#submit_qc_button').removeClass("disable");
+            }
+            jQuery('#submit_qc_button').text( text );
+            jQuery('#order_details_prd_description').val( prd_decription );
+            jQuery('#order_details_prd_qty').val( qty_to_qc );
+            jQuery('#order_details_prd_amount').val( price );
+            
+            
+            
+        });
+        jQuery('.question_orderdetails').click(function(){
+            jQuery(this).parent('tr').toggleClass('active_row');
+            jQuery(this).toggleClass('active_row');
+        });
+    });
+
+</script>

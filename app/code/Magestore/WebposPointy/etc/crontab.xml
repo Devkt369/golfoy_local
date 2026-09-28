@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2016 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="default">
+        <job name="magestore_pointy_integration_cron_submit_sales" instance="Magestore\WebposPointy\Cron\SubmitSales" method="execute">
+            <schedule>0 * * * *</schedule>
+        </job>
+        <job name="magestore_pointy_integration_cron_submit_inventory"
+             instance="Magestore\WebposPointy\Cron\SubmitInventory" method="execute">
+            <schedule>0 0 * * *</schedule>
+        </job>
+    </group>
+</config>

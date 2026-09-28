@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Custom Homepage Layout
+ * Replaces default CMS homepage content with custom template
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="css/homepage.css" />
+    </head>
+    <body>
+        <!-- Remove default CMS page content -->
+        <referenceContainer name="content">
+            <block class="Magento\Framework\View\Element\Template" 
+                   name="custom.homepage" 
+                   template="Magento_Theme::html/homepage/homepage.phtml" />
+        </referenceContainer>
+        
+        <!-- Remove the default CMS content block if it exists -->
+        <referenceBlock name="page.main.title" remove="true"/>
+    </body>
+</page>

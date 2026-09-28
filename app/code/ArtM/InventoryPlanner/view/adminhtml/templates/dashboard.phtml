@@ -1,0 +1,449 @@
+<?php
+/**
+ * @var \ArtM\InventoryPlanner\Block\Adminhtml\Dashboard $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+$weekOptions = $block->getWeekOptions();
+$pageSizeOptions = $block->getPageSizeOptions();
+$selectedFromWeeks = $block->getSelectedFromWeeks();
+$selectedToWeeks = $block->getSelectedToWeeks();
+$selectedPageSize = $block->getSelectedPageSize();
+$rows = $block->getReportRows();
+$currentPage = $block->getCurrentPage();
+$totalPages = $block->getTotalPages();
+$totalRecords = $block->getTotalRecordsCount();
+$attributeSetOptions = $block->getAttributeSetOptions();
+$brandOptions = $block->getBrandOptions();
+$hasAttributeSetFilter = (bool) $block->getSelectedAttributeSetFilters();
+$hasBrandFilter = (bool) $block->getSelectedBrandFilters();
+$liveInventoryEnabled = $block->isLiveInventoryEnabled();
+$columnGroups = $block->getColumnGroupsForPopup();
+$currentQueryParams = $block->getCurrentQueryParams();
+
+/**
+ * Renders an inventory cell's contents - shared markup for both the Captured
+ * Inventory and Live Inventory columns, which only differ in where their data
+ * comes from ($row['captured_inventory'] vs $row['live_inventory']).
+ */
+$renderInventoryCell = static function (?array $inventory) use ($escaper): void {
+    if ($inventory === null) {
+        ?>
+        <span class="artm-inventory-empty">&mdash;</span>
+        <?php
+        return;
+    }
+    ?>
+    <div class="artm-inventory-cell">
+        <div class="artm-inventory-dated">
+            <?= $escaper->escapeHtml(__('Dated')) ?>: <?= $escaper->escapeHtml($inventory['calculated_at']) ?>
+        </div>
+        <div class="artm-inventory-line">
+            <span class="artm-inventory-label"><?= $escaper->escapeHtml(__('Total In Selected Sources')) ?>:</span>
+            <strong><?= $escaper->escapeHtml((string) $inventory['total_selected_source_qty']) ?></strong>
+        </div>
+        <?php foreach ($inventory['sources'] as $source): ?>
+            <div class="artm-inventory-source-line">
+                <?= $escaper->escapeHtml($source['name']) ?>: <?= $escaper->escapeHtml((string) $source['qty']) ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+    <?php
+};
+
+/**
+ * Renders a sortable column header: a plain link that resubmits the page with
+ * sort/dir query params - there is no JS framework in this module, so sorting is
+ * handled entirely server-side via normal page reloads.
+ */
+$renderSortableHeader = static function (string $field, $label) use ($block, $escaper): void {
+    ?>
+    <th>
+        <a href="<?= $escaper->escapeUrl($block->getSortUrl($field)) ?>">
+            <?= $escaper->escapeHtml((string) $label) ?>
+            <?= /* @noEscape */ $block->getSortIndicator($field) ?>
+        </a>
+    </th>
+    <?php
+};
+
+/**
+ * Renders the Previous/Next + "Showing X to Y out of Z" pagination bar - used both
+ * above and below the table.
+ */
+$renderPagination = static function () use ($block, $escaper, $currentPage, $totalPages, $totalRecords): void {
+    ?>
+    <div class="artm-pagination">
+        <span class="artm-pagination-summary">
+            <?= $escaper->escapeHtml(__(
+                'Showing %1 to %2 out of %3',
+                $block->getRangeStart(),
+                $block->getRangeEnd(),
+                $totalRecords
+            )) ?>
+        </span>
+        <span class="artm-pagination-links">
+            <?php if ($currentPage > 1): ?>
+                <a href="<?= $escaper->escapeUrl($block->getPageUrl($currentPage - 1)) ?>"><?= $escaper->escapeHtml(__('&laquo; Previous')) ?></a>
+            <?php else: ?>
+                <span class="artm-pagination-disabled"><?= $escaper->escapeHtml(__('&laquo; Previous')) ?></span>
+            <?php endif; ?>
+
+            <?php if ($currentPage < $totalPages): ?>
+                <a href="<?= $escaper->escapeUrl($block->getPageUrl($currentPage + 1)) ?>"><?= $escaper->escapeHtml(__('Next &raquo;')) ?></a>
+            <?php else: ?>
+                <span class="artm-pagination-disabled"><?= $escaper->escapeHtml(__('Next &raquo;')) ?></span>
+            <?php endif; ?>
+        </span>
+    </div>
+    <?php
+};
+
+/**
+ * Renders every hidden field needed to carry the current weeks/filters/sort/page
+ * state through the (separate, POST) Columns form, so saving column visibility
+ * doesn't reset the view the admin was looking at.
+ */
+$renderCarriedStateFields = static function () use ($currentQueryParams, $escaper): void {
+    foreach ($currentQueryParams as $name => $value) {
+        if (is_array($value)) {
+            foreach ($value as $singleValue) {
+                ?>
+                <input type="hidden" name="<?= $escaper->escapeHtmlAttr($name) ?>[]" value="<?= $escaper->escapeHtmlAttr($singleValue) ?>"/>
+                <?php
+            }
+        } else {
+            ?>
+            <input type="hidden" name="<?= $escaper->escapeHtmlAttr($name) ?>" value="<?= $escaper->escapeHtmlAttr($value) ?>"/>
+            <?php
+        }
+    }
+};
+?>
+<div class="artm-inventory-planner">
+    <div class="artm-toolbar">
+        <form method="get" action="<?= $escaper->escapeUrl($block->getFormActionUrl()) ?>" class="artm-toolbar-get-form">
+            <div class="artm-filter-form">
+                <div class="artm-filter-field">
+                    <label for="artm_from_weeks"><?= $escaper->escapeHtml(__('From (Last N Weeks)')) ?></label>
+                    <select id="artm_from_weeks" name="from_weeks">
+                        <?php foreach ($weekOptions as $weeks): ?>
+                            <option value="<?= (int) $weeks ?>" <?= $weeks === $selectedFromWeeks ? 'selected="selected"' : '' ?>>
+                                <?= (int) $weeks ?> <?= $escaper->escapeHtml(__('Weeks')) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="artm-filter-field">
+                    <label for="artm_to_weeks"><?= $escaper->escapeHtml(__('To (Last N Weeks)')) ?></label>
+                    <select id="artm_to_weeks" name="to_weeks">
+                        <?php foreach ($weekOptions as $weeks): ?>
+                            <option value="<?= (int) $weeks ?>" <?= $weeks === $selectedToWeeks ? 'selected="selected"' : '' ?>>
+                                <?= (int) $weeks ?> <?= $escaper->escapeHtml(__('Weeks')) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="artm-filter-field">
+                    <label for="artm_page_size"><?= $escaper->escapeHtml(__('Show Per Page')) ?></label>
+                    <select id="artm_page_size" name="limit">
+                        <?php foreach ($pageSizeOptions as $pageSize): ?>
+                            <option value="<?= (int) $pageSize ?>" <?= $pageSize === $selectedPageSize ? 'selected="selected"' : '' ?>>
+                                <?= (int) $pageSize ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="artm-filter-field artm-filter-checkbox">
+                    <label for="artm_live_inventory">
+                        <input type="checkbox" id="artm_live_inventory" name="live_inventory" value="1" <?= $liveInventoryEnabled ? 'checked="checked"' : '' ?>/>
+                        <?= $escaper->escapeHtml(__('Show Live Inventory')) ?>
+                    </label>
+                </div>
+                <div class="artm-filter-field artm-filter-submit">
+                    <button type="submit" class="action-default scalable"><?= $escaper->escapeHtml(__('Submit')) ?></button>
+                </div>
+            </div>
+
+            <details class="artm-filters-panel">
+                <summary class="artm-filters-button"><?= $escaper->escapeHtml(__('Filters')) ?></summary>
+                <div class="artm-filters-panel-body">
+                    <div class="artm-filter-field">
+                        <label for="artm_sku">
+                            <?= $escaper->escapeHtml(__('SKU')) ?>
+                            <span class="artm-multiselect-hint"><?= $escaper->escapeHtml(__('(comma-separated for multiple)')) ?></span>
+                        </label>
+                        <input type="text" id="artm_sku" name="sku" value="<?= $escaper->escapeHtmlAttr($block->getSkuFilterValue()) ?>" placeholder="<?= $escaper->escapeHtmlAttr(__('e.g. SKU1, SKU2, SKU3')) ?>"/>
+                    </div>
+                    <div class="artm-filter-field">
+                        <label for="artm_product_name"><?= $escaper->escapeHtml(__('Product')) ?></label>
+                        <input type="text" id="artm_product_name" name="product_name" value="<?= $escaper->escapeHtmlAttr($block->getProductNameFilterValue()) ?>" placeholder="<?= $escaper->escapeHtmlAttr(__('Search by product name')) ?>"/>
+                    </div>
+                    <div class="artm-filter-field">
+                        <label for="artm_attribute_set">
+                            <?= $escaper->escapeHtml(__('Attribute Set')) ?>
+                            <span class="artm-multiselect-hint"><?= $escaper->escapeHtml(__('(Ctrl/Cmd+click to select multiple)')) ?></span>
+                        </label>
+                        <select id="artm_attribute_set" name="attribute_set[]" multiple="multiple" size="6">
+                            <?php foreach ($attributeSetOptions as $option): ?>
+                                <option value="<?= (int) $option['value'] ?>" <?= $block->isAttributeSetSelected((string) $option['value']) ? 'selected="selected"' : '' ?>>
+                                    <?= $escaper->escapeHtml($option['label']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <?php if ($hasAttributeSetFilter): ?>
+                            <a class="artm-filter-clear-one" href="<?= $escaper->escapeUrl($block->getUrlWithoutParams(['attribute_set'])) ?>" title="<?= $escaper->escapeHtmlAttr(__('Clear')) ?>">&times;</a>
+                        <?php endif; ?>
+                    </div>
+                    <div class="artm-filter-field">
+                        <label for="artm_brand">
+                            <?= $escaper->escapeHtml(__('Brand')) ?>
+                            <span class="artm-multiselect-hint"><?= $escaper->escapeHtml(__('(Ctrl/Cmd+click to select multiple)')) ?></span>
+                        </label>
+                        <select id="artm_brand" name="brand[]" multiple="multiple" size="6">
+                            <?php foreach ($brandOptions as $option): ?>
+                                <option value="<?= $escaper->escapeHtmlAttr($option['value']) ?>" <?= $block->isBrandSelected($option['value']) ? 'selected="selected"' : '' ?>>
+                                    <?= $escaper->escapeHtml($option['label']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <?php if ($hasBrandFilter): ?>
+                            <a class="artm-filter-clear-one" href="<?= $escaper->escapeUrl($block->getUrlWithoutParams(['brand'])) ?>" title="<?= $escaper->escapeHtmlAttr(__('Clear')) ?>">&times;</a>
+                        <?php endif; ?>
+                    </div>
+                    <div class="artm-filter-field">
+                        <label><?= $escaper->escapeHtml($block->getFromColumnLabel()) ?></label>
+                        <div class="artm-range-inputs">
+                            <input type="number" name="from_qty_min" value="<?= $escaper->escapeHtmlAttr($block->getRangeFilterMin('from_qty')) ?>" placeholder="<?= $escaper->escapeHtmlAttr(__('From')) ?>"/>
+                            <input type="number" name="from_qty_max" value="<?= $escaper->escapeHtmlAttr($block->getRangeFilterMax('from_qty')) ?>" placeholder="<?= $escaper->escapeHtmlAttr(__('To')) ?>"/>
+                        </div>
+                    </div>
+                    <div class="artm-filter-field">
+                        <label><?= $escaper->escapeHtml($block->getDifferenceColumnLabel()) ?></label>
+                        <div class="artm-range-inputs">
+                            <input type="number" name="difference_qty_min" value="<?= $escaper->escapeHtmlAttr($block->getRangeFilterMin('difference_qty')) ?>" placeholder="<?= $escaper->escapeHtmlAttr(__('From')) ?>"/>
+                            <input type="number" name="difference_qty_max" value="<?= $escaper->escapeHtmlAttr($block->getRangeFilterMax('difference_qty')) ?>" placeholder="<?= $escaper->escapeHtmlAttr(__('To')) ?>"/>
+                        </div>
+                    </div>
+                    <div class="artm-filter-field">
+                        <label><?= $escaper->escapeHtml($block->getToColumnLabel()) ?></label>
+                        <div class="artm-range-inputs">
+                            <input type="number" name="to_qty_min" value="<?= $escaper->escapeHtmlAttr($block->getRangeFilterMin('to_qty')) ?>" placeholder="<?= $escaper->escapeHtmlAttr(__('From')) ?>"/>
+                            <input type="number" name="to_qty_max" value="<?= $escaper->escapeHtmlAttr($block->getRangeFilterMax('to_qty')) ?>" placeholder="<?= $escaper->escapeHtmlAttr(__('To')) ?>"/>
+                        </div>
+                    </div>
+                    <div class="artm-filter-field">
+                        <label><?= $escaper->escapeHtml(__('Growth %')) ?></label>
+                        <div class="artm-range-inputs">
+                            <input type="number" name="growth_min" value="<?= $escaper->escapeHtmlAttr($block->getRangeFilterMin('growth')) ?>" placeholder="<?= $escaper->escapeHtmlAttr(__('From')) ?>"/>
+                            <input type="number" name="growth_max" value="<?= $escaper->escapeHtmlAttr($block->getRangeFilterMax('growth')) ?>" placeholder="<?= $escaper->escapeHtmlAttr(__('To')) ?>"/>
+                        </div>
+                    </div>
+                    <div class="artm-filter-field artm-filter-submit">
+                        <button type="submit" class="action-primary scalable"><?= $escaper->escapeHtml(__('Filter')) ?></button>
+                        <?php if ($block->hasActiveFilters()): ?>
+                            <a href="<?= $escaper->escapeUrl($block->getClearFiltersUrl()) ?>"><?= $escaper->escapeHtml(__('Clear All')) ?></a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </details>
+        </form>
+
+        <details class="artm-filters-panel" id="artm_columns_panel">
+            <summary class="artm-filters-button"><?= $escaper->escapeHtml(__('Columns')) ?></summary>
+            <div class="artm-filters-panel-body artm-columns-panel-body">
+                <form method="post" action="<?= $escaper->escapeUrl($block->getSaveColumnsFormActionUrl()) ?>">
+                    <input type="hidden" name="form_key" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>"/>
+                    <?php $renderCarriedStateFields() ?>
+
+                    <?php foreach ($columnGroups as $group): ?>
+                        <?php
+                        $groupColumns = array_keys($group['columns']);
+                        $allVisible = true;
+                        foreach ($groupColumns as $colKey) {
+                            if (!$block->isColumnVisible($colKey)) {
+                                $allVisible = false;
+                                break;
+                            }
+                        }
+                        ?>
+                        <div class="artm-column-checkbox-group">
+                            <label class="artm-column-group-master">
+                                <input type="checkbox" data-role="group-toggle" data-group="<?= $escaper->escapeHtmlAttr($group['key']) ?>" <?= $allVisible ? 'checked="checked"' : '' ?>/>
+                                <strong><?= $escaper->escapeHtml($group['name']) ?></strong>
+                            </label>
+                            <div class="artm-column-checkbox-children">
+                                <?php foreach ($group['columns'] as $colKey => $colLabel): ?>
+                                    <label class="artm-column-checkbox-item">
+                                        <input type="checkbox" name="visible_columns[]" value="<?= $escaper->escapeHtmlAttr($colKey) ?>" data-role="column-toggle" data-group="<?= $escaper->escapeHtmlAttr($group['key']) ?>" <?= $block->isColumnVisible($colKey) ? 'checked="checked"' : '' ?>/>
+                                        <?= $escaper->escapeHtml($colLabel) ?>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+
+                    <div class="artm-filter-field artm-filter-submit">
+                        <button type="submit" class="action-primary scalable"><?= $escaper->escapeHtml(__('Apply')) ?></button>
+                    </div>
+                </form>
+            </div>
+        </details>
+    </div>
+
+    <?php if ($block->hasActiveFilters()): ?>
+        <div class="artm-filter-chips">
+            <?php foreach ($block->getActiveFilterChips() as $chip): ?>
+                <span class="artm-filter-chip">
+                    <?= $escaper->escapeHtml($chip['label']) ?>
+                    <a href="<?= $escaper->escapeUrl($chip['removeUrl']) ?>" title="<?= $escaper->escapeHtmlAttr(__('Remove')) ?>">&times;</a>
+                </span>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!$rows): ?>
+        <div class="message message-notice">
+            <?= $escaper->escapeHtml(__('No synced data found for the selected periods/filters. Run Sync Data / Sync Now first, or adjust your filters.')) ?>
+        </div>
+    <?php else: ?>
+        <?php $renderPagination(); ?>
+
+        <div class="artm-table-card">
+        <div class="artm-table-wrapper">
+        <table class="artm-report-table data-grid">
+            <thead>
+                <tr>
+                    <?php if ($block->isColumnVisible('product_id')): ?>
+                        <?php $renderSortableHeader('product_id', __('Product ID')) ?>
+                    <?php endif; ?>
+                    <?php if ($block->isColumnVisible('product_details')): ?>
+                        <th><?= $escaper->escapeHtml(__('Product Details')) ?></th>
+                    <?php endif; ?>
+                    <?php if ($block->isColumnVisible('attribute_set')): ?>
+                        <?php $renderSortableHeader('attribute_set', __('Attribute Set')) ?>
+                    <?php endif; ?>
+                    <?php if ($block->isColumnVisible('brand')): ?>
+                        <?php $renderSortableHeader('brand', __('Brand')) ?>
+                    <?php endif; ?>
+                    <?php if ($block->isColumnVisible('from_qty')): ?>
+                        <?php $renderSortableHeader('from_qty', $block->getFromColumnLabel()) ?>
+                    <?php endif; ?>
+                    <?php if ($block->isColumnVisible('difference_qty')): ?>
+                        <?php $renderSortableHeader('difference_qty', $block->getDifferenceColumnLabel()) ?>
+                    <?php endif; ?>
+                    <?php if ($block->isColumnVisible('to_qty')): ?>
+                        <?php $renderSortableHeader('to_qty', $block->getToColumnLabel()) ?>
+                    <?php endif; ?>
+                    <?php if ($block->isColumnVisible('growth_percent')): ?>
+                        <?php $renderSortableHeader('growth_percent', __('Growth %')) ?>
+                    <?php endif; ?>
+                    <?php if ($block->isColumnVisible('captured_inventory')): ?>
+                        <th><?= $escaper->escapeHtml(__('Captured Inventory')) ?></th>
+                    <?php endif; ?>
+                    <?php if ($liveInventoryEnabled && $block->isColumnVisible('live_inventory')): ?>
+                        <th><?= $escaper->escapeHtml(__('Live Inventory')) ?></th>
+                    <?php endif; ?>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($rows as $row): ?>
+                    <?php
+                    $growthPercent = $row['growth_percent'];
+                    $growthClass = 'artm-growth-neutral';
+                    if ($growthPercent !== null) {
+                        if ($growthPercent > 0) {
+                            $growthClass = 'artm-growth-positive';
+                        } elseif ($growthPercent < 0) {
+                            $growthClass = 'artm-growth-negative';
+                        }
+                    }
+                    $trendSymbol = ['up' => '&#9650;', 'down' => '&#9660;', 'flat' => '&#9654;'][$row['trend']] ?? '';
+                    ?>
+                    <tr>
+                        <?php if ($block->isColumnVisible('product_id')): ?>
+                            <td><?= (int) $row['product_id'] ?></td>
+                        <?php endif; ?>
+                        <?php if ($block->isColumnVisible('product_details')): ?>
+                            <td>
+                                <div class="artm-product-details">
+                                    <div class="artm-product-name"><?= $escaper->escapeHtml($row['product_name'] ?? '&mdash;') ?></div>
+                                    <div class="artm-product-sku"><?= $escaper->escapeHtml($row['sku'] ?? '&mdash;') ?></div>
+                                </div>
+                            </td>
+                        <?php endif; ?>
+                        <?php if ($block->isColumnVisible('attribute_set')): ?>
+                            <td><?= $escaper->escapeHtml($row['attribute_set'] ?? '&mdash;') ?></td>
+                        <?php endif; ?>
+                        <?php if ($block->isColumnVisible('brand')): ?>
+                            <td><?= $escaper->escapeHtml($row['brand'] ?? '&mdash;') ?></td>
+                        <?php endif; ?>
+                        <?php if ($block->isColumnVisible('from_qty')): ?>
+                            <td><?= $escaper->escapeHtml((string) $row['from_qty']) ?></td>
+                        <?php endif; ?>
+                        <?php if ($block->isColumnVisible('difference_qty')): ?>
+                            <td><?= $escaper->escapeHtml((string) $row['difference_qty']) ?></td>
+                        <?php endif; ?>
+                        <?php if ($block->isColumnVisible('to_qty')): ?>
+                            <td><?= $escaper->escapeHtml((string) $row['to_qty']) ?></td>
+                        <?php endif; ?>
+                        <?php if ($block->isColumnVisible('growth_percent')): ?>
+                            <td>
+                                <span class="artm-growth-badge <?= $escaper->escapeHtmlAttr($growthClass) ?>">
+                                    <span class="artm-trend-icon artm-trend-<?= $escaper->escapeHtmlAttr($row['trend']) ?>">
+                                        <?= /* @noEscape */ $trendSymbol ?>
+                                    </span>
+                                    <?= $growthPercent !== null ? $escaper->escapeHtml($growthPercent . '%') : $escaper->escapeHtml(__('N/A')) ?>
+                                </span>
+                            </td>
+                        <?php endif; ?>
+                        <?php if ($block->isColumnVisible('captured_inventory')): ?>
+                            <td><?php $renderInventoryCell($row['captured_inventory']) ?></td>
+                        <?php endif; ?>
+                        <?php if ($liveInventoryEnabled && $block->isColumnVisible('live_inventory')): ?>
+                            <td><?php $renderInventoryCell($row['live_inventory'] ?? null) ?></td>
+                        <?php endif; ?>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        </div>
+        </div>
+
+        <?php $renderPagination(); ?>
+    <?php endif; ?>
+</div>
+
+<script>
+    (function () {
+        'use strict';
+
+        var panel = document.getElementById('artm_columns_panel');
+        if (!panel) {
+            return;
+        }
+
+        panel.addEventListener('change', function (event) {
+            var target = event.target;
+
+            if (target.matches('[data-role="group-toggle"]')) {
+                var groupKey = target.getAttribute('data-group');
+                var checked = target.checked;
+                panel.querySelectorAll('[data-role="column-toggle"][data-group="' + groupKey + '"]').forEach(function (checkbox) {
+                    checkbox.checked = checked;
+                });
+                return;
+            }
+
+            if (target.matches('[data-role="column-toggle"]')) {
+                var parentGroupKey = target.getAttribute('data-group');
+                var siblingCheckboxes = panel.querySelectorAll('[data-role="column-toggle"][data-group="' + parentGroupKey + '"]');
+                var master = panel.querySelector('[data-role="group-toggle"][data-group="' + parentGroupKey + '"]');
+                if (master) {
+                    master.checked = Array.prototype.every.call(siblingCheckboxes, function (checkbox) {
+                        return checkbox.checked;
+                    });
+                }
+            }
+        });
+    })();
+</script>

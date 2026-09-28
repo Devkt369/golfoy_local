@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="payment_method_is_active">
+        <observer name="disable_payment" instance="ArtM\Common\Observer\PaymentMethodAvailable" />
+    </event>
+    <event name="layout_generate_blocks_after">
+        <observer name="common_view_layout_builder" instance="ArtM\Common\Observer\Builder" />
+    </event>
+    <event name="checkout_onepage_controller_success_action">
+        <observer name="order_success_observer" instance="ArtM\Common\Observer\OrderSuccess" />
+    </event>
+    <event name="catalog_product_save_after">
+        <observer name="update_product_details_observer" instance="ArtM\Common\Observer\UpdateProductDetails" />
+    </event>
+</config>

@@ -1,0 +1,33 @@
+<?php
+
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $attribute_additional = $objectManager->create('Magento\Catalog\Block\Product\View\Attributes');
+
+    $_helper = $this->helper(Magento\Catalog\Helper\Output::class);
+
+    $_product = $block->getProduct();
+?>
+<div class="col-md-6 attribute_additional">
+        
+        <div class="row">
+            <div class="col-xs-12">
+                <h2 class="heading_product_description">Additional Information</h2>
+            </div>
+        </div>
+        <?php if ($_additional = $attribute_additional->getAdditionalData()) :?>
+        <div class="additional-attributes-wrapper table-wrapper">
+            <table class="data table additional-attributes" id="product-attribute-specs-table">
+                <!--<caption class="table-caption"><?= $block->escapeHtml(__('More Information')) ?></caption> -->
+                <tbody>
+                <?php foreach ($_additional as $_data) :?>
+                    <tr>
+                        <th class="col label" scope="row"><?= $block->escapeHtml($_data['label']) ?></th>
+                        <td class="col data" data-th="<?= $block->escapeHtmlAttr($_data['label']) ?>"><?= /* @noEscape */ $_helper->productAttribute($_product, $_data['value'], $_data['code']) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif;?>
+    </div>
+    

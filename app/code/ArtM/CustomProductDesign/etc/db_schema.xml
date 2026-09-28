@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+     <table name="artm_customprint_area" resource="default" engine="innodb" comment="Custom Print Area Table">
+        <column xsi:type="int" name="area_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Area ID"/>
+        <column xsi:type="int" name="product_id" padding="10" unsigned="true" nullable="false" comment="Product ID"/>
+        <column xsi:type="varchar" name="image" length="255" nullable="false" comment="Image"/>
+        <column xsi:type="text" name="area_data" nullable="false" comment="Area Data"/>
+        <column xsi:type="varchar" name="allowed_types" length="20" nullable="false" default="both" comment="Allowed Types"/>
+        <column xsi:type="decimal" name="extra_price_text" scale="2" precision="10" nullable="true" default="0.00" comment="Extra Price Text"/>
+        <column xsi:type="decimal" name="extra_price_image" scale="2" precision="10" nullable="true" default="0.00" comment="Extra Price Image"/>
+        <column xsi:type="text" name="additional_data" nullable="true" comment="Additional Data"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="area_id"/>
+        </constraint>
+        <index referenceId="ARTM_CUSTOMPRINT_AREA_PRODUCT_ID_IDX">
+            <column name="product_id"/>
+        </index>
+    </table>
+    <table name="artm_customprint_userdata" resource="default" engine="innodb" comment="Custom Print User Data Table">
+        <column xsi:type="int" name="id" padding="10" unsigned="true" nullable="false" identity="true" comment="ID"/>
+        <column xsi:type="int" name="product_id" padding="10" unsigned="true" nullable="false" comment="Product ID"/>
+        <column xsi:type="int" name="customer_id" padding="10" unsigned="true" nullable="true" comment="Customer ID"/>
+        <column xsi:type="varchar" name="session_id" length="128" nullable="true" comment="Session ID"/>
+        <column xsi:type="varchar" name="customer_seasion" length="150" nullable="false" comment="Customer Seasion"/>
+        <column xsi:type="varchar" name="image" length="255" nullable="false" comment="Image"/>
+        <column xsi:type="text" name="config" nullable="false" comment="Config"/>
+        <column xsi:type="varchar" name="img_path" length="255" nullable="false" comment="Img Path"/>
+        <column xsi:type="text" name="additional_data" nullable="true" comment="Additional Data"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+        <column xsi:type="smallint" name="attached_to_cart" padding="5" unsigned="true" nullable="false" default="0" comment="Attached To Cart"/>
+        <column xsi:type="smallint" name="attached_to_order" padding="5" unsigned="true" nullable="false" default="0" comment="Attached To Order"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+        <index referenceId="ARTM_CUSTOMPRINT_USERDATA_PRODUCT_ID_IDX">
+            <column name="product_id"/>
+        </index>
+        <index referenceId="ARTM_CUSTOMPRINT_USERDATA_CUSTOMER_ID_IDX">
+            <column name="customer_id"/>
+        </index>
+        <index referenceId="ARTM_CUSTOMPRINT_USERDATA_SESSION_ID_IDX">
+            <column name="session_id"/> 
+            <column name="customer_seasion"/>
+        </index>
+    </table>
+</schema>

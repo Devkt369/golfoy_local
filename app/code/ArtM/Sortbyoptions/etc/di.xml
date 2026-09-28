@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Catalog\Block\Product\ProductList\Toolbar">
+        <plugin name="ArtM_block_toolbar" type="ArtM\Sortbyoptions\Plugin\Catalog\Block\Toolbar"/>
+    </type>
+    <type name="Magento\Catalog\Model\Config">
+        <plugin name="ArtM_catalog_model_config" type="ArtM\Sortbyoptions\Plugin\Catalog\Model\Config"/>
+    </type>
+    <preference for="Magento\Catalog\Model\Indexer\Product\Price\Action\Full"
+     type="ArtM\Sortbyoptions\Model\Full"/>
+    <type name="Magento\Elasticsearch\Model\Adapter\BatchDataMapper\ProductDataMapper">
+        <plugin name="add_data_to_mappers_result" type="ArtM\Sortbyoptions\Plugin\Model\Adapter\BatchDataMapper\ProductDataMapperPlugin"/>
+    </type>
+	<preference for="Magento\Elasticsearch\Model\ResourceModel\Fulltext\Collection\SearchResultApplier" type="ArtM\Sortbyoptions\Model\ResourceModel\Fulltext\Collection\SearchResultApplier"/>
+</config>

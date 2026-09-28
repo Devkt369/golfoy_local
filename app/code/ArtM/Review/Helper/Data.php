@@ -1,0 +1,291 @@
+<?php
+namespace ArtM\Review\Helper;
+
+class Data extends \Magento\Framework\App\Helper\AbstractHelper
+{
+    protected $customerRepository;
+    protected $filterBuilder;
+    protected $searchCriteriaBuilder;
+    protected $session;
+    protected $_orderCollectionFactory;
+    protected $_getreviewedorder;
+    protected $_getcron;
+    protected $scopeConfig;
+    protected $order_instance;
+
+    public function __construct(
+//        \Magento\Customer\Api\CustomerRepositoryInterface $customerRepositoryInterface,
+        \Magento\Framework\App\Helper\Context $context,
+        \Magento\Framework\Api\FilterBuilder $filterBuilder,
+        \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
+        \Magento\Customer\Model\Session $session,
+        \Magento\Sales\Model\ResourceModel\Order\CollectionFactory $orderCollectionFactory,
+        \Magento\Framework\App\Config\ScopeConfigInterface $ScopeConfigInterface,
+        \ArtM\Review\Model\CronFactory $cron,
+        \ArtM\Review\Model\GetreviewedorderFactory $getreviewedorder,
+        \Magento\Sales\Model\Order $orderInstance
+        
+    )
+    {
+//        $this->_customerRepositoryInterface = $customerRepositoryInterface;
+        $this->filterBuilder = $filterBuilder;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->session = $session;
+        $this->_orderCollectionFactory = $orderCollectionFactory;
+        $this->_getreviewedorder = $getreviewedorder;
+        $this->_getcron = $cron;
+        $this->scopeConfig = $ScopeConfigInterface;
+        $this->order_instance = $orderInstance;
+        
+
+    }
+    
+    public function getloggedincustomerid(){
+        $customer = $this->session;
+        $customerName = $customer->getName();
+        $customerId = $customer->getId();
+        return $customerId;
+    }
+    
+    public function checkifcustomerloggedin(){
+        $customer = $this->session;
+        if( $customer->isLoggedIn() ){
+            return true;
+        }
+        return false;
+    }
+    public function getConfig($config_path){
+        return $this->scopeConfig->getValue(
+                $config_path,
+                \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+                );
+    }
+    
+    
+    public function getCustomerIdByOrderIncId($orderId){
+        
+        $orderinstance = $this->order_instance->loadByIncrementId($orderId);
+        if( $orderinstance->getCustomerId() ){
+            return $orderinstance->getCustomerId();
+        }
+        return false;
+    }
+    public function getorders($customer_id , $from , $to){
+        
+        $from = -abs((int)$from);  // -60 always negative
+        $to   = -abs((int)$to);    // -30 always negative
+
+        if ($from > $to) {
+            $temp = $from;
+            $from = $to;
+            $to   = $temp;
+        }
+
+        if ($from == $to || $from == 0 || $to == 0) {
+            $from = -180;
+            $to   = -1;
+        }
+
+
+        $return_array = array();
+        date_default_timezone_set("Asia/Kolkata");   //India time (GMT+5:30)
+        $date = date('Y-m-d H:i:s' );
+        
+        $searchcritiria_array = array('complete' , 'closed');
+        
+        
+        $from_date = date('Y-m-d  H:i:s', strtotime($date. ''.$from.' days'));
+        $to_date = date('Y-m-d H:i:s', strtotime($date. ''.$to.' days'));
+        $ordercollection = $this->_orderCollectionFactory->create()
+            ->addFieldToSelect('*')
+            ->addFieldToFilter('customer_id', $customer_id)
+            ->addFieldToFilter('created_at', array('gteq' => $from_date))
+            ->addFieldToFilter('created_at', array('lteq' => $to_date))
+            ->addAttributeToFilter('state', array('in' => $searchcritiria_array))
+            ->setOrder('increment_id', 'DESC')
+            ->setPageSize(10);
+
+        if ($ordercollection->getTotalCount() > 0) {
+
+            foreach ($ordercollection->getItems() as $item) {
+                // ↑ NO $i counter
+                // ↑ NO if($i > 0) break
+                // Just loop cleanly through all orders
+
+                $curr_order_id   = $item->getIncrementId();
+                $alreadyReviewed = $this->checkIfAlreadyShown($curr_order_id);
+
+                if ($alreadyReviewed) {
+                    continue; // skip reviewed orders
+                }
+
+                $prd_ids    = '';
+                $orderItems = $item->getAllItems();
+
+                foreach ($orderItems as $orderItem) {
+                    if ($orderItem->getParentItemId() == '') {
+                        $prd_ids .= ($prd_ids ? ',' : '') . $orderItem->getProductId();
+                    }
+                }
+
+                if ($prd_ids == '') continue;
+
+                // first unreviewed order found — return it
+                return [
+                    'order_id_date' => $item->getCreatedAt(),
+                    'order_id'      => $curr_order_id,
+                    'prd_ids'       => $prd_ids,
+                ];
+            }
+        }
+
+        return false;
+
+     
+    }
+
+    public function getOrderByIncrementId($order_id)
+    {
+        $order = $this->order_instance->loadByIncrementId($order_id);
+        if ($order->getId()) {
+            return $order;
+        }
+        return false;
+    }
+    
+    public function addInReviewfolder($curr_order_id){
+        
+//        echo "Message: Called function addInReviewfolder curr_order_id-".$curr_order_id."<br>";
+        
+        $date = date('Y-m-d H:i:s' );
+        
+        $orderinstance = $this->order_instance->loadByIncrementId($curr_order_id);
+        
+
+        $curr_order_date = $orderinstance->getCreatedAt();
+                
+        //check if this customer is already in review table
+        $reviewordercollection = $this->_getreviewedorder
+            ->create()
+            ->getCollection()
+            ->addFieldToFilter('order_id', $curr_order_id);
+
+        $countrevieworder = count($reviewordercollection);
+            //    echo "<br>curr_order_id: ".$curr_order_id;
+            //    echo "<br>countrevieworder: ".$countrevieworder;die('asdfdsf');
+        if($countrevieworder > 0){
+            return false;
+        }
+
+
+
+
+
+        $curr_order_state = $orderinstance->getState();
+//        echo "Message: curr_order_state-".$curr_order_state."<br>";
+
+        if( $curr_order_state == 'complete' || $curr_order_state == 'closed' ){    
+            $prd_ids = '';
+            $curr_order_id = $orderinstance->getIncrementId();
+            $order = $orderinstance->loadByIncrementId($curr_order_id);
+            $orderItems = $order->getAllItems();
+            
+            foreach ($orderItems as $orderinstance) {
+                if( $orderinstance->getParentItemId() == '' ){
+//                            echo "<br>";
+//                            echo $curr_order_id." : Review this id only<br>";
+//                            echo $orderinstance->getProductId();
+                    if($prd_ids == ''){
+                        $prd_ids = $orderinstance->getProductId();
+                    }else{
+                        $prd_ids = $prd_ids.",".$orderinstance->getProductId();
+                    }
+
+                }
+            }
+
+            $return_array['order_id_date'] = $curr_order_date;
+            $return_array['order_id'] = $curr_order_id;
+            $return_array['prd_ids'] = $prd_ids;
+
+            $customer_id = $this->getCustomerIdByOrderIncId( $curr_order_id );
+            
+            $getreviewedorder_model = $this->_getreviewedorder->create();
+
+            $getreviewedorder_model->addData([
+                "order_id" => $curr_order_id,
+                "customer_id" => $customer_id,
+                "order_status" => $curr_order_state,
+                "updated_at" => $date,
+                "product_ids" => $prd_ids
+            ]);
+            $saveData = $getreviewedorder_model->save();
+
+            return $return_array;
+        }
+        return false;
+    }
+    public function getordersFromTo($from , $to){
+        
+        $return_array = [];
+        date_default_timezone_set("Asia/Calcutta");   //India time (GMT+5:30)
+        $date = date('Y-m-d H:i:s' );
+        $searchcritiria_array = ['complete'];
+        
+        $from_date = date('Y-m-d  H:i:s', strtotime($date. ''.$from.' days'));
+        $to_date = date('Y-m-d H:i:s', strtotime($date. ''.$to.' days'));
+       
+       //echo "<br>from_date:".$from_date;
+        //echo "<br>to_date:".$to_date;
+       
+        $fields = ['entity_id', 'increment_id', 'created_at', 'customer_id', 'customer_firstname', 'customer_lastname', 'customer_email', 'pos_id'];
+        $ordercollection = $this->_orderCollectionFactory->create()
+            ->addFieldToSelect($fields)
+          //->addFieldToSelect('*')
+            ->addFieldToFilter('created_at', ['from'=>$from_date, 'to'=>$to_date])
+            ->addAttributeToFilter('state', ['in' => $searchcritiria_array ])
+            ->setOrder('increment_id','ASC');
+        
+            $total = $ordercollection->getTotalCount(); 
+            if($total > 0) { 
+              $orders = $ordercollection->getItems();             
+                foreach ($orders as $order) {                    
+                    $k = $order->getEntityId();
+                    $return_array[$k] = $order->getData() ;
+                }
+            }
+            return $return_array;     
+    }
+    public function checkIfAlreadyShown($order_id, $params = null){
+        
+        //check if this order id is already in review table
+        $reviewordercollection = $this->_getreviewedorder
+            ->create()
+            ->getCollection()
+            ->addFieldToFilter('order_id', $order_id);
+        $countrevieworder = count($reviewordercollection);
+        if($countrevieworder > 0){
+            return true;
+        }
+        
+        
+        //if order found and also clicked 'yes' in cron table
+        $_getcroncollection = $this->_getcron
+            ->create()
+            ->getCollection()
+            ->addFieldToFilter('orderid', $order_id);
+        if($params == 'check_clicked'){
+            $_getcroncollection->addFieldToFilter('clicked', 'yes');
+        }
+        
+        $count_getcron = count($_getcroncollection);        
+        if($count_getcron > 0){
+            return true;
+        }
+            
+            
+        return false;
+            
+            
+    }
+}

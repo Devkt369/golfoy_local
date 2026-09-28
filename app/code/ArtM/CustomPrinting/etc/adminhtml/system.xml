@@ -1,0 +1,48 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+	<system>
+		<section id="customprint" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+			<label>Custom Printing</label>
+			<tab>artm</tab>
+			<resource>ArtM_CustomPrinting::config_artm_customprinting</resource>
+			<group id="Attrconf" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+				<label>AttributeSet configuration</label>
+				<field id="custom_printing" type="multiselect" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Enable custom printing for Attribute set</label>
+					<comment/>
+					<source_model>ArtM\CustomPrinting\Model\Config\Source\CustomPrinting</source_model>
+				</field>
+				<field id="text_logo" type="select" sortOrder="20" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Printing option type</label>
+					<comment/>
+					<source_model>ArtM\CustomPrinting\Model\Config\Source\PrintingType</source_model>
+				</field>
+				<field id="pre_define_text" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>Pre Defined Text</label>
+					<comment><![CDATA[Enter pre defined cusotm text seprate by ||]]></comment>
+				</field>
+				<field id="pre_define_image" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>Pre Defined Image</label>
+					<comment><![CDATA[Enter full image url and seprate by || , and image should be available on own server]]></comment>
+				</field>
+				<field id="text_font_family" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+					<label>Enter Font family name </label>
+					<comment><![CDATA[enter font family name seprate by ||]]></comment>
+				</field>
+			</group>
+		</section>
+		<section id="category_setting" sortOrder="20" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+			<label>Category Setting</label>
+			<tab>artm</tab>
+			<resource>ArtM_CustomPrinting::config_artm_customprinting</resource>
+			<group id="engrave_print" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+				<label>Engrave Print</label>
+
+				<field id="custom_printing" type="multiselect" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Enable custom Engrave for Attribute set</label>
+					<source_model>ArtM\CustomPrinting\Model\Config\Source\CustomPrinting</source_model>
+				</field>
+			</group>
+		</section>
+	</system>
+</config>

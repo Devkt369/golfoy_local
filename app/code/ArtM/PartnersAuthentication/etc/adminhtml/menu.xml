@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+
+    <menu>
+    
+        <add id="ArtM_PartnersAuthentication::dealer_portal"
+             title="Dealer Portal Account"
+             module="ArtM_PartnersAuthentication"
+             sortOrder="500"
+             parent="Magento_Customer::customer"
+             resource="ArtM_PartnersAuthentication::partnersauthentication"/>
+
+        <add id="ArtM_PartnersAuthentication::pendingposorder"
+             title="All Dealer"
+             module="ArtM_PartnersAuthentication"
+             sortOrder="100"
+             parent="ArtM_PartnersAuthentication::dealer_portal"
+             action="artm_partnersauthentication/dealer/index"
+             resource="ArtM_PartnersAuthentication::partnersauthentication"/>
+    </menu>
+</config>

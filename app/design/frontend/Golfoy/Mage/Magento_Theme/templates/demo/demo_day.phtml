@@ -1,0 +1,171 @@
+
+<script>
+(function () {
+    const ICON_BASE = "https://golfoy.com/media/official-partners-icons/";
+    const MAP = {
+        xxio: "xxio_.svg",
+        srixon: "srixon_.svg",
+        cleveland: "cleveland_.svg",
+        titleist: "titleist_.svg",
+        ping: "Ping_.svg",
+        callaway: "callaways_.svg",
+        mizuno: "mizuno_.svg",
+        cobra: "new-cobra.svg",
+        taylormade: "taylormade_.svg",
+    };
+
+    // debounce helper
+    function debounce(fn, wait) {
+        let t = null;
+        return function () {
+            clearTimeout(t);
+            t = setTimeout(() => fn.apply(this, arguments), wait);
+        };
+    }
+
+    // process any unprocessed swatch-box inside #demo_day
+    function processSwatches(root) {
+
+
+// add .brands class to this particular swatch-group
+const brandGroup = document.querySelector('#demo_day .swatch-group');
+if (brandGroup && !brandGroup.classList.contains('brands')) {
+    brandGroup.classList.add('brands');
+}
+
+        // root may be document or a container node
+        const container = root.querySelector ? root : document;
+        const selector = '#demo_day .swatch-group .swatch-box';
+        const boxes = container.querySelectorAll(selector);
+
+        boxes.forEach(box => {
+            // skip already processed boxes
+            if (box.dataset.processed === "1") return;
+
+            // try to find radio input inside (might be moved/hidden)
+            const input = box.querySelector('input[type="radio"][name="fields[brand]"]');
+            if (!input) {
+                // sometimes React injects text nodes first; skip for now
+                return;
+            }
+
+            const value = input.value && input.value.trim();
+            if (!value || !MAP[value]) {
+                box.dataset.processed = "1"; // mark even if no mapping to avoid loops
+                return;
+            }
+
+            // build new inner HTML but keep the original input attributes (name/value/checked)
+            // create input element programmatically to preserve properties
+            const newInput = document.createElement('input');
+            newInput.type = 'radio';
+            newInput.name = input.name;
+            newInput.value = input.value;
+            newInput.style.display = 'none';
+
+            // preserve checked state if any
+            if (input.checked) newInput.checked = true;
+
+            // image element
+            const img = document.createElement('img');
+            img.src = ICON_BASE + MAP[value];
+            img.alt = value;
+            img.style.width = '40px';
+            img.style.height = 'auto';
+            img.style.display = 'block';
+
+            // clear and append
+            box.innerHTML = '';
+            box.appendChild(newInput);
+            box.appendChild(img);
+
+            // click handler to mimic original behaviour
+            box.addEventListener('click', function (ev) {
+                ev.stopPropagation();
+                const parent = box.closest('.swatch-group');
+                if (!parent) return;
+                parent.querySelectorAll('.swatch-box').forEach(el => el.classList.remove('selected'));
+                box.classList.add('selected');
+
+                const inp = box.querySelector('input[type="radio"]');
+                if (inp) {
+                    inp.checked = true;
+                    // trigger input/change events (bubbles)
+                    inp.dispatchEvent(new Event('input', { bubbles: true }));
+                    inp.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+
+            // mark processed
+            box.dataset.processed = "1";
+        });
+    }
+
+    // debounce wrapper for observer callback
+    const debouncedProcess = debounce((mutationsList) => {
+        // try to find #demo_day first
+        const demo = document.querySelector('#demo_day');
+        if (!demo) return;
+
+        // process anything inside demo
+        processSwatches(demo);
+    }, 80);
+
+    // Observe body for subtree changes (for React innerHTML inserts)
+    const observer = new MutationObserver((mutations) => {
+        // if #demo_day isn't present yet, also check added nodes for it
+        let foundDemo = false;
+        for (let m of mutations) {
+            if (!foundDemo) {
+                if (m.addedNodes && m.addedNodes.length) {
+                    for (let n of m.addedNodes) {
+                        if (n.nodeType === 1 && (n.matches && n.matches('#demo_day') || n.querySelector && n.querySelector('#demo_day'))) {
+                            foundDemo = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        debouncedProcess(mutations);
+    });
+
+    // start observing
+    observer.observe(document.body, { childList: true, subtree: true, attributes: false });
+
+    // also run once on load in case content already present
+    document.addEventListener('DOMContentLoaded', function () {
+        // small timeout to let React possibly finish sync operations
+        setTimeout(() => {
+            const demo = document.querySelector('#demo_day');
+            if (demo) processSwatches(demo);
+        }, 120);
+    });
+
+    // Fallback polling for tricky environments (runs for up to ~6 seconds)
+    (function pollFallback(retries = 30, interval = 200) {
+        let count = 0;
+        const id = setInterval(() => {
+            const demo = document.querySelector('#demo_day');
+            if (demo) {
+                processSwatches(demo);
+                clearInterval(id);
+                return;
+            }
+            count++;
+            if (count >= retries) clearInterval(id);
+        }, interval);
+    })();
+
+    // expose a manual trigger if you want to call it from React after injection:
+    window.ARTM_processDemoDaySwatches = function () {
+        const demo = document.querySelector('#demo_day');
+        if (demo) processSwatches(demo);
+    };
+
+    // optional: cleanup method
+    window.ARTM_cleanupDemoDaySwatches = function () {
+        observer.disconnect();
+    };
+})();
+</script>

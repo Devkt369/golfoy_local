@@ -1,0 +1,222 @@
+<style>
+    .icons_booster_inside {
+        display: inline-block;
+        width: 100%;
+    }
+    icons_booster_single_block {
+        display: inline-block;
+    }
+    .icons_booster_single_block img {
+        max-width: 40px;
+    }
+    .icons_booster_single_block {
+        display: inline-block;
+        width: 115px;
+        text-align: center;
+        float: left;
+        text-transform: capitalize;
+        margin-top: 15px;
+    }
+    .icons_booster_single_text{
+        opacity: 1;
+        border-bottom: 0px;
+        margin-bottom: 0px;
+        font-weight: 600;
+        font-size: 12px;
+        color: #767676;
+        margin-top: 1px;
+    }
+    .icons_booster_single_block span.icons_booster_single_text.tooltip {
+        margin-left: -21px;
+    }
+    .b_p_g_text.icons_booster_single_text.points.mp-point-label.tooltip{
+        word-wrap: initial;
+        border: 1px solid transparent;
+        display: inline-block;
+        width: auto !important;
+        max-width: min-content;
+        z-index: 0 !important;
+    }
+    .catalog-product-view span.points.mp-point-label.tooltip{
+        margin-bottom: 0px;
+    }
+    .catalog-product-view span.points.mp-point-label.tooltip,
+    .icons_booster_single_text{
+        font-size: 12px !important;
+        
+    }
+</style>
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+$baseUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
+?>
+<!--<div class="booster_block row">
+    <div class="boosters">
+        <div class="booster_single">
+            <span class="img_booster">
+            <img src="<?php echo $baseUrl ?>media/wysiwyg/2023_homepage/new_bulk/easy_emi.svg" alt="easy_emi.svg">
+            </span>
+            <span class="text_booster">
+                EASY EMI
+            </span>
+        </div>
+        
+        <div class="booster_single" onclick="location.href = 'https://golfoy.com/best-price-guarantee';">
+            <span class="img_booster">
+            <img src="<?php echo $baseUrl ?>media/wysiwyg/2023_homepage/new_bulk/warranty_policy.svg" alt="warranty_policy">
+            </span>
+            <span class="text_booster">
+                best price guarantee
+            </span>
+        </div>
+    </div>
+</div>-->
+
+
+
+<!--<div class="catalog-points mp-reward-points mp-productt">
+    <img src="https://mage.golfoy.com/media/mageplaza/rewardpoints/default/reward_coin.png" alt="Reward Points" width="15" height="15">                
+    <span class="icons_booster_single_text tooltip">
+        Earn <strong>1528 points</strong> on this product           
+        <span class="tooltiptext" style="visibility: hidden;">Use golfoy points at Checkout and save upto 50% extra</span>
+    </span>
+</div>-->
+
+
+
+
+<div class="icons_booster">
+    <div class="icons_booster_inside">
+<!--        easy_emi.svg-->
+<!--        pay_on_delivery.svg-->
+       
+<?php
+    $_product = $block->getProduct();
+    if( strtolower( $_product->getAttributeText('warranty') ) != 'no' && strtolower( $_product->getAttributeText('warranty') ) != 'no warranty' && strtolower( $_product->getAttributeText('warranty') ) != 'no waterproof warranty' && strtolower( $_product->getAttributeText('warranty') ) != '' ){
+?>
+        <div class="icons_booster_single_block">
+            <div class="icons_single_img">
+                <img src="<?php echo $baseUrl ?>media/wysiwyg/product_feature_icon/warranty_policy.svg" />
+            </div>
+            <div class="icons_single_text">
+                <span class="icons_booster_single_text points mp-point-label tooltip">
+                    Warranty
+                    <span class="tooltiptext" style="visibility: hidden;"><?php echo $_product->getAttributeText('warranty'); ?></span>
+                </span>
+            </div>
+        </div>
+<?php
+    }else{
+//        echo "Warranty is set to NO";
+    }
+    if( strtolower( $_product->getAttributeText('returnable') ) != 'no' && strtolower( $_product->getAttributeText('returnable') ) != '' ){
+//        echo "Show returnable icon";
+?>
+        <div class="icons_booster_single_block">
+            <div class="icons_single_img">
+                <img src="<?php echo $baseUrl ?>media/wysiwyg/product_feature_icon/returnable.svg" />
+            </div>
+            <div class="icons_single_text">
+                <span class="icons_booster_single_text">
+                    Returnable
+                    <span class="hide" style="visibility: hidden;"><?php echo $_product->getAttributeText('returnable'); ?></span>
+                </span>
+            </div>
+        </div>
+<?php
+//        echo "<br>Hover text: ".$_product->getAttributeText('returnable');
+    }else{
+//        echo "Returnable is set to NO";
+    }
+                 
+    if( strtolower( $_product->getAttributeText('replacement_policy') ) != 'no' && strtolower( $_product->getAttributeText('replacement_policy') ) != '' ){
+?>
+        <div class="icons_booster_single_block">
+            <div class="icons_single_img">
+                <img src="<?php echo $baseUrl ?>media/wysiwyg/product_feature_icon/replacement.svg" />
+            </div>
+            <div class="icons_single_text">
+                <span class="icons_booster_single_text points mp-point-label tooltip">
+                    Replacement
+                    <span class="tooltiptext" style="visibility: hidden;"><?php echo $_product->getAttributeText('replacement_policy'); ?></span>
+                </span>
+            </div>
+        </div>
+<?php
+//        echo "Replacement";
+//        echo "<br>Hover text: ".$_product->getAttributeText('replacement_policy');
+    }else{
+//        echo "replacement_policy is set to NO";
+    }
+                 
+                 
+?>
+         <div class="icons_booster_single_block">
+            <div class="icons_single_img">
+                <img src="<?php echo $baseUrl ?>media/wysiwyg/product_feature_icon/best_price.svg" />
+            </div>
+            <div class="icons_single_text">
+                <a href="<?php echo $baseUrl ?>best-price-guarantee">
+                    <div class="icons_booster_single_text points mp-point-label">
+                        <span class="b_p_g_text icons_booster_single_text points mp-point-label tooltip">
+                            Best price guarantee
+                        </span>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="icons_booster_single_block">
+            <div class="icons_single_img">
+                <img src="<?php echo $baseUrl ?>media/wysiwyg/product_feature_icon/free_delivery.svg" />
+            </div>
+            <div class="icons_single_text">
+                <span class="icons_booster_single_text">
+                    Free Delivery
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row share_page_icons visible-xs">
+    <div class="share_page_icons_inside">
+        <div class="share_sms" style="padding: 10px 10px;">
+            <img src='<?php echo $this->getViewFileUrl('images/share_by_sms_icon.png'); ?>'>
+
+            <?php
+                function isIphone($user_agent=NULL) {
+                    if(!isset($user_agent)) {
+                        $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
+                    }
+                    return (strpos($user_agent, 'iPhone') !== FALSE);
+                }
+
+                if(isIphone()) {
+             ?>
+                    <a href="sms:&body=<?php echo (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; ?>">
+                        Share via sms
+                    </a>
+            <?php
+                }else{
+            ?>
+                    <a href="sms:?body=<?php echo (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; ?>">
+                        Share via sms
+                    </a>
+            <?php
+                }
+            ?>
+        </div>
+        <div class="share_whatsapp" style="padding: 10px 6px;">
+            <img src='<?php echo $this->getViewFileUrl('images/enviodewhatsapp06.png'); ?>'>
+            <a href="whatsapp://send?text=<?php echo (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; ?>" data-action="share/whatsapp/share">Share via Whatsapp</a>
+        </div>
+    </div>
+</div>
+
+
+
+
+

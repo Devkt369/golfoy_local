@@ -1,0 +1,76 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+	<type name="Magento\Framework\Console\CommandList">
+		<arguments>
+			<argument name="commands" xsi:type="array">
+				<item name="process" xsi:type="object">ArtM\RecommendedSort\Console\Command\Process</item>
+			</argument>
+		</arguments>
+	</type>
+	<type name="ArtM\RecommendedSort\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">RecommendedSort</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">ArtM\RecommendedSort\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </type>
+	<type name="ArtM\RecommendedSort\Logger\SortingQueueLogLogger">
+        <arguments>
+            <argument name="name" xsi:type="string">RecommendedSort</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">ArtM\RecommendedSort\Logger\SortingQueueLogHandler</item>
+            </argument>
+        </arguments>
+    </type>
+	<type name="ArtM\RecommendedSort\Logger\SortingLogLogger">
+        <arguments>
+            <argument name="name" xsi:type="string">RecommendedSort</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">ArtM\RecommendedSort\Logger\SortingLogHandler</item>
+            </argument>
+        </arguments>
+    </type>
+	<type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+		<arguments>
+			<argument name="collections" xsi:type="array">
+				<item name="recommended_sort_listing_grid_data_source" xsi:type="string">ArtM\RecommendedSort\Model\ResourceModel\SortingJob\Grid\Collection</item>
+			</argument>
+		</arguments>
+	</type>
+	<virtualType name="ArtM\RecommendedSort\Model\ResourceModel\SortingJob\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">artm_sorting_jobs</argument>
+            <argument name="resourceModel" xsi:type="string">ArtM\RecommendedSort\Model\ResourceModel\SortingJob</argument>
+        </arguments>
+    </virtualType>
+
+	<type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+		<arguments>
+			<argument name="collections" xsi:type="array">
+				<item name="recommended_sort_queue_listing_data_source" xsi:type="string">ArtM\RecommendedSort\Model\ResourceModel\RecommendQueue\Grid\Collection</item>
+			</argument>
+		</arguments>
+	</type>
+	<virtualType name="ArtM\RecommendedSort\Model\ResourceModel\RecommendQueue\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">artm_recommendedsort_queue</argument>
+            <argument name="resourceModel" xsi:type="string">ArtM\RecommendedSort\Model\ResourceModel\RecommendQueue</argument>
+        </arguments>
+    </virtualType>
+
+	<type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+		<arguments>
+			<argument name="collections" xsi:type="array">
+				<item name="recommended_sort_manual_index_data_source" xsi:type="string">ArtM\RecommendedSort\Model\ResourceModel\SortingCategoryProducts\Grid\Collection</item>
+			</argument>
+		</arguments>
+	</type>
+	<virtualType name="ArtM\RecommendedSort\Model\ResourceModel\SortingCategoryProducts\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">artm_sorting_category_products</argument>
+            <argument name="resourceModel" xsi:type="string">ArtM\RecommendedSort\Model\ResourceModel\SortingCategoryProducts</argument>
+        </arguments>
+    </virtualType>
+
+</config>

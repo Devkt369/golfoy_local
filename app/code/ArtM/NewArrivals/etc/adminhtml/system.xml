@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="artm" translate="label" sortOrder="200">
+            <label>artm</label>
+        </tab>
+        <section id="artm_newarrivals" translate="label" type="text" sortOrder="120"
+                 showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>New Arrivals</label>
+            <tab>artm</tab>
+            <resource>ArtM_NewArrivals::config_artm_newarrivals</resource>
+            <group id="general" translate="label" type="text" sortOrder="10"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Module Status</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                    <comment>When enabled, new products get the newarrivals attribute set to Yes, and expired flags are cleared by cron.</comment>
+                </field>
+                <field id="duration_days" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>New Arrival Period (days)</label>
+                    <validate>validate-number validate-zero-or-greater validate-digits</validate>
+                    <comment><![CDATA[Number of days after product creation during which newarrivals stays Yes. After that period from the product created date, the attribute is set to No by the cron job. Cron runs daily at 03:00 (see app/code/ArtM/NewArrivals/etc/crontab.xml to change the schedule).]]></comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

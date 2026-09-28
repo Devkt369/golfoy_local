@@ -1,0 +1,347 @@
+<?php
+/** @var \ArtM\ProductSlider\Block\Adminhtml\Group\Edit $block */
+$data = $block->getDataValues();
+$selectedStoreViews = $block->getSelectedValues('store_view_ids');
+$selectedCustomerGroups = $block->getSelectedValues('customer_group_ids');
+$tabs = isset($data['tabs']) && is_array($data['tabs']) ? $data['tabs'] : [];
+?>
+<div class="admin__page-section artm-ps-page">
+    <div class="admin__page-section-title artm-ps-header">
+        <span class="title"><?= $block->escapeHtml($block->isEdit() ? __('Edit Slider Group') : __('New Slider Group')) ?></span>
+    </div>
+    <div class="admin__page-section-content artm-ps-content">
+        <div class="artm-ps-toolbar">
+            <a class="action-default" href="<?= $block->escapeUrl($block->getBackUrl()) ?>"><?= $block->escapeHtml(__('Back')) ?></a>
+            <?php if ($block->isEdit()): ?>
+                <a class="action-delete" href="<?= $block->escapeUrl($block->getDeleteUrl()) ?>" onclick="return confirm('<?= $block->escapeHtmlAttr(__('Delete this slider group?')) ?>');"><?= $block->escapeHtml(__('Delete')) ?></a>
+            <?php endif; ?>
+        </div>
+
+        <form method="post" action="<?= $block->escapeUrl($block->getSaveUrl()) ?>" class="artm-ps-form" id="artm-group-form">
+            <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>" />
+            <input type="hidden" name="group[group_id]" value="<?= (int)$data['group_id'] ?>" />
+
+            <div class="artm-ps-save-fixed-wrap">
+                <button type="submit" class="action-primary" name="back" value="1"><?= $block->escapeHtml(__('Save and Continue Edit')) ?></button>
+            </div>
+
+            <h3><?= $block->escapeHtml(__('10.1 General')) ?></h3>
+            <div class="artm-ps-grid-form">
+                <div class="artm-ps-card">
+                    <p><label><?= $block->escapeHtml(__('Status')) ?></label><select name="group[status]"><?php foreach ($block->getStatusOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['status'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Group Name')) ?> *</label><input type="text" name="group[name]" value="<?= $block->escapeHtmlAttr((string)$data['name']) ?>" required /></p>
+                    <p><label><?= $block->escapeHtml(__('Identifier')) ?> *</label><input type="text" name="group[identifier]" value="<?= $block->escapeHtmlAttr((string)$data['identifier']) ?>" required /></p>
+                    <p><label><?= $block->escapeHtml(__('Sort Order')) ?></label><input type="number" name="group[sort_order]" value="<?= (int)$data['sort_order'] ?>" /></p>
+                </div>
+
+                <div class="artm-ps-card">
+                    <p><label><?= $block->escapeHtml(__('Store View')) ?></label><select name="group[store_view_ids][]" multiple size="6"><?php foreach ($block->getStoreViewOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= in_array((string)$option['value'], $selectedStoreViews, true) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Customer Groups')) ?></label><select name="group[customer_group_ids][]" multiple size="6"><?php foreach ($block->getCustomerGroupOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= in_array((string)$option['value'], $selectedCustomerGroups, true) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                </div>
+
+                <div class="artm-ps-card">
+                    <p><label><?= $block->escapeHtml(__('Heading (Optional)')) ?></label><input type="text" name="group[heading]" value="<?= $block->escapeHtmlAttr((string)$data['heading']) ?>" /></p>
+                    <p><label><?= $block->escapeHtml(__('Sub Heading (Optional)')) ?></label><input type="text" name="group[sub_heading]" value="<?= $block->escapeHtmlAttr((string)$data['sub_heading']) ?>" /></p>
+                    <p><label><?= $block->escapeHtml(__('Show on Desktop')) ?></label><select name="group[show_desktop]"><?php foreach ($block->getStatusOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['show_desktop'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Show on Tablet')) ?></label><select name="group[show_tablet]"><?php foreach ($block->getStatusOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['show_tablet'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Show on Mobile')) ?></label><select name="group[show_mobile]"><?php foreach ($block->getStatusOptions() as $option): ?><option value="<?= $block->escapeHtmlAttr((string)$option['value']) ?>" <?= ((string)$data['show_mobile'] === (string)$option['value']) ? 'selected' : '' ?>><?= $block->escapeHtml((string)$option['label']) ?></option><?php endforeach; ?></select></p>
+                    <p><label><?= $block->escapeHtml(__('Description')) ?></label><textarea name="group[description]" rows="4"><?= $block->escapeHtml((string)$data['description']) ?></textarea></p>
+                </div>
+            </div>
+
+            <h3><?= $block->escapeHtml(__('10.2 Tabs')) ?></h3>
+            <div class="artm-ps-grid-form">
+                <div class="artm-ps-card" style="grid-column: 1 / -1;">
+                    <p class="artm-ps-note"><?= $block->escapeHtml(__('Drag and drop rows to reorder tabs.')) ?></p>
+                    <table class="artm-ps-table" id="group-tabs-table">
+                        <thead>
+                            <tr>
+                                <th><?= $block->escapeHtml(__('Order')) ?></th>
+                                <th><?= $block->escapeHtml(__('Slider')) ?></th>
+                                <th><?= $block->escapeHtml(__('Custom Tab Name')) ?></th>
+                                <th><?= $block->escapeHtml(__('View All Override')) ?></th>
+                                <th><?= $block->escapeHtml(__('Manual URL')) ?></th>
+                                <th><?= $block->escapeHtml(__('Sort Order')) ?></th>
+                                <th><?= $block->escapeHtml(__('Default Tab')) ?></th>
+                                <th><?= $block->escapeHtml(__('Action')) ?></th>
+                            </tr>
+                        </thead>
+                        <tbody id="group-tabs-body"></tbody>
+                    </table>
+                    <p><button type="button" class="action-default" id="add-group-tab-row"><?= $block->escapeHtml(__('Add Tab Row')) ?></button></p>
+                </div>
+            </div>
+
+            <h3><?= $block->escapeHtml(__('10.3 Preview')) ?></h3>
+            <div class="artm-ps-grid-form">
+                <div class="artm-ps-card" style="grid-column: 1 / -1;">
+                    <div id="group-preview-tabs" class="artm-ps-tabs"></div>
+                    <div id="group-preview-content" class="artm-ps-note"><?= $block->escapeHtml(__('Select or add tabs to preview.')) ?></div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+(function () {
+    var form = document.getElementById('artm-group-form');
+    var tableBody = document.getElementById('group-tabs-body');
+    var addBtn = document.getElementById('add-group-tab-row');
+    var previewTabs = document.getElementById('group-preview-tabs');
+    var previewContent = document.getElementById('group-preview-content');
+    if (!form || !tableBody || !addBtn) {
+        return;
+    }
+
+    var sliderOptions = <?= /* @noEscape */ json_encode($block->getSliderOptions()) ?>;
+    var initialTabs = <?= /* @noEscape */ json_encode($tabs) ?>;
+
+    function optionHtml(value) {
+        var html = '';
+        sliderOptions.forEach(function (opt) {
+            var selected = String(opt.value) === String(value) ? ' selected' : '';
+            html += '<option value="' + String(opt.value).replace(/"/g, '&quot;') + '"' + selected + '>' + String(opt.label).replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</option>';
+        });
+        return html;
+    }
+
+    function createRow(tab) {
+        var tr = document.createElement('tr');
+        tr.className = 'group-tab-row';
+        tr.draggable = true;
+
+        var sortOrder = typeof tab.sort_order !== 'undefined' ? tab.sort_order : tableBody.querySelectorAll('tr').length + 1;
+        var isDefault = String(tab.is_default || '0') === '1';
+
+        tr.innerHTML = '' +
+            '<td class="drag-handle" title="Drag">::</td>' +
+            '<td><select data-field="slider_id">' + optionHtml(tab.slider_id || '') + '</select></td>' +
+            '<td><input type="text" data-field="tab_name" value="' + (tab.tab_name || '').replace(/"/g, '&quot;') + '" /></td>' +
+            '<td><select data-field="view_all_override">' +
+                '<option value="use_slider_button"' + ((tab.view_all_override || 'use_slider_button') === 'use_slider_button' ? ' selected' : '') + '>Use Slider Button</option>' +
+                '<option value="manual_url"' + ((tab.view_all_override || '') === 'manual_url' ? ' selected' : '') + '>Manual URL</option>' +
+                '<option value="hide"' + ((tab.view_all_override || '') === 'hide' ? ' selected' : '') + '>Hide</option>' +
+            '</select></td>' +
+            '<td><input type="text" data-field="manual_url" value="' + (tab.manual_url || '').replace(/"/g, '&quot;') + '" /></td>' +
+            '<td><input type="number" data-field="sort_order" value="' + sortOrder + '" /></td>' +
+            '<td><input type="radio" name="group_default_tab_radio" ' + (isDefault ? 'checked' : '') + ' /></td>' +
+            '<td><button type="button" class="action-delete remove-tab-row">Remove</button></td>' +
+            '<input type="hidden" data-field="is_default" value="' + (isDefault ? '1' : '0') + '" />';
+
+        tableBody.appendChild(tr);
+        bindRowEvents(tr);
+        syncManualUrlVisibility(tr);
+    }
+
+    function syncManualUrlVisibility(row) {
+        var overrideSelect = row.querySelector('[data-field="view_all_override"]');
+        var manualInput = row.querySelector('[data-field="manual_url"]');
+        if (!overrideSelect || !manualInput) {
+            return;
+        }
+        var show = overrideSelect.value === 'manual_url';
+        manualInput.disabled = !show;
+        manualInput.closest('td').style.opacity = show ? '1' : '0.45';
+    }
+
+    function syncDefaultTab() {
+        tableBody.querySelectorAll('tr').forEach(function (row) {
+            var radio = row.querySelector('input[type="radio"][name="group_default_tab_radio"]');
+            var hidden = row.querySelector('input[type="hidden"][data-field="is_default"]');
+            if (radio && hidden) {
+                hidden.value = radio.checked ? '1' : '0';
+            }
+        });
+    }
+
+    function reindexRows() {
+        tableBody.querySelectorAll('tr').forEach(function (row, index) {
+            row.querySelectorAll('[data-field]').forEach(function (fieldEl) {
+                var field = fieldEl.getAttribute('data-field');
+                if (!field) {
+                    return;
+                }
+                fieldEl.setAttribute('name', 'group[tabs][' + index + '][' + field + ']');
+            });
+        });
+    }
+
+    function refreshSortOrder() {
+        tableBody.querySelectorAll('tr').forEach(function (row, index) {
+            var sort = row.querySelector('input[data-field="sort_order"]');
+            if (sort && !sort.dataset.manualTouched) {
+                sort.value = String(index + 1);
+            }
+        });
+    }
+
+    function refreshPreview() {
+        if (!previewTabs || !previewContent) {
+            return;
+        }
+
+        var rows = Array.from(tableBody.querySelectorAll('tr'));
+        previewTabs.innerHTML = '';
+        if (!rows.length) {
+            previewContent.textContent = 'Select or add tabs to preview.';
+            return;
+        }
+
+        var activeIndex = 0;
+        rows.forEach(function (row, i) {
+            var labelInput = row.querySelector('input[data-field="tab_name"]');
+            var sliderSelect = row.querySelector('select[data-field="slider_id"]');
+            var defaultHidden = row.querySelector('input[type="hidden"][data-field="is_default"]');
+            var label = (labelInput && labelInput.value.trim()) ? labelInput.value.trim() : 'Tab ' + (i + 1);
+
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'action-default';
+            btn.textContent = label;
+            btn.dataset.index = String(i);
+            if (defaultHidden && defaultHidden.value === '1') {
+                activeIndex = i;
+            }
+            btn.addEventListener('click', function () {
+                renderPreviewContent(i);
+            });
+            previewTabs.appendChild(btn);
+        });
+
+        function renderPreviewContent(index) {
+            var row = rows[index];
+            if (!row) {
+                return;
+            }
+            var labelInput = row.querySelector('input[data-field="tab_name"]');
+            var sliderSelect = row.querySelector('select[data-field="slider_id"]');
+            var overrideSelect = row.querySelector('select[data-field="view_all_override"]');
+            var manualUrl = row.querySelector('input[data-field="manual_url"]');
+            var tabLabel = (labelInput && labelInput.value.trim()) ? labelInput.value.trim() : 'Tab ' + (index + 1);
+            var sliderText = sliderSelect && sliderSelect.options[sliderSelect.selectedIndex]
+                ? sliderSelect.options[sliderSelect.selectedIndex].text
+                : '-';
+            var overrideText = overrideSelect && overrideSelect.options[overrideSelect.selectedIndex]
+                ? overrideSelect.options[overrideSelect.selectedIndex].text
+                : '-';
+
+            previewContent.innerHTML =
+                '<strong>' + tabLabel + '</strong><br>' +
+                'Slider: ' + sliderText + '<br>' +
+                'View All: ' + overrideText + (manualUrl && manualUrl.value ? ' (' + manualUrl.value + ')' : '') + '<br>' +
+                'Verify products: open selected slider and confirm configured source and limits.';
+
+            previewTabs.querySelectorAll('button').forEach(function (b, bi) {
+                b.classList.toggle('action-primary', bi === index);
+                b.classList.toggle('action-default', bi !== index);
+            });
+        }
+
+        renderPreviewContent(activeIndex);
+    }
+
+    function bindRowEvents(row) {
+        var removeBtn = row.querySelector('.remove-tab-row');
+        var overrideSelect = row.querySelector('select[data-field="view_all_override"]');
+        var radio = row.querySelector('input[type="radio"][name="group_default_tab_radio"]');
+        var sort = row.querySelector('input[data-field="sort_order"]');
+
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function () {
+                row.remove();
+                var remainingRadios = tableBody.querySelectorAll('input[type="radio"][name="group_default_tab_radio"]');
+                if (remainingRadios.length && !Array.from(remainingRadios).some(function (r) { return r.checked; })) {
+                    remainingRadios[0].checked = true;
+                }
+                syncDefaultTab();
+                refreshSortOrder();
+                reindexRows();
+                refreshPreview();
+            });
+        }
+        if (overrideSelect) {
+            overrideSelect.addEventListener('change', function () {
+                syncManualUrlVisibility(row);
+                refreshPreview();
+            });
+        }
+        if (radio) {
+            radio.addEventListener('change', function () {
+                syncDefaultTab();
+                refreshPreview();
+            });
+        }
+        if (sort) {
+            sort.addEventListener('input', function () {
+                sort.dataset.manualTouched = '1';
+                refreshPreview();
+            });
+        }
+
+        row.querySelectorAll('input, select, textarea').forEach(function (el) {
+            el.addEventListener('change', refreshPreview);
+            el.addEventListener('input', refreshPreview);
+        });
+
+        row.addEventListener('dragstart', function () {
+            row.classList.add('dragging');
+        });
+        row.addEventListener('dragend', function () {
+            row.classList.remove('dragging');
+            refreshSortOrder();
+            reindexRows();
+            refreshPreview();
+        });
+    }
+
+    tableBody.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        var dragging = tableBody.querySelector('.dragging');
+        if (!dragging) {
+            return;
+        }
+
+        var afterElement = Array.from(tableBody.querySelectorAll('tr:not(.dragging)')).find(function (child) {
+            var box = child.getBoundingClientRect();
+            return e.clientY < box.top + box.height / 2;
+        });
+
+        if (afterElement) {
+            tableBody.insertBefore(dragging, afterElement);
+        } else {
+            tableBody.appendChild(dragging);
+        }
+    });
+
+    addBtn.addEventListener('click', function () {
+        createRow({});
+        var radios = tableBody.querySelectorAll('input[type="radio"][name="group_default_tab_radio"]');
+        if (radios.length === 1) {
+            radios[0].checked = true;
+            syncDefaultTab();
+        }
+        refreshSortOrder();
+        reindexRows();
+        refreshPreview();
+    });
+
+    if (Array.isArray(initialTabs) && initialTabs.length) {
+        initialTabs.forEach(function (tab) {
+            createRow(tab || {});
+        });
+    } else {
+        createRow({is_default: 1});
+    }
+
+    syncDefaultTab();
+    refreshSortOrder();
+    reindexRows();
+    refreshPreview();
+
+    form.addEventListener('submit', function () {
+        syncDefaultTab();
+        reindexRows();
+    });
+})();
+</script>

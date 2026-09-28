@@ -1,0 +1,22 @@
+{
+    "name": "artm/module-inventory-planner",
+    "description": "Internal admin tool that reports weekly qty sold per SKU from a chosen start date to today.",
+    "type": "magento2-module",
+    "license": "proprietary",
+    "require": {
+        "php": "~8.2.0||~8.3.0",
+        "magento/framework": "*",
+        "magento/module-backend": "*",
+        "magento/module-sales": "*",
+        "magento/module-catalog": "*",
+        "magento/module-eav": "*"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "ArtM\\InventoryPlanner\\": ""
+        }
+    }
+}

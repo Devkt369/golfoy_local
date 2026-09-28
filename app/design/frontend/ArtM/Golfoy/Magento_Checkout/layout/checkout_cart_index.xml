@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <script src="js/checkout-cart-page.js"/>
+        <css src="css/checkout-cart-page.css"/>
+    </head>
+    <body>
+
+        <referenceBlock name="checkout.cart.shipping">
+            <arguments>
+                <argument name="jsLayout" xsi:type="array">
+                    <item name="components" xsi:type="array">
+                        <item name="block-summary" xsi:type="array">
+                            <item name="children" xsi:type="array">
+                                <item name="block-shipping" xsi:type="array">
+                                    <item name="componentDisabled" xsi:type="boolean">true</item>
+                                </item>
+                            </item>
+                        </item>
+                    </item>
+                </argument>
+            </arguments>
+        </referenceBlock>
+
+        <referenceBlock name="page.main.title" remove="true"/>
+        <referenceBlock name="mpreward.earn.items" remove="true"/>
+        <referenceBlock name="checkout.cart.crosssell" remove="true"/>
+
+        <referenceBlock name="checkout.cart.item.renderers.default.actions.move_to_wishlist" remove="true"/>
+        <referenceBlock name="checkout.cart.item.renderers.simple.actions.move_to_wishlist" remove="true"/>
+        <referenceBlock name="checkout.cart.item.renderers.bundle.actions.move_to_wishlist" remove="true"/>
+        <referenceBlock name="checkout.cart.item.renderers.grouped.actions.move_to_wishlist" remove="true"/>
+        <referenceBlock name="checkout.cart.item.renderers.configurable.actions.move_to_wishlist" remove="true"/>
+        <referenceBlock name="checkout.cart.item.renderers.virtual.actions.move_to_wishlist" remove="true"/>
+        
+        <referenceBlock name="checkout.cart.summary.title">
+            <arguments>
+                <argument translate="true" name="text" xsi:type="string">Grand Total</argument>
+            </arguments>
+        </referenceBlock>
+
+        <referenceContainer name="checkout.cart.container">
+            <container name="cart.discount.wrapper"
+                       htmlTag="div"
+                       htmlClass="cart-discount-wrapper rewards"
+                       before="checkout.cart.form.before"/>
+        </referenceContainer>
+        
+        <move element="checkout.cart.discount"
+              destination="cart.discount.wrapper"/>
+
+        <move element="checkout.cart.coupon"
+              destination="cart.discount.wrapper"/>
+
+        <referenceBlock name="checkout.cart.totals">
+            <arguments>
+                <argument name="jsLayout" xsi:type="array">
+                    <item name="components" xsi:type="array">
+                        <item name="block-totals" xsi:type="array">
+                            <item name="children" xsi:type="array">
+                                <item name="subtotal" xsi:type="array">
+                                    <item name="component" xsi:type="string">Magento_Checkout/js/view/summary/subtotal</item>
+                                    <item name="config" xsi:type="array">
+                                        <item name="title" xsi:type="string" translate="true">Total</item>
+                                        <item name="template" xsi:type="string">Magento_Checkout/cart/totals/subtotal</item>
+                                    </item>
+                                </item>
+                            </item>
+                        </item>
+                    </item>
+                </argument>
+            </arguments>
+        </referenceBlock>
+        
+        <referenceBlock name="checkout.cart.totals">
+            <arguments>
+                <argument name="jsLayout" xsi:type="array">
+                    <item name="components" xsi:type="array">
+                        <item name="block-totals" xsi:type="array">
+                            <item name="children" xsi:type="array">
+                                <item name="tax" xsi:type="array">
+                                    <item name="component" xsi:type="string">Magento_Tax/js/view/checkout/cart/totals/tax</item>
+                                    <item name="config" xsi:type="array">
+                                        <item name="template" xsi:type="string">Magento_Tax/checkout/cart/totals/tax</item>
+                                        <item name="title" xsi:type="string" translate="true">Tax (included)</item>
+                                    </item>
+                                </item>
+                            </item>
+                        </item>
+                    </item>
+                </argument>
+            </arguments>
+        </referenceBlock>
+
+    </body>
+</page>

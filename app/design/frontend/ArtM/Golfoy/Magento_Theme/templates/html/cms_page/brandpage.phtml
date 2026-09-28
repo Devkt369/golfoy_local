@@ -1,0 +1,375 @@
+<?php
+
+/**
+ * Brand Directory Page: Mobile Phone Directory Style
+ * All brands from Brands category (A-Z), right-side alphabet nav (mobile only)
+ */
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$categoryRepository = $objectManager->get(\Magento\Catalog\Model\CategoryRepository::class);
+$escaper = $objectManager->get(\Magento\Framework\Escaper::class);
+
+$brandsCategoryId = 307;
+try {
+  $brandsCategory = $categoryRepository->get($brandsCategoryId);
+  $brandSubcategories = $brandsCategory->getChildrenCategories();
+} catch (Exception $e) {
+  $brandSubcategories = [];
+}
+
+// Prepare brands by letter
+$brandsByLetter = [];
+foreach ($brandSubcategories as $brandCat) {
+  if (!$brandCat->getIsActive()) continue;
+  $name = trim($brandCat->getName());
+  $firstLetter = strtoupper(mb_substr($name, 0, 1));
+  if (!preg_match('/[A-Z]/', $firstLetter)) {
+    $firstLetter = '#';
+  }
+  $brandsByLetter[$firstLetter][] = [
+    'name' => $name,
+    'url' => $brandCat->getUrl(),
+  ];
+}
+$alphabet = range('A', 'Z');
+?>
+<style>
+  body.cms-brands.cms-page-view main#maincontent {
+    margin-top: 0px !important;
+  }
+
+  @media (min-width: 768px) {
+    .brand-directory-cms-azbar {
+      display: flex;
+      position: sticky;
+      top: var(--total-fixed-height, 110px);
+      z-index: 10;
+      background: #fff;
+      border-bottom: 1px solid #eee;
+      padding: 10px 0px;
+      gap: 4px;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .brand-directory-cms-azbar .brand-directory-cms-letter-btn {
+      font-size: 15px;
+      font-weight: 700;
+      color: #e60023;
+      background: none;
+      border: none;
+      border-radius: 4px;
+      padding: 7px 10px 4px 10px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .brand-directory-cms-azbar .brand-directory-cms-letter-btn.active,
+    .brand-directory-cms-azbar .brand-directory-cms-letter-btn:active {
+      background: #e60023;
+      color: #fff;
+    }
+  }
+
+  .brand-directory-cms-page {
+    position: relative;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 0 40px;
+    height: auto;
+  }
+
+  .brand-directory-cms-sections {
+    padding: 0;
+    height: auto;
+  }
+
+  .brand-directory-cms-section {
+    padding: 0 0 24px;
+  }
+
+  .brand-directory-cms-letter {
+    font-size: 2rem;
+    font-weight: 600;
+    color: black;
+    margin: 0 0 10px 0;
+  }
+
+  .brand-directory-cms-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+  }
+
+  .brand-directory-cms-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    color: #333;
+    text-decoration: none;
+    background: transparent;
+    border-radius: 6px;
+    padding: 6px 12px;
+    box-shadow: none;
+    transition: box-shadow 0.2s;
+    border: 1px solid black;
+  }
+
+  .brand-directory-cms-link:hover {
+    color: #e60023;
+  }
+
+  .brand-directory-cms-link img {
+    width: 180px;
+    height: 120px;
+    object-fit: contain;
+    background: transparent;
+    border-radius: 4px;
+  }
+
+  .brand-directory-cms-link .brand-directory-cms-fallback {
+    font-size: 13px;
+    color: #666;
+  }
+
+  /* Right-side alphabet nav (mobile only) */
+  @media (max-width: 767px) {
+    .brand-directory-cms-rail {
+      position: fixed;
+      right: 8px;
+      top: 110px;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+      padding: 0px;
+      justify-content: space-around;
+      align-content: flex-end;
+      height: calc(100% - 120px);
+    }
+
+    .brand-directory-cms-rail .brand-directory-cms-letter-btn {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e60023;
+      padding: 3px 7px 3px 7px;
+      border-radius: 4px;
+      margin: 1px 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .brand-directory-cms-rail .brand-directory-cms-letter-btn.active,
+    .brand-directory-cms-rail .brand-directory-cms-letter-btn:active {
+      background: #e60023;
+      color: #fff;
+      padding: 7px 8px;
+    }
+
+    main#maincontent {
+      padding: 0px !important;
+    }
+
+    div#brandDirectoryCmsSections {
+      /* max-width: calc(100% - 50px); */
+      padding: 10px 50px 30px 20px;
+    }
+
+    .brand-directory-cms-link img {
+      width: 70px;
+      height: 55px;
+    }
+
+    .brand-directory-cms-grid {
+      gap: 10px;
+    }
+
+    .brand-directory-cms-letter {
+      font-size: 14px;
+    }
+
+    nav#brandDirectoryCmsAzbar {
+      display: none;
+    }
+
+    body.cms-brands.cms-page-view .floating-whatsapp {
+      right: 40px !important;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .brand-directory-cms-rail {
+      display: none !important;
+    }
+
+  }
+</style>
+<div class="brand-directory-cms-page">
+  <!-- A-Z bar at top for desktop only -->
+  <nav class="brand-directory-cms-azbar" id="brandDirectoryCmsAzbar">
+    <?php foreach ($alphabet as $letter): ?>
+      <?php if (!empty($brandsByLetter[$letter])): ?>
+        <button class="brand-directory-cms-letter-btn" data-letter="<?= $letter ?>"><?= $letter ?></button>
+      <?php endif; ?>
+    <?php endforeach; ?>
+  </nav>
+  <div class="brand-directory-cms-sections" id="brandDirectoryCmsSections">
+    <?php foreach ($alphabet as $letter): ?>
+      <?php if (!empty($brandsByLetter[$letter])): ?>
+        <section class="brand-directory-cms-section" id="brandDirectoryCmsSection-<?= $letter ?>">
+          <div class="brand-directory-cms-letter"><?= $letter ?></div>
+          <div class="brand-directory-cms-grid">
+            <?php foreach ($brandsByLetter[$letter] as $brand): ?>
+              <?php
+              $cleanName = preg_replace('/\s*store\s*/i', '', $brand['name']);
+              $imageName = preg_replace('/[^a-zA-Z0-9]/', '', $cleanName);
+              $imageName = ucfirst(strtolower($imageName));
+              $imageUrl = 'https://golfoy.com/pub/media/wysiwyg/2024/brands/' . $imageName . '.svg';
+              ?>
+              <a class="brand-directory-cms-link" href="<?= $escaper->escapeUrl($brand['url']) ?>">
+                <img src="<?= $escaper->escapeUrl($imageUrl) ?>" alt="<?= $escaper->escapeHtml($brand['name']) ?>" title="<?= $escaper->escapeHtml($brand['name']) ?>" onerror="this.style.display='none';this.parentNode.insertAdjacentHTML('beforeend','<span class=\'brand-directory-cms-fallback\'><?= $escaper->escapeHtml($brand['name']) ?></span>');">
+                <span class="brand-directory-cms-name" style="display:none;"> <?= $escaper->escapeHtml($brand['name']) ?> </span>
+              </a>
+            <?php endforeach; ?>
+          </div>
+        </section>
+      <?php endif; ?>
+    <?php endforeach; ?>
+  </div>
+  <!-- Mobile right-side alphabet rail -->
+  <nav class="brand-directory-cms-rail" id="brandDirectoryCmsRail">
+    <?php foreach ($alphabet as $letter): ?>
+      <?php if (!empty($brandsByLetter[$letter])): ?>
+        <button class="brand-directory-cms-letter-btn" data-letter="<?= $letter ?>"><?= $letter ?></button>
+      <?php endif; ?>
+    <?php endforeach; ?>
+  </nav>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Top A-Z bar
+    var azbar = document.getElementById('brandDirectoryCmsAzbar');
+    var azLetters = azbar ? azbar.querySelectorAll('.brand-directory-cms-letter-btn') : [];
+    // Mobile right rail
+    var rail = document.getElementById('brandDirectoryCmsRail');
+    var railLetters = rail ? rail.querySelectorAll('.brand-directory-cms-letter-btn') : [];
+    var sections = {};
+    document.querySelectorAll('.brand-directory-cms-section').forEach(function(sec) {
+      sections[sec.id.replace('brandDirectoryCmsSection-', '')] = sec;
+    });
+    // Scroll to section with extra offset
+    function scrollToLetter(letter, source) {
+      var sec = sections[letter];
+      if (sec) {
+        var headerOffset = window.innerWidth >= 768 ? getFixedHeaderHeight() : 0;
+        var extraOffset = 100; // additional offset for fixed header/search bar
+        var rect = sec.getBoundingClientRect();
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        var top = rect.top + scrollTop - headerOffset - extraOffset;
+        window.scrollTo({
+          top: top,
+          behavior: 'smooth'
+        });
+        if (source === 'azbar') {
+          azLetters.forEach(function(btn) {
+            btn.classList.toggle('active', btn.dataset.letter === letter);
+          });
+        } else if (source === 'rail') {
+          railLetters.forEach(function(btn) {
+            btn.classList.toggle('active', btn.dataset.letter === letter);
+          });
+        }
+      }
+    }
+    // Top bar click
+    azLetters.forEach(function(btn) {
+      if (btn) {
+        btn.addEventListener('click', function() {
+          scrollToLetter(btn.dataset.letter, 'azbar');
+        });
+      }
+    });
+    // Mobile touch/drag
+    if (rail) {
+      var isTouching = false;
+      var lastLetter = null;
+
+      function handleTouch(e) {
+        var touch = e.touches[0];
+        var target = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (target && target.classList.contains('brand-directory-cms-letter-btn')) {
+          var letter = target.dataset.letter;
+          if (letter !== lastLetter) {
+            scrollToLetter(letter, 'rail');
+            lastLetter = letter;
+          }
+        }
+      }
+
+      if (rail) {
+        rail.addEventListener('touchstart', function(e) {
+          isTouching = true;
+          handleTouch(e);
+        });
+        rail.addEventListener('touchmove', function(e) {
+          handleTouch(e);
+        });
+        rail.addEventListener('touchend', function() {
+          isTouching = false;
+          lastLetter = null;
+        });
+      }
+
+      // Mobile click
+      railLetters.forEach(function(btn) {
+        if (btn) {
+          btn.addEventListener('click', function() {
+            scrollToLetter(btn.dataset.letter, 'rail');
+          });
+        }
+      });
+    }
+    // --- Improved scroll event for active alphabet highlight ---
+    function updateActiveLetterOnScroll() {
+      var scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+      var headerOffset = window.innerWidth >= 768 ? getFixedHeaderHeight() : 0;
+      var extraOffset = 200;
+      var currentLetter = null;
+      Object.keys(sections).forEach(function(letter) {
+        var sec = sections[letter];
+        var rect = sec.getBoundingClientRect();
+        var top = rect.top + scrollPosition - headerOffset - extraOffset;
+        if (scrollPosition >= top) {
+          currentLetter = letter;
+        }
+      });
+      if (currentLetter) {
+        railLetters.forEach(function(btn) {
+          btn.classList.toggle('active', btn.dataset.letter === currentLetter);
+        });
+        azLetters.forEach(function(btn) {
+          btn.classList.toggle('active', btn.dataset.letter === currentLetter);
+        });
+      }
+    }
+    window.addEventListener('scroll', function() {
+      updateActiveLetterOnScroll();
+    });
+    updateActiveLetterOnScroll();
+
+    function getFixedHeaderHeight() {
+      // Try to get CSS variable, fallback to 110px
+      var val = getComputedStyle(document.documentElement).getPropertyValue('--total-fixed-height');
+      if (val) {
+        var px = parseInt(val);
+        if (!isNaN(px)) return px;
+      }
+      return 110;
+    }
+  });
+</script>

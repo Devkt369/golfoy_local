@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2016 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="default">
+        <job name="webpos_order_converter_process" instance="Magestore\Webpos\Cron\WebposOrderConverter" method="execute">
+            <schedule>*/30 * * * *</schedule>
+        </job>
+        <job name="webpos_order_delete_backup_table" instance="Magestore\Webpos\Cron\DeleteWebposOrderBackupTable" method="execute">
+            <schedule>* * 1 * *</schedule>
+        </job>
+    </group>
+</config>

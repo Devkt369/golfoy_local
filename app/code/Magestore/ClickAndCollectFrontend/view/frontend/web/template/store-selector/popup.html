@@ -1,0 +1,44 @@
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<div id="store-selector-popup" data-bind="blockLoader: isLoading">
+    <div class="row search-store-row">
+        <p class="error-message" data-bind="i18n: 'Sorry, we\'re unable to determine your location. Please try searching by town or postcode.', if: !allowPosition()"></p>
+        <label id="search-store-label">
+            <span><!-- ko text: 'Find a store' --><!-- /ko --></span>
+        </label>
+        <div class="search-store-wrapper">
+            <div class="search-store-form">
+                <div class="search-store-input">
+                    <div class="search-store-input-wrapper">
+                        <input data-test="store-selector-search-bar" id="search-store-input" name="search_store_input" type="text"
+                               class="search-store-input" data-bind="value: searchKey, attr: {placeholder: $t('My address is...')},
+                               event: {keypress: $parent.handlePressSearchKey.bind($parent)},
+                               afterRender: $parent.initSuggest">
+                        <button class="search-location-button"
+                                role="button" tabindex="0"
+                                data-bind="click: searchLocation"
+                                type="button">
+                            <span><!-- ko text: 'Find' --><!-- /ko --></span>
+                        </button>
+                    </div>
+                </div>
+                <button class="get-position" role="button" tabindex="0" type="button" data-bind="click: getCurrentPosition">
+                    <img data-bind="attr: {src: getPositionImageSrc(), alt: $t('Get Position')}" class="get-position-icon"/>
+                </button>
+            </div>
+        </div>
+    </div>
+    <table class="store-selector-popup-table"
+           data-bind="visible: locationList() && locationList().length">
+        <tbody>
+        <!-- ko foreach: { data: locationList(), as: 'location' } -->
+        <!-- ko template: { name: $parent.storeSelectorPopupItemTemplate } --><!-- /ko -->
+        <!-- /ko -->
+        <p data-bind="i18n: 'There are no stores around you.', if: (!locationList() || (locationList() !== null && !locationList().length))"></p>
+       </tbody>
+   </table>
+</div>

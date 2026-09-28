@@ -1,0 +1,558 @@
+<?php
+/** @var $block \Magento\Backend\Block\Template */
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$request = $objectManager->get('Magento\\Framework\\App\\RequestInterface');
+$id = $request->getParam('id');
+
+$formModel = $objectManager->create('ArtM\\Forms\\Model\\Forms');
+if ($id) {
+	$formModel->load($id);
+}
+$actionUrl = $block->getUrl('artm_forms/forms/save');
+?>
+
+<style>
+	#edit_form {
+		background: #fff;
+		border-radius: 8px;
+		box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+		padding: 32px 24px 24px 24px;
+		width: 100%;
+		max-width: none;
+		margin: 32px 0;
+		font-family: 'Segoe UI', Arial, sans-serif;
+		box-sizing: border-box;
+	}
+	#edit_form fieldset {
+		border: 1px solid #e3e3e3;
+		border-radius: 6px;
+		margin-bottom: 28px;
+		padding: 18px 20px 16px 20px;
+		background: #fafbfc;
+	}
+	#edit_form legend {
+		font-size: 1.2em;
+		font-weight: 600;
+		color: #333;
+		margin-bottom: 10px;
+		padding: 0 8px;
+	}
+	#edit_form label {
+		display: block;
+		font-weight: 500;
+		margin-bottom: 4px;
+		color: #444;
+	}
+	#edit_form input[type="text"],
+	#edit_form input[type="number"],
+	#edit_form textarea,
+	#edit_form select {
+		width: 100%;
+		padding: 7px 10px;
+		border: 1px solid #c8c8c8;
+		border-radius: 4px;
+		font-size: 1em;
+		margin-bottom: 10px;
+		background: #fff;
+		box-sizing: border-box;
+		transition: border-color 0.2s;
+	}
+	#edit_form input[type="text"]:focus,
+	#edit_form input[type="number"]:focus,
+	#edit_form textarea:focus,
+	#edit_form select:focus {
+		border-color: #1979c3;
+		outline: none;
+	}
+	#edit_form table {
+		border-collapse: collapse;
+		width: 100%;
+		background: #fff;
+		margin-bottom: 10px;
+	}
+	#edit_form th, #edit_form td {
+		border: 1px solid #e3e3e3;
+		padding: 8px 6px;
+		text-align: left;
+		vertical-align: middle;
+	}
+	#edit_form th {
+		background: #f4f6fa;
+		font-weight: 600;
+		color: #222;
+	}
+	#edit_form button[type="button"] {
+		background: #f4f6fa;
+		color: #1979c3;
+		border: 1px solid #c8c8c8;
+		border-radius: 4px;
+		padding: 5px 14px;
+		font-size: 1em;
+		cursor: pointer;
+		margin: 2px 0;
+		transition: background 0.2s, color 0.2s;
+	}
+	#edit_form button[type="button"]:hover {
+		background: #1979c3;
+		color: #fff;
+	}
+	#edit_form .action-primary {
+		background: #1979c3;
+		color: #fff;
+		border: none;
+		border-radius: 4px;
+		padding: 8px 28px;
+		font-size: 1.1em;
+		font-weight: 600;
+		cursor: pointer;
+		box-shadow: 0 2px 4px rgba(25,121,195,0.08);
+		margin-top: 10px;
+		transition: background 0.2s;
+	}
+	#edit_form .action-primary:hover {
+		background: #145a96;
+	}
+	.fixed-save-bar {
+		position: fixed;
+		left: 0;
+		bottom: 0;
+		width: 100vw;
+		background: #fff;
+		border-top: 1px solid #e3e3e3;
+		box-shadow: 0 -2px 8px rgba(0,0,0,0.07);
+		padding: 16px 0 12px 0;
+		z-index: 100;
+		display: flex;
+		justify-content: flex-end;
+	}
+	.fixed-save-bar .action-primary {
+		margin: 0 32px 0 0;
+	}
+	#edit_form td input[type="checkbox"] {
+		width: auto;
+		margin: 0 0 0 2px;
+	}
+	#edit_form td {
+		background: #fff;
+	}
+	@media (max-width: 700px) {
+		#edit_form { padding: 10px; }
+		#edit_form table, #edit_form thead, #edit_form tbody, #edit_form th, #edit_form td, #edit_form tr { display: block; }
+		#edit_form tr { margin-bottom: 10px; }
+		#edit_form th { background: #f4f6fa; font-weight: 600; }
+		#edit_form td { border: none; position: relative; padding-left: 50%; }
+		#edit_form td:before { position: absolute; left: 10px; top: 8px; width: 45%; white-space: nowrap; font-weight: 600; color: #888; }
+	}
+</style>
+<form action="<?= $actionUrl ?>" method="post" id="edit_form">
+	<?= $block->getBlockHtml('formkey') ?>
+	<input type="hidden" name="id" value="<?= $formModel->getId() ?>" />
+
+
+	<?php
+	$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+	$request = $objectManager->get('Magento\\Framework\\App\\RequestInterface');
+	$id = $request->getParam('id');
+	$formModel = $objectManager->create('ArtM\\Forms\\Model\\Forms');
+	if ($id) {
+		$formModel->load($id);
+	}
+	$actionUrl = $block->getUrl('artm_forms/forms/save');
+	$formFields = [];
+	if ($formModel->getId() && $formModel->getData('form_fields')) {
+		$formFields = json_decode($formModel->getData('form_fields'), true) ?: [];
+	}
+	?>
+	<form action="<?= $actionUrl ?>" method="post" id="edit_form">
+		<?= $block->getBlockHtml('formkey') ?>
+		<input type="hidden" name="id" value="<?= $formModel->getId() ?>" />
+		<fieldset>
+			<legend>General Information</legend>
+			<div>
+				<label for="form_name">Form Name</label>
+				<input type="text" name="form_name" id="form_name" value="<?= $block->escapeHtml($formModel->getData('form_name')) ?>" required />
+			</div>
+			<div>
+				<label for="form_identifier">Form Identifier</label>
+				<input type="text" name="form_identifier" id="form_identifier" value="<?= $block->escapeHtml($formModel->getData('form_identifier')) ?>" required />
+			</div>
+			<div>
+				<label for="form_description">Form Description</label>
+				<textarea name="form_description" id="form_description"><?= $block->escapeHtml($formModel->getData('form_description')) ?></textarea>
+			</div>
+			<div>
+				<label for="form_css_class">Form CSS Class (for frontend)</label>
+				<input type="text" name="form_css_class" id="form_css_class" value="<?= $block->escapeHtml($formModel->getData('form_css_class')) ?>" placeholder="e.g. my-custom-form" />
+			</div>
+			<div>
+				   <label for="form_html_id">Form HTML ID (for frontend)</label>
+				   <input type="text" name="form_html_id" id="form_html_id" value="<?= $block->escapeHtml($formModel->getData('form_html_id')) ?>" placeholder="e.g. my-form-id" />
+			   </div>
+			   <div>
+				   <label for="form_success_heading">Success Heading</label>
+				   <input type="text" name="form_success_heading" id="form_success_heading" value="<?= $block->escapeHtml($formModel->getData('form_success_heading')) ?>" placeholder="e.g. Thank You!" />
+			   </div>
+			   <div>
+				   <label for="form_success_content">Success Content</label>
+				   <textarea name="form_success_content" id="form_success_content" placeholder="e.g. Thank you for submitting this form, we will revert you shortly."><?= $block->escapeHtml($formModel->getData('form_success_content')) ?></textarea>
+			</div>
+			<div>
+				<label for="form_captcha_enabled">Enable Captcha?</label>
+				<select name="form_captcha_enabled" id="form_captcha_enabled">
+					<option value="0"<?= $formModel->getData('form_captcha_enabled') ? '' : ' selected' ?>>No</option>
+					<option value="1"<?= $formModel->getData('form_captcha_enabled') ? ' selected' : '' ?>>Yes</option>
+				</select>
+			</div>
+			<div id="captcha-type-row" style="display:<?= $formModel->getData('form_captcha_enabled') ? 'block' : 'none' ?>;">
+				<label for="form_captcha_type">Captcha Type</label>
+				<select name="form_captcha_type" id="form_captcha_type">
+					<option value="simple"<?= $formModel->getData('form_captcha_type')==="simple" ? ' selected' : '' ?>>Simple Math</option>
+				</select>
+			</div>
+<script>
+// Show/hide captcha type row based on enable select
+document.addEventListener('DOMContentLoaded', function() {
+	var enableSel = document.getElementById('form_captcha_enabled');
+	var typeRow = document.getElementById('captcha-type-row');
+	if (enableSel && typeRow) {
+		enableSel.addEventListener('change', function() {
+			typeRow.style.display = this.value == '1' ? 'block' : 'none';
+		});
+	}
+});
+</script>
+		</fieldset>
+		<div style="background:#eaf6ff;border:1px solid #b3d8fd;padding:18px 20px 14px 20px;border-radius:6px;margin-bottom:22px;max-width:700px;">
+				<div style="font-size:1.13em;font-weight:600;color:#1979c3;margin-bottom:6px;">Embed This Form</div>
+				<div style="margin-bottom:7px;font-size:1.01em;">
+					   <b>CMS/Static Block Shortcode:</b><br>
+					   <code style="background:#f4f6fa;padding:2px 7px;border-radius:4px;">{{artm_form identifier="<?= htmlspecialchars($formModel->getData('form_identifier')) ?>"}}</code>
+				</div>
+		</div>
+		<fieldset>
+			<legend>Form Fields</legend>
+			<table id="form-fields-table" border="1" style="width:100%;">
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Label</th>
+						<th>Type</th>
+						<th>Is Required</th>
+						<th>Sort Order</th>
+						<th>Options</th>
+						<th>Show If</th>
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody id="form-fields-body">
+				</tbody>
+			</table>
+			<button type="button" onclick="addFormField()">Add Field</button>
+		</fieldset>
+		<div class="fixed-save-bar">
+			<button type="submit" class="action-primary">Save</button>
+		</div>
+	</form>
+	<script>
+	var fieldTypesWithOptions = ['select','multiselect','swatch','radio'];
+	var formFields = <?= json_encode($formFields) ?>;
+	// Sort by sort_order (numeric, blanks last)
+	formFields.sort(function(a, b) {
+		var aOrder = (a.sort_order === undefined || a.sort_order === null || a.sort_order === '' || isNaN(a.sort_order)) ? Infinity : parseInt(a.sort_order);
+		var bOrder = (b.sort_order === undefined || b.sort_order === null || b.sort_order === '' || isNaN(b.sort_order)) ? Infinity : parseInt(b.sort_order);
+		return aOrder - bOrder;
+	});
+
+	function renderOptionsCell(options, fieldIndex, type) {
+		if (!fieldTypesWithOptions.includes(type)) return '';
+		options = options || [];
+		var html = '<table style="width:100%;"><thead><tr><th>Label</th><th>Value</th><th>Action</th></tr></thead><tbody id="options-body-'+fieldIndex+'">';
+		for (var i=0; i<options.length; i++) {
+			html += '<tr>' +
+				'<td><input type="text" name="form_fields['+fieldIndex+'][options]['+i+'][label]" value="'+(options[i].label||'')+'" required></td>' +
+				'<td><input type="text" name="form_fields['+fieldIndex+'][options]['+i+'][value]" value="'+(options[i].value||'')+'" required></td>' +
+				'<td><button type="button" onclick="removeOption('+fieldIndex+','+i+')">Remove</button></td>' +
+			'</tr>';
+		}
+		html += '</tbody></table>';
+		html += '<button type="button" onclick="addOption('+fieldIndex+')">Add Value</button>';
+		return html;
+	}
+
+	function renderFormFields() {
+		var tbody = document.getElementById('form-fields-body');
+		tbody.innerHTML = '';
+		for (var i=0; i<formFields.length; i++) {
+			var f = formFields[i];
+			var row = document.createElement('tr');
+			var extraSettings = '';
+			   if (['text','email','phone'].includes(f.type)) {
+				   var maxLen = (typeof f.max_length !== 'undefined' && f.max_length !== null && f.max_length !== '') ? f.max_length : 50;
+				   extraSettings += '<div style="margin-top:4px;font-size:0.95em;color:#888;">Max Length: <input type="number" min="1" name="form_fields['+i+'][max_length]" value="'+maxLen+'" style="width:70px;" /></div>';
+			   }
+			   if (f.type === 'textarea') {
+				   var maxLen = (typeof f.max_length !== 'undefined' && f.max_length !== null && f.max_length !== '') ? f.max_length : 500;
+				   extraSettings += '<div style="margin-top:4px;font-size:0.95em;color:#888;">Max Length: <input type="number" min="1" name="form_fields['+i+'][max_length]" value="'+maxLen+'" style="width:70px;" /></div>';
+			   }
+			   if (f.type === 'file' || f.type === 'image') {
+				   var mbValue = (typeof f.max_file_size !== 'undefined' && f.max_file_size !== null && f.max_file_size !== '') ? (parseInt(f.max_file_size, 10) > 1000 ? Math.round(parseInt(f.max_file_size, 10) / 1024 / 1024) : parseInt(f.max_file_size, 10)) : 5;
+				   var maxCount = (typeof f.max_file_count !== 'undefined' && f.max_file_count !== null && f.max_file_count !== '') ? f.max_file_count : 5;
+				   extraSettings += '<div style="margin-top:4px;font-size:0.95em;color:#888;">Max File Size (MB): <input type="number" min="1" step="1" name="form_fields['+i+'][max_file_size]" value="'+mbValue+'" style="width:70px;" /> &nbsp; Max Files: <input type="number" min="1" name="form_fields['+i+'][max_file_count]" value="'+maxCount+'" style="width:60px;" /></div>';
+			   }
+			   if (f.type === 'date') {
+				   extraSettings += '<div style="margin-top:4px;font-size:0.95em;color:#888;">'
+					   + '<label style="font-weight:400;font-size:0.97em;"><input type="checkbox" name="form_fields['+i+'][past_only]" value="1"'+(f.past_only?' checked':'')+'> Past date only</label>'
+					   + '&nbsp; '
+					   + '<label style="font-weight:400;font-size:0.97em;"><input type="checkbox" name="form_fields['+i+'][future_only]" value="1"'+(f.future_only?' checked':'')+'> Future date only</label>'
+					   + '</div>';
+			   }
+			row.innerHTML =
+				'<td><input type="text" name="form_fields['+i+'][name]" value="'+(typeof f.name !== 'undefined' ? f.name : '')+'" required></td>'+ 
+				'<td><input type="text" name="form_fields['+i+'][label]" value="'+(typeof f.label !== 'undefined' ? f.label : '')+'" required></td>'+ 
+				'<td>'+ 
+					'<select name="form_fields['+i+'][type]" onchange="changeType('+i+',this.value)">' +
+						getTypeOptions(f.type) +
+					'</select>'+ 
+					((f.type==='file'||f.type==='image') ? '<br><label style="font-weight:400;font-size:0.95em;"><input type="checkbox" name="form_fields['+i+'][multiple]" value="1"'+(f.multiple?' checked':'')+'> Allow multiple</label>' : '')+
+					extraSettings+
+				'</td>'+ 
+				'<td><input type="checkbox" name="form_fields['+i+'][is_required]" value="1"'+(f.is_required?' checked':'')+'></td>'+ 
+				'<td><input type="number" name="form_fields['+i+'][sort_order]" value="'+(f.sort_order||'')+'"></td>'+ 
+				'<td>'+renderOptionsCell(f.options,i,f.type)+'</td>'+ 
+				'<td><input type="text" name="form_fields['+i+'][show_if]" value="'+(f.show_if||'')+'" placeholder="field=value or field!=value" style="width:120px;font-size:0.97em;" /></td>'+
+				'<td><button type="button" onclick="removeFormField('+i+')">Remove</button></td>';
+			tbody.appendChild(row);
+		}
+	}
+
+	function getTypeOptions(selected) {
+	var types = ['text','textarea','email','phone','select','multiselect','date','file','image','swatch','checkbox','radio','price','button'];
+		var html = '';
+		for (var t of types) {
+			html += '<option value="'+t+'"'+(selected==t?' selected':'')+'>'+t.charAt(0).toUpperCase()+t.slice(1)+'</option>';
+		}
+		return html;
+	}
+
+	function addFormField() {
+		// Save current input values before adding a new field
+		var tbody = document.getElementById('form-fields-body');
+		var rows = tbody.getElementsByTagName('tr');
+		// console.log(rows);return;
+		for (var i = 0; i < rows.length; i++) {
+			var inputs = rows[i].querySelectorAll('input, select, textarea');
+			for (var j = 0; j < inputs.length; j++) {
+				var input = inputs[j];
+				var nameMatch = input.name.match(/form_fields\[(\d+)\]\[([^\]]+)\](?:\[(\d+)\]\[([^\]]+)\])?/);
+				if (nameMatch) {
+					var idx = parseInt(nameMatch[1]);
+					var key = nameMatch[2];
+					if (typeof formFields[idx] !== 'object') continue;
+					if (nameMatch[3] !== undefined && nameMatch[4] !== undefined) {
+						// Nested option
+						var optIdx = parseInt(nameMatch[3]);
+						var optKey = nameMatch[4];
+						if (!formFields[idx].options) formFields[idx].options = [];
+						if (!formFields[idx].options[optIdx]) formFields[idx].options[optIdx] = {};
+						formFields[idx].options[optIdx][optKey] = input.type === 'checkbox' ? input.checked : input.value;
+					} else {
+						formFields[idx][key] = input.type === 'checkbox' ? input.checked : input.value;
+					}
+				}
+			}
+		}
+	   formFields.push({
+		   name:'',
+		   label:'',
+		   type:'text',
+		   is_required:false,
+		   sort_order:'',
+		   options:[],
+		   multiple:false,
+		   max_length:50,
+		   max_file_size:5,
+		   max_file_count:5,
+		   past_only:false,
+		   future_only:false
+	   });
+		renderFormFields();
+	}
+	function removeFormField(idx) {
+		// Save all current input values before removing a field
+		var tbody = document.getElementById('form-fields-body');
+		var rows = tbody.getElementsByTagName('tr');
+		for (var i = 0; i < rows.length; i++) {
+			var inputs = rows[i].querySelectorAll('input, select, textarea');
+			for (var j = 0; j < inputs.length; j++) {
+				var input = inputs[j];
+				var nameMatch = input.name.match(/form_fields\[(\d+)\]\[([^\]]+)\](?:\[(\d+)\]\[([^\]]+)\])?/);
+				if (nameMatch) {
+					var idx2 = parseInt(nameMatch[1]);
+					var key = nameMatch[2];
+					if (typeof formFields[idx2] !== 'object') continue;
+					if (nameMatch[3] !== undefined && nameMatch[4] !== undefined) {
+						// Nested option
+						var optIdx = parseInt(nameMatch[3]);
+						var optKey = nameMatch[4];
+						if (!formFields[idx2].options) formFields[idx2].options = [];
+						if (!formFields[idx2].options[optIdx]) formFields[idx2].options[optIdx] = {};
+						formFields[idx2].options[optIdx][optKey] = input.type === 'checkbox' ? input.checked : input.value;
+					} else {
+						formFields[idx2][key] = input.type === 'checkbox' ? input.checked : input.value;
+					}
+				}
+			}
+		}
+		formFields.splice(idx,1);
+		renderFormFields();
+	}
+	function changeType(idx, type) {
+		// Save all rows' input values before changing type
+		var tbody = document.getElementById('form-fields-body');
+		var rows = tbody.getElementsByTagName('tr');
+		for (var i = 0; i < rows.length; i++) {
+			var inputs = rows[i].querySelectorAll('input, select, textarea');
+			for (var j = 0; j < inputs.length; j++) {
+				var input = inputs[j];
+				var nameMatch = input.name.match(/form_fields\[(\d+)\]\[([^\]]+)\](?:\[(\d+)\]\[([^\]]+)\])?/);
+				if (nameMatch) {
+					var idx2 = parseInt(nameMatch[1]);
+					var key = nameMatch[2];
+					if (typeof formFields[idx2] !== 'object') continue;
+					if (nameMatch[3] !== undefined && nameMatch[4] !== undefined) {
+						// Nested option
+						var optIdx = parseInt(nameMatch[3]);
+						var optKey = nameMatch[4];
+						if (!formFields[idx2].options) formFields[idx2].options = [];
+						if (!formFields[idx2].options[optIdx]) formFields[idx2].options[optIdx] = {};
+						formFields[idx2].options[optIdx][optKey] = input.type === 'checkbox' ? input.checked : input.value;
+					} else {
+						// Always use .value, not .defaultValue
+						formFields[idx2][key] = input.type === 'checkbox' ? input.checked : input.value;
+					}
+				}
+			}
+		}
+		if (fieldTypesWithOptions.includes(type)) {
+			if (!formFields[idx].options) formFields[idx].options = [];
+		} else {
+			formFields[idx].options = undefined;
+		}
+		formFields[idx].type = type;
+		// Reset multiple if not file/image
+		if (type !== 'file' && type !== 'image') formFields[idx].multiple = false;
+		renderFormFields();
+		// Add multiple:false by default
+		if ((formFields[idx].type==='file'||formFields[idx].type==='image') && typeof formFields[idx].multiple==='undefined') formFields[idx].multiple = false;
+	}
+	function addOption(fieldIdx) {
+		// Save all current input values before adding a new option
+		var tbody = document.getElementById('form-fields-body');
+		var rows = tbody.getElementsByTagName('tr');
+		for (var i = 0; i < rows.length; i++) {
+			var inputs = rows[i].querySelectorAll('input, select, textarea');
+			for (var j = 0; j < inputs.length; j++) {
+				var input = inputs[j];
+				var nameMatch = input.name.match(/form_fields\[(\d+)\]\[([^\]]+)\](?:\[(\d+)\]\[([^\]]+)\])?/);
+				if (nameMatch) {
+					var idx = parseInt(nameMatch[1]);
+					var key = nameMatch[2];
+					if (typeof formFields[idx] !== 'object') continue;
+					if (nameMatch[3] !== undefined && nameMatch[4] !== undefined) {
+						// Nested option
+						var optIdx = parseInt(nameMatch[3]);
+						var optKey = nameMatch[4];
+						if (!formFields[idx].options) formFields[idx].options = [];
+						if (!formFields[idx].options[optIdx]) formFields[idx].options[optIdx] = {};
+						formFields[idx].options[optIdx][optKey] = input.type === 'checkbox' ? input.checked : input.value;
+					} else {
+						formFields[idx][key] = input.type === 'checkbox' ? input.checked : input.value;
+					}
+				}
+			}
+		}
+		if (!formFields[fieldIdx].options) formFields[fieldIdx].options = [];
+		formFields[fieldIdx].options.push({label:'',value:''});
+		renderFormFields();
+	}
+	function removeOption(fieldIdx, optIdx) {
+		// Save all current input values before removing an option
+		var tbody = document.getElementById('form-fields-body');
+		var rows = tbody.getElementsByTagName('tr');
+		for (var i = 0; i < rows.length; i++) {
+			var inputs = rows[i].querySelectorAll('input, select, textarea');
+			for (var j = 0; j < inputs.length; j++) {
+				var input = inputs[j];
+				var nameMatch = input.name.match(/form_fields\[(\d+)\]\[([^\]]+)\](?:\[(\d+)\]\[([^\]]+)\])?/);
+				if (nameMatch) {
+					var idx2 = parseInt(nameMatch[1]);
+					var key = nameMatch[2];
+					if (typeof formFields[idx2] !== 'object') continue;
+					if (nameMatch[3] !== undefined && nameMatch[4] !== undefined) {
+						// Nested option
+						var optIdx2 = parseInt(nameMatch[3]);
+						var optKey = nameMatch[4];
+						if (!formFields[idx2].options) formFields[idx2].options = [];
+						if (!formFields[idx2].options[optIdx2]) formFields[idx2].options[optIdx2] = {};
+						formFields[idx2].options[optIdx2][optKey] = input.type === 'checkbox' ? input.checked : input.value;
+					} else {
+						formFields[idx2][key] = input.type === 'checkbox' ? input.checked : input.value;
+					}
+				}
+			}
+		}
+		formFields[fieldIdx].options.splice(optIdx,1);
+		renderFormFields();
+	}
+	// Patch: Convert max_file_size from MB to bytes before saving
+	function saveAllFieldInputs() {
+		var tbody = document.getElementById('form-fields-body');
+		var rows = tbody.getElementsByTagName('tr');
+		for (var i = 0; i < rows.length; i++) {
+			var inputs = rows[i].querySelectorAll('input, select, textarea');
+			for (var j = 0; j < inputs.length; j++) {
+				var input = inputs[j];
+				var nameMatch = input.name.match(/form_fields\[(\d+)\]\[([^\]]+)\](?:\[(\d+)\]\[([^\]]+)\])?/);
+				if (nameMatch) {
+					var idx = parseInt(nameMatch[1]);
+					var key = nameMatch[2];
+					if (typeof formFields[idx] !== 'object') continue;
+					if (nameMatch[3] !== undefined && nameMatch[4] !== undefined) {
+						// Nested option
+						var optIdx = parseInt(nameMatch[3]);
+						var optKey = nameMatch[4];
+						if (!formFields[idx].options) formFields[idx].options = [];
+						if (!formFields[idx].options[optIdx]) formFields[idx].options[optIdx] = {};
+						formFields[idx].options[optIdx][optKey] = input.type === 'checkbox' ? input.checked : input.value;
+					} else {
+						if (key === 'max_file_size') {
+							formFields[idx][key] = parseInt(input.value, 10) * 1024 * 1024;
+						} else {
+							formFields[idx][key] = input.type === 'checkbox' ? input.checked : input.value;
+						}
+					}
+				}
+			}
+		}
+	}
+	// Patch: Call saveAllFieldInputs before submit
+	var editForm = document.getElementById('edit_form');
+	if (editForm) {
+		editForm.addEventListener('submit', function() {
+			saveAllFieldInputs();
+		});
+	}
+	// Patch: Call saveAllFieldInputs before add/remove/change field
+	var _addFormField = addFormField;
+	addFormField = function() { saveAllFieldInputs(); _addFormField(); };
+	var _removeFormField = removeFormField;
+	removeFormField = function(idx) { saveAllFieldInputs(); _removeFormField(idx); };
+	var _changeType = changeType;
+	changeType = function(idx, type) { saveAllFieldInputs(); _changeType(idx, type); };
+	var _addOption = addOption;
+	addOption = function(fieldIdx) { saveAllFieldInputs(); _addOption(fieldIdx); };
+	var _removeOption = removeOption;
+	removeOption = function(fieldIdx, optIdx) { saveAllFieldInputs(); _removeOption(fieldIdx, optIdx); };
+	// Initial render
+	renderFormFields();
+	</script>

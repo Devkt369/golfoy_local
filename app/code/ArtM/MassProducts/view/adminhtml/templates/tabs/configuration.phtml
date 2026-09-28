@@ -1,0 +1,107 @@
+<?php
+/** @var \Magento\Backend\Block\Template $block */
+$loaderUrl = $block->getUrl('massproducts/index/tab');
+$activeChild = (string)$block->getRequest()->getParam('child_tab', 'column_mapping');
+if (!in_array($activeChild, ['column_mapping', 'attributes_assignment', 'attribute_sorting', 'single_sku_config', 'single_sku_template', 'logs'], true)) {
+    $activeChild = 'column_mapping';
+}
+?>
+<div id="artm-configuration-parent-root">
+    <style>
+        #artm-configuration-parent-root .artm-config-tab-groups {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        #artm-configuration-parent-root .artm-config-tab-group {
+            border: 1px solid #d8e2ec;
+            border-radius: 8px;
+            background: #fff;
+            padding: 10px;
+            min-width: 220px;
+        }
+        #artm-configuration-parent-root .artm-config-tab-group-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            margin-bottom: 8px;
+        }
+        #artm-configuration-parent-root .artm-config-tab-group-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+    </style>
+    <div class="artm-config-tab-groups">
+        <div class="artm-config-tab-group">
+            <div class="artm-config-tab-group-title"><?= $block->escapeHtml(__('Mapping')) ?></div>
+            <div class="artm-config-tab-group-buttons">
+                <button type="button" class="<?= $activeChild === 'column_mapping' ? 'action-primary' : 'action-secondary' ?> artm-parent-child-tab" data-tab="column_mapping"><span><?= $block->escapeHtml(__('Column Mapping')) ?></span></button>
+            </div>
+        </div>
+        <div class="artm-config-tab-group">
+            <div class="artm-config-tab-group-title"><?= $block->escapeHtml(__('Attributes')) ?></div>
+            <div class="artm-config-tab-group-buttons">
+                <button type="button" class="<?= $activeChild === 'attributes_assignment' ? 'action-primary' : 'action-secondary' ?> artm-parent-child-tab" data-tab="attributes_assignment"><span><?= $block->escapeHtml(__('Attributes Assignment')) ?></span></button>
+                <button type="button" class="<?= $activeChild === 'attribute_sorting' ? 'action-primary' : 'action-secondary' ?> artm-parent-child-tab" data-tab="attribute_sorting"><span><?= $block->escapeHtml(__('Attribute Sorting')) ?></span></button>
+            </div>
+        </div>
+        <div class="artm-config-tab-group">
+            <div class="artm-config-tab-group-title"><?= $block->escapeHtml(__('Single SKU')) ?></div>
+            <div class="artm-config-tab-group-buttons">
+                <button type="button" class="<?= $activeChild === 'single_sku_config' ? 'action-primary' : 'action-secondary' ?> artm-parent-child-tab" data-tab="single_sku_config"><span><?= $block->escapeHtml(__('Map Attribute Groups')) ?></span></button>
+                <button type="button" class="<?= $activeChild === 'single_sku_template' ? 'action-primary' : 'action-secondary' ?> artm-parent-child-tab" data-tab="single_sku_template"><span><?= $block->escapeHtml(__('Manage groups')) ?></span></button>
+            </div>
+        </div>
+        <div class="artm-config-tab-group">
+            <div class="artm-config-tab-group-title"><?= $block->escapeHtml(__('History')) ?></div>
+            <div class="artm-config-tab-group-buttons">
+                <button type="button" class="<?= $activeChild === 'logs' ? 'action-primary' : 'action-secondary' ?> artm-parent-child-tab" data-tab="logs"><span><?= $block->escapeHtml(__('Logs')) ?></span></button>
+            </div>
+        </div>
+        <!-- Queued and Processing tabs removed as requested -->
+    </div>
+    <div id="artm-configuration-parent-content"></div>
+</div>
+<script>
+require(['jquery'], function ($) {
+    'use strict';
+
+    var $root = $('#artm-configuration-parent-root');
+    var $content = $('#artm-configuration-parent-content');
+    var loaderUrl = '<?= $block->escapeJs($loaderUrl) ?>';
+    var activeChild = '<?= $block->escapeJs($activeChild) ?>';
+
+    function setActive(tab) {
+        $root.find('.artm-parent-child-tab').removeClass('action-primary').addClass('action-secondary');
+        $root.find('.artm-parent-child-tab[data-tab="' + tab + '"]').removeClass('action-secondary').addClass('action-primary');
+    }
+
+    function loadChild(tab) {
+        if (!tab) {
+            return;
+        }
+        setActive(tab);
+        $content.html('<div style="padding:8px;">Loading...</div>');
+        $.ajax({
+            url: loaderUrl,
+            type: 'GET',
+            dataType: 'html',
+            data: { tab: tab }
+        }).done(function (html) {
+            $content.html(html);
+        }).fail(function () {
+            $content.html('<div class="message message-error error"><div>Unable to load section.</div></div>');
+        });
+    }
+
+    $root.find('.artm-parent-child-tab').off('click').on('click', function () {
+        loadChild(String($(this).data('tab') || ''));
+    });
+
+    loadChild(activeChild);
+});
+</script>

@@ -1,0 +1,999 @@
+<?php
+
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+use Magento\Framework\App\Action\Action;
+
+?>
+<?php
+
+$debug = false;
+?>
+<?php
+$_productCollection = $block->getLoadedProductCollection();
+/** @var \Magento\Catalog\Helper\Output $_helper */
+$_helper = $block->getData('outputHelper');
+
+// Cache configuration values for performance
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$scopeConfig = $objectManager->get(\Magento\Framework\App\Config\ScopeConfigInterface::class);
+$engraveAttrSets = $scopeConfig->getValue('category_setting/engrave_print/custom_printing', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+$engraveAttrSets = $engraveAttrSets ? array_map('intval', explode(',', $engraveAttrSets)) : [];
+
+// Get featured attributes config
+$featuredAttrsConfig = $scopeConfig->getValue('common/categoryfeaturedattr/common_categoryfeaturedattr', \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+$featuredAttrsMapping = [];
+if ($featuredAttrsConfig) {
+    $pairs = explode('|', $featuredAttrsConfig);
+    foreach ($pairs as $pair) {
+        $parts = explode(':', $pair);
+        if (count($parts) === 2) {
+            $featuredAttrsMapping[trim($parts[0])] = trim($parts[1]);
+        }
+    }
+}
+
+// Fetch 'luxury' directly from EAV, keyed by entity_id, instead of relying on
+// $_product->getData('luxury'). The category grid's product collection runs
+// against the flat catalog table, which only has whatever attribute columns
+// existed at the time of the last flat reindex — 'luxury' isn't guaranteed to
+// be one of them (PDP loads the full EAV product so it always sees the value).
+$luxuryValuesByEntity = [];
+try {
+    $eavConfig = $objectManager->get(\Magento\Eav\Model\Config::class);
+    $luxuryAttribute = $eavConfig->getAttribute(\Magento\Catalog\Model\Product::ENTITY, 'luxury');
+    if ($luxuryAttribute && $luxuryAttribute->getAttributeId()) {
+        $entityIds = [];
+        foreach ($_productCollection as $_productForLuxuryLookup) {
+            $entityIds[] = (int) $_productForLuxuryLookup->getId();
+        }
+        if ($entityIds) {
+            $storeId = (int) $objectManager->get(\Magento\Store\Model\StoreManagerInterface::class)->getStore()->getId();
+            $connection = $luxuryAttribute->getResource()->getConnection();
+            $rows = $connection->fetchAll(
+                $connection->select()
+                    ->from($luxuryAttribute->getBackend()->getTable(), ['entity_id', 'store_id', 'value'])
+                    ->where('attribute_id = ?', (int) $luxuryAttribute->getAttributeId())
+                    ->where('entity_id IN (?)', $entityIds)
+                    ->where('store_id IN (?)', [0, $storeId])
+            );
+            foreach ($rows as $row) {
+                $entityId = (int) $row['entity_id'];
+                // A store-specific row (store_id = current store) overrides the default (store_id = 0) row
+                if (!isset($luxuryValuesByEntity[$entityId]) || (int) $row['store_id'] === $storeId) {
+                    $luxuryValuesByEntity[$entityId] = $row['value'];
+                }
+            }
+        }
+    }
+} catch (\Exception $e) {
+    $luxuryValuesByEntity = [];
+}
+
+// Configure which flares go to left or right - CUSTOMIZABLE
+$flarePositions = [
+    // Left side flares (product status/quality indicators)
+    'left' => ['luxury', 'newarrivals', 'bestseller', 'playerschoice', 'offer_status', 'used_clubs_grade', 'can_customize'],
+    // Right side flares (services/options)
+    'right' => ['limitedstock', 'free_print', 'free_engrave', 'custom_print', 'custom_engrave', 'express_delivery', 'gift_wrap']
+];
+?>
+<?php if (!$_productCollection->count()): ?>
+    <div class="message info empty">
+        <div>
+            <?= $escaper->escapeHtml(__('We can\'t find products matching the selection.')) ?>
+        </div>
+    </div>
+<?php else: ?>
+    <?= $block->getToolbarHtml() ?>
+    <?= $block->getAdditionalHtml() ?>
+    <?php
+    if ($block->getMode() === 'grid') {
+        $viewMode = 'grid';
+        $imageDisplayArea = 'category_page_grid';
+        $showDescription = false;
+        $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VIEW;
+    } else {
+        $viewMode = 'list';
+        $imageDisplayArea = 'category_page_list';
+        $showDescription = true;
+        $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::FULL_VIEW;
+    }
+    /**
+     * Position for actions regarding image size changing in vde if needed
+     */
+    $pos = $block->getPositioned();
+    ?>
+    <div class="products wrapper <?= /* @noEscape */ $viewMode ?> products-<?= /* @noEscape */ $viewMode ?>">
+        <ol class="products list items product-items">
+            <?php /** @var $_product \Magento\Catalog\Model\Product */ ?>
+            <?php foreach ($_productCollection as $_product): ?>
+                <li class="item product product-item">
+                    <div class="product-item-info"
+                         id="product-item-info_<?= /* @noEscape */ $_product->getId() ?>"
+                         data-container="product-<?= /* @noEscape */ $viewMode ?>"
+                         data-product-id="<?= $_product->getId() ?>"
+                         data-sku="<?= $escaper->escapeHtmlAttr($_product->getSku()) ?>"
+                         data-attr-set="<?= $_product->getAttributeSetId() ?>"
+                         data-print-type="<?= in_array($_product->getAttributeSetId(), $engraveAttrSets) ? 'engrave' : 'print' ?>"
+                         data-print-type-capitalized="<?= ucfirst(in_array($_product->getAttributeSetId(), $engraveAttrSets) ? 'engrave' : 'print') ?>"
+                         data-can-print="<?= $_product->getData('can_print') ? '1' : '0' ?>"
+                         data-flare-positions='<?= json_encode($flarePositions) ?>'
+                    >
+                        <?php
+                        $productImage = $block->getImage($_product, $imageDisplayArea);
+                        if ($pos != null) {
+                            $position = 'left:' . $productImage->getWidth() . 'px;'
+                                . 'top:' . $productImage->getHeight() . 'px;';
+                        }
+                        ?>
+
+                        <div class="all_flares">
+                            <?php
+                            // Set debug flag - change to false for production
+
+                            // IMMEDIATE FLARES - Simple attributes (no DB queries)
+
+                            $simpleAttributes = [
+                                'newarrivals' => $_product->getCreatedAt() && (time() - strtotime($_product->getCreatedAt()) <= 30 * 86400) && ($_product->getData('freshness') == '111'),
+                                'offer_status' => $_product->getAttributeText('offer_status') ?: $_product->getData('offer_status'),
+                                'bestseller' => $_product->getData('bestseller'),
+                                'playerschoice' => $_product->getAttributeText('playerschoice') ?: $_product->getData('playerschoice'),
+                                'limitedstock' => $_product->getData('limitedstock'),
+                                'used_clubs_grade' => $_product->getAttributeText('used_clubs_grade') ?: $_product->getData('used_clubs_grade'),
+                                'luxury' => $luxuryValuesByEntity[(int) $_product->getId()] ?? null,
+                                'can_customize' => $_product->getAttributeText('can_customize') ?: $_product->getData('can_customize')
+                            ];
+
+                            // Define flare labels
+                            $flareLabels = [
+                                'newarrivals' => 'New Arrival',
+                                'offer_status' => 'Lowest Price',
+                                'bestseller' => 'Best Seller',
+                                'playerschoice' => 'Pro\'s Choice',
+                                'limitedstock' => 'Limited Stock',
+                                'used_clubs_grade' => 'Used Grade',
+                                'can_customize' => 'Customization',
+                                'free_print' => 'Free Print',
+                                'free_engrave' => 'Free Engrave',
+                                'custom_print' => 'Custom Print',
+                                'luxury' => 'Luxe',
+                                'custom_engrave' => 'Custom Engrave'
+                            ];
+
+                            // Show simple flares immediately
+                            $immediateFlares = [];
+                            foreach ($simpleAttributes as $attrName => $attrValue) {
+                                // Special logic for offer_status - only show if "Yes" or "YES"
+                                if ($attrName === 'offer_status') {
+                                    $stringValue = (string)$attrValue;
+                                    if ($stringValue === 'yes' || $stringValue === 'YES' || $stringValue === 'Yes') {
+                                        $immediateFlares[$attrName] = $stringValue;
+                                    }
+                                    continue;
+                                }
+                                // Special logic for luxury - matches the raw-value check used on the PDP (productattributeset.phtml)
+                                if ($attrName === 'luxury') {
+                                    if ($attrValue == 1) {
+                                        $immediateFlares[$attrName] = $attrValue;
+                                    }
+                                    continue;
+                                }
+                                // Special logic for can_customize - only show if "Yes" or "yes"
+                                if ($attrName === 'can_customize') {
+                                    $stringValue = strtolower(trim((string)$attrValue));
+                                    if ($stringValue === 'yes') {
+                                        $immediateFlares[$attrName] = 'Yes';
+                                    }
+                                    continue;
+                                }
+                                // General logic for other attributes
+                                $isZeroOrNo = ($attrValue === '0' || $attrValue === 0 ||
+                                    (is_string($attrValue) && ($attrValue === 'no' || $attrValue === 'No' || $attrValue === 'NO')) || empty($attrValue));
+                                if (!$isZeroOrNo) {
+                                    $immediateFlares[$attrName] = $attrValue;
+                                }
+                            }
+
+                            // DEBUG for simple attributes
+                            if ($debug) {
+                                echo '<div style="background: #e8f5e8; padding: 8px; margin: 3px 0; border: 1px solid #c3e6c3; font-size: 11px;">';
+                                echo '<strong>🚀 IMMEDIATE FLARES - Product ID: ' . $_product->getId() . '</strong><br>';
+                                echo '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin-top: 3px;">';
+
+                                foreach ($simpleAttributes as $attrName => $attrValue) {
+                                    $displayValue = '';
+                                    if ($attrName === 'can_customize') {
+                                        // Print both raw and text value for debug, handle array safely
+                                        $rawValue = $_product->getData('can_customize');
+                                        $textValue = $_product->getAttributeText('can_customize');
+                                        $rawValueStr = is_array($rawValue) ? json_encode($rawValue) : $rawValue;
+                                        $textValueStr = is_array($textValue) ? json_encode($textValue) : $textValue;
+                                        $displayValue = '<span style="color: #333;"><strong>can_customize raw:</strong> ' . $escaper->escapeHtml($rawValueStr) . ' <strong>text:</strong> ' . $escaper->escapeHtml($textValueStr) . '</span>';
+                                    } elseif ($attrValue === null || $attrValue === '') {
+                                        $displayValue = '<span style="color: #999; font-style: italic;">' . $attrName . ' is not assigned</span>';
+                                    } else {
+                                        $attrValueStr = is_array($attrValue) ? json_encode($attrValue) : $attrValue;
+                                        // Always pass string to escaper
+                                        $safeAttrValueStr = is_array($attrValueStr) ? json_encode($attrValueStr) : (string)$attrValueStr;
+                                        $displayValue = '<span style="color: #333;"><strong>' . $attrName . ':</strong> ' . $escaper->escapeHtml($safeAttrValueStr) . '</span>';
+                                    }
+                                    echo '<div>' . $displayValue . '</div>';
+                                }
+                                echo '</div></div>';
+                            }
+
+                            // PLACEHOLDER FOR AJAX DEBUG (will be inserted here by JavaScript)
+                            echo '<div class="ajax-debug-placeholder" data-product-id="' . $_product->getId() . '"></div>';
+
+                            // OUTPUT FINAL FLARES WITH LEFT/RIGHT STRUCTURE
+                            echo '<div class="final-flares" data-product-id="' . $_product->getId() . '">';
+
+                            // Separate flares into left and right arrays
+                            $leftFlares = [];
+                            $rightFlares = [];
+                            $usedClubsGradeHtml = '';
+
+                            foreach ($immediateFlares as $flareName => $flareValue) {
+                                $displayLabel = isset($flareLabels[$flareName]) ? $flareLabels[$flareName] : ucfirst(str_replace('_', ' ', $flareName));
+                                $safeFlareValue = is_array($flareValue) ? json_encode($flareValue) : (string)$flareValue;
+                                $displayValue = ($flareValue === '0' || $flareValue === '1' || $flareValue === 0 || $flareValue === 1) ?
+                                    ($flareValue ? '1' : '0') : $escaper->escapeHtml($safeFlareValue);
+
+                                // Special star rating for used_clubs_grade
+                                if ($flareName === 'used_clubs_grade') {
+
+                                    $grade = trim($flareValue);
+                                    $stars = 0;
+                                    $color = '#bbb';
+
+                                    if ($grade === 'Good') {
+                                        $stars = 2;
+                                        $color = '#e53935'; // red
+                                    } elseif ($grade === 'Value') {
+                                        $stars = 3;
+                                        $color = '#f7b714'; // orange/yellow
+                                    } elseif ($grade === 'Very Good') {
+                                        $stars = 4;
+                                        $color = '#66bb6a'; // green
+                                    } elseif ($grade === 'Excellent') {
+                                        $stars = 5;
+                                        $color = '#388e3c'; // deep green
+                                    }
+
+                                    // Sanitize grade for class (remove spaces/special chars, lowercase)
+                                    $gradeClass = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $grade));
+
+                                    /* =====================
+       HTML STRUCTURE
+    ====================== */
+                                    $usedClubsGradeHtml  = '<div class="flare used_clubs_grade">';
+                                    $usedClubsGradeHtml .= '<div class="used-clubs-grade-wrapper">';
+
+                                    // Stars
+                                    $usedClubsGradeHtml .= '<div class="used-clubs-stars ' . $gradeClass . '" style="font-family:FontAwesome; letter-spacing:1px;">';
+
+                                    for ($i = 1; $i <= 5; $i++) {
+                                        if ($i <= $stars) {
+                                            $usedClubsGradeHtml .= '<span style="color:' . $color . ';">&#xf005;</span>';
+                                        } else {
+                                            $usedClubsGradeHtml .= '<span style="color:#eee;">&#xf005;</span>';
+                                        }
+                                    }
+
+                                    $usedClubsGradeHtml .= '</div>';
+
+                                    // Grade text
+                                    $usedClubsGradeHtml .= '<div class="used-clubs-grade-text '.$gradeClass.' ">'
+                                        . $escaper->escapeHtml($grade)
+                                        . '</div>';
+
+                                    $usedClubsGradeHtml .= '</div>'; // wrapper
+                                    $usedClubsGradeHtml .= '</div>'; // flare
+
+                                    // Position handling
+                                    if (in_array($flareName, $flarePositions['left'])) {
+                                        $leftFlares[] = $usedClubsGradeHtml;
+                                    } else {
+                                        $rightFlares[] = $usedClubsGradeHtml;
+                                    }
+
+                                    continue;
+                                }
+
+
+                                // Create flare HTML with span tag
+                                $safeDisplayValue = is_array($displayValue) ? json_encode($displayValue) : (string)$displayValue;
+                                $flareHtml = '<span class="flare ' . $flareName . '" value="' . $escaper->escapeHtmlAttr($safeDisplayValue) . '">' . $displayLabel . '</span>';
+
+                                // Determine position based on configuration
+                                if (in_array($flareName, $flarePositions['left'])) {
+                                    $leftFlares[] = $flareHtml;
+                                } elseif (in_array($flareName, $flarePositions['right'])) {
+                                    $rightFlares[] = $flareHtml;
+                                } else {
+                                    // Default to left if not specified
+                                    $leftFlares[] = $flareHtml;
+                                }
+                            }
+
+                            // Output left flares container
+                            echo '<div class="flares-left">';
+                            foreach ($leftFlares as $flareHtml) {
+                                echo $flareHtml;
+                            }
+                            echo '</div>';
+
+                            // Output right flares container
+                            echo '<div class="flares-right">';
+                            foreach ($rightFlares as $flareHtml) {
+                                echo $flareHtml;
+                            }
+                            echo '</div>';
+
+                            echo '</div>'; // Close final-flares
+
+                            // Define variables for AJAX processing
+                            $canPrint = $_product->getData('can_print');
+                            ?>
+                        </div>
+
+                        <!-- AJAX Script for Print/Engrave Flares -->
+                        <script type="text/javascript">
+                            require(['jquery'], function($) {
+                                $(function () { // shorthand for document ready
+
+                                    setTimeout(function () {
+
+                                        var $container = $('.final-flares[data-product-id="<?= $_product->getId() ?>"]');
+                                        var $debugPlaceholder = $('.ajax-debug-placeholder[data-product-id="<?= $_product->getId() ?>"]');
+
+                                        var productId = <?= (int) $_product-> getId() ?>;
+                                        var attrSet = <?= (int) $_product-> getAttributeSetId() ?>;
+                                        var canPrint = <?= $canPrint ? 'true' : 'false' ?>;
+
+                                        $container.find('.flare-loading').remove();
+
+                                        var printType = 'print';
+                                        var printTypeCapitalized = 'Print';
+
+                                        if (canPrint) {
+                                            var engraveAttrSets = [<?= implode(',', array_map('intval', $engraveAttrSets)) ?>];
+                                            var isEngraveProduct = engraveAttrSets.indexOf(parseInt(attrSet)) !== -1;
+
+                                            printType = isEngraveProduct ? 'engrave' : 'print';
+                                            printTypeCapitalized = printType.charAt(0).toUpperCase() + printType.slice(1);
+                                        }
+
+                                    }, 100);
+                                });
+                            });
+                        </script>
+
+                        <?php // Product Image 
+                        ?>
+                        <a href="<?= $escaper->escapeUrl($_product->getProductUrl()) ?>"
+                            class="product photo product-item-photo" tabindex="-1">
+                            <?= $productImage->toHtml() ?>
+                        </a>
+                        <?= $block->getReviewsSummaryHtml($_product, $templateType) ?>
+                        <?php
+                        // Water flares section - separate from main flares
+                        $waterproof = $_product->getData('waterproof');
+                        $waterrepel = $_product->getData('waterrepel');
+                        $hasWaterFlares = false;
+
+                        // Check if waterproof is not 0, '0', 'no', 'No', 'NO', or empty
+                        $waterproofActive = !($waterproof === '0' || $waterproof === 0 ||
+                            (is_string($waterproof) && ($waterproof === 'no' || $waterproof === 'No' || $waterproof === 'NO')) ||
+                            empty($waterproof));
+
+                        // Check if waterrepel is not 0, '0', 'no', 'No', 'NO', or empty
+                        $waterrepelActive = !($waterrepel === '0' || $waterrepel === 0 ||
+                            (is_string($waterrepel) && ($waterrepel === 'no' || $waterrepel === 'No' || $waterrepel === 'NO')) ||
+                            empty($waterrepel));
+
+                        $hasWaterFlares = $waterproofActive || $waterrepelActive;
+                        ?>
+
+                        <?php if ($hasWaterFlares): ?>
+                            <div class="water_flares">
+                                <?php if ($waterproofActive): ?>
+                                    <div class="water-flare waterproof-flare">
+                                        <img src="https://golfoy.com/media/wysiwyg/flayers/Water-proof-new.svg"
+                                            alt="Waterproof"
+                                            loading="lazy">
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if ($waterrepelActive): ?>
+                                    <div class="water-flare waterrepel-flare">
+                                        <img src="https://golfoy.com/media/wysiwyg/flayers/Water-repellent-new.svg"
+                                            alt="Water Repellent"
+                                            loading="lazy">
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="product details product-item-details">
+
+                            <?php
+                            // Get brand name (manufacturer attribute)
+                            $brand = $_product->getAttributeText('brand');
+                            $productName = $_product->getName();
+                            $productNameStripped = $block->stripTags($productName, null, true);
+                            $brandStripped = $brand ? trim($block->stripTags($brand, null, true)) : '';
+                            $displayProductName = $productNameStripped;
+                            // Remove brand from product name if present (case-insensitive, word boundary)
+                            if ($brandStripped && stripos($productNameStripped, $brandStripped) !== false) {
+                                // Remove only if brand is at the start or after a space or dash
+                                $pattern = '/(^|[\s\-\|\/])' . preg_quote($brandStripped, '/') . '([\s\-\|\/]|$)/i';
+                                $displayProductName = preg_replace($pattern, ' ', $productNameStripped);
+                                $displayProductName = preg_replace('/\s+/', ' ', $displayProductName); // Clean up extra spaces
+                                $displayProductName = trim($displayProductName, " -|/");
+                            }
+                            ?>
+
+                            <strong class="product name product-item-name">
+                                <a class="product-item-link" href="<?= $escaper->escapeUrl($_product->getProductUrl()) ?>">
+                                    <?php if ($brandStripped): ?>
+                                        <div class="product-brand">
+                                            <?= $escaper->escapeHtml($brandStripped) ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="attribute_brand cleaned_product_name">
+                                        <?= /* @noEscape */ $escaper->escapeHtml($displayProductName) ?>
+                                    </div>
+                                </a>
+                            </strong>
+                            <?= /* @noEscape */ $block->getProductPrice($_product) ?>
+
+                            <!-- tier price html -->
+                            <?php
+
+                            $productForPrice = $_product;
+
+                            // For configurable products, get price from first simple product
+                            if ($_product->getTypeId() === 'configurable') {
+                                $childProducts = $_product->getTypeInstance()->getUsedProducts($_product);
+                                if (!empty($childProducts)) {
+                                    $productForPrice = $childProducts[0]; // Get first simple product
+                                }
+                            }
+
+                            $tierPrices = $productForPrice->getTierPrice();
+                            if (!empty($tierPrices)):
+                                // Get the first tier price (lowest quantity)
+                                $firstTierPrice = reset($tierPrices);
+                                $tierQty = (int)$firstTierPrice['price_qty'];
+                                $tierPrice = (float)$firstTierPrice['price'];
+
+                                // Get prices for comparison
+                                $regularPrice = $productForPrice->getPrice();
+                                $finalPrice = $productForPrice->getFinalPrice();
+                                $specialPrice = $productForPrice->getSpecialPrice();
+
+                                // For comparison, use the current display price (special price if available, otherwise regular price)
+                                $currentDisplayPrice = ($specialPrice && $specialPrice < $regularPrice) ? $finalPrice : $regularPrice;
+
+                                // Calculate savings compared to current display price
+                                $savings = $currentDisplayPrice - $tierPrice;
+                                $savingsPercent = $currentDisplayPrice > 0 ? round(($savings / $currentDisplayPrice) * 100) : 0;
+
+                                // Get currency symbol
+                                $store = $_product->getStore();
+                                $currencySymbol = $store->getCurrentCurrency()->getCurrencySymbol();
+
+                                if ($tierPrice < $currentDisplayPrice && $tierQty > 1 && $savingsPercent > 0):
+                            ?>
+                                    <div class="tier-price-info">
+                                        Buy
+                                        <?= $tierQty ?> for
+                                        <?= $escaper->escapeHtml($currencySymbol . ' ' . number_format($tierPrice, 0, '.', ',')) ?> each
+                                        and save
+                                        <?= $savingsPercent ?>% more
+                                    </div>
+                            <?php
+                                endif;
+                            endif;
+                            ?>
+                            <!-- tier price html -->
+
+                            <?= $block->getProductDetailsHtml($_product) ?>
+
+                            <div class="product-item-inner">
+                                <div class="product actions product-item-actions">
+                                    <div class="actions-primary">
+                                        <?php if ($_product->isSaleable()): ?>
+                                            <?php $postParams = $block->getAddToCartPostParams($_product); ?>
+                                            <form data-role="tocart-form"
+                                                data-product-sku="<?= $escaper->escapeHtml($_product->getSku()) ?>"
+                                                action="<?= $escaper->escapeUrl($postParams['action']) ?>"
+                                                data-mage-init='{"catalogAddToCart": {"bindSubmit": false}}'
+                                                method="post">
+                                                <?php $options = $block->getData('viewModel')->getOptionsData($_product); ?>
+                                                <?php foreach ($options as $optionItem): ?>
+                                                    <input type="hidden"
+                                                        name="<?= $escaper->escapeHtml($optionItem['name']) ?>"
+                                                        value="<?= $escaper->escapeHtml($optionItem['value']) ?>">
+                                                <?php endforeach; ?>
+                                                <input type="hidden"
+                                                    name="product"
+                                                    value="<?= /* @noEscape */ $postParams['data']['product'] ?>">
+                                                <input type="hidden"
+                                                    name="<?= /* @noEscape */ Action::PARAM_NAME_URL_ENCODED ?>"
+                                                    value="<?=
+                                                            /* @noEscape */ $postParams['data'][Action::PARAM_NAME_URL_ENCODED]
+                                                            ?>">
+                                                <?= $block->getBlockHtml('formkey') ?>
+                                                <button type="submit"
+                                                    title="<?= $escaper->escapeHtmlAttr(__('Add to Cart')) ?>"
+                                                    class="action tocart primary"
+                                                    disabled>
+                                                    <span><?= $escaper->escapeHtml(__('Add to Cart')) ?></span>
+                                                </button>
+                                            </form>
+                                        <?php else: ?>
+                                            <?php if ($_product->isAvailable()): ?>
+                                                <div class="stock available">
+                                                    <span><?= $escaper->escapeHtml(__('In stock')) ?></span>
+                                                </div>
+                                            <?php else: ?>
+                                                <div class="stock unavailable">
+                                                    <span><?= $escaper->escapeHtml(__('Out of stock')) ?></span>
+                                                </div>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?= ($pos && strpos($pos, $viewMode . '-primary')) ?
+                                        /* @noEscape */ $secureRenderer->renderStyleAsTag(
+                                            $position,
+                                            'product-item-info_' . $_product->getId() . ' div.actions-primary'
+                                        ) : '' ?>
+                                    <div data-role="add-to-links" class="actions-secondary">
+                                        <?php if ($addToBlock = $block->getChildBlock('addto')): ?>
+                                            <?= $addToBlock->setProduct($_product)->getChildHtml() ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?= ($pos && strpos($pos, $viewMode . '-secondary')) ?
+                                        /* @noEscape */ $secureRenderer->renderStyleAsTag(
+                                            $position,
+                                            'product-item-info_' . $_product->getId() . ' div.actions-secondary'
+                                        ) : '' ?>
+                                </div>
+                                <?php if ($showDescription): ?>
+                                    <div class="product description product-item-description">
+                                        <?= /* @noEscape */ $_helper->productAttribute(
+                                            $_product,
+                                            $_product->getShortDescription(),
+                                            'short_description'
+                                        ) ?>
+                                        <a href="<?= $escaper->escapeUrl($_product->getProductUrl()) ?>"
+                                            title="<?= /* @noEscape */ $_productNameStripped ?>"
+                                            class="action more"><?= $escaper->escapeHtml(__('Learn More')) ?></a>
+                                    </div>
+                                <?php endif; ?>
+
+                                <!-- Featured Attribute Placeholder (AJAX) -->
+                                <div class="featured-attribute-placeholder" data-sku="<?= $escaper->escapeHtmlAttr($_product->getSku()) ?>" data-product-id="<?= $_product->getId() ?>" data-attr-set="<?= $_product->getAttributeSetId() ?>"></div>
+                                <!-- Sizes Placeholder (AJAX) -->
+                                <div class="sizes-placeholder" data-sku="<?= $escaper->escapeHtmlAttr($_product->getSku()) ?>" data-product-id="<?= $_product->getId() ?>"></div>
+                                <!-- Express Delivery Icon Placeholder (AJAX) -->
+                                <div class="express-delivery-placeholder" data-sku="<?= $escaper->escapeHtmlAttr($_product->getSku()) ?>" data-product-id="<?= $_product->getId() ?>"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <?= ($pos && strpos($pos, $viewMode . '-actions')) ?
+                        /* @noEscape */ $secureRenderer->renderStyleAsTag(
+                            $position,
+                            'product-item-info_' . $_product->getId() . ' div.product-item-actions'
+                        ) : '' ?>
+                </li>
+            <?php endforeach; ?>
+        </ol>
+    </div>
+    <?= $block->getChildBlock('toolbar')->setIsBottom(true)->toHtml() ?>
+
+    <!-- Bulk Product Data Processing - EARLY DEFINITION -->
+    <script type="text/javascript">
+        // Define the function early to ensure it's available when called
+        var processBulkProductDataReady = false;
+
+        require(['jquery'], function($) {
+            window.processBulkProductData = function() {
+                if (!window._bulkProductDataQueue || window._bulkProductDataQueue.length === 0) {
+                    return;
+                }
+
+                // Collect all SKUs and product IDs
+                var skuSet = new Set();
+                var productIds = [];
+                var productMap = {};
+
+                window._bulkProductDataQueue.forEach(function(item) {
+                    skuSet.add(item.sku);
+                    productIds.push(item.productId);
+                    productMap[item.productId] = item;
+                    productMap[item.sku] = item;
+                });
+
+                var skuArr = Array.from(skuSet);
+                var baseUrl = '<?= rtrim($block->getUrl(''), '/') ?>';
+                var fullUrl = baseUrl + '/common/index/bulkproductdata';
+
+                // Make single bulk request for all product data
+                $.ajax({
+                    url: fullUrl,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        skus: skuArr,
+                        product_ids: productIds,
+                        get_featured_attrs: true,
+                        featured_attrs_config: '<?= $escaper->escapeJs($featuredAttrsConfig) ?>',
+                        check_estimation_delivery: true, // New flag to check/create estimation delivery records
+                        use_estimation_module_logic: true // Use estimation delivery module logic for express delivery
+                    }),
+                    dataType: 'json',
+                    global: false, // Prevent customer-data.js from intercepting this request
+                    success: function(response) {
+                        try {
+                            // Expected response format:
+                            // {
+                            //   customOptions: { productId: {hasOptions: true, allFree: false, totalOptions: 3} },
+                            //   expressDelivery: { sku: true/false },
+                            //   sizes: { sku: "M,L,XL" },
+                            //   featuredAttrs: { productId: {attrName: "feel", attrLabel: "Feel", attrValue: "Soft"} }
+                            // }
+
+                            // Process featured attributes
+                            if (response.featuredAttrs) {
+                                Object.keys(response.featuredAttrs).forEach(function(productId) {
+                                    var attrData = response.featuredAttrs[productId];
+                                    if (attrData && attrData.attrValue) {
+                                        var featuredAttrHtml =
+                                            '<div class="featured-attribute-info">' +
+                                            '<div class="attr_label">' + attrData.attrLabel + '</div>' +
+                                            '<div class="attr_separator">:</div>' +
+                                            '<div class="attr_value">' + attrData.attrValue + '</div>' +
+                                            '</div>';
+
+
+                                        $('.featured-attribute-placeholder[data-product-id="' + productId + '"]').html(featuredAttrHtml);
+                                    }
+                                });
+                            }
+
+                            // Process custom options (print/engrave flares) - ONLY for products that can print
+                            if (response.customOptions) {
+                                Object.keys(response.customOptions).forEach(function(productId) {
+                                    var item = productMap[productId];
+                                    if (item && item.canPrint) { // Only process if product can print
+                                        var optionData = response.customOptions[productId];
+                                        var hasCustomOptions = optionData.hasOptions || false;
+                                        var allOptionsFree = optionData.allFree || false;
+                                        var totalOptions = optionData.totalOptions || 0;
+
+                                        // Determine flare type based on options pricing
+                                        var flareType, flareLabel, flareValue;
+                                        if (hasCustomOptions && allOptionsFree && totalOptions > 0) {
+                                            flareType = 'free_' + item.printType;
+                                            flareLabel = 'Free ' + item.printTypeCapitalized;
+                                            flareValue = '1';
+                                        } else if (hasCustomOptions && totalOptions > 0) {
+                                            flareType = 'custom_' + item.printType;
+                                            flareLabel = 'Custom ' + item.printTypeCapitalized;
+                                            flareValue = '1';
+                                        } else {
+                                            flareType = 'custom_' + item.printType;
+                                            flareLabel = 'Custom ' + item.printTypeCapitalized;
+                                            flareValue = '1';
+                                        }
+
+                                        // Create flare HTML with span tag
+                                        var flareHtml = '<span class="flare ' + flareType + '" value="' + flareValue + '">' + flareLabel + '</span>';
+
+                                        // Determine which container to append to based on flare positioning
+                                        var targetContainer;
+                                        if (item.flarePositions && item.flarePositions.left && item.flarePositions.left.indexOf(flareType) !== -1) {
+                                            targetContainer = item.container.find('.flares-left');
+                                        } else if (item.flarePositions && item.flarePositions.right && item.flarePositions.right.indexOf(flareType) !== -1) {
+                                            targetContainer = item.container.find('.flares-right');
+                                        } else {
+                                            // Default to right for print/engrave flares
+                                            targetContainer = item.container.find('.flares-right');
+                                        }
+
+                                        if (targetContainer.length > 0) {
+                                            targetContainer.find('.free_print, .free_engrave, .custom_print, .custom_engrave').remove();
+                                            targetContainer.append(flareHtml);
+                                        } else {
+                                            // Fallback: append to main container if left/right not found
+                                            item.container.find('.free_print, .free_engrave, .custom_print, .custom_engrave').remove();
+                                            item.container.append(flareHtml);
+                                        }
+
+                                        <?php if ($debug): ?>
+                                            var debugHtml = '<div style="background: #fff3cd; padding: 8px; margin: 3px 0; border: 1px solid #ffeaa7; font-size: 11px;">' +
+                                                '<strong>🔥 BULK FLARES - Product ID: ' + productId + '</strong><br>' +
+                                                '<strong>Print Logic:</strong> attr_set=' + item.attrSet + ', print_type=' + item.printType + '<br>' +
+                                                '<strong>Options:</strong> total=' + totalOptions + ', all_free=' + (allOptionsFree ? 'YES' : 'NO') + ', has_custom=' + (hasCustomOptions ? 'YES' : 'NO') + '<br>' +
+                                                '<strong>Result:</strong> flare_type=' + flareType + ', label=' + flareLabel +
+                                                '</div>';
+                                            item.debugPlaceholder.html(debugHtml);
+                                        <?php endif; ?>
+                                    }
+                                });
+                            }
+
+                            // Process express delivery
+                            if (response.expressDelivery) {
+                                var expressHtml = `<div class="express_icon"><span class="estimation_time_text">
+    <span class="express_icon">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" width="300" height="300" xmlns:svgjs="http://svgjs.dev/svgjs"><g width="100%" height="100%" transform="matrix(1,0,0,1,0,0)"><g>
+            <line style="stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10;" x1="352.999" y1="336.637" x2="211.428" y2="336.637" fill="none" fill-opacity="1" stroke="#000000" stroke-opacity="1" data-original-stroke-color="#000000ff" stroke-width="12" data-original-stroke-width="20"></line>
+        <path style="stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10;" d="M186.517,140.359h-82.769c-9.337,0-16.915,7.561-16.915,16.915v162.449c0,9.337,7.578,16.915,16.915,16.915h36.705" fill="none" fill-opacity="1" stroke="#000000" stroke-opacity="1" data-original-stroke-color="#000000ff" stroke-width="12" data-original-stroke-width="20"></path>
+        <path style="stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10;" d="M388.486,302.283V188.211v-30.937c0-9.354-7.578-16.915-16.915-16.915h-93.194" fill="none" fill-opacity="1" stroke="#000000" stroke-opacity="1" data-original-stroke-color="#000000ff" stroke-width="12" data-original-stroke-width="20"></path>
+        <path style="stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10;" d="M423.973,336.637h61.113c9.337,0,16.915-7.578,16.915-16.915v-50.118c0-44.959-36.451-81.393-81.393-81.393h-32.121v114.073" fill="none" fill-opacity="1" stroke="#000000" stroke-opacity="1" data-original-stroke-color="#000000ff" stroke-width="12" data-original-stroke-width="20"></path>
+        <circle style="stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10;" cx="175.946" cy="337.812" r="33.829" fill="none" fill-opacity="1" stroke="#000000" stroke-opacity="1" data-original-stroke-color="#000000ff" stroke-width="12" data-original-stroke-width="20"></circle>
+        <circle style="stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10;" cx="388.483" cy="337.812" r="33.829" fill="none" fill-opacity="1" stroke="#000000" stroke-opacity="1" data-original-stroke-color="#000000ff" stroke-width="12" data-original-stroke-width="20"></circle>
+        <line style="stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10;" x1="232.474" y1="140.359" x2="232.474" y2="140.359" fill="none" fill-opacity="1" stroke="#000000" stroke-opacity="1" data-original-stroke-color="#000000ff" stroke-width="12" data-original-stroke-width="20"></line>
+        <line style="stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10;" x1="175.946" y1="337.812" x2="175.946" y2="337.812" fill="none" fill-opacity="1" stroke="#000000" stroke-opacity="1" data-original-stroke-color="#000000ff" stroke-width="12" data-original-stroke-width="20"></line>
+        <line style="stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10;" x1="388.483" y1="337.812" x2="388.483" y2="337.812" fill="none" fill-opacity="1" stroke="#000000" stroke-opacity="1" data-original-stroke-color="#000000ff" stroke-width="12" data-original-stroke-width="20"></line>
+        <path style="stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10;" d="M499.627,260.71h-61.625c-4.613,0-8.353-3.74-8.353-8.353v-61.799" fill="none" fill-opacity="1" stroke="#000000" stroke-opacity="1" data-original-stroke-color="#000000ff" stroke-width="12" data-original-stroke-width="20"></path>
+        <line style="stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10;" x1="36.664" y1="183.474" x2="197.349" y2="183.474" fill="none" fill-opacity="1" stroke="#000000" stroke-opacity="1" data-original-stroke-color="#000000ff" stroke-width="12" data-original-stroke-width="20"></line>
+        <line style="stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10;" x1="10" y1="223.626" x2="140.189" y2="223.626" fill="none" fill-opacity="1" stroke="#000000" stroke-opacity="1" data-original-stroke-color="#000000ff" stroke-width="12" data-original-stroke-width="20"></line>
+        <line style="stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10;" x1="36.664" y1="263.778" x2="197.349" y2="263.778" fill="none" fill-opacity="1" stroke="#000000" stroke-opacity="1" data-original-stroke-color="#000000ff" stroke-width="12" data-original-stroke-width="20"></line>
+    </g></g></svg>
+    </span>
+    <span class="deliver-title">
+        <span class="express-title">Express delivery </span>
+    </span>
+</span></div>`;
+                                Object.keys(response.expressDelivery).forEach(function(sku) {
+                                    if (response.expressDelivery[sku]) {
+                                        $('.express-delivery-placeholder[data-sku="' + sku + '"]').html(expressHtml);
+                                    }
+                                });
+                            }
+
+                            // Process sizes
+                            if (response.sizes) {
+                                Object.keys(response.sizes).forEach(function(sku) {
+                                    var sizes = response.sizes[sku];
+                                    if (sizes) {
+                                        $('.sizes-placeholder[data-sku="' + sku + '"]').html('<div class="sizes-roll">Sizes ' + (sizes ? sizes.toUpperCase() : '') + '</div>');
+                                    }
+                                });
+                            }
+
+                        } catch (e) {
+                            console.error('Error processing bulk product data:', e);
+                            // Fallback processing only for products that can print
+                            window._bulkProductDataQueue.forEach(function(item) {
+                                if (item.canPrint) {
+                                    var fallbackHtml = '<span class="flare custom_' + item.printType + '" value="1">Custom ' + item.printTypeCapitalized + '</span>';
+                                    var rightContainer = item.container.find('.flares-right');
+                                    if (rightContainer.length > 0) {
+                                        rightContainer.append(fallbackHtml);
+                                    } else {
+                                        item.container.append(fallbackHtml);
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        // Fallback processing only for products that can print
+                        window._bulkProductDataQueue.forEach(function(item) {
+                            if (item.canPrint) {
+                                var fallbackHtml = '<span class="flare custom_' + item.printType + '" value="1">Custom ' + item.printTypeCapitalized + '</span>';
+                                var rightContainer = item.container.find('.flares-right');
+                                if (rightContainer.length > 0) {
+                                    rightContainer.append(fallbackHtml);
+                                } else {
+                                    item.container.append(fallbackHtml);
+                                }
+                            }
+                        });
+                    }
+                });
+            };
+
+            // Mark function as ready
+            processBulkProductDataReady = true;
+        });
+    </script>
+
+    <!-- Debug Network Request -->
+    <script type="text/javascript">
+        require(['jquery'], function($) {
+            // Debug script removed
+        });
+    </script>
+
+    <!-- Control Customer Section Loading -->
+    <script type="text/javascript">
+        require(['jquery', 'Magento_Customer/js/customer-data'], function($, customerData) {
+            $(document).ready(function() {
+                // Reduce the frequency of customer section auto-reload
+                if (window.checkoutConfig && window.checkoutConfig.customerData) {
+                    // Disable auto-reload for messages section on listing page
+                    var sections = customerData.getInitCustomerData();
+                    if (sections.messages) {
+                        // Clear any pending reload timers
+                        customerData.set('messages', sections.messages);
+                    }
+                }
+
+                // Prevent excessive form binding on listing pages
+                $('form[data-role="tocart-form"]').each(function() {
+                    var $form = $(this);
+                    // Disable the automatic customer data invalidation on form events
+                    $form.off('focusin.customerData focusout.customerData');
+                });
+            });
+        });
+    </script>
+    <?php // phpcs:ignore Magento2.Legacy.PhtmlTemplate 
+    ?>
+<?php endif; ?>
+
+<script type="text/javascript">
+require(['jquery'], function ($) {
+    $(document).ready(function () {
+    // Configuration: Add your URLs and popup content here
+    // Popup configuration
+    var popupConfigs = [
+        // {
+        //     url: '/clubs.html',
+        //     type: 'image',
+        //     source: 'https://example.com/path/to/bags-popup.jpg',
+        //     show_once: true
+        // },
+        // {
+        //     url: '/shoes.html',
+        //     type: 'static',
+        //     source: '<div style="padding:20px;">Special offer on shoes! <a href=\"/shoes-sale\">Shop now</a></div>',
+        //     show_once: true
+        // }
+        // Add more configs as needed
+    ];
+
+    var currentPath = window.location.pathname;
+    var config = popupConfigs.find(function(cfg) { return cfg.url === currentPath; });
+
+    if (config) {
+        var popupKey = 'popup_shown_' + encodeURIComponent(config.url);
+        var alreadyShown = config.show_once && window.localStorage && localStorage.getItem(popupKey);
+        if (!alreadyShown) {
+            setTimeout(function() {
+                // Fade black background overlay
+                var $overlay = $('<div id="custom-popup-overlay" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.6);z-index:2147483646;"></div>');
+                // Popup box
+                var $popup = $('<div id="custom-popup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:2147483647; background:#fff; border-radius:8px; box-shadow:0 2px 16px rgba(0,0,0,0.2); padding:20px; text-align:center; min-width:300px; max-width:90vw;">' +
+                    '<span id="popup-close" style="position:absolute; top:8px; right:12px; cursor:pointer; font-size:22px;">&times;</span>' +
+                    '<div class="popup-content"></div>' +
+                    '</div>');
+                if (config.type === 'image') {
+                    $popup.find('.popup-content').html('<img src="' + config.source + '" alt="Popup Image" style="max-width:100%;height:auto;">');
+                } else {
+                    $popup.find('.popup-content').html(config.source);
+                }
+                // Overlay click closes popup
+                $overlay.on('click', function(e) {
+                    $popup.fadeOut(200, function() { $popup.remove(); });
+                    $overlay.fadeOut(200, function() { $overlay.remove(); });
+                });
+                // Prevent tabbing out of popup
+                $popup.attr('tabindex', '-1');
+                // Append at end of body
+                $('body').append($overlay).append($popup);
+                $popup.fadeIn(200);
+                // Focus popup for accessibility
+                $popup.focus();
+
+                $popup.find('#popup-close').on('click', function(e) {
+                    e.stopPropagation();
+                    $popup.fadeOut(200, function() { $popup.remove(); });
+                    $overlay.fadeOut(200, function() { $overlay.remove(); });
+                });
+                if (config.show_once && window.localStorage) {
+                    localStorage.setItem(popupKey, '1');
+                }
+            }, 3000); // 3 seconds delay
+        }
+    }
+
+    });
+});
+</script>
+
+<script type="text/javascript">
+    require(['jquery'], function($) {
+        $(document).ready(function() {
+        function debounce(func, wait) {
+            var timeout;
+            return function() {
+                var context = this, args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(function() {
+                    func.apply(context, args);
+                }, wait);
+            };
+        }
+
+        var lastBulkRun = 0;
+        var lastProductCount = 0;
+        window._bulkProductDataRunning = false;
+        function runBulkProductDataOnce() {
+            var now = Date.now();
+            var currentCount = $('.product-item-info').length;
+            if (window._bulkProductDataRunning) return;
+            if (currentCount === 0) return;
+            if (now - lastBulkRun < 1000) return;
+            lastBulkRun = now;
+            window._bulkProductDataQueue = [];
+            window._bulkDataProcessed = false;
+            $('.product-item-info').each(function() {
+                var $container = $(this);
+                var productId = $container.data('product-id');
+                var sku = $container.data('sku');
+                if (!productId || !sku) return; // skip invalid
+                var attrSet = $container.data('attr-set');
+                var printType = $container.data('print-type');
+                var printTypeCapitalized = $container.data('print-type-capitalized');
+                var canPrint = $container.data('can-print');
+                var debugPlaceholder = $container.find('.ajax-debug-placeholder');
+                var flarePositions = $container.data('flare-positions') || {};
+                window._bulkProductDataQueue.push({
+                    productId: productId,
+                    attrSet: attrSet,
+                    printType: printType,
+                    printTypeCapitalized: printTypeCapitalized,
+                    canPrint: canPrint,
+                    sku: sku,
+                    container: $container,
+                    debugPlaceholder: debugPlaceholder,
+                    flarePositions: flarePositions
+                });
+            });
+            if (window._bulkProductDataQueue.length > 0 && typeof window.processBulkProductData === 'function') {
+                window.processBulkProductData();
+            }
+        }
+
+        // On page load (only once)
+        var pageLoadTriggered = false;
+        $(window).on('load', function() {
+            if (pageLoadTriggered) return;
+            pageLoadTriggered = true;
+            window._bulkProductDataRunning = false;
+            setTimeout(runBulkProductDataOnce, 200);
+        });
+
+        // On filter AJAX
+        $(document).on('contentUpdated','#ajaxlist-reload-product_list', function() {
+            window._bulkProductDataRunning = false;
+            lastProductCount = 0;
+            setTimeout(runBulkProductDataOnce, 200);
+        });
+
+        // Patch processBulkProductData to set the flag only after AJAX call is made
+        var origProcessBulk = window.processBulkProductData;
+        window.processBulkProductData = function() {
+            if (window._bulkProductDataRunning) return;
+            if (typeof origProcessBulk === 'function') {
+                origProcessBulk.apply(this, arguments);
+                window._bulkProductDataRunning = true; // Set flag after AJAX
+            }
+        };
+
+    }); 
+
+    });
+</script>

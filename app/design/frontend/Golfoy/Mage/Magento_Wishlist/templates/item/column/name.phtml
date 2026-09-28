@@ -1,0 +1,26 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var \Magento\Wishlist\Block\Customer\Wishlist\Item\Column\Info $block */
+
+/** @var \Magento\Wishlist\Model\Item $item */
+$item = $block->getItem();
+$product = $item->getProduct();
+$limitedstock = $product->getData('limitedstock');
+$lshtml = '';
+if($limitedstock== 1){
+    $lshtml = '<div class= "limitedstock-text">Limited Stock</div>';
+}
+echo $lshtml;
+$brand_name = $product->getResource()->getAttribute('brand')->getFrontend()->getValue($product) ?>
+<div class="brand_name">
+    <?= $brand_name; ?>
+</div>
+<strong class="product name product-item-name">
+    <a href="<?= $block->escapeUrl($block->getProductUrl($item)) ?>" title="<?= $block->escapeHtmlAttr($product->getName()) ?>" class="product-item-link">
+        <?= str_ireplace( $brand_name , '' , $block->escapeHtml($product->getName())); ?>
+    </a>
+</strong>

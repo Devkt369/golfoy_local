@@ -1,0 +1,50 @@
+<?php
+ /*
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * All rights reserved.
+ *
+ * This source code is licensed under the license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+namespace FacebookAds\Object\Fields;
+
+use FacebookAds\Enum\AbstractEnum;
+
+/**
+ * This class is auto-generated.
+ *
+ * For any issues or feature requests related to this class, please let us know
+ * on github and we'll fix in our codegen framework. We'll not be able to accept
+ * pull request for this class.
+ *
+ */
+
+class CopyrightAudioAssetFields extends AbstractEnum {
+
+  const AUDIO_AVAILABILITY_STATUS = 'audio_availability_status';
+  const AUDIO_LIBRARY_POLICY = 'audio_library_policy';
+  const CANONICAL_REFERENCE_FILE = 'canonical_reference_file';
+  const CREATION_TIME = 'creation_time';
+  const ID = 'id';
+  const REFERENCE_FILE_ISRCS = 'reference_file_isrcs';
+  const REFERENCE_FILES = 'reference_files';
+  const REPRESENTATIVE_REFERENCE_FILE = 'representative_reference_file';
+  const TITLE = 'title';
+  const UPDATE_TIME = 'update_time';
+
+  public function getFieldTypes() {
+    return array(
+      'audio_availability_status' => 'string',
+      'audio_library_policy' => 'list<map<string, list<map<string, Object>>>>',
+      'canonical_reference_file' => 'AudioAsset',
+      'creation_time' => 'datetime',
+      'id' => 'string',
+      'reference_file_isrcs' => 'list<string>',
+      'reference_files' => 'list<Object>',
+      'representative_reference_file' => 'AudioAsset',
+      'title' => 'string',
+      'update_time' => 'datetime',
+    );
+  }
+}

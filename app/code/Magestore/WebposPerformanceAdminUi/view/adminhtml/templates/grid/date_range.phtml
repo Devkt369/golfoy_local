@@ -1,0 +1,34 @@
+<?php /* @var \Magestore\WebposPerformanceAdminUi\Block\Adminhtml\RankingGrid\DateRange $block */?>
+<div class="custom-select">
+    <div class="admin__field-control range-control">
+        <select id="date-range-select" class="admin__control-select">
+            <?php foreach ($block->getListPeriod() as $key => $label): ?>
+                <option value="<?= /* @noEscape */ $key?>">
+                    <?= /* @noEscape */ $label; ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+    <div class="admin__field-control date-range range-control" style="display: none">
+        <input type="text" name="from"
+               placeholder="<?= /* @noEscape */ __('From') ;?>"
+               id="from"
+               class="admin__control-text"/>
+    </div>
+    <div class="admin__field-control date-range range-control" style="display: none">
+        <input type="text" name="to"
+               placeholder="<?= /* @noEscape */ __('To') ;?>"
+               id="to"
+               class="admin__control-text"/>
+    </div>
+    <script>
+        require([
+            "jquery",
+            'Magestore_WebposPerformanceAdminUi/js/performance/date_range'
+        ], function ($, initDateRange) {
+            $(document).ready(function () {
+                initDateRange();
+            });
+        });
+    </script>
+</div>

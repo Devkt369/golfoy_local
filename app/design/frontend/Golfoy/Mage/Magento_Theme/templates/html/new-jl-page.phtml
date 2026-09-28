@@ -1,0 +1,21 @@
+    <script async src="//www.instagram.com/embed.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const title = document.querySelector('.hero-title');
+            title.classList.add('animate-in');
+        });
+    </script>
+
+    <?php
+
+    /** @var \Magento\Framework\View\Element\Template\Context $context */
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $cmsPage = $objectManager->create(\Magento\Cms\Model\Page::class);
+    $pageIdentifier = 'testing16'; // Replace with your CMS page identifier
+    $page = $cmsPage->load($pageIdentifier, 'identifier');
+
+    if ($page && $page->getId()) {
+        echo $page->getContent();
+    } else {
+        echo '<p>CMS Page not found.</p>';
+    }

@@ -1,0 +1,73 @@
+<?php
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $customerSession = $objectManager->get('\Magento\Customer\Model\Session');
+    $data_model = $objectManager->get('\ArtM\Common\Helper\Data');
+    if( !$customerSession->isLoggedIn() ) {
+        // customer login action
+?>
+
+<?php
+    $initial = 'G';
+    $name = 'guest';
+    $point_balamce_html = 'Login to see Point Balance';
+    $signin_detail_html = '<span class="mobile_icon_signin_signup">
+                                <a href="#social-login-popup" class="social-login-btn signin_signout_blockoutside not-logged-in sso-model-popup" data-effect="mfp-move-from-top" data-target="#signon_button" data-toggle="modal">login</a>
+                            </span>
+                        <span>
+                            <span class="circle"></span>
+                        </span>
+                        <span class="mobile_icon_signin_signup">
+                            <a href="#social-login-popup" class="social-login-btn signin_signout_blockoutside not-logged-in sso-model-popup" data-effect="mfp-move-from-top" data-target="#signon_button" data-toggle="modal" data-effect="mfp-move-from-top">sign up</a>
+                        </span>';
+    echo $data_model->getHtmlSidebarProfile($initial , $name , $point_balamce_html, $signin_detail_html);
+?>
+<!--
+    <div class="sign_in_banner_sidebar container_signin">
+        <div class="sign_in_banner_sidebar_inside">
+            <div class="sign_in_banner_sidebar_left">
+                <div class="name_initial_box">
+                    <div class="name_initial_box_inside">
+                        M
+                    </div>
+                </div>
+            </div>
+            <div class="sign_in_banner_sidebar_right">
+                <div class="name_box">
+                    <h3 class="name_box_heading">
+                        guest
+                    </h3>
+                </div>
+                <div class="reward_point">
+                    <h3 class="reward_point_inside">
+                        login to see point balance
+                    </h3>
+                </div>
+                <div class="detail_section">
+                    <div class="detail_section_inside">
+                        <span class="mobile_icon_signin_signup">
+                            <a href="#social-login-popup" class="social-login-btn" data-effect="mfp-move-from-top">login</a>
+                        </span>
+                        <span>
+                            <span class="circle"></span>
+                        </span>
+                        <span class="mobile_icon_signin_signup">
+                            <a href="#social-login-popup" class="social-login-btn" data-effect="mfp-move-from-top">sign up</a>
+                        </span>
+                         
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>-->
+<?php
+    }
+?>
+
+<style>
+.detail_section .signin_signout_blockoutside {
+    float: none;
+}
+.catalog-product-view div#signon_button {
+    z-index: 10999950 !important;
+}
+</style>

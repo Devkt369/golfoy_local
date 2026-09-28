@@ -1,0 +1,68 @@
+<?xml version="1.0" ?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="shipsy_creds" translate="label" sortOrder="10">
+            <label>Shipsy Settings</label>
+        </tab>
+        <section id="configuration" translate="label" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Configuration</label>
+            <tab>shipsy_creds</tab>
+            <resource>Shipsy_EcommerceExtension::configuration_config</resource>
+            <!-- Begin of services group  -->
+            <group id="services" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Configuration</label>
+                <attribute type="expanded">1</attribute>
+
+                <!-- Begin of Shipsy Tracking API group  -->
+                
+                <field id="shipsy_username" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Shipsy Username</label>
+                </field>
+                
+                <field id="shipsy_password" translate="label" type="obscure" sortOrder="6" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Shipsy Password</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+
+                
+                <field id="shipsy_url" type="hidden" sortOrder="6" showInDefault="0" showInWebsite="0" showInStore="0"></field>
+                <field id="dtdc_projectx_url" type="hidden" sortOrder="6" showInDefault="0" showInWebsite="0" showInStore="0"></field>
+
+                <field id="organisation_id" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Organisation Id</label>
+                </field>
+                
+                <!-- End Shipsy Tracking API -->
+
+            </group>
+            <!-- End services -->
+        </section>
+        <section id="shipsy_optional_settings" translate="label" sortOrder="131" showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Optional Settings</label>
+            <tab>shipsy_creds</tab>
+            <resource>Shipsy_EcommerceExtension::shipsy_opt_settings</resource>
+            <!-- Begin of services group  -->
+            <group id="optional_settings" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Optional Settings</label>
+                <attribute type="expanded">1</attribute>
+
+                <!-- Begin of Shipsy Tracking API group  -->
+                
+                <field id="shipsy_show_awb_number_tracking" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Show AWB Number for Tracking</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                
+                <field id="shipsy_restrict_num_pieces_input_modification" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Restrict Number of Pieces Input Field Modification</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <!-- End Shipsy Tracking API -->
+            </group>
+            <!-- End services -->
+        </section>
+    </system>
+</config>

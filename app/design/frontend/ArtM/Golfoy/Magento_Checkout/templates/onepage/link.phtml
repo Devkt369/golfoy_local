@@ -1,0 +1,63 @@
+<?php
+
+use Magento\Checkout\Block\Onepage\Link;
+use Magento\Framework\Escaper;
+
+/** @var Link $block */
+/** @var Escaper $escaper */
+?>
+
+<?php if ($block->isPossibleOnepageCheckout()): ?>
+    <button type="button"
+        data-role="proceed-to-checkout"
+        title="<?= $escaper->escapeHtmlAttr(__('CHECKOUT SECURELY')) ?>"
+        data-mage-init='{
+            "Magento_Checkout/js/proceed-to-checkout":{
+                "checkoutUrl":"<?= $escaper->escapeJs($block->getCheckoutUrl()) ?>"
+            }
+        }'
+        class="action primary checkout<?= ($block->isDisabled()) ? ' disabled' : '' ?>"
+        <?= $block->isDisabled() ? 'disabled="disabled"' : '' ?>>
+
+        <span class="label-text">
+            <?= $escaper->escapeHtml(__('CHECKOUT SECURELY')) ?>
+        </span>
+        <span class="price_custom"></span>
+
+    </button>
+<?php endif; ?>
+
+<script>
+    require(['jquery'], function($) {
+        'use strict';
+
+        if (!$('body').hasClass('checkout-cart-index') || $(window).width() > 768) {
+            return;
+        }
+
+        function updateCheckoutButtonPrice() {
+            var price = $('#cart-totals .grand.totals .amount .price').first().text();
+            if (price) {
+                $('button.action.primary.checkout .price_custom').text(' | ' + price);
+            }
+        }
+
+        // Initial load
+        updateCheckoutButtonPrice();
+
+        // Observe changes in cart totals
+        var target = document.querySelector('#cart-totals');
+
+        if (target) {
+            var observer = new MutationObserver(function() {
+                updateCheckoutButtonPrice();
+            });
+
+            observer.observe(target, {
+                childList: true,
+                subtree: true,
+                characterData: true
+            });
+        }
+    });
+</script>

@@ -1,0 +1,29 @@
+/*
+ * Copyright © 2016 Magestore. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+define([
+    'jquery',
+    'Magento_Ui/js/form/components/button',
+    'uiRegistry'
+], function ($, Component, registry) {
+    'use strict';
+
+    return Component.extend({
+        defaults: {
+            imports: {
+                canVisibleOnForm: "${$.provider}:data.transfer_summary.general_information.status"
+            }
+        },
+
+        canVisibleOnForm: function (status) {
+            this.visible(true);
+            // if (!parseInt(status)) {
+            //     this.visible(true);
+            // } else {
+            //     this.visible(false);
+            // }
+        }
+    });
+});

@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+
+<!--
+  ~ Copyright © 2018 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="webposperformance" translate="label" sortOrder="600" type="text" showInDefault="1" showInWebsite="0" showInStore="0">
+            <label>POS Performance</label>
+            <class>separator-top</class>
+            <tab>magestore</tab>
+            <resource>Magestore_WebposPerformanceAdminUi::config_performance</resource>
+            <group id="by_action" translate="label" sortOrder="20" type="text" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>Action Ranking Performance</label>
+                <field id="pos_number_in_chart" translate="label" sortOrder="10" type="text" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Number of POS in chart</label>
+                </field>
+            </group>
+        </section>
+        <section id="webpos" translate="label" sortOrder="300" type="text" showInDefault="1" showInWebsite="0" showInStore="0">
+            <group id="performance" translate="label" sortOrder="130" type="text" showInDefault="1" showInWebsite="1" showInStore="0">
+                <field id="enabled" translate="label" sortOrder="30" type="select" showInDefault="1"
+                       showInWebsite="0" showInStore="0">
+                    <label>Enable Tracking Performance</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

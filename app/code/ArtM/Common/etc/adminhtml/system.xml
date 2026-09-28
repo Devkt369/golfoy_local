@@ -1,0 +1,61 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+	<system>
+		<tab id="artm" translate="label" sortOrder="999">
+			<label>artm</label>
+		</tab>
+		<section id="common" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+			<label>common</label>
+			<tab>artm</tab>
+			<resource>ArtM_Common::config_artm_common</resource>
+			<group id="ajaxprice" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+				<label>Ajax Pricing</label>
+				<field id="common_ajaxprice" type="select" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Enable/disable</label>
+					<comment/>
+					<source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+				</field>
+
+			</group>
+			<group id="previousorder" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+				<label>Previous ordered product display on cart</label>
+				<field id="previousorderproduct" type="select" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Enable/disable</label>
+					<comment/>
+					<source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+				</field>
+				<field id="numberofpreviousorderproduct" type="text" sortOrder="30" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Total number of product visible on cart</label>
+					<comment><![CDATA[Max number of product display 15]]></comment>
+				</field>
+			</group>
+			<group id="sizeroll" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+				<label>Sizeroll</label>
+				<field id="common_sizeroll" type="select" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Enable/disable</label>
+					<comment/>
+					<source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+				</field>
+			</group>
+			<group id="categoryfeaturedattr" sortOrder="30" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+				<label>Category Page Attributes Listing</label>
+				<field id="common_categoryfeaturedattr_enable" type="select" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Show Featured Attribute on List</label>
+					<comment/>
+					<source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+				</field>
+				<field id="common_categoryfeaturedattr" type="text" sortOrder="20" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Attribute set and Attribute value </label>
+					<comment/>
+				</field>
+			</group>
+			<group id="disablecashondelivery" sortOrder="40" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+				<label>Disable Cash On Delivery Payment Method</label>
+				<field id="nonecodproudct" type="text" sortOrder="30" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Product ID</label>
+					<comment><![CDATA[Enter product ID seprated by comma (Product visiblity = Catalog search )]]></comment>
+				</field>
+			</group>
+		</section>
+	</system>
+</config>

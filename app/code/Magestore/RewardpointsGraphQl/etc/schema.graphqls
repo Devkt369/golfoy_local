@@ -1,0 +1,156 @@
+type Query {
+    msGetRewardPointTransactionHistory (
+        filter: RewardTransactionAttributeFilterInput @doc(description: "Identifies which transaction attributes to search for and return."),
+        pageSize: Int = 20 @doc(description: "Specifies the maximum number of results to return at once. This attribute is optional."),
+        currentPage: Int = 1 @doc(description: "Specifies which page of results to return. The default value is 1."),
+    ): MSRewardPointTransactions @resolver (class: "\\Magestore\\RewardpointsGraphQl\\Model\\Resolver\\CustomerRewardPointTransactionHistory") @doc(description: "Reward point transaction history of current customer")
+    msGetRewardCustomerSettings : RewardCustomerSetting  @resolver (class: "\\Magestore\\RewardpointsGraphQl\\Model\\Resolver\\GetRewardCustomerSettings") @doc(description: "Reward customer settings.")
+
+    msGetRewardPointPolicy: CmsPage @resolver (class: "\\Magestore\\RewardpointsGraphQl\\Model\\Resolver\\GetRewardPointPolicy") @doc(description: "Get reward point policy")
+    msRewardPointWelcomePage: CmsPage @resolver (class: "\\Magestore\\RewardpointsGraphQl\\Model\\Resolver\\GetRewardPointWelcomePage") @doc(description: "Get reward point welcome page")
+}
+
+type StoreConfig {
+    magestore_rewardpoints_general_enable: String @doc(description: "Enable Reward Points Extension")
+    magestore_rewardpoints_general_point_name: String @doc(description: "Label for Point")
+    magestore_rewardpoints_general_point_names: String @doc(description: "Label for Points (plural)")
+    magestore_rewardpoints_general_point_image: String @doc(description: "Reward Points Image")
+    magestore_rewardpoints_general_show_policy_menu: String @doc(description: "Use Reward Policy page")
+    magestore_rewardpoints_general_policy_page: String @doc(description: "Reward Policy page uses CMS")
+    magestore_rewardpoints_general_show_welcome_page: String @doc(description: "Use Reward Welcome page")
+    magestore_rewardpoints_general_welcome_page: String @doc(description: "Reward Welcome page uses CMS")
+    magestore_rewardpoints_earning_rounding_method: String @doc(description: "Rounding Method")
+    magestore_rewardpoints_earning_expire: String @doc(description: "Points expire after")
+    magestore_rewardpoints_earning_max_balance: String @doc(description: "Number of points in balance allowed")
+    magestore_rewardpoints_earning_by_tax: String @doc(description: "Earn points from tax")
+    magestore_rewardpoints_earning_by_shipping: String @doc(description: "Earn points from shipping fee")
+    magestore_rewardpoints_earning_earn_when_spend: String @doc(description: "Allow earning points when using points to spend")
+    magestore_rewardpoints_earning_order_invoice: String @doc(description: "Allow receiving points when invoice is created")
+    magestore_rewardpoints_earning_holding_days: String @doc(description: "Hold point transactions for")
+    magestore_rewardpoints_spending_redeemable_points: String @doc(description: "Minimum redeemable points")
+    magestore_rewardpoints_spending_max_points_per_order: String @doc(description: "Maximum spending points per order")
+    magestore_rewardpoints_spending_max_point_default: String @doc(description: "Use maximum points at checkout by default")
+    magestore_rewardpoints_spending_spend_for_shipping: String @doc(description: "Allow using points for Shipping Fee")
+    magestore_rewardpoints_display_toplink: String @doc(description: "Show total point balance next to My Account link")
+    magestore_rewardpoints_display_product: String @doc(description: "On Product Page")
+    magestore_rewardpoints_display_minicart: String @doc(description: "On Minicart")
+    magestore_rewardpoints_email_enable: String @doc(description: "Enable notification email")
+    magestore_rewardpoints_email_sender: String @doc(description: "Sender")
+    magestore_rewardpoints_email_update_balance: String @doc(description: "Template of email sent to Customer when point balance is updated")
+    magestore_rewardpoints_email_before_expire_transaction: String @doc(description: "Template of email sent to Customer before a transaction expires")
+    magestore_rewardpoints_email_before_expire_days: String @doc(description: "Send reminder email before a transaction expires")
+}
+
+type Customer {
+    ms_reward_point_balance: Int @resolver (class: "\\Magestore\\RewardpointsGraphQl\\Model\\Resolver\\CustomerRewardPointBalance") @doc(description: "Customer reward points balance")
+    ms_spending_rate: [MSSpendingRate] @resolver (class: "\\Magestore\\RewardpointsGraphQl\\Model\\Resolver\\GetSpendingRateByCustomer") @doc(description: "Customer Spending Rate")
+    ms_earning_rate: [MSEarningRate] @resolver (class: "\\Magestore\\RewardpointsGraphQl\\Model\\Resolver\\GetEarningRateByCustomer") @doc(description: "Customer Earning Rate")
+}
+
+interface MSRateInterface @typeResolver(class: "Magestore\\RewardpointsGraphQl\\Model\\Resolver\\RateTypeResolver") {
+    rate_id: Int @doc(description: "The ID number assign to rate.")
+    website_ids: String @doc(description: "The list of website of this rate.")
+    customer_group_ids: String @doc(description: "The list of website link of this rate.")
+    direction: Int @doc(description: "Direction of rate to determine rate is spending or earning.")
+    points: Float @doc(description: "The number point of this rate.")
+    money: Float @doc(description: "The money of this rate..")
+    status: Int @doc(description: "The state of this rate.")
+    sort_order: Int @doc(description: "The priority of this rate.")
+}
+
+type MSSpendingRate implements MSRateInterface @doc(description:"Magestore Spending Rate") {
+    max_price_spended_type: String @doc(description: "Max Price Spended Type")
+    max_price_spended_value: Float @doc(description: "Max Price Spended Value")
+}
+
+type MSEarningRate implements MSRateInterface @doc(description:"Magestore Earning Rate") {
+}
+
+type MSRewardPointTransactions @doc(description: "List reward point transaction") {
+    items: [MSRewardPointTransaction] @doc(description: "An array of transactions that match the specified search criteria.")
+    page_info: SearchResultPageInfo @doc(description: "An object that includes the page_info and currentPage values specified in the query.")
+    total_count: Int @doc(description: "The total number of reward point transactions.")
+}
+
+type MSRewardPointTransaction implements MSRewardPointTransactionInterface @doc(description:"MSRewardPointTransactionInterface") {
+
+}
+
+interface MSRewardPointTransactionInterface @typeResolver(class: "Magestore\\RewardpointsGraphQl\\Model\\RewardPointTransactionTypeResolver") {
+    transaction_id: Int! @doc(description: "The ID of reward transaction.")
+    reward_id: Int @doc(description: "Reward id")
+    customer_id: Int @doc(description: "Customer id")
+    customer_email: String @doc(description: "Customer email")
+    title: String @doc(description: "Transaction title")
+    action: String @doc(description: "Transaction action")
+    action_type: Int @doc(description: "Transaction action type")
+    store_id: Int @doc(description: "Store id")
+    point_amount: Int @doc(description: "Point amount")
+    point_used: Int @doc(description: "Point used")
+    real_point: Int @doc(description: "Real point")
+    status: Int @doc(description: "Status")
+    created_time: String @doc(description: "Created time")
+    updated_time: String @doc(description: "Updated time")
+    expiration_date: String @doc(description: "Expire date")
+    expire_email: Int @doc(description: "Expire email")
+    order_id: Int @doc(description: "Order id")
+    order_increment_id: String @doc(description: "Order increment id")
+    order_base_amount: Float @doc(description: "Order base amount")
+    order_amount: Float @doc(description: "Order amount")
+    base_discount: Float @doc(description: "Base discount")
+    discount: Float @doc(description: "Discount")
+    extra_content: String @doc(description: "Added content")
+}
+
+input RewardTransactionAttributeFilterInput @doc(description: "LocationAttributeFilterInput defines the filters to be used in the search. A filter contains at least one attribute, a comparison operator, and the value that is being searched for.") {
+    transaction_id: FilterTypeInput @doc(description: "Filter by transaction ID")
+    customer_id: FilterTypeInput @doc(description: "Filter by customer ID")
+    action: FilterTypeInput @doc(description: "Filter by action")
+    order_id: FilterTypeInput @doc(description: "Filter by order id")
+    order_increment_id: FilterTypeInput @doc(description: "Filter by order increment id")
+}
+
+interface ProductInterface {
+    ms_earning_point: Int @doc(description: "Earning point from product") @resolver(class: "Magestore\\RewardpointsGraphQl\\Model\\Resolver\\EstimateEarningPointProduct")
+}
+
+type CartPrices {
+    ms_reward_point: MagestoreRewards @doc(description: "Earning point in quote") @resolver(class: "Magestore\\RewardpointsGraphQl\\Model\\Resolver\\GetRewardPointInfoInQuote")
+}
+
+type MagestoreRewards {
+    rewardpoints_earn: Int @doc(description: "Earning point in quote")
+    use_point: Int @doc(description: "Use point in quote")
+    use_max_point: Int @doc(description: "Use max point in quote")
+    reward_checked_rules: String @doc(description: "Reward checked rules")
+    reward_sales_rules: String @doc(description: "Reward sales rules")
+    rewardpoints_spent: Int @doc(description: "Reward spent")
+    rewardpoints_discount: Float @doc(description: "Reward discount")
+    rewardpoints_base_discount: Float @doc(description: "Reward base discount")
+    rewardpoints_discount_for_shipping: Float @doc(description: "Reward discount for shipping")
+    rewardpoints_base_discount_for_shipping: Float @doc(description: "Reward base discount for shipping")
+}
+
+type Mutation {
+    msApplyRewardPointToCart(cartId: ID!, useMaxPoint: Int!, pointApplied: Int!): MsApplyRewardPointsToCartOutput @resolver (class: "\\Magestore\\RewardpointsGraphQl\\Model\\Resolver\\ApplyRewardPoints") @doc(description: "Apply all available points, up to the cart total. ")
+    msRemoveRewardPointFromCart(cartId: ID!): MsRemoveRewardPointsFromCartOutput @resolver (class: "\\Magestore\\RewardpointsGraphQl\\Model\\Resolver\\RemoveRewardPoints") @doc(description: "Cancel the application of reward points to the cart")
+    msSaveRewardCustomerSettings(rewardCustomerSetting: RewardCustomerSettingInput!): RewardCustomerSetting @resolver (class: "\\Magestore\\RewardpointsGraphQl\\Model\\Resolver\\SaveRewardCustomerSettings") @doc(description: "Save reward customer settings.")
+}
+
+input RewardCustomerSettingInput {
+    is_notification: Boolean! @doc(description: "Is notification")
+    expire_notification: Boolean! @doc(description: "Expire notification")
+}
+
+type RewardCustomerSetting {
+    is_notification: Boolean! @doc(description: "Is notification")
+    expire_notification: Boolean! @doc(description: "Expire notification")
+}
+
+type MsApplyRewardPointsToCartOutput {
+    cart: Cart! @doc(description: "The customer cart after reward points are applied")
+}
+
+type MsRemoveRewardPointsFromCartOutput {
+    cart: Cart! @doc(description: "The customer cart after reward points are removed")
+}

@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\App\RouterList">
+        <arguments>
+            <argument name="routerList" xsi:type="array">
+                <item name="artm_luxurycategory" xsi:type="array">
+                    <item name="class" xsi:type="string">ArtM\LuxuryCategory\Controller\Router</item>
+                    <item name="disable" xsi:type="boolean">false</item>
+                    <!--
+                        Runs after the core urlrewrite router (20) so any
+                        real, explicit rewrite always wins, and before the
+                        standard (30) / cms (60) routers so "/luxe" paths
+                        never fall through to a 404.
+                    -->
+                    <item name="sortOrder" xsi:type="string">25</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Catalog\Model\Layer\Category">
+        <plugin name="artmLuxuryCategoryProductCollection"
+                type="ArtM\LuxuryCategory\Plugin\Catalog\Model\LuxuryLayerProductCollectionPlugin"/>
+    </type>
+
+    <!--
+        DELIBERATELY NOT registering any plugin on the shared
+        Magento\Catalog\Model\ResourceModel\Product\Collection base class.
+        An earlier version of this module did (three plugins: correcting
+        getSize(), re-applying the id filter on every getSelect(), and
+        temporarily widening/re-slicing page size for correct pagination
+        under a search-engine backend). That class is instantiated
+        constantly across the entire site — search, related/upsell/
+        cross-sell products, admin grids, not just category pages — and
+        after enabling all three, a site-wide PHP memory exhaustion
+        appeared on completely unrelated, non-/luxe URLs; disabling this
+        module fixed it. The exact mechanism wasn't pinned down with
+        certainty, so those three plugins were deleted rather than kept
+        around disabled. The risk of touching such a foundational class
+        outweighs perfecting /luxe pagination beyond page 1 on this
+        store's search-engine setup.
+
+        Known limitation as a result: on Elasticsearch/OpenSearch-backed
+        catalog listing, the luxury filter (applied narrowly below, only
+        on Magento\Catalog\Model\Layer\Category::getProductCollection())
+        can only narrow within whatever the search engine already
+        returned for the requested page — see
+        LuxuryLayerProductCollectionPlugin docblock. If this needs
+        revisiting, do it with a mechanism that never touches the shared
+        Product\Collection class (e.g. a dedicated, separately-typed
+        collection built specifically for /luxe listings).
+    -->
+
+    <type name="Magento\Theme\Block\Html\Topmenu">
+        <!--
+            Magento_Catalog's own "catalogTopmenu" plugin (sortOrder 0)
+            builds the category node tree in its beforeGetHtml. Ours must
+            run after that so the tree already exists to inject "Luxe"
+            nodes into — hence sortOrder 10.
+        -->
+        <plugin name="artmLuxuryTopmenuItems"
+                type="ArtM\LuxuryCategory\Plugin\Theme\Block\Html\AddLuxuryTopmenuItemPlugin"
+                sortOrder="10"/>
+    </type>
+
+    <type name="Magento\Theme\Block\Html\Breadcrumbs">
+        <plugin name="artmLuxuryBreadcrumb"
+                type="ArtM\LuxuryCategory\Plugin\Theme\Block\Html\AddLuxuryBreadcrumbPlugin"/>
+    </type>
+</config>

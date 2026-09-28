@@ -1,0 +1,180 @@
+<?php
+
+/** @var \Magento\Backend\Block\Template $block */
+$matrixUrl = $block->getUrl('massproducts/failed/tabMatrix');
+$addProductUrl = $block->getUrl('massproducts/ready/addProduct');
+$moveToReadyUrl = $block->getUrl('massproducts/failed/moveToReady');
+$productEditUrlTemplate = $block->getUrl('catalog/product/edit', ['id' => '__ID__']);
+?>
+
+<div id="artm-failed-products-tab-root">
+	<style>
+		#artm-failed-products-tab-root .artm-failed-toolbar {
+			display: flex;
+			gap: 8px;
+			align-items: center;
+			margin-bottom: 12px;
+			flex-wrap: wrap;
+		}
+
+		#artm-failed-products-tab-root .artm-failed-table-wrap {
+			overflow: auto;
+		}
+
+		#artm-failed-products-tab-root .artm-failed-table {
+			min-width: 1200px;
+		}
+
+		#artm-failed-products-tab-root .artm-failed-table tbody tr:nth-child(odd) td {
+			background: #f8fafc;
+		}
+
+		#artm-failed-products-tab-root .artm-failed-table tbody tr:nth-child(even) td {
+			background: #ffffff;
+		}
+
+		#artm-failed-products-tab-root .artm-failed-table th,
+		#artm-failed-products-tab-root .artm-failed-table td {
+			padding: 6px 8px;
+			vertical-align: top;
+		}
+
+		#artm-failed-products-tab-root .artm-col-media,
+		#artm-failed-products-tab-root .artm-failed-table th.artm-col-media {
+			position: sticky;
+			left: 0;
+			z-index: 3;
+			min-width: 180px;
+			max-width: 180px;
+			border-right: 1px solid #d7dce1;
+			background: #ffffff;
+		}
+
+		#artm-failed-products-tab-root .artm-col-actions,
+		#artm-failed-products-tab-root .artm-failed-table th.artm-col-actions {
+			position: sticky;
+			right: 0;
+			z-index: 3;
+			min-width: 200px;
+			border-left: 1px solid #d7dce1;
+			background: #ffffff;
+		}
+
+		#artm-failed-products-tab-root .artm-failed-table thead .artm-col-media,
+		#artm-failed-products-tab-root .artm-failed-table thead .artm-col-actions {
+			background: #eef2f7;
+			z-index: 4;
+		}
+
+		#artm-failed-products-tab-root .artm-failed-thumb-wrap {
+			display: flex;
+			flex-direction: column;
+			gap: 6px;
+			align-items: center;
+		}
+
+		#artm-failed-products-tab-root .artm-failed-thumb {
+			width: 150px;
+			height: 100px;
+			border: 1px solid #dbe2ea;
+			background: #f8fafc;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 4px;
+			overflow: hidden;
+		}
+
+		#artm-failed-products-tab-root .artm-failed-thumb img {
+			max-width: 150px;
+			max-height: 100px;
+			object-fit: contain;
+			display: block;
+		}
+
+		#artm-failed-products-tab-root .artm-failed-name {
+			font-size: 12px;
+			color: #334155;
+			text-align: center;
+			line-height: 1.3;
+			word-break: break-word;
+		}
+
+		#artm-failed-products-tab-root .artm-ready-status.queued {
+			background: #fef9c3;
+			color: #b45309;
+		}
+
+		#artm-failed-products-tab-root .artm-ready-status.processing {
+			background: #e0e7ff;
+			color: #3730a3;
+		}
+
+		#artm-failed-products-tab-root .artm-ready-status.success {
+			background: #dcfce7;
+			color: #166534;
+		}
+
+		#artm-failed-products-tab-root .artm-ready-status.failed {
+			background: #fee2e2;
+			color: #dc2626;
+		}
+
+		#artm-failed-products-tab-root .artm-error-message {
+			color: #dc2626;
+			font-size: 11px;
+			font-weight: 600;
+			margin-top: 4px;
+			padding: 4px;
+			background: #fef2f2;
+			border: 1px solid #fecaca;
+			border-radius: 3px;
+		}
+
+		div#artm-failed-products-tab-root th.artm-col-product-url,
+		div#artm-failed-products-tab-root td.artm-col-product-url,
+		div#artm-failed-products-tab-root td.artm-col-upload-right {
+			display: none;
+		}
+	</style>
+
+	<div class="message message-notice notice">
+		<div><?= $block->escapeHtml(__('Failed tab shows products that failed to be created. Check error messages for details.')) ?></div>
+	</div>
+
+	<div class="artm-failed-toolbar">
+		<label><input type="checkbox" id="artm-ready-select-all" /> <?= $block->escapeHtml(__('Select All')) ?></label>
+		<button type="button" class="action-secondary" id="artm-ready-mass-draft"><span><?= $block->escapeHtml(__('Mass Move to Ready')) ?></span></button>
+		<button type="button" class="action-secondary" id="artm-ready-mass-add"><span><?= $block->escapeHtml(__('Mass Try Uploading Again')) ?></span></button>
+	</div>
+
+	<div id="artm-failed-msg" class="message" style="display:none;"></div>
+	<div id="artm-failed-groups"></div>
+</div>
+
+<script>
+	require(['ArtM_MassProducts/js/ready-attribute-set-tab'], function(initReadyAttributeSetTab) {
+		initReadyAttributeSetTab({
+			rootSelector: '#artm-failed-products-tab-root',
+			groupsSelector: '#artm-failed-groups',
+			msgSelector: '#artm-failed-msg',
+			matrixUrl: '<?= $block->escapeJs($matrixUrl) ?>',
+			isReadOnly: true,
+			enableSelection: true,
+			showDraftAction: true,
+			showQueueAction: false,
+			showAddAction: true,
+			showMassDraft: true,
+			showMassQueue: false,
+			showMassAdd: true,
+			moveToDraftUrl: '<?= $block->escapeJs($moveToReadyUrl) ?>',
+			rowDraftLabel: '<?= $block->escapeJs(__('Move to Ready')) ?>',
+			moveToDraftMovedLabel: '<?= $block->escapeJs(__('Moved to Ready')) ?>',
+			rowAddLabel: '<?= $block->escapeJs(__('Try uploading again')) ?>',
+			addProductUrl: '<?= $block->escapeJs($addProductUrl) ?>',
+			showViewDetailsAction: true,
+			showViewProductAction: true,
+			productEditUrlTemplate: '<?= $block->escapeJs($productEditUrlTemplate) ?>'
+		});
+	});
+</script>

@@ -1,0 +1,72 @@
+<?php /** @var \Facebook\BusinessExtension\Block\Pixel\Head $block */ ?>
+<?php if ($block->getFacebookPixelID()) { ?>
+<!-- Meta Business Extension for Magento 2 -->
+<!-- Meta Pixel Code (Delayed) -->
+
+<script>
+window.addEventListener('load', function () {
+    setTimeout(function () {
+
+        !function(f,b,e,v,n,t,s){
+            if(f.fbq) return;
+            n=f.fbq=function(){
+                n.callMethod ? n.callMethod.apply(n,arguments) : n.queue.push(arguments)
+            };
+            if(!f._fbq) f._fbq=n;
+            n.push=n;
+            n.loaded=!0;
+            n.version='2.0';
+            n.queue=[];
+            t=b.createElement(e);
+            t.async=!0;
+            t.src=v;
+            s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s);
+        }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+
+        <?php
+        $dataProcessingOptionsCode = $block->getDataProcessingOptionsJSCode();
+        if (!empty($dataProcessingOptionsCode)) {
+            echo $dataProcessingOptionsCode . "\n";
+        }
+        ?>
+
+        if (typeof fbq !== 'undefined') {
+            fbq(
+                'init',
+                '<?= $block->escapeJs($block->getFacebookPixelID()) ?>',
+                <?= $block->getPixelInitCode() ?>,
+                { agent: '<?= $block->escapeJs($block->getFacebookAgentVersion()) ?>' }
+            );
+
+            fbq('track', 'PageView', {
+                source: "<?= $block->escapeJs($block->getSource()) ?>",
+                pluginVersion: "<?= $block->escapeJs($block->getPluginVersion()) ?>"
+            });
+        }
+
+    }, 3000); // ⏱ Delay = 3 seconds
+});
+</script>
+
+<noscript>
+<?php
+$dataProcessingOptionsImgTag = $block->getDataProcessingOptionsImgTag();
+$imgSrc = 'https://www.facebook.com/tr?id=' . $block->getFacebookPixelID()
+    . '&ev=PageView&noscript=1&a=' . $block->getFacebookAgentVersion();
+
+if (!empty($dataProcessingOptionsImgTag)) {
+    $imgSrc .= '&' . $dataProcessingOptionsImgTag;
+}
+?>
+<img height="1" width="1" style="display:none" src="<?= $block->escapeUrl($imgSrc) ?>" />
+</noscript>
+
+<!-- End Meta Pixel Code -->
+
+<?php } else { ?>
+<!-- NO Pixel ID is configured -->
+<script>
+console.log('No Meta pixel is configured. Please configure it in Admin → Stores → Meta → Setup.');
+</script>
+<?php } ?>

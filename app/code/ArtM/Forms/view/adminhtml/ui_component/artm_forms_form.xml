@@ -1,0 +1,245 @@
+<?xml version="1.0"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">artm_forms_form.artm_forms_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Form Information</item>
+    </argument>
+    <dataSource name="artm_forms_form_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">ArtM\Forms\Ui\DataProvider\Form\DataProvider</argument>
+            <argument name="name" xsi:type="string">artm_forms_form_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">id</argument>
+            <argument name="requestFieldName" xsi:type="string">id</argument>
+        </argument>
+    </dataSource>
+    <fieldset name="general_information" sortOrder="10">
+        <settings>
+            <label translate="true">General Information</label>
+        </settings>
+        <field name="form_name">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">text</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="label" xsi:type="string" translate="true">Form Name</item>
+                    <item name="dataScope" xsi:type="string">form_name</item>
+                    <item name="validation" xsi:type="array">
+                        <item name="required-entry" xsi:type="boolean">true</item>
+                    </item>
+                </item>
+            </argument>
+        </field>
+        <field name="form_identifier">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">text</item>
+                    <item name="formElement" xsi:type="string">input</item>
+                    <item name="label" xsi:type="string" translate="true">Form Identifier</item>
+                    <item name="dataScope" xsi:type="string">form_identifier</item>
+                    <item name="validation" xsi:type="array">
+                        <item name="required-entry" xsi:type="boolean">true</item>
+                    </item>
+                </item>
+            </argument>
+        </field>
+        <field name="form_description">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="dataType" xsi:type="string">text</item>
+                    <item name="formElement" xsi:type="string">textarea</item>
+                    <item name="label" xsi:type="string" translate="true">Form Description</item>
+                    <item name="dataScope" xsi:type="string">form_description</item>
+                </item>
+            </argument>
+        </field>
+    </fieldset>
+    <fieldset name="form_fields" sortOrder="20">
+        <settings>
+            <label translate="true">Form Fields</label>
+        </settings>
+        <container name="form_fields_container">
+            <field name="form_fields">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="formElement" xsi:type="string">dynamicRows</item>
+                        <item name="componentType" xsi:type="string">dynamicRows</item>
+                        <item name="dataScope" xsi:type="string">form_fields</item>
+                        <item name="addButtonLabel" xsi:type="string" translate="true">Add Field</item>
+                        <item name="deleteButtonLabel" xsi:type="string" translate="true">Delete</item>
+                        <item name="recordTemplate" xsi:type="string">form_field_record</item>
+                        <item name="sortOrder" xsi:type="number">10</item>
+                    </item>
+                </argument>
+                <formElements>
+                    <formElement name="form_field_record">
+                        <field name="name"> ... </field>
+                        <field name="label"> ... </field>
+                        <field name="type"> ... </field>
+                        <field name="is_required"> ... </field>
+                        <field name="sort_order"> ... </field>
+                        <!-- Nested dynamicRows for options can be added here as another field -->
+                    </formElement>
+                </formElements>
+                <container name="form_field_record" as="form_field_record">
+                    <field name="name">
+                        <argument name="data" xsi:type="array">
+                            <item name="config" xsi:type="array">
+                                <item name="dataType" xsi:type="string">text</item>
+                                <item name="formElement" xsi:type="string">input</item>
+                                <item name="label" xsi:type="string" translate="true">Name</item>
+                                <item name="dataScope" xsi:type="string">name</item>
+                                <item name="validation" xsi:type="array">
+                                    <item name="required-entry" xsi:type="boolean">true</item>
+                                </item>
+                            </item>
+                        </argument>
+                    </field>
+                    <field name="label">
+                        <argument name="data" xsi:type="array">
+                            <item name="config" xsi:type="array">
+                                <item name="dataType" xsi:type="string">text</item>
+                                <item name="formElement" xsi:type="string">input</item>
+                                <item name="label" xsi:type="string" translate="true">Label</item>
+                                <item name="dataScope" xsi:type="string">label</item>
+                                <item name="validation" xsi:type="array">
+                                    <item name="required-entry" xsi:type="boolean">true</item>
+                                </item>
+                            </item>
+                        </argument>
+                    </field>
+                    <field name="type">
+                        <argument name="data" xsi:type="array">
+                            <item name="config" xsi:type="array">
+                                <item name="dataType" xsi:type="string">text</item>
+                                <item name="formElement" xsi:type="string">select</item>
+                                <item name="label" xsi:type="string" translate="true">Type</item>
+                                <item name="dataScope" xsi:type="string">type</item>
+                                <item name="options" xsi:type="array">
+                                    <item name="text" xsi:type="array">
+                                        <item name="value" xsi:type="string">text</item>
+                                        <item name="label" xsi:type="string">Text</item>
+                                    </item>
+                                    <item name="textarea" xsi:type="array">
+                                        <item name="value" xsi:type="string">textarea</item>
+                                        <item name="label" xsi:type="string">Textarea</item>
+                                    </item>
+                                    <item name="select" xsi:type="array">
+                                        <item name="value" xsi:type="string">select</item>
+                                        <item name="label" xsi:type="string">Select</item>
+                                    </item>
+                                    <item name="multiselect" xsi:type="array">
+                                        <item name="value" xsi:type="string">multiselect</item>
+                                        <item name="label" xsi:type="string">Multiselect</item>
+                                    </item>
+                                    <item name="date" xsi:type="array">
+                                        <item name="value" xsi:type="string">date</item>
+                                        <item name="label" xsi:type="string">Date</item>
+                                    </item>
+                                    <item name="file" xsi:type="array">
+                                        <item name="value" xsi:type="string">file</item>
+                                        <item name="label" xsi:type="string">File</item>
+                                    </item>
+                                    <item name="image" xsi:type="array">
+                                        <item name="value" xsi:type="string">image</item>
+                                        <item name="label" xsi:type="string">Image</item>
+                                    </item>
+                                    <item name="swatch" xsi:type="array">
+                                        <item name="value" xsi:type="string">swatch</item>
+                                        <item name="label" xsi:type="string">Swatch</item>
+                                    </item>
+                                    <item name="checkbox" xsi:type="array">
+                                        <item name="value" xsi:type="string">checkbox</item>
+                                        <item name="label" xsi:type="string">Checkbox</item>
+                                    </item>
+                                    <item name="radio" xsi:type="array">
+                                        <item name="value" xsi:type="string">radio</item>
+                                        <item name="label" xsi:type="string">Radio</item>
+                                    </item>
+                                    <item name="price" xsi:type="array">
+                                        <item name="value" xsi:type="string">price</item>
+                                        <item name="label" xsi:type="string">Price</item>
+                                    </item>
+                                    <item name="button" xsi:type="array">
+                                        <item name="value" xsi:type="string">button</item>
+                                        <item name="label" xsi:type="string">Button</item>
+                                    </item>
+                                </item>
+                            </item>
+                        </argument>
+                    </field>
+                    <field name="is_required">
+                        <argument name="data" xsi:type="array">
+                            <item name="config" xsi:type="array">
+                                <item name="dataType" xsi:type="string">boolean</item>
+                                <item name="formElement" xsi:type="string">checkbox</item>
+                                <item name="label" xsi:type="string" translate="true">Is Required</item>
+                                <item name="dataScope" xsi:type="string">is_required</item>
+                            </item>
+                        </argument>
+                    </field>
+                    <field name="sort_order">
+                        <argument name="data" xsi:type="array">
+                            <item name="config" xsi:type="array">
+                                <item name="dataType" xsi:type="string">number</item>
+                                <item name="formElement" xsi:type="string">input</item>
+                                <item name="label" xsi:type="string" translate="true">Sort Order</item>
+                                <item name="dataScope" xsi:type="string">sort_order</item>
+                            </item>
+                        </argument>
+                    </field>
+                    <!-- Nested dynamicRows for options -->
+                    <container name="options_container" if="type == 'select' || type == 'multiselect' || type == 'swatch' || type == 'radio'">
+                        <field name="options">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="formElement" xsi:type="string">dynamicRows</item>
+                                    <item name="componentType" xsi:type="string">dynamicRows</item>
+                                    <item name="dataScope" xsi:type="string">options</item>
+                                    <item name="addButtonLabel" xsi:type="string" translate="true">Add Value</item>
+                                    <item name="deleteButtonLabel" xsi:type="string" translate="true">Delete</item>
+                                    <item name="recordTemplate" xsi:type="string">option_record</item>
+                                </item>
+                            </argument>
+                            <container name="option_record" as="option_record">
+                                <field name="label">
+                                    <argument name="data" xsi:type="array">
+                                        <item name="config" xsi:type="array">
+                                            <item name="dataType" xsi:type="string">text</item>
+                                            <item name="formElement" xsi:type="string">input</item>
+                                            <item name="label" xsi:type="string" translate="true">Label</item>
+                                            <item name="dataScope" xsi:type="string">label</item>
+                                        </item>
+                                    </argument>
+                                </field>
+                                <field name="value">
+                                    <argument name="data" xsi:type="array">
+                                        <item name="config" xsi:type="array">
+                                            <item name="dataType" xsi:type="string">text</item>
+                                            <item name="formElement" xsi:type="string">input</item>
+                                            <item name="label" xsi:type="string" translate="true">Value</item>
+                                            <item name="dataScope" xsi:type="string">value</item>
+                                        </item>
+                                    </argument>
+                                </field>
+                            </container>
+                        </field>
+                    </container>
+                </container>
+            </field>
+        </container>
+    </fieldset>
+    <button name="save" class="primary" type="submit">
+        <settings>
+            <label translate="true">Save</label>
+        </settings>
+    </button>
+    <button name="back" class="back" type="button">
+        <settings>
+            <label translate="true">Back</label>
+            <onClick>history.back()</onClick>
+        </settings>
+    </button>
+</form>

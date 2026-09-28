@@ -1,0 +1,106 @@
+<?php
+/**
+ * Copyright © Magestore. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/**
+ * @var ViewPage $block
+ */
+
+use Magestore\ClickAndCollectFrontend\Block\Store\ViewPage;
+
+$store = $block->getCurrentStoreProvider()->getCurrentStore();
+
+?>
+<div class="views-wrapper">
+    <div class="back-page"><a href="<?= /* @noEscape */ $block->getUrl('clickandcollect/store') ?>">
+            <span class="glyphicon glyphicon-menu-left"></span><?= /* @noEscape */ __('Back to store list') ?></a>
+    </div>
+    <div class="map-box-container col-md-6 col-sm-12 col-xs-12 pull-right">
+        <div class="googlemap"></div>
+    </div>
+    <div class="col-md-6 col-sm-12 col-xs-12 pull-left">
+        <h2 class="title-store">
+            <?= $block->escapeHtml($store->getName()) ?>
+        </h2>
+        <?php if ($block->getHelperData()->getConfigEnableClickAndCollect()
+            && (int)$store->getIsAllowPickup()): ?>
+            <p class="clickandcollect-title">
+                <span class="glyphicon glyphicon-circle-arrow-up"></span>
+                <?= /* @noEscape */ __('Click & Collect | Buy online, collect at store') ?>
+            </p>
+        <?php endif; ?>
+        <!-- Address -->
+        <p class="col-full">
+            <span class="group-info">
+                <span class="glyphicon glyphicon-map-marker"></span>
+                <span><?= $block->escapeHtml($block->getAddress($store)) ?></span>
+            </span>
+        </p>
+
+        <!-- Phone -->
+        <?php if ($store->getTelephone()): ?>
+            <p class="col-full">
+                <span class="glyphicon glyphicon-earphone"></span>
+                <span class="group-info"><?= $block->escapeHtml($store->getTelephone()); ?></span>
+            </p>
+        <?php endif; ?>
+        <?php if ($store->getSchedule()): ?>
+            <div id="open_hour" class="open_hour col-full container-fluid schedule-container">
+                <h4>
+                    <span class="glyphicon glyphicon-time"></span>
+                    <span><?=  $block->escapeHtml(__('Our opening hours...')) ?></span>
+                </h4>
+                <div class="col-xs-6">
+                    <?php foreach ($block->getWeekdays()[ViewPage::WEEK_DAYS_LEFT_COLUMN] as $day):?>
+                        <?= $block->getScheduleTimeHtml($store->getSchedule(), $day); ?>
+                    <?php endforeach; ?>
+                </div>
+                <div class="col-xs-6">
+                    <?php foreach ($block->getWeekdays()[ViewPage::WEEK_DAYS_RIGHT_COLUMN] as $day):?>
+                        <?= $block->getScheduleTimeHtml($store->getSchedule(), $day); ?>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+<script id="popup-store-template" class="popup-store-template" type="text/x-magento-template">
+    <div class="popup-store store-item store-<%- data.location_id %>"
+         title="<%- data.name %>"
+         data-store-id="<%- data.location_id %>"
+         data-latitude="<%- data.latitude %>"
+         data-longitude="<%- data.longitude %>"
+         data-address="<%- data.address_data %>"
+    >
+        <div class="store-content">
+            <div class="col-sm-12 col-xs-12 tag-content" style="padding-left: 5px;padding-right: 5px;" >
+                <h4><%- data.name %></h4>
+                <?php if ($block->getHelperData()->getConfigEnableClickAndCollect()): ?>
+                    <% if(Number(data.is_allow_pickup)) { %>
+                    <p class="clickandcollect-title">
+                        <?= /* @noEscape */ __('Click & Collect | Buy online, collect at store') ?>
+                    </p>
+                    <% } %>
+                <?php endif; ?>
+                <p class="address-store"><%- data.address_data %></p>
+                <p class="telephone-store"><%- data.telephone %></p>
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/javascript">
+    require(['jquery', 'Magestore_ClickAndCollectFrontend/js/viewpage/map'], function ($) {
+        $(document).ready(function ($) {
+            $('.googlemap').Map($.extend({
+                storePopupTemplate: '.popup-store-template',
+                mediaUrlImage: '<?= /* @noEscape */ $block->getMediaUrlImage() ?>',
+                defaultStoreIcon: '<?= /* @noEscape */
+                    $block->getViewFileUrl(ViewPage::DEFAULT_STORE_ICON_PATH)?>',
+            }, <?= /* @noEscape */ $block->getStoreJson($store)?>));
+        });
+
+    });
+    window.googleMapApiKey="<?= /* @noEscape */ $block->getHelperData()->getGoogleApiKey()?>";
+</script>

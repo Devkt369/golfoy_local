@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="ArtM\CustomerSurvey\Api\QuestionRepositoryInterface" type="ArtM\CustomerSurvey\Model\QuestionRepository"/>
+    <preference for="ArtM\CustomerSurvey\Api\QuestionOptionRepositoryInterface" type="ArtM\CustomerSurvey\Model\QuestionOptionRepository"/>
+    <preference for="ArtM\CustomerSurvey\Api\LocationRepositoryInterface" type="ArtM\CustomerSurvey\Model\LocationRepository"/>
+    <preference for="ArtM\CustomerSurvey\Api\SurveyRepositoryInterface" type="ArtM\CustomerSurvey\Model\SurveyRepository"/>
+    <preference for="ArtM\CustomerSurvey\Api\SurveyEngineInterface" type="ArtM\CustomerSurvey\Model\Engine\SurveyEngine"/>
+
+    <preference for="ArtM\CustomerSurvey\Api\Data\QuestionInterface" type="ArtM\CustomerSurvey\Model\Question"/>
+    <preference for="ArtM\CustomerSurvey\Api\Data\QuestionOptionInterface" type="ArtM\CustomerSurvey\Model\QuestionOption"/>
+    <preference for="ArtM\CustomerSurvey\Api\Data\LocationInterface" type="ArtM\CustomerSurvey\Model\Location"/>
+    <preference for="ArtM\CustomerSurvey\Api\Data\SurveyInterface" type="ArtM\CustomerSurvey\Model\Survey"/>
+    <preference for="ArtM\CustomerSurvey\Api\Data\QuestionSearchResultsInterface" type="ArtM\CustomerSurvey\Model\Data\QuestionSearchResults"/>
+    <preference for="ArtM\CustomerSurvey\Api\Data\QuestionOptionSearchResultsInterface" type="ArtM\CustomerSurvey\Model\Data\QuestionOptionSearchResults"/>
+    <preference for="ArtM\CustomerSurvey\Api\Data\LocationSearchResultsInterface" type="ArtM\CustomerSurvey\Model\Data\LocationSearchResults"/>
+    <preference for="ArtM\CustomerSurvey\Api\Data\SurveySearchResultsInterface" type="ArtM\CustomerSurvey\Model\Data\SurveySearchResults"/>
+
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="customersurvey_location_listing_data_source" xsi:type="string">ArtM\CustomerSurvey\Model\ResourceModel\Location\Grid\Collection</item>
+                <item name="customersurvey_survey_listing_data_source" xsi:type="string">ArtM\CustomerSurvey\Model\ResourceModel\Survey\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="ArtM\CustomerSurvey\Model\Engine\SurveyEngine">
+        <arguments>
+            <argument name="contextProviders" xsi:type="array">
+                <item name="product" xsi:type="object">ArtM\CustomerSurvey\Model\Engine\Context\Provider\ProductContextProvider</item>
+                <item name="category" xsi:type="object">ArtM\CustomerSurvey\Model\Engine\Context\Provider\CategoryContextProvider</item>
+                <item name="cms" xsi:type="object">ArtM\CustomerSurvey\Model\Engine\Context\Provider\CmsContextProvider</item>
+                <item name="cart" xsi:type="object">ArtM\CustomerSurvey\Model\Engine\Context\Provider\CartContextProvider</item>
+                <item name="customer" xsi:type="object">ArtM\CustomerSurvey\Model\Engine\Context\Provider\CustomerContextProvider</item>
+            </argument>
+        </arguments>
+    </type>
+
+</config>

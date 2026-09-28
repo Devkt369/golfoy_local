@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">dealer_account_index.contact_us_grid_listing_data_source</item>
+            <item name="deps" xsi:type="string">dealer_account_index.contact_us_grid_listing_data_source</item>
+        </item>
+        <item name="spinner" xsi:type="string">dealer_columns</item>
+    </argument>
+    <dataSource name="contact_us_grid_listing_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider</argument>
+            <argument name="name" xsi:type="string">contact_us_grid_listing_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">id</argument>
+            <argument name="requestFieldName" xsi:type="string">id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+                    <item name="update_url" xsi:type="url" path="mui/index/render" />
+                    <item name="storageConfig" xsi:type="array">
+                        <item name="indexField" xsi:type="string">id</item>
+                    </item>
+                </item>
+            </argument>
+        </argument>
+    </dataSource>
+    <listing>
+        <listingToolbar>
+            <bookmark name="bookmarks" />
+            <columnsControls name="columns_controls" />
+            <filters>
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="applied" xsi:type="array">
+                            <item name="is_approved" xsi:type="string">1</item>
+                        </item>
+                    </item>
+                </argument>
+            </filters>
+            <paging name="listing_paging" />
+        </listingToolbar>
+    </listing>
+    <columns name="dealer_columns">
+        <column name="name" class="ArtM\PartnersAuthentication\Ui\Component\Listing\Column\CustomerName">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Name</label>
+                <sortable>true</sortable>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+            </settings>
+        </column>
+        <column name="email">
+            <settings>
+                <filter>text</filter>
+                <label>Email</label>
+            </settings>
+        </column>
+        <column name="telephone">
+            <settings>
+                <filter>text</filter>
+                <label>Telephone</label>
+            </settings>
+        </column>
+        <column name="company_name">
+            <settings>
+                <filter>text</filter>
+                <label>Company Name</label>
+            </settings>
+        </column>
+        <column name="comment">
+            <settings>
+                <filter>text</filter>
+                <label>Message</label>
+            </settings>
+        </column>
+        <column name="query_type">
+            <settings>
+                <filter>text</filter>
+                <label>Query type</label>
+            </settings>
+        </column>
+
+        <column name="has_account">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Status</item>
+                    <item name="filter" xsi:type="string">select</item>
+                    <item name="bodyTmpl" xsi:type="string">ArtM_PartnersAuthentication/grid/cells/status</item>
+                    <item name="editor" xsi:type="array">
+                        <item name="editorType" xsi:type="string">select</item>
+                        <item name="validation" xsi:type="array">
+                            <item name="required" xsi:type="boolean">true</item>
+                            <item name="required-entry" xsi:type="boolean">true</item>
+                        </item>
+                    </item>
+                    <item name="dataType" xsi:type="string">select</item>
+                    <item name="sortOrder" xsi:type="number">30</item>
+                </item>
+                <item name="options" xsi:type="object">ArtM\PartnersAuthentication\Model\OptionSource\Status</item>
+            </argument>
+        </column>
+
+        <column name="created_at"  class="Magento\Ui\Component\Listing\Columns\Date" component="Magento_Ui/js/grid/columns/date">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label>Request Date</label>
+            </settings>
+        </column>
+
+        <actionsColumn name="actions" class="ArtM\PartnersAuthentication\Ui\Component\Listing\Column\ApprovedActions">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="indexField" xsi:type="string">id</item>
+                </item>
+            </argument>
+        </actionsColumn>
+    </columns>
+</listing>
+
+

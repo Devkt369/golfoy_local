@@ -1,0 +1,140 @@
+<?php
+
+namespace ArtM\MsiPriority\Ui\DataProvider\PosOrder\Listing;
+
+use Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult;
+use ArtM\MsiPriority\Helper\Data as HelperData;
+use Psr\Log\LoggerInterface;
+
+class Collection extends SearchResult
+{
+    /**
+     * @var HelperData
+     */
+    protected $helperData;
+
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
+     * Collection constructor
+     */
+    public function __construct(
+        \Magento\Framework\Data\Collection\EntityFactoryInterface $entityFactory,
+        \Psr\Log\LoggerInterface $logger,
+        \Magento\Framework\Data\Collection\Db\FetchStrategyInterface $fetchStrategy,
+        \Magento\Framework\Event\ManagerInterface $eventManager,
+        $mainTable,
+        $resourceModel,
+        HelperData $helperData = null,
+        $identifierName = null,
+        $connection = null,
+        \Magento\Framework\Model\ResourceModel\Db\AbstractDb $resource = null
+    ) {
+        $this->helperData = $helperData ?: \Magento\Framework\App\ObjectManager::getInstance()->get(HelperData::class);
+        $this->logger = $logger;
+        parent::__construct(
+            $entityFactory,
+            $logger,
+            $fetchStrategy,
+            $eventManager,
+            $mainTable,
+            $resourceModel,
+            $identifierName,
+            $connection,
+            $resource
+        );
+    }
+
+    /**
+     * Override _initSelect to add custom columns and filters
+     *
+     * @return void
+     */
+    protected function _initSelect()
+    {
+        parent::_initSelect();
+        $this->addFilterToMap('status', 'main_table.status');
+        $this->addFilterToMap('pos_id', 'main_table.pos_id');
+        $this->addFilterToMap('increment_id', 'main_table.increment_id');
+        $this->addFilterToMap('created_at', 'main_table.created_at');
+
+        
+        $this->getSelect()->joinLeft(
+            ['billing_address' => $this->getTable('sales_order_address')],
+            'main_table.billing_address_id = billing_address.entity_id',
+            ['billing_name' => new \Zend_Db_Expr('CONCAT(billing_address.firstname, " ", billing_address.lastname)')]
+        );
+        
+        $this->getSelect()->joinLeft(
+            ['shipping_address' => $this->getTable('sales_order_address')],
+            'main_table.shipping_address_id = shipping_address.entity_id',
+            ['shipping_name' => new \Zend_Db_Expr('CONCAT(shipping_address.firstname, " ", shipping_address.lastname)')]
+        );
+
+        
+        $this->getSelect()->where('main_table.pos_id >= ?', 1);
+        
+        
+        $startDate = $this->helperData->getStartDate();
+        
+        if ($startDate) {
+            
+            $formattedDate = date('Y-m-d H:i:s', strtotime($startDate));
+            $this->getSelect()->where('main_table.created_at >= ?', $formattedDate);
+            
+        }
+        
+        
+        $selectedBrands = $this->helperData->getSelectedBrands();
+        
+        
+        if (!empty($selectedBrands)) {
+
+            
+            // Assume $selectedBrands contains brand IDs
+            $brandIds = array_map('intval', $selectedBrands);
+
+            if (!empty($brandIds)) {
+                $brandIdsStr = implode(',', $brandIds);
+                $this->getSelect()->where(
+                    'main_table.entity_id IN (
+                        SELECT DISTINCT soi.order_id
+                        FROM ' . $this->getTable('sales_order_item') . ' soi
+                        LEFT JOIN ' . $this->getTable('catalog_product_entity') . ' cpe ON soi.product_id = cpe.entity_id
+                        LEFT JOIN ' . $this->getTable('eav_attribute') . ' ea_brand ON ea_brand.attribute_code = "brand" AND ea_brand.entity_type_id = 4
+                        LEFT JOIN ' . $this->getTable('catalog_product_entity_int') . ' cpei_brand ON cpe.entity_id = cpei_brand.entity_id AND cpei_brand.attribute_id = ea_brand.attribute_id
+                        WHERE soi.order_id = main_table.entity_id
+                        AND cpei_brand.value IN (' . $brandIdsStr . ')
+                    )'
+                );
+            }
+        }
+
+        $vinRequestTable = $this->getTable('vin_inventory_requests');
+        if ($this->getConnection()->isTableExists($vinRequestTable)) {
+            $this->getSelect()->where(
+                'main_table.entity_id NOT IN (SELECT pos_order_id FROM ' . $vinRequestTable . ' WHERE pos_order_id IS NOT NULL)'
+            );
+            
+        } else {
+            
+        }
+        $archivedTable = $this->getTable('vin_inventory_archived_order');
+        if ($this->getConnection()->isTableExists($archivedTable)) {
+            
+            $this->getConnection()->fetchOne("SELECT COUNT(*) FROM " . $archivedTable);
+            $this->getConnection()->fetchCol("SELECT order_id FROM " . $archivedTable);
+            
+            $this->getSelect()->where(
+                'main_table.entity_id NOT IN (SELECT order_id FROM ' . $archivedTable . ' WHERE order_id IS NOT NULL)'
+            );
+            
+        } else {
+            
+        }
+        
+    }
+}

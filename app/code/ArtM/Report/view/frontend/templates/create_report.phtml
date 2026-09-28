@@ -1,0 +1,191 @@
+<style>
+    table td{width:200px !important;line-break:anywhere;padding:2px;}
+</style>
+<h1>Sales Report</h1>
+<form class="form contact" action="<?= $block->getUrl('createreport/index/index'); ?>" id="sales-report-form" method="post" data-hasrequired="* Required Fields"  data-mage-init='{"validation":{}}'>
+<input name="form_key" type="hidden" value="<?php echo $block->getFormKey(); ?>" />
+<fieldset class="fieldset">
+         <div class="field name required">
+            <label class="label" for="from_date"><span>From date</span></label>
+            <div class="control">
+                <input name="from_date" id="from_date" title="from_date" value="" class="input-text" type="date" data-validate="{required:true}" aria-required="true">
+            </div>
+        </div>
+        <div class="field name required">
+            <label class="label" for="to_date"><span>To date</span></label>
+            <div class="control">
+                <input name="to_date" id="to_date" title="to_date" value="" class="input-text" type="date" data-validate="{required:true}" aria-required="true">
+            </div>
+        </div>
+        <div class="field name required">
+            <label class="label" for="pin"><span>PIN</span></label>
+            <div class="control">
+                <input name="pin" id="pin" title="pin" value="" class="input-text" type="password" data-validate="{required:true}" aria-required="true">
+            </div>
+        </div>
+    </fieldset>
+    <div class="actions-toolbar">
+        <div class="primary" style="margin-bottom:50px;">
+            <button type="submit" title="Submit" class="action submit primary">
+                <span>Show Report</span>
+            </button>
+        </div>
+    </div>
+</form>
+<?php
+$PostValues = $block->getData("PostValues");
+if(isset($PostValues['from_date']) && $PostValues['pin'] == 'g0lf0y'){
+    $from = $PostValues['from_date'].' 00:00:00';
+    $to =   $PostValues['to_date'].' 23:59:59';
+    $data =  $this->getAllOrders($from, $to);
+    $cnt = 0;
+    if(!empty($data['records'])){
+        echo "<strong>From: </strong> $PostValues[from_date] &nbsp; <strong>To:</strong> $PostValues[to_date]  &nbsp; <strong>Total records:</strong> $data[total]";
+        echo "<table border='1'><tr>
+                    <th>Invoice</th>
+                    <th>Invoice Created</th>
+                    <th>Ship to</th>                
+                    <th>Street</th>				
+                    <th>City</th>
+                    <th>State</th>
+                    <th>Postcode</th>
+                    <th>Order Status</th>
+                    <th>Total Qty</th>
+                    <th>Subtotal incl tax</th>
+                    <th>Grand total</th>
+                    <th>shipment</th>	
+                    <th>Courier Name</th>	
+                    <th>Title</th>				
+                    <th>Tracking number</th>  
+                    </tr>";
+        foreach($data['records'] as $v){
+            if($v['invoice_id'] != ''){
+            $d = $v['created_at'];
+			$dd =  date('Y-m-d H:i:s',strtotime('+5 hour +30 minutes',strtotime($d)));
+            echo "<tr>
+                    <td>$v[invoice_id]</td>
+                    <td>$v[created_at]</td>
+                    <td>$v[ship_to]</td>
+                    <td>$v[street] </td>			
+                    <td>$v[city]</td>
+                    <td>$v[state]</td>
+                    <td>$v[postcode]</td>
+                    <td>$v[order_status]</td>
+                    <td>$v[total_qty]</td>
+                    <td>$v[subtotal_incl_tax]</td>
+                    <td>$v[grand_total]</td>
+                    <td>$v[shipmentids]</td>
+                    <td>$v[courier_title]</td>
+                    <td>$v[shipment_title]</td>			
+                    <td>$v[tracking_number]</td>
+                </tr>";
+            $cnt++;
+           }
+        }     
+        echo "<table><br/> <strong>Total invoiced: </strong>". $cnt;
+    }else{
+        echo "No records found";
+    }
+}
+?>
+<h1>Customers Report</h1>
+<form class="form contact" action="<?= $block->getUrl('createreport/index/index'); ?>" id="customer-report-form" method="post" data-hasrequired="* Required Fields"  data-mage-init='{"validation":{}}'>
+<input name="form_key" type="hidden" value="<?php echo $block->getFormKey(); ?>" />
+<input name="type" type="hidden" value="customer" />
+<fieldset class="fieldset">
+        <div class="field name required">
+            <label class="label" for="pin"><span>PIN</span></label>
+            <div class="control">
+                <input name="cpin" id="cpin" title="pin" value="" class="input-text" type="password" data-validate="{required:true}" aria-required="true">
+            </div>
+        </div>
+    </fieldset>
+    <div class="actions-toolbar">
+        <div class="primary" style="margin-bottom:50px;">
+            <button type="submit" title="Submit" class="action submit primary">
+                <span>Show Report</span>
+            </button>
+        </div>
+    </div>
+</form>
+<?php
+
+$PostValues = $block->getData("PostValues");
+if(isset($PostValues['type']) && $PostValues['type'] == 'customer' && $PostValues['cpin'] == 'g0lf0y'){
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+$connection = $resource->getConnection();
+$customer_collection = $objectManager->create('Magento\Customer\Model\Customer')->getCollection();
+
+$query = "SELECT count(*) as total from  customer_grid_flat";
+$result = $connection->fetchAll($query);
+$tcus =  $result[0]['total'];
+echo "Total registered customers: <strong> $tcus </strong> <br/>";
+
+
+$query = "SELECT customers.email AS Email, COUNT(orders.customer_id) AS OrderCount  FROM sales_order AS orders
+ INNER JOIN customer_grid_flat AS customers ON customers.entity_id = orders.customer_id
+     WHERE orders.status <> 'canceled' GROUP BY orders.customer_id HAVING COUNT(orders.customer_id) > 0 ORDER BY COUNT(orders.customer_id) desc";
+ $result = $connection->fetchAll($query);
+ $tcus1 = count($result);
+ echo "Total customers with atleast one order : <strong> $tcus1  </strong> <br/>";
+ $per = $tcus1 * 100/ $tcus;
+ $per = number_format($per ,2);
+ echo "Customers % who ordered after registration: <strong> $per </strong> <br/><br/>";
+
+ $query = "SELECT customers.email AS Email, COUNT(orders.customer_id) AS OrderCount  FROM sales_order AS orders
+ INNER JOIN customer_grid_flat AS customers ON customers.entity_id = orders.customer_id
+     WHERE orders.status <> 'canceled' GROUP BY orders.customer_id HAVING COUNT(orders.customer_id) > 1 ORDER BY COUNT(orders.customer_id) desc";
+ $result2 = $connection->fetchAll($query);
+ $tcus2 = count($result2);
+ echo "Total customers with 2 or more orders : <strong> $tcus2  </strong> <br/>";
+ $per = $tcus2 * 100/ $tcus1;
+ $per = number_format($per ,2);
+
+ echo "Repeated customers %: <strong> $per </strong> <br/><br/><br/><br/>";
+
+ $query = "SELECT count(*) as total from  customer_grid_flat Where created_at >= '2022-04-01 00:00:00'";
+$result = $connection->fetchAll($query);
+$tcus =  $result[0]['total'];
+echo "<strong>from 1st April, 2022</strong>:<br/>";
+echo "Total customers registered: <strong> $tcus </strong> <br/>";
+
+ $query = "SELECT customers.email AS Email, COUNT(orders.customer_id) AS OrderCount  FROM sales_order AS orders
+ INNER JOIN customer_grid_flat AS customers ON customers.entity_id = orders.customer_id
+     WHERE orders.status <> 'canceled'  AND customers.created_at >= '2022-04-01 00:00:00' GROUP BY orders.customer_id HAVING COUNT(orders.customer_id) > 0 ORDER BY COUNT(orders.customer_id) desc";
+
+
+$resultf = $connection->fetchAll($query);
+ $tcusf1 = count($resultf);
+ echo "Total customers with atleast one order : <strong> $tcusf1  </strong> <br/>";
+ $per = $tcusf1 * 100/ $tcus;
+ $per = number_format($per ,2);
+ echo "Customers % who ordered after registration: <strong> $per </strong> <br/><br/>";
+
+
+$query = "SELECT customers.email AS Email, COUNT(orders.customer_id) AS OrderCount  FROM sales_order AS orders
+ INNER JOIN customer_grid_flat AS customers ON customers.entity_id = orders.customer_id
+     WHERE orders.status <> 'canceled'  AND customers.created_at >= '2022-04-01 00:00:00' GROUP BY orders.customer_id HAVING COUNT(orders.customer_id) > 1 ORDER BY COUNT(orders.customer_id) desc";
+  $resultf2 = $connection->fetchAll($query);
+  $tcusf2 = count($resultf2);
+  echo "Total customers with 2 or more orders : <strong> $tcusf2  </strong> <br/>";
+
+  $per = $tcusf2 * 100/ $tcusf1;
+  $per = number_format($per ,2);
+
+    echo "Repeated customers %: <strong> $per </strong>";
+    echo "<br/><br/><br/><br/><br/>";
+    echo '<div class="col-sm-6 col-xs-12">';
+    echo "<strong> Customers and count of their orders:</strong><br/>";
+    foreach($result2 as $v){
+        echo $v['Email'].' &nbsp; <strong>'.$v['OrderCount'].'</strong> <br/>';
+        }
+    echo '</div>';
+    echo '<div class="col-sm-6 col-xs-12">';
+        echo "<strong>Customers (from 1st April,2022) and count of their orders:</strong><br/>";
+        foreach($resultf2 as $v){
+            echo $v['Email'].' &nbsp; <strong>'.$v['OrderCount'].'</strong> <br/>';
+        }
+    echo '</div>';
+}
+?>

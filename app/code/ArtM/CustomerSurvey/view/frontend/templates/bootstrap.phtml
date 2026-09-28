@@ -1,0 +1,18 @@
+<?php
+/** @var \ArtM\CustomerSurvey\Block\Frontend\Bootstrap $block */
+$config = $block->getWidgetConfig();
+?>
+<div id="artm-cs-bootstrap-marker" style="display:none;"
+     data-module="ArtM_CustomerSurvey"
+     data-js="ArtM_CustomerSurvey/js/survey-renderer"
+     data-eligible-url="<?= $block->escapeHtmlAttr((string)($config['api']['eligible'] ?? '')) ?>"></div>
+<script>
+window.artmCustomerSurveyConfig = <?= /* @noEscape */ json_encode($config) ?>;
+</script>
+<script type="text/x-magento-init">
+{
+    "*": {
+        "ArtM_CustomerSurvey/js/survey-renderer": <?= /* @noEscape */ json_encode($config) ?>
+    }
+}
+</script>

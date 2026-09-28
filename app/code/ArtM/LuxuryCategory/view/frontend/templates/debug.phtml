@@ -1,0 +1,36 @@
+<?php
+/** @var \ArtM\LuxuryCategory\Block\Debug $block */
+if (!$block->isDebugEnabled()) {
+    return;
+}
+
+$luxuryIds = $block->getLuxuryProductIds();
+$collectionIds = $block->getCollectionProductIds();
+?>
+<div style="font-size:12px;background:#fffbe6;border:2px solid #e0c200;padding:10px;margin:10px 0;white-space:pre-wrap;font-family:monospace;">
+DEBUG /luxe (product #<?= (int)$block->getCategoryId() ?> — <?= $block->escapeHtml($block->getCategoryName()) ?>)
+
+isLuxuryMode(): <?= $block->isLuxuryMode() ? 'true' : 'false' ?>
+pathInfo: <?= $block->escapeHtml($block->getPathInfo()) ?>
+request params: <?= $block->escapeHtml(var_export($block->getRequestParams(), true)) ?>
+
+layer class: <?= $block->escapeHtml($block->getLayerClass()) ?>
+collection class: <?= $block->escapeHtml($block->getCollectionClass()) ?>
+collection object hash: <?= $block->escapeHtml($block->getCollectionObjectHash()) ?>
+OUR PLUGIN FLAG SET ON THIS COLLECTION: <?= $block->isOurFilterFlagSet() ? 'YES' : 'NO - plugin never ran on this instance' ?>
+collection getSize(): <?= var_export($block->getCollectionSize(), true) ?>
+collection getPageSize(): <?= var_export($block->getCollectionPageSize(), true) ?>
+collection getCurPage(): <?= var_export($block->getCollectionCurPage(), true) ?>
+collection getItems() count (actual loaded page): <?= $block->getCollectionItemCount() ?>
+collection product id count (getAllIds - unreliable on search-engine collections, ignore if it looks wrong): <?= count($collectionIds) ?>
+collection product ids (first 30): <?= $block->escapeHtml(implode(',', array_slice($collectionIds, 0, 30))) ?>
+
+luxury product id count for this category (direct SQL): <?= count($luxuryIds) ?>
+luxury product ids (first 30): <?= $block->escapeHtml(implode(',', array_slice($luxuryIds, 0, 30))) ?>
+
+--- toolbar (product_list_toolbar) ---
+<?= $block->escapeHtml(var_export($block->getToolbarInfo(), true)) ?>
+
+--- pagination plugin trace (call order + state at each hook) ---
+<?= $block->escapeHtml(var_export($block->getPaginationTrace(), true)) ?>
+</div>

@@ -1,0 +1,54 @@
+<?php
+
+use Magento\Framework\Escaper;
+use Meta\Conversion\Block\Pixel\Head;
+
+/**
+ * @var Head $block
+ * @var Escaper $escaper
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ */
+
+$userDataUrl = $block->getUserDataUrl();
+$trackerUrl = $block->getTrackerUrl();
+?>
+<?php /** @var \Magento\Framework\Escaper $escaper */ ?>
+<?php if ($block->getFacebookPixelID()) { ?>
+<!-- Meta Business Extension for Magento 2 -->
+<script type="text/x-magento-init">
+{
+    "*": {
+        "Meta_Conversion/js/initPixel" : {
+            "pixelId": "<?= $escaper->escapeHtml($block->getFacebookPixelID()); ?>",
+            "automaticMatchingFlag": <?= /* @noEscape */ $block->getAutomaticMatchingFlag() ? 'true' : 'false'; ?>,
+            "userDataUrl" : "<?= $escaper->escapeUrl($userDataUrl); ?>",
+            "agent": "<?= $escaper->escapeHtml($block->getFacebookAgentVersion()); ?>"
+        },
+        "Meta_Conversion/js/metaPixelTracker" : {
+            "url" : "<?= $escaper->escapeUrl($trackerUrl); ?>",
+            "payload": <?= /* @noEscape */ json_encode([
+                "eventName" => $block->getEventToObserveName(),
+            ]) ?>,
+            "browserEventData": <?= /* @noEscape */ json_encode([
+                'fbAgentVersion' => $block->getFacebookAgentVersion(),
+                'fbPixelId' => $block->getFacebookPixelID(),
+                'source' => $block->getSource(),
+                'pluginVersion' => $block->getPluginVersion(),
+                'track' => 'track',
+                'event' => 'PageView',
+                'payload' => []
+            ]) ?>
+        }
+    }
+}
+</script>
+<!-- End Meta Pixel Code -->
+<?php } else { ?>
+<!-- NO Pixel ID is configured, please goto Admin -->
+<?php
+    $scriptString = <<<script
+        console.log('No Meta pixel is configured, please log in as a admin and then visit Stores -> Meta -> Setup -> Get Started');
+    script;
+?>
+<?= /* @noEscape */ $secureRenderer->renderTag('script', ['type' => 'text/javascript'], $scriptString, false); ?>
+<?php } ?>

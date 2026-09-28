@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+	<system>
+		<tab id="artm" translate="label" sortOrder="999">
+			<label>artm</label>
+		</tab>
+		<section id="common" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+			<label>Common</label>
+			<tab>artm</tab>
+			<resource>ArtM_ProductSwatchesChanges::config_artm_swatch</resource>
+			<group id="general" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+				<label>Show Available Qty on Product Swatch</label>
+				<field id="swatchqty_attributes" type="multiselect" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Select Attributes</label>
+                    <source_model>ArtM\ProductSwatchesChanges\Model\Config\Source\Attributes</source_model>
+				</field>
+			</group>
+		</section>
+	</system>
+</config>

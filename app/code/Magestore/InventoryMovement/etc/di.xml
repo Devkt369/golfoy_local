@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Magestore\InventoryMovementApi\Api\Data\InventoryMovementInterface" type="Magestore\InventoryMovement\Model\InventoryMovement"/>
+    <preference for="Magestore\InventoryMovementApi\Api\GetProductInfoForMovementInterface" type="Magestore\InventoryMovement\Model\GetProductInfoForMovement"/>
+    <preference for="Magestore\InventoryMovementApi\Api\GetSourceInfoForMovementInterface" type="Magestore\InventoryMovement\Model\GetSourceInfoForMovement"/>
+    <preference for="Magestore\InventoryMovementApi\Api\ProcessCreateMovementsInterface" type="Magestore\InventoryMovement\Model\ProcessCreateMovements"/>
+    <preference for="Magestore\InventoryMovementApi\Api\SkipMovementLogInterface" type="Magestore\InventoryMovement\Model\DataProvider\SkipMovementLog"/>
+    <preference for="Magestore\InventoryMovementApi\Api\GetAreaAndUrlInterface" type="Magestore\InventoryMovement\Model\GetAreaAndUrl"/>
+    <preference for="Magestore\InventoryMovementApi\Api\FilterSourceItemInterface" type="Magestore\InventoryMovement\Model\FilterSourceItem"/>
+    <!-- Save in code -->
+    <type name="Magento\Inventory\Model\ResourceModel\SourceItem\SaveMultiple">
+        <plugin name="source_item_save_multiple" type="Magestore\InventoryMovement\Plugin\Model\ResourceModel\SourceItem\SaveMultiple"/>
+    </type>
+    <type name="Magento\Inventory\Model\ResourceModel\SourceItem">
+        <plugin name="source_item_save" type="Magestore\InventoryMovement\Plugin\Model\ResourceModel\SourceItem"/>
+    </type>
+    <!-- End: Save in code -->
+    <!-- Action shipment -->
+    <type name="Magento\InventoryShipping\Observer\SourceDeductionProcessor">
+        <plugin name="inventory_sales_source_shipment_movement" type="Magestore\InventoryMovement\Plugin\Observer\SourceDeductionProcessor"/>
+    </type>
+    <!-- End: Action shipment -->
+    <!-- Action invoice -->
+    <type name="Magento\InventoryShipping\Observer\VirtualSourceDeductionProcessor">
+        <plugin name="inventory_sales_source_virtual_invoice_movement" type="Magestore\InventoryMovement\Plugin\Observer\VirtualSourceDeductionProcessor"/>
+    </type>
+    <!-- End: Action invoice -->
+    <!-- Action refund -->
+    <type name="Magento\InventorySales\Observer\SalesInventory\DeductSourceItemQuantityOnRefundObserver">
+        <plugin name="inventory_sales_source_refund_movement" type="Magestore\InventoryMovement\Plugin\Observer\DeductSourceItemQuantityOnRefundObserver"/>
+    </type>
+    <type name="Magento\InventorySales\Plugin\SalesInventory\ProcessReturnQtyOnCreditMemoPlugin">
+        <plugin name="sales_inventory_source_refund_movement" type="Magestore\InventoryMovement\Plugin\Plugin\SalesInventory\ProcessReturnQtyOnCreditMemoPlugin"/>
+    </type>
+    <!-- End: Action refund -->
+    <!-- Action edit product -->
+    <type name="Magento\Catalog\Controller\Adminhtml\Product\Save">
+        <plugin name="inventory_movement_product_save" type="Magestore\InventoryMovement\Plugin\Catalog\Controller\Adminhtml\Product\SavePlugin"/>
+    </type>
+    <!-- End: Action edit product -->
+    <!-- Action delete product -->
+    <type name="Magento\Catalog\Model\ResourceModel\Product">
+        <plugin name="inventory_movement_product_resource_model" type="Magestore\InventoryMovement\Plugin\Catalog\Model\ResourceModel\ProductPlugin"/>
+    </type>
+    <type name="Magento\Catalog\Api\ProductRepositoryInterface">
+        <plugin name="inventory_movement_product_repository" type="Magestore\InventoryMovement\Plugin\Catalog\ProductRepositoryPlugin"/>
+    </type>
+    <!-- End: Action delete product -->
+    <!-- Action Unassign product from source -->
+    <type name="Magento\InventoryCatalogApi\Api\BulkSourceUnassignInterface">
+        <plugin name="inventory_movement_unassign_product_from_source" type="Magestore\InventoryMovement\Plugin\InventoryCatalogApi\Api\BulkSourceUnassignInterfacePlugin"/>
+    </type>
+    <!-- End: Action Unassign product from source -->
+    <!-- Action Transfer stock -->
+    <type name="Magento\InventoryCatalog\Model\ResourceModel\BulkInventoryTransfer">
+        <plugin name="inventory_movement_transfer_stock" type="Magestore\InventoryMovement\Plugin\InventoryCatalog\Model\ResourceModel\BulkInventoryTransferPlugin"/>
+    </type>
+    <!-- End: Action Transfer stock -->
+
+    <!-- Action Delete source item -->
+    <type name="Magento\Inventory\Model\ResourceModel\SourceItem\DeleteMultiple">
+        <plugin name="inventory_movement_source_item_delete_multiple" type="Magestore\InventoryMovement\Plugin\Model\ResourceModel\SourceItem\DeleteMultiple"/>
+    </type>
+    <!-- End: Action Delete source item -->
+
+    <!-- Action Magento import -->
+    <type name="Magento\InventoryImportExport\Plugin\Import\SourceItemImporter">
+        <plugin name="inventory_movement_import_product" type="Magestore\InventoryMovement\Plugin\InventoryImportExport\Plugin\Import\SourceItemImporterPlugin"/>
+    </type>
+    <type name="Magento\InventoryImportExport\Model\Import\Command\Append">
+        <plugin name="inventory_movement_import_source_items_append" type="Magestore\InventoryMovement\Plugin\InventoryImportExport\Model\Import\Command\AppendPlugin"/>
+    </type>
+    <type name="Magento\InventoryImportExport\Model\Import\Command\Replace">
+        <plugin name="inventory_movement_import_source_items_replace" type="Magestore\InventoryMovement\Plugin\InventoryImportExport\Model\Import\Command\ReplacePlugin"/>
+    </type>
+    <type name="Magento\InventoryImportExport\Model\Import\Command\Delete">
+        <plugin name="inventory_movement_import_source_items_delete" type="Magestore\InventoryMovement\Plugin\InventoryImportExport\Model\Import\Command\DeletePlugin"/>
+    </type>
+    <!-- End: Action Magento import -->
+
+    <type name="Magento\AdminNotification\Block\Grid\Renderer\Actions">
+        <plugin name="admin_notification_render_url_movement" type="Magestore\InventoryMovement\Plugin\AdminNotification\Block\Grid\Renderer\Actions"/>
+    </type>
+</config>

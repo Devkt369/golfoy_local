@@ -1,0 +1,27 @@
+<?php
+$_product = $block->getProduct();
+$os = $_product->getData('offer_status');
+$typeId = $_product->getTypeId();
+
+/* if ($os == 1) {
+  if ($typeId == 'giftvoucher') {
+?>
+    <div class="offerstatus-giftcard"> Cashback or Discount coupons will not be applicable.<br> This item is on final sale and cannot be returned.</div>
+  <?php
+  } else {
+  ?>
+    <div class="offerstatus"> This product is already at its best price.<br /> Cashback/ Discount Coupon will not be applicable.</div>
+<?php
+  }
+} */
+
+if($os == 1 && $typeId !='giftvoucher'){ ?>
+  <div class="offerstatus"> This product is already at its best price.<br /> Cashback/ Discount Coupon will not be applicable.</div>
+<?php } 
+
+if($typeId =='giftvoucher'){ ?>
+<div class="offerstatus-giftcard"> Cashback or Discount coupons will not be applicable.<br> This item is on final sale and cannot be returned.</div>
+<?php }
+
+?>
+

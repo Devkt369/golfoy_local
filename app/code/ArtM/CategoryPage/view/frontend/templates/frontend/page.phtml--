@@ -1,0 +1,17 @@
+<?php
+
+/** @var \ArtM\CategoryPage\Block\Frontend\Page $block */ ?>
+<div id="artm-categorypage-frontend" class="artm-categorypage-shell" data-page-config='<?= $block->escapeHtmlAttr($block->getPageConfigJson()) ?>'>
+
+    <aside class="artm-sidebar" data-role="sidebar"></aside>
+    <section class="artm-main">
+        <div class="artm-content" data-role="content">
+            <div class="artm-loading artm-skeleton">Loading showcase...</div>
+        </div>
+    </section>
+</div>
+<script>
+    require(['jquery', 'ArtM_CategoryPage/js/category-showcase'], function($, initShowcase) {
+        initShowcase($('#artm-categorypage-frontend'), JSON.parse($('#artm-categorypage-frontend').attr('data-page-config') || '{}'));
+    });
+</script>

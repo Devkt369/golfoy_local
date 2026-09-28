@@ -1,0 +1,163 @@
+<?php
+/** @var \Magento\Backend\Block\Template $block */
+$showToggle = (int)$block->getRequest()->getParam('config', 0) === 1;
+?>
+<style>
+    #mass-upload-root .ui-tabs-nav {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 6px;
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        background: #fff;
+        padding: 6px 0;
+        border-bottom: 1px solid #d8dde6;
+        align-items: center;
+    }
+
+    #mass-upload-root .ui-tabs-nav li {
+        float: none;
+        white-space: nowrap;
+    }
+    .notices-wrapper {
+        display: none;
+    }
+    /* Toggle bar (only shown when ?config=1 is in URL) */
+    #artm-config-toggle-bar {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        background: #fffbe6;
+        border: 1px solid #ffe58f;
+        border-radius: 4px;
+        font-size: 13px;
+        color: #614700;
+    }
+    #artm-config-toggle-bar .artm-config-toggle-label {
+        font-weight: 600;
+    }
+    #artm-config-toggle-btn {
+        cursor: pointer;
+        padding: 5px 16px;
+        border-radius: 14px;
+        border: 1px solid #d8dde6;
+        background: #f5f5f5;
+        font-size: 12px;
+        font-weight: 700;
+        color: #333;
+        min-width: 60px;
+        transition: background .15s, color .15s, border-color .15s;
+    }
+    #artm-config-toggle-btn.is-on {
+        background: #1e88e5;
+        color: #fff;
+        border-color: #1565c0;
+    }
+    #artm-config-toggle-btn.is-off {
+        background: #f5f5f5;
+        color: #777;
+    }
+    /* Configuration tab hidden state — multiple selector strategies for compatibility */
+    .artm-config-tab-hidden { display: none !important; }
+</style>
+<div class="artm-mass-upload-dashboard">
+    <?php if ($showToggle): ?>
+    <div id="artm-config-toggle-bar">
+        <span class="artm-config-toggle-label"><?= $block->escapeHtml(__('Show Configuration Tab:')) ?></span>
+        <button type="button" id="artm-config-toggle-btn" class="is-off">NO</button>
+    </div>
+    <?php endif; ?>
+    <div id="mass-upload-root">
+        <?= $block->getChildHtml('artm.massproducts.dashboard.tabs') ?>
+    </div>
+</div>
+<script>
+require(['jquery'], function ($) {
+    'use strict';
+
+    var STORAGE_KEY = 'artm_show_configuration_tab';
+    var $root = $('#mass-upload-root');
+    var $toggleBtn = $('#artm-config-toggle-btn');
+
+    /**
+     * Find the Configuration tab element. Magento may render tabs in several ways
+     * (ui-tabs-nav, .tabs, .admin__page-nav, etc.) so we try multiple strategies.
+     */
+    function findConfigTab() {
+        // Strategy 1: any <li> that text-matches "Configuration"
+        var $li = $root.find('li').filter(function () {
+            var t = $(this).children('a, span').first().text().trim().toLowerCase();
+            if (!t) { t = $(this).text().trim().toLowerCase(); }
+            return t === 'configuration';
+        });
+        if ($li.length) { return $li; }
+        // Strategy 2: any <a> matching, return its parent <li>
+        var $a = $root.find('a').filter(function () {
+            return $(this).text().trim().toLowerCase() === 'configuration';
+        });
+        if ($a.length) { return $a.closest('li'); }
+        return $();
+    }
+
+    function getPref() {
+        try {
+            var v = localStorage.getItem(STORAGE_KEY);
+            return v === null ? false : v === '1';  // default: hidden
+        } catch (e) { return false; }
+    }
+
+    function setPref(val) {
+        try { localStorage.setItem(STORAGE_KEY, val ? '1' : '0'); } catch (e) {}
+    }
+
+    function applyVisibility(visible) {
+        var $li = findConfigTab();
+        if ($li.length) {
+            if (visible) {
+                $li.removeClass('artm-config-tab-hidden').show();
+            } else {
+                $li.addClass('artm-config-tab-hidden');
+                // If currently active, switch to first visible tab
+                var isActive = $li.hasClass('ui-tabs-active') || $li.hasClass('ui-state-active') || $li.hasClass('active');
+                if (isActive) {
+                    var $first = $root.find('li').not('.artm-config-tab-hidden').first();
+                    $first.find('a').first().trigger('click');
+                }
+            }
+        }
+        updateToggleButton(visible);
+    }
+
+    function updateToggleButton(visible) {
+        if (!$toggleBtn.length) { return; }
+        $toggleBtn.removeClass('is-on is-off').addClass(visible ? 'is-on' : 'is-off');
+        $toggleBtn.text(visible ? 'YES' : 'NO');
+    }
+
+    // Wire up button click (works whether tabs are rendered yet or not)
+    $toggleBtn.on('click', function () {
+        var next = !getPref();
+        setPref(next);
+        applyVisibility(next);
+    });
+
+    // Apply initial state — keep retrying until tabs render
+    var attempts = 0;
+    var poll = setInterval(function () {
+        attempts++;
+        var $li = findConfigTab();
+        if ($li.length || attempts > 60) {
+            clearInterval(poll);
+            applyVisibility(getPref());
+        }
+    }, 100);
+
+    // Also apply on initial DOM ready
+    $(function () { applyVisibility(getPref()); });
+});
+</script>

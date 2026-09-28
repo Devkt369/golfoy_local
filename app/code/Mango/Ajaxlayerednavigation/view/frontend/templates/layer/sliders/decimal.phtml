@@ -1,0 +1,31 @@
+<?php
+/**
+ * Template for filter items block
+ *
+ * @var $block \Magento\LayeredNavigation\Block\Navigation\FilterRenderer
+ */
+
+$_code = $filter->getCode();
+
+?>
+<div class="numeric-filter-container">
+    <div class="ajax-layered-navigation-slider">
+        <div id="<?=$_code;?>-slider-container" data-slider-config='<?= $json_config; ?>'></div>
+    </div>
+    <div class="numeric-slider-values" id="<?=$_code;?>-slider-values">
+        <span class="filter-unit"><?= $units; ?></span>
+        <input type="text" <?= ( $hide_input ) ? ' disabled="disabled" ' : ""; ?> 
+               name="<?=$_code;?>_minimum" id="<?=$_code;?>_minimum" 
+               value="<?= $min_value; ?>"/>
+        <span class="numeric-filter-separator">&nbsp;-&nbsp;</span><span class="filter-unit"><?= $units; ?></span>
+        <input type="text" <?= ( $hide_input ) ? ' disabled="disabled" ' : ""; ?> 
+               name="<?=$_code;?>_maximum" id="<?=$_code;?>_maximum" 
+               value="<?= $max_value; ?>"/> <?php if (!$hide_input):
+                    ?><button class="action primary" id="<?=$_code;?>-filter-button"><img 
+                    src="<?= $block->getViewFileUrl("Mango_Ajaxlayerednavigation::images/search.png"); ?>" 
+                    alt="<?= __("Search"); ?>" 
+                    title="<?= __("Search"); ?>"/></button><?php
+endif; ?>
+
+    </div>
+</div>

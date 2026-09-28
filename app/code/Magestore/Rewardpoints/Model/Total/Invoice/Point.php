@@ -1,0 +1,195 @@
+<?php
+/**
+ * Magestore
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Magestore.com license that is
+ * available through the world-wide-web at this URL:
+ * http://www.magestore.com/license-agreement.html
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade this extension to newer
+ * version in the future.
+ *
+ * @category    Magestore
+ * @package     Magestore_RewardPoints
+ * @copyright   Copyright (c) 2012 Magestore (http://www.magestore.com/)
+ * @license     http://www.magestore.com/license-agreement.html
+ */
+
+namespace Magestore\Rewardpoints\Model\Total\Invoice;
+
+use Magento\Sales\Model\Order\Invoice;
+use Magento\Sales\Model\Order\Invoice\Total\AbstractTotal;
+use Magento\Store\Model\StoreManagerInterface;
+use Magestore\Rewardpoints\Helper\Calculation\Earning;
+use Magestore\Rewardpoints\Helper\Data;
+use Magestore\Rewardpoints\Model\TransactionFactory;
+
+/**
+ * Class Point
+ *
+ * Used to calculate points
+ */
+class Point extends AbstractTotal
+{
+    /**
+     * @var Earning
+     */
+    protected $_helperEarning;
+    /**
+     * @var Data
+     */
+    protected $_transaction;
+    /**
+     * @var transactionFactory
+     */
+    protected $_storeManager;
+
+    /**
+     * Constructor
+     *
+     * @param Earning $helperEarning
+     * @param TransactionFactory $transaction
+     * @param StoreManagerInterface $storeManager
+     * @param array $data
+     */
+    public function __construct(
+        Earning $helperEarning,
+        TransactionFactory $transaction,
+        StoreManagerInterface $storeManager,
+        array $data = []
+    ) {
+        parent::__construct($data);
+        $this->_helperEarning = $helperEarning;
+        $this->_transaction = $transaction;
+        $this->_storeManager = $storeManager;
+    }
+
+    /**
+     * Collect total for invoice
+     *
+     * @param Invoice $invoice
+     * @return $this
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
+     */
+    public function collect(Invoice $invoice)
+    {
+        $order = $invoice->getOrder();
+        $invoiceCollection = $order->getInvoiceCollection();
+        /** Earning point **/
+        $earnPoint = 0;
+        $maxEarn = $order->getRewardpointsEarn();
+        $maxEarn -= (int)$this->_transaction->create()->getCollection()
+            ->addFieldToFilter('action', 'earning_invoice')
+            ->addFieldToFilter('order_id', $order->getId())
+            ->getFieldTotal();
+        if ($maxEarn >= 0) {
+            foreach ($invoice->getAllItems() as $item) {
+                $orderItem = $item->getOrderItem();
+                if ($orderItem->isDummy()) {
+                    continue;
+                }
+                $earnPoint += floor((int)$orderItem->getRewardpointsEarn()
+                    * $item->getQty() / $orderItem->getQtyOrdered());
+            }
+            if ($invoiceCollection->getSize() == 0) {
+                $earnPoint += $this->_helperEarning->getShippingEarningPoints($order);
+            }
+            if ($this->isLast($invoice)) {
+                $earnPoint = $maxEarn;
+            }
+        }
+        if ($earnPoint > 0) {
+            $invoice->setRewardpointsEarn($earnPoint);
+        }
+        /** End earningn point **/
+
+        /** Spending point **/
+        if ($order->getRewardpointsDiscount() < 0.0001) {
+            return $this;
+        }
+
+        $totalDiscountAmount = 0;
+        $baseTotalDiscountAmount = 0;
+        $totalDiscountInvoiced = 0;
+        $baseTotalDiscountInvoiced = 0;
+
+        /**
+         * Checking if shipping discount was added in previous invoices.
+         * So basically if we have invoice with positive discount and it
+         * was not canceled we don't add shipping discount to this one.
+         */
+        $addShippingDicount = true;
+        foreach ($invoiceCollection as $previusInvoice) {
+            if ($previusInvoice->getRewardpointsDiscount()) {
+                $addShippingDicount = false;
+                $totalDiscountInvoiced += $previusInvoice->getRewardpointsDiscount();
+                $baseTotalDiscountInvoiced += $previusInvoice->getRewardpointsBaseDiscount();
+            }
+        }
+        if ($addShippingDicount) {
+            $totalDiscountAmount = $order->getRewardpointsDiscountForShipping();
+            $baseTotalDiscountAmount = $order->getRewardpointsBaseDiscountForShipping();
+        }
+        if ($this->isLast($invoice)) {
+            $totalDiscountAmount = $order->getRewardpointsDiscount() - $totalDiscountInvoiced;
+            $baseTotalDiscountAmount = $order->getRewardpointsBaseDiscount() - $baseTotalDiscountInvoiced;
+        } else {
+            foreach ($invoice->getAllItems() as $item) {
+                $orderItem = $item->getOrderItem();
+                if ($orderItem->isDummy()) {
+                    continue;
+                }
+                $orderItemDiscount = (float)$orderItem->getRewardpointsDiscount();
+                $baseOrderItemDiscount = (float)$orderItem->getRewardpointsBaseDiscount();
+                $orderItemQty = $orderItem->getQtyOrdered();
+                if ($orderItemDiscount && $orderItemQty) {
+                    $totalDiscountAmount += $invoice->roundPrice(
+                        $orderItemDiscount / $orderItemQty * $item->getQty(),
+                        'regular',
+                        true
+                    );
+                    $baseTotalDiscountAmount += $invoice->roundPrice(
+                        $baseOrderItemDiscount / $orderItemQty * $item->getQty(),
+                        'base',
+                        true
+                    );
+                }
+            }
+        }
+
+        $invoice->setRewardpointsDiscount($totalDiscountAmount);
+        $invoice->setRewardpointsBaseDiscount($baseTotalDiscountAmount);
+
+        $grandTotal = abs($invoice->getGrandTotal()) < 0.0001 ? 0 : $invoice->getGrandTotal();
+        $baseGrandTotal = abs($invoice->getBaseGrandTotal()) < 0.0001 ? 0 : $invoice->getBaseGrandTotal();
+        $invoice->setGrandTotal($grandTotal);
+        $invoice->setBaseGrandTotal($baseGrandTotal);
+
+        return $this;
+    }
+
+    /**
+     * Is last invoice
+     *
+     * @param Invoice $invoice
+     * @return bool
+     */
+    public function isLast($invoice)
+    {
+        foreach ($invoice->getAllItems() as $item) {
+            $orderItem = $item->getOrderItem();
+            if ($orderItem->isDummy()) {
+                continue;
+            }
+            if (!$item->isLast()) {
+                return false;
+            }
+        }
+        return true;
+    }
+}

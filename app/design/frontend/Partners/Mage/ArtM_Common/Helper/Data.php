@@ -1,0 +1,1002 @@
+<?php
+namespace ArtM\Common\Helper;
+
+use Exception;
+use Magento\Eav\Api\Data\AttributeSetInterface;
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Catalog\Api\AttributeSetRepositoryInterface;
+use Magento\Catalog\Model\CategoryFactory;
+use Magento\Store\Model\App\Emulation;
+
+class Data extends \Magento\Framework\App\Helper\AbstractHelper
+{
+    private $attributeSetRepository;
+    private $searchCriteriaBuilder;
+    protected $categoryFactory;
+    protected $context;
+    protected $Cart;
+    protected $_productRepository;
+    protected $transportBuilder;
+    protected $storeManager;
+    protected $orderRepository;
+    protected $_customcache;
+    protected $emulation;
+    protected $categoryHelper;
+
+    public function __construct(
+        AttributeSetRepositoryInterface $attributeSetRepository,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        \Magento\Framework\App\Helper\Context $context,
+        \Magento\Checkout\Model\Cart $cart,
+        \Magento\Catalog\Model\ProductRepository $productRepository,
+		\Magento\Framework\Mail\Template\TransportBuilder $transportBuilder,
+		\Magento\Store\Model\StoreManagerInterface $storeManager,
+        \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
+        \Magento\Catalog\Helper\Category $categoryHelper,
+        CategoryFactory $categoryFactory,
+        \ArtM\Common\Model\CustomcacheFactory $customcache,
+        Emulation $emulation,
+		array $data = []
+    ){
+		$this->storeManager = $storeManager;
+		$this->transportBuilder = $transportBuilder;
+        $this->attributeSetRepository = $attributeSetRepository;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+        $this->Cart = $cart;
+        $this->orderRepository = $orderRepository;
+        $this->_customcache = $customcache;   
+        $this->categoryFactory = $categoryFactory;
+		$this->_productRepository = $productRepository;
+        $this->emulation = $emulation;
+        $this->categoryHelper = $categoryHelper;
+		parent::__construct($context);
+    }
+    
+    
+    public function getIncrementId( $orderId ){
+        $order = $this->orderRepository->get($orderId);
+        $orderIncrementId = $order->getIncrementId();
+        return $orderIncrementId;
+    }
+    public function send_mail_data($typeOfMail, $order_id=null, $recipient_name=null ){
+        $order_id = $this->getIncrementId($order_id);
+        
+        $send_mail_data = array();
+        if($typeOfMail == 'cancelorder' ){
+            $send_mail_data['sendor_name'] = 'Golfoy Customer Care';
+            $send_mail_data['sendor_email'] = 'operations@golfoy.com';
+            
+            $send_mail_data['bcc'] = 'contact@golfoy.com';
+//            $send_mail_data['bcc'] = 'mohit@golfoy.com';
+            $send_mail_data['templateidentifier'] = 11;
+            $send_mail_data['subject'] = 'Cancellation requested for order at Golfoy.com';
+            $send_mail_data['content'] = 'Dear '.$recipient_name.',
+<br><br>We have received your request to cancel your order #'.$order_id.'<br>
+Your cancellation request is being processed & we will update you shortly.<br><br>';
+        }else if($typeOfMail == 'return_replace'){
+            $send_mail_data['sendor_name'] = 'Golfoy Customer Care';
+            $send_mail_data['sendor_email'] = 'operations@golfoy.com';
+            
+            $send_mail_data['bcc'] = 'contact@golfoy.com';
+//            $send_mail_data['bcc'] = 'mohit@golfoy.com';
+            $send_mail_data['templateidentifier'] = 11;
+            $send_mail_data['subject'] = 'Return/Replace requested for order at Golfoy.com';
+            $send_mail_data['content'] = 'Dear '.$recipient_name.',
+<br><br>We have received your request to Return/Replace your order #'.$order_id.'<br>
+Your request is being processed & we will update you shortly.<br><br>';
+        }else{
+            return false;
+        }
+        return $send_mail_data;
+    }
+    public function send_mail($typeOfMail, $recipient_name, $recipient_email , $order_id){
+        //echo "reached here with: ".$typeOfMail."<br>";
+        
+        $mail_data = $this->send_mail_data($typeOfMail, $order_id, $recipient_name);
+        if($mail_data){
+            $storeId    = $this->storeManager->getStore()->getStoreId();
+            $sendor_name = $mail_data['sendor_name'];
+            $sendor_email = $mail_data['sendor_email'];
+            $bcc = $mail_data['bcc'];
+            $subject = $mail_data['subject'];
+            $templateidentifier = $mail_data['templateidentifier'];
+
+            $content = $mail_data['content'];
+            if($sendor_name != '' || $sendor_email != '' || $bcc != '' || $content != '' ){
+                $subject   = $recipient_name.', '.$subject;
+                $templateVars = [
+                            'subj'  => $subject,
+                            'mail_body' => $content
+                        ];
+                $this->transportBuilder
+                    ->setTemplateIdentifier($templateidentifier)
+                    ->setTemplateOptions(['area' => \Magento\Framework\App\Area::AREA_FRONTEND, 'store' => $storeId])
+                    ->setTemplateVars($templateVars)
+                    ->setFrom(['name' => $sendor_name,'email' => $sendor_email])
+                    ->addTo([$recipient_email])
+//                    ->addTo(['mohit@golfoy.com'])
+                    ->addBcc([$bcc]);
+
+                $transport = $this->transportBuilder->getTransport();
+                if (!isset($transport)) {
+                    $transport = $this->transportBuilder->getTransport();
+                }
+                if($transport->sendMessage() ){
+                    return true;
+                }
+            }
+        }
+        return false;
+        
+    }
+    
+    public function getlabel($label){
+        switch ($label) {
+          case "mrp":
+            return "MRP";
+            break;
+                 
+          case "deal_price":
+            return "Deal Price";
+            break;
+          default:
+            return;
+        }
+    }
+    public function createSlider($heading , $catId, $numProduct){
+        
+        $html = '';
+        $prd_html = '';
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        //$html = 'sample html here';
+        
+        $_category = $objectManager->create('Magento\Catalog\Model\Category')->load( $catId );
+        $cat_url = $_category->getUrl();
+
+        $productCollection = $objectManager->create('Magento\Catalog\Model\ResourceModel\Product\Collection');
+        
+        $collection = $productCollection
+                    ->addAttributeToSelect('*')
+                    ->addCategoryFilter($_category)
+                    ->addAttributeToFilter('visibility', \Magento\Catalog\Model\Product\Visibility::VISIBILITY_BOTH)
+                    ->addAttributeToFilter('status',\Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED)
+                    ->setPageSize($numProduct)
+                    ->setOrder('position','ASC')
+                    ->load();
+        
+        
+        $count = $collection->count();
+        if($count > 0){
+            $imageUrl = '';    
+            foreach ($collection as $product){
+                $prd_html .= $this->getsliderProducts( $product->getId() );
+            }  
+        }
+        
+        $html = $this->slider_html($heading, $cat_url, $prd_html);
+        return $html;
+    }
+    
+    public function getcustomPriceHtml($regular_price , $finalPriceAmt , $prd_id){
+        
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $priceHelper = $objectManager->create('Magento\Framework\Pricing\Helper\Data');
+        
+        $pricehtml = '';
+        $pricehtml .= "<div class='custom_code simple_prd'>";
+        if( (int)$finalPriceAmt == (int)$regular_price){
+            $pricehtml .= '<span class="price-label">'.$this->getlabel("mrp").'</span>';
+            $class= 'mrp_here';
+            $pricehtml .= '<div class="price_html_category_page configurable_product mrp_here">
+                <div class="price-box price-final_price" data-role="priceBox" data-product-id="'.$prd_id.'" data-price-box="product-id-'.$prd_id.'">
+                    <span class="price-container price-final_price tax weee">
+                        <span id="product-price-'.$prd_id.'" data-price-amount="'.(int)$finalPriceAmt.'" data-price-type="finalPrice" class="price-wrapper "><span class="price">'.$priceHelper->currency( (int)$finalPriceAmt, true, false).'</span></span>
+                    </span>
+                </div>
+            </div>';
+        }else{
+
+            $save_percentage = ceil(100 - ((100 / (int)$regular_price) * (int)$finalPriceAmt));
+            $class= '';
+            $pricehtml .= '<div class="price-box price-final_price" data-role="priceBox" data-product-id="'.$prd_id.'" data-price-box="product-id-'.$prd_id.'">
+                <span class="old-price">
+                    <span class="price-container price-final_price tax weee">
+                        <span class="price-label">'.$this->getlabel("mrp").'</span>
+                        <span id="old-price-'.$prd_id.'" data-price-amount="'.(int)$regular_price.'" data-price-type="oldPrice" class="price-wrapper "><span class="price">'.$priceHelper->currency((int)$regular_price, true, false).'</span></span>
+                    </span>
+                </span>
+                <div class="break_here"></div>
+                <span class="special-price">
+                    <span class="price-container price-final_price tax weee">
+                        <span class="price-label">'.$this->getlabel("deal_price").'</span>
+                        <span id="product-price-'.$prd_id.'" data-price-amount="'.(int)$finalPriceAmt.'" data-price-type="finalPrice" class="price-wrapper "><span class="price">'.$priceHelper->currency((int)$finalPriceAmt, true, false).'</span></span>
+                    </span>
+                </span>
+                <div class="break_here"></div>
+                <div class="you-save-statement">
+                    <span class="label_special_price_custom yousave_price_label">You save:</span>
+                    <span class="yousave_price">
+                        <span>
+                            '.$priceHelper->currency( ((int)$regular_price - (int)$finalPriceAmt) , true, false).'                
+                        </span>
+                        <span>
+                            ('.$save_percentage.'% OFF)
+                        </span>
+                    </span>
+                </div>
+            </div>';
+        }
+        $pricehtml .= "</div>";
+        return $pricehtml;
+    }
+    public function getsliderProducts($prd_id){
+        
+        $pricehtml = '';
+        $product = $this->_productRepository->getById( $prd_id );
+        
+        $templateType = \Magento\Catalog\Block\Product\ReviewRendererInterface::SHORT_VIEW;
+        
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $priceHelper = $objectManager->create('Magento\Framework\Pricing\Helper\Data');
+        
+        $productUrl = $product->getProductUrl();
+        $brandname = $product->getResource()->getAttribute('brand')->getFrontend()->getValue($product);
+        
+        
+        if( $product->getTypeId() == \Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE){
+
+            $prd_id_for_tier_price = $product->getId();
+            $pricehtml.= "<div class='custom_code configurable_prd'>";
+
+            $_configChild = $product->getTypeInstance()->getUsedProductIds($product);
+            $getChildId = array();
+            $first_id = '';
+            foreach ($_configChild as $child){
+                $getChildId[] = $child;
+            }
+            if(!empty($getChildId)){
+                $first_id = $getChildId[0];
+            }
+
+            $prd_id_for_tier_price = $first_id;
+//            $pricehtml.= $first_id;
+            $product_first_simple = $objectManager->create('Magento\Catalog\Model\Product')->load($first_id);
+
+
+            
+            $regular_price = (int)$product_first_simple->getPrice();
+            
+            $finalPriceAmt = (int)$product_first_simple->getPriceInfo()->getPrice('final_price')->getValue();
+            
+            $pricehtml .= $this->getcustomPriceHtml($regular_price, $finalPriceAmt, $prd_id);
+            
+            
+            $product->getReviewsSummaryHtml($product, $templateType);
+
+            $product_obj = $objectManager->create('Magento\Catalog\Model\Product')->load($prd_id_for_tier_price);                
+            $tier_price = $product_obj->getTierPrice();
+            $mrp = $product_obj->getPrice();
+            if(count($tier_price) > 0){
+                foreach($tier_price as $pirces){
+    //                                        var_dump( $pirces );
+
+                    $tier_qty = (int)$pirces['price_qty'];
+                    $tier_price = (int)$pirces['website_price'];
+
+
+                    $save_percentage = ceil(100 - ((100 / $mrp) * $tier_price));
+                    $pricehtml.= "<div class='tier_price_category_page'>Buy ".$tier_qty." for <strong>₹".$tier_price."</strong> each and save <strong>".$save_percentage."%</strong></div>";
+
+                }
+            }
+            $pricehtml.= "</div>";
+        }else{
+            $regular_price = (int)$product->getPrice();
+            
+            $finalPriceAmt = (int)$product->getPriceInfo()->getPrice('final_price')->getValue();
+            
+            $pricehtml .= $this->getcustomPriceHtml($regular_price, $finalPriceAmt, $prd_id);
+            
+        }
+        
+        $helperImport = $objectManager->get('\Magento\Catalog\Helper\Image');
+                    
+        $imageUrl = $helperImport->init($product, 'product_page_image_small')
+                ->setImageFile($product->getSmallImage())
+                ->resize(380)
+                ->getUrl();
+        
+        $SliderPrdhtml = '
+                    <li class="item product product-item">
+                        <div class="product-item-info" data-container="product-grid">
+                            <a href="'.$productUrl.'" class="product photo product-item-photo" tabindex="-1">
+                                <span class="product-image-container product-image-container-15362" style="width: 320px;">
+                                    <span class="product-image-wrapper" style="padding-bottom: 125%;">
+                                        <img class="product-image-photo" src="'.$imageUrl.'" alt="'.$product->getName().'">  
+                                    </span>
+                                </span>
+                            </a>
+                            <div class="product details product-item-details">
+                                <div class="brand_name">
+                                    '.$brandname.'                        
+                                </div>
+                                <strong class="product name product-item-name">
+                                    <a class="product-item-link" title="Callaway Chrome Soft Golf Balls" href="'.$productUrl.'">
+                                        '.str_ireplace( $brandname , '' , $product->getName()).'
+                                    </a>
+                                </strong>
+                                '.$pricehtml.'
+                            </div>
+                        </div>
+                    </li>';
+        return $SliderPrdhtml;
+    }
+    public function slider_html($heading, $cat_url, $prd_html){
+        
+        $sliderHtml = '
+        <div class="container-fluid product_slider_container">
+            <div class="container-fluid product_container_inside">
+                <div class="header_content_product_slider">
+                    <div class="header_content_product_slider_inside">
+                        <div class="heading_product_slider">
+                            <div class="heading_golfoy left">
+                                <h1>
+                                    '.$heading.'
+                                </h1>
+                            </div>
+                        </div>
+                        <div class="header_link_product_slider">
+                            <a href="'.$cat_url.'">
+                                View all
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="product_content_product_slider">
+                    <div class="product_content_product_slider_inside">
+                        <div class="slider_arrows">
+                            <div class="left_arrow">
+                            </div>
+                            <div class="right_arrow">
+                            </div>
+                        </div>
+                        <div class="product_content_product_slider_before_list">
+                            <ol class="products list items product-items">
+                                '.$prd_html.'
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>';
+        
+        return $sliderHtml;
+    }
+    
+    public function getHtmlSidebarProfile($initial , $name , $point_balamce_html, $signin_detail_html){
+        
+        
+        $html = '<div class="sign_in_banner_sidebar container_signin">
+                    <div class="sign_in_banner_sidebar_inside">
+                        <div class="sign_in_banner_sidebar_left">
+                            <div class="name_initial_box">
+                                <div class="name_initial_box_inside">
+                                    '.$initial.'
+                                </div>
+                            </div>
+                        </div>
+                        <div class="sign_in_banner_sidebar_right">
+                            <div class="name_box">
+                                <h3 class="name_box_heading">
+                                    '.$name.'
+                                </h3>
+                            </div>
+                            <div class="reward_point">
+                                <div style="margin-top: 3px;font-size: 12px;" class="reward_point_inside">
+                                    '.$point_balamce_html.'
+                                </div>
+                            </div>
+                            <div class="detail_section">
+                                <div class="detail_section_inside">
+                                    '.$signin_detail_html.'
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>';
+        return $html;
+            
+    }
+    
+    
+    public function CheckIfCustomPrintInCart(){
+        $itemsCollection = $this->Cart->getQuote()->getItemsCollection();
+        $v = $this->Cart->getQuote()->getAllVisibleItems();
+
+        $p = $this->Cart->getItems();
+
+        $a= $this->Cart->getQuote()->getAllItems();
+        $codoption = 1;
+        foreach($v as $item) {
+            
+            // echo 'ID: '.$item->getProductId().'<br />';
+            // echo 'Name: '.$item->getName().'<br />';
+            // echo 'Sku: '.$item->getSku().'<br />';
+            // echo 'Quantity: '.$item->getQty().'<br />';
+            // echo 'Price: '.$item->getPrice().'<br />';
+            // echo "<br />";   
+            $options = $item->getProduct()->getTypeInstance(true)->getOrderOptions($item->getProduct());
+
+           // print_r($options);
+            // if (in_array('Custom Text (Printed On Pocket)', $options)){
+
+            //     $codoption=0;
+            // }
+
+            // if(($options['label'] =='Custom Text (Printed On Pocket)')||($options['label'] =='Custom Text (Printed On Divison)'))
+            // {
+            //     echo "Cod False ";
+            //     $codoption=false;
+            // }
+            // $customOptions = $options['options'];
+            $arcod = array();
+            //echo count($options)."numbers";
+            //print_r($arcod);
+            $tarry=0;
+            $larrys = count($options);
+
+            foreach ($options as $val) 
+                {
+
+                        if(is_array($val)){
+
+                        foreach($val as $deepval)
+                        {
+
+
+                            if(is_array($deepval))
+                            {  
+                               // echo "<hr/>"; 
+                               // print_r($deepval);
+                                if(array_key_exists('print_value', $deepval)){
+                                   // echo "printable hai  <br/> <hr/>";
+                                    $codoption = 0;
+                                }
+                                // foreach($deepval as $k=>$dval)
+                                // {
+                                //     if(array_key_exists('print_value', $deepval)){
+                                //         echo "ander printable hai <br/>";
+                                //     }
+
+                                //     // if($dval=='Custom Text (Printed On Divison)'){
+                                //     //     echo "its c print in umbrella";
+                                //     //     $codoption = 0;
+                                //     // }
+                                //     // else if($dval=='Custom Text (Printed On Pocket)'){
+                                //     //     echo "its c print in bag";
+                                //     //     $codoption = 0;
+                                //     // }
+                                //     // else if($dval=='Custom Text (Printed On Ball)'){
+                                //     //     echo "its c print in ball";
+                                //     //     $codoption = 0;
+                                //     // }
+
+                                // }
+                            }
+                        }
+
+                    }
+
+                    $tarry = $tarry+1;
+                }
+        }
+//        echo $codoption;
+        if ($codoption==0){
+            echo "COD will not be available for custom option";
+//            return true;
+        }
+//        return false;
+        
+        
+        // $paymentHelper = $objectManager->get('Magento\Payment\Helper\Data');
+        // $allPaymentMethods = $paymentHelper->getPaymentMethods();
+        // $allPaymentMethodsArray = $paymentHelper->getPaymentMethodList();
+
+        // var_dump($allPaymentMethodsArray);
+        // var_dump($allPaymentMethods);
+
+        // $paymentConfig = $objectManager->get('Magento\Payment\Model\Config');
+        // $activePaymentMethods = $paymentConfig->getActiveMethods();
+
+        // var_dump(array_keys($activePaymentMethods));
+
+        // $orderPaymentCollection = $objectManager->get('\Magento\Sales\Model\ResourceModel\Order\Payment\Collection');
+        // $orderPaymentCollection->getSelect()->group('method');
+        // $paymentMethods[] = array('value' => '', 'label' => 'Any');
+        // foreach ($orderPaymentCollection as $col) { 
+        //     $paymentMethods[] = array('value' => $col->getMethod(), 'label' => $col->getAdditionalInformation());       } 
+
+        //     //print_r($paymentMethods);
+
+        //     foreach($paymentMethods as $kpm=>$kval)
+        //     {
+        //         if ($kpm== "cashondelivery") {
+        //             unset($kval[$kpm]);
+        //         }
+        //         //echo $kval;
+        //     }
+        // print_r($paymentMethods);
+
+        
+    }
+    public function listAttributeSet()  // used in customprinting  module
+    {
+        $attributeSetList = null;
+        try {
+            $searchCriteria = $this->searchCriteriaBuilder->create();
+            $attributeSet = $this->attributeSetRepository->getList($searchCriteria);
+        } catch (Exception $exception) {
+            throw new Exception($exception->getMessage());
+        }
+
+        if ($attributeSet->getTotalCount()) {
+            $attributeSetList = $attributeSet;            
+        }
+
+        return $attributeSetList;
+    }
+    public function optionImage($text) //used to display custom print option image in cart, admin area
+    {
+        $tmp =  explode('.',$text);
+        if($tmp[1] == 'pdf'){
+            $toshow = '<a href="/media/'.$text.'" target="blank"><img style="max-width:100px;" src ="/media/customprint/pdf.svg"/ ></a>';
+        }elseif($tmp[1] == 'ai'){
+            $toshow = '<a href="/media/'.$text.'" target="blank"><img style="max-width:100px;" src ="/media/customprint/ai.svg"/ ></a>';
+        }elseif($tmp[1] == 'eps'){
+            $toshow = '<a href="/media/'.$text.'" target="blank"><img style="max-width:100px;" src ="/media/customprint/eps.svg"/ ></a>';
+        }else{
+            $toshow = '<a href="/media/'.$text.'" target="blank"><img style="max-width:100px;" src ="/media/'.$text.'"/ ></a>';
+        }
+        return  $toshow ;
+    }
+    public function optionImagetext($text) //used to display custom print option image text in invoice, shipment pdf
+    {
+        $toshow = 'Image uploaded';
+        return  $toshow ;
+    }
+    public function getAppliedFilters($OM){
+        $request = $OM->get('\Magento\Framework\App\Request\Http');        
+        $productAttributeCollectionFactory = $OM->get('\Magento\Catalog\Model\ResourceModel\Product\Attribute\CollectionFactory');
+        $productAttributes = $productAttributeCollectionFactory->create();
+        $productAttributes->addFieldToFilter(
+            ['is_filterable', 'is_filterable_in_search'],
+            [[1, 2], 1]
+        );
+        $filterableAttr = [];
+        foreach ($productAttributes as $attribute) {
+            $filterableAttr[] =  $attribute->getAttributeCode();
+        }        
+        $urlparams = $request->getParams();
+        if(isset($urlparams['price']))
+        unset($urlparams['price']);        
+        //echo "<pre>"; print_r($urlparams); echo "</pre>";
+        $urlparamskeys = array_keys($urlparams);
+        $appliedfilterskey = array_intersect($urlparamskeys, $filterableAttr);
+        $appliedfilters = [];
+        foreach($appliedfilterskey as  $k){
+            $appliedfilters[$k] = $urlparams[$k];
+        }
+        return $appliedfilters;
+    }
+    public function getOutofStockIds($ids) //used to get out of stock conf products when filter applied
+    { 
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();        
+        $StockState = $objectManager->get('\Magento\InventorySalesAdminUi\Model\GetSalableQuantityDataBySku');
+        $filters = $this->getAppliedFilters($objectManager);               
+       if(!empty($filters)){
+            $filtersCount = count($filters);
+            $resultids = [];
+            foreach($ids as $cid){
+                $configProduct = $objectManager->create('Magento\Catalog\Model\Product')->load($cid); 
+                $_children  = $configProduct->getTypeInstance()->getUsedProducts($configProduct);
+                if(!empty($_children)){
+                foreach($_children as $child){
+                    //echo "<pre>"; print_r($child->getData()); echo "</pre>";
+                    if($child->getStatus() == 1){
+                            $filterMatch = 0;
+                            foreach($filters as $txt => $val){
+                               /* if($txt == 'price'){
+                                    $orgprice = $child->getPrice();
+                                    $specialprice = $child->getSpecialPrice();
+                                    $specialfromdate = $child->getSpecialFromDate();
+                                    $specialtodate = $child->getSpecialToDate();
+                                    $today = time();
+                                    $pricetocmp = $orgprice;
+                                    if (!$specialprice)
+                                    $pricetocmp = $orgprice;
+                                    if (($specialprice) && ($specialprice < $orgprice)) {
+                                        if ((is_null($specialfromdate) &&is_null($specialtodate)) || ($today >= strtotime($specialfromdate) &&is_null($specialtodate)) || ($today <= strtotime($specialtodate) &&is_null($specialfromdate)) || ($today >= strtotime($specialfromdate) && $today <= strtotime($specialtodate))) {
+                                            $pricetocmp = $specialprice;
+                                        }
+                                    }
+                                    $prarr = explode('-', $val); 
+                                    if($pricetocmp >= $prarr[0] && $pricetocmp <= $prarr[1]){
+                                        $filterMatch = $filterMatch + 1; 
+                                    } 
+                                }else{*/
+                                    $valarr = explode(',', $val);
+                                    $childattrval = $child->getData($txt);                               
+                                    if(in_array($childattrval, $valarr)){
+                                        $filterMatch = $filterMatch + 1; 
+                                    }                              
+                               // }
+                            }
+                            if($filtersCount == $filterMatch){
+                                $resultids[$cid][] = ['id' => $child->getID(), 'sku' => trim($child->getSku())];
+                            }                    
+                        }
+                    }
+                }
+        }     
+        $outofStock = [];
+        if(!empty($resultids)){
+            //echo "<pre>"; print_r($resultids);  echo "</pre>";
+                 foreach($resultids as $key => $val){ 
+                     $qtyOfAllVarient = 0;          
+                     foreach($val as $v){  
+                         $prModel= $objectManager->create('Magento\Catalog\Model\Product')->load($v['id']); 
+                         $isManageStock = $prModel->getExtensionAttributes()->getStockItem()->getManageStock();
+                         if($isManageStock == 1){
+                             $qtysrc = $StockState->execute($v['sku']);
+                             $tqty = 0 ;
+                             foreach($qtysrc as $src){
+                                 $tqty +=  $src['qty'];
+                             }
+                             $qtyOfAllVarient += $tqty; 
+                         }else{
+                             $qtyOfAllVarient = 1;
+                         }                   
+                     }
+                     if($qtyOfAllVarient == 0){
+                         $outofStock[$key][] = $v['id'];
+                     }
+                 }
+         }
+        if(empty($outofStock)){
+                return [];
+        }else{
+                return array_keys($outofStock);
+        } 
+      }else{
+         return [];
+      }  
+    }
+    public function test(){
+      /*  $objectManager = \Magento\Framework\App\ObjectManager::getInstance(); 
+        $layer = $objectManager->get('\Magento\Catalog\Model\Layer\Resolver')->get();
+
+    // $productCollection1 = $objectManager->create('\Magento\Catalog\Model\ResourceModel\Product\Collection');
+    // $productCollection = $productCollection1->addAttributeToSelect('*')->load();
+     $productCollection =  $layer->getProductCollection();
+      //$productCollection1 =  $objectManager->get('\Magento\Catalog\Block\Product\ListProduct');
+     // $productCollection = $productCollection1->getLoadedProductCollection();
+    echo $category_id =  $layer->getCurrentCategory()->getId();
+          $pids = [];
+           foreach ($productCollection as  $singleproduct) {
+              // print_r($singleproduct->getData());
+               $type = $singleproduct->getTypeId();
+               if($type = 'configurable'){
+                   $pids[] =  $singleproduct->getEntityId() ;
+               }             
+           }
+           print_r($pids);*/
+    }
+    public function getConfig($config_path)
+    {
+        return $this->scopeConfig->getValue(
+            $config_path,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+        );
+    }
+    public function isSalableNew($_product) //used to get out of stock conf products when filter applied
+    {   $return = false;
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();        
+        $StockState = $objectManager->get('\Magento\InventorySalesAdminUi\Model\GetSalableQuantityDataBySku');
+         // echo $this->getTypeId();   //simple configurable
+         $type = $_product->getTypeId();
+         $cid = $_product->getId();
+         if($type == 'configurable'){
+            $qtyOfAllVarient = 0; 
+            $configProduct = $objectManager->create('Magento\Catalog\Model\Product')->load($cid); 
+            $_children  = $configProduct->getTypeInstance()->getUsedProducts($configProduct);
+            if(!empty($_children)){              
+                foreach($_children as $child){
+                    if($child->getStatus() == 1){
+                        $childid = $child->getID();
+                        $childSku = $child->getSku();                                
+                           
+                            $prModel= $objectManager->create('Magento\Catalog\Model\Product')->load($childid); 
+                            $isManageStock = $prModel->getExtensionAttributes()->getStockItem()->getManageStock();
+                            if($isManageStock == 1){
+                                $qtysrc = $StockState->execute($childSku);
+                                $tqty = 0 ;
+                                foreach($qtysrc as $src){
+                                    $tqty +=  $src['qty'];
+                                }
+                                $qtyOfAllVarient += $tqty; 
+                            }else{
+                                $qtyOfAllVarient = 1;
+                            } 
+                    }
+
+                }
+            }
+            if($qtyOfAllVarient > 0){
+                $return = true;
+            }
+         }else{
+            $qtyOfAllVarient = 0;
+            $prModel= $objectManager->create('Magento\Catalog\Model\Product')->load($_product->getId());
+            $childSku = $prModel->getSku();
+            $isManageStock = $prModel->getExtensionAttributes()->getStockItem()->getManageStock();
+            if($isManageStock == 1){
+                $qtysrc = $StockState->execute($childSku);
+                $tqty = 0 ;
+                foreach($qtysrc as $src){
+                    $tqty +=  $src['qty'];
+                }
+                $qtyOfAllVarient += $tqty; 
+            }else{
+                $qtyOfAllVarient = 1;
+            } 
+            if($qtyOfAllVarient > 0){
+                $return = true;
+            }
+         }
+         return $return;
+    }
+
+    public function getCategoryById()
+    {
+        $menuFactoryModel = $this->_customcache->create();
+        $categoryId = 307;
+        $category = $this->categoryFactory->create()->load($categoryId);
+
+        $childrenCategories = $category->getChildrenCategories();
+        $categoryarray = [];
+        $categoryUrl = [];
+        foreach ($childrenCategories as $subcategory) {
+            $subid = $subcategory->getId();
+            $catname = $subcategory->getName();
+            $catURL = $subcategory->getUrl();
+            $catName = $subcategory->getName();
+            $categoryUrl[str_replace(" Store", "", $catname)] = $catURL;
+            $categoryarray[] = str_replace(" Store", "", $catname);
+        }
+
+        usort($categoryarray, function($a, $b) {
+            return strcmp($a, $b);
+        });
+        
+        // Print the sorted array
+        // print_r($categoryarray);
+        // die('asdfsdfsadf');
+
+        $newArray = [];
+        foreach ($categoryarray as $value) {
+            $initial = strtoupper($value[0]);
+            $newArray[$initial][] = $value;
+        }
+        $html = '';
+        $alphabets = '';
+        $j = 0;
+        foreach ($newArray as $initial => $group) {
+            $groupCount = count($group);
+            $groupColumns = ceil($groupCount / 6);
+
+            for ($col = 0; $col < $groupColumns; $col++) {
+                $startIndex = $col * 6;
+                $endIndex = min(($col + 1) * 6, $groupCount);
+                $groupItems = array_slice($group, $startIndex, $endIndex - $startIndex);
+
+                if ($j == 0 && $col == 0) {
+
+                    $html .= "<div class='single_alpha_brands_menu' for_menu='" . $initial . "_block'>";
+                } else {
+
+                    $html .= "<div class='single_alpha_brands_menu' for_menu='" . $initial . "_block'>";
+                }
+
+                if ($col == 0) {
+                    $html .= "<div class='alpha_heading_menu first'>" . $initial . "</div>";
+                } else {
+                    $html .= "<div class='alpha_heading_menu second '> </div>";
+                }
+
+
+                foreach ($groupItems as $value) {
+                    $html .= "<div class='alpha_heading_menu'><a href='" . $categoryUrl[$value] . "' class='alphabet-link react-comp'>";
+                    $html .= "<span>" . $value . "</span>";
+                    $html .= "</a></div>";
+                }
+
+                $html .= "</div>";
+                $j++;
+            }
+
+            if ($j == 0) {
+                $alphabets .= "<span show_menu='" . $initial . "_block'><div class='alpha_heading_menu'>" . $initial . "</div></span>";
+            } else {
+                $alphabets .= "<span show_menu='" . $initial . "_block'><div class='alpha_heading_menu'>" . $initial . "</div></span>";
+            }
+        }
+
+        $alphabetHtml = "<div class='brand_alpha_sections'><div class='alphabets menu_alphabets_block'>".$alphabets."</div>";
+
+        $brandHtml = "<div class='brands_html'>";
+
+        $brandInsideHtml = "<div class='brand_html_inside_block'>";
+
+        $html = $alphabetHtml.$brandHtml.$brandInsideHtml.$html."</div></div></div>";
+
+        $menuFactoryModel->setData([
+            "type" => "menu_cache",
+            "content" => $html
+        ]);
+        $menuFactoryModel->save();
+        $this->partnerBrandMenu();
+    }
+
+    public function partnerBrandMenu()
+    {
+        $menuFactoryModel = $this->_customcache->create();
+        $categoryId = 1780;
+        $storeId = 5; // Frontend store ID
+
+        // --- Start store emulation ---
+        $this->emulation->startEnvironmentEmulation(
+            $storeId,
+            \Magento\Framework\App\Area::AREA_FRONTEND,
+            true
+        );
+
+        /** @var \Magento\Catalog\Model\Category $category */
+        $category = $this->categoryFactory->create()
+            ->setStoreId($storeId)
+            ->load($categoryId);
+        $childrenCategories = $category->getChildrenCategories();
+
+        $categoryarray = [];
+        $categoryUrl = [];
+
+        $defaultStoreId = 1; // Source store (main Golfoy)
+        $partnerStoreId = 5; // Target store (Partners)
+
+        $sourceBaseUrl = rtrim($this->storeManager->getStore($defaultStoreId)->getBaseUrl(), '/');
+        $targetBaseUrl = rtrim($this->storeManager->getStore($partnerStoreId)->getBaseUrl(), '/');
+
+        foreach ($childrenCategories as $subcategory) {
+            $catname = str_replace(" Store", "", $subcategory->getName());
+            $catURL = $this->categoryHelper->getCategoryUrl($subcategory->setStoreId($partnerStoreId));
+
+            // Replace source base URL with target one dynamically
+            $catURL = str_replace($sourceBaseUrl, $targetBaseUrl, $catURL);
+
+            $categoryUrl[$catname] = $catURL;
+            $categoryarray[] = $catname;
+        }
+        usort($categoryarray, function ($a, $b) {
+            return strcmp($a, $b);
+        });
+
+        $newArray = [];
+        foreach ($categoryarray as $value) {
+            $initial = strtoupper($value[0]);
+            $newArray[$initial][] = $value;
+        }
+
+        // Build HTML
+        $html = '';
+        $alphabets = '';
+        $j = 0;
+
+        foreach ($newArray as $initial => $group) {
+            $groupCount = count($group);
+            $groupColumns = ceil($groupCount / 6);
+
+            for ($col = 0; $col < $groupColumns; $col++) {
+                $startIndex = $col * 6;
+                $endIndex = min(($col + 1) * 6, $groupCount);
+                $groupItems = array_slice($group, $startIndex, $endIndex - $startIndex);
+
+                $html .= "<div class='single_alpha_brands_menu' for_menu='" . $initial . "_block'>";
+
+                if ($col == 0) {
+                    $html .= "<div class='alpha_heading_menu first'>" . $initial . "</div>";
+                } else {
+                    $html .= "<div class='alpha_heading_menu second '> </div>";
+                }
+
+                foreach ($groupItems as $value) {
+                    $html .= "<div class='alpha_heading_menu ui-menu-item'><a href='" . $categoryUrl[$value] . "' class='alphabet-link react-comp'>";
+                    $html .= "<span>" . $value . "</span>";
+                    $html .= "</a></div>";
+                }
+
+                $html .= "</div>";
+                $j++;
+            }
+
+            $alphabets .= "<span show_menu='" . $initial . "_block'><div class='alpha_heading_menu'>" . $initial . "</div></span>";
+        }
+
+        $alphabetHtml = "<div class='brand_alpha_sections'><div class='alphabets menu_alphabets_block'>" . $alphabets . "</div>";
+        $brandHtml = "<div class='brands_html'>";
+        $brandInsideHtml = "<div class='brand_html_inside_block'>";
+        $html = $alphabetHtml . $brandHtml . $brandInsideHtml . $html . "</div></div></div>";
+
+        // --- End store emulation ---
+        $this->emulation->stopEnvironmentEmulation();
+
+        // ✅ Load existing cache record before saving
+        $existing = $menuFactoryModel->getCollection()
+            ->addFieldToFilter('type', 'menu_cache_partners')
+            ->getFirstItem();
+
+        if ($existing && $existing->getId()) {
+            $menuFactoryModel = $existing; // Update existing record
+        }
+
+        $menuFactoryModel = $this->_customcache->create();
+        $existing = $menuFactoryModel->getCollection()
+            ->addFieldToFilter('type', 'menu_cache_partners')
+            ->getFirstItem();
+        if ($existing && $existing->getId()) {
+            $existing->setContent($html);
+            $existing->save();
+        } else {
+            $menuFactoryModel->setData([
+                'type' => 'menu_cache_partners',
+                'content' => $html
+            ]);
+            $menuFactoryModel->save();
+        }
+        return;
+    }
+
+    public function isAvailableMenuCache(){
+        $menuFactoryModel = $this->_customcache->create();
+        $collection = $menuFactoryModel->getCollection()
+            ->addFieldToFilter('type', 'menu_cache');
+        $menuData = $collection->getData();
+        if(isset($menuData[0]['content']) > 0){
+            $menuData = $menuData[0]['content'];
+            return $menuData;
+        }else{
+            $this->getCategoryById();
+            $collection = $menuFactoryModel->getCollection()
+            ->addFieldToFilter('type', 'menu_cache');
+            $menuData = $collection->getData();
+            $menuData = $menuData[0]['content'];
+            return $menuData;
+        }
+    }
+    
+    public function isAvailablePartnersMenuCache(){
+        $menuFactoryModel = $this->_customcache->create();
+        $collection = $menuFactoryModel->getCollection()
+            ->addFieldToFilter('type', 'menu_cache_partners');
+        $menuData = $collection->getData();
+        if(isset($menuData[0]['content']) > 0){
+            $menuData = $menuData[0]['content'];
+            return $menuData;
+        }else{
+            $this->getCategoryById();
+            $collection = $menuFactoryModel->getCollection()
+            ->addFieldToFilter('type', 'menu_cache_partners');
+            $menuData = $collection->getData();
+            $menuData = $menuData[0]['content'];
+            return $menuData;
+        }
+    }
+}

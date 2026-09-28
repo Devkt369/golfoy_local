@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="catalog_category_save_after">
+        <observer name="custom_save_category" instance="Meta\Catalog\Observer\ProcessCategoryAfterSaveEventObserver" />
+    </event>
+    <event name="catalog_category_delete_before">
+        <observer name="custom_delete_category" instance="Meta\Catalog\Observer\ProcessCategoryBeforeDeleteEventObserver" />
+    </event>
+    <event name="facebook_fbe_onboarding_after">
+        <observer name="facebook_sync_full_catalog" instance="Meta\Catalog\Observer\Facebook\SyncFullCatalog" />
+    </event>
+    <event name="facebook_update_catalog_configuration_after">
+        <observer name="facebook_sync_full_catalog" instance="Meta\Catalog\Observer\Facebook\SyncFullCatalog" />
+    </event>
+    <event name="facebook_delete_assets_after">
+        <observer name="facebook_catalog_clear_product_set_ids" instance="Meta\Catalog\Observer\Facebook\ClearProductSetIds" />
+    </event>
+    <event name="facebook_update_catalog_configuration">
+        <observer name="facebook_catalog_clear_product_set_ids" instance="Meta\Catalog\Observer\Facebook\ClearProductSetIds" />
+    </event>
+</config>

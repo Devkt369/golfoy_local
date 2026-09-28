@@ -1,0 +1,33 @@
+<h1>Websites</h1>
+<table class="admin__table-primary">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>Name</th>
+			<th>URL</th>
+			<th>Logo</th>
+			<th>Price Selectors</th>
+			<th>Actions</th>
+		</tr>
+	</thead>
+	<tbody>
+		<?php
+		$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+		$collection = $objectManager->create('ArtM\\PriceCompare\\Model\\ResourceModel\\Website\\Collection');
+		foreach ($collection as $website): ?>
+		<tr>
+			<td><?= $website->getId() ?></td>
+			<td><?= $website->getName() ?></td>
+			<td><?= $website->getUrl() ?></td>
+			<td><?php if ($website->getLogo()): ?><img src="<?= $block->getBaseUrl(['_type' => \Magento\Framework\UrlInterface::URL_TYPE_MEDIA]) . $website->getLogo() ?>" width="50"/><?php endif; ?></td>
+			<td><?= $website->getPriceSelectors() ?></td>
+			<td>
+				<a href="#" class="action-edit">Edit</a> |
+				<a href="#" class="action-delete">Delete</a>
+			</td>
+		</tr>
+		<?php endforeach; ?>
+	</tbody>
+</table>
+<br />
+<?php include($block->getTemplateFile('ArtM_PriceCompare::website_form.phtml')); ?>

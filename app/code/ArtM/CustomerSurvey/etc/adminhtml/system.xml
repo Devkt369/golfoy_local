@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="customersurvey" translate="label" type="text" sortOrder="970" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Customer Survey</label>
+            <tab>general</tab>
+            <resource>ArtM_CustomerSurvey::customersurvey</resource>
+            <group id="privacy" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Privacy</label>
+                <field id="store_ip_address" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Store IP Address in Survey Responses</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Disable to avoid storing visitor IP in response records.</comment>
+                </field>
+            </group>
+
+            <group id="analytics" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Analytics &amp; Performance</label>
+                <field id="enable_cache" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Analytics Cache</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Cache heavy report queries for faster admin analytics pages.</comment>
+                </field>
+                <field id="cache_ttl" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Cache TTL (seconds)</label>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                    <comment>Default 900 seconds.</comment>
+                </field>
+                <field id="aggregation_days" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Aggregation Window (days)</label>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                    <comment>How many recent days cron should re-aggregate into summary tables.</comment>
+                </field>
+                <field id="retention_days" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Raw Analytics Retention (days)</label>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                    <comment>Older event/response rows are purged by cleanup cron.</comment>
+                </field>
+                <field id="summary_retention_days" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Summary Retention (days)</label>
+                    <validate>validate-number validate-greater-than-zero</validate>
+                    <comment>Retention for aggregated daily stats tables.</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

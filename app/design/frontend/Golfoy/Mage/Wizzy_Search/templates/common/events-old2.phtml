@@ -1,0 +1,152 @@
+<?php ?>
+<script defer="defer">
+require(['jquery'], function($) {
+    if (window.wizzyConfig.events !== null && window.wizzyConfig.events !== undefined) {
+        wizzyInit();
+    } else {
+        window.onWizzyLoaded = [];
+        window.onWizzyLoaded.push(function() {
+            wizzyInit();
+        });
+    }
+
+    function wizzyInit() {
+        window.wizzyConfig.events.registerEvent(
+            window.wizzyConfig.events.allowedEvents.BEFORE_INIT,
+            function(payload) {
+                window.wizzyConfig.search.configs.facets.leftFacets.mobileCollapsible = true;
+                return payload;
+            });
+        window.wizzyConfig.events.registerEvent(
+            window.wizzyConfig.events.allowedEvents.BEFORE_RENDER_RESULTS,
+            function(payload) {
+                const facets = payload.response.payload.facets;
+                facets.forEach((facet) => {
+                    if (facet.key == "colors") {
+                        const facetItem = facet.data;
+                        facetItem.forEach((item) => {
+                            if (typeof item.data.swatch !== "undefined" && item.data
+                                .swatch !== null) {
+                                item.data.swatch.value =
+                                    "https://golfoy.com/media/attribute/swatch/swatch_image/30x20" +
+                                    item.data.swatch.value;
+                            }
+                        });
+                    }
+                });
+                return payload;
+            });
+
+        window.wizzyConfig.events.registerEvent(
+            window.wizzyConfig.events.allowedEvents.BEFORE_AUTOCOMPLETE_EXECUTED,
+                function(payload) {
+                    payload.minLastWordLength = 2;
+                    return payload;
+                });
+        window.wizzyConfig.events.registerEvent(window.wizzyConfig.events.allowedEvents.BEFORE_SEARCH_EXECUTED,
+            function(payload) {
+                payload.minLastWordLength = 2;
+                return payload; 
+            });
+
+
+        window.wizzyConfig.events.registerEvent(
+            window.wizzyConfig.events.allowedEvents.AFTER_PRODUCTS_TRANSFORMED,
+            function(products) {
+                products.forEach((product) => {
+                    var swatches = product.swatches;
+                    if (swatches) {
+                        swatches.forEach((swatch) => {
+                            if (swatch.key == "colors") {
+                                var colorValues = swatch.values;
+                                colorValues.forEach((colorValue) => {
+                                    colorValue.isURLSwatch = true;
+                                    colorValue.swatchValue =
+                                        "https://golfoy.com/media/attribute/swatch/swatch_image/30x20" +
+                                        colorValue.swatchValue;
+                                });
+                            }
+                        });
+                    }
+                    if (product.brand) {
+                        product.name = product.name.replace(new RegExp(product.brand, 'gi'), '')
+                            .trim();
+                    }
+                    if (product.price) {
+                        product.price = parseInt(product.price.replace(/,/g, ""));
+                        product.price = product.price.toLocaleString();
+                    }
+                    if (product.sellingPrice) {
+                        product.sellingPrice = parseInt(product.sellingPrice.replace(/,/g, ""));
+                        product.sellingPrice = product.sellingPrice.toLocaleString();
+                    }
+                    if (product.discount) {
+                        product.discount = parseInt(product.discount.replace(/,/g, ""));
+                        product.discount = product.discount.toLocaleString();
+                    }
+
+                    var attributes = product.attributes;
+
+                    attributes.forEach((attribute) => {
+                        var value = attribute.values[0].value[0];
+
+                        if (attribute.id === "bestseller" && value !== '0' && value !==
+                            'false' && value !== 'No') {
+                            product.isBestSeller = true;
+                        }
+
+                        if (attribute.id === "newarrivals" && value !== '0' && value !==
+                            'false' && value !== 'No') {
+                            product.isNewArrival = true;
+                        }
+
+                        if (attribute.id === "clearance_sale" && value !== '0' && value !==
+                            'false' && value !== 'No') {
+                            product.isLowestPrice = true;
+                        }
+
+                        if (attribute.id === "can_print" && value !== '0' && value !==
+                            'false' && value !== 'No') {
+                            product.iscustomPrint = true;
+                        }
+
+                        if (attribute.id === "waterproof" && value !== '0' && value !==
+                            'false' && value !== 'No') {
+                            product.isWaterProof = true;
+                        }
+
+                        if (attribute.id === "waterrepel" && value !== '0' && value !==
+                            'false' && value !== 'No') {
+                            product.isWaterRepel = true;
+                        }
+
+                        if (attribute.id === "limitedstock" && value !== '0' && value !==
+                            'false' && value !== 'No') {
+                            product.isLimitedStock = true;
+                        }
+
+                        if (attribute.id === "playerschoice" && value !== '0' && value !==
+                            'false' && value !== 'No') {
+                            product.isPlayersChoice = true;
+                        }
+                    });
+
+                });
+
+                return products;
+            });
+            
+            window.wizzyConfig.events.registerEvent(
+                window.wizzyConfig.events.allowedEvents.PRODUCTS_RESULTS_RENDERED,
+                function(payload) {
+                    var backButton = document.querySelector('.wizzy-search-back');
+                    backButton.click();
+                    return payload;
+                }
+            );
+
+
+    }
+ 
+});  
+</script>

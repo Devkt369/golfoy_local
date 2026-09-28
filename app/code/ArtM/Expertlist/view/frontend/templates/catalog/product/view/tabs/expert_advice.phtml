@@ -1,0 +1,54 @@
+<?php
+
+$dataHelper =  $this->helper('ArtM\Expertlist\Helper\Data');
+
+$_product = $block->getProduct();
+$prd_id = $_product->getId();
+
+$expertHeading = $_product->getResource()->getAttribute('expert_heading')->getFrontend()->getValue($_product);
+$expertName = $_product->getResource()->getAttribute('expert_name')->getFrontend()->getValue($_product);
+$expertReviewContent = $_product->getResource()->getAttribute('expert_review_content')->getFrontend()->getValue($_product);
+
+$expertData = $dataHelper->getrow($expertName);
+
+if ($expertName && $expertReviewContent && !empty($expertData)) : ?>
+    <div class="expert_block">
+        <div class="expert_block_details">
+
+            <div class="row expert_sections">
+                <div class="col-sm-12 expert_content_block">
+                    <div class="expert_review_content">
+                        <p><?= $expertReviewContent ?></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row expert_img_block">
+                <div class="col-sm-4 col-xs-4 expert_img">
+                    <img
+                        alt="Expert Image Preview"
+                        style="max-width: 100%;"
+                        src="<?= $block->escapeUrl($expertData[0]['image_url']) ?>" />
+                </div>
+
+                <div class="col-sm-8 col-xs-8 expert-details">
+                    <h3><?= $block->escapeHtml($expertName) ?></h3>
+                    <p class="span_line">
+                        <em><?= $block->escapeHtml($expertData[0]['designation']) ?></em>
+                    </p>
+                    <p class="span_line_second">
+                        <em><?= $block->escapeHtml($expertData[0]['role']) ?></em>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+<?php else : ?>
+    <style>
+        #tab-label-tab_expert_advice,
+        #tab_expert_advice {
+            display: none !important;
+        }
+    </style>
+<?php endif; ?>

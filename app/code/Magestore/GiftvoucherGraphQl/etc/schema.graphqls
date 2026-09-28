@@ -1,0 +1,275 @@
+type Query {
+    msGetGiftVoucherTransactionHistory (
+        filter: GiftVoucherTransactionAttributeFilterInput @doc(description: "Identifies which transaction attributes to search for and return."),
+        pageSize: Int = 20 @doc(description: "Specifies the maximum number of results to return at once. This attribute is optional."),
+        currentPage: Int = 1 @doc(description: "Specifies which page of results to return. The default value is 1."),
+    ): MSGiftVoucherTransactions @resolver (class: "\\Magestore\\GiftvoucherGraphQl\\Model\\Resolver\\CustomerGiftVoucherTransactionHistory") @doc(description: "Gift Voucher point transaction history of current customer")
+}
+
+type MSGiftVoucherTransactions @doc(description: "List gift voucher transaction") {
+    items: [MSGiftVoucherTransaction] @doc(description: "An array of transactions that match the specified search criteria.")
+    page_info: SearchResultPageInfo @doc(description: "An object that includes the page_info and currentPage values specified in the query.")
+    total_count: Int @doc(description: "The total number of gift voucher transactions.")
+}
+
+type MSGiftVoucherTransaction implements MSGiftVoucherTransactionInterface @doc(description:"MSGiftVoucherTransactionInterface") {
+
+}
+
+interface MSGiftVoucherTransactionInterface @typeResolver(class: "Magestore\\GiftvoucherGraphQl\\Model\\GiftVoucherTransactionTypeResolver") {
+    history_id: Int! @doc(description: "The ID of gift voucher transaction.")
+    giftvoucher_id: Int @doc(description: "GiftVoucher id")
+    action: Int @doc(description: "Transaction action")
+    created_at: String @doc(description: "Created time")
+    amount: Float @doc(description: "Point amount")
+    currency: String @doc(description: "Point currency")
+    status: Int @doc(description: "Status")
+    comments: String @doc(description: "Comments")
+    order_increment_id: String @doc(description: "Order increment id")
+    quote_item_id: Int @doc(description: "Quote item id")
+    order_amount: Float @doc(description: "Order amount")
+    extra_content: String @doc(description: "Added content")
+    balance: Float @doc(description: "Balance")
+    customer_id: Int @doc(description: "Customer id")
+    customer_email: String @doc(description: "Customer email")
+    order_item_id: Int @doc(description: "Order item id")
+    creditmemo_increment_id: Int @doc(description: "Creditmemo increment id")
+}
+
+input GiftVoucherTransactionAttributeFilterInput @doc(description: "GiftVoucherTransactionAttributeFilterInput defines the filters to be used in the search. A filter contains at least one attribute, a comparison operator, and the value that is being searched for.") {
+    history_id: FilterTypeInput @doc(description: "Filter by transaction ID")
+    customer_id: FilterTypeInput @doc(description: "Filter by customer ID")
+    customer_email: FilterTypeInput @doc(description: "Filter by customer email")
+    action: FilterTypeInput @doc(description: "Filter by action")
+    order_increment_id: FilterTypeInput @doc(description: "Filter by order increment id")
+}
+
+type StoreConfig {
+    magestore_giftvoucher_general_active: String @doc(description: "Enable Gift Card")
+    magestore_giftvoucher_general_pattern: String @doc(description: "Gift code")
+    magestore_giftvoucher_general_showprefix: String @doc(description: "The number of prefixes shown")
+    magestore_giftvoucher_general_hiddenchar: String @doc(description: "Replace hidden characters by")
+    magestore_giftvoucher_general_expire: String @doc(description: "Gift Cards codes expire after")
+    magestore_giftvoucher_general_maximum: String @doc(description: "Maximum time(s) to enter gift code incorrectly")
+    magestore_giftvoucher_general_share_card: String @doc(description: "Maximum number of users per gift code")
+    magestore_giftvoucher_general_use_for_ship: String @doc(description: "Use Gift Cards for shipping fee")
+    magestore_giftvoucher_general_use_with_coupon: String @doc(description: "Use Gift Cards with coupon codes")
+    magestore_giftvoucher_general_gc_show_check_link: String @doc(description: "Show the link to check Gift Cards codes on website")
+    magestore_giftvoucher_general_show_expiry_date: String @doc(description: "Show Gift Card expiry date on website")
+    magestore_giftvoucher_interface_amount: String @doc(description: "Default Gift Card value")
+    magestore_giftvoucher_interface_description: String @doc(description: "Description of Gift Card value")
+    magestore_giftvoucher_interface_custom_image: String @doc(description: "Allow customers to change the image inserted into template")
+    magestore_giftvoucher_interface_upload_max_size: String @doc(description: "Maximum size of image(s) uploaded by customers")
+    magestore_giftvoucher_interface_postoffice: String @doc(description: "Allow shipping Gift Card")
+    magestore_giftvoucher_interface_postoffice_date: String @doc(description: "Minimum days for store owner to send Gift Card through post office")
+    magestore_giftvoucher_interface_max: String @doc(description: "Message max length")
+    magestore_giftvoucher_interface_schedule: String @doc(description: "Enable scheduling Gift Card deliver")
+    magestore_giftvoucher_interface_checkout_show_gift_card: String @doc(description: "Show Gift Card box on shopping cart page")
+    magestore_giftvoucher_interface_checkout_display: String @doc(description: "Information displayed on shopping cart page")
+    magestore_giftvoucher_interface_checkout_display_image_item: String @doc(description: "Show Gift Card image as product image in shopping cart")
+    magestore_giftvoucher_interface_payment_show_gift_card: String @doc(description: "Show Gift Card box on Checkout Page")
+    magestore_giftvoucher_email_enable: String @doc(description: "Enable email notification")
+    magestore_giftvoucher_email_only_complete: String @doc(description: "Send Gift Card to friend when Gift Card status is")
+    magestore_giftvoucher_email_sender: String @doc(description: "Sender of email notification")
+    magestore_giftvoucher_email_send_with_ship: String @doc(description: "Send Gift Card copy via email")
+    magestore_giftvoucher_email_self: String @doc(description: "Send-to-purchaser email template when recipient receives Gift Card")
+    magestore_giftvoucher_email_template_success: String @doc(description: "Send-to-purchaser email template when recipient receives Gift Card")
+    magestore_giftvoucher_email_send_refund: String @doc(description: "Send notification email to recipient when purchaser refunds Gift Card")
+    magestore_giftvoucher_email_template: String @doc(description: "Send-to-recipient email template")
+    magestore_giftvoucher_email_template_refund: String @doc(description: "Send-to-recipient email template when Gift Card is refunded")
+    magestore_giftvoucher_email_autosend: String @doc(description: "Auto-send reminder email before Gift Card expires")
+    magestore_giftvoucher_email_daybefore: String @doc(description: "Auto-send reminder email before")
+    magestore_giftvoucher_print_voucher_logo: String @doc(description: "Logo on PDF Printouts")
+    magento_sales_totals_sort_giftvoucher: String @doc(description: "Gift Voucher Before Tax")
+    magento_sales_totals_sort_giftvoucher_after_tax: String @doc(description: "Gift Voucher After Tax")
+}
+
+type GiftCardProduct implements ProductInterface, PhysicalProductInterface, CustomizableProductInterface @doc(description: "GiftCardProduct defines properties of a gift card, including the minimum and maximum values and an array that contains the current and past values on the specific gift card") {
+    gift_card_type: GiftCardTypeEnum @doc(description: "Either VIRTUAL, PHYSICAL, or COMBINED.") @resolver(class: "Magestore\\GiftvoucherGraphQl\\Model\\Resolver\\Product\\GiftCardType")
+    gift_type: GiftCardValueTypeEnum @doc(description: "Either FIXED, RANGE, or DROPDOWN.") @resolver(class: "Magestore\\GiftvoucherGraphQl\\Model\\Resolver\\Product\\GiftCardValueType")
+    gift_price_type: GiftCardPriceTypeEnum @doc(description: "Either SAME, FIXED, or PERCENT.") @resolver(class: "Magestore\\GiftvoucherGraphQl\\Model\\Resolver\\Product\\GiftCardPriceType")
+    gift_from: Float @doc(description: "The minimum acceptable value of an open amount gift card.")
+    gift_to: Float @doc(description: "The maximum acceptable value of an open amount gift card.")
+    gift_price: Float @doc(description: "The fixed price/Percentance of gift card.")
+    gift_value: Float @doc(description: "The fixed value of gift card.")
+    gift_dropdown: [Float] @doc(description: "The gift card options") @resolver(class: "Magestore\\GiftvoucherGraphQl\\Model\\Resolver\\Product\\GiftCardDropdown")
+    gift_template_ids: [Int] @doc(description: "The gift card template ids") @resolver(class: "Magestore\\GiftvoucherGraphQl\\Model\\Resolver\\Product\\GiftCardTemplateIds")
+    gift_templates: [GiftCardTemplate] @doc(description: "The gift card template ids") @resolver(class: "Magestore\\GiftvoucherGraphQl\\Model\\Resolver\\Product\\GiftCardTemplates")
+    gift_card_options: [CustomizableOptionInterface!]! @doc(description: "An array of giftcard options.") @resolver(class: "Magestore\\GiftvoucherGraphQl\\Model\\Resolver\\Product\\Options\\GiftCardOptions")
+}
+
+type GiftCardTemplate @doc(description: "Gift card template information") {
+    giftcard_template_id: Int @doc(description: "Gift card template id")
+    template_name: String @doc(description: "Template name")
+    notes: String @doc(description: "Notes")
+    style_color: String @doc(description: "Style color")
+    text_color: String @doc(description: "Text color")
+    design_pattern: String @doc(description: "Design Pattern")
+    images: String @doc(description: "Images")
+    created_at: String @doc(description: "Created at")
+    updated_at: String @doc(description: "Updated at")
+    status: Int @doc(description: "status")
+}
+
+enum GiftCardTypeEnum @doc(description: "This enumeration defines the types of gift cards") {
+    VIRTUAL
+    PHYSICAL
+    COMBINED
+}
+
+enum GiftCardValueTypeEnum @doc(description: "This enumeration defines the value types of gift cards") {
+    FIXED
+    RANGE
+    DROPDOWN
+}
+
+enum GiftCardPriceTypeEnum @doc(description: "This enumeration defines the price types of gift cards") {
+    SAME
+    FIXED
+    PERCENT
+}
+
+type Customer {
+    ms_gift_codes: [MSGiftCode] @resolver (class: "\\Magestore\\GiftvoucherGraphQl\\Model\\Resolver\\GetGiftCodeOfCustomer") @doc(description: "Get list gift code of customer")
+}
+
+type MSGiftCode {
+    giftvoucher_id: Int @doc(description: "Giftvoucher Id")
+    gift_code: String @doc(description: "Gift Code")
+    balance: String @doc(description: "Balance")
+    currency: String @doc(description: "Currency")
+    status: Int @doc(description: "Status")
+    expired_at: String @doc(description: "Expired At")
+    customer_id: Int @doc(description: "Customer Id")
+    customer_name: String @doc(description: "Customer Name")
+    recipient_name: String @doc(description: "Recipient Name")
+    recipient_email: String @doc(description: "Recipient Email")
+    recipient_address: String @doc(description: "Recipient Address")
+    message: String @doc(description: "Message")
+    store_id: Int @doc(description: "Store Id")
+    day_to_send: String @doc(description: "Day to send")
+    is_sent: String @doc(description: "Is Sent")
+    shipped_to_customer: Int @doc(description: "Shipped To customer")
+    created_form: String @doc(description: "Created Form")
+    template_id: Int @doc(description: "Template Id")
+    description: String @doc(description: "Description")
+    giftvoucher_comments: String @doc(description: "Giftvoucher Comments")
+    email_sender: Int @doc(description: "Email sender")
+    notify_success: Int @doc(description: "Notify Success")
+    giftcard_custom_image: Int @doc(description: "Giftcard Custom Image")
+    giftcard_template_id: Int @doc(description: "Giftcard Template Id")
+    giftcard_template_image: String @doc(description: "Giftcard Template Image")
+    timezone_to_send: String @doc(description: "Timezone To Send")
+    day_store: String @doc(description: "Day Store")
+    used: Int @doc(description: "used")
+    set_id: Int @doc(description: "Set Id")
+}
+
+type Mutation {
+    addGiftCardProductsToCart(input: AddGiftCardProductsToCartInput): AddGiftCardProductsToCardOutput @resolver(class: "Magestore\\GiftvoucherGraphQl\\Model\\Resolver\\AddGiftCardProductsToCart")
+    uploadGiftCardTemplateImage(
+        base64_encoded_data: String! @doc(description: "The image in base64 format.")
+        name: String! @doc(description: "The file name of the image.")
+        type: String! @doc(description: "The MIME type of the file, such as image/png.")
+    ): GiftCardTemplateImage @resolver(class: "Magestore\\GiftvoucherGraphQl\\Model\\Resolver\\UploadGiftCardTemplateImage")
+    msApplyGiftCodeToCart(cart_id: ID!, gift_code: String!, amount_applied: Float): MsApplyGiftCodeToCartOutput @resolver (class: "\\Magestore\\GiftvoucherGraphQl\\Model\\Resolver\\ApplyGiftCode") @doc(description: "Apply gift code into cart.")
+    msRemoveGiftCodeFromCart(cart_id: ID!, gift_code: String, is_remove_all: Boolean): MsRemoveGiftCodeToCartOutput @resolver (class: "\\Magestore\\GiftvoucherGraphQl\\Model\\Resolver\\RemoveGiftCode") @doc(description: "Remove gift code into cart.")
+}
+
+type GiftCardTemplateImage {
+    error_message: String @doc(description: "Error Message")
+    url: String @doc(description: "Image Url")
+}
+
+input AddGiftCardProductsToCartInput {
+    cart_id: String!
+    cart_items: [GiftCardProductCartItemInput!]!
+}
+
+input GiftCardProductCartItemInput {
+    data: CartItemInput!
+    customizable_options:[CustomizableOptionInput!]
+}
+
+input CartItemInput {
+    giftcard_options: GiftCardOptions @doc(description: "Gift Card Option")
+}
+
+input GiftCardOptions {
+    recipient_name: String @doc(description: "Recipient Name")
+    recipient_email: String @doc(description: "Recipient Email")
+    message: String @doc(description: "Message")
+    day_to_send: String @doc(description: "Day to send")
+    timezone_to_send: String @doc(description: "Timezone to send")
+    recipient_address: String @doc(description: "Recipient Address")
+    notify_success: Int @doc(description: "Notify success or not")
+    send_friend: Int @doc(description: "Send friend")
+    giftcard_template_id: Int @doc(description: "Gift card template id")
+    customer_name: String @doc(description: "Customer name")
+    giftcard_template_image: String @doc(description: "Gift card template image")
+    giftcard_use_custom_image: Int @doc(description: "Gift card use custom image")
+    amount: Float @doc(description: "Amount")
+    giftcard_amount: Float @doc(description: "Gift card amount")
+}
+
+type AddGiftCardProductsToCardOutput {
+    cart: Cart!
+}
+
+type GiftCardCartItem implements CartItemInterface @doc(description: "Gift Card Cart Item") {
+    customizable_options: [SelectedCustomizableOption] @resolver(class: "Magento\\QuoteGraphQl\\Model\\Resolver\\CustomizableOptions")
+    giftcard_options: GiftCardOptionsOutput @doc(description: "Gift card options output") @resolver(class: "Magestore\\GiftvoucherGraphQl\\Model\\Resolver\\GiftCardOptions")
+}
+
+type GiftCardOptionsOutput {
+    recipient_name: String @doc(description: "Recipient Name")
+    recipient_email: String @doc(description: "Recipient Email")
+    message: String @doc(description: "Message")
+    day_to_send: String @doc(description: "Day to send")
+    timezone_to_send: String @doc(description: "Timezone to send")
+    recipient_address: String @doc(description: "Recipient Address")
+    notify_success: Int @doc(description: "Notify success or not")
+    send_friend: Int @doc(description: "Send friend")
+    giftcard_template_id: Int @doc(description: "Gift card template id")
+    giftcard_template: GiftCardTemplate @doc(description: "Gift card template")  @resolver(class: "Magestore\\GiftvoucherGraphQl\\Model\\Resolver\\GiftCardOptions\\GiftCardTemplate")
+    customer_name: String @doc(description: "Customer name")
+    giftcard_template_image: String @doc(description: "Gift card template image")
+    giftcard_use_custom_image: Int @doc(description: "Gift card use custom image")
+    amount: Float @doc(description: "Amount")
+    giftcard_amount: Float @doc(description: "Gift card amount")
+}
+
+type MsApplyGiftCodeToCartOutput {
+    cart: Cart! @doc(description: "The customer cart after gift code are applied")
+    notice_messages: [String] @doc(description: "Notice message when applied gift code")
+}
+
+type MsRemoveGiftCodeToCartOutput {
+    cart: Cart! @doc(description: "The customer cart after gift code are removed")
+    notice_messages: [String] @doc(description: "Notice message when removed gift code")
+}
+
+type CartPrices {
+    ms_gift_voucher_info: MagestoreGiftVoucherInfo @doc(description: "Gift voucher information in quote") @resolver(class: "Magestore\\GiftvoucherGraphQl\\Model\\Resolver\\GetGiftVoucherInfoInQuote")
+}
+
+type MagestoreGiftVoucherInfo {
+    giftvoucher_base_shipping_hidden_tax_amount: Float @doc(description: "Gift voucher base shipping hidden tax amount")
+    giftvoucher_shipping_hidden_tax_amount: Float @doc(description: "Gift voucher shipping hidden tax amount")
+    base_giftvoucher_discount_for_shipping: Float @doc(description: "Base gift voucher discount for shipping")
+    giftvoucher_discount_for_shipping: Float @doc(description: "Gift voucher discount for shipping")
+    giftvoucher_base_hidden_tax_amount: Float @doc(description: "Base gift voucher hidden tax")
+    giftvoucher_hidden_tax_amount: Float @doc(description: "Gift voucher hidden tax")
+    base_gift_voucher_discount: Float @doc(description: "Base gift voucher discount")
+    gift_voucher_discount: Float @doc(description: "Gift voucher discount")
+    gift_voucher_gift_codes: [String] @doc(description: "Gift code list used in quote")
+    giftcodes_applied_discount: [GiftCodeAppliedAmount] @doc(description: "Gift code used and discount in quote")
+    giftcodes_applied_discount_for_shipping: [GiftCodeAppliedAmount] @doc(description: "Gift codes applied for shipping")
+}
+
+type GiftCodeAppliedAmount {
+    code: String @doc(description: "Gift code applied"),
+    discount: Float @doc(description: "Gift code discount amount"),
+    base_discount: Float @doc(description: "Base Gift code discount amount"),
+}
+

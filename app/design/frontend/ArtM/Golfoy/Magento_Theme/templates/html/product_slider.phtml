@@ -1,0 +1,35 @@
+<?php
+    
+    
+    $cat_id = $this->getCatId();
+    $heading = $this->getHeading();
+    $num_prds = $this->getNumPrds();
+    $classes = $this->getCssclass();
+    
+    $heading =  ( trim($heading) == '' ) ? '':$heading;
+    $cat_id =  ( trim($cat_id) == '' ) ? 2:$cat_id;
+    $num_prds =  ( trim($num_prds) == '' ) ? 15:$num_prds;
+    $classes =  ( trim($classes) == '' ) ? :$classes;
+
+//    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+//    $CommonHelper = $objectManager->get('ArtM\Common\Helper\Data');
+
+//    echo "<br>heading".$heading."<br>";
+//    echo "<br>cat_id".$cat_id."<br>";
+//    echo "<br>num_prds".$num_prds."<br>";
+
+    
+   echo "<div class='slider_html_here container-fluid ".$classes." ' param_heading='".$heading."' param_catid='".$cat_id."' param_numproducts='".$num_prds."' >";
+   echo "<div class='animation_div slider_html_here_inner'></div>";
+   echo "</div>";
+   
+   
+?>
+<style>
+   .animation_div.slider_html_here_inner{height:332px;width:100%;}
+   @media screen and (min-width: 768px) {
+       .animation_div.slider_html_here_inner{height:532px;width:100%;}
+       }    
+</style>
+
+

@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+
+<!--
+  ~ Copyright © 2018 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <!-- Temporary use rest api to login, deprecated in future -->
+    <route url="/V1/click-and-collect/staff/login" method="POST">
+        <service class="Magestore\Webpos\Api\Staff\StaffManagementInterface" method="login"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+
+    <route url="/V1/click-and-collect/config" method="GET">
+        <service class="Magestore\Webpos\Api\Config\ConfigRepositoryInterface" method="getAllConfig"/>
+        <resources>
+            <resource ref="Magestore_ClickAndCollectAdminUi::click_and_collect" />
+        </resources>
+    </route>
+
+    <route url="/V1/click-and-collect/orders/sync" method="GET">
+        <service class="Magestore\Webpos\Api\Sales\OrderRepositoryInterface" method="sync"/>
+        <resources>
+            <resource ref="Magestore_ClickAndCollectAdminUi::click_and_collect" />
+        </resources>
+    </route>
+
+    <route url="/V1/click-and-collect/orders/search" method="GET">
+        <service class="Magestore\Webpos\Api\Sales\OrderSearchRepositoryInterface" method="searchAllOrder"/>
+        <resources>
+            <resource ref="Magestore_ClickAndCollectAdminUi::click_and_collect" />
+        </resources>
+    </route>
+    
+    <route url="/V1/click-and-collect/orders/statuses" method="GET">
+        <service class="Magestore\Webpos\Api\Sales\Order\StatusRepositoryInterface" method="getStatuses"/>
+        <resources>
+            <resource ref="Magestore_ClickAndCollectAdminUi::click_and_collect" />
+        </resources>
+    </route>
+    
+    <route url="/V1/click-and-collect/load-order-by-increment-id" method="GET">
+        <service class="Magestore\Webpos\Api\Sales\OrderRepositoryInterface" method="getByIncrementId"/>
+        <resources>
+            <resource ref="Magestore_ClickAndCollectAdminUi::click_and_collect" />
+        </resources>
+    </route>
+
+    <route url="/V1/click-and-collect/order/sendEmail" method="POST">
+        <service class="Magestore\Webpos\Api\Sales\OrderRepositoryInterface" method="sendEmail"/>
+        <resources>
+            <resource ref="Magestore_ClickAndCollectAdminUi::click_and_collect" />
+        </resources>
+    </route>
+
+    <route url="/V1/click-and-collect/order/comment" method="POST">
+        <service class="Magestore\Webpos\Api\Sales\OrderRepositoryInterface" method="commentOrder"/>
+        <resources>
+            <resource ref="Magestore_ClickAndCollectAdminUi::click_and_collect" />
+        </resources>
+    </route>
+    
+    <route url="/V1/click-and-collect/staff/continueLogin" method="GET">
+        <service class="Magestore\Webpos\Api\Staff\StaffManagementInterface" method="continueLogin"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+
+    <route url="/V1/click-and-collect/staff/logout" method="GET">
+        <service class="Magestore\Webpos\Api\Staff\StaffManagementInterface" method="logout"/>
+        <resources>
+            <resource ref="Magestore_ClickAndCollectAdminUi::click_and_collect"/>
+        </resources>
+    </route>
+
+    <route url="/V1/click-and-collect/website/information" method="GET">
+        <service class="Magestore\Webpos\Api\Website\WebsiteInformationRepositoryInterface" method="getInformation"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+
+</routes>

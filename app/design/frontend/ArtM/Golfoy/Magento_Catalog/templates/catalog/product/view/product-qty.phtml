@@ -1,0 +1,42 @@
+<?php
+/**
+ * Product Quantity Template
+ * 
+ * @var \Magento\Catalog\Block\Product\View $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \ArtM\Common\ViewModel\ProductData $productData
+ */
+$productData = $block->getData('product_qty');
+if (!$productData) {
+    return;
+}
+
+// Get current product
+$registry = \Magento\Framework\App\ObjectManager::getInstance()->get(\Magento\Framework\Registry::class);
+$currentProduct = $registry->registry('current_product');
+
+if (!$currentProduct) {
+    return;
+}
+
+// Only show quantity for simple products
+if ($currentProduct->getTypeId() !== 'simple') {
+    return;
+}
+
+// Get stock quantity for current product (using MSI)
+$stockQty = $productData->getProductStockQuantity($currentProduct->getId());
+
+if ($stockQty === null || $stockQty <= 0) {
+    return;
+}
+
+// Determine display text based on quantity
+if ($stockQty <= 10) {
+    $displayText = 'Qty: Only ' . (int)$stockQty. ' left';
+} else {
+    $displayText = '10+ Available';
+}
+?>
+
+<div class="show-available-qty stock-message"><?= $escaper->escapeHtml($displayText) ?></div>

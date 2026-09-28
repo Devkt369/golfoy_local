@@ -1,0 +1,60 @@
+<style>
+        .container.container_failure {
+            text-align: center;
+        }
+        .image_failure img {
+            max-width: 300px;
+        }
+        .content_failure {
+            margin-bottom: 100px;
+        }
+        .content_failure p {
+            font-weight: 500;
+            max-width: 700px;
+            margin: auto;
+            border-top: 1px solid #f3f3f3;
+            padding-top: 20px;
+            margin-bottom: 20px;
+        }
+        .content_failure a.try_again {
+            text-decoration: underline;
+            color: #e60023;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+        .go_to_cart_box {
+            margin-top: 25px;
+        }
+
+        .go_to_cart_box a {
+            background-color: #e60023;
+            color: white;
+            text-decoration: none;
+            padding: 10px 14px 7px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .content_failure h1 {
+            font-size: 27px;
+            font-weight: 700;
+        }
+    </style>
+  <div class="container container_failure">
+        <div class="image_failure">
+            <img src='<?php echo $this->getViewFileUrl('images/rejected.svg'); ?>'>
+        </div>
+        <div class="content_failure">
+            <h1>
+                Payment Failed
+            </h1>
+            <p>
+                In Case the amount is debited from your account, the refund will be initiated within 48 hours and credit to your account with in 5-7 business days.
+            </p>
+            <div>
+                <a class="try_again" href="<?php echo $this->getUrl('checkout', ['_secure' => true]); ?>">Try another payment method</a>
+            </div>
+            <div class="go_to_cart_box">
+                <a class="go_to_cart" href="<?php echo $this->getUrl('checkout/cart', ['_secure' => true]); ?>">View Cart</a>
+            </div>
+        </div>
+    </div>

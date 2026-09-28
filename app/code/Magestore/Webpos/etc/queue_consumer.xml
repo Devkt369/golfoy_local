@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/consumer.xsd">
+    <consumer name="magestore_pos_process_order.convert.consumer" queue="magestore_pos_process_order.convert.queue" connection="db" maxMessages="200" consumerInstance="Magento\Framework\MessageQueue\Consumer" handler="Magestore\Webpos\Model\Checkout\PosOrder\Consumer::execute" />
+</config>

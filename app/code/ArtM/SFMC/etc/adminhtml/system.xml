@@ -1,0 +1,154 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="artm" translate="label" sortOrder="999">
+            <label>artm</label>
+        </tab>
+        <section id="sfmc" sortOrder="110" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+            <label>SFMC</label>
+            <tab>artm</tab>
+            <resource>ArtM_Review::config_artm_review</resource>
+            <group id="module_status" translate="label" type="text" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General</label>
+                <field id="status" type="select" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Enable/Disable Module</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+            </group>
+            <group id="module" translate="label" type="text" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Customer Cron Config</label>
+                <field id="cron" type="select" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Enable/Disable Customer Cron</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+                <field id="cron_after_message" translate="label" type="text" sortOrder="13" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Cron After ( In minutes )</label>
+                </field>
+                <field id="batch_of" translate="label" type="text" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Batch of ( Max 1000 )</label>
+                </field>
+                <field id="create_customer_url" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Create Customer Url</label>
+                </field>
+                <field id="last_update" translate="label" sortOrder="930" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Last Updated</label>
+                    <frontend_model>ArtM\SFMC\Block\Adminhtml\Cron\LastUpdate</frontend_model>
+                </field>
+            </group>
+            <group id="module_product" translate="label" type="text" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Product Cron Config</label>
+                <field id="cron" type="select" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Enable/Disable Product Cron</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+                <field id="batch_of" translate="label" type="text" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Batch of ( Max 1000 )</label>
+                </field>
+                <field id="create_product_url" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Create Product Url</label>
+                </field>
+                <field id="new_create_product_url" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>(New) Create Product Url</label>
+                </field>
+                <field id="last_update" translate="label" sortOrder="930" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Last Updated</label>
+                    <frontend_model>ArtM\SFMC\Block\Adminhtml\Cron\LastUpdate</frontend_model>
+                </field>
+            </group>
+            <group id="module_order" translate="label" type="text" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Order Cron Config</label>
+                <field id="cron" type="select" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Enable/Disable Order Cron</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+                <field id="batch_of" translate="label" type="text" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Batch of ( Max 1000 )</label>
+                </field>
+                <field id="create_order_url" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Create Order Url</label>
+                </field>
+                <field id="last_update" translate="label" sortOrder="930" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Last Updated</label>
+                    <frontend_model>ArtM\SFMC\Block\Adminhtml\Cron\LastUpdate</frontend_model>
+                </field>
+                <field id="tracking_order_url" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Tracking order Url</label>
+                </field>
+            </group>
+            <group id="module_coupon" translate="label" type="text" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Coupon</label>
+                <field id="create_coupon_url" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Create Order Url</label>
+                </field>
+            </group>
+            <group id="module_abandoned" translate="label" type="text" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Abandoned Cart</label>
+                <field id="cron" type="select" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Enable/Disable Order Cron</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+                <field id="batch_of" translate="label" type="text" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Batch of ( Max 1000 )</label>
+                </field>
+                <field id="create_abandoned_url" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Create Abandoned Url</label>
+                </field>
+            </group>
+
+            <group id="module_abandoned_coupon" translate="label" type="text" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Abandoned Coupon Cart</label>
+                <field id="cron" type="select" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+                    <label>Enable/Disable Abandoned Coupon Cart Cron</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+                <field id="prefix" translate="label" type="text" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Coupon Perfix</label>
+                </field>
+                <field id="suffix" translate="label" type="text" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Coupon Suffix</label>
+                </field>
+                <field id="total_length" translate="label" type="text" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Total length</label>
+                </field>
+                <field id="expiry_date" translate="label" type="text" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Total Days for Coupon Validation ( +15 days )</label>
+                </field>
+                <field id="descripton" translate="label" type="text" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Description </label>
+                </field>
+                <field id="total_discount" translate="label" type="text" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Total Discount In(%)</label>
+                </field>
+                <field id="abandoned_coupon_url" translate="label" type="text" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>URL</label>
+                </field>
+            </group>
+
+            <group id="configuration" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Configuration</label>
+                <field id="mid" translate="label" type="text" sortOrder="15" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Mid</label>
+                </field>
+                <field id="client_id" translate="label" type="text" sortOrder="16" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Client Id</label>
+                </field>
+                <field id="client_secret" translate="label" type="text" sortOrder="17" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Client Secret</label>
+                </field>
+                <field id="bearer_key_update_after" translate="label" type="text" sortOrder="17" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Bearer Key Update After (in minutes)</label>
+                </field>
+                <field id="create_bearer_key" translate="label" type="text" sortOrder="19" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Create Bearer key Url</label>
+                </field>
+                <field id="bearer_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Bearer key</label>
+                </field>
+                <field id="bearer_key_last_update" translate="label" sortOrder="930" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Bearer key Last Updated</label>
+                    <frontend_model>ArtM\SFMC\Block\Adminhtml\Cron\BearerKeyLastUpdate</frontend_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

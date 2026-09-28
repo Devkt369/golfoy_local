@@ -1,0 +1,654 @@
+<?php
+//echo $block->getOrder()->getId();
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$customerSession = $objectManager->create('Magento\Customer\Model\Session');
+$orderId = $block->getOrder()->getIncrementId();
+$orderId = $block->getOrder()->getId();
+$payment = $block->getOrder()->getPayment();
+$ordersituation= $block->getOrderStateLabel($orderId);
+$orderstatus= $block->getOrderStatusLabel($orderId);
+$customerid= $block->getOrder()->getCustomerId();
+$order_created=$block->getOrder()->getCreatedAt();
+$paymentMethod = $payment->getMethodInstance();
+$paymentmethodcode = $paymentMethod->getCode();
+
+
+$today = date('Y-m-d');
+$datelimit = date('Y-m-d', strtotime($order_created. ' + 10 days')); 
+/*
+
+
+echo "<br>orderId : ".$orderId;
+echo "<br>ordersituation : ".$ordersituation;
+echo "<br>orderstatus : ".$orderstatus;
+echo "<br>customerid : ".$customerid;
+echo "<br>order_created : ".$order_created;
+*/
+
+//////////////////////////Checking for Status to Cancel/////////////////////////////////
+
+    $flag_show_button = false;
+    if( $ordersituation == 'processing' ){
+        $url = $this->getUrl('cancelorder/index/submit');
+        $flag_show_button = true;
+        if( trim(strtolower($orderstatus)) == 'order cancellation requested' ){
+            $flag_show_button = false;
+        }
+    }else if($ordersituation == 'new'){
+        $url = $this->getUrl('cancelorder/index/submit');
+        $flag_show_button = true;
+    }else{
+        $url = '';
+        $flag_show_button = false;
+    }
+
+    if($flag_show_button ){ 
+        
+    if ($customerSession->isLoggedIn()) {
+        $customer_name = $customerSession->getCustomer()->getName();  // get  Full Name
+        $customer_email = $customerSession->getCustomer()->getEmail(); 
+        
+    }
+    ?>
+
+        <form method="post" class="form cancelcustomform_form" action="<?php echo $url; ?>" id="cancelcustomform" >
+            <input type="hidden" value="<?= $customer_name?>" name="customer_name"/>
+            <input type="hidden" value="<?= $customer_email?>" name="customer_email"/>
+            <input type="hidden" value="<?= $orderId?>" name="order_id"/>
+            <input type="hidden" value="<?= $ordersituation?>" name="order_state"/>
+            <input type="hidden" value="<?= $orderstatus?>" name="order_status"/>
+            <input type="hidden" value="cancel" name="return_cancel_status"/>
+            <input type="hidden" value="<?= $customerid?>" name="customer_id"/>
+            <input name="form_key" type="hidden" value="<?php /* @escapeNotVerified */ echo $block->getFormKey(); ?>" />
+            <input type="submit" value="Cancel Order" class="ordercancel"/>
+        </form>  
+    <?php 
+    }
+
+
+    if( $ordersituation == 'processing' && strtolower($orderstatus) == 'order cancellation requested' ){
+        echo "<div class='order_request_text'>Order Cancellation request was sent</div>";	
+    } 
+
+    //////////////////////////Return the order code starts/////////////////////////////////
+    if ($customerSession->isLoggedIn()) {
+        $customer_name = $customerSession->getCustomer()->getName();  // get  Full Name
+        $customer_email = $customerSession->getCustomer()->getEmail(); 
+        $phone = '';
+        
+        if( !empty($block->getOrder()->getShippingAddress()) ){
+            $phone = $block->getOrder()->getShippingAddress()->getTelephone();
+        }
+        
+        if( $phone == '' ){
+            //if phone is still empty > in case shipping address is not given then it will pick phone from billing address
+            if( !empty($block->getOrder()->getBillingAddress()) ){
+                $billing = $block->getOrder()->getBillingAddress()->getData();
+                $phone = $billing['telephone']; 
+            }   
+        }
+        
+    }else{
+        $customer_name = '';
+        $customer_email = '';
+        $phone = '';
+    }
+
+    if( $ordersituation == 'complete' && strtolower($orderstatus) == 'replacement requested' ){
+        echo "<div class='order_request_text'>Order Return/Replace request was sent</div>";
+    }else if( $ordersituation == 'complete' && strtolower($orderstatus) == 'replacement request placed' ){
+        echo "<div class='order_request_text'>Order Return/Replace request was sent</div>";
+    }else if (($ordersituation=='complete') && ($datelimit>= $today)){
+        $url = $this->getUrl('cancelorder/index/submit', ['_secure' => true]);
+    ?>
+
+        <div class="triggercstm">
+            <div class="return_request_button">
+                <input type="checkbox" class="checkbox checkbox--red checkbox_return_button" id="return_order_checkbox" value="<?= $customer_name ?>">
+                <label for="return_order_checkbox" id="return_order_checkbox_text">Return/Replace Order</label>
+            </div>
+            <div class="msgcstm" style="display:none;">
+                <form class="return_quest_form" class="form" action="<?php echo $url; ?>" id="cancelcustomform" method="post" enctype="multipart/form-data">
+        <?php       
+                $i = 0;
+                echo "<label>Select products to return</label>";
+                    foreach ($block->getOrder()->getAllVisibleItems() as $_item) {                    
+        ?>  
+                    <div class="row product_info_return">
+                        
+                    <!-- checkingh if returnable or not -->
+                    <span style="display:none">
+                       <?php 
+                       $rprid=$_item->getProductId();
+                       $rproduct= $objectManager->get('Magento\Catalog\Model\Product')->load($rprid);
+                       $attr = $rproduct->getData('returnable'); 
+                       $repttr = $rproduct->getData('replacement_policy');?>
+                       <?php echo 'lee'.$attr.$repttr;?>
+                       
+                    
+                    </span>  
+                                <?php
+                               // $e='no';
+                                if($repttr==1439) {
+                                    
+                                    ?>
+                                    <input disabled type="checkbox" id="input_<?php echo $i; ?>_prd" value="<?= $_item->getProductId() ?>" name="productids" class="productids"> 
+                                        <label for="input_<?php echo $i; ?>_prd">
+                                        <strike> <?= $_item->getName() ?> </strike> 
+                                        <span style="color:#e60023"> &nbsp;&nbsp;  Not Refundable/ No Exchangable</span>
+                                        </label> 
+                                        <?php } else  { ?>
+                                            <input  type="checkbox" id="input_<?php echo $i; ?>_prd" value="<?= $_item->getProductId() ?>" name="productids" class="productids"> 
+                                <label for="input_<?php echo $i; ?>_prd">
+                                    <?= $_item->getName() ?> <span style="color:#e60023"> &nbsp;&nbsp; Not Refundable/ Only Exchangable</span>
+                                </label>
+                                     <?php    }
+                                      
+                                  ?>  
+                               
+                               
+                                <img src="<?= $_item->getProductThumbnail()?>">  
+                        </div>
+                    
+
+        <?php 
+            $i++;  
+                    }
+        
+        ?>
+                    <div class="row input_area">
+                        <label for="customer_name">Name</label>
+                        <input type="text" name="customer_name" id="customer_name" value="<?= $customer_name ?>" required>
+                    </div>
+                    <div class="row input_area">
+                        <label for="customer_email">Email</label>
+                        <input type="text" name="customer_email" id="customer_email" value="<?= $customer_email ?>" required>
+                    </div>
+                    <div class="row input_area">
+                        <label for="customer_phone">Phone</label>
+                        <input type="text" name="customer_phone" id="customer_phone" value="<?= $phone ?>" required>
+                    </div>
+                    
+                
+    <!--   ****************    Drop down menu ******************  -->  
+                    <div>
+                    <script>
+
+                </script>  
+                <?php 
+                    $firstreason = ["0"=>"Size/color Issue",
+                                    "1"=>"Did not like the Product",
+                                    "2"=>"Defective/Damage Product received",
+                                    "3"=>"Wrong item Shipped",
+                                    "show"=>"Other"];
+                    
+                    $subreason = ["0"=>"Wrong Color Delivered",
+                                  "1"=>"Different from what was ordered",
+                                  "2"=>"Delivered wrong size",
+                                  "3"=>"Product not as displayed on website"
+                    ];    
+
+                ?>    <label for="Setect reson">Select Reason</label>              
+                    <select class="form-select form-select-sm" name="firstreson" required="required" id="firstreason">
+                        <option selected value="">Select Reason First</option>
+                        <?php  foreach ($firstreason as $key=>$v){
+                            echo '<option value="'.$key.'">'.$v.'</option>';
+                        }
+                        
+                        ?>
+                        <!-- <option value="0">Size/color Issue</option>
+                        <option value="1">Did not like the Product</option>
+                        <option value="2">Defective/Damage Product received</option>
+                        <option value="3">Wrong item Shipped</option>
+                        <option value="show">Other</option> -->
+                    </select>
+
+                    <select class="form-select form-select-sm" name="subreson" style="display: none !important; margin-top:10px;" id="subfield">
+                     
+                        <?php   foreach($subreason as $keys=>$vs){
+                            echo '<option value="'.$keys.'">'.$vs.'</option>';
+                        } 
+                        
+                        ?>
+                        <!-- <option value="0">Wrong Color Delivered</option>
+                        <option value="1">Different from what was ordered</option>
+                        <option value="2">Delivered wrong size</option>
+                        <option value="3">Product not as displayed on website(Please give details)</option> -->
+                    </select>
+
+                    </div>
+
+                    <div class="row input_area" style="display: none !important;" id="inputField">
+                        <label for="return_reason" class="return_label">Reason to return </label>
+                        <textarea name="return_reason" id="return_reason"></textarea>
+                        
+                    </div>
+
+                    <!-- Return image upload  -->      
+                    <div class="field review-field-media" class="review-form" method="post" id="review-form">
+                        <label class="label" style="margin-top:10px;"><span><?php /* @escapeNotVerified */ echo __('Add a photo ') ?>(at least 2 or upto 5)</span></label>
+                        <div class="control">
+                            <input type="file"  style="display:none !important;" name="review_media[]" id="review_media" accept=".png, .jpg, .jpeg" multiple="multiple" />
+                            
+                        </div>
+                        <!--------------------------------------->
+                        <div id="review-drag-area" class="review-drag-area" style="border:3px dashed lightgray;border-radius:10px;">   
+                        <p class="review-dragdrop" style="text-align:center;color:gray;">+ </p> 
+                        </div> 
+                        <!--------------------------------------->
+                        <div for="media_field" generated="true" class="mage-error" id="media_field-error" style="display: none;">
+                            <?php /* @escapeNotVerified */ echo __('You can Upload minimum 2 and maximum 5 images.') ?>
+                        </div>
+                    </div> 
+                    <?php $return_orderId = $block->getOrder()->getIncrementId();  ?>
+<style>
+     #review-drag-area{width:80px;min-height:85px;display:inline-block;}
+     .review-resultimg{width:115px;display:inline-block;position:relative;margin-right:8px;}
+     p.review-dragdrop{font-size:35px;margin:0px;cursor:pointer;padding:15px 15px;}
+     .review-img-cross{position: absolute;right: 0; cursor:pointer;top: 0;border-radius: 31px;width: 25px;
+     height: 25px;background: #fff;border: 1px solid gray;text-align: center;padding-top: 2px;}
+    .review-resultimg.image{position:relative;margin-top:0px !important;margin-left:0px !important;width:100% !important;}
+</style>
+
+
+
+                    <script>
+    require(
+        [ 'jquery', 'jquery/ui' ], function ($) {
+             //----------------drag drop upload-----------------
+         $("html").on("dragover", function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+             
+          });
+    
+          $("html").on("drop", function(e) { e.preventDefault(); e.stopPropagation(); });
+    
+          // Drag enter        
+            $("#review-form").on("dragenter", ".review-drag-area", function(e){ 
+              e.stopPropagation();
+              e.preventDefault();
+          });
+    
+          // Drag over         
+            $("#review-form").on("dragover", ".review-drag-area", function(e){ 
+              e.stopPropagation();
+              e.preventDefault();
+          });
+    
+          // Drop         
+            $("#review-form").on("drop", ".review-drag-area", function(e){                 
+              e.stopPropagation();
+              e.preventDefault();
+              var file = e.originalEvent.dataTransfer.files;
+              var ins = file.length;  
+              var ln = $(".review-resultimg").length; 
+              var tc = 0;
+              if(ln){ tc = parseInt(ln) + parseInt(tc);}   
+              if(ins){ tc = parseInt(ins) + parseInt(tc);}          
+              if(tc >5){
+                $("#media_field-error").show();
+              }else{
+                $("#media_field-error").hide();
+                for (var x = 0; x < ins; x++) {
+                        var fdata = new FormData();   
+                        fdata.append("files[]", file[x]);
+                        uploadlogofunc(fdata); 
+                }
+              }
+          });  
+          function uploadlogofunc(fdata) {             
+           if(fdata != null && fdata != ''){
+            //var fd = $('#file_data');
+            
+            $.ajax({
+                url: "/cancelorder/index/ajaxupload?orderid=<?php echo $return_orderId ?>",
+                type: "POST",
+                cache: false,
+                contentType: false,
+                processData: false,  
+                data:fdata,
+                dataType: 'json',
+                showLoader: true,
+                success:function(res){
+                  if(res.path){
+                    $htmlstr = '<div class ="review-resultimg" ><img src = "/media/return_image/<?php echo $return_orderId ?>'+res.path+'"><div class="review-img-cross" rel = "'+res.path+'">&#10006;</div>';                   
+                    $htmlstr = $htmlstr + '<input type="hidden" name = "review_media_files[]" value ="'+ res.path +'"></div>'; 
+                    //console.log(res.path);
+                    var temp = $('#file_data').val();
+                    var newtemp =  temp+","+res.path;
+                    $('#file_data').val(newtemp);
+
+                    $($htmlstr).insertBefore("#review-drag-area"); 
+                                
+                  }
+                }
+            });  
+          }
+          } 
+          $("#review-form").on("click", ".review-dragdrop", function(){ 
+               $("#review_media").trigger('click');
+            }); 
+            $("#review-form").on("click", ".review-img-cross", function(){  
+                var el = $(this).parent(".review-resultimg");
+                var rel = $(this).attr('rel');
+                var path = 'return_image/<?php echo $return_orderId ?>' + rel;
+                $.ajax({
+                    url: "/cancelorder/index/deleteajaxupload",
+                    type: "POST",
+                    data: 'path='+path,      
+                    dataType: 'json',
+                    showLoader: true,
+                    success:function(res){
+                        el.remove();
+                        $("#media_field-error").hide();
+                    }
+                }); 
+            })
+            $(document).on('change','#review_media',function(){
+                var files = $(this)[0].files;
+                var ins = files.length;
+                var tc = 0;
+                var ln = $(".review-resultimg").length; 
+                if(ln){ tc = parseInt(ln) + parseInt(tc);}   
+                if(ins){ tc = parseInt(ins) + parseInt(tc);}  
+                if(tc > 5){
+                    $(this).val('');
+                    $("#media_field-error").show();
+                }else{
+                    for (var x = 0; x < ins; x++) {
+                        var fdata = new FormData();   
+                        fdata.append("files[]", document.getElementById('review_media').files[x]);
+                        uploadlogofunc(fdata);                              
+                    }
+                    $("#media_field-error").hide();
+                }
+            });
+            
+            $("#firstreason").change(function() {
+                var selectedOption = $(this).val();
+                var inputField = $("#inputField");
+                var subfield = $("#subfield");
+
+                if (selectedOption === "show") {
+                inputField.show();
+                subfield.hide();
+
+                }
+                else if (selectedOption === "0") {
+                    subfield.show();
+                    inputField.hide();
+                }
+                else {
+                    inputField.hide();
+                    subfield.hide();
+                }
+            });
+
+        });
+</script>
+
+
+
+<!-- end return image upload -->
+
+
+
+
+                    <!--<input name="form_key" type="hidden" value="<?php /* @escapeNotVerified */ 
+                    echo $block->getFormKey(); ?>" />-->
+                    
+                    <div class="row input_area" style="margin-top:30px;">
+                        <label for="refund_type">How would you like your refund</label>            
+                            <br>
+                        
+                        <input type="radio" name="refund_type" checked value="refund_wallet"><label>Golfoy Wallet</label> &nbsp; &nbsp; &nbsp;
+                        <input type="radio" name="refund_type" value="refund_bank"><label>IMPS(Bank Transfer)</label>   &nbsp; &nbsp; &nbsp;
+                        <?php if($paymentmethodcode == "cashondelivery"){
+                            echo '<input type="radio" name="refund_type" value="refund_source"><label>Return To Source</label>'; 
+                        }                        
+                        ?>
+                            <!-- <option selected value="">Select refund method</option>
+                            <option value="refund_bank">IMPS(Bank Transfer)</option>
+                            <option value="refund_wallet">Golfoy Wallet</option> -->
+                        <div class = "refund_bank_text" id = "refund_bank_text" style="margin-top:10px;display:none;">
+                        <?php  
+                            $showFields = true;                     
+                            $custId = $customerSession->getCustomer()->getId(); 
+                            if($custId){
+                                $collection =  $this->getAccounts($custId); 
+                                if(!empty($collection)){
+                                       foreach($collection as $item){               
+                                        if($item['method'] == 'refund_bank'){
+                                            $title = 'Account Number';
+                                            $Accdetails =  explode('||', $item['details']);
+                                            $accNumber = $Accdetails[0];
+                                            $ifsc = $Accdetails[1];
+                                            $length = strlen($accNumber);
+                                            if ( $length < 4){
+                                                $maskedString = $accNumber;
+                                            } else{
+                                                $maskedString = str_repeat("*", $length - 4) . substr($accNumber, -4);                                       
+                                            }
+                                        echo '<input type="radio" name="bankrefund" value="'.$item['id'].'"><label>'.$title. $maskedString.'</label> <br/>';
+                                        }
+                                    }
+                                    $showFields = false;
+                                    echo '<input type="radio" name="bankrefund" value="0"><label>Add New</label>';
+                                }else{
+                                    echo '<input type="radio" style= "display:none !important;" name="bankrefund" value="0" checked>';
+                                }                                
+                            }
+                            if($showFields){
+                                echo '<div class = "refund_bank_text_fields" id = "refund_bank_text_fields">';
+                            }else{
+                                echo '<div class = "refund_bank_text_fields" id = "refund_bank_text_fields" style="display:none;">';
+                            }
+                            ?>
+                            
+                            
+                                <label for="refund_type">Account Number</label>          
+                                <input type ="text" name ="refund_bank_accnumber" id ="refund_bank_accnumber"> 
+
+                                <label for="refund_type"> Confirm Account Number</label>          
+                                <input  type = "password"  name ="refund_bank_confirmaccnumber" id ="refund_bank_confirmaccnumber"> 
+
+                                <label for="refund_type">IFSC Code</label> <br/>        
+                                <input style="width:200px" maxlength ="11" type ="text" name ="refund_bank_ifsccode" id ="refund_bank_ifsccode"> 
+                                <span id="ifscdetail" style="font-size:11px;color:#333;"></span> 
+                                <input type="hidden" name="ifscverify" value = '1' id="ifscverify">
+                            </div>    
+                        </div>
+                      
+                        <div class = "refund_wallet_text" id = "refund_wallet_text" >
+                        <br>
+                            <p>The refund will be credit in your Golfoy Wallet in the form of golfoy wallet <a href="#">Know more </a></p>
+                        </div>
+
+                    </div>  
+
+                    <div class="row input_area" style="margin-top:10px;">  
+                        <input type="checkbox" class="checkbox " name = "return_consent" id="return_consent" >
+                        <label for="return_consent"> I haven't used this product. All tags,box are intact (if possible).</label>
+                    </div>
+                    
+                    <input type="hidden" name="product_ids" class="product_ids" id="product_ids">
+                    <input type="hidden" value="<?= $orderId?>" name="order_id"/>
+                    <input type="hidden" value="<?= $ordersituation?>" name="order_state"/>
+                    <input type="hidden" value="<?= $orderstatus?>" name="order_status"/>
+                    <input type="hidden" value="return" name="return_cancel_status"/>
+                    <input type="hidden" value="<?= $customerid?>" name="customer_id"/>
+                    <input type="hidden" value="" id="file_data" name="file_name" />
+                    <div class="error_return"></div>
+
+                    <input type="submit" name="submit" value="Send Return/Replace Request" class="return_submit primary tocart">
+                </form>    
+            </div>
+        </div>
+
+
+        <script>
+            require(['jquery'], function($){
+                jQuery(document).ready(function(){
+                    
+                    jQuery('form#cancelcustomform').submit(function(e){
+                        var proceed = true;
+                        var error = '';
+                        var count = $('input[name^="review_media_fi"]').length;
+                        //console.log(count);
+
+                        if( jQuery("#product_ids").val() == '' ){
+                            proceed = false;
+                            error = 'Please choose product(s) to return or replace';
+                        }
+                       
+                        if( count < 2 || count > 5 ){
+                            proceed = false;
+                            error = 'Please Upload minimum 2 and maximum 5 images';
+                        }
+
+                        if( jQuery("#firstreason").val() == 'show' && jQuery("#return_reason").val() == '' ){
+                            proceed = false;
+                            error = 'Please enter reason';
+                        }
+                        //------------------------
+                        
+                        if (jQuery("#refund_type").val() == 'refund_bank'){
+                            var refundAcc = jQuery("input[name='bankrefund']:checked").val();
+                            if(refundAcc == 0){
+                                if(jQuery("#refund_bank_accnumber").val() == '' ||
+                                    jQuery("#refund_bank_confirmaccnumber").val() == '' || 
+                                    jQuery("#refund_bank_ifsccode").val() == ''){
+                                    proceed = false;
+                                    error = 'Please enter account details';
+                                }
+                                if(jQuery("#refund_bank_accnumber").val() != 
+                                    jQuery("#refund_bank_confirmaccnumber").val() ){
+                                    proceed = false;
+                                    error = 'Account number does not match';
+                                }
+                                var ifscelmtval = jQuery("#ifscverify").val();
+                                if(ifscelmtval != '1'){
+                                    proceed = false;
+                                    error = 'ifsc code is not valid';
+                                }
+                            }
+                        }
+                        if (!jQuery('#return_consent').is(':checked')) {
+                            proceed = false;
+                            error = 'Tick the checkbox to accept that product is unused';
+                        }
+                        //-------------------------                       
+                        
+                        if( proceed ){
+                            jQuery('form#cancelcustomform').submit();
+                        }else{
+                            jQuery('.error_return').text(error);
+                            e.preventDefault();
+                        }                        
+                        
+                    });
+                    
+                    jQuery('.productids').click(function(){
+                        var prd_ids  = '';
+                        jQuery('.productids').each(function(){
+                            if( jQuery(this).is(':checked') ){
+                                prd_ids = prd_ids + "," + jQuery(this).val();
+                            }
+                        });
+                        prd_ids = prd_ids.replace(/^,/, '');
+                        jQuery("#product_ids").val( prd_ids );
+                    });
+
+                    jQuery('.return_request_button').click(function(){
+                        if( jQuery(this).children('input').is(':checked') ){
+                            jQuery('.msgcstm').slideDown();
+                        }else{
+                            jQuery('.msgcstm').slideUp();
+                        }
+
+                    });
+                    //--------------------refund type ---------------------------
+                   jQuery('input[name="refund_type"]').change(function() {
+                        var selectedOption =jQuery(this).val(); 
+
+                        if (selectedOption == "refund_bank") {
+                           jQuery("#refund_bank_text").show();
+                           jQuery("#refund_wallet_text").hide();
+
+                        }else if (selectedOption == "refund_wallet") {
+                           jQuery("#refund_bank_text").hide();
+                           jQuery("#refund_wallet_text").show();
+                        }
+                        else {
+                           jQuery("#refund_bank_text, #refund_wallet_text").hide();
+                        }
+                    });
+                   jQuery('input[name="bankrefund"]').change(function() {
+                        var selectedOption =jQuery(this).val(); 
+
+                        if (selectedOption == "0") {
+                           jQuery("#refund_bank_text_fields").show();
+                        }else {
+                           jQuery("#refund_bank_text_fields").hide();
+                        }
+                    });
+                    jQuery("#refund_bank_ifsccode").blur(function() {
+                        var val = jQuery(this).val();
+                        var ifscelmt =  jQuery("#ifscverify");
+                        if(val != ''){
+                            val = val.trim();
+                            var length = val.length;
+                            if(length < 11){
+                                jQuery.ajax({
+                                    url: "https://ifsc.razorpay.com/"+val,
+                                    type: "GET",
+                                    success: function(response) {
+                                        ifscelmt.val('1');
+                                        jQuery("#ifscdetail").html('&#9989;' + response.BANK +', ' + response.BRANCH);
+                                    },
+                                    error: function(jqXHR, textStatus, errorThrown) {
+                                        ifscelmt.val('0');
+                                        jQuery("#ifscdetail").html('not valid');
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    jQuery("#refund_bank_ifsccode").keyup(function() {
+                        var val = jQuery(this).val();
+                        var ifscelmt =  jQuery("#ifscverify");
+                        if(val != ''){
+                            val = val.trim();
+                            var length = val.length;
+                            if(length == 11){
+                                jQuery.ajax({
+                                    url: "https://ifsc.razorpay.com/"+val,
+                                    type: "GET",
+                                    success: function(response) {
+                                        ifscelmt.val('1');
+                                        jQuery("#ifscdetail").html('&#9989;' + response.BANK +', ' + response.BRANCH);
+                                    },
+                                    error: function(jqXHR, textStatus, errorThrown) {
+                                        ifscelmt.val('0');
+                                        jQuery("#ifscdetail").html('not valid');
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    //---------------------------------------------
+                });
+            });
+
+
+    
+        </script>
+<?php 
+
+    }
+?>
+
+
+

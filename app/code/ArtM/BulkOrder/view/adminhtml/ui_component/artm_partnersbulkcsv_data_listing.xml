@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">artm_partnersbulkcsv_data_listing.artm_partnersbulkcsv_data_source</item>
+            <item name="deps" xsi:type="string">artm_partnersbulkcsv_data_listing.artm_partnersbulkcsv_data_source</item>
+        </item>
+        <item name="spinner" xsi:type="string">artm_partnersbulkcsv_data_columns</item>
+    </argument>
+    <dataSource name="artm_partnersbulkcsv_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider</argument>
+            <argument name="name" xsi:type="string">artm_partnersbulkcsv_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">id</argument>
+            <argument name="requestFieldName" xsi:type="string">id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+                    <item name="update_url" xsi:type="url" path="mui/index/render" />
+                    <item name="storageConfig" xsi:type="array">
+                        <item name="indexField" xsi:type="string">id</item>
+                    </item>
+                </item>
+            </argument>
+        </argument>
+    </dataSource>
+    <listing>
+        <listingToolbar>
+            <bookmark name="bookmarks" />
+            <columnsControls name="columns_controls" />
+            <filters>
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="applied" xsi:type="array">
+                            <item name="is_approved" xsi:type="string">1</item>
+                        </item>
+                    </item>
+                </argument>
+            </filters>
+            <paging name="listing_paging" />
+        </listingToolbar>
+    </listing>
+    <columns name="artm_partnersbulkcsv_data_columns">
+        <column name="dealer_email" class="Magento\Ui\Component\Listing\Columns\Column">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Dealer Email</item>
+                    <item name="sortable" xsi:type="boolean">true</item>
+                    <item name="filter" xsi:type="string">text</item>
+                </item>
+            </argument>
+        </column>
+        <column name="dealer_name" class="Magento\Ui\Component\Listing\Columns\Column">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Dealer Name</item>
+                    <item name="sortable" xsi:type="boolean">true</item>
+                    <item name="filter" xsi:type="string">text</item>
+                </item>
+            </argument>
+        </column>
+        <column name="created_at" class="Magento\Ui\Component\Listing\Columns\Column">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Created At</item>
+                    <item name="sortable" xsi:type="boolean">true</item>
+                    <item name="filter" xsi:type="string">dateRange</item>
+                </item>
+            </argument>
+        </column>
+        <actionsColumn name="order_file" class="ArtM\BulkOrder\Ui\Component\Listing\Column\DownloadCsv">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="indexField" xsi:type="string">id</item>
+                    <item name="label" xsi:type="string" translate="true">SKU list</item>
+                </item>
+            </argument>
+        </actionsColumn>
+
+    </columns>
+</listing>

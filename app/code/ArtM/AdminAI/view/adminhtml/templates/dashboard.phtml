@@ -1,0 +1,310 @@
+<?php
+/** @var \ArtM\AdminAI\Block\Adminhtml\Dashboard $block */
+$currentSection = $block->getCurrentSection();
+$sidebarItems = $block->getSidebarItems();
+$sectionDataUrls = $block->getSectionDataUrls();
+?>
+<div class="adminai-dashboard">
+	<aside class="adminai-sidebar">
+		<h1 class="adminai-sidebar__title">Admin AI Dashboard</h1>
+		<nav class="adminai-sidebar__nav" aria-label="Dashboard navigation">
+			<?php foreach ($sidebarItems as $item): ?>
+				<a class="adminai-sidebar__link<?= $block->isSectionActive($item['code']) ? ' is-active' : '' ?>"
+				   href="<?= $block->escapeUrl($item['url']) ?>">
+					<?= $block->escapeHtml($item['label']) ?>
+				</a>
+			<?php endforeach; ?>
+		</nav>
+	</aside>
+	<section class="adminai-content">
+		<div class="adminai-content__header">
+			<span class="adminai-content__eyebrow">Section</span>
+			<h2 class="adminai-content__title"><?= $block->escapeHtml($block->getSectionTitle()) ?></h2>
+			<p class="adminai-content__subtitle">CDP Dashboard = Aggregated insights + segmentation + actions (not records).</p>
+		</div>
+		<div class="adminai-content__panel">
+			<div class="adminai-toolbar">
+				<div class="adminai-toolbar__group">
+					<label for="adminai-filter-range">Range</label>
+					<select id="adminai-filter-range" class="adminai-filter-range">
+						<option value="7d">7d</option>
+						<option value="30d" selected="selected">30d</option>
+						<option value="90d">90d</option>
+						<option value="custom">Custom</option>
+					</select>
+				</div>
+				<div class="adminai-toolbar__group">
+					<label for="adminai-filter-from">From</label>
+					<input id="adminai-filter-from" class="adminai-filter-from" type="date"/>
+				</div>
+				<div class="adminai-toolbar__group">
+					<label for="adminai-filter-to">To</label>
+					<input id="adminai-filter-to" class="adminai-filter-to" type="date"/>
+				</div>
+				<div class="adminai-toolbar__group">
+					<label for="adminai-filter-store">Store ID</label>
+					<input id="adminai-filter-store" class="adminai-filter-store" type="number" min="0" placeholder="All"/>
+				</div>
+				<div class="adminai-toolbar__actions">
+					<button type="button" class="action-primary adminai-filter-apply">Apply</button>
+					<button type="button" class="action-secondary adminai-filter-reset">Reset</button>
+				</div>
+			</div>
+			<div class="adminai-overview-zone is-hidden">
+				<div class="adminai-zone-card">
+					<h3 class="adminai-zone-title">Business Health Summary</h3>
+					<div class="adminai-overview-kpis"></div>
+				</div>
+				<div class="adminai-zone-card">
+					<h3 class="adminai-zone-title">Customer Segmentation</h3>
+					<div class="adminai-segment-cards"></div>
+				</div>
+				<div class="adminai-zone-grid-2">
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">Customer Risk Monitor</h3>
+						<div class="adminai-risk-monitor"></div>
+					</div>
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">Acquisition vs Retention</h3>
+						<div class="adminai-acq-retention"></div>
+					</div>
+				</div>
+				<div class="adminai-zone-card">
+					<h3 class="adminai-zone-title">Smart Notifications</h3>
+					<div class="adminai-alerts-summary"></div>
+					<div class="adminai-alert-feed"></div>
+				</div>
+			</div>
+			<div class="adminai-section-zone adminai-section-zone--sales is-hidden" data-zone-section="sales">
+				<div class="adminai-zone-card">
+					<h3 class="adminai-zone-title">Top Sold Products (Top 50)</h3>
+					<div class="adminai-widget-table" data-widget="top_sold_products"></div>
+				</div>
+				<div class="adminai-zone-card">
+					<h3 class="adminai-zone-title">Executive Sales Summary</h3>
+					<div class="adminai-widget-list" data-widget="executive_sales_summary"></div>
+				</div>
+			</div>
+			<div class="adminai-section-zone adminai-section-zone--products is-hidden" data-zone-section="products">
+				<div class="adminai-zone-grid-2">
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">Trending Products</h3>
+						<div class="adminai-widget-table" data-widget="trending_products"></div>
+					</div>
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">Stock Projection (Stock Left For Less Than 7 Days)</h3>
+						<div class="adminai-widget-table" data-widget="stock_projection"></div>
+					</div>
+				</div>
+				<div class="adminai-zone-card">
+					<h3 class="adminai-zone-title">Slow Moving Products</h3>
+					<div class="adminai-widget-table" data-widget="slow_moving_products"></div>
+				</div>
+				<div class="adminai-zone-card adminai-sku-tracker">
+					<h3 class="adminai-zone-title">SKU Performance Tracker</h3>
+					<div class="adminai-sku-tracker__controls">
+						<label>
+							SKU
+							<input type="text" class="adminai-sku-input" placeholder="Enter SKU" />
+						</label>
+						<label>
+							From (optional)
+							<input type="date" class="adminai-sku-from" />
+						</label>
+						<label>
+							To (optional)
+							<input type="date" class="adminai-sku-to" />
+						</label>
+						<div class="adminai-sku-tracker__actions">
+							<button type="button" class="action-primary adminai-sku-submit">Track SKU</button>
+							<button type="button" class="action-secondary adminai-sku-clear">Clear</button>
+						</div>
+					</div>
+					<div class="adminai-sku-tracker__meta" data-widget="sku_tracker_meta"></div>
+					<div class="adminai-sku-tracker__product" data-widget="sku_tracker_product"></div>
+					<div class="adminai-sku-tracker__children" data-widget="sku_tracker_children"></div>
+					<div class="adminai-sku-tracker__kpis" data-widget="sku_tracker_kpis"></div>
+					<div class="adminai-zone-title adminai-zone-title--sub">Order History</div>
+					<div class="adminai-widget-table" data-widget="sku_tracker_orders"></div>
+				</div>
+			</div>
+			<div class="adminai-section-zone adminai-section-zone--customers is-hidden" data-zone-section="customers">
+				<div class="adminai-zone-grid-2 adminai-customer-insights-row">
+					<div class="adminai-zone-card adminai-customer-orders-chart-card">
+						<h3 class="adminai-zone-title">Order Frequency Spread</h3>
+						<p class="adminai-customer-orders-chart-card__hint">Active customers split into 3 order-count bands: bottom 10%, middle 80%, and top 10% of the order-count range.</p>
+						<div class="adminai-customer-orders-chart-meta" data-widget="customer_order_distribution_meta"></div>
+						<div class="adminai-empty is-hidden" data-widget="customer_order_distribution_empty">No active customers available.</div>
+						<div class="adminai-customer-orders-band-list" data-widget="customer_order_distribution_bars"></div>
+					</div>
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">Customer Engagement Levels</h3>
+						<p class="adminai-customer-orders-chart-card__hint">Inactive: no orders in window &bull; Active: ≥1 order &bull; Super Active: 1–5 orders &bull; Super Duper Active: more than 5 orders.</p>
+						<div class="adminai-customer-engagement-bars" data-widget="customer_engagement_bars"></div>
+					</div>
+				</div>
+				<div class="adminai-zone-card adminai-customer-period-card">
+					<div class="adminai-customer-period-card__header">
+						<div>
+							<h3 class="adminai-zone-title">Customer Activity Window</h3>
+							<p class="adminai-customer-period-card__hint">Active means the customer placed at least one order in the selected window.</p>
+						</div>
+						<label class="adminai-customer-period-card__label">
+							<span>Window</span>
+							<select class="adminai-customer-period">
+								<option value="90d" selected="selected">Last 90 Days</option>
+								<option value="180d">Last 180 Days</option>
+								<option value="360d">Last 360 Days</option>
+								<option value="2y">Last 2 Years</option>
+								<option value="3y">Last 3 Years</option>
+								<option value="4y">Last 4 Years</option>
+								<option value="5y">Last 5 Years</option>
+							</select>
+						</label>
+					</div>
+					<div class="adminai-customer-summary" data-widget="customer_summary_cards"></div>
+				</div>
+				<div class="adminai-zone-grid-2">
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">Active Customers</h3>
+						<div class="adminai-widget-table" data-widget="customer_active"></div>
+					</div>
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">Inactive Customers</h3>
+						<div class="adminai-widget-table" data-widget="customer_inactive"></div>
+					</div>
+				</div>
+				<div class="adminai-zone-card">
+					<h3 class="adminai-zone-title">What Customers Bought</h3>
+					<div class="adminai-widget-list" data-widget="customer_recent_purchases"></div>
+				</div>
+				<div class="adminai-zone-grid-3">
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">New Customers</h3>
+						<div class="adminai-widget-table" data-widget="customer_new_customers"></div>
+					</div>
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">Frequent Buyers</h3>
+						<div class="adminai-widget-table" data-widget="customer_frequent_buyers"></div>
+					</div>
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">High Value Customers</h3>
+						<div class="adminai-widget-table" data-widget="customer_high_value_customers"></div>
+					</div>
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">Discount Hunters</h3>
+						<div class="adminai-widget-table" data-widget="customer_discount_hunters"></div>
+					</div>
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">Category Loyal Customers</h3>
+						<div class="adminai-widget-table" data-widget="customer_category_loyal_customers"></div>
+					</div>
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">New Arrival Buyers</h3>
+						<div class="adminai-widget-table" data-widget="customer_new_arrival_buyers"></div>
+					</div>
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">At-Risk Customers</h3>
+						<div class="adminai-widget-table" data-widget="customer_at_risk_customers"></div>
+					</div>
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">Reactivated Customers</h3>
+						<div class="adminai-widget-table" data-widget="customer_reactivated_customers"></div>
+					</div>
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">One-Time Buyers</h3>
+						<div class="adminai-widget-table" data-widget="customer_one_time_buyers"></div>
+					</div>
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">Lost Customers</h3>
+						<div class="adminai-widget-table" data-widget="customer_lost_customers"></div>
+					</div>
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">Zero-Price Purchases</h3>
+						<p class="adminai-customer-orders-chart-card__hint">Filter inside the table by brand and attribute set to see which customers took free items.</p>
+						<div class="adminai-widget-table" data-widget="customer_zero_price_purchases"></div>
+					</div>
+				</div>
+				<div class="adminai-zone-card adminai-customer-lookup">
+					<h3 class="adminai-zone-title">Customer Search</h3>
+					<div class="adminai-customer-lookup__controls">
+						<label>
+							Customer ID or Email
+							<input type="text" class="adminai-customer-lookup-input" placeholder="Search by customer ID or email" />
+						</label>
+						<div class="adminai-customer-lookup__actions">
+							<button type="button" class="action-primary adminai-customer-lookup-submit">Search</button>
+							<button type="button" class="action-secondary adminai-customer-lookup-clear">Clear</button>
+						</div>
+					</div>
+					<div class="adminai-customer-lookup__meta" data-widget="customer_lookup_meta"></div>
+					<div class="adminai-customer-lookup__profile" data-widget="customer_lookup_profile"></div>
+					<div class="adminai-customer-lookup__addresses" data-widget="customer_lookup_addresses"></div>
+					<div class="adminai-customer-lookup__recent" data-widget="customer_lookup_recent"></div>
+					<div class="adminai-zone-title adminai-zone-title--sub">Order History</div>
+					<div class="adminai-widget-table" data-widget="customer_lookup_orders"></div>
+				</div>
+			</div>
+			<div class="adminai-section-zone adminai-section-zone--notifications is-hidden" data-zone-section="notifications">
+				<div class="adminai-zone-grid-2">
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">Action Recommendations</h3>
+						<div class="adminai-widget-list" data-widget="action_recommendations"></div>
+					</div>
+					<div class="adminai-zone-card">
+						<h3 class="adminai-zone-title">Severity Summary</h3>
+						<div class="adminai-widget-table" data-widget="severity_summary"></div>
+					</div>
+				</div>
+			</div>
+			<div class="adminai-chart-stack">
+				<div class="adminai-chart-card" data-chart-section="sales">
+					<h3 class="adminai-chart-card__title">Sales Revenue Trend</h3>
+					<p class="adminai-chart-card__description">This graph shows how revenue changes over time. It helps you spot growth or drops quickly.</p>
+					<div id="adminai-chart-meta-sales" class="adminai-chart-summary"></div>
+					<canvas id="adminai-chart-sales" height="120"></canvas>
+				</div>
+				<div class="adminai-chart-card" data-chart-section="sales">
+					<h3 class="adminai-chart-card__title">Order Trend</h3>
+					<p class="adminai-chart-card__description">This graph shows how many orders are placed on each date.</p>
+					<div id="adminai-chart-meta-orders" class="adminai-chart-summary"></div>
+					<canvas id="adminai-chart-orders" height="120"></canvas>
+				</div>
+				<div class="adminai-chart-card" data-chart-section="notifications">
+					<h3 class="adminai-chart-card__title">Notification Severity Distribution</h3>
+					<p class="adminai-chart-card__description">This pie chart shows the share of alerts by severity, so teams can prioritize urgent issues first.</p>
+					<canvas id="adminai-chart-notifications" height="120"></canvas>
+					<div id="adminai-chart-legend-notifications" class="adminai-chart-legend"></div>
+				</div>
+			</div>
+			<div id="adminai-dashboard-root"
+				 data-section="<?= $block->escapeHtmlAttr($currentSection) ?>"
+				 data-url-overview="<?= $block->escapeUrl($sectionDataUrls['overview']) ?>"
+				 data-url-sales="<?= $block->escapeUrl($sectionDataUrls['sales']) ?>"
+				 data-url-products="<?= $block->escapeUrl($sectionDataUrls['products']) ?>"
+				 data-url-customers="<?= $block->escapeUrl($sectionDataUrls['customers']) ?>"
+				 data-url-notifications="<?= $block->escapeUrl($sectionDataUrls['notifications']) ?>"
+				 data-mage-init='{"ArtM_AdminAI/js/dashboard":{}}'>
+				<div class="adminai-data-summary"></div>
+				<h3 class="adminai-grid-title">Detailed Records</h3>
+				<div class="adminai-grid-controls">
+					<div class="adminai-grid-controls__left">
+						<label for="adminai-page-size">Show per page</label>
+						<select id="adminai-page-size" class="adminai-page-size">
+							<option value="10">10</option>
+							<option value="20" selected="selected">20</option>
+							<option value="50">50</option>
+							<option value="100">100</option>
+						</select>
+					</div>
+					<div class="adminai-pagination">
+						<button type="button" class="action-secondary adminai-page-prev">Prev</button>
+						<span class="adminai-page-info">Page 1 of 1</span>
+						<button type="button" class="action-secondary adminai-page-next">Next</button>
+					</div>
+				</div>
+				<div class="adminai-data-grid"></div>
+			</div>
+		</div>
+	</section>
+</div>

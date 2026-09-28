@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magestore, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Communication/etc/communication.xsd">
+    <topic name="magestore_pointy_integration.submit_sales.topic" request="int">
+        <handler name="magestore_pointy_integration.submit_sales.handle" type="Magestore\WebposPointy\Model\SubmitSales\Consumer" method="execute" />
+    </topic>
+    <topic name="magestore_pointy_integration.submit_inventory.topic" request="int">
+        <handler name="magestore_pointy_integration.submit_inventory"
+                 type="Magestore\WebposPointy\Model\Inventory\Consumer"
+                 method="execute" />
+    </topic>
+</config>

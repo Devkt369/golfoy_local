@@ -1,0 +1,301 @@
+<?php
+/** @var \ArtM\AdminAI\Block\Adminhtml\AllChats $block */
+?>
+<style>
+    .adminai-ac-wrap { max-width: 1200px; }
+
+    .adminai-ac-grid {
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        gap: 16px;
+        align-items: start;
+    }
+
+    .adminai-ac-card {
+        background: #fff;
+        border: 1px solid #d6d6d6;
+        border-radius: 4px;
+        padding: 12px;
+    }
+
+    .adminai-ac-panel-title {
+        margin: 0 0 10px;
+        font-size: 16px;
+    }
+
+    .adminai-ac-search {
+        width: 100%;
+        margin-bottom: 8px;
+        box-sizing: border-box;
+    }
+
+    .adminai-ac-session-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .adminai-ac-session-item {
+        border: 1px solid #e5e5e5;
+        border-radius: 4px;
+        padding: 8px;
+        margin-bottom: 8px;
+        background: #fafafa;
+        cursor: pointer;
+    }
+
+    .adminai-ac-session-item.is-active {
+        border-color: #0a6ecb;
+        background: #edf6ff;
+    }
+
+    .adminai-ac-session-title {
+        font-weight: 600;
+        font-size: 13px;
+        margin-bottom: 2px;
+    }
+
+    .adminai-ac-session-user {
+        font-size: 12px;
+        color: #006bb4;
+        margin-bottom: 2px;
+    }
+
+    .adminai-ac-session-date,
+    .adminai-ac-session-preview {
+        font-size: 12px;
+        color: #5f5f5f;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .adminai-ac-messages-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding: 8px 10px;
+        border: 1px solid #d6d6d6;
+        border-radius: 4px;
+        background: #f8f8f8;
+        min-height: 42px;
+    }
+
+    .adminai-ac-messages-header-title {
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .adminai-ac-messages-header-user {
+        font-size: 12px;
+        color: #006bb4;
+    }
+
+    .adminai-ac-messages {
+        height: 560px;
+        overflow-y: auto;
+        border: 1px solid #d6d6d6;
+        border-radius: 4px;
+        background: #fff;
+        padding: 12px;
+    }
+
+    .adminai-ac-message { margin: 0 0 10px; }
+    .adminai-ac-message strong { display: block; margin-bottom: 4px; }
+
+    .adminai-ac-message-content {
+        border: 1px solid #e8e8e8;
+        border-radius: 4px;
+        padding: 8px 10px;
+        background: #fcfcfc;
+        white-space: pre-wrap;
+        line-height: 1.45;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        font-size: 13px;
+    }
+
+    .adminai-ac-message-user strong { color: #006bb4; }
+    .adminai-ac-message-user .adminai-ac-message-content { background: #eef7ff; border-color: #cfe8ff; }
+    .adminai-ac-message-assistant .adminai-ac-message-content { background: #f7f7f7; }
+
+    .adminai-ac-empty {
+        color: #888;
+        font-style: italic;
+        padding: 20px 0;
+        text-align: center;
+    }
+
+    @media (max-width: 1100px) {
+        .adminai-ac-grid { grid-template-columns: 1fr; }
+        .adminai-ac-session-list { max-height: 260px; }
+    }
+</style>
+
+<div class="admin-ai-assistant adminai-ac-wrap">
+    <h1>All Chats — AI Assistant</h1>
+
+    <div id="adminai-allchats-container"
+         data-sessions-url="<?= $block->escapeUrl($block->getAllSessionsUrl()) ?>"
+         data-messages-url="<?= $block->escapeUrl($block->getMessagesUrl()) ?>">
+        <div class="adminai-ac-grid">
+
+            <!-- Left: session list -->
+            <aside class="adminai-ac-card">
+                <h2 class="adminai-ac-panel-title">All Chats</h2>
+                <input type="text" class="admin__control-text adminai-ac-search" placeholder="Search chats or users..." />
+                <ul class="adminai-ac-session-list"></ul>
+            </aside>
+
+            <!-- Right: messages view -->
+            <section class="adminai-ac-card">
+                <div class="adminai-ac-messages-header">
+                    <span class="adminai-ac-messages-header-title">Select a chat to view messages</span>
+                    <span class="adminai-ac-messages-header-user"></span>
+                </div>
+                <div class="adminai-ac-messages">
+                    <p class="adminai-ac-empty">No chat selected.</p>
+                </div>
+            </section>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+require(['jquery', 'mage/translate'], function ($, $t) {
+    'use strict';
+
+    var $container = $('#adminai-allchats-container');
+    if (!$container.length) { return; }
+
+    var urls = {
+        sessions: $container.data('sessions-url'),
+        messages: $container.data('messages-url')
+    };
+
+    var allSessions = [];
+    var activeSessionId = 0;
+
+    var $sessionList = $container.find('.adminai-ac-session-list');
+    var $messages    = $container.find('.adminai-ac-messages');
+    var $headerTitle = $container.find('.adminai-ac-messages-header-title');
+    var $headerUser  = $container.find('.adminai-ac-messages-header-user');
+    var $search      = $container.find('.adminai-ac-search');
+
+    function escapeHtml(text) {
+        return $('<div/>').text(String(text || '')).html();
+    }
+
+    function formatDate(dateStr) {
+        return String(dateStr || '').replace('T', ' ').substring(0, 16);
+    }
+
+    function renderSessions() {
+        var term = $.trim($search.val()).toLowerCase();
+        $sessionList.empty();
+
+        var filtered = allSessions;
+        if (term) {
+            filtered = $.grep(allSessions, function (s) {
+                return (s.title || '').toLowerCase().indexOf(term) !== -1
+                    || (s.admin_username || '').toLowerCase().indexOf(term) !== -1
+                    || (s.admin_name || '').toLowerCase().indexOf(term) !== -1;
+            });
+        }
+
+        if (!filtered.length) {
+            $sessionList.append('<li class="adminai-ac-session-item"><em>' + $t(term ? 'No matching chats.' : 'No chats yet.') + '</em></li>');
+            return;
+        }
+
+        $.each(filtered, function (_, s) {
+            var activeClass = Number(s.session_id) === Number(activeSessionId) ? ' is-active' : '';
+            var userLabel = s.admin_name ? escapeHtml(s.admin_name) + ' (' + escapeHtml(s.admin_username) + ')' : (s.admin_username ? escapeHtml(s.admin_username) : '<em>Unknown</em>');
+            $sessionList.append(
+                '<li class="adminai-ac-session-item' + activeClass + '" data-session-id="' + s.session_id + '">' +
+                '<div class="adminai-ac-session-title">' + escapeHtml(s.title || ('Chat #' + s.session_id)) + '</div>' +
+                '<div class="adminai-ac-session-user">' + userLabel + '</div>' +
+                '<div class="adminai-ac-session-date">' + escapeHtml(formatDate(s.updated_at || s.created_at)) + '</div>' +
+                '<div class="adminai-ac-session-preview">' + escapeHtml(s.last_message || '') + '</div>' +
+                '</li>'
+            );
+        });
+    }
+
+    function loadSessions() {
+        $.ajax({
+            url: urls.sessions,
+            type: 'GET',
+            dataType: 'json'
+        }).done(function (response) {
+            allSessions = response && response.sessions ? response.sessions : [];
+            renderSessions();
+        }).fail(function () {
+            $sessionList.html('<li class="adminai-ac-session-item"><em>' + $t('Failed to load sessions.') + '</em></li>');
+        });
+    }
+
+    function loadMessages(sessionId) {
+        $messages.html('<p class="adminai-ac-empty">' + $t('Loading...') + '</p>');
+
+        $.ajax({
+            url: urls.messages,
+            type: 'GET',
+            dataType: 'json',
+            data: { session_id: sessionId }
+        }).done(function (response) {
+            $messages.empty();
+            var msgs = response && response.messages ? response.messages : [];
+            if (!msgs.length) {
+                $messages.html('<p class="adminai-ac-empty">' + $t('No messages in this chat.') + '</p>');
+                return;
+            }
+            $.each(msgs, function (_, m) {
+                var senderClass = m.role === 'user' ? 'adminai-ac-message-user' : 'adminai-ac-message-assistant';
+                var senderLabel = m.role === 'user' ? $t('User') : $t('AI Assistant');
+                $messages.append(
+                    '<div class="adminai-ac-message ' + senderClass + '">' +
+                    '<strong>' + senderLabel + '</strong>' +
+                    '<div class="adminai-ac-message-content">' + escapeHtml(m.content || '') + '</div>' +
+                    '</div>'
+                );
+            });
+            $messages.scrollTop($messages[0].scrollHeight);
+        }).fail(function () {
+            $messages.html('<p class="adminai-ac-empty">' + $t('Failed to load messages.') + '</p>');
+        });
+    }
+
+    function setActiveSession(sessionId) {
+        activeSessionId = Number(sessionId);
+        renderSessions();
+
+        var session = null;
+        $.each(allSessions, function (_, s) {
+            if (Number(s.session_id) === activeSessionId) { session = s; return false; }
+        });
+
+        if (session) {
+            $headerTitle.text(session.title || ('Chat #' + session.session_id));
+            var userLabel = session.admin_name
+                ? session.admin_name + ' (' + session.admin_username + ')'
+                : (session.admin_username || 'Unknown user');
+            $headerUser.text(userLabel);
+        }
+
+        loadMessages(activeSessionId);
+    }
+
+    $search.on('input', function () { renderSessions(); });
+
+    $container.on('click', '.adminai-ac-session-item', function () {
+        var sid = Number($(this).data('session-id') || 0);
+        if (sid) { setActiveSession(sid); }
+    });
+
+    loadSessions();
+});
+</script>

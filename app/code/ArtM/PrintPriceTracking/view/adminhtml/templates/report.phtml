@@ -1,0 +1,171 @@
+<?php
+
+$collection = $block->getCollection();
+
+$currentPage = $collection->getCurPage();
+$lastPage = $collection->getLastPageNumber();
+$fromValue = $block->getRequest()->getParam('from');
+if (empty($fromValue)) {
+    $fromValue = '2026-07-20';
+}
+?>
+<form method="get" action="<?= $block->getUrl('*/*/*') ?>" style="margin-bottom:20px;">
+
+    <label>From</label>
+
+    <input type="date"
+           name="from"
+           min="2026-07-20"
+           value="<?= $block->escapeHtml($fromValue) ?>">
+
+    <label>To</label>
+
+    <input type="date"
+           name="to"
+           value="<?= $block->escapeHtml($block->getRequest()->getParam('to')) ?>">
+
+    <label>Sort</label>
+
+    <select name="sort">
+
+        <option value="desc"
+            <?= $block->getRequest()->getParam('sort') != 'asc' ? 'selected' : '' ?>>
+            Newest First
+        </option>
+
+        <option value="asc"
+            <?= $block->getRequest()->getParam('sort') == 'asc' ? 'selected' : '' ?>>
+            Oldest First
+        </option>
+
+    </select>
+
+    <button type="submit" class="action-primary">
+        Filter
+    </button>
+
+    <a href="<?= $block->getUrl('*/*/*') ?>"
+       class="action-secondary">
+        Reset
+    </a>
+
+    <a href="<?= $block->getUrl('*/*/export', ['_current' => true]) ?>"
+       class="action-secondary" style="margin-left:10px;">
+        Download Excel
+    </a>
+
+    <a href="<?= $block->getUrl('*/*/recalculate', ['_current' => true, 'from' => $fromValue]) ?>"
+       class="action-primary" style="margin-left:10px;">
+        Recalculate Print Prices
+    </a>
+
+</form>
+<?php $collection = $block->getCollection(); ?>
+
+<table class="admin__table-primary">
+
+    <thead>
+
+    <tr>
+        <th>Item ID</th>
+        <th>Order ID</th>
+        <th>Increment ID</th>
+        <th>SKU</th>
+        <th>Name</th>
+        <th>Qty</th>
+        <th>Print Price</th>
+        <th>Total Print</th>
+        <th>Date</th>
+    </tr>
+
+    </thead>
+
+    <tbody>
+
+    <?php
+    $pageTotal = 0;
+    foreach ($collection as $item): ?>
+
+        <tr>
+
+            <td><?= $item->getItemId() ?></td>
+
+            <td><a href="<?= $block->getUrl('sales/order/view', ['order_id' => $item->getOrderId()]) ?>"><?= $block->escapeHtml($item->getOrderId()) ?></a></td>
+
+            <td><?= $block->escapeHtml($item->getIncrementId()) ?></td>
+
+            <td><?= $block->escapeHtml($item->getSku()) ?></td>
+
+            <td><?= $block->escapeHtml($item->getName()) ?></td>
+
+            <td><?= (float)$item->getQtyOrdered() ?></td>
+
+            <td><?= number_format((float)$item->getPrintPrice(), 4) ?></td>
+
+            <?php $lineTotal = (float)$item->getPrintPrice() * (float)$item->getQtyOrdered(); $pageTotal += $lineTotal; ?>
+            <td><?= number_format($lineTotal, 4) ?></td>
+
+            <td><?= $item->getCreatedAt() ?></td>
+
+        </tr>
+
+    <?php endforeach; ?>
+
+    </tbody>
+
+</table>
+
+<?php
+
+$currentPage = $collection->getCurPage();
+$lastPage = $collection->getLastPageNumber();
+
+?>
+
+<div style="margin-top:20px;">
+
+<?php if ($currentPage > 1): ?>
+
+    <a href="<?= $block->getUrl('*/*/*', [
+        '_current' => true,
+        'p' => $currentPage - 1
+    ]) ?>">
+        ◀ Previous
+    </a>
+
+<?php endif; ?>
+
+&nbsp;&nbsp;
+
+Page <?= $currentPage ?> of <?= $lastPage ?>
+
+&nbsp;&nbsp;
+
+<?php if ($currentPage < $lastPage): ?>
+
+    <a href="<?= $block->getUrl('*/*/*', [
+        '_current' => true,
+        'p' => $currentPage + 1
+    ]) ?>">
+        Next ▶
+    </a>
+
+<?php endif; ?>
+
+<form method="get" action="<?= $block->getUrl('*/*/*') ?>" style="display:inline-block;margin-left:15px;">
+    <input type="hidden" name="from" value="<?= $block->escapeHtml($block->getRequest()->getParam('from')) ?>">
+    <input type="hidden" name="to" value="<?= $block->escapeHtml($block->getRequest()->getParam('to')) ?>">
+    <input type="hidden" name="sort" value="<?= $block->escapeHtml($block->getRequest()->getParam('sort', 'desc')) ?>">
+    <label>Jump to page</label>
+    <input type="number" name="p" min="1" max="<?= max(1, (int)$lastPage) ?>" value="<?= (int)$currentPage ?>" style="width:70px;">
+    <button type="submit" class="action-secondary">Go</button>
+</form>
+
+</div>
+
+<div style="margin-top:20px;font-weight:bold;">
+    Total Print (current page): <?= number_format($pageTotal, 4) ?>
+</div>
+<div style="margin-top:6px;font-weight:bold;">
+    Total Print (all pages): <?= number_format($block->getTotalPrintSum(), 4) ?>
+</div>

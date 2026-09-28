@@ -1,0 +1,63 @@
+type Query {
+    getAvailableSizeRollValue(
+        productId: Int! 
+    ): AvailableSizeRollValue 
+    @resolver(class: "ArtM\\GraphqlCache\\Model\\Resolver\\AvailableSizeRollValue") 
+    @doc(description: "Get the available size roll value for a product by its ID")
+
+    products(
+        filter: ProductAttributeFilterInput
+        pageSize: Int
+        currentPage: Int
+        sort: ProductSortInput @resolver(class: "ArtM\\GraphqlCache\\Model\\Resolver\\SortByRecommend")
+    ): Products
+
+    topProducts(product_ids: [Int!]!): [TopProduct] @resolver(class: "ArtM\\GraphqlCache\\Model\\Resolver\\TopProducts")
+}
+
+type AvailableSizeRollValue {
+    product_id: Int! @doc(description: "The ID of the product")
+    available_size_roll_value: String @doc(description: "The available size roll value from the custom table")
+}
+
+type TopProduct {
+    id: Int
+    name: String
+    price: String
+    url: String
+}
+
+type StoreConfig {
+    attribute_set_and_attribute_value : String  @doc(description: "Extended Config Data - common/categoryfeaturedattr/common_categoryfeaturedattr")
+    getReactConfig : String  @doc(description: "Extended Config Data - react_config/general/enable")
+}
+
+input ProductSortInput {
+    crecommend: SortEnum
+    crating: SortEnum
+    discount: SortEnum
+    position: SortEnum 
+    created: SortEnum 
+}
+extend input ProductAttributeSortInput {
+    crecommend: SortEnum
+    created: SortEnum
+    discount: SortEnum
+}
+enum SortEnum {
+    ASC
+    DESC
+}
+
+interface AggregationOptionInterface
+{
+    swatch_data: SwatchData @doc(description: "Data required to render swatch filter item")
+}
+type SwatchData
+{
+    type: String @doc(description: "Type of swatch filter item: 1 - text, 2 - image")
+    value: String @doc(description: "Value for swatch item (text or image link)")
+}
+type CategoryTree {
+    page_layout: String @resolver(class: "ArtM\\GraphqlCache\\Model\\Resolver\\Category\\PageLayout")
+}

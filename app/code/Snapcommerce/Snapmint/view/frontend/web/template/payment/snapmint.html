@@ -1,0 +1,55 @@
+<!--
+/**
+ * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<div class="payment-method snapmint" data-bind="css: {'_active': (getCode() == isChecked())}">
+    <div class="payment-method-title field choice fc-dirty" style="display: flex;align-items: center;">
+        <label class="has-radio-hack">
+            <input type="radio"
+                   name="payment[method]"
+                   class="radio screen-reader-text"
+                   data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()"/>
+            <span class="radio-hack"></span>
+            <label data-bind="attr: {'for': getCode()}" class="label"><style>.snapmint-text{font-size:18px;font-weight:600;color:#000}</style><div class=snapmint-text>0% EMI on UPI | Snapmint</div></label></label>
+    </div>
+    <div class="payment-method-content">
+        <!-- ko foreach: getRegion('messages') -->
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!--/ko-->
+        <div class="payment-method-billing-address">
+            <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
+        <div class="checkout-agreements-block">
+            <!-- ko foreach: $parent.getRegion('before-place-order') -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
+
+
+
+        <div class="actions-toolbar">
+            <div class="primary">
+                <button class="action primary checkout"
+                        type="submit"
+                        data-bind="
+                        click: placeOrder,
+                        attr: {title: $t('Place Order')},
+                        css: {disabled: !isPlaceOrderActionAllowed()},
+                        enable: (getCode() == isChecked())"
+                        disabled>
+                    <span data-bind="i18n: 'Make Payment'"></span>
+                </button>
+            </div>
+        </div>
+
+
+
+    </div>
+
+
+
+</div>

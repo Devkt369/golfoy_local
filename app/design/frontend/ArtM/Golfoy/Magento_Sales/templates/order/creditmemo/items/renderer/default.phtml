@@ -1,0 +1,652 @@
+<?php
+
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+?>
+<?php
+/**
+ * @var \Magento\Sales\Block\Order\Item\Renderer\DefaultRenderer $block
+ * @var \Magento\Framework\Locale\LocaleFormatter $localeFormatter
+ */
+?>
+<?php $_item = $block->getItem() ?>
+<?php $sku = $block->getSku();
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+//$productModel = $objectManager->get('\Magento\Catalog\Model\Product');
+//$product = $productModel->loadByAttribute('sku', $sku);
+ $chelper = $objectManager->get('ArtM\Common\Helper\Data');
+$productModel = $objectManager->create('\Magento\Catalog\Model\ProductRepository');
+$product = $productModel->get($sku);
+?>
+<?php $_order = $block->getItem()->getOrderItem()->getOrder() ?>
+<tr id="order-item-row-<?= (int) $_item->getId() ?>">
+    <td class="col name" data-th="<?= $block->escapeHtmlAttr(__('Product Name')) ?>">
+        <div class="product-details">
+            <span><img src="/media/catalog/product<?= $product->getSmallImage() ?>" width="120px"></span>
+            <div style="display: flex; flex-direction: column;gap: 5px;">
+                <strong class="product name product-item-name"><?= $block->escapeHtml($_item->getName()) ?></strong>
+                <?php if ($_options = $block->getItemOptions()): ?>
+                    <dl class="item-options">
+                    <?php foreach ($_options as $_option): ?>
+                        <dt><?= $block->escapeHtml($_option['label']) ?></dt>
+                        <?php if (!$block->getPrintStatus()): ?>
+                            <?php $_formatedOptionValue = $block->getFormatedOptionValue($_option) ?>
+                            <dd<?= (isset($_formatedOptionValue['full_view']) ? ' class="tooltip wrapper"' : '') ?>>
+                                <!--  custom print/image  -->
+                                <?php $formatedval = $_formatedOptionValue['value'] ;
+                                                    if(strpos($formatedval, 'customprint/') !== false){
+                                                    $toshow = $chelper->optionImage($formatedval); 
+                                                    echo $toshow;
+                                                }else{?>
+                                                    <?= $block->escapeHtml($_formatedOptionValue['value'], ['a']) ?>
+                                                    <?php }  ?>
+
+                                <!--  custom print/image  -->
+                                <?php if (isset($_formatedOptionValue['full_view'])): ?>
+                                    <div class="tooltip content">
+                                        <dl class="item options">
+                                            <dt><?= $block->escapeHtml($_option['label']) ?></dt>
+                                            <dd><?= $block->escapeHtml($_formatedOptionValue['full_view']) ?></dd>
+                                        </dl>
+                                    </div>
+                                <?php endif; ?>
+                            </dd>
+                        <?php else: ?>
+                            <dd> <?php if(strpos($_option['value'], 'customprint/') !== false){
+                                    $toshow = $chelper->optionImagetext($_option['value']); 
+                                    echo "<dd> $toshow </dd>";
+                                }else{ ?>
+                                <?= $block->escapeHtml($_option['print_value'] ?? $_option['value']) ?>                    
+                        </dd>
+                        <?php }endif; ?>
+                    <?php endforeach; ?>
+                    </dl>
+                <?php endif; ?>
+
+                <?php /* downloadable */ ?>
+                <?php if ($links = $block->getLinks()): ?>
+                    <dl class="item options">
+                        <dt><?= $block->escapeHtml($block->getLinksTitle()) ?></dt>
+                        <?php foreach ($links->getPurchasedItems() as $link): ?>
+                            <dd><?= $block->escapeHtml($link->getLinkTitle()) ?></dd>
+                        <?php endforeach; ?>
+                    </dl>
+                <?php endif; ?>
+                <?php /* EOF downloadable */ ?>
+
+                <?php $addInfoBlock = $block->getProductAdditionalInformationBlock(); ?>
+                <?php if ($addInfoBlock): ?>
+                    <?= $addInfoBlock->setItem($_item->getOrderItem())->toHtml() ?>
+                <?php endif; ?>
+                <?= $block->escapeHtml($_item->getDescription()) ?>
+
+                <div class="mobile-product-meta" aria-hidden="true">
+                    <div class="mobile-product-meta-item">
+                        <span class="mobile-product-meta-label">
+                            <?= $block->escapeHtml(__('Qty')) ?>
+                        </span>
+                        <span class="mobile-product-meta-value">
+                            <?= /* @noEscape */ $localeFormatter->formatNumber((float) $_item->getQty()) ?>
+                        </span>
+                    </div>
+                    <div class="mobile-product-meta-item">
+                        <span class="mobile-product-meta-label">
+                            <?= $block->escapeHtml(__('Price')) ?>
+                        </span>
+                        <span class="mobile-product-meta-value">
+                            <?= $block->getItemPriceHtml() ?>
+                        </span>
+                    </div>
+                    <div class="mobile-product-meta-item">
+                        <span class="mobile-product-meta-label">
+                            <?= $block->escapeHtml(__('Subtotal')) ?>
+                        </span>
+                        <span class="mobile-product-meta-value">
+                            <?= $block->getItemRowTotalHtml() ?>
+                        </span>
+                    </div>
+                    <div class="mobile-product-meta-item">
+                        <span class="mobile-product-meta-label">
+                            <?= $block->escapeHtml(__('Row Total')) ?>
+                        </span>
+                        <span class="mobile-product-meta-value">
+                            <?= $block->getItemRowTotalAfterDiscountHtml() ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </td>
+    <td class="col sku table-hidden-mobile-data" data-th="<?= $block->escapeHtml(__('SKU')) ?>">
+        <?= /* @noEscape */ $block->prepareSku($block->getSku()) ?>
+    </td>
+    <td class="col price table-hidden-mobile-data" data-th="<?= $block->escapeHtml(__('Price')) ?>">
+        <?= $block->getItemPriceHtml() ?>
+    </td>
+    <td class="col qty table-hidden-mobile-data" data-th="<?= $block->escapeHtml(__('Qty')) ?>">
+        <?= /* @noEscape */ $localeFormatter->formatNumber((float) $_item->getQty()) ?>
+    </td>
+    <td class="col subtotal table-hidden-mobile-data" data-th="<?= $block->escapeHtml(__('Subtotal')) ?>">
+        <?= $block->getItemRowTotalHtml() ?>
+    </td>
+    <td class="col discount table-hidden-mobile-data" data-th="<?= $block->escapeHtml(__('Discount Amount')) ?>">
+        <?= /* @noEscape */ $_order->formatPrice(-$_item->getDiscountAmount()) ?>
+    </td>
+    <td class="col total table-hidden-mobile-data" data-th="<?= $block->escapeHtml(__('Row Total')) ?>">
+        <?= $block->getItemRowTotalAfterDiscountHtml() ?>
+        </div>
+        </div>
+    </td>
+</tr>
+<style>
+    body.account ul.items.order-links>li.current {
+        border: none;
+    }
+
+    body.account .table-wrapper,
+    body.account .block.block-gift-card .block-content,
+    body.account .box-content,
+    body.account ul.items.order-links {
+        background-color: #fff;
+    }
+
+    .items.order-links .nav.item.current::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -4px;
+        width: 120px;
+        height: 3px;
+        background: #111;
+        border-radius: 20px;
+    }
+
+    .items.order-links .nav.item.current a {
+        color: #111;
+        font-weight: 600;
+    }
+
+    .items.order-links .nav.item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        margin: 0;
+    }
+
+    .items.order-links {
+        display: flex;
+        align-items: center;
+        gap: 70px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .items.order-links .nav.item:nth-child(2) a::after {
+        content: "↓";
+        font-size: 16px;
+        margin-left: 12px;
+        color: black;
+        font-weight: 900;
+        position: relative;
+        top: -1px;
+    }
+
+    .order-details-items .order-title>strong {
+        font-weight: 600;
+        font-size: 1.4rem !important;
+    }
+
+    .order-details-items.creditmemo .order-title a.action.print {
+        background-color: white !important;
+        border: 1px solid #cacaca;
+        border-radius: 5px;
+        margin-left: 15px;
+    }
+
+    .order-details-items.creditmemo .order-title {
+        border: 1px solid #ececec;
+        margin-top: 0px;
+        padding: 15px;
+        border-bottom: 0px;
+    }
+
+    .table-wrapper.order-items-creditmemo {
+        border: 1px solid #ececec;
+        padding: 0px !important;
+    }
+
+    .order-details-items.creditmemo thead tr th {
+        background-color: white !important;
+        padding: 15px;
+        font-size: 12px;
+        color: #000;
+        font-weight: 600;
+        text-wrap-mode: nowrap;
+
+    }
+
+    .table:not(.cart):not(.totals) tfoot .mark {
+        font-weight: 500;
+        color: #000;
+    }
+
+    /* .order-details-items.creditmemo thead {
+        border-bottom: 1px solid #ececec;
+    } */
+
+    .order-details-items {
+        border-bottom: none;
+    }
+
+    .mobile-product-meta {
+        display: none;
+    }
+
+    .product-details {
+        display: flex;
+        gap: 20px;
+    }
+
+    .product-details>span {
+        width: 110px;
+        min-width: 110px;
+        height: 120px;
+        border-radius: 5px;
+        overflow: hidden;
+        background: #f7f7f7;
+        border: 1px solid #efefef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-details>span img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        mix-blend-mode: darken;
+        display: block;
+    }
+
+    body.account .table-wrapper tfoot th,
+    body.account .table-wrapper tfoot tr.totals.tax.details td.mark,
+    body.account .table-wrapper tfoot tr.totals-tax-summary td.mark {
+        padding: 10px 60px 10px 10px;
+    }
+
+    body.account .table-wrapper td {
+        font-size: 12px;
+        padding: 30px 15px;
+    }
+
+    body.account .table-wrapper td,
+    body.account .block.block-gift-card .block-content td {
+        vertical-align: top;
+    }
+
+    .product-details dl.item-options {
+        margin-bottom: 0px;
+    }
+
+    .order-details-items .item-options dd {
+        display: inline-flex;
+        align-items: center;
+        font-size: 11px;
+        font-weight: 500;
+        color: black;
+    }
+
+    .product-item-name+.item-options {
+        display: grid;
+        grid-template-columns: max-content 1fr;
+        gap: 5px;
+    }
+
+    .product-item-name+.item-options dt {
+        margin: 0;
+        font-size: 11px;
+        font-weight: 500;
+        color: #555;
+    }
+
+    .order-details-items.creditmemo .price-including-tax .price,
+    .order-details-items.creditmemo .price-excluding-tax .price {
+        font-size: 11px;
+        color: black;
+        font-weight: 600;
+    }
+
+    .product.name.product-item-name {
+        font-size: 12px;
+        font-weight: 600;
+        color: black;
+        line-height: 1.4;
+        margin: 0;
+        max-width: 500px;
+        text-wrap: auto;
+    }
+
+    .table:not(.cart):not(.totals) tfoot>tr:first-child th {
+        padding-top: 10px;
+    }
+
+    .table:not(.cart):not(.totals) tfoot>tr:first-child td {
+        padding-top: 8px;
+    }
+
+    tr.grand_total {
+        border-top: 1px solid #ececec;
+    }
+
+    body.account .table-wrapper tfoot td {
+        padding: 5px 15px;
+        font-size: 11px;
+    }
+
+    body.account .table-wrapper th {
+        font-size: 12px;
+    }
+
+    body.account #maincontent a.action.back:before {
+        content: "\f060" !important;
+        font: normal normal normal 14px / 1 FontAwesome;
+    }
+
+    .order-details-items.creditmemo a.action.print {
+        display: none !important;
+    }
+
+    .order-details-items.creditmemo .actions-toolbar:first-of-type {
+        display: none;
+    }
+
+    @media only screen and (max-width: 991px) {
+        .product-details {
+            gap: 14px;
+        }
+
+        .table-hidden-mobile-data {
+            display: none !important;
+        }
+
+        .product-details>span {
+            width: 85px;
+            min-width: 85px;
+            height: 85px;
+        }
+
+        .mobile-product-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .mobile-product-meta-item {
+            flex: 1;
+            text-align: center;
+        }
+
+        .mobile-product-meta-item:last-child {
+            margin-left: auto;
+            text-align: right;
+        }
+    }
+
+    @media only screen and (max-width: 639px) {
+        .table-wrapper .table:not(.cart):not(.totals):not(.table-comparison) tbody>tr>td:first-child {
+            padding-top: 0px;
+        }
+    }
+
+    @media only screen and (max-width: 768px) {
+        .mobile-product-meta {
+            display: flex !important;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding-top: 0px;
+        }
+
+        .order-details-items .item-options dd {
+            margin: 0 0 0px;
+        }
+
+        .table-hidden-mobile-data {
+            display: none !important;
+        }
+
+        .price-excluding-tax {
+            line-height: initial;
+        }
+
+        .mobile-product-meta-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .mobile-product-meta-item:last-child {
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .mobile-product-meta-item:not(:last-child)::after {
+            content: "•";
+            color: #b7b7b7;
+            font-size: 11px;
+            margin-left: 4px;
+        }
+
+        .mobile-product-meta-label,
+        .mobile-product-meta-value,
+        .mobile-product-meta-value .price {
+            font-size: 10px;
+        }
+
+        .mobile-product-meta-label {
+            color: #6a6a6a;
+            font-weight: 500;
+        }
+
+        .mobile-product-meta-value,
+        .mobile-product-meta-value .price {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .product.name.product-item-name {
+            font-size: 11px;
+            padding: 0px !important;
+        }
+
+        .product-item-name+.item-options {
+            display: grid;
+            grid-template-columns: unset;
+            gap: 5px;
+        }
+
+        .order-details-items.creditmemo .price-including-tax .price,
+        .order-details-items.creditmemo .price-excluding-tax .price {
+            font-weight: 500;
+        }
+
+        body.account #maincontent a.action {
+            font-size: 9px !important;
+        }
+
+        .product-details {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .product-details>span {
+            width: 86px !important;
+            min-width: 86px !important;
+            height: 86px !important;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #efefef;
+            background: #f8f8f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-details>span img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            mix-blend-mode: darken;
+            display: block;
+        }
+
+        .items.order-links {
+            gap: 6px;
+            margin-top: 30px;
+        }
+
+        body.account ul.items.order-links>li {
+            padding: 15px 10px;
+        }
+
+        body.account ul.items.order-links>li a,
+        body.account ul.items.order-links>li strong {
+            font-size: 12px;
+
+        }
+
+        body.account.sales-order-creditmemo li.nav.item.current {
+            background-color: white !important;
+            font-weight: bold;
+        }
+
+        .items.order-links .nav.item.current::after {
+            content: "" !important;
+            display: block !important;
+            position: absolute !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: -5px !important;
+            width: 100% !important;
+            height: 2px !important;
+            background: #111 !important;
+            border-radius: 20px;
+            z-index: 2;
+        }
+
+
+        body.account.sales-order-creditmemo .table-wrapper tr {
+            background-color: white !important;
+        }
+
+        table.data.table.table-order-items.creditmemo td.col.name[data-th="Product Name"]::before {
+            display: none !important;
+        }
+
+        body.account.sales-order-creditmemo .table-wrapper td {
+            font-weight: 500;
+        }
+
+        .price-including-tax .price,
+        .price-excluding-tax .price {
+            font-weight: 500;
+        }
+
+        body.account .table-wrapper tfoot tr {
+            padding: 0px;
+        }
+
+        table.data.table.table-order-items.creditmemo tfoot {
+            border: 1px solid #e5e5e5;
+            border-radius: 0px 0px 12px 12px;
+            border-top: 0px;
+            padding: 15px;
+        }
+
+        .table:not(.cart):not(.totals) tfoot>tr:first-child th,
+        .table:not(.cart):not(.totals) tfoot>tr:first-child td {
+            border-top: 0px;
+        }
+
+        body.account .table-wrapper td {
+            font-size: 11px;
+        }
+
+        body.account .table-wrapper {
+            padding: 0px !important;
+        }
+
+        .table-wrapper .table:not(.cart):not(.totals):not(.table-comparison)>tbody {
+            border-bottom: 1px solid #e5e5e5;
+            border-top: 0px;
+        }
+
+        .table-wrapper .table:not(.totals):not(.table-comparison) tfoot tr:first-child th,
+        .table-wrapper .table:not(.totals):not(.table-comparison) tfoot tr:first-child td {
+            padding: 0px;
+        }
+
+        tfoot tr.totals.tax.details.details-1 td.amount {
+            width: 70%;
+        }
+
+        body.account .table-wrapper tr {
+            background-color: white !important;
+            padding: 0px;
+            margin-bottom: 0px;
+            border-radius: 0px;
+        }
+
+        tfoot tr.totals.tax.details.details-1 td.mark {
+            text-align: left;
+            padding: 10px 0px !important;
+        }
+
+        .product-details {
+            display: grid !important;
+            grid-template-columns: 86px minmax(0, 1fr);
+            align-items: start !important;
+            column-gap: 10px !important;
+            row-gap: 8px !important;
+            padding: 20px 14px 20px 14px;
+        }
+
+        .creditmemo td.col.sku,
+        .creditmemo td.col.price,
+        .creditmemo td.col.qty,
+        .creditmemo td.col.subtotal,
+        .creditmemo td.col.discount,
+        .creditmemo td.col.total {
+            padding: 10px 14px !important;
+        }
+
+        .order-details-items .order-title>strong {
+            font-size: 1.1rem !important;
+            margin: 0px;
+        }
+
+        .product.name.product-item-name {
+            margin: 0 0 6px !important;
+            font-size: 11px !important;
+            line-height: 1.4 !important;
+            font-weight: 600 !important;
+            color: #1f2937 !important;
+        }
+
+        .product-item-name+.item-options dt {
+            font-size: 10px;
+            color: #555;
+        }
+
+        body.account #maincontent a.action.back {
+            padding: 13px 10px !important;
+            max-width: 185px;
+            float: left;
+        }
+    }
+</style>

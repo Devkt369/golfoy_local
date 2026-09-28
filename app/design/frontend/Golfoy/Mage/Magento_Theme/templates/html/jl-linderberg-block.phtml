@@ -1,0 +1,335 @@
+<style>
+    .jl-product-blocks {
+        display: flex;
+        justify-content: center;
+        margin: 20px 0px 40px 0px;
+        gap: 20px;
+    }
+
+    .jl-main-block {
+        width: 1090px;
+        margin: auto;
+    }
+
+    .category-block {
+        padding: 0px;
+    }
+
+    .category-block img {
+        border-radius: 5px;
+    }
+
+    .category-block a {
+        text-decoration: none;
+    }
+
+    .category-block h4 {
+        text-align: center;
+        font-size: 1.5rem;
+        margin: 20px 0 5px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: black;
+    }
+
+    .jlinder-animated-block-first {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin: auto;
+        align-items: center;
+        border-radius: 5px;
+        background: #f4f4f4;
+    }
+
+    .jlinder-animated-block-first .inner-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 10px !important;
+    }
+
+    .jlinder-animated-block-first .slider-container {
+        position: relative;
+        width: 600px;
+        height: 300px;
+        overflow: hidden;
+    }
+
+    .jlinder-animated-block-first .slider img {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 5px;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 1s ease-in-out;
+    }
+
+    .jlinder-animated-block-first .slider img.active {
+        opacity: 1;
+    }
+
+    .jlinder-animated-block-first .text-section {
+        flex: 1;
+        padding: 20px 0px 20px 80px;
+        text-align: left;
+    }
+
+    .jlinder-animated-block-first .text-section h3 {
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 1.5px;
+    }
+
+    .jlinder-animated-block-first .text-section p {
+        font-weight: 500;
+        font-size: 13px;
+        line-height: 22px;
+        margin-bottom: 20px;
+        padding-right: 16px;
+        letter-spacing: .8px;
+    }
+
+    .jlinder-animated-block-first .text-section a {
+        display: inline-block;
+        margin-top: 10px;
+        color: black;
+        font-size: 16px;
+        font-weight: 500;
+        text-decoration: none;
+        border-bottom: 1px solid black;
+    }
+
+    .text-section img {
+        width: 100%;
+        max-width: 230px;
+        padding-bottom: 20px;
+    }
+
+    /* Responsive Design */
+    @media screen and (max-width: 1024px) {
+        .jlinder-animated-block-first .inner-container {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .jlinder-animated-block-first .text-section {
+            padding: 20px 0;
+        }
+
+        .jlinder-animated-block-first .slider-container {
+            height: 250px;
+        }
+    }
+
+    @media screen and (max-width: 768px) {
+        .jlinder-animated-block-first .slider-container {
+            max-width: 100%;
+            height: 200px;
+        }
+
+        .jl-main-block {
+            width: 100%;
+        }
+
+        .jlinder-animated-block-first {
+            width: 100%;
+        }
+
+        .jlinder-animated-block-first .text-section h3 {
+            font-size: 16px;
+        }
+
+        .jlinder-animated-block-first .text-section p {
+            font-size: 14px;
+        }
+
+        .jlinder-animated-block-first .text-section a {
+            font-size: 16px;
+        }
+
+        .jlinder-animated-block-first .slider img {
+            left: 0;
+        }
+
+        .jlinder-animated-block-first .inner-container {
+            padding: 40px 10px !important;
+        }
+
+        .category-block {
+            flex: 0 0 45%;
+        }
+    }
+
+    @media screen and (max-width: 480px) {
+        .jlinder-animated-block-first .slider-container {
+            height: 220px;
+        }
+
+        .category-block h4 {
+            font-size: 1.2rem;
+            margin: 15px 0 5px;
+
+        }
+
+        .jlinder-animated-block-first .inner-container {
+            padding: 40px 100px !important;
+        }
+
+        .category-block {
+            flex: 0 0 36%;
+        }
+
+        .jlinder-animated-block-first .slider img {
+            left: 0;
+        }
+
+        .text-section img {
+            max-width: 190px;
+        }
+
+        .jlinder-animated-block-first .text-section {
+            text-align: center;
+        }
+
+        .jlinder-animated-block-first .inner-container {
+            padding: 10px 10px 10px 10px !important;
+        }
+
+        .jlinder-animated-block-first .text-section h3 {
+            font-size: 11px;
+            margin-bottom: 2px;
+        }
+
+        .jlinder-animated-block-first .text-section p {
+            font-size: 11px;
+            padding-right: 0px;
+            line-height: 20px;
+        }
+
+        .jlinder-animated-block-first .text-section a {
+            font-size: 14px;
+        }
+
+        .jlinder-animated-block-first .text-section a {
+            margin-top: 10px;
+        }
+
+        .text-section img {
+            padding: 5px 0px 15px 0px;
+        }
+    }
+
+    @media screen and (max-width: 768px) {
+        .jl-product-blocks {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            gap: 10px;
+            max-width: 100%;
+            cursor: pointer;
+            padding: 0px;
+            white-space: nowrap;
+            margin: 10px 0px 0px 0px !important;
+        }
+
+        .category-block {
+            scroll-snap-align: center;
+            padding: 10px 0px;
+        }
+
+        .jl-product-blocks {
+            justify-content: unset;
+        }
+
+        .jl-product-blocks::-webkit-scrollbar {
+            height: 5px;
+        }
+
+        .jl-main-block {
+            padding: 10px;
+            margin-top: 30px;
+        }
+
+        .jl-product-blocks::-webkit-scrollbar-thumb {
+            border-radius: 20px !important;
+            border: 1px solid transparent;
+        }
+    }
+</style>
+<div class="jl-main-block">
+    <div class="jlinder-animated-block-first">
+        <div class="inner-container"><!-- Image Section -->
+            <div class="slider-container">
+                <div class="slider"><a href="https://golfoy.com/golf-apparels.html?brand=4550&product_list_order=created"><img class="slides active" src="https://golfoy.com/media/wysiwyg/2025/landing_page/html/jl-fullwidth-01.jpg"></a>
+                    <a href="https://golfoy.com/golf-apparels.html?brand=4550&product_list_order=created"><img class="slides" src="https://golfoy.com/media/wysiwyg/2025/landing_page/html/jl-fullwidth-02.jpg"></a>
+                </div>
+            </div>
+            <!-- Text Section -->
+            <div class="text-section">
+                <h3>New arrivals</h3>
+                <img src="https://golfoy.com/media/logo.svg" alt="">
+                <p>Golf collection featuring tech-driven details and <br>bold patterns inspired by Y2K digital art</p>
+                <a href="https://golfoy.com/golf-apparels.html?brand=4550&product_list_order=created">Shop the
+                    collection</a>
+            </div>
+        </div>
+    </div>
+    <div class="jl-sublock">
+        <div class="jl-product-blocks">
+            <div class="category-block">
+                <a
+                    href="https://golfoy.com/all-golf-brands-india/j-lindeberg/men-s-collection/by-type/t-shirt.html?product_list_order=created">
+                    <img src="https://golfoy.com/media/wysiwyg/2025/landing_page/html/tshirt-jl-new-1.jpg" alt="T-Shirts">
+                    <h4>T-Shirts</h4>
+                </a>
+            </div>
+            <div class="category-block">
+                <a href="https://golfoy.com/golf-apparels/apparel-category/headwear.html?brand=4550">
+                    <img src="https://golfoy.com/media/wysiwyg/2025/landing_page/html/HEADWEAR-final-1.jpg" alt="Headwear">
+                    <h4>Headwear</h4>
+                </a>
+            </div>
+            <div class="category-block">
+                <a href="https://golfoy.com/golf-apparels/apparel-category/belts.html?brand=4550">
+                    <img src="https://golfoy.com/media/wysiwyg/2025/landing_page/html/ACCESSORIES-88.jpg" alt="Belts">
+                    <h4>Belts</h4>
+                </a>
+            </div>
+            <div class="category-block">
+                <a href="https://golfoy.com/all-golf-brands-india/j-lindeberg/glenmuir-collection.html">
+                    <img src="https://golfoy.com/media/wysiwyg/2025/landing_page/html/GLENMUIR-99.jpg" alt="Glenmuir">
+                    <h4>Glenmuir</h4>
+                </a>
+            </div>
+            <div class="category-block">
+                <a
+                    href="https://golfoy.com/golf-apparels/apparel-category/arm-sleeves.html?brand=4550">
+                    <img src="https://golfoy.com/media/wysiwyg/2025/landing_page/html/arm-sleeves.jpg" alt="arm-sleeve">
+                    <h4>Arm sleeves</h4>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const slides = document.querySelectorAll('.slides');
+    let currentIndex = 0;
+
+    function changeSlide() {
+        slides.forEach((slide, index) => {
+            slide.classList.remove("active");
+            if (index === currentIndex) {
+                slide.classList.add("active");
+            }
+        });
+
+        currentIndex = (currentIndex + 1) % slides.length;
+    }
+
+    setInterval(changeSlide, 2000);
+</script>

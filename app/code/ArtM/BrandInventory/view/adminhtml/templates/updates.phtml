@@ -1,0 +1,3095 @@
+<!-- Section 1: Upload CSV -->
+<div class="section-card" id="section-upload">
+    <div class="section-header" data-target="upload-content">
+        <span class="section-title">📁 Upload CSV</span>
+        <span class="toggle-icon">▼</span>
+    </div>
+    <div class="section-content" id="upload-content">
+        <form id="csv-upload-form"
+            action="<?= $block->getUrl('brandinventory/data/upload') ?>"
+            method="post"
+            enctype="multipart/form-data">
+
+            <input type="hidden" name="form_key" value="<?= $block->getFormKey() ?>" />
+            <input type="hidden" name="uploaded_file" id="uploaded_file" value="" />
+
+            <div class="source-container">
+                <label>Select Source:</label>
+                <select name="source_code">
+                    <option value="">-- Select Source --</option>
+                    <?php foreach ($block->getSources() as $source): ?>
+                        <option value="<?= $source->getSourceCode(); ?>">
+                            <?= $source->getName(); ?> (<?= $source->getSourceCode(); ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="format-container" id="format-selector-wrapper" style="display: none; margin-top: 12px;">
+                <label>Select Format:</label>
+                <select name="format_id" id="format-select">
+                    <option value="">-- Select Format --</option>
+                </select>
+            </div>
+
+            <!-- Format Preview Panel -->
+            <div id="format-preview" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px;">
+                <h4 style="margin: 0 0 10px 0;">📋 Format Preview</h4>
+                <div id="format-details"></div>
+            </div>
+
+            <div class="upload-controls">
+                <input type="file" name="csv_file" />
+                <button type="submit">Upload CSV</button>
+            </div>
+
+        </form>
+        <!-- <div class="csv_source_type" style="float: right; margin-top: -25px;">
+            <label>Source Type</label>
+            <select name="source_type">
+                <option value="style_composite">Style-Based (concatenate sizes to build SKU)</option>
+                <option value="direct_sku">SKU-Based (CSV already contains SKU column)</option>
+            </select>
+        </div> -->
+        <input type="hidden" name="source_type" id="source_type_hidden" value="direct_sku" />
+
+        <div id="csv-result"></div>
+        <div id="filtered-result"></div>
+
+    </div>
+    
+</div>
+
+<!-- Section 2: Saved Records -->
+<div class="section-card" id="section-saved">
+    <div class="section-header" data-target="saved-content">
+        <span class="section-title">💾 Saved Records</span>
+        <span class="toggle-icon">▼</span>
+    </div>
+    <div class="section-content" id="saved-content">
+        <div style="margin-bottom: 12px;">
+            <button id="btn-view-all-saved" class="btn btn-primary">🔍 View All Records</button>
+        </div>
+        <div id="saved-data"></div>
+    </div>
+</div>
+
+<!-- Section 3: Generated SKU Data -->
+<div class="section-card" id="section-generated">
+    <div class="section-header" data-target="generated-content">
+        <span class="section-title">📊 Generated SKU Data</span>
+        <span class="toggle-icon">▼</span>
+    </div>
+    <div class="section-content" id="generated-content">
+        
+        <!-- Match Summary Bar -->
+        <div class="match-summary-bar">
+            <span id="match-summary"></span>
+        </div>
+
+        <!-- Sync & Download Buttons -->
+        <div class="sync-bar" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="sync-bar-left">
+                <button id="btn-sync-magento" class="btn btn-sync">🔄 Match With Magento SKUs</button>
+                <button id="btn-download-excel" class="btn btn-download">📥 Download All Data</button>
+                <button id="btn-sync-inventory" class="btn btn-inventory">📦 Sync Inventory</button>
+                <span class="sync-status" id="sync-status"></span>
+            </div>
+            <div class="sync-bar-right">
+                <button id="btn-manual-match" class="btn btn-primary">📤 Link Sku By Sheet</button>
+            </div>
+        </div>
+
+        <div id="result-container"></div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-controls">
+            <div class="per-page-group">
+                <label>Per Page:</label>
+                <select id="per-page">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="200">200</option>
+                </select>
+            </div>
+            <div id="pagination"></div>
+            <div class="go-to-page">
+                <label>Go to:</label>
+                <input type="number" id="go-to-page" min="1" placeholder="#" />
+                <button id="btn-go-page" class="btn btn-small">Go</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Manual Match Modal -->
+<div id="manual-match-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+    <div style="background: white; width: 500px; border-radius: 5px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+        <div style="padding: 15px 20px; background: #f8f9fa; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; font-size: 16px;">📤 Manual Bulk SKU Matching</h3>
+            <button id="btn-close-modal" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #666;">&times;</button>
+        </div>
+        
+        <div style="padding: 20px;">
+            <div style="font-size: 12px; color: #666; margin-bottom: 15px;">
+                CSV format: <code>Potential SKU, Magento SKU</code><br>
+                <a href="#" id="btn-download-template" style="color: #007bdb;">📥 Download Template</a>
+            </div>
+            
+            <input type="file" id="manual-match-file" accept=".csv" style="margin-bottom: 15px;" />
+            
+            <div id="match-result"></div>
+        </div>
+        
+        <div style="padding: 15px 20px; background: #f8f9fa; border-top: 1px solid #ddd; display: flex; justify-content: flex-end; gap: 10px;">
+            <button id="btn-upload-match" class="btn btn-primary">Upload & Apply</button>
+        </div>
+    </div>
+</div>
+
+<div id="batch-history-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.55); z-index: 10000; justify-content: center; align-items: center;">
+    <div style="background: white; width: 760px; max-height: 88vh; overflow: auto; border-radius: 8px; box-shadow: 0 8px 28px rgba(0,0,0,0.25);">
+        <div style="padding: 18px 20px; background: #f4f4f4; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; font-size: 16px;">📜 Batch History</h3>
+            <button id="btn-close-history" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #333;">&times;</button>
+        </div>
+        <div style="padding: 18px;">
+            <div id="batch-history-content" style="font-size: 13px; color: #333;"></div>
+        </div>
+        <div style="padding: 12px 20px; background: #f4f4f4; border-top: 1px solid #ddd; text-align: right;">
+            <button id="btn-close-history-bottom" class="btn btn-secondary">Close</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+require(['jquery'], function($) {
+    let currentBatchId = null;
+    let currentFileName = null;
+    let baseLoadUrl = '<?= $block->getUrl("brandinventory/data/load") ?>';
+    let allSkuData = [];
+    let filteredData = [];
+    let currentPage = 1;
+    let perPage = 15;
+    let savedAttributes = [];
+    let isSyncing = false;
+    let sortColumn = '';
+    let sortDirection = 'asc';
+
+    // Store unique values for dropdowns
+    let uniqueGenders = [];
+    let uniqueSizes = [];
+    function isColumnVisible(columnKey) {
+        if (columnKey === 'action') return true;
+            if (!visibleColumns || visibleColumns.length === 0) {
+                return defaultVisibleColumns.includes(columnKey);
+        }
+        return visibleColumns.includes(columnKey);
+    }
+
+    $(function () {
+        var $btn = $('#csv-upload-form button[type="submit"]');
+        var $source = $('select[name="source_code"]');
+        var $file = $('input[name="csv_file"]');
+
+        $btn.prop('disabled', true);
+
+        function validate() {
+            $btn.prop('disabled', !($source.val() && $file.val()));
+        }
+
+        $source.on('change', validate);
+        $file.on('change', validate);
+    });
+    // ===============================
+    // SECTION TOGGLE
+    // ===============================
+    $(document).on('click', '.section-header', function() {
+        let targetId = $(this).data('target');
+        let $content = $('#' + targetId);
+        let $icon = $(this).find('.toggle-icon');
+        $content.slideToggle(300);
+        $icon.toggleClass('collapsed');
+
+        $('input[name="csv_file"]').on('change', function() {
+            let file = this.files[0];
+            if (!file) return;
+
+            let allowedExtensions = ['csv'];
+            let extension = file.name.split('.').pop().toLowerCase();
+
+            if (!allowedExtensions.includes(extension)) {
+                alert('Invalid file type: "' + extension + '"\n\nPlease upload a valid .csv file only.');
+                this.value = ''; // Clear the invalid file
+            }
+        });
+    });
+
+    function collapseSection(sectionId) {
+        let $content = $('#' + sectionId);
+        let $header = $content.prev('.section-header');
+        let $icon = $header.find('.toggle-icon');
+        $content.slideUp(300);
+        $icon.addClass('collapsed');
+    }
+
+    function expandSection(sectionId) {
+        let $content = $('#' + sectionId);
+        let $header = $content.prev('.section-header');
+        let $icon = $header.find('.toggle-icon');
+        $content.slideDown(300);
+        $icon.removeClass('collapsed');
+    }
+
+    // ===============================
+    // SOURCE & ATTRIBUTES
+    // ===============================
+    $(document).on('change', 'select[name="source_code"]', function() {
+        let sourceCode = $(this).val();
+        let $formatWrapper = $('#format-selector-wrapper');
+        let $formatSelect = $('#format-select');
+        let $preview = $('#format-preview');
+        let $sourceTypeHidden = $('#source_type_hidden');
+
+        // Reset
+        $formatSelect.html('<option value="">-- Select Format --</option>');
+        
+        $preview.hide();
+        $('#format-details').html('');
+        savedAttributes = [];
+
+        if (!sourceCode) {
+            $formatWrapper.hide();
+            return;
+        }
+
+        // For KF source: fetch formats first, then attributes
+        if (sourceCode === 'KF' || sourceCode === 'ZSPL') {
+            $formatWrapper.show();
+
+        if (sourceCode === 'KF') {
+                $sourceTypeHidden.val('style_composite');
+        } else {
+                $sourceTypeHidden.val('direct_sku'); // ZSPL uses direct_sku
+        }
+            $.ajax({
+                url: '<?= $block->getUrl("brandinventory/data/updates") ?>',
+                type: 'GET',
+                data: { 
+                    action: 'getFormats', 
+                    source: sourceCode, 
+                    form_key: window.FORM_KEY 
+                },
+                success: function(res) {
+                    console.log('Formats response kf:', res);
+                    if (res.success && res.formats && res.formats.length > 0) {
+                        res.formats.forEach(function(fmt) {
+                            $formatSelect.append(
+                                `<option value="${fmt.id}">${escapeHtml(fmt.format)}</option>`
+                            );
+                        });
+                       
+                    } else {
+                        $formatSelect.append('<option value="" disabled>No formats found</option>');
+                    }
+                },
+                error: function() {
+                    $formatSelect.append('<option value="" disabled>Error loading formats</option>');
+                }
+            });
+
+        } else { 
+
+                $sourceTypeHidden.val('direct_sku'); // default
+                // Non-KF: hide format, fetch attributes directly
+                $formatWrapper.hide();
+                fetchSavedAttributes(sourceCode, '');
+        }
+    });
+
+    // ✅ Call fetchSavedAttributes only when customer selects a format
+    $(document).on('change', '#format-select', function() {
+        let formatId = $(this).val();
+        let sourceCode = $('select[name="source_code"]').val();
+
+        if (formatId && sourceCode === 'KF' || sourceCode === 'ZSPL') {
+            fetchSavedAttributes(sourceCode, formatId);
+        }
+    });
+
+    // Separate reusable function
+    function fetchSavedAttributes(sourceCode, formatType) {
+        console.log('Fetching saved attributes for source:', sourceCode, 'format:', formatType);
+        
+        // ✅ Clear existing checkboxes and highlights before fetching new data
+        $('.header-checkbox').prop('checked', false);
+        $('#csv-result table tr').each(function() {
+            $(this).find('td').css('background', '');
+        });
+
+        let requestData = {
+            action: 'getSelectedAttrs',
+            source: sourceCode,
+            form_key: window.FORM_KEY
+        };
+
+        // Only send formatType if KF and format is selected
+        if (sourceCode === 'KF' && formatType) {
+            requestData.formatType = formatType;
+        }
+
+        $.ajax({
+            url: '<?= $block->getUrl("brandinventory/data/updates") ?>',
+            type: 'GET',
+            data: requestData,
+            success: function(res) {
+                savedAttributes = (res.success && res.attributes) ? res.attributes : [];
+                
+                // Apply checkboxes if table is rendered
+                if ($('.header-checkbox').length > 0) {
+                    applySavedAttributes();
+                }
+            },
+            error: function() {
+                savedAttributes = [];
+            }
+        });
+    }
+
+    function applySavedAttributes() {
+        if (!savedAttributes || savedAttributes.length === 0) return;
+        let matchedCount = 0;
+        $('.header-checkbox, .header-radio').each(function() {
+            let labelText = $(this).next('label').text().trim();
+            if (savedAttributes.includes(labelText)) {
+                $(this).prop('checked', true);
+                matchedCount++;
+            }
+        });
+        if (matchedCount > 0) {
+            let checkedCols = [];
+            $('.header-checkbox:checked, .header-radio:checked').each(function() { checkedCols.push(parseInt($(this).val())); });
+            $('#csv-result table tr').each(function() {
+                $(this).find('td').css('background', '');
+                checkedCols.forEach(colIndex => { $(this).find('td').eq(colIndex).css('background', '#d4edda'); });
+            });
+            $('.header-checkbox, .header-radio').first().trigger('change');
+        }
+    }
+
+    // ===============================
+    // CSV UPLOAD
+    // ===============================
+    $(document).ready(function() { 
+        collapseSection('upload-content');
+        collapseSection('saved-content');
+        collapseSection('generated-content');
+        
+        toggleGeneratedControls(false);
+        loadSavedData(); 
+    });
+
+    $('#csv-upload-form').on('submit', function(e) {
+        e.preventDefault();
+
+        let $form = $(this);
+        let source = $('select[name="source_code"]').val();
+        let fileInput = $('input[name="csv_file"]')[0];
+        let sourceType = $('#source_type_hidden').val();
+        let file = fileInput.files[0];
+        let formatType = $('#format-select').val(); // Get selected format
+
+        // 1. Validate source
+        if (!source) {
+            alert('Please select a source first.');
+            return;
+        }
+
+        // 2. Validate file selected
+        if (!file) {
+            alert('Please select a file to upload.');
+            return;
+        }
+
+        var formData = new FormData(this);
+        formData.append('form_key', window.FORM_KEY);
+        formData.append('source_type', sourceType);
+
+        if (source === 'KF' && formatType) {
+            if(formatType =='' || formatType == null){
+                alert('Please select a format type.');
+                return;
+            }
+            formData.append('format_type', formatType);
+        }
+
+        $.ajax({
+            url: $form.attr('action'),
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            showLoader: true,
+            success: function(response) {
+                console.log('Upload CSV response:', response);
+                if (response.success) {
+                    $("#uploaded_file").val(response.file_path);
+                    localStorage.removeItem('brand_csv_headers');
+                    localStorage.removeItem('brand_csv_rows');
+                    localStorage.setItem('brand_csv_headers', JSON.stringify(response.headers));
+                    localStorage.setItem('brand_csv_rows', JSON.stringify(response.rows));
+                    $('#filtered-result').html('');
+                    $('#csv-result').html('');
+                    renderTable(response.headers, response.rows,sourceType,source);
+                    expandSection('upload-content');
+                } else {
+                    // Server returned success: false with a message
+                    let msg = response.message || 'Upload failed. Please check the file and try again.';
+                    alert('Upload Failed:\n' + msg);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Upload error:', xhr, status, error);
+                
+                let message = 'Upload failed. Please try again.';
+                
+                // Try to extract server error message
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    message = xhr.responseJSON.message;
+                } else if (xhr.responseText) {
+                    // Sometimes Magento returns HTML error pages
+                    try {
+                        let resp = JSON.parse(xhr.responseText);
+                        if (resp.message) message = resp.message;
+                    } catch (e) {
+                        // If it's HTML, show a generic message
+                        if (xhr.status === 413) {
+                            message = 'File is too large for the server to process.';
+                        } else if (xhr.status === 500) {
+                            message = 'Server error occurred. Please check the file format and try again.';
+                        }
+                    }
+                }
+                alert('Upload Failed:\n' + message);
+            }
+        });
+    });
+
+    let currentFormatHeading ='Choose Sku Containing Column';
+    function renderTable(headers, rows, sourceType,source) {
+        //console.log('new -  '+sourceType); 
+        let html = '';
+        html += '<h3 style="margin-top:20px;">' + escapeHtml(currentFormatHeading) + '</h3>';
+        html += '<div id="header-checkboxes">';
+        
+        // Select All button
+        html += '<button id="select-all-headers" type="button" style="margin-bottom:10px;">Select All</button>';
+        
+        let inputType = (currentFormatHeading === 'Choose Sku Containing Column') ? 'radio' : 'checkbox';
+        let inputClass = (inputType === 'radio') ? 'header-radio' : 'header-checkbox';
+        let inputName = (inputType === 'radio') ? ' name="sku-column"' : '';
+        console.log('source -  '+source);
+
+        html += `<div id="header-checkbox-grid">`;
+        headers.forEach(function(header, index) {
+            html += `<div class="checkbox-item"><input type="${inputType}" class="${inputClass}" value="${index}" id="col_${index}"${inputName}><label for="col_${index}">${header}</label></div>`;
+        });
+        html += '</div>';;
+        
+        
+        // ✅ NEW: Row Filter Section
+        html += '<div id="row-filter-section" style="margin-top:20px; padding:15px; background:#f8f9fa; border:1px solid #ddd; border-radius:4px;">';
+        html += '<h4 style="margin:0 0 10px 0;">🚫 Skip Rows Filter</h4>';
+        html += '<p style="font-size:12px; color:#666; margin-bottom:10px;">Select a column and enter values to skip those rows during SKU creation.</p>';
+    
+        // Filter column dropdown
+        html += '<div style="margin-bottom:10px;">';
+        html += '<label style="display:block; font-size:12px; margin-bottom:4px;">Filter Column:</label>';
+        html += '<select id="row-filter-column" style="padding:5px; border-radius:4px; border:1px solid #ccc; min-width:150px;">';
+        html += '<option value="">-- Select Column --</option>';
+        headers.forEach(function(header, index) {
+            html += `<option value="${index}">${escapeHtml(header)}</option>`;
+        });
+        html += '</select>';
+        html += '</div>';
+        
+        // Filter values input
+        html += '<div style="margin-bottom:10px;">';
+        html += '<label style="display:block; font-size:12px; margin-bottom:4px;">Skip Values (comma separated):</label>';
+        html += '<input type="text" id="row-filter-values" placeholder="e.g. gloves, hats, shoes" style="padding:5px; border-radius:4px; border:1px solid #ccc; width:100%; max-width:300px;" />';
+        html += '</div>';
+        
+        // Active filters display
+        html += '<div id="active-row-filters" style="display:none;">';
+        html += '<label style="display:block; font-size:12px; margin-bottom:4px;">Active Filters:</label>';
+        html += '<div id="active-filters-list" style="display:flex; flex-wrap:wrap; gap:6px;"></div>';
+        html += '</div>';
+        
+        // Add filter button
+        html += '<button id="add-row-filter" type="button" class="btn btn-small" style="background:#dc3545; color:#fff; border:none; padding:5px 12px; border-radius:4px; cursor:pointer;">Add Skip Filter</button>';
+        
+        html += '</div>'; // end row-filter-section
+        
+        html += '</div>'; // end header-checkboxes
+        html += '<button id="process-data" style="margin-top:15px;">Process Sheet</button>';
+        
+        $('#csv-result').html(html);
+        // ✅ Move this AFTER the html is inserted
+        if (source === 'TGIP') {
+            $('#row-filter-section').hide();
+        }
+
+        applySavedAttributes();
+        
+        // Bind Select All button
+        bindSelectAllHandler();
+        
+        // ✅ Store rows for filtering
+        window.csvRows = rows;
+        window.csvHeaders = headers;
+        window.activeRowFilters = []; // Store active filters
+    }
+
+    // Add row filter
+$(document).on('click', '#add-row-filter', function() {
+    let columnIndex = $('#row-filter-column').val();
+    let filterValues = $('#row-filter-values').val().trim();
+    
+    if (!columnIndex) {
+        alert('Please select a column to filter');
+        return;
+    }
+    
+    if (!filterValues) {
+        alert('Please enter values to skip');
+        return;
+    }
+    
+    let columnName = window.csvHeaders[parseInt(columnIndex)];
+    let values = filterValues.split(',').map(v => v.trim().toLowerCase()).filter(v => v);
+    
+    // Check if filter already exists for this column
+    let existingIndex = window.activeRowFilters.findIndex(f => f.columnIndex === columnIndex);
+    if (existingIndex !== -1) {
+        window.activeRowFilters[existingIndex].values = values;
+    } else {
+        window.activeRowFilters.push({
+            columnIndex: columnIndex,
+            columnName: columnName,
+            values: values
+        });
+    }
+    
+    // Clear input
+    $('#row-filter-values').val('');
+    
+    // Update display
+    renderActiveFilters();
+    
+    // Preview filtered rows
+    previewFilteredRows();
+});
+
+// Remove a filter
+$(document).on('click', '.remove-filter-btn', function() {
+    let index = $(this).data('index');
+    window.activeRowFilters.splice(index, 1);
+    renderActiveFilters();
+    previewFilteredRows();
+});
+
+// Render active filters as tags
+function renderActiveFilters() {
+    let $container = $('#active-row-filters');
+    let $list = $('#active-filters-list');
+    
+    if (window.activeRowFilters.length === 0) {
+        $container.hide();
+        return;
+    }
+    
+    let html = '';
+    window.activeRowFilters.forEach(function(filter, index) {
+        html += `<span style="background:#f8d7da; color:#721c24; padding:4px 10px; border-radius:12px; font-size:12px; border:1px solid #f5c6cb; display:inline-flex; align-items:center; gap:6px;">`;
+        html += `<strong>${escapeHtml(filter.columnName)}</strong>: ${escapeHtml(filter.values.join(', '))}`;
+        html += `<button class="remove-filter-btn" data-index="${index}" style="background:#dc3545; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:11px; cursor:pointer; line-height:1;">×</button>`;
+        html += `</span>`;
+    });
+    
+    $list.html(html);
+    $container.show();
+}
+
+// Preview how many rows will be skipped
+function previewFilteredRows() {
+    if (!window.csvRows || window.activeRowFilters.length === 0) return;
+    
+    let skippedCount = 0;
+    window.csvRows.forEach(function(row) {
+        if (shouldSkipRow(row)) {
+            skippedCount++;
+        }
+    });
+    
+    // You can show this info somewhere if needed
+    console.log(`Rows to be skipped: ${skippedCount} of ${window.csvRows.length}`);
+}
+
+// Check if a row should be skipped
+function shouldSkipRow(row) {
+    if (!window.activeRowFilters || window.activeRowFilters.length === 0) return false;
+    
+    return window.activeRowFilters.some(function(filter) {
+        let colIndex = parseInt(filter.columnIndex);
+        let cellValue = String(row[colIndex] || '').trim().toLowerCase();
+        
+        return filter.values.some(function(val) {
+            return cellValue.includes(val);
+        });
+    });
+}
+
+    // Separate handler function
+    function bindSelectAllHandler() {
+        var isAllSelected = false;
+        
+        $('#select-all-headers').on('click', function() {
+            isAllSelected = !isAllSelected;
+            
+            $('.header-checkbox').prop('checked', isAllSelected);
+            
+            // Update button text
+            $(this).text(isAllSelected ? 'Deselect All' : 'Select All');
+        });
+    }
+
+    $(document).on('change', '.header-checkbox, .header-radio', function() {
+        let checkedCols = [];
+        $('.header-checkbox:checked, .header-radio:checked').each(function() { checkedCols.push(parseInt($(this).val())); });
+        $('#csv-result table tr').each(function() {
+            $(this).find('td').css('background', '');
+            checkedCols.forEach(colIndex => { $(this).find('td').eq(colIndex).css('background', '#d4edda'); });
+        });
+    });
+
+    $(document).on('click', '#process-data', function() {
+        let selectedLabels = [];
+        let fileName = $('#uploaded_file').val();
+        
+        $('.header-checkbox:checked, .header-radio:checked').each(function() {
+            selectedLabels.push($(this).next('label').text().trim());
+        });
+        
+        if (selectedLabels.length === 0) { 
+            alert('Please select at least one column'); 
+            return; 
+        }
+        
+        let source = $('select[name="source_code"]').val();
+        let sourceType = $('#source_type_hidden').val();
+        let formatType = $('#format-select').val();
+
+        if (!source) { 
+            alert('Please select source'); 
+            return; 
+        }
+        
+        let headers = JSON.parse(localStorage.getItem('brand_csv_headers'));
+        let rows = JSON.parse(localStorage.getItem('brand_csv_rows'));
+        
+        // Apply row filters
+        let rowsToProcess = rows;
+        let skippedCount = 0;
+        let hasFilters = window.activeRowFilters && window.activeRowFilters.length > 0;
+        
+        if (hasFilters) {
+            rowsToProcess = rows.filter(function(row) {
+                let skip = shouldSkipRow(row);
+                if (skip) skippedCount++;
+                return !skip;
+            });
+        }
+        
+        let requestData = {
+            selected_columns: selectedLabels,
+            headers: headers,
+            fileName: fileName,
+            source_code: source,
+            sourceType: sourceType,
+            formatType: formatType,
+            form_key: window.FORM_KEY
+        };
+        
+        // ✅ Send filters to server for saving
+        if (hasFilters) {
+            requestData.rows = JSON.stringify(rowsToProcess);
+            requestData.skipped_count = skippedCount;
+            requestData.row_filters = JSON.stringify(window.activeRowFilters);
+        }
+        
+        $.ajax({
+            url: '<?= $block->getUrl("brandinventory/data/process") ?>',
+            type: 'POST',
+            data: requestData,
+            success: function(res) {
+                alert('Sheet has been processed successfully');
+                $('#uploaded_file').val('');
+                $('#csv-upload-form button[type="submit"]').prop('disabled', true);
+                loadSavedData();
+                collapseSection('upload-content');
+                expandSection('saved-content');
+            },
+            error: function() { 
+                alert('Processing failed'); 
+            }
+        });
+    });
+
+    $(document).on('change', '.header-checkbox', function() {
+        let selectedCols = [];
+        $('.header-checkbox:checked').each(function() { selectedCols.push(parseInt($(this).val())); });
+        if (selectedCols.length === 0) { $('#filtered-result').html(''); return; }
+        let headers = JSON.parse(localStorage.getItem('brand_csv_headers'));
+        let rows = JSON.parse(localStorage.getItem('brand_csv_rows'));
+        let skuIndex = 1, result = [];
+        let colorIndex = headers.findIndex(h => h.toLowerCase().includes('color'));
+        rows.forEach(function(row) {
+            let sku = row[skuIndex];
+            let color = colorIndex !== -1 ? row[colorIndex] : '';
+            selectedCols.forEach(function(colIndex) {
+                let value = row[colIndex], size = headers[colIndex];
+                if (value && parseFloat(value) > 0) {
+                    result.push({ sku: sku, column: size, color: color, value: value });
+                }
+            });
+        });
+        //renderFilteredTable(result);
+    });
+
+    // function renderFilteredTable(data) {
+    //     let html = '<h3 style="margin-top:20px;">Filtered Data</h3>';
+    //     if (data.length === 0) { html += '<p>No matching data found</p>'; $('#filtered-result').html(html); return; }
+    //     html += '<table border="1" cellpadding="10"><tr><th>Potential SKU</th><th>Size</th><th>Color</th><th>Qty</th></tr>';
+    //     data.forEach(function(row) {
+    //         html += `<tr><td>${row.sku}</td><td>${row.column}</td><td>${row.color}</td><td>${row.value}</td></tr>`;
+    //     });
+    //     html += '</table>';
+    //     $('#filtered-result').html(html);
+    // }
+
+    // ===============================
+    // SAVED RECORDS
+    // ===============================
+    let savedPage = 1, savedPerPage = 10, savedRows = [];
+    function loadSavedData() {
+        $.ajax({
+            url: '<?= $block->getUrl("brandinventory/data/listing") ?>', 
+            type: 'GET',
+            action:'listing',
+            success: function(res) { 
+                console.log('Saved data response:', res);
+                if (res.success) renderSavedTable(res.data); 
+            }
+        });
+    }
+
+    function renderSavedTable(data) 
+    {
+        savedRows = data;
+        const total = data.length, pages = Math.ceil(total / savedPerPage) || 1;
+        savedPage = Math.min(savedPage, pages) || 1;
+        const slice = data.slice((savedPage - 1) * savedPerPage, savedPage * savedPerPage);
+
+        let html = '';
+        if (total === 0) { 
+            html += '<p class="no-data">No records found</p>'; 
+            $('#saved-data').html(html); 
+            return; 
+        }
+
+        html += '<table class="custom-table">';
+        html += '<thead><tr>';
+        html += '<th>ID</th>';
+        html += '<th>File</th>';
+        html += '<th>Source</th>';
+        html += '<th>User</th>';
+        html += '<th>Date</th>';
+        html += '<th>Status</th>';
+        html += '<th>Total</th>';
+        html += '<th>Matched</th>';
+        html += '<th>Pending</th>';
+        html += '<th>Actions</th>';
+        html += '</tr></thead><tbody>';
+
+        if (!slice.length) {
+            html += '<tr><td colspan="10" style="text-align:center;padding:12px;">No records on this page</td></tr>';
+        } else {
+            slice.forEach(function(row) {
+                let skuSynced = row.status === "Unsynced";
+                let reportBtnAttrs = skuSynced ? 'disabled title="Report available after SKU sync"' : '';
+                let reportBtnStyle = skuSynced ? 'opacity:0.6; cursor:not-allowed;' : '';
+
+                let statusClass = '';
+                let statusIcon = '';
+                let statusText = row.status || 'Pending';
+                console.log('Row status:', row.status);
+                if(statusText == 'Partially Synced'){
+                    statusText = 'Loaded';
+                }
+                
+                let inventorySynced = parseInt(row.synced_inventory, 10) === 1;
+                
+                if (inventorySynced) {
+                    statusClass = 'status-synced';
+                    statusIcon = '✅';
+                    statusText = 'Inventory Synced';
+                }else if (row.status === 'Unsynced') {
+                    statusText = 'Uploaded';
+                    statusClass = 'status-pending';
+                } else if (row.status === 'Complete') {
+                    statusClass = 'status-complete';
+                    statusIcon = '✅';
+                } else if (row.status === 'In Progress') {
+                    statusClass = 'status-progress';
+                    statusIcon = '🔄';
+                } else if (row.status === 'Sku Synced') {
+                    statusText = 'All Matched';
+                    statusClass = 'status-complete';
+                    statusIcon = '🔄';
+                } else {
+                    statusClass = 'status-pending';
+                    statusIcon = '⏳';
+                }
+                
+                let inventorySyncedBtn = parseInt(row.synced_inventory, 10) === 1;
+                let loadButtonAttrs = inventorySynced ? 'disabled title="Inventory already synced for this batch"' : '';
+                let loadButtonStyle = inventorySynced ? 'opacity:0.6; cursor:not-allowed;' : '';
+                let loadButtonText = inventorySynced ? 'Inventory Synced' : 'Load';
+                html += `<tr>
+                        <td>${row.id}</td>
+                        <td>
+                            <a href="#" class="file-download-link" data-file="${escapeHtml(row.file)}" style="color: #007bdb; text-decoration: underline; cursor: pointer;">
+                                📄 ${escapeHtml(row.file)}
+                            </a>
+                        </td>
+                        <td>${escapeHtml(row.source)}</td>
+                        <td>${escapeHtml(row.user)}</td>
+                        <td>${row.date}</td>
+                        <td><span class="status-badge ${statusClass}">${statusIcon} ${statusText}</span></td>
+                        <td><strong>${row.total}</strong></td>
+                        <td style="color: #28a745;"><strong>${row.matched}</strong></td>
+                        <td style="color: ${row.pending > 0 ? '#dc3545' : '#28a745'};"><strong>${row.pending}</strong></td>
+                        <td>
+                            <button class="btn load-btn" data-id="${row.id}" data-file="${escapeHtml(row.file)}" data-status="${row.status || 'Pending'}" ${loadButtonAttrs} style="${loadButtonStyle}">${loadButtonText}</button>
+                            <!--<button class="btn btn-view-all" data-id="${row.id}" data-file="${escapeHtml(row.file)}">🔍 View All</button> -->
+                            <button class="btn btn-history" data-batch="${row.id}">📜 History</button>
+                            <button class="btn btn-report" data-id="${row.id}" data-file="${escapeHtml(row.file)}" data-matched="${row.matched}" ${reportBtnAttrs} style="${reportBtnStyle}">📊 Download Report</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        html += '</tbody></table>';
+        html += `<div style="margin:10px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-small" id="saved-prev" ${savedPage==1?'disabled':''}>← Prev</button>
+            <b>Page ${savedPage} / ${pages}</b>
+            <span style="color:#666;font-size:12px;">(${total} total)</span>
+            <button class="btn btn-small" id="saved-next" ${savedPage==pages?'disabled':''}>Next →</button>
+            <select id="saved-per-page" style="padding:4px;border-radius:4px;border:1px solid #ccc;">
+                <option value="5" ${savedPerPage==5?'selected':''}>5</option>
+                <option value="10" ${savedPerPage==10?'selected':''}>10</option>
+                <option value="25" ${savedPerPage==25?'selected':''}>25</option>
+                <option value="50" ${savedPerPage==50?'selected':''}>50</option>
+            </select>
+        </div>`;
+
+        $('#saved-data').html(html);
+    }
+
+    // Click on file name to download original CSV
+    $(document).on('click', '.file-download-link', function(e) {
+        e.preventDefault();
+        let fileName = $(this).data('file');
+        window.open('<?= $block->getUrl("brandinventory/data/download") ?>?file=' + encodeURIComponent(fileName), '_blank');
+    });
+
+
+    // Batch history button
+    $(document).on('click', '.btn-history', function() {
+        let batchId = $(this).data('batch');
+        $('#batch-history-content').html('<p>Loading history...</p>');
+        $('#batch-history-modal').css('display', 'flex');
+
+        $.ajax({
+            url: '<?= $block->getUrl("brandinventory/data/updates") ?>',
+            type: 'GET',
+            data: { action: 'getBatchLogs', batch_id: batchId, form_key: window.FORM_KEY },
+            success: function(res) {
+                if (!res.success) {
+                    $('#batch-history-content').html('<p style="color:#d32f2f;">' + escapeHtml(res.message || 'Unable to load history') + '</p>');
+                    return;
+                }
+               // console.log('Batch history logs:', res); return false;
+                renderBatchHistory(batchId, res.comments || [], res.summary_logs || []);
+            },
+            error: function() {
+                $('#batch-history-content').html('<p style="color:#d32f2f;">Error loading history</p>');
+            }
+        });
+    });
+
+    $(document).on('click', '#btn-close-history, #btn-close-history-bottom', function() {
+        $('#batch-history-modal').hide();
+    });
+
+    function renderBatchHistory(batchId, comments, summaryLogs) {
+        let html = '<div style="margin-bottom: 16px;"><strong>Batch ID:</strong> ' + escapeHtml(batchId) + '</div>';
+
+        if (summaryLogs.length > 0) {
+            html += '<div style="margin-bottom: 16px;"><strong>Manual Match Uploads</strong><div style="margin-top: 8px;">';
+            summaryLogs.forEach(function(summary) {
+                html += '<div style="padding: 10px; border: 1px solid #e1e1e1; margin-bottom: 8px; border-radius: 4px; background: #fafafa;">';
+                html += '<div><strong>Uploaded By:</strong> ' + escapeHtml(summary.uploaded_by || 'unknown') + '</div>';
+
+                // File with download link when available
+                var fileDisplay = escapeHtml(summary.file_path || summary.file || '-');
+                if (summary.file_path) {
+                    var dl = '<?= $block->getUrl("brandinventory/data/download") ?>'
+                        + '?file=' + encodeURIComponent(summary.file_path)
+                        + '&batch_id=' + encodeURIComponent(batchId)
+                        + '&type=manual_match'
+                        + '&form_key=' + encodeURIComponent(window.FORM_KEY);
+                    fileDisplay += ' <a href="' + dl + '" style="margin-left:8px; color:#0066cc; text-decoration:none;">⬇ Download</a>';
+                }
+
+                html += '<div><strong>File:</strong> ' + fileDisplay + '</div>';
+                html += '<div><strong>Applied:</strong> ' + escapeHtml(summary.applied_count || 0) + ', <strong>Skipped:</strong> ' + escapeHtml(summary.skipped_count || 0) + ', <strong>Not Found:</strong> ' + escapeHtml(summary.not_found_count || 0) + ', <strong>Already Linked:</strong> ' + escapeHtml(summary.already_linked_count || 0) + '</div>';
+                html += '<div><strong>Date:</strong> ' + escapeHtml(summary.created_at || '-') + '</div>';
+                html += '</div>';
+            });
+            html += '</div></div>';
+        }
+
+        if (comments.length === 0) {
+            html += '<p>No batch history entries found for this batch.</p>';
+            $('#batch-history-content').html(html);
+            return;
+        }
+
+        html += '<div style="display: grid; gap: 10px;">';
+        comments.forEach(function(entry) {
+            html += '<div style="padding: 12px; border: 1px solid #e1e1e1; border-radius: 6px; background: #fafafa;">';
+
+            // Normalize label and user to avoid [object Object]
+            var labelText = (typeof entry.label === 'string') ? entry.label : ((typeof entry.action === 'string') ? entry.action : JSON.stringify(entry.label));
+            var userText = (typeof entry.user === 'string') ? entry.user : (entry.user && entry.user.username ? entry.user.username : JSON.stringify(entry.user));
+
+            html += '<div><strong>' + escapeHtml(labelText) + '</strong>: ' + escapeHtml(userText || '-') + '</div>';
+
+            // Display details if present
+            if (entry.details && typeof entry.details === 'object') {
+                let detailsHtml = '<div style="margin-top: 6px; padding: 6px; background: #f0f0f0; border-radius: 4px; font-size: 12px;">';
+
+                if (entry.details.sku) {
+                    detailsHtml += '<div><strong>SKU:</strong> ' + escapeHtml(entry.details.sku) + '</div>';
+                }
+
+                if (entry.details.file) {
+                    // Show filename
+                    detailsHtml += '<div><strong>File:</strong> ' + escapeHtml(entry.details.file);
+
+                    // If a download path exists, show a simple clickable link
+                    var downloadPath = entry.details.file_path || entry.details.file_path_rel || null;
+                    if (!downloadPath && entry.details.file && entry.details.file.indexOf('/') !== -1) {
+                        downloadPath = entry.details.file; // fallback if full path stored in file
+                    }
+
+                    if (downloadPath) {
+                        let downloadUrl = '<?= $block->getUrl("brandinventory/data/download") ?>'
+                            + '?file=' + encodeURIComponent(downloadPath)
+                            + '&batch_id=' + encodeURIComponent(batchId)
+                            + '&type=manual_match'
+                            + '&form_key=' + encodeURIComponent(window.FORM_KEY);
+                        detailsHtml += ' <a href="' + downloadUrl + '" style="margin-left: 8px; color: #0066cc; text-decoration: none; font-weight: bold;">⬇ Download</a>';
+                    }
+
+                    detailsHtml += '</div>';
+                }
+
+                if (entry.details.applied_count) {
+                    detailsHtml += '<div><strong>Applied:</strong> ' + escapeHtml(entry.details.applied_count) + '/' + escapeHtml(entry.details.total_processed) + '</div>';
+                }
+
+                detailsHtml += '</div>';
+                html += detailsHtml;
+            }
+
+            html += '<div style="margin-top: 6px; color: #555; font-size: 12px;">' + escapeHtml(entry.created_at || '-') + '</div>';
+            html += '</div>';
+        });
+        html += '</div>';
+
+        $('#batch-history-content').html(html);
+    }
+
+    // Download Report button
+    $(document).on('click', '.btn-report', function() {
+        let batchId = $(this).data('id');
+        let serverMatched = parseInt($(this).data('matched')) || 0;
+        let $btn = $(this);
+
+        let liveMatched = 0;
+        if (currentBatchId == batchId && allSkuData.length > 0) {
+            liveMatched = allSkuData.filter(r => r.linked_sku && r.linked_sku.trim() !== '').length;
+        }
+
+        let hasMatches = serverMatched > 0 || liveMatched > 0;
+
+        // if (!hasMatches) {
+        //     alert('No report available yet.');
+        //     return;
+        // }
+
+        $btn.prop('disabled', true).text('Generating...');
+
+        let downloadUrl = '<?= $block->getUrl("brandinventory/data/download") ?>'
+            + '?batch_id=' + encodeURIComponent(batchId)
+            + '&type=report'
+            + '&form_key=' + encodeURIComponent(window.FORM_KEY);
+
+        window.open(downloadUrl, '_blank');
+
+        $btn.text('✓ Downloaded').css('background', '#28a745');
+        setTimeout(() => {
+            $btn.prop('disabled', false).text('📊 Download Report').css('background', '');
+        }, 2000);
+    });
+
+    // Load button
+    $(document).on('click', '.load-btn', function() {
+        currentBatchId = $(this).data('id');
+        currentFileName = $(this).data('file');
+        let batchStatus = $(this).data('status') || 'Pending';
+        currentPage = 1;
+        loadAllData();
+        collapseSection('saved-content');
+        expandSection('generated-content');
+            //alert(batchStatus); return false;
+        // Enable Sync Inventory only if Magento sync has been done
+        // if (batchStatus === 'Pending' || batchStatus === 'Unsynced'  || batchStatus === 'Partially Synced' || !batchStatus) {
+        if (batchStatus === 'Pending' || batchStatus === 'Unsynced' || !batchStatus) {
+            //alert(batchStatus);
+            $('#btn-sync-inventory').prop('disabled', true).attr('title', 'Match with Magento SKUs first');
+        } else {
+            $('#btn-sync-inventory').prop('disabled', false).removeAttr('title');
+        }
+    });
+
+    $(document).on('click', '#btn-view-all-saved', function() {
+        window.location.href = '<?= $block->getUrl("brandinventory/data/view") ?>';
+    });
+
+    // ===============================
+    // LOAD ALL DATA
+    // ===============================
+    let currentSourceType='';
+    let currentSheetColumns = [];
+    let batchSyncStatus = 0;
+   function loadAllData() 
+   {
+        if (!currentBatchId || !currentFileName) { 
+            alert('Missing batch info'); 
+            return; 
+        }
+
+        $('#result-container').html('<p>Loading all data...</p>');
+        //baseLoadUrl = brandinventory/data/load
+        fetch(`${baseLoadUrl}?id=${currentBatchId}&file=${currentFileName}&page=1&pageSize=999999`)
+            .then(res => res.json())
+            .then(res => {
+                console.log('Load all data response:', res);
+                
+                if (!res.success) { 
+                    alert(res.message); 
+                    return; 
+                }
+                
+                allSkuData = res.data || [];
+                filteredData = [...allSkuData];
+                currentSourceType = res.source_type || 'style_composite';
+                currentSheetColumns = res.sheet_columns || [];
+                batchSyncStatus = res.sync_status || 0;
+                
+                console.log('currentSheetColumns:', currentSheetColumns);
+                console.log('currentSourceType:', currentSourceType);
+                
+                try {
+                    // ✅ Initialize column visibility
+                    allColumns = buildDynamicColumns();
+                    console.log('allColumns built:', allColumns);
+                    
+                    if (visibleColumns.length === 0) {
+                        visibleColumns = [...defaultVisibleColumns];
+                    }
+                    console.log('visibleColumns:', visibleColumns);
+                    
+                    extractUniqueValues();
+                    applyFilters();
+                    updateMatchSummary();
+                    toggleGeneratedControls(true);
+                    
+                } catch (e) {
+                    console.error('Error in render setup:', e);
+                    alert('Error setting up table: ' + e.message);
+                }
+            })
+            .catch((err) => { 
+                console.error('Fetch error:', err);
+                alert('Error loading data: ' + err.message); 
+            });
+    }
+
+    // ===============================
+    // EXTRACT UNIQUE VALUES FOR DROPDOWNS
+    // ===============================
+    function extractUniqueValues() {
+        let genders = new Set();
+        let sizes = new Set();
+
+        allSkuData.forEach(row => {
+            let gender = getCellValue(row, 'gender');
+            let size = getCellValue(row, 'size');
+            
+            if (gender && gender !== '-') genders.add(gender);
+            if (size && size !== '-') sizes.add(size);
+        });
+
+        uniqueGenders = Array.from(genders).sort();
+        uniqueSizes = Array.from(sizes).sort();
+    }
+
+    // ===============================
+    // RENDER TABLE
+    // ===============================
+    let defaultVisibleColumns = ['style', 'size', 'qty', 'sku', 'update_qty', 'potential_sku', 'linked_sku', 'match_status', 'action','location'];
+    let allColumns = [];
+    let visibleColumns = [];
+
+    function renderDbTable(data, showNoResultsMsg, showResetMsg, showNoRecordsAvailable) {
+        console.log('Rendering table with data:', data);
+        let html = '';
+
+        if (showResetMsg) {
+            html += '<p class="no-data" style="background:#fff3cd;color:#856404;border:1px solid #ffeaa7;padding:10px;margin-bottom:10px;border-radius:4px;">⚠ No data found matching your filters — showing all records instead.</p>';
+        }
+
+        if (showNoResultsMsg) {
+            html += '<p class="no-data">No data found matching your filters</p>';
+            $('#result-container').html(html);
+            return;
+        }
+
+        if (showNoRecordsAvailable) {
+            html += '<p class="no-data">No records available</p>';
+            $('#result-container').html(html);
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            html += '<p class="no-data">No records available</p>';
+            $('#result-container').html(html);
+            return;
+        }
+
+        // ✅ BUILD DYNAMIC COLUMNS
+        let columns = buildDynamicColumns();
+
+        // ✅ COLUMN VISIBILITY TOGGLE BAR
+        html += buildColumnToggleBar(columns);
+
+        // ✅ TABLE
+        html += `<table class="admin__table-primary" id="sku-data-table"><thead><tr>`;
+
+        columns.forEach(function(col) {
+            // Only show if visible
+            if (!isColumnVisible(col.key)) return;
+
+            let sortIcon = '';
+            let activeClass = '';
+            let tooltipHtml = '';
+
+            if (sortColumn === col.key) {
+                sortIcon = sortDirection === 'asc' ? ' ▲' : ' ▼';
+                activeClass = ' sorted-active';
+            }
+
+            if (col.key === 'match_status') {
+                tooltipHtml = ` <span class="header-tooltip" title="pending = Not yet synced&#10;not_found = No Magento SKU found&#10;manually_updated = User entered via UI&#10;updated_via_sheet = Bulk CSV upload&#10;table_matched = Found via lookup table&#10;sync_matched = Auto-matched in Magento&#10;duplicate_record_found = SKU already in use">ℹ️</span>`;
+            }
+            
+            html += `<th class="sortable-header${activeClass}" data-column="${col.key}">${col.label}${sortIcon}${tooltipHtml}</th>`;
+        });
+
+        html += `</tr>`;
+
+        // ✅ FILTER ROW — only for visible columns
+        html += buildDynamicFilterRow(columns);
+        html += `</thead><tbody>`;
+
+        // ROWS
+        data.forEach((row) => {
+            html += renderDynamicRow(row, columns);
+        });
+
+        html += '</tbody></table>';
+        $('#result-container').html(html);
+    }
+
+    function buildColumnToggleBar(columns) {
+        let html = '<div id="column-toggle-bar" style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px;">';
+        html += '<div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">';
+        html += '<strong style="font-size: 13px;">📊 Columns:</strong>';
+        
+        // "Show All" / "Show Default" buttons
+        html += '<button id="btn-show-default" class="btn btn-small btn-secondary" style="font-size: 11px; padding: 3px 8px;">Default</button>';
+        html += '<button id="btn-show-all" class="btn btn-small btn-secondary" style="font-size: 11px; padding: 3px 8px;">Show All</button>';
+        
+        html += '<span style="color: #666; font-size: 11px;">| Click to toggle:</span>';
+        
+        // Individual column toggles
+        columns.forEach(function(col) {
+            if (col.key === 'action') return; // Always show action column
+            
+            let isVisible = isColumnVisible(col.key);
+            let activeClass = isVisible ? 'btn-primary' : 'btn-secondary';
+            let opacity = isVisible ? '1' : '0.6';
+            
+            html += `<button class="btn btn-small column-toggle-btn ${activeClass}" 
+                data-column="${col.key}" 
+                style="font-size: 11px; padding: 3px 10px; opacity: ${opacity};">
+                ${isVisible ? '✓' : ''} ${col.label}
+            </button>`;
+        });
+        
+        html += '</div></div>';
+        return html;
+    }
+
+    function buildDynamicColumns() {
+        let columns = [];
+        
+        // If we have sheet columns from the uploaded file, use them
+        if (currentSheetColumns && currentSheetColumns.length > 0) {
+            currentSheetColumns.forEach(function(colName, index) {
+                let key = 'sheet_col_' + index;
+                let label = colName;
+                
+                // Map known columns to friendly keys for sorting/filtering
+                let lowerCol = colName.toLowerCase().replace(/\s+/g, '');
+                
+                if (lowerCol.includes('style') && lowerCol.includes('group')) {
+                    key = 'style_group';
+                } else if (lowerCol === 'style' || lowerCol === 'stylecode') {
+                    key = 'brand_sku';
+                } else if (lowerCol.includes('gender')) {
+                    key = 'gender';
+                } else if (lowerCol.includes('size')) {
+                    key = 'size';
+                } else if (lowerCol.includes('color') || lowerCol.includes('colour')) {
+                    key = 'color';
+                } else if (lowerCol.includes('qty') || lowerCol.includes('quantity') || lowerCol.includes('balance') || lowerCol.includes('stock')) {
+                    key = 'qty';
+                } else if (lowerCol.includes('location')) {
+                    key = 'location';
+                 }
+                
+                columns.push({ key: key, label: label, sheetIndex: index });
+            });
+        } else {
+            // Fallback to default columns
+            columns = [
+                { key: 'style_group', label: 'Style Group' },
+                { key: 'brand_sku', label: 'Brand SKU' },
+                { key: 'gender', label: 'Gender' },
+                { key: 'size', label: 'Size' },
+                { key: 'qty', label: 'Brand Qty' }
+            ];
+        }
+
+        // Always add these fixed columns at the end
+        columns.push(
+
+            // { key: 'qty', label: 'Brand Qty' },
+            { key: 'style', label: 'Sku' },
+            { key: 'potential_sku', label: 'Potential SKU' },
+            { key: 'linked_sku', label: 'Linked SKU' },
+            { key: 'update_qty', label: 'Update Qty' },
+            { key: 'match_status', label: 'Match Status' },
+            { key: 'action', label: 'Action' }
+        );
+
+        return columns;
+    }
+
+    function buildDynamicFilterRow(columns) {
+        console.log('Building filter row for columns:', columns);
+        let html = '<tr class="column-filters">';
+        
+        columns.forEach(function(col) {
+            // Only show filter for visible columns
+            if (!isColumnVisible(col.key)) return;
+            
+            let lowerCol = col.label.toLowerCase().replace(/\s+/g, '');
+            let filterId = 'filter-' + col.key;
+
+            if (col.key === 'style_group') {
+                html += `<th><input type="text" id="${filterId}" placeholder="Search Style Group" class="column-filter-input" value="${escapeHtml($('#' + filterId).val() || '')}" /></th>`;
+            } else if (col.key === 'brand_sku') {
+                html += `<th><input type="text" id="${filterId}" placeholder="Search Brand SKU" class="column-filter-input" value="${escapeHtml($('#' + filterId).val() || '')}" /></th>`;
+            } else if (col.key === 'gender') {
+                let genderOptions = '<option value="">All</option>';
+                uniqueGenders.forEach(g => {
+                    let selected = ($('#' + filterId).val() === g) ? 'selected' : '';
+                    genderOptions += `<option value="${g}" ${selected}>${g}</option>`;
+                });
+                html += `<th><select id="${filterId}" class="column-filter-select">${genderOptions}</select></th>`;
+            } else if (col.key === 'size') {
+                let sizeOptions = '<option value="">All</option>';
+                uniqueSizes.forEach(s => {
+                    let selected = ($('#' + filterId).val() === s) ? 'selected' : '';
+                    sizeOptions += `<option value="${s}" ${selected}>${s}</option>`;
+                });
+                html += `<th><select id="${filterId}" class="column-filter-select">${sizeOptions}</select></th>`;
+            } else if (col.key === 'qty') {
+                html += `<th>
+                    <div class="qty-filter-inputs">
+                        <select id="filter-brand-qty-operator" class="column-filter-select" style="width:45%; display:inline-block;">
+                            <option value="">--</option>
+                            <option value="<" ${($('#filter-brand-qty-operator').val() === '<') ? 'selected' : ''}>&lt;</option>
+                            <option value="<=" ${($('#filter-brand-qty-operator').val() === '<=') ? 'selected' : ''}>&lt;=</option>
+                            <option value="=" ${($('#filter-brand-qty-operator').val() === '=') ? 'selected' : ''}>=</option>
+                            <option value=">=" ${($('#filter-brand-qty-operator').val() === '>=') ? 'selected' : ''}>&gt;=</option>
+                            <option value=">" ${($('#filter-brand-qty-operator').val() === '>') ? 'selected' : ''}>&gt;</option>
+                        </select>
+                        <input type="number" id="filter-brand-qty-value" placeholder="Qty" class="column-filter-input" style="width:50%; display:inline-block; margin-left:5px;" value="${escapeHtml($('#filter-brand-qty-value').val() || '')}" min="0" />
+                    </div>
+                </th>`;
+            } else if (col.key === 'update_qty') {
+                html += `<th></th>`; // No filter for update_qty
+            } else if (col.key === 'color') {
+                html += `<th><input type="text" id="filter-color" placeholder="Search Color" class="column-filter-input" value="${escapeHtml($('#filter-color').val() || '')}" /></th>`;
+            } else if (col.key === 'potential_sku') {
+                html += `<th><input type="text" id="filter-potential" placeholder="Search SKU" class="column-filter-input" value="${escapeHtml($('#filter-potential').val() || '')}" /></th>`;
+            } else if (col.key === 'linked_sku') {
+                html += `<th><input type="text" id="filter-linked-sku" placeholder="Search Linked SKU" class="column-filter-input" value="${escapeHtml($('#filter-linked-sku').val() || '')}" /></th>`;
+            } else if (col.key === 'match_status') {
+                html += `<th>
+                    <select id="filter-status" class="column-filter-select">
+                        <option value="">All</option>
+                        <option value="pending" ${($('#filter-status').val() === 'pending') ? 'selected' : ''}>pending</option>
+                        <option value="not_found" ${($('#filter-status').val() === 'not_found') ? 'selected' : ''}>not_found</option>
+                        <option value="manually_updated" ${($('#filter-status').val() === 'manually_updated') ? 'selected' : ''}>manually_updated</option>
+                        <option value="updated_via_sheet" ${($('#filter-status').val() === 'updated_via_sheet') ? 'selected' : ''}>updated_via_sheet</option>
+                        <option value="table_matched" ${($('#filter-status').val() === 'table_matched') ? 'selected' : ''}>table_matched</option>
+                        <option value="sync_matched" ${($('#filter-status').val() === 'sync_matched') ? 'selected' : ''}>sync_matched</option>
+                        <option value="duplicate_record_found" ${($('#filter-status').val() === 'duplicate_record_found') ? 'selected' : ''}>duplicate_record_found</option>
+                    </select>
+                </th>`;
+            } else if (col.key === 'location') {
+                html += `<th></th>`; // No filter for location
+            } else if (col.key === 'action') {
+                html += `<th></th>`; // No filter for action column
+            } else {
+                // Generic text filter for other columns
+                html += `<th><input type="text" id="${filterId}" placeholder="Search ${escapeHtml(col.label)}" class="column-filter-input" value="${escapeHtml($('#' + filterId).val() || '')}" /></th>`;
+            }
+        });
+
+        html += `<th><button id="clear-filters" class="btn btn-secondary btn-small">Clear</button></th>`;
+        html += '</tr>';
+        return html;
+    }
+
+    function renderDynamicRow(row, columns) {
+        console.log('Rendering row:', row);
+        console.log(row.location);
+        let rowId = row.entity_id;
+        let html = `<tr data-id="${rowId}" data-batch="${currentBatchId}" data-file="${currentFileName}">`;
+        
+        // Parse product_data
+        let productData = {};
+        if (row.product_data) {
+            try {
+                productData = typeof row.product_data === 'string' ? JSON.parse(row.product_data) : row.product_data;
+            } catch (e) {
+                productData = {};
+            }
+        }
+
+        // Render each column only if visible
+        columns.forEach(function(col) {
+            if (!isColumnVisible(col.key)) return;
+
+            switch(col.key) {
+                case 'style_group':
+                    let styleGroup = '-';
+                    if (row.product_data) {
+                        try {
+                            let data = typeof row.product_data === 'string' ? JSON.parse(row.product_data) : row.product_data;
+                            const key = Object.keys(data).find(k => k.replace(/\s+/g, '').toLowerCase() === 'stylegroup');
+                            styleGroup = key ? data[key] : '-';
+                        } catch(e) { styleGroup = '-'; }
+                    }
+                    if (styleGroup === '-' && row.style_code) styleGroup = row.style_code;
+                    html += `<td>${styleGroup}</td>`;
+                    break;
+
+                case 'brand_sku':
+                    let brandSku = '-';
+                    if (row.product_data) {
+                        try {
+                            let data = typeof row.product_data === 'string' ? JSON.parse(row.product_data) : row.product_data;
+                            brandSku = data.style || data.Style || '-';
+                        } catch(e) { brandSku = '-'; }
+                    }
+                    if (brandSku === '-' && row.style) brandSku = row.style;
+                    html += `<td>${brandSku}</td>`;
+                    break;
+
+                case 'gender':
+                    let gender = '-';
+                    if (row.product_data) {
+                        try {
+                            let data = typeof row.product_data === 'string' ? JSON.parse(row.product_data) : row.product_data;
+                            gender = data.gender || data.Gender || '-';
+                        } catch(e) { gender = '-'; }
+                    }
+                    html += `<td>${gender}</td>`;
+                    break;
+
+                case 'size':
+                    html += `<td>${row.size || '-'}</td>`;
+                    break;
+
+                case 'qty':
+                    html += `<td>${row.qty || '0'}</td>`;
+                    break;
+                case 'style':
+                    html += `<td>${row.style || '-'}</td>`;
+                    break;
+
+                case 'update_qty':
+                    html += `<td>
+                        <input type="number" class="update-qty-input" value="${row.update_qty || '0'}" min="0" data-original="${row.update_qty || '0'}" data-id="${rowId}" />
+                    </td>`;
+                    break;
+
+                case 'color':
+                    html += `<td>${row.color || '-'}</td>`;
+                    break;
+
+                case 'potential_sku':
+                    let potentialSkuHtml = renderPotentialSkus(row);
+                    html += `<td class="potential-sku">${potentialSkuHtml || '-'}</td>`;
+                    break;
+
+                case 'linked_sku':
+                    html += `<td>
+                        <input type="text" class="linked-sku-input" value="${row.linked_sku || ''}" placeholder="Enter SKU..." data-original="${row.linked_sku || ''}" />
+                    </td>`;
+                    break;
+
+                case 'match_status':
+                    let matchStatus = row.match_status || '';
+                    let matchClass = '';
+                    if (!matchStatus && row.linked_sku) {
+                        matchStatus = 'linked';
+                        matchClass = 'status-linked';
+                    } else if (!matchStatus) {
+                        matchStatus = 'pending';
+                        matchClass = 'status-pending';
+                    } else {
+                        switch (matchStatus) {
+                            case 'manually_updated':
+                            case 'updated_via_sheet':
+                                matchClass = 'status-manual';
+                                break;
+                            case 'duplicate_record_found':
+                                matchClass = 'status-duplicate';
+                                break;
+                            case 'table_matched':
+                                matchClass = 'status-table';
+                                break;
+                            case 'sync_matched':
+                                matchClass = 'status-sync';
+                                break;
+                            default:
+                                matchClass = 'status-default';
+                        }
+                    }
+                    html += `<td class="match-status ${matchClass}" id="status-${rowId}">${matchStatus}</td>`;
+                    break;
+
+                case 'location':
+                    let locationHtml = '-';
+                    if (row.location) {
+                        try {
+                            let locations = typeof row.location === 'string' ? JSON.parse(row.location) : row.location;
+                            
+                            if (Array.isArray(locations) && locations.length > 0) {
+                                // Array format: [{location: 'DELHI', limit_value: 3, availability: 'OK'}, ...]
+                                locationHtml = locations.map(function(loc) {
+                                    let badge = loc.availability === 'OK' 
+                                        ? '<span style="color:#28a745;">✓</span>' 
+                                        : '<span style="color:#fd7e14;">⚠</span>';
+                                    return `<div style="font-size:11px; margin-bottom:2px;">
+                                        ${badge} <strong>${escapeHtml(loc.location)}</strong>: ${loc.limit_value} (${escapeHtml(loc.availability)})
+                                    </div>`;
+                                }).join('');
+                            } else if (locations && typeof locations === 'object') {
+                                // Object format: {"DELHI": {"LIMIT VALUE": 3, "AVAILABILITY": "LTD"}, ...}
+                                locationHtml = Object.keys(locations).map(function(locName) {
+                                    let loc = locations[locName];
+                                    let availability = loc.AVAILABILITY || loc.availability || '-';
+                                    let limitValue = loc['LIMIT VALUE'] || loc.limit_value || loc.limitValue || '-';
+                                    let badge = availability === 'OK' 
+                                        ? '<span style="color:#28a745;">✓</span>' 
+                                        : '<span style="color:#fd7e14;">⚠</span>';
+                                    return `<div style="font-size:11px; margin-bottom:2px;">
+                                        ${badge} <strong>${escapeHtml(locName)}</strong>: ${limitValue} (${escapeHtml(availability)})
+                                    </div>`;
+                                }).join('');
+                            }
+                        } catch (e) {
+                            locationHtml = escapeHtml(row.location);
+                        }
+                    }
+                html += `<td class="location-cell">${locationHtml}</td>`;
+                break;
+
+                case 'action':
+                    html += `<td>
+                        <button class="btn btn-update" data-id="${rowId}">Update</button>
+                        <button class="btn btn-remove" data-id="${rowId}">Remove</button>
+                    </td>`;
+                    break;
+
+                default:
+                    // Dynamic sheet columns
+                    if (col.sheetIndex !== undefined) {
+                        let colName = currentSheetColumns[col.sheetIndex];
+                        let lowerCol = colName.toLowerCase().replace(/\s+/g, '');
+                        let keys = Object.keys(productData);
+                        let matchedKey = keys.find(k => k.toLowerCase().replace(/\s+/g, '') === lowerCol);
+                        let value = matchedKey ? productData[matchedKey] : '-';
+                        html += `<td>${escapeHtml(value || '-')}</td>`;
+                    } else {
+                        html += `<td>-</td>`;
+                    }
+            }
+        });
+
+        html += `</tr>`;
+        return html;
+    }
+    
+function renderPotentialSkus(row) 
+{
+    let rawPotential = row.potential_sku || '';
+    let linkedSku = (row.linked_sku || '').trim().toUpperCase();
+    let potentialSkus = [];
+
+    if (rawPotential) {
+        try {
+            if (rawPotential.trim().startsWith('[')) {
+                let decoded = JSON.parse(rawPotential);
+                if (Array.isArray(decoded)) {
+                    potentialSkus = decoded.map(s => String(s).trim()).filter(s => s);
+                } else {
+                    potentialSkus = [String(decoded).trim()];
+                }
+            } else if (rawPotential.includes(',')) {
+                potentialSkus = rawPotential.split(',').map(s => s.trim()).filter(s => s);
+            } else {
+                potentialSkus = [rawPotential.trim()];
+            }
+        } catch (e) {
+            if (rawPotential.includes(',')) {
+                potentialSkus = rawPotential.split(',').map(s => s.trim()).filter(s => s);
+            } else {
+                potentialSkus = [rawPotential.trim()];
+            }
+        }
+    }
+
+    if (potentialSkus.length > 0) {
+        return potentialSkus.map(function(ps) {
+            let cleanPs = String(ps).trim();
+            let isMatched = linkedSku.length > 0 && cleanPs.toUpperCase() === linkedSku;
+            
+            if (isMatched) {
+                return `<strong style="color:#155724;background:#d4edda;padding:3px 8px;border-radius:4px;border:2px solid #28a745;font-weight:bold;">${escapeHtml(cleanPs)}</strong>`;
+            }
+            return `<span>${escapeHtml(cleanPs)}</span>`;
+        }).join(', ');
+    }
+    return '-';
+}
+
+
+// Toggle individual column
+$(document).on('click', '.column-toggle-btn', function() {
+    let colKey = $(this).data('column');
+    
+    if (visibleColumns.includes(colKey)) {
+        // Hide
+        visibleColumns = visibleColumns.filter(c => c !== colKey);
+    } else {
+        // Show
+        visibleColumns.push(colKey);
+    }
+    
+    // Re-render current page
+    renderCurrentPage();
+});
+
+// Show default columns
+$(document).on('click', '#btn-show-default', function() {
+    visibleColumns = [...defaultVisibleColumns];
+    renderCurrentPage();
+});
+
+// Show all columns
+$(document).on('click', '#btn-show-all', function() {
+    // Get all column keys from current columns
+    visibleColumns = allColumns.map(c => c.key);
+    renderCurrentPage();
+});
+
+function buildGenderOptions() {
+    let options = '<option value="">All</option>';
+    uniqueGenders.forEach(g => {
+        let selected = ($('#filter-gender').val() === g) ? 'selected' : '';
+        options += `<option value="${g}" ${selected}>${g}</option>`;
+    });
+    return options;
+}
+
+function buildSizeOptions() {
+    let options = '<option value="">All</option>';
+    uniqueSizes.forEach(s => {
+        let selected = ($('#filter-size').val() === s) ? 'selected' : '';
+        options += `<option value="${s}" ${selected}>${s}</option>`;
+    });
+    return options;
+}
+
+    // ===============================
+    // ESCAPE HTML TO PREVENT XSS
+    // ===============================
+    function escapeHtml(text) {
+        if (!text && text !== 0) return '';
+        text = String(text);
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // ===============================
+    // APPLY FILTERS
+    // ===============================
+    function applyFilters() {
+        filteredData = allSkuData.filter(function(row) {
+        let productData = {};
+        if (row.product_data) {
+            try {
+                productData = typeof row.product_data === 'string' ? JSON.parse(row.product_data) : row.product_data;
+            } catch (e) {
+                productData = {};
+            }
+        }
+
+        // Dynamic sheet column filters
+        if (currentSheetColumns && currentSheetColumns.length > 0) {
+            let shouldInclude = true;
+            
+            currentSheetColumns.forEach(function(colName, index) {
+                let filterVal = ($('#filter-sheet-' + index).val() || '').trim().toLowerCase();
+                if (!filterVal) return;
+                
+                let lowerCol = colName.toLowerCase().replace(/\s+/g, '');
+                let keys = Object.keys(productData);
+                let matchedKey = keys.find(k => k.toLowerCase().replace(/\s+/g, '') === lowerCol);
+                let cellValue = matchedKey ? String(productData[matchedKey]).toLowerCase() : '';
+                
+                if (!cellValue.includes(filterVal)) {
+                    shouldInclude = false;
+                }
+            });
+            
+            if (!shouldInclude) return false;
+        } else {
+            // Default filters
+            let styleGroupSearch = ($('#filter-style-group').val() || '').trim().toLowerCase();
+            let genderFilter = $('#filter-gender').val();
+            let sizeFilter = $('#filter-size').val();
+            let brandSkuSearch = ($('#filter-brand-sku').val() || '').trim().toLowerCase();
+            
+            if (styleGroupSearch) {
+                let sg = getCellValue(row, 'style_group').toLowerCase();
+                if (!sg.includes(styleGroupSearch)) return false;
+            }
+            if (genderFilter) {
+                let g = getCellValue(row, 'gender');
+                if (g !== genderFilter) return false;
+            }
+            if (sizeFilter) {
+                let s = getCellValue(row, 'size');
+                if (s !== sizeFilter) return false;
+            }
+            if (brandSkuSearch) {
+                let brandSku = getCellValue(row, 'brand_sku').toLowerCase();
+                if (!brandSku.includes(brandSkuSearch)) return false;
+            }
+        }
+
+        // Brand Qty filter
+        let brandQtyOperator = $('#filter-brand-qty-operator').val();
+        let brandQtyValue = $('#filter-brand-qty-value').val();
+        if (brandQtyOperator && brandQtyValue !== '') {
+            let qty = parseFloat(row.qty) || 0;
+            let val = parseFloat(brandQtyValue);
+            switch (brandQtyOperator) {
+                case '<': if (!(qty < val)) return false; break;
+                case '<=': if (!(qty <= val)) return false; break;
+                case '=': if (!(qty === val)) return false; break;
+                case '>=': if (!(qty >= val)) return false; break;
+                case '>': if (!(qty > val)) return false; break;
+            }
+        }
+
+        // Color filter
+        let colorSearch = ($('#filter-color').val() || '').trim().toLowerCase();
+        if (colorSearch) {
+            let color = row.color || '';
+            let pdColor = productData.color || productData.Color || '';
+            if (!color.toLowerCase().includes(colorSearch) && !pdColor.toLowerCase().includes(colorSearch)) {
+                return false;
+            }
+        }
+
+        // Potential SKU filter
+        let potentialSearch = ($('#filter-potential').val() || '').trim().toLowerCase();
+        if (potentialSearch) {
+            let allPotentialSkus = [];
+            let raw = row.potential_sku || '';
+            try {
+                if (raw.trim().startsWith('[') && raw.trim().endsWith(']')) {
+                    let decoded = JSON.parse(raw);
+                    allPotentialSkus = Array.isArray(decoded) ? decoded : [String(decoded)];
+                } else {
+                    allPotentialSkus = raw ? [raw] : [];
+                }
+            } catch (e) {
+                allPotentialSkus = raw ? [raw] : [];
+            }
+            let found = allPotentialSkus.some(function(ps) {
+                return String(ps).toLowerCase().includes(potentialSearch);
+            });
+            if (!found) return false;
+        }
+
+        // Linked SKU filter
+        let linkedSkuSearch = ($('#filter-linked-sku').val() || '').trim().toLowerCase();
+        if (linkedSkuSearch && row.linked_sku) {
+            if (!row.linked_sku.toLowerCase().includes(linkedSkuSearch)) return false;
+        } else if (linkedSkuSearch && !row.linked_sku) {
+            return false;
+        }
+
+        // Status filter
+        let statusSearch = $('#filter-status').val();
+        if (statusSearch) {
+            let effectiveStatus = row.match_status || '';
+            if (!effectiveStatus && row.linked_sku) {
+                effectiveStatus = 'linked';
+            } else if (!effectiveStatus) {
+                effectiveStatus = 'pending';
+            }
+            if (effectiveStatus !== statusSearch) return false;
+        }
+
+        return true;
+    });
+
+    applySort();
+
+    let totalQty = filteredData.reduce(function(sum, row) {
+        return sum + (parseFloat(row.qty) || 0);
+    }, 0);
+    $('#sku-stats').text(`Matched: ${filteredData.length} of ${allSkuData.length} | Total Qty: ${totalQty}`);
+
+    currentPage = 1;
+    renderCurrentPage();
+}
+
+    // ===============================
+    // SORTING
+    // ===============================
+    function applySort() {
+        if (!sortColumn) return;
+        filteredData.sort(function(a, b) {
+            let valA = getCellValue(a, sortColumn).toLowerCase();
+            let valB = getCellValue(b, sortColumn).toLowerCase();
+            let numA = parseFloat(valA);
+            let numB = parseFloat(valB);
+            if (!isNaN(numA) && !isNaN(numB) && valA !== '' && valB !== '') {
+                return sortDirection === 'asc' ? numA - numB : numB - numA;
+            }
+            if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+            if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+            return 0;
+        });
+    }
+
+    function getCellValue(row, column) {
+        switch(column) {
+            case 'style_group':
+                if (!row.product_data) return '-';
+                try {
+                    let data = typeof row.product_data === 'string' ? JSON.parse(row.product_data) : row.product_data;
+                    const key = Object.keys(data).find(k => k.replace(/\s+/g, '').toLowerCase() === 'stylegroup');
+                    return key ? data[key] : '-';
+                } catch(e) { return '-'; }
+            case 'brand_sku':
+                if (!row.product_data) return '-';
+                try {
+                    let data = typeof row.product_data === 'string' ? JSON.parse(row.product_data) : row.product_data;
+                    return data.style || data.Style || '-';
+                } catch(e) { return '-'; }
+            case 'gender':
+                if (!row.product_data) return '-';
+                try {
+                    let data = typeof row.product_data === 'string' ? JSON.parse(row.product_data) : row.product_data;
+                    return data.gender || data.Gender || '-';
+                } catch(e) { return '-'; }
+            case 'size': return row.size || '-';
+            case 'qty': return row.qty || '0';
+            case 'update_qty': return row.update_qty || '0';
+            case 'color': return row.color || '-';
+            case 'potential_sku':
+            let rawPs = row.potential_sku || '-';
+            try {
+                if (String(rawPs).trim().startsWith('[') && String(rawPs).trim().endsWith(']')) {
+                    let decoded = JSON.parse(rawPs);
+                    return Array.isArray(decoded) ? decoded.join(', ') : String(rawPs);
+                }
+            } catch (e) {}
+            return rawPs;
+            case 'linked_sku': return row.linked_sku || '-';
+            case 'match_status': return row.match_status || 'pending';
+            default: return '';
+        }
+    }
+
+    // ===============================
+    // SORT CLICK
+    // ===============================
+    $(document).on('click', '.sortable-header', function() {
+        let column = $(this).data('column');
+        if (sortColumn === column) {
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortColumn = column;
+            sortDirection = 'asc';
+        }
+        applyFilters();
+    });
+
+    // ===============================
+    // COLUMN FILTER EVENTS - BLUR (FOCUS OUT) FOR TEXT, CHANGE FOR DROPDOWNS
+    // ===============================
+    
+    // Text inputs: apply on blur (focus out) - preserves value visibility while typing
+    $(document).on('blur', '#filter-style-group', function() { applyFilters(); });
+    $(document).on('blur', '#filter-color', function() { applyFilters(); });
+    $(document).on('blur', '#filter-potential', function() { applyFilters(); });
+    $(document).on('blur', '#filter-linked-sku', function() { applyFilters(); });
+    
+    // Also allow Enter key to trigger filter immediately
+    $(document).on('keypress', '#filter-style-group, #filter-color, #filter-potential, #filter-linked-sku', function(e) {
+        if (e.which === 13) {
+            $(this).blur();
+            applyFilters();
+        }
+    });
+
+    // Dropdowns: apply on change
+    $(document).on('change', '#filter-gender', function() { applyFilters(); });
+    $(document).on('change', '#filter-size', function() { applyFilters(); });
+    $(document).on('change', '#filter-status', function() { applyFilters(); });
+
+    // ===============================
+    // UPDATE BUTTON (Linked SKU + Update Qty)
+    // ===============================
+   $(document).on('click', '.btn-update', function() {
+    let $btn = $(this);
+    let $row = $btn.closest('tr');
+    let rowId = $row.data('id');
+    let batchId = $row.data('batch');
+    let linkedSku = $row.find('.linked-sku-input').val().trim();
+    let updateQty = $row.find('.update-qty-input').val().trim();
+    let originalSku = $row.find('.linked-sku-input').data('original');
+    let originalQty = $row.find('.update-qty-input').data('original');
+
+    // No changes
+    if (linkedSku === originalSku && updateQty === originalQty) {
+        alert('No changes to save');
+        return;
+    }
+
+    // If linked SKU is being set/changed, check for duplicates first
+    if (linkedSku && linkedSku !== originalSku) {
+        $btn.prop('disabled', true).text('Checking...');
+
+        $.ajax({
+            url: '<?= $block->getUrl("brandinventory/data/updates") ?>',
+            type: 'GET',
+            data: {
+                action: 'checkDuplicateSku',
+                batch_id: batchId,
+                linked_sku: linkedSku,
+                exclude_id: rowId,
+                form_key: window.FORM_KEY
+            },
+            success: function(checkRes) {
+                if (checkRes.duplicate) {
+                    // Show error with existing potential SKU info
+                    let existing = checkRes.existing;
+                    let potentialSkus = existing.potential_sku || '-';
+                    
+                    // Format potential SKUs for display
+                    let displaySkus = potentialSkus;
+                    try {
+                        let decoded = JSON.parse(potentialSkus);
+                        if (Array.isArray(decoded)) {
+                            displaySkus = decoded.join(', ');
+                        }
+                    } catch(e) {}
+
+                    let errorHtml = `
+                        <div style="text-align:left;">
+                            <h3 style="color:#dc3545; margin-bottom:10px;">❌ Duplicate SKU</h3>
+                            <p><strong>${checkRes.message}</strong></p>
+                            <hr style="margin:10px 0;">
+                            <p><strong>Already linked to:</strong></p>
+                            <ul style="margin:5px 0; padding-left:20px;">
+                                <li><strong>Potential SKU:</strong> ${escapeHtml(displaySkus)}</li>
+                                <li><strong>Size:</strong> ${escapeHtml(existing.size || '-')}</li>
+                                <li><strong>Color:</strong> ${escapeHtml(existing.color || '-')}</li>
+                                <li><strong>Row ID:</strong> ${existing.entity_id}</li>
+                            </ul>
+                        </div>
+                    `;
+
+                    // Use a nicer alert or modal
+                    alert(`❌ ${checkRes.message}\n\nAlready linked to:\nPotential SKU: ${displaySkus}\nSize: ${existing.size || '-'}\nColor: ${existing.color || '-'}\nRow ID: ${existing.entity_id}`);
+
+                    // Highlight the conflicting row if visible
+                    highlightConflictingRow(existing.entity_id);
+
+                    $btn.prop('disabled', false).text('Update');
+                    return;
+                }
+
+                // No duplicate, proceed with save
+                doSaveUpdate($btn, $row, rowId, linkedSku, updateQty);
+            },
+            error: function() {
+                alert('Error checking duplicate SKU');
+                $btn.prop('disabled', false).text('Update');
+            }
+        });
+    } else {
+        // No linked SKU change, just save
+        doSaveUpdate($btn, $row, rowId, linkedSku, updateQty);
+    }
+});
+/**
+ * Actual save function
+ */
+    function doSaveUpdate($btn, $row, rowId, linkedSku, updateQty) {
+    $btn.prop('disabled', true).text('Saving...');
+
+    // Remove any old inline messages from this row
+    $row.find('.sync-warning-msg').remove();
+
+    $.ajax({
+        url: '<?= $block->getUrl("brandinventory/data/updates") ?>',
+        type: 'POST',
+        data: {
+            action: 'update',
+            id: rowId,
+            linked_sku: linkedSku,
+            update_qty: updateQty,
+            form_key: window.FORM_KEY
+        },
+        success: function(res) {
+            if (res.success) {
+                $row.find('.linked-sku-input').data('original', linkedSku);
+                $row.find('.update-qty-input').data('original', updateQty);
+
+                let $qtyInput = $row.find('.update-qty-input');
+                $qtyInput.addClass('updated-success');
+                setTimeout(() => $qtyInput.removeClass('updated-success'), 1500);
+
+                let $statusCell = $row.find('.match-status');
+                if (linkedSku) {
+                    $statusCell.text('✎ Manual')
+                        .removeClass('status-pending status-sync status-linked')
+                        .addClass('status-manual');
+                } else {
+                    $statusCell.text('✗ Pending')
+                        .removeClass('status-manual status-sync status-linked')
+                        .addClass('status-pending');
+                }
+
+                let dataIndex = allSkuData.findIndex(r => r.entity_id == rowId);
+                if (dataIndex > -1) {
+                    allSkuData[dataIndex].linked_sku = linkedSku;
+                    allSkuData[dataIndex].update_qty = updateQty;
+                    allSkuData[dataIndex].match_status = linkedSku ? 'manually_updated' : 'pending';
+                }
+
+                // ✅ Handle sync failure vs full success
+                if (res.synced === false) {
+                    // Extract clean error from message
+                    let syncError = res.message.includes('(') 
+                        ? res.message.match(/\(([^)]+)\)/)?.[1] 
+                        : 'Magento sync failed';
+
+                    // Show orange button
+                    $btn.text('Saved ⚠').css('background', '#fd7e14');
+
+                    // Add small inline message below the buttons
+                    let $actionCell = $btn.closest('td');
+                    $actionCell.append(
+                        `<div class="sync-warning-msg" style="margin-top:6px;padding:4px 8px;background:#fff3cd;border:1px solid #ffc107;border-radius:4px;color:#856404;font-size:11px;line-height:1.3;">
+                            ⚠️ Saved but <b>not synced</b><br>
+                            <span style="color:#dc3545;">${escapeHtml(syncError)}</span>
+                        </div>`
+                    );
+
+                    setTimeout(() => {
+                        $btn.prop('disabled', false).text('Update').css('background', '');
+                        $row.find('.sync-warning-msg').fadeOut(400, function(){ $(this).remove(); });
+                    }, 4000);
+                } else {
+                    // Full success
+                    $btn.text('Updated').css('background', '#28a745');
+                    setTimeout(() => {
+                        $btn.prop('disabled', false).text('Update').css('background', '');
+                    }, 1500);
+                }
+
+                updateMatchSummary();
+            } else if (res.duplicate) {
+                let existing = res.existing;
+                let displaySkus = existing.potential_sku || '-';
+                try {
+                    let decoded = JSON.parse(displaySkus);
+                    if (Array.isArray(decoded)) displaySkus = decoded.join(', ');
+                } catch(e) {}
+                
+                alert(`❌ ${res.message}\n\nAlready linked to Potential SKU: ${displaySkus}\nSize: ${existing.size || '-'}\nColor: ${existing.color || '-'}`);
+                $btn.prop('disabled', false).text('Update');
+            } else {
+                alert(res.message || 'Update failed');
+                $btn.prop('disabled', false).text('Update');
+            }
+        },
+        error: function() {
+            alert('Error saving data');
+            $btn.prop('disabled', false).text('Update');
+        }
+    });
+}
+
+/**
+ * Highlight conflicting row in table
+ */
+function highlightConflictingRow(entityId) {
+    let $row = $('tr[data-id="' + entityId + '"]');
+    if ($row.length) {
+        $row.addClass('row-conflict');
+        $row.find('.potential-sku').css({
+            'border': '3px solid #dc3545',
+            'padding': '5px'
+        });
+        
+        // Scroll to row
+        $('html, body').animate({
+            scrollTop: $row.offset().top - 150
+        }, 500);
+
+        // Remove highlight after 4 seconds
+        setTimeout(() => {
+            $row.removeClass('row-conflict');
+            $row.find('.potential-sku').css({
+                'border': '',
+                'padding': ''
+            });
+        }, 4000);
+    } else {
+        alert('Conflicting row is not visible on current page. Go to page containing Row ID: ' + entityId);
+    }
+}
+
+    // ===============================
+    // REMOVE BUTTON
+    // ===============================
+    $(document).on('click', '.btn-remove', function() {
+        let $btn = $(this);
+        let $row = $btn.closest('tr');
+        let rowId = $row.data('id');
+        let $input = $row.find('.linked-sku-input');
+        
+        if (!$input.val().trim()) return;
+        if (!confirm('Clear linked SKU for this record?')) return;
+
+        $btn.prop('disabled', true).text('Clearing...');
+
+        $.ajax({
+            url: '<?= $block->getUrl("brandinventory/data/updates") ?>',
+            type: 'POST',
+            data: {
+                action: 'remove',
+                id: rowId,
+                form_key: window.FORM_KEY
+            },
+            success: function(res) {
+                if (res.success) {
+                    $input.val('').data('original', '');
+                    let $statusCell = $row.find('.match-status');
+                    $statusCell.text('✗ Pending')
+                        .removeClass('status-sync status-manual status-linked')
+                        .addClass('status-pending');
+                    
+                    let dataIndex = allSkuData.findIndex(r => r.entity_id == rowId);
+                    if (dataIndex > -1) {
+                        allSkuData[dataIndex].linked_sku = '';
+                        allSkuData[dataIndex].match_status = 'pending';
+                    }
+                    $btn.prop('disabled', false).text('Remove');
+                    updateMatchSummary();
+                } else {
+                    alert(res.message || 'Remove failed');
+                    $btn.prop('disabled', false).text('Remove');
+                }
+            },
+            error: function() {
+                alert('Error clearing linked SKU');
+                $btn.prop('disabled', false).text('Remove');
+            }
+        });
+    });
+
+    // ===============================
+    // CLEAR FILTERS
+    // ===============================
+ $(document).on('click', '#clear-filters', function() {
+    // Clear dynamic filters
+    if (currentSheetColumns && currentSheetColumns.length > 0) {
+        currentSheetColumns.forEach(function(colName, index) {
+            $('#filter-sheet-' + index).val('');
+        });
+    } else {
+        $('#filter-style-group').val('');
+        $('#filter-brand-sku').val('');
+        $('#filter-gender').val('');
+        $('#filter-size').val('');
+    }
+    
+    $('#filter-brand-qty-operator').val('');
+    $('#filter-brand-qty-value').val('');
+    $('#filter-color').val('');
+    $('#filter-potential').val('');
+    $('#filter-linked-sku').val('');
+    $('#filter-status').val('');
+    
+    applyFilters();
+});
+
+    // ===============================
+    // PAGINATION
+    // ===============================
+    // Track active reset timeout to prevent stacking
+let filterResetTimeout = null;
+
+function renderCurrentPage() {
+    let totalRecords = filteredData.length;
+    let totalPages = Math.ceil(totalRecords / perPage) || 1;
+    let showResetMsg = false;
+
+    // If active filters returned nothing, show message then auto-reset after delay
+    if (filteredData.length === 0 && allSkuData.length > 0) {
+        // Render the "No records available" message immediately
+        renderDbTable([], false, false, true);
+        renderPagination(1, 1, 0);
+        
+        // Clear any existing pending reset
+        if (filterResetTimeout) clearTimeout(filterResetTimeout);
+        
+        // Auto-clear filters after 2.5 seconds and show all data
+        filterResetTimeout = setTimeout(function() {
+            // Clear all filter inputs
+            $('#filter-style-group').val('');
+            $('#filter-brand-sku').val('');
+            $('#filter-gender').val('');
+            $('#filter-size').val('');
+            $('#filter-brand-qty-operator').val('');
+            $('#filter-brand-qty-value').val('');
+            $('#filter-color').val('');
+            $('#filter-potential').val('');
+            $('#filter-linked-sku').val('');
+            $('#filter-status').val('');
+
+            // Reset to full dataset
+            filteredData = [...allSkuData];
+            currentPage = 1;
+            applySort();
+            renderCurrentPage();
+        }, 2500);
+        
+        return;
+    }
+
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+    let start = (currentPage - 1) * perPage;
+    let end = start + perPage;
+
+    let pageData = filteredData.slice(start, end);
+    //console.log('pageData:', pageData);
+    renderDbTable(pageData, false, false, false);
+    renderPagination(currentPage, totalPages, totalRecords);
+}
+
+    function renderPagination(current, total, totalRecords) {
+        let html = '';
+        if (total <= 1) { $('#pagination').html(html); return; }
+        html += '<div class="custom-pagination">';
+        html += `<span class="page-info">Page ${current} of ${total} (${totalRecords} records)</span>`;
+        if (current > 1) html += `<button class="page-btn" data-page="${current - 1}">Prev</button>`;
+        html += `<button class="page-btn ${current === 1 ? 'active' : ''}" data-page="1">1</button>`;
+        if (current > 4) html += `<span class="dots">...</span>`;
+        let start = Math.max(2, current - 2), end = Math.min(total - 1, current + 2);
+        for (let i = start; i <= end; i++) html += `<button class="page-btn ${i === current ? 'active' : ''}" data-page="${i}">${i}</button>`;
+        if (current < total - 3) html += `<span class="dots">...</span>`;
+        if (total > 1) html += `<button class="page-btn ${current === total ? 'active' : ''}" data-page="${total}">${total}</button>`;
+        if (current < total) html += `<button class="page-btn" data-page="${current + 1}">Next</button>`;
+        html += '</div>';
+        $('#pagination').html(html);
+    }
+
+    $(document).on('click', '.page-btn', function() { currentPage = $(this).data('page'); renderCurrentPage(); });
+    $(document).on('change', '#per-page', function() { perPage = parseInt($(this).val()); currentPage = 1; renderCurrentPage(); });
+    $(document).on('click', '#btn-go-page', function() {
+        let page = parseInt($('#go-to-page').val());
+        if (page && page >= 1) {
+            let totalPages = Math.ceil(filteredData.length / perPage) || 1;
+            if (page > totalPages) page = totalPages;
+            currentPage = page; renderCurrentPage(); $('#go-to-page').val('');
+        }
+    });
+    $(document).on('keypress', '#go-to-page', function(e) { if (e.which === 13) $('#btn-go-page').click(); });
+    // Brand SKU filter
+    $(document).on('blur', '#filter-brand-sku', function() { applyFilters(); });
+    $(document).on('keypress', '#filter-brand-sku', function(e) { if (e.which === 13) { $(this).blur(); applyFilters(); } });
+
+    // Brand Qty filter
+    $(document).on('change', '#filter-brand-qty-operator', function() { applyFilters(); });
+    $(document).on('blur', '#filter-brand-qty-value', function() { applyFilters(); });
+    $(document).on('keypress', '#filter-brand-qty-value', function(e) { if (e.which === 13) { $(this).blur(); applyFilters(); } });
+
+    // ===============================
+    // Match with MAGENTO sku
+    // ===============================
+    $(document).on('click', '#btn-sync-magento', function() {
+        if (isSyncing) return;
+        if (!currentBatchId) { alert('Please load a batch first'); return; }
+
+        let $btn = $(this);
+        let $status = $('#sync-status');
+        isSyncing = true;
+
+        $btn.prop('disabled', true).text('Syncing...');
+        $status.text('Processing all SKUs in background...').css('color', '#1976d2');
+
+        $.ajax({
+            url: '<?= $block->getUrl("brandinventory/data/syncMagento") ?>',
+            type: 'POST',
+            data: {
+                action: 'syncBatch',
+                batch_id: currentBatchId,
+                form_key: window.FORM_KEY
+            },
+            success: function(res) {
+                isSyncing = false;
+                $btn.prop('disabled', false).text('🔄 Sync with Magento');
+                if (res.success) {
+                    $status.html(`✓ Matched: <strong>${res.matched}</strong> | ✗ Not Found: <strong>${res.failed}</strong> | Total: <strong>${res.total}</strong>`).css('color', '#28a745');
+                    loadAllData();
+                    loadSavedData();
+                    $('#btn-sync-inventory').prop('disabled', false).removeAttr('title'); // <-- enable inventory sync
+                }else {
+                    $status.text('Sync failed: ' + res.message).css('color', '#dc3545');
+                }
+            },
+            error: function() {
+                isSyncing = false;
+                $btn.prop('disabled', false).text('🔄 Sync with Magento');
+                $status.text('Error during sync').css('color', '#dc3545');
+            }
+        });
+    });
+
+    // ===============================
+    // DOWNLOAD EXCEL
+    // ===============================
+    $(document).on('click', '#btn-download-excel', function() {
+        if (!currentBatchId) { alert('Please load a batch first'); return; }
+
+        let exportData = filteredData.length > 0 ? filteredData : allSkuData;
+        console.log('Exporting data:', exportData);
+        if (exportData.length === 0) { alert('No data to download'); return; }
+
+        // ─── 1. DISCOVER SYSTEM COLUMNS ───
+        let activeSystemColumns = [];
+        let hasGenderInProductData = false;
+
+        exportData.forEach(row => {
+            // Check which system columns have data
+            ['entity_id', 'style', 'style_code', 'color', 'size', 'qty', 'update_qty', 
+            'potential_sku', 'linked_sku', 'match_status', 'location'].forEach(col => {
+                if (row[col] !== null && row[col] !== undefined && String(row[col]).trim() !== '') {
+                    if (!activeSystemColumns.includes(col)) activeSystemColumns.push(col);
+                }
+            });
+
+            // Check if gender exists in product_data for any row
+            if (row.product_data) {
+                try {
+                    let pd = typeof row.product_data === 'string' ? JSON.parse(row.product_data) : row.product_data;
+                    if (pd.gender !== undefined || pd.Gender !== undefined) {
+                        hasGenderInProductData = true;
+                    }
+                } catch (e) {}
+            }
+        });
+
+        // ─── 2. DEFINE FIXED COLUMN ORDER ───
+        // Only include columns that actually have data, in your preferred order
+        let desiredOrder = ['entity_id', 'style', 'style_code'];
+        
+        // Insert gender here (between style_code and color) if it exists anywhere
+        if (hasGenderInProductData) {
+            desiredOrder.push('gender');
+        }
+        
+        desiredOrder.push('color', 'size', 'qty', 'update_qty', 'potential_sku', 'linked_sku', 'match_status', 'location');
+
+        // Filter to only columns that have data
+        let allColumns = desiredOrder.filter(col => activeSystemColumns.includes(col) || col === 'gender');
+
+        // ─── 3. COLUMN LABELS ───
+        let columnLabels = {
+            'entity_id': 'ID',
+            'style': 'Style',
+            'style_code': 'Style Code',
+            'gender': 'Gender',
+            'color': 'Color',
+            'size': 'Size',
+            'qty': 'Brand Qty',
+            'update_qty': 'Update Qty',
+            'potential_sku': 'Potential SKU',
+            'linked_sku': 'Matched Magento SKU',
+            'match_status': 'Status',
+            'location': 'Location'
+        };
+
+        // ─── 4. BUILD CSV ───
+        let csvHeader = allColumns.map(col => `"${columnLabels[col].replace(/"/g, '""')}"`).join(',') + '\n';
+        let csvContent = csvHeader;
+
+        let escapeCsv = (str) => {
+            if (str === null || str === undefined) return '""';
+            str = String(str).replace(/"/g, '""');
+            return `"${str}"`;
+        };
+
+        exportData.forEach(row => {
+            let rowValues = allColumns.map(col => {
+                // Special handling for gender — pull from product_data if not in row directly
+                if (col === 'gender') {
+                    // First check direct row property
+                    if (row.gender !== undefined && row.gender !== null && String(row.gender).trim() !== '') {
+                        return escapeCsv(row.gender);
+                    }
+                    // Then check product_data JSON
+                    if (row.product_data) {
+                        try {
+                            let pd = typeof row.product_data === 'string' ? JSON.parse(row.product_data) : row.product_data;
+                            let genderVal = pd.gender || pd.Gender || '';
+                            return escapeCsv(genderVal);
+                        } catch (e) {
+                            return escapeCsv('');
+                        }
+                    }
+                    return escapeCsv('');
+                }
+                
+                // All other columns — pull directly from row
+                return escapeCsv(row[col]);
+            });
+            csvContent += rowValues.join(',') + '\n';
+        });
+
+        // ─── 5. DOWNLOAD ───
+        let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        let link = document.createElement('a');
+        let url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `brand_inventory_batch_${currentBatchId}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+
+    // ===============================
+    // MATCH SUMMARY
+    // ===============================
+   function updateMatchSummary() {
+        if (!currentBatchId) return;
+        $.ajax({
+            url: '<?= $block->getUrl("brandinventory/data/updates") ?>',
+            type: 'GET',
+            data: { action: 'getMatchSummary', batch_id: currentBatchId, form_key: window.FORM_KEY },
+            success: function(res) {
+                if (res.success) {
+                    $('#match-summary').html(
+                        `Total: <strong>${res.total}</strong> | ` +
+                        `✓ Matched: <strong style="color:#28a745">${res.matched}</strong> | ` +
+                        `✗ Pending: <strong style="color:#ed6c02">${res.pending}</strong>`
+                    );
+
+                    // 🆕 Handle button state and notification
+                    var $btn = $('#btn-manual-match');
+                    
+                    // CRITICAL: Remove any existing notification first to prevent duplicates
+                    $('#match-complete-notification').remove();
+
+                    if (res.pending === 0 && res.total > 0) {
+                        // All linked — disable button and show notification
+                        $btn
+                            .prop('disabled', true)
+                            .addClass('btn-disabled')
+                            .removeClass('btn-primary')
+                            .text('✓ All SKUs Linked');
+                        
+                        // Add notification right before the button
+                        $btn.before(
+                            '<div id="match-complete-notification" class="match-complete-msg">' +
+                            '✅ All SKUs have been successfully linked for this batch.' +
+                            '</div>'
+                        );
+                    } else {
+                        // Still pending — enable button
+                        $btn
+                            .prop('disabled', false)
+                            .removeClass('btn-disabled')
+                            .addClass('btn-primary')
+                            .text('📤 Link Sku By Sheet');
+                    }
+                }
+            }
+        });
+    }
+
+    // ===============================
+    // SYNC INVENTORY
+    // ===============================
+    $(document).on('click', '#btn-sync-inventory', function() {
+        $('#match-complete-notification').hide();
+
+        if (isSyncing) return;
+        if (!currentBatchId) { alert('Please load a batch first'); return; }
+
+        let $btn = $(this);
+        let $status = $('#sync-status');
+        isSyncing = true;
+
+        $btn.prop('disabled', true).text('Syncing Inventory...');
+        $status.text('Updating Magento stock quantities...').css('color', '#f57c00');
+
+            $.ajax({
+                url: '<?= $block->getUrl("brandinventory/data/syncInventory") ?>',
+                type: 'POST',
+                data: {
+                    batch_id: currentBatchId,
+                    form_key: window.FORM_KEY
+                },
+                success: function(res) {
+                    isSyncing = false;
+                    $btn.prop('disabled', false).text('📦 Sync Inventory');
+
+                    if (res.status === 'error') {
+                        $status.text('❌ Sync failed: ' + res.message).css('color', '#dc3545');
+                        return;
+                    }
+
+                    if (res.status === 'info') {
+                        $status.text('ℹ️ ' + res.message).css('color', '#ed6c02');
+                        loadSavedData();
+                        return;
+                    }
+
+                    let updated = res.updated || 0;
+                    let failed = res.failed || 0;
+                    let total = res.total || 0;
+                    let failedItems = res.failed_items || [];
+
+                    let msgHtml = '';
+                    let statusColor = failed > 0 ? '#ed6c02' : '#28a745';
+
+                    if (failed === 0) {
+                        msgHtml = `✅ Inventory synced successfully! <strong>${updated}</strong> of <strong>${total}</strong> SKUs updated.`;
+                    } else {
+                        // Parse "SKU (reason)" format
+                        let failures = [];
+                        failedItems.forEach(function(item) {
+                            let match = item.match(/^([^\s(]+)\s*\((.+)\)$/);
+                            if (match) {
+                                failures.push({ sku: match[1], reason: match[2] });
+                            } else {
+                                failures.push({ sku: item, reason: 'Unknown' });
+                            }
+                        });
+
+                        // Group by reason
+                        let reasonGroups = {};
+                        failures.forEach(function(f) {
+                            if (!reasonGroups[f.reason]) reasonGroups[f.reason] = [];
+                            reasonGroups[f.reason].push(f.sku);
+                        });
+
+                        let reasonList = Object.entries(reasonGroups).map(function([reason, skus]) {
+                            return `<div style="margin-left:12px;font-size:12px;color:#721c24;">• <strong>${skus.length}</strong> failed: ${escapeHtml(reason)}</div>`;
+                        }).join('');
+
+                        msgHtml = `<div>⚠️ Inventory sync partial: <strong style="color:#28a745">${updated}</strong> synced, <strong style="color:#dc3545">${failed}</strong> failed out of <strong>${total}</strong> total.</div>` +
+                                `<div style="margin-top:6px;padding:10px;background:#f8d7da;border:1px solid #f5c6cb;border-radius:4px;">` +
+                                `<strong style="color:#721c24;">Failure breakdown:</strong>` +
+                                reasonList +
+                                `</div>`;
+                    }
+
+                    $status.html(msgHtml).css('color', statusColor);
+                    loadSavedData();
+
+                    if (res.pending === 0) {
+                        $('#match-complete-notification').show();
+                    }
+                },
+                error: function() {
+                    isSyncing = false;
+                    $btn.prop('disabled', false).text('📦 Sync Inventory');
+                    $status.text('❌ Error during inventory sync').css('color', '#dc3545');
+                }
+            });
+         });
+
+        // ===============================
+        // MANUAL MATCH MODAL
+        // ===============================
+        $(document).on('click', '#btn-manual-match', function() {
+            if (!currentBatchId) {
+                alert('Please load a batch first');
+                return;
+            }
+            //alert(currentSourceType);
+            $('#manual-match-modal').css('display', 'flex');
+        });
+
+        $(document).on('click', '#btn-close-modal, #manual-match-modal', function(e) {
+            if (e.target === this) {
+                $('#manual-match-modal').hide();
+                $('#manual-match-file').val('');
+                $('#match-result').html('');
+            }
+    });
+
+    // Upload manual match file
+    $(document).on('click', '#btn-upload-match', function() {
+        let $btn = $(this);
+        let fileInput = $('#manual-match-file')[0];
+        
+        if (!fileInput.files.length) {
+            alert('Please select a CSV file');
+            return;
+        }
+
+        let formData = new FormData();
+        formData.append('match_file', fileInput.files[0]);
+        formData.append('batch_id', currentBatchId);
+        formData.append('form_key', window.FORM_KEY);
+
+        $btn.prop('disabled', true).text('Processing...');
+
+        $.ajax({
+            url: '<?= $block->getUrl("brandinventory/data/manualMatch") ?>',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(res) {
+                if (res.success) {
+                    let stats = res.stats;
+                    let detailsHtml = '';
+                    
+                    res.details.forEach(function(d) {
+                        let color = d.status === 'applied' ? '#28a745' : (d.status === 'skipped' ? '#fd7e14' : '#dc3545');
+                        detailsHtml += `<div style="font-size:12px; color:${color}; padding:2px 0;">
+                            ${d.status === 'applied' ? '✓' : (d.status === 'skipped' ? '⚠' : '✗')} 
+                            ${d.potential_sku} → ${d.magento_sku} (${d.reason})
+                        </div>`;
+                    });
+
+                    $('#match-result').html(
+                        `<div style="padding: 15px; background: #f8f9fa; border-radius: 3px; margin-top: 10px;">
+                            <div style="margin-bottom: 10px; font-weight: bold;">
+                                ✅ Applied: <span style="color:#28a745">${stats.applied}</span> | 
+                                ⚠ Skipped: <span style="color:#fd7e14">${stats.skipped}</span> | 
+                                ✗ Not Found: <span style="color:#dc3545">${stats.not_found}</span> | 
+                                🔒 Already Linked: <span style="color:#6c757d">${stats.already_linked}</span>
+                            </div>
+                            <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 5px; background: white;">
+                                ${detailsHtml}
+                            </div>
+                        </div>`
+                    );
+
+                    $btn.prop('disabled', false).text('Upload & Apply');
+                    
+                    // Reload data
+                    loadAllData();
+                    loadSavedData(); 
+                } else {
+                    alert(res.message);
+                    $btn.prop('disabled', false).text('Upload & Apply');
+                }
+            },
+            error: function() {
+                alert('Upload failed');
+                $btn.prop('disabled', false).text('Upload & Apply');
+            }
+        });
+    });
+
+    // Download template for manual matching
+    $(document).on('click', '#btn-download-template', function(e) {
+        e.preventDefault();
+        
+        if (currentBatchId && allSkuData.length > 0) {
+            generateTemplateFromBatch();
+            return;
+        }
+
+        let pendingData = allSkuData.filter(row => {
+            let status = row.match_status || '';
+            return (!row.linked_sku || row.linked_sku.trim() === '') 
+                && status !== 'duplicate_record_found';
+        });
+        
+        if (pendingData.length === 0) {
+            alert('No pending SKUs found. All items are already linked!');
+            return;
+        }
+                
+        let csvContent = 'Style Group,Style,Color,Size,Potential SKU,Magento SKU\n';
+        
+        let escapeCsv = (str) => {
+            str = String(str || '').replace(/"/g, '""');
+            return `"${str}"`;
+        };
+
+        pendingData.forEach(row => {
+            let styleGroup = '-', styleCode = '-';
+            
+            if (row.product_data) {
+                try {
+                    let filterData = typeof row.product_data === 'string' 
+                        ? JSON.parse(row.product_data) 
+                        : row.product_data;
+                    styleCode = filterData.style || filterData.Style || '-';
+                    const styleKey = Object.keys(filterData).find(
+                        k => k.replace(/\s+/g, '').toLowerCase() === 'stylegroup'
+                    );
+                    styleGroup = styleKey ? filterData[styleKey] : '-';
+                } catch (e) {
+                    styleGroup = '-'; 
+                    styleCode = '-';
+                }
+            }
+
+            let color = row.color || '-';
+            let size = row.size || '-';
+            
+            // Strip spaces only, keep internal dashes (e.g., G7S21K-480, T-SHIRT)
+            let cleanStyleGroup = String(styleGroup).replace(/\s+/g, '');
+            let cleanStyle = String(styleCode).replace(/\s+/g, '');
+            let cleanColor = String(color).replace(/\s+/g, '');
+            let cleanSize = String(size).replace(/\s+/g, '');
+            
+            // Potential SKU = raw concatenation, spaces removed, internal dashes preserved
+            let potentialSku = cleanStyleGroup + cleanStyle + cleanColor + cleanSize;
+
+            let csvRow = [
+                escapeCsv(styleGroup),
+                escapeCsv(styleCode),
+                escapeCsv(color),
+                escapeCsv(size),
+                escapeCsv(potentialSku),
+                escapeCsv('')
+            ];
+            
+            csvContent += csvRow.join(',') + '\n';
+        });
+
+        let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        let link = document.createElement('a');
+        let url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `manual_match_template_batch_${currentBatchId}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+
+    function generateTemplateFromBatch() {
+        let originalHeaders = JSON.parse(localStorage.getItem('brand_csv_headers') || '[]');
+        console.log('Original CSV Headers:', originalHeaders);
+
+        let pendingData = allSkuData.filter(row => {
+            let status = row.match_status || '';
+            return (!row.linked_sku || row.linked_sku.trim() === '') 
+                && status !== 'duplicate_record_found';
+        });
+        
+        if (pendingData.length === 0) {
+            alert('No pending SKUs found. All items are already linked!');
+            return;
+        }
+
+        let csvContent = '';
+        let escapeCsv = (str) => {
+            str = String(str || '').replace(/"/g, '""');
+            return `"${str}"`;
+        };
+
+        if (currentSourceType === "direct_sku") {
+            // ═══════════════════════════════════════════════════════
+            // DIRECT SKU FORMAT
+            // SKU itself is the potential SKU — no concatenation
+            // ═══════════════════════════════════════════════════════
+            
+            const includeProductType = pendingData.some(row => {
+            let productData = {};
+
+            if (row.product_data) {
+                try {
+                    productData = typeof row.product_data === 'string'
+                        ? JSON.parse(row.product_data)
+                        : row.product_data;
+                } catch (e) {
+                    productData = {};
+                }
+            }
+
+            const productType =
+                row.style_code ||
+                productData.product_type ||
+                productData.Product_Type ||
+                productData["Product Name"] ||
+                '';
+
+            return String(productType).trim() !== '';
+        });
+
+        // Set header once
+        csvContent = includeProductType
+            ? 'SKU,Product Type,Potential SKU,Magento SKU\n'
+            : 'SKU,Potential SKU,Magento SKU\n';
+
+        // Add all rows
+        pendingData.forEach(row => {
+
+            let productData = {};
+
+            if (row.product_data) {
+                try {
+                    productData = typeof row.product_data === 'string'
+                        ? JSON.parse(row.product_data)
+                        : row.product_data;
+                } catch (e) {
+                    productData = {};
+                }
+            }
+
+            let sku = row.style || productData.sku || productData.SKU || '-';
+
+            let productType =
+                row.style_code ||
+                productData.product_type ||
+                productData.Product_Type ||
+                productData["Product Name"] ||
+                '';
+
+            let potentialSku = sku;
+
+            let csvRow;
+
+            if (includeProductType) {
+                csvRow = [
+                    escapeCsv(sku),
+                    escapeCsv(productType),
+                    escapeCsv(potentialSku),
+                    escapeCsv('')
+                ];
+            } else {
+                csvRow = [
+                    escapeCsv(sku),
+                    escapeCsv(potentialSku),
+                    escapeCsv('')
+                ];
+            }
+
+            csvContent += csvRow.join(',') + '\n';
+        });
+
+
+        } else {
+            // ═══════════════════════════════════════════════════════
+            // STYLE COMPOSITE FORMAT (existing logic)
+            // ═══════════════════════════════════════════════════════
+            csvContent = 'Style Group,Style,Color,Size,Potential SKU,Magento SKU\n';
+
+            pendingData.forEach(row => {
+                let styleGroup = '-', styleCode = '-';
+                
+                if (row.product_data) {
+                    try {
+                        let filterData = typeof row.product_data === 'string' 
+                            ? JSON.parse(row.product_data) 
+                            : row.product_data;
+                        styleCode = filterData.style || filterData.Style || '-';
+                        const styleKey = Object.keys(filterData).find(
+                            k => k.replace(/\s+/g, '').toLowerCase() === 'stylegroup'
+                        );
+                        styleGroup = styleKey ? filterData[styleKey] : '-';
+                    } catch (e) {
+                        styleGroup = '-'; 
+                        styleCode = '-';
+                    }
+                }
+
+                let color = row.color || '-';
+                let size = row.size || '-';
+                
+                // Strip spaces only, keep internal dashes
+                let cleanStyleGroup = String(styleGroup).replace(/\s+/g, '');
+                let cleanStyle = String(styleCode).replace(/\s+/g, '');
+                let cleanColor = String(color).replace(/\s+/g, '');
+                let cleanSize = String(size).replace(/\s+/g, '');
+                
+                // Potential SKU = concatenation
+                let potentialSku = cleanStyleGroup + cleanStyle + cleanColor + cleanSize;
+
+                let csvRow = [
+                    escapeCsv(styleGroup),
+                    escapeCsv(styleCode),
+                    escapeCsv(color),
+                    escapeCsv(size),
+                    escapeCsv(potentialSku),
+                    escapeCsv('')
+                ];
+                
+                csvContent += csvRow.join(',') + '\n';
+            });
+        }
+
+        let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        let link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `manual_match_template_batch_${currentBatchId}.csv`;
+        link.click();
+    }
+
+    function toggleGeneratedControls(show) {
+        if (show && allSkuData.length > 0) {
+            $('#generated-content .match-summary-bar').show();
+            $('#generated-content .sync-bar').css('display', 'flex');
+            $('#generated-content .pagination-controls').show();
+
+            let $syncBtn = $('#btn-sync-magento');
+            if (batchSyncStatus === 1) {
+                $syncBtn
+                    .prop('disabled', true)
+                    .addClass('btn-disabled')
+                    .text('✓ SKUs Already Synced')
+                    .attr('title', 'SKUs have already been matched with Magento');
+            } else {
+                $syncBtn
+                    .prop('disabled', false)
+                    .removeClass('btn-disabled')
+                    .text('🔄 Match With Magento SKUs')
+                    .removeAttr('title');
+            }
+        } else {
+            $('#generated-content .match-summary-bar').hide();
+            $('#generated-content .sync-bar').hide();
+            $('#generated-content .pagination-controls').hide();
+        }
+    }
+
+
+    $(document).on('click', '#saved-prev', function() { if(savedPage>1){savedPage--; renderSavedTable(savedRows);} });
+    $(document).on('click', '#saved-next', function() { let max=Math.ceil(savedRows.length/savedPerPage)||1; if(savedPage<<max){savedPage++; renderSavedTable(savedRows);} });
+    $(document).on('change', '#saved-per-page', function() { savedPerPage=+this.value; savedPage=1; renderSavedTable(savedRows); });
+
+    // When format is selected, fetch and display details
+    // When format is selected, fetch and display details
+    $(document).on('change', '#format-select', function() {
+        let formatId = $(this).val();
+        let $preview = $('#format-preview');
+        let $details = $('#format-details');
+
+        if (!formatId) {
+            $preview.hide();
+            return;
+        }
+
+        $details.html('<p>Loading format details...</p>');
+        $preview.show();
+
+        $.ajax({
+            url: '<?= $block->getUrl("brandinventory/data/updates") ?>',
+            type: 'GET',
+            data: {
+                action: 'getFormatDetails',
+                format_id: formatId,
+                form_key: window.FORM_KEY
+            },
+            success: function(res) {
+                if (res.success && res.format) {
+                    
+                    let fmt = res.format;
+                    let html = '';
+                    currentFormatHeading = fmt.heading || 'Choose Sku Containing Column';
+                    console.log('Current Format Heading:', currentFormatHeading);
+                    
+                    html += '<div style="margin-bottom: 8px;"><strong>Format:</strong> ' + escapeHtml(fmt.format) + '</div>';
+
+                    let columns = [];
+                    let rows = [];
+
+                    try {
+                        let data = (typeof fmt.format_data === 'string') ? JSON.parse(fmt.format_data) : fmt.format_data;
+
+                        // ✅ Handle array of objects (your actual data structure)
+                        if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object') {
+                            columns = Object.keys(data[0]); // Extract column names from first row
+                            rows = data; // Store all sample rows
+                        }
+                        // Handle object with columns array
+                        else if (data && typeof data === 'object' && data.columns && Array.isArray(data.columns)) {
+                            columns = data.columns;
+                            rows = data.rows || (data.sample ? [data.sample] : []);
+                        }
+                        // Handle flat array of strings
+                        else if (Array.isArray(data)) {
+                            columns = data;
+                        }
+                        // Handle single object
+                        else if (data && typeof data === 'object') {
+                            columns = Object.keys(data);
+                        }
+                    } catch (e) {
+                        columns = [String(fmt.format_data)];
+                    }
+
+                    // Show columns as tags
+                    if (columns.length > 0) {
+                        // html += '<div style="margin-bottom: 8px;"><strong>Expected Columns (' + columns.length + '):</strong></div>';
+                        // html += '<div style="display: flex; flex-wrap: wrap; gap: 6px;">';
+                        // columns.forEach(function(col) {
+                        //     html += '<span style="background: #e3f2fd; color: #1565c0; padding: 3px 10px; border-radius: 12px; font-size: 12px; border: 1px solid #bbdefb;">' + escapeHtml(String(col)) + '</span>';
+                        // });
+                        // html += '</div>';
+                    }
+
+                    // Show sample data as a table
+                    if (rows.length > 0) {
+                        html += '<div style="margin-top: 15px;"><strong>Sample Data (' + rows.length + ' rows):</strong></div>';
+                        html += '<div style="overflow-x: auto; margin-top: 8px;">';
+                        html += '<table style="width: 100%; border-collapse: collapse; font-size: 12px; background: #fff; border: 1px solid #ddd;">';
+                        
+                        // Header
+                        html += '<thead><tr style="background: #f4f4f4;">';
+                        columns.forEach(function(col) {
+                            html += '<th style="padding: 8px; border: 1px solid #ddd; text-align: left; font-weight: bold;">' + escapeHtml(String(col)) + '</th>';
+                        });
+                        html += '</tr></thead><tbody>';
+
+                        // Rows (show max 3 rows)
+                        rows.slice(0, 3).forEach(function(row) {
+                            html += '<tr>';
+                            columns.forEach(function(col) {
+                                let val = row[col] !== undefined ? row[col] : '-';
+                                html += '<td style="padding: 8px; border: 1px solid #ddd;">' + escapeHtml(String(val)) + '</td>';
+                            });
+                            html += '</tr>';
+                        });
+
+                        if (rows.length > 3) {
+                            html += '<tr><td colspan="' + columns.length + '" style="padding: 8px; border: 1px solid #ddd; text-align: center; color: #666; font-style: italic;">... and ' + (rows.length - 3) + ' more rows</td></tr>';
+                        }
+
+                        html += '</tbody></table></div>';
+                    }
+
+                    // Raw data toggle
+                    html += '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #ddd;">';
+                    html += '<details><summary style="font-size: 12px; color: #666; cursor: pointer;">View Raw Format Data</summary>';
+                    html += '<pre style="background: #fff; padding: 10px; border-radius: 4px; border: 1px solid #e0e0e0; font-size: 11px; overflow-x: auto; margin-top: 8px;">' + escapeHtml(JSON.stringify(fmt.format_data, null, 2)) + '</pre>';
+                    html += '</details></div>';
+
+                    $details.html(html);
+                } else {
+                    $details.html('<p style="color: #dc3545;">Failed to load format details</p>');
+                }
+            },
+            error: function() {
+                $details.html('<p style="color: #dc3545;">Error fetching format details</p>');
+            }
+        });
+    });
+});
+</script>

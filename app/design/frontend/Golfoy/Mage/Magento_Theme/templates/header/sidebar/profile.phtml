@@ -1,0 +1,34 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var \Magento\Customer\Block\Account\Dashboard\Info $block */
+?>
+<?php
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $mageplaza_rewardpoint_object = $objectManager->create('Mageplaza\RewardPoints\Block\Account\Dashboard\Exchange');
+    
+    $customerSession = $objectManager->get('\Magento\Customer\Model\Session');
+    
+    $data_model = $objectManager->get('\ArtM\Common\Helper\Data');
+
+    $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+    $base_url = $storeManager->getStore()->getBaseUrl();
+
+
+    $point_balance_line = "<span class='point_text'>Point: </span>";
+    $point_balance_line .= "<span class='point_points'>".$mageplaza_rewardpoint_object->getAvailableBalance()."</span>";
+
+    if( $customerSession->isLoggedIn() ) {
+        
+        $name = $block->escapeHtml($block->getName());
+        $initial = $name[0];
+        $name = $name;
+        $point_balamce_html = $point_balance_line;
+        $signin_detail_html = "<span class=''><a href='".$base_url."customer/account/'>View Details>></a></span>";
+        echo $data_model->getHtmlSidebarProfile($initial , $name , $point_balamce_html, $signin_detail_html);
+    }
+
+?>

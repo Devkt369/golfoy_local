@@ -1,0 +1,31 @@
+<?php
+/**
+ * Product Icons Template - Optimized with ViewModel
+ * 
+ * @var \Magento\Catalog\Block\Product\View $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \ArtM\Common\ViewModel\ProductData $productIcons
+ */
+$productIcons = $block->getData('product_icons');
+if (!$productIcons) {
+    return;
+}
+
+$visibleIcons = $productIcons->getVisibleIcons();
+if (empty($visibleIcons)) {
+    return;
+}
+
+$iconBaseUrl = $productIcons->getIconBaseUrl();
+?>
+<div class="icons_booster">
+    <div class="icons_booster_inside" id="icons-container">
+        <?php foreach ($visibleIcons as $icon): ?>
+        <div class="icon-card" data-mage-init='{"tooltip":{}}' data-original-title="<?= $escaper->escapeHtmlAttr($icon['tooltip']) ?>">
+            <img src="<?= $escaper->escapeUrl($iconBaseUrl . $icon['img']) ?>">
+            <span><?= $escaper->escapeHtml($icon['text']) ?></span>
+        </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+

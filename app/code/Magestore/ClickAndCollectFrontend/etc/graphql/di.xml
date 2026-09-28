@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Need ignore plugin clear customer session because we use graphql at normal Theme, not PWA Theme -->
+    <!-- We still need customer session -->
+    <type name="Magestore\ClickAndCollectGraphQl\Plugin\IgnoreClearCustomerSessionAfterRequest">
+        <arguments>
+            <argument name="whiteList" xsi:type="array">
+                <item name="msGetAllLocationsAtFrontend" xsi:type="string">msGetAllLocationsAtFrontend</item>
+                <item name="msGetSortedLocationByDistanceAtFrontend" xsi:type="string">msGetSortedLocationByDistanceAtFrontend</item>
+                <item name="msGetAllLocationListAtFrontend" xsi:type="string">msGetAllLocationListAtFrontend</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

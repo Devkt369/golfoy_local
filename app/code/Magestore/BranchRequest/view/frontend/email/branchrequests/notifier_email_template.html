@@ -1,0 +1,29 @@
+<!--@subject {{trans "Branch Request %ID from %FROM " ID=$branch_request.getBranchrequestCode() FROM=$branch_request.getSourceWarehouseCode() FROM=$branch_request.getTo() }} @-->
+<!--@vars {
+"var view_url":"View Branch Request",
+"var download_url":"Download Branch Request Product",
+"var branch_request.getBranchrequestCode()":"Branchrequest Code",
+"var branch_request.getTo()":"Source",
+"var branch_request.getFrom()":"Source",
+"var branch_request.getCreatedByName()":"Created By Name"
+} @-->
+
+<!--@styles
+body,td { color:#2f2f2f; font:13px/1.35em Verdana, Arial, Helvetica, sans-serif; }
+@-->
+
+
+{{template config_path="design/email/header_template"}}
+<!-- [ middle starts here] -->
+<table cellspacing="0" cellpadding="0" border="0" width="650">
+    <tr>
+        <td valign="top">
+            <p>{{trans "Hello," }}</p>
+            {{trans 'A new Branch Request from %TO to %FROM is created by %CreatedByName. Please have a look at <a href="%view_url">%ID</a>.'
+            FROM=$branch_request.getFrom() TO=$branch_request.getTo() CreatedByName=$branch_request.getCreatedByName()
+            view_url=$view_url  ID=$branch_request.getBranchrequestCode() |raw}}
+            {{trans 'List Stock: <a href="%download_url">Download</a>.' download_url=$download_url |raw}}
+        </td>
+    </tr>
+</table>
+{{template config_path="design/email/footer_template"}}

@@ -1,0 +1,22 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$product = $objectManager->get('Magento\Framework\Registry')->registry('current_product');
+if ($product) {
+    $productId = $product->getId();
+    $regularPrice = $product->getPriceInfo()->getPrice('regular_price')->getValue();
+    $specialPrice = $product->getPriceInfo()->getPrice('special_price')->getValue();
+
+    // Calculate old price based on regular price and special price
+    $finalprice = $specialPrice ?: $regularPrice;
+    
+//    $finalprice = str_replace(',' , '' , $finalprice);
+    if($finalprice > 10000){
+        
+        $emi_amount = $finalprice / 6;
+        $emi_amount = (int)$emi_amount;
+        $emi_amount = preg_replace("/(\d+?)(?=(\d\d)+(\d)(?!\d))(\.\d+)?/i", "$1,", $emi_amount);
+        echo "<div class='no-cos-emi-line'><b>No Cost EMI</b> starts at <span>₹".$emi_amount."</span> Per month.</div>";
+//        echo "<div class='no-cos-emi-line'>EMI starts at <span>₹".$emi_amount."</span>. <b>No Cost EMI</b> available</div>";
+    }
+}
+?>

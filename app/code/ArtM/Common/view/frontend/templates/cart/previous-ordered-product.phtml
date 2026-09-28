@@ -1,0 +1,125 @@
+<?php
+/** @var \ArtM\Common\Block\CustomerLastPurchase $block */
+$lastPurchase = $block->getLastPurchase();
+$showProduct = $block->getConfigValue('common/previousorder/numberofpreviousorderproduct');
+$flag = 0;
+$productHtml = '';
+if ($lastPurchase){
+    $productIds = [];
+    foreach($lastPurchase as $order){
+        foreach($order->getAllVisibleItems() as $item){
+            if($flag == $showProduct){
+                break;
+            }
+            $product = $item->getProduct();
+            if(!$product){
+                continue;
+            }
+            if(!$product->isAvailable()){
+                continue;
+            }
+            if(in_array($product->getId(), $productIds)){
+                continue;
+            }
+            $productIds[] = $product->getId();
+            $flag++;
+            $brandname = $product->getResource()->getAttribute('brand')->getFrontend()->getValue($product);
+            $productNameModified = str_ireplace($brandname, '', $product->getName());
+            $priceHtml = $block->getCachePriceHtml($product);
+            $productImage = $product->getThumbnail();
+            $productHtml .= <<<HTML
+                                <li class="item product product-item">
+                                    <div class="product-item-info" data-container="product-grid">
+                                        <a href="{$product->getProductUrl()}"
+                                            class="product photo product-item-photo" tabindex="-1">
+                                            <span class="product-image-container product-image-container-{$product->getId()}" style="width: 320px">
+                                                <span class="product-image-wrapper" style="padding-bottom: 125%">
+                                                    <img class="product-image-photo" loading="lazy"
+                                                        src="https://staging-golfoy.hyperx.cloud/media/catalog/product{$productImage}"
+                                                        alt="{$product->getName()}"
+                                                        draggable="true" />
+                                                </span>
+                                            </span>
+                                        </a>
+                                        <div class="product details product-item-details">
+                                            <div class="brand_name">{$brandname}</div>
+                                            <strong class="product name product-item-name">
+                                                <a class="product-item-link" title="{$product->getName()}"
+                                                    href="{$product->getProductUrl()}">
+                                                    {$productNameModified}
+                                                </a>
+                                            </strong>
+                                            {$priceHtml}
+                                        </div>
+                                    </div>
+                                </li>
+                            HTML;
+            
+        }
+    }
+    if(!count($productIds) > 0){
+        return;
+    }
+    echo <<<HTML
+            <div class="users-ordered-product">
+                <div class="slider_html container-fluid">
+                    <div class="container-fluid product_slider_container">
+                        <div class="container-fluid product_container_inside">
+                            <div class="header_content_product_slider">
+                                <div class="header_content_product_slider_inside">
+                                    <div class="heading_product_slider">
+                                        <div class="heading_golfoy left">
+                                            <h2>
+                                                Your Previously Ordered Products
+                                            </h2>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="product_content_product_slider">
+                                <div class="product_content_product_slider_inside">
+                                    <div class="slider_arrows">
+                                        <div class="left_arrow">
+                                        </div>
+                                        <div class="right_arrow">
+                                        </div>
+                                    </div>
+                                    <div class="product_content_product_slider_before_list">
+                                        <ol class="products list items product-items">
+                                            {$productHtml}
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        HTML;
+}
+
+?>
+<style>
+.last-order-product {
+    max-width: 1280px;
+    margin: auto;
+}
+.users-ordered-product ol.products.list.items.product-items {
+    white-space: nowrap;
+    width: auto;
+}
+.users-ordered-product .product_slider_container {
+    max-height: 540px;
+}
+.users-ordered-product .price_html_category_page.configurable_product {
+    white-space: normal;
+}
+.users-ordered-product h2 {
+    font-size: 20px;
+}
+@media only screen and (max-width: 767px) {
+    .users-ordered-product .product_slider_container {
+        overflow: unset;
+    }
+}
+</style>

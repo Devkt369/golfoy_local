@@ -1,0 +1,26 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$customerCollection = $objectManager->create('Magento\Sales\Model\OrderFactory')->create()->load(104686);
+$orderData = $customerCollection->getData();
+echo '<pre>';
+print_r($orderData);
+echo '</pre>';
+// $objectManager = \Magento\Framework\App\ObjectManager::getInstance(); 
+// updateValue();
+
+
+// function updateValue(){
+//     $objectManager = \Magento\Framework\App\ObjectManager::getInstance(); 
+//     $sku = 'N7771201';
+//     $attributeCode = 'manufacturer';
+//     $optionValue = 'TaylormadeChina';
+    
+//         $productRepository = $objectManager->get('Magento\Catalog\Api\ProductRepositoryInterface');
+    
+//         $product = $productRepository->get($sku);
+    
+// }
+?>
+
+
+

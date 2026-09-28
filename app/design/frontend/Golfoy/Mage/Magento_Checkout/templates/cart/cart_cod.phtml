@@ -1,0 +1,13 @@
+<?php 
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $cart = $objectManager->get('\ArtM\Common\Helper\Data'); 
+
+
+    $CheckIfCustomPrintInCart = $cart->CheckIfCustomPrintInCart();
+    if( $CheckIfCustomPrintInCart == true ){
+        echo "True";
+    }else{
+        echo "False";
+    }
+
+?>

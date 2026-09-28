@@ -1,0 +1,10 @@
+<fieldset class="fieldset create account" data-hasrequired="<?php /* @escapeNotVerified */ echo __('* Required Fields') ?>">
+    <legend class="legend"><span><?php /* @escapeNotVerified */ echo __('Additional Information') ?></span></legend>
+    <div class="field required">
+        <label for="regulation" class="label"><span><?php /* @escapeNotVerified */
+                echo __('Phone Number') ?></span></label>
+        <div class="control">
+            <input type="text" name="phone_number" id="phone_number" title="<?php /* @escapeNotVerified */ echo __('Phone Number') ?>" class="input-text validate-length minimum-length-10 maximum-length-10" data-validate="{required:true,'validate-length':true}" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" maxlength="10" />
+        </div>
+    </div>
+</fieldset>

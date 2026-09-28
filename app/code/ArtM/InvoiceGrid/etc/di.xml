@@ -1,0 +1,16 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../lib/internal/Magento/Framework/ObjectManager/etc/config.xsd">
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="invoicegrid_data_source" xsi:type="string">ArtM\InvoiceGrid\Model\ResourceModel\Invoices\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="ArtM\InvoiceGrid\Model\ResourceModel\Invoices\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">artm_invoices</argument>
+            <argument name="resourceModel" xsi:type="string">ArtM\InvoiceGrid\Model\ResourceModel\Invoices</argument>
+        </arguments>
+    </virtualType>
+    <preference for="Magento\Sales\Model\Order\Pdf\Total\DefaultTotal" type="ArtM\InvoiceGrid\Model\Order\Pdf\Total\DefaultTotal" />
+</config>

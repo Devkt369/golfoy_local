@@ -1,0 +1,1473 @@
+<?php
+
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var \Magento\Sales\Block\Order\Item\Renderer\DefaultRenderer $block */
+$_item = $block->getItem();
+
+?>
+
+<tr id="order-item-row-<?= (int) $_item->getId() ?>" class="new changes qweqw23123213">
+    <td class="col name" data-th="<?= $block->escapeHtml(__('Product Name')) ?>">
+        <div class="product-details">
+            <span><img src="/media/catalog/product<?= $_item->getProduct()->getSmallImage() ?>" width="120px"></span>
+            <div style="display: flex; flex-direction: column;">
+                <strong class="product name product-item-name"><?= $block->escapeHtml($_item->getName()) ?></strong>
+                <?php if ($_options = $block->getItemOptions()): ?>
+                    <div class="item-options">
+                        <?php foreach ($_options as $_option): ?>
+                            <?php if (isset($_option['label']) && $_option['label'] === 'Customization'): ?>
+                                <?php
+                                $optionValue = isset($_option['print_value']) ? $_option['print_value'] : $_option['value'];
+                                $helper = $this->helper('ArtM\CustomProductDesign\Helper\Data');
+                                echo $helper->getCustomizationLink($optionValue);
+                                ?>
+                            <?php else: ?>
+                                <div class="option-row">
+                                    <p><?= $block->escapeHtml($_option['label']) ?></p>
+                                    <?php if (!$block->getPrintStatus()): ?>
+                                        <?php $_formatedOptionValue = $block->getFormatedOptionValue($_option) ?>
+                                        <span<?= (isset($_formatedOptionValue['full_view']) ? ' class="tooltip wrapper"' : '') ?>>
+                                            <?php
+                                            $formatedval = $_formatedOptionValue['value'];
+                                            if (strpos($formatedval, 'customprint') !== false) {
+                                                echo '<span class="custom-print-account-img"><img src="/media/' . htmlspecialchars($formatedval) . '" alt="Custom Print" /></span>';
+                                            } else {
+                                                echo $block->escapeHtml($_formatedOptionValue['value'], ['a']);
+                                            }
+                                            ?>
+                                            <?php if (isset($_formatedOptionValue['full_view'])): ?>
+                                                <div class="tooltip content">
+                                                    <p class="item options">
+                                                        <span><?= $block->escapeHtml($_option['label']) ?></span>
+                                                        <span><?= $block->escapeHtml($_formatedOptionValue['full_view']) ?></span>
+                                                    </p>
+                                                </div>
+                                            <?php endif; ?>
+                                            </span>
+                                </div>
+                            <?php else: ?>
+                                <?php if (strpos($_option['value'], 'customprint') !== false): ?>
+                                    <span>Image Uploaded</span>
+                                <?php else: ?>
+                                    <span><?= $block->escapeHtml($_option['print_value'] ?? $_option['value']) ?></span>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php
+        if (($_item->getOrder()->getStatus() == 'delivered') && ($block->getItem()->getQtyShipped() > 0) && $_item && !$_item->getParentItem()):
+            $customReviewBlock = $block->getLayout()->createBlock(
+                \ArtM\Review\Block\OrderItemReview::class,
+                'order_item_review_form_' . $_item->getId()
+            );
+            if ($customReviewBlock) {
+                $customReviewBlock->setTemplate('ArtM_Review::order/item_review.phtml');
+                $customReviewBlock->setOrderItem($_item); // Pass order context directly down
+                echo $customReviewBlock->toHtml();
+            }
+        endif;
+        ?>
+        <?php $addtInfoBlock = $block->getProductAdditionalInformationBlock(); ?>
+        <?php if ($addtInfoBlock): ?>
+            <?= $addtInfoBlock->setItem($_item)->toHtml() ?>
+        <?php endif; ?>
+        <?= $block->escapeHtml($_item->getDescription()) ?>
+    </td>
+    <td class="col qty" data-th="<?= $block->escapeHtml(__('Qty')) ?>">
+        <ul class="items-qty">
+            <?php if ($block->getItem()->getQtyOrdered() > 0): ?>
+                <li class="item">
+                    <span class="content"><?= (float) $block->getItem()->getQtyOrdered() ?></span>
+                </li>
+            <?php endif; ?>
+    </td>
+    <td class="col price" data-th="<?= $block->escapeHtml(__('Price')) ?>">
+        <?= $block->getItemPriceHtml() ?>
+    </td>
+    <td class="col subtotal" data-th="<?= $block->escapeHtml(__('Total')) ?>">
+        <?= $block->getItemRowTotalHtml() ?>
+    </td>
+    <td class="col status-and-action" data-th="<?= $block->escapeHtml(__('Status & Actions')) ?>">
+
+        <?php
+        $_product = $_item->getProduct();
+        $order    = $_item->getOrder();
+
+        $qtyOrdered  = (float) $_item->getQtyOrdered();
+        $qtyInvoiced = (float) $_item->getQtyInvoiced();
+        $qtyShipped  = (float) $_item->getQtyShipped();
+        $qtyCanceled = (float) $_item->getQtyCanceled();
+        $qtyRefunded = (float) $_item->getQtyRefunded();
+
+        $orderStatus = $order->getStatus();
+
+        /**
+         * Default values
+         */
+        $statusTitle = '';
+        $statusText  = '';
+        $buttonText  = '';
+        $buttonUrl   = '';
+
+        /**
+         * ESTIMATED DELIVERY DATE
+         */
+        $formattedDate = '';
+
+        if (
+            $qtyCanceled <= 0 &&
+            $qtyRefunded <= 0 &&
+            !$order->getPosId()
+        ) {
+
+            $estimationAfter = 0;
+
+            if ($this->helper(ArtM\EstimateDelivery\Helper\Data::class)->IsEnabled()) {
+
+                $estimateDelivery = $this->helper(
+                    ArtM\EstimateDelivery\Helper\Data::class
+                )->getEstimatedDeliveryDate($_item->getSku());
+
+                if (!empty($estimateDelivery['total_days'])) {
+                    $estimationAfter = (int) $estimateDelivery['total_days'];
+                }
+            } else {
+
+                $shippingDaysText = $_product->getAttributeText('shippingdays');
+                $dispatchText     = $_product->getAttributeText('dispatch');
+
+                $shippingDays = 0;
+                $dispatch     = 0;
+
+                if (preg_match('/\d+/', (string)$shippingDaysText, $matches)) {
+                    $shippingDays = (int)$matches[0];
+                }
+
+                if (preg_match('/\d+/', (string)$dispatchText, $matches)) {
+                    $dispatch = (int)$matches[0];
+                }
+
+                $estimationAfter = $shippingDays + $dispatch;
+            }
+
+            if ($estimationAfter > 0) {
+                $createdAt = new DateTime($order->getCreatedAt());
+                $createdAt->modify("+{$estimationAfter} days");
+                $formattedDate = $createdAt->format('j M Y');
+            }
+        }
+
+        /**
+         * CASE 1
+         * Cancel Pending
+         */
+        if ($orderStatus == 'cancelpending') {
+
+            $statusTitle = __('');
+            $statusText  = __('Order Cancellation request was sent');
+
+            /**
+             * CASE 2
+             * Refunded
+             */
+        } elseif ($qtyRefunded > 0) {
+
+            $statusTitle = __('Refunded');
+
+            /**
+             * CASE 3
+             * Cancelled
+             */
+        } elseif ($qtyCanceled > 0) {
+
+            $statusTitle = __('Cancelled');
+
+            /**
+             * CASE 4
+             * Delivered
+             */
+        } elseif ($orderStatus == 'delivered' || $orderStatus == 'replacement_order' && $qtyShipped > 0) {
+
+            $statusTitle = __('Delivered');
+
+            // $buttonText = __('Return / Exchange');
+            // $buttonUrl  = $block->getUrl('returns');
+
+            // // Test Static Text
+            // $statusText = __('Return window closed on 28 May 2026 (13 days left)');
+
+            if ($orderStatus == 'delivered' || $orderStatus == 'replacement_order' && $qtyShipped > 0) {
+
+                echo $block->getLayout()
+                    ->createBlock(\ArtM\CancelOrder\Block\Ordercancelbutton::class)
+                    ->setTemplate('ArtM_CancelOrder::order/item/returnexchange.phtml')
+                    ->setData('order', $order)
+                    ->setData('item', $_item)
+                    ->toHtml();
+            } else {
+        ?>
+                <div style="font-weight:600;">
+                    <?= $block->escapeHtml($statusTitle) ?>
+                </div>
+        <?php }
+
+            /**
+             * CASE 5
+             * Shipped
+             */
+        } elseif ($qtyShipped > 0) {
+
+            $statusTitle = __('Shipped');
+
+            if (!empty($formattedDate)) {
+                $statusText = __('Expected delivery by %1', $formattedDate);
+            }
+
+            $shipmentCollection = $order->getShipmentsCollection();
+
+            if ($shipmentCollection->getSize()) {
+
+                foreach ($shipmentCollection as $shipment) {
+
+                    $buttonText = __('Track Shipment');
+
+                    $buttonUrl = $block->getUrl(
+                        'sales/order/shipment',
+                        [
+                            'order_id'    => $order->getId(),
+                            'shipment_id' => $shipment->getId()
+                        ]
+                    );
+
+                    break;
+                }
+            }
+
+            /**
+             * CASE 6
+             * Processing
+             */
+        } elseif ($qtyInvoiced > 0) {
+
+            $statusTitle = __('Processing');
+            $statusText  = __('Shipment will be created soon');
+
+            /**
+             * CASE 7
+             * Pending
+             */
+        } else {
+
+            $statusTitle = __('Pending');
+        }
+        ?>
+
+        <div class="order-item-status-wrapper">
+
+            <div style="font-weight:600; margin-bottom:6px;">
+                <?= $block->escapeHtml($statusTitle) ?>
+            </div>
+
+            <?php if (!empty($statusText)) : ?>
+                <div class="expected-date">
+                    <?= $block->escapeHtml($statusText) ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (!empty($buttonText) && !empty($buttonUrl)) : ?>
+                <a class="action primary"
+                    href="<?= $block->escapeUrl($buttonUrl) ?>">
+                    <?= $block->escapeHtml($buttonText) ?>
+                </a>
+            <?php endif; ?>
+
+        </div>
+
+    </td>
+</tr>
+
+<!-- Modal HTML -->
+<div id="customization-popup" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:99999;overflow: scroll;">
+    <div style="background:#fff;margin:40px auto;padding:20px;width:90vw;max-width:600px;border-radius:8px;position:relative;">
+        <span id="customization-popup-close" style="position:absolute;top:10px;right:10px;cursor:pointer;font-size:22px;">&times;</span>
+        <div id="customization-popup-content"></div>
+    </div>
+</div>
+<!-- script here -->
+<script>
+    require(['jquery'], function($) {
+        window.openCustomizationPopup = function(url) {
+            $.get(url, function(response) {
+                $('#customization-popup-content').html(response);
+                $('#customization-popup').fadeIn();
+            });
+        };
+        $('#customization-popup-close').on('click', function() {
+            $('#customization-popup').fadeOut();
+            $('#customization-popup-content').html('');
+        });
+        // Optional: close when clicking outside modal
+        $('#customization-popup').on('click', function(e) {
+            if (e.target === this) {
+                $('#customization-popup').fadeOut();
+                $('#customization-popup-content').html('');
+            }
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll(".right-boxes").forEach(function(box) {
+            const blocks = box.querySelectorAll(".custom-card-block");
+
+            if (blocks.length > 1) {
+                box.classList.add("grid-apply"); // apply grid for multiple blocks
+            } else {
+                box.classList.remove("grid-apply"); // keep single block as normal
+            }
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Select all .custom-print-data containers
+        const containers = document.querySelectorAll(".custom-print-data");
+
+        containers.forEach(function(container) {
+            // Count how many .custom-print-inner-blocks are inside
+            const innerBlocks = container.querySelectorAll(".custom-print-inner-blocks");
+
+            if (innerBlocks.length > 1) {
+                // Add class if more than 1 inner block
+                container.classList.add("multiple-inner");
+            } else {
+                // Remove class if 1 or 0 inner blocks
+                container.classList.remove("multiple-inner");
+            }
+        });
+    });
+</script>
+
+<!-- style here -->
+<style>
+    /* =========================
+    GENERAL & LAYOUT
+    ========================= */
+    .customization-details {
+        padding: 20px;
+    }
+
+    .customization-details h2 {
+        margin-bottom: 20px;
+        font-size: 24px;
+    }
+
+    .customization-area {
+        margin-bottom: 30px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 20px;
+    }
+
+    .customization-area:last-child {
+        border-bottom: none;
+    }
+
+    .customization-area h3 {
+        margin-bottom: 15px;
+        font-size: 18px;
+    }
+
+    .customization-image {
+        margin: 15px 0;
+    }
+
+    .customization-image img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .customization-text {
+        margin-top: 10px;
+    }
+
+    .modal-popup .modal-title {
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 10px;
+    }
+
+    .modal-popup .modal-content {
+        padding: 20px;
+    }
+
+    /* =========================
+    DELIVERY TIME
+    ========================= */
+    .deliveryTime span {
+        color: #555;
+    }
+
+    /* =========================
+    CUSTOM PRINT BLOCKS
+    ========================= */
+    .custom-print-data-blocks {
+        padding: 0px 10px !important;
+        max-width: 100% !important;
+    }
+
+    .custom-print-data-blocks .right-boxes {
+        flex: unset !important;
+    }
+
+    .custom-print-data-img img {
+        border: none !important;
+    }
+
+    .custom-area {
+        background-color: #e3e3e3;
+        padding: 9px 10px 5px 10px;
+        border-bottom: 1px solid #00000012;
+        font-size: 10px;
+        font-weight: 600;
+        color: #404040;
+    }
+
+    .custom-area span {
+        color: black !important;
+    }
+
+    .custom-content.text,
+    .custom-content.image {
+        padding: 0px 5px;
+    }
+
+    .custom-print-inner-blocks {
+        display: flex;
+        align-items: start;
+        border-radius: 10px;
+        gap: 10px !important;
+        overflow: hidden;
+        border: 1px solid #80808024;
+    }
+
+    .custom-content.text>p:nth-child(2) {
+        margin-bottom: 10px;
+    }
+
+    .custom-print-data-block_heading {
+        padding-bottom: 5px;
+        border-top: 0px !important;
+    }
+
+    .custom-print-data-block_heading>span {
+        font-size: 12px;
+        font-family: 'spartan';
+    }
+
+    aside.customization-popup-modal footer.modal-footer {
+        display: none;
+    }
+
+    .custom-print-data {
+        margin-bottom: 10px;
+        border-bottom: 0px solid #eee;
+    }
+
+    aside.modal-popup.customization-popup-modal.modal-slide._inner-scroll._show .modal-inner-wrap {
+        padding-left: 0px !important;
+    }
+
+    /* =========================
+    GRID & CARD
+    ========================= */
+    .grid-apply {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .custom-card-block {
+        max-width: 180px;
+        padding: 0px !important;
+        border: none !important;
+        box-shadow: rgba(14, 63, 126, 0.06) 0px 0px 0px 1px, rgba(42, 51, 70, 0.03) 0px 1px 1px -0.5px, rgba(42, 51, 70, 0.04) 0px 2px 2px -1px, rgba(42, 51, 70, 0.04) 0px 3px 3px -1.5px, rgba(42, 51, 70, 0.03) 0px 5px 5px -2.5px, rgba(42, 51, 70, 0.03) 0px 10px 10px -5px, rgba(42, 51, 70, 0.03) 0px 24px 24px -8px;
+    }
+
+    @media only screen and (max-width: 768px) {
+        aside.modal-popup.customization-popup-modal.modal-slide._inner-scroll._show {
+            left: 0px !important;
+            margin-top: 0px !important;
+        }
+
+        aside.modal-popup.customization-popup-modal.modal-slide._inner-scroll._show button.action-close {
+            padding: 5px 20px !important;
+        }
+
+        .custom-print-data-blocks {
+            padding: 0px !important;
+        }
+    }
+
+    .order-left h1 {
+        font-size: 20px;
+    }
+
+    .order-meta {
+        font-size: 11px;
+        font-weight: 500;
+    }
+
+    .order-status {
+        margin: 0px;
+        padding: 4px 30px;
+        font-size: 9px;
+    }
+
+    .table-order-items th.col {
+        font-size: 13px;
+        font-weight: 600;
+        color: #222;
+        background: white;
+        padding: 16px 24px;
+        border-bottom: 1px solid #ececec;
+        text-align: left;
+    }
+
+    .table-order-items td.col {
+        font-size: 13px;
+        color: #222;
+        padding: 30px 15px;
+        border-bottom: 1px solid #ececec;
+        vertical-align: top;
+    }
+
+    .product.name.product-item-name {
+        display: block;
+        font-size: 12px;
+        line-height: 1.4;
+        font-weight: 600;
+        color: #1f1f1f;
+        margin: 0px;
+        max-width: 500px;
+    }
+
+    .item-options {
+        margin-top: 6px;
+    }
+
+    .items-qty {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .items-qty .item {
+        margin: 0;
+    }
+
+    .items-qty .content {
+        font-size: 12px;
+        font-weight: 600;
+        color: #555;
+    }
+
+    .cart-price .price,
+    .price-excluding-tax .price {
+        font-size: 12px;
+        line-height: 1;
+        color: #555;
+        font-weight: 600;
+    }
+
+    .price-excluding-tax {
+        display: block;
+    }
+
+    /* =========================
+    STATUS COLUMN
+    ========================= */
+    .status-and-action>div {
+        font-size: 12px;
+        line-height: 1.5;
+        color: #555;
+    }
+
+    body.account #maincontent a.action:hover,
+    .status-and-action .action:hover,
+    .status-and-action button:hover {
+        border-color: #111 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06) !important;
+    }
+
+    .custom-print-account-img {
+        display: inline-flex;
+        width: 55px;
+        height: 55px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #eaeaea;
+        margin-top: 8px;
+    }
+
+    .custom-print-account-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .table-order-items tfoot {
+        background: #fafafa;
+    }
+
+    .table-order-items tfoot tr {
+        border-top: 1px solid #ececec;
+    }
+
+    .table-order-items tfoot th,
+    .table-order-items tfoot td {
+        padding: 16px 24px;
+    }
+
+    .table-order-items tfoot .mark {
+        text-align: right;
+        color: #555;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    .table-order-items tfoot .amount {
+        text-align: right;
+        color: #111;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .table-order-items tfoot .price {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .table-order-items tfoot .grand_total,
+    .table-order-items tfoot .grand_total_incl {
+        background: #fff;
+    }
+
+    .table-order-items tfoot .grand_total strong,
+    .table-order-items tfoot .grand_total_incl strong {
+        font-size: 20px;
+        color: #111;
+    }
+
+    /* =========================
+    REMOVE EXTRA STYLES
+    ========================= */
+    .table-order-items .col.qty::before,
+    .table-order-items .col.price::before,
+    .table-order-items .col.subtotal::before {
+        display: none !important;
+    }
+
+    /* =========================
+    MOBILE
+    ========================= */
+    @media only screen and (max-width: 991px) {
+
+        .table-order-items,
+        .table-order-items tbody,
+        .table-order-items tr,
+        .table-order-items td {
+            display: block;
+            width: 100%;
+        }
+
+        .table-order-items tbody tr {
+            padding: 12px 0;
+            position: relative;
+        }
+
+        .table-order-items tbody td {
+            padding: 14px 18px;
+            text-align: left !important;
+            border: none;
+        }
+
+        .product-details {
+            gap: 14px;
+        }
+
+        .product-details>span {
+            width: 85px;
+            min-width: 85px;
+            height: 85px;
+        }
+
+        .product.name.product-item-name {
+            font-size: 17px;
+            margin-bottom: 10px;
+        }
+    }
+</style>
+<style>
+    .order-details-items .order-increment-id {
+        background-color: #fff !important;
+    }
+
+    body.account.sales-order-view main#maincontent>.columns {
+        max-width: 1440px;
+    }
+
+    body.account.sales-order-view main#maincontent {
+        padding: 0;
+    }
+
+    body.account .table-wrapper,
+    body.account .block.block-gift-card .block-content,
+    body.account .box-content,
+    body.account ul.items.order-links {
+        background-color: #fff;
+    }
+
+    body.account .box-content {
+        padding: 10px 0px;
+    }
+
+    body.account .table-wrapper,
+    body.account .block.block-gift-card .block-content {
+        border-radius: 5px;
+        padding: 0;
+        overflow: auto;
+    }
+
+    body.account .table-wrapper td,
+    body.account .block.block-gift-card .block-content td {
+        vertical-align: top;
+    }
+
+    .table-wrapper.order-items {
+        overflow: hidden;
+        margin-top: 20px;
+    }
+
+    .table-wrapper.order-items tbody {
+        border: 1px solid #ececec;
+        border-radius: 12px;
+    }
+
+    .table-order-items {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: auto;
+        margin: 0;
+    }
+
+    .table-order-items caption,
+    .box.box-order-shipping-method,
+    tfoot,
+    .block.block-order-details-view .block-title,
+    .order-increment-id {
+        display: none;
+    }
+
+    .table-order-items tbody tr {
+        border-bottom: 1px solid #efefef;
+        transition: all .3s ease;
+    }
+
+    .table-order-items tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .table-order-items tbody td {
+        padding: 22px;
+        vertical-align: middle;
+        background: #fff;
+        text-align: left !important;
+        width: auto !important;
+        white-space: nowrap;
+    }
+
+
+
+    .table-order-items .col.qty::before,
+    .table-order-items .col.price::before,
+    .table-order-items .col.subtotal::before {
+        display: none !important;
+    }
+
+    .product-details {
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .product-details>span {
+        width: 110px;
+        min-width: 110px;
+        height: 110px;
+        border-radius: 5px;
+        overflow: hidden;
+        background: #f7f7f7;
+        border: 1px solid #efefef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .product-details>span img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+    }
+
+    .item-options {
+        margin-top: 6px;
+    }
+
+    .item-options dt,
+    .item-options dd {
+        display: inline-block;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    .item-options dt {
+        color: #666;
+        margin-right: 4px;
+    }
+
+    .item-options dd {
+        color: #111;
+        margin: 0 0 10px;
+    }
+
+    .item-options a {
+        display: inline-block;
+        margin-bottom: 12px;
+        color: #2874f0;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .item-options a:hover {
+        text-decoration: underline;
+    }
+
+    .items-qty {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .items-qty .item {
+        margin: 0;
+    }
+
+    .items-qty .content,
+    .cart-price .price,
+    .price-excluding-tax .price {
+        font-size: 12px;
+        font-weight: 600;
+        color: #555;
+    }
+
+    .cart-price .price,
+    .price-excluding-tax .price {
+        line-height: 1;
+    }
+
+    .price-excluding-tax {
+        display: block;
+    }
+
+    .status-and-action>div {
+        font-size: 12px;
+        line-height: 1.5;
+        color: #555;
+    }
+
+    body.account #maincontent a.action,
+    .status-and-action .action,
+    .status-and-action button {
+        align-items: center;
+        padding: 10px 20px !important;
+        border: 1px solid #d8d8d8 !important;
+        background: #fff !important;
+        color: #555 !important;
+        text-decoration: none !important;
+        box-shadow: none !important;
+        transition: all .25s ease;
+        text-transform: capitalize;
+        font-size: 12px !important;
+        margin-top: 10px;
+    }
+
+    body.account #maincontent a.action:hover,
+    .status-and-action .action:hover,
+    .status-and-action button:hover {
+        border-color: #111 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06) !important;
+    }
+
+    .custom-print-account-img {
+        display: inline-flex;
+        width: 55px;
+        height: 55px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #eaeaea;
+        margin-top: 8px;
+    }
+
+    .custom-print-account-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .table-order-items tfoot {
+        background: #fafafa;
+    }
+
+    .table-order-items tfoot tr {
+        border-top: 1px solid #ececec;
+    }
+
+    .table-order-items tfoot th,
+    .table-order-items tfoot td {
+        padding: 16px 24px;
+    }
+
+    .table-order-items tfoot .mark,
+    .table-order-items tfoot .amount {
+        text-align: right;
+        font-size: 15px;
+    }
+
+    .table-order-items tfoot .mark {
+        color: #555;
+        font-weight: 500;
+    }
+
+    .table-order-items tfoot .amount,
+    .table-order-items tfoot .price {
+        color: #111;
+        font-weight: 600;
+    }
+
+    .table-order-items tfoot .price {
+        font-size: 16px;
+    }
+
+    .table-order-items tfoot .grand_total,
+    .table-order-items tfoot .grand_total_incl {
+        background: #fff;
+    }
+
+    .table-order-items tfoot .grand_total strong,
+    .table-order-items tfoot .grand_total_incl strong {
+        font-size: 20px;
+        color: #111;
+    }
+
+    .items.order-links {
+        display: flex;
+        align-items: center;
+        gap: 70px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    body.account ul.items.order-links {
+        border-bottom: 2px solid #e4e0e0b5;
+    }
+
+    body.account ul.items.order-links>li.current {
+        border: none;
+    }
+
+    .items.order-links .nav.item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        margin: 0;
+    }
+
+    .items.order-links .nav.item a,
+    .items.order-links .nav.item strong {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: #575757;
+        text-decoration: none;
+        letter-spacing: .1px;
+        transition: all .25s ease;
+        padding: 0;
+        background: transparent !important;
+        border: none !important;
+    }
+
+    .items.order-links .nav.item.current strong {
+        color: #111;
+        font-weight: 600;
+    }
+
+    .items.order-links .nav.item.current::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 150px;
+        height: 3px;
+        background: #111;
+        border-radius: 20px;
+    }
+
+    .items.order-links .nav.item a:hover {
+        color: #111;
+    }
+
+    .items.order-links .nav.item:nth-child(2) a::after {
+        content: "↓";
+        font-size: 16px;
+        margin-left: 12px;
+        color: #7b7b7b;
+        font-weight: 600;
+        position: relative;
+        top: -1px;
+    }
+
+    .items.order-links .nav.item a:before,
+    .items.order-links .nav.item a:after {
+        text-decoration: none !important;
+    }
+
+    .block.block-order-details-view .block-content {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0;
+    }
+
+    .block.block-order-details-view .block-content .box {
+        flex: 1;
+        position: relative;
+        padding: 0 40px;
+    }
+
+    .block.block-order-details-view .block-content .box:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 1px;
+        height: 100%;
+        background: #dcdcdc;
+    }
+
+    .block.block-order-details-view .block-content .box:first-child {
+        padding-left: 0;
+    }
+
+    .block.block-order-details-view .block-content .box:last-child {
+        padding-right: 0;
+    }
+
+    body.account strong.box-title * {
+        font-weight: 600 !important;
+        color: #000;
+        margin-bottom: 15px !important;
+        font-size: 13px !important;
+    }
+
+    .block.block-order-details-view .box-content,
+    .block-order-details-view .box-content .payment-method .title {
+        font-size: 11px;
+        color: #000;
+        font-weight: 500;
+    }
+
+    .item-options {
+        margin-top: 10px;
+    }
+
+    .item-options a {
+        display: inline-block;
+        margin-bottom: 10px;
+        font-size: 12px;
+    }
+
+    .option-row {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 12px;
+    }
+
+    .option-row p {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 500;
+        color: #555;
+    }
+
+    .option-row p::after {
+        content: ":";
+    }
+
+    .option-row span {
+        display: inline-flex;
+        align-items: center;
+        font-size: 12px;
+        font-weight: 600;
+        color: #555;
+        line-height: 1;
+    }
+
+    @media only screen and (max-width: 991px) {
+
+        .table-order-items,
+        .table-order-items tbody,
+        .table-order-items tr,
+        .table-order-items td {
+            display: block;
+            width: 100%;
+        }
+
+        .table-order-items tbody tr {
+            padding: 12px 0;
+            position: relative;
+        }
+
+        .table-order-items tbody td {
+            padding: 14px 18px;
+            text-align: left !important;
+            border: none;
+        }
+
+        .product-details {
+            gap: 14px;
+        }
+
+        .product-details>span {
+            width: 85px;
+            min-width: 85px;
+            height: 85px;
+        }
+
+        .product.name.product-item-name {
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .item-options dt,
+        .item-options dd {
+            font-size: 13px;
+        }
+
+        .items-qty .content,
+        .cart-price .price {
+            font-size: 16px;
+        }
+
+        .status-and-action>div {
+            margin-top: 12px;
+            gap: 12px;
+        }
+
+        body.account #maincontent a.action,
+        .status-and-action .action,
+        .status-and-action button {
+            width: 100%;
+            min-width: 100%;
+            height: 46px;
+            font-size: 14px;
+        }
+
+        .table-order-items tfoot th,
+        .table-order-items tfoot td {
+            padding: 12px 16px;
+            font-size: 14px;
+        }
+
+        .table-order-items tfoot .grand_total strong,
+        .table-order-items tfoot .grand_total_incl strong {
+            font-size: 17px;
+        }
+
+        .items.order-links {
+            gap: 28px;
+            padding: 0 16px;
+            overflow-x: auto;
+            white-space: nowrap;
+            min-height: 60px;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .items.order-links::-webkit-scrollbar {
+            display: none;
+        }
+
+        .items.order-links .nav.item {
+            height: 60px;
+            flex-shrink: 0;
+        }
+
+        .items.order-links .nav.item a,
+        .items.order-links .nav.item strong {
+            font-size: 14px;
+        }
+
+        .items.order-links .nav.item.current::after {
+            width: 100%;
+            height: 2px;
+        }
+
+        .custom-order-header,
+        .order-actions {
+            flex-wrap: wrap;
+        }
+
+        .custom-order-header {
+            margin-top: 50px;
+        }
+
+        li.nav.item.current,
+        body.account .table-wrapper tr {
+            background: white !important;
+        }
+
+        .items.order-links {
+            gap: 15px;
+            padding: 0px;
+        }
+
+    }
+
+    /* =========================================
+MOBILE CARD DESIGN EXACT LIKE REFERENCE
+========================================= */
+    @media only screen and (max-width: 768px) {
+
+        .table-order-items tbody tr {
+            display: block !important;
+            border: 1px solid #e8e8e8;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #fff;
+            margin-bottom: 18px;
+            padding: 0 !important;
+        }
+
+        .table-order-items tbody td {
+            display: block !important;
+            width: 100% !important;
+            border: none !important;
+            padding: 0 !important;
+            white-space: normal !important;
+            background: transparent !important;
+        }
+
+        .table-order-items td.col.name {
+            padding: 16px !important;
+        }
+
+        .product-details {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .product-details>span {
+            width: 86px !important;
+            min-width: 86px !important;
+            height: 86px !important;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #efefef;
+            background: #f8f8f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-details>span img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .product.name.product-item-name {
+            font-size: 15px !important;
+            line-height: 1.35;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 10px;
+        }
+
+        .item-options {
+            margin-top: 0;
+        }
+
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 5px;
+        }
+
+        .option-row p,
+        .option-row span {
+            font-size: 14px;
+            color: #6a6a6a;
+            line-height: 1.4;
+        }
+
+        .option-row span {
+            font-weight: 500;
+        }
+
+        .table-order-items td.col.qty,
+        .table-order-items td.col.price,
+        .table-order-items td.col.subtotal {
+            display: inline-block !important;
+            width: auto !important;
+            padding: 0 0 16px 16px !important;
+            vertical-align: middle;
+        }
+
+        .table-order-items td.col.qty {
+            padding-left: 0 !important;
+        }
+
+        .table-order-items td.col.subtotal {
+            padding-right: 0 !important;
+        }
+
+        .items-qty .content,
+        .cart-price .price,
+        .price-excluding-tax .price {
+            font-size: 15px !important;
+            font-weight: 600;
+            color: #2a2a2a;
+        }
+
+        /* separator dots */
+        .table-order-items td.col.price::after,
+        .table-order-items td.col.qty::after {
+            content: "•";
+            display: inline-block;
+            margin-left: 14px;
+            color: #b7b7b7;
+            font-size: 11px;
+            position: relative;
+            top: -1px;
+        }
+
+        .table-order-items td.col.status-and-action {
+            border-top: 1px solid #efefef !important;
+            padding: 18px 16px !important;
+        }
+
+        .order-item-status-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* STATUS BADGE */
+        .order-item-status-wrapper>div:first-child {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #f3f3f3;
+            color: #555;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .7px;
+            text-transform: uppercase;
+            min-height: 34px;
+            padding: 0 18px;
+            margin-bottom: 14px !important;
+        }
+
+        /* SHIPPED BLUE STYLE */
+        .order-item-status-wrapper>div:first-child:contains("Shipped") {
+            background: #eef5ff;
+            color: #3575d3;
+        }
+
+        .expected-date {
+            font-size: 14px !important;
+            line-height: 1.5;
+            color: #555;
+            margin-bottom: 16px;
+            max-width: 240px;
+        }
+
+        body.account #maincontent a.action,
+        .status-and-action .action,
+        .status-and-action button {
+            width: 100%;
+            min-height: 46px;
+            border-radius: 8px !important;
+            border: 1px solid #dddddd !important;
+            background: #fff !important;
+            color: #222 !important;
+            font-size: 15px !important;
+            font-weight: 500;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px !important;
+            margin-top: 0 !important;
+            box-shadow: none !important;
+            text-decoration: none !important;
+        }
+
+        .table-order-items .col.qty::before,
+        .table-order-items .col.price::before,
+        .table-order-items .col.subtotal::before,
+        .table-order-items .col.status-and-action::before {
+            display: none !important;
+        }
+
+        .table-order-items tbody tr:last-child {
+            margin-bottom: 0;
+        }
+
+        .status-and-action>div {
+            font-size: unset !important;
+            line-height: normal !important;
+            color: unset !important;
+        }
+
+        .block.block-order-details-view .block-content {
+            display: block;
+            padding: 10px;
+        }
+
+        .block.block-order-details-view .block-content .box:first-child,
+        .block.block-order-details-view .block-content .box {
+            padding: 10px;
+            border: 1px solid #ececec;
+            border-radius: 5px;
+        }
+    }
+</style>

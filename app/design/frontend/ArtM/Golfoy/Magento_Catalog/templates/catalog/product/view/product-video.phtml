@@ -1,0 +1,77 @@
+<?php
+$_product = $block->getProduct();
+
+if (
+    ($_product->getVideo() && $_product->getData('video') != '') ||
+    ($_product->getYoutubeVideoLink() && $_product->getData('youtube_video_link') != '')
+): ?>
+
+    <div class="col-xs-12">
+        <div class="youtbe_video_custom">
+
+            <?php if ($_product->getVideo() && $_product->getData('video') != ''):
+                $vsrc = $block->getBaseUrl() . 'media/product_videos/' . $_product->getVideo();
+            ?>
+
+                <div class="video-thumbnail">
+                    <video
+                        class="product-video-link"
+                        playsinline
+                        preload="metadata">
+                        <source src="<?= $vsrc ?>" type="video/mp4">
+                    </video>
+                    <div class="video-overlay"></div>
+                    <button
+                        type="button"
+                        class="play-video-btn"
+                        data-type="video"
+                        data-video="<?= $vsrc ?>">
+                        <i class="fa fa-play play-icon" aria-hidden="true"></i>
+                    </button>
+                </div>
+            <?php endif; ?>
+            <?php if ($_product->getYoutubeVideoLink() && $_product->getData('youtube_video_link') != ''):
+                $youtubeVideoLink = trim($_product->getYoutubeVideoLink());
+                $videoId = '';
+                if (preg_match('/(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $youtubeVideoLink, $matches)) {
+                    $videoId = $matches[1];
+                }
+            ?>
+                <div class="video-thumbnail">
+                    <img
+                        src="https://img.youtube.com/vi/<?= $videoId ?>/maxresdefault.jpg"
+                        alt="Video Thumbnail"
+                        class="youtube-thumb">
+                    <div class="video-overlay"></div>
+                    <button
+                        type="button"
+                        class="play-video-btn"
+                        data-type="youtube"
+                        data-video="<?= $videoId ?>">
+                        <i class="fa fa-play play-icon" aria-hidden="true"></i>
+                    </button>
+                    <iframe
+                        class="product-video-iframe"
+                        src="<?= $_product->getYoutubeVideoLink() ?>"
+                        frameborder="0"
+                        allowfullscreen
+                        style="display:none;">
+                    </iframe>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <div class="video-popup">
+        <div class="video-popup-overlay"></div>
+        <div class="video-popup-content">
+            <button
+                type="button"
+                class="popup-close">
+                &times;
+            </button>
+            <div class="popup-video-container"></div>
+        </div>
+    </div>
+<?php endif; ?>
+ 

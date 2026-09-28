@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2020 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Magento_Backend::stores">
+                    <resource id="Magento_Backend::stores_settings">
+                        <resource id="Magento_Config::config">
+                            <resource id="Magestore_ClickAndCollectAdminUi::config" title="Click And Collect" />
+                        </resource>
+                    </resource>
+                    <resource id="Magestore_ClickAndCollectAdminUi::physical_store" sortOrder="45" title="Click And Collect">
+                        <resource id="Magestore_ClickAndCollectAdminUi::manage_order" sortOrder="10" title="Click &amp; Collect Orders" />
+                        <resource id="Magestore_ClickAndCollectAdminUi::store" sortOrder="20" title="Manage Locations" />
+                        <resource id="Magestore_ClickAndCollectAdminUi::schedule" sortOrder="30" title="Manage Schedule" />
+                        <resource id="Magestore_ClickAndCollectAdminUi::specialday" sortOrder="40" title="Manage Special Day" />
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

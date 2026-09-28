@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="ArtM\ProductSlider\Api\SliderRepositoryInterface"
+                type="ArtM\ProductSlider\Model\SliderRepository"/>
+    <preference for="ArtM\ProductSlider\Api\SliderGroupRepositoryInterface"
+                type="ArtM\ProductSlider\Model\SliderGroupRepository"/>
+    <preference for="ArtM\ProductSlider\Api\Data\SliderSearchResultsInterface"
+                type="ArtM\ProductSlider\Model\SearchResults\SliderSearchResults"/>
+    <preference for="ArtM\ProductSlider\Api\Data\SliderGroupSearchResultsInterface"
+                type="ArtM\ProductSlider\Model\SearchResults\SliderGroupSearchResults"/>
+
+    <type name="Magento\Cms\Model\Template\Filter">
+        <plugin name="artm_productslider_cms_template_filter"
+                type="ArtM\ProductSlider\Plugin\Cms\TemplateFilterPlugin"
+                sortOrder="10"/>
+    </type>
+</config>

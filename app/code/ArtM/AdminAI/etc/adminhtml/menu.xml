@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add
+            id="ArtM_AdminAI::menu_parent"
+            title="Admin AI"
+            module="ArtM_AdminAI"
+            sortOrder="999"
+            parent="Magento_Backend::system"
+            resource="Magento_Backend::system"/>
+        <add
+            id="ArtM_AdminAI::dashboard"
+            title="Dashboard"
+            module="ArtM_AdminAI"
+            sortOrder="5"
+            parent="ArtM_AdminAI::menu_parent"
+            action="adminai/dashboard/index"
+            resource="Magento_Backend::system"/>
+        <add
+            id="ArtM_AdminAI::assistant"
+            title="Chat"
+            module="ArtM_AdminAI"
+            sortOrder="10"
+            parent="ArtM_AdminAI::menu_parent"
+            action="adminai/chat/index"
+            resource="Magento_Backend::system"/>
+        <add
+            id="ArtM_AdminAI::allchats"
+            title="All Chats"
+            module="ArtM_AdminAI"
+            sortOrder="20"
+            parent="ArtM_AdminAI::menu_parent"
+            action="adminai/allchats/index"
+            resource="Magento_Backend::system"/>
+    </menu>
+</config>

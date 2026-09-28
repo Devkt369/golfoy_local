@@ -1,0 +1,162 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+$baseUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
+$_product = $block->getProduct();
+
+$brand_name = $_product->getResource()->getAttribute('brand')->getFrontend()->getValue($_product);
+
+function GetIconHtml($baseUrl, $img_name, $text, $tooltip_text)
+{
+    $html = '';
+    if ($tooltip_text != '') {
+        $class = 'tooltip_exists';
+        $tooltip_html = '<i class="fas fa-info-circle tooltip-btn"></i>
+    <div class="tooltip">
+      ' . $tooltip_text . '
+    </div>';
+    } else {
+        $class = 'tooltip_not_exists';
+        $tooltip_html = '';
+    }
+    $html = '
+  <div class="icon ' . $class . '">
+    <img src="https://golfoy.com/media/wysiwyg/product_feature_icon/new/' . $img_name . '">
+    <span>' . $text . '</span>
+    ' . $tooltip_html . '
+  </div>';
+    return $html;
+}
+?>
+
+
+<div class="icons_booster">
+    <div class="icons_booster_inside">
+
+        <?php
+        $text = '<div>100% original </div>
+                    <div>product</div>';
+        $tooltip_text = 'This product is directly procured from the authorised distributor for the brand ' . $brand_name . '.';
+
+        echo GetIconHtml($baseUrl, 'original-icon.svg', $text, $tooltip_text);
+        ?>
+
+
+
+        <?php
+        $_product = $block->getProduct();
+        if (strtolower($_product->getAttributeText('returnable')) != 'no' && strtolower($_product->getAttributeText('returnable')) != 'no warranty' && strtolower($_product->getAttributeText('returnable')) != 'no waterproof warranty' && strtolower($_product->getAttributeText('returnable')) != '') {
+        ?>
+
+
+            <?php
+            $text = ' <div>7 Days- Return</div>
+                    <div>&amp; Exchange</div>';
+            $tooltip_text = 'No questions asked return or exchange within 7 days of delivery, for unused product with original packaging.';
+
+            echo GetIconHtml($baseUrl, 'easy-return.svg', $text, $tooltip_text);
+            ?>
+
+        <?php
+        } else {
+        }
+        ?>
+
+        <?php
+
+        ?>
+        <?php
+        if (strtolower($_product->getAttributeText('replacement_policy')) != 'no' && strtolower($_product->getAttributeText('replacement_policy')) != '') {
+        ?>
+
+
+            <?php
+            $text = ' <div>7 Days Easy</div>
+                    <div>Replacement</div>';
+            $tooltip_text = '7 days replacement only if received physically damaged, defective, wrong or missing item.';
+
+            echo GetIconHtml($baseUrl, 'easy-exchange.svg', $text, $tooltip_text);
+            ?>
+
+        <?php
+        }
+        ?>
+
+        <?php
+        if (strtolower($_product->getAttributeText('warranty')) != 'no' && strtolower($_product->getAttributeText('warranty')) != 'no warranty' && strtolower($_product->getAttributeText('warranty')) != 'no waterproof warranty' && strtolower($_product->getAttributeText('warranty')) != '') {
+        ?>
+
+
+            <?php
+            $text = 'Warranty';
+            $tooltip_text = '7 days replacement only if received physically damaged, defective, wrong or missing item.';
+            $tooltip_text = $_product->getAttributeText('warranty');
+            echo GetIconHtml($baseUrl, 'warranty-icon.svg', $text, $tooltip_text);
+            ?>
+        <?php
+        } else {
+        }
+        ?>
+
+
+        <?php
+        $text = 'Free Delivery';
+        $tooltip_text = '';
+        echo GetIconHtml($baseUrl, 'free-delivery.svg', $text, $tooltip_text);
+        ?>
+        <?php
+        $text = 'pay on delivery';
+        $tooltip_text = '';
+        echo GetIconHtml($baseUrl, 'pay-on-delivery.svg', $text, $tooltip_text);
+        ?>
+        <?php
+        $text = 'no cost emi';
+        $tooltip_text = '';
+        ?>
+
+
+
+        <?php
+        ?>
+
+    </div>
+</div>
+
+
+
+<div class="row share_page_icons visible-xs">
+    <div class="share_page_icons_inside">
+        <div class="share_sms" style="padding: 10px 10px;">
+            <img src='<?php echo $this->getViewFileUrl('images/share_by_sms_icon.png'); ?>'>
+
+            <?php
+            function isIphone($user_agent = NULL)
+            {
+                if (!isset($user_agent)) {
+                    $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
+                }
+                return (strpos($user_agent, 'iPhone') !== FALSE);
+            }
+
+            if (isIphone()) {
+            ?>
+                <a href="sms:&body=<?php echo (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; ?>">
+                    Share via sms
+                </a>
+            <?php
+            } else {
+            ?>
+                <a href="sms:?body=<?php echo (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; ?>">
+                    Share via sms
+                </a>
+            <?php
+            }
+            ?>
+        </div>
+        <div class="share_whatsapp" style="padding: 10px 6px;">
+            <img src='<?php echo $this->getViewFileUrl('images/enviodewhatsapp06.png'); ?>'>
+            <a href="whatsapp://send?text=<?php echo (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; ?>" data-action="share/whatsapp/share">Share via Whatsapp</a>
+        </div>
+    </div>
+</div>

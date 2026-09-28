@@ -1,0 +1,73 @@
+<?php /* @var \Magestore\WebposPerformanceAdminUi\Block\Adminhtml\ActionRanking\RankingDetail $block */?>
+
+<?php if ($block->getRequest()->getParam('action_code')): ?>
+    <?php $slowestPos = $block->getSlowestPos(); ?>
+<div class="rank-detailed-header">
+    <div class="rank-detailed-header-title">
+        <?= /* @noEscape */ $block->getActionLabel($slowestPos->getActionCode());?>
+    </div>
+    <div class="summary-metric">
+        <div class="component component--loaded">
+            <div class="component__main chart chart-billboard center-vertical">
+                <div class="billboard">
+                    <div class="chart-container">
+                        <div class="billboard-grid"
+                             style="font-size: 32px;">
+                            <?php if ($block->getSlowestDate()): ?>
+                            <div class="billboard-element"
+                                 style="width: 33%; height: 100%;">
+                                <div class="billboard-element__inner">
+                                    <div>
+                                        <span class="billboard-metric ok">
+                                            <?= /* @noEscape */
+                                                $block->formatDateDisplay($block->getSlowestDate()->getPeriod());
+                                            ?>
+                                        </span>
+                                        <span class="billboard-name ok">
+                                            <?= /* @noEscape */ __('Slowest date'); ?>
+                                            <b>
+                                                (<?= /* @noEscape */ $block->getSlowestDate()->getAveragePeriod();?>s)
+                                            </b>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+                            <div class="billboard-element"
+                                 style="width: 33%; height: 100%;">
+                                <div class="billboard-element__inner">
+                                    <div>
+                                        <span class="billboard-metric ok">
+                                            <?= /* @noEscape */ $block->getPosName($slowestPos->getPosId());?>
+                                        </span>
+                                        <span class="billboard-name ok">
+                                            <?= /* @noEscape */ __('Slowest POS by action'); ?>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="billboard-element"
+                                 style="width: 33%; height: 100%;">
+                                <div class="billboard-element__inner">
+                                    <div>
+                                        <span class="billboard-metric ok">
+                                            <?= /* @noEscape */ $block->getThroughPut();?>
+                                        </span>
+                                        <span class="billboard-name ok">
+                                            <?= /* @noEscape */ __('Throughput (count, queries per day)'); ?>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<?php else: ?>
+<div>
+    <?= /* @noEscape */ __('No Item') ;?>
+</div>
+<?php endif;?>

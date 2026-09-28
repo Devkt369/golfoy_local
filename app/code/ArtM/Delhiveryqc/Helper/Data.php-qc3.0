@@ -1,0 +1,475 @@
+<?php
+namespace ArtM\Delhiveryqc\Helper;
+
+use Magento\Framework\Json\Helper\Data as JsonHelper;
+
+class Data extends \Magento\Framework\App\Helper\AbstractHelper
+{
+    private $attributeSetRepository;
+    private $searchCriteriaBuilder;
+    private $OrderData;
+	private $ProductData;
+    protected $jsonHelper;
+    protected $OrderQcComment;
+    
+    public function __construct(
+        \Magento\Framework\App\Helper\Context $context,
+		\Magento\Store\Model\StoreManagerInterface $storeManager,
+        \Magento\Directory\Model\CountryFactory $countryFactory,
+        \Magento\Eav\Api\AttributeSetRepositoryInterface $attributeSet,
+        \Magento\Catalog\Api\ProductRepositoryInterface $productRepository,
+        \ArtM\CancelOrder\Model\CancelOrderCustomFactory $CancelOrderCustom,
+        \ArtM\Delhiveryqc\Model\QuestionQcFactory $QuestionQc,
+        \ArtM\Delhiveryqc\Model\ProductQcFactory $ProductData,  
+        \ArtM\Delhiveryqc\Model\OrderQcCommentFactory $OrderQcComment,
+        \ArtM\Delhiveryqc\Model\SettingsQcFactory $SettingsData,   
+        \Magento\Framework\HTTP\Client\Curl $curl,
+        JsonHelper $jsonHelper,
+        \ArtM\Delhiveryqc\Model\OrderQcFactory $OrderData
+        
+    )
+    
+    {
+		$this->storeManager = $storeManager;
+        $this->_countryFactory = $countryFactory;
+        $this->attributeSet = $attributeSet;
+        $this->productRepository = $productRepository;
+        $this->CancelOrderCustom = $CancelOrderCustom;
+        $this->QuestionQc = $QuestionQc;
+        $this->OrderQc = $OrderData;
+        $this->ProductQc = $ProductData;
+        $this->SettingsData = $SettingsData;
+        $this->curl = $curl;
+        $this->jsonHelper = $jsonHelper;
+        $this->OrderQcComment = $OrderQcComment;
+        
+		parent::__construct($context);
+    }
+    
+    
+    public function CanShow($order_id , $prd_id){
+        $return_data = array();
+        
+         $IsAlreadySubmitted = $this->IsAlreadySubmitted( $order_id , $prd_id );
+        if( $IsAlreadySubmitted == true ){
+            $return_data['message'] = 'Row Already Existed';
+            return $return_data;
+        }
+        
+        $return_data['message'] = '';
+        return $return_data;
+    }
+    
+    
+    
+    public function GetProductsDataByPackageId( $packageid ){
+        
+//        return "packageid: ".$packageid;
+        
+//        $result = $this->resultJsonFactory->create();
+        
+        $OrderCollection = $this->OrderQc->Create()->getCollection()
+            ->addFieldToFilter('qc_id', $packageid );
+        $id = '';
+        $prd_data = array();
+        if( $OrderCollection->count() > 0 ){
+            //echo "found result";
+            foreach($OrderCollection as $QcOrder_id){
+                $id = $QcOrder_id['id'];
+                break;
+            }
+            
+            if($id != ''){
+                $ProductCollection = $this->ProductQc->Create()->getCollection()
+                ->addFieldToFilter('qc_order_table_primary_id', $id );
+                
+                
+                if( $ProductCollection->count() > 0 ){
+                    
+                    foreach($ProductCollection as $QcProducts){
+                        $single_prd_data = array();
+                        $qcproduct_row = $QcProducts->getData();
+                        
+                        
+                        $qcproduct_row_arr = explode(',' , $qcproduct_row['images']);
+                        $image = array( $qcproduct_row_arr[0] );
+                        
+                        
+                        $single_prd_data['item'] = $qcproduct_row['item'];
+                        $single_prd_data['description'] = $qcproduct_row['description'];
+                        $single_prd_data['images'] = $image;
+                        $single_prd_data['return_reason'] = $qcproduct_row['return_reason'];
+                        $single_prd_data['quantity'] = $qcproduct_row['quantity'];
+                        $single_prd_data['brand'] = $qcproduct_row['brand'];
+                        $single_prd_data['product_category'] = $qcproduct_row['product_category'];
+                        
+                        $qcproduct_row_additional_info = array();
+                        
+                        
+//                        echo $qcproduct_row['additional_info'];
+//                        $additional_info = array();
+                        $additional_info = $qcproduct_row['additional_info'];
+                        //echo $additional_info;
+//                        echo "additional_info from db: ".$additional_info."<br><br><br><br>";
+                        
+//                        $additional_info = '[{"questions_id":"kts_size","options":["UK 10","No"],"value":["UK 10"],"required":true,"type":"multi"},{"questions_id":"kts_size1","options":["UK 20","No"],"value":["UK 20"],"required":true,"type":"multi"}]';
+//echo "<br>";
+//                        echo $additional_info;
+//                        exit;
+                        $jsonString = json_decode($additional_info, true);
+                        
+//                        echo $jsonString;
+//                        print_r($jsonString);
+//                        exit;
+                        /*if ($jsonString === null) {
+                            // JSON parsing failed
+                            die('Error parsing JSON');
+                        }*/
+
+//                        print_r($array);
+                        
+                        /*
+                        $options = array("Peter" , "abc");
+                        $age = array("Peter"=>true, "Ben"=>$options, "Joe"=>"43");
+//                        $qcproduct_row_additional_info = $qcproduct_row['additional_info'];
+                        
+                        $qcproduct_row_additional_info[] = $age;
+                        $qcproduct_row_additional_info[] = $age;
+                        $qcproduct_row_additional_info[] = $age;
+                        
+                        $single_prd_data['questions'] = $qcproduct_row_additional_info;
+//                        echo $qcproduct_row_additional_info;
+//                        exit;
+                        
+                        $jsonString = str_replace('True', 'true', $qcproduct_row_additional_info);
+                        $array = json_decode($jsonString, true);
+                        */
+                        
+
+//                        print_r($array);
+                        
+                        
+                        $single_prd_data['questions'] = $jsonString;
+                        
+                        
+                        
+                        array_push($prd_data , $single_prd_data);
+                    }
+                }
+            }
+        }
+        return $prd_data;
+    }
+    
+    public function IsAlreadySubmitted($order_id , $prod_id){
+        $productCollection = $this->ProductQc->Create()->getCollection()
+            ->addFieldToFilter('incremented', $order_id )
+            ->addFieldToFilter('prd_id', $prod_id );
+
+        if( $productCollection->count() > 0 ){
+            return true;
+        }else{
+            return false;
+        }
+        return false;
+
+    }
+
+    public function qcNumber($order_id , $prod_id){
+        $productCollection = $this->ProductQc->Create()->getCollection()
+            ->addFieldToFilter('incremented', $order_id )
+            ->addFieldToFilter('prd_id', $prod_id );
+            $productCollection = $productCollection->getData();
+           $qc_order_table_primary_id = $productCollection['0']['qc_order_table_primary_id'];
+           $OrderCollection = $this->OrderQc->Create()->getCollection()->addFieldToFilter('id', $qc_order_table_primary_id );
+           $qc_id = $OrderCollection->getData();
+           $qcid = $qc_id['0']['qc_id'];
+           
+        if( $qcid > 0 ){
+            return $qcid;
+        }else{
+            $qcid = $qc_id['0']['response'];
+            return [$qcid];
+        }
+    }
+    public function qcNumberForComment($order_id , $prod_id){
+        $productCollection = $this->ProductQc->Create()->getCollection()
+            ->addFieldToFilter('incremented', $order_id )
+            ->addFieldToFilter('prd_id', $prod_id );
+            $productCollection = $productCollection->getData();
+            
+            if( $productCollection > 0 ){
+                return $productCollection['0']['qc_order_table_primary_id'];
+            }else{
+                return null;
+            }
+
+        //    $qc_order_table_primary_id = $productCollection['0']['qc_order_table_primary_id'];
+        //    $OrderCollection = $this->OrderQc->Create()->getCollection()->addFieldToFilter('id', $qc_order_table_primary_id );
+        //    $qc_id = $OrderCollection->getData();
+        //    $qcid = $qc_id['0']['qc_id'];
+           
+        
+    }
+
+    public function getStatus($order_id , $prod_id){
+        $productCollection = $this->ProductQc->Create()->getCollection()
+            ->addFieldToFilter('incremented', $order_id )
+            ->addFieldToFilter('prd_id', $prod_id );
+            $productCollection = $productCollection->getData();
+            return $productCollection;
+//           $qc_order_table_primary_id = $productCollection['0']['qc_order_table_primary_id'];
+//           $OrderCollection = $this->OrderQc->Create()->getCollection()->addFieldToFilter('id', $qc_order_table_primary_id );
+//           $qc_id = $OrderCollection->getData();
+//           $status = $qc_id['0']['status'];
+//            return $status;
+//           if($status > 0){
+//                return true;
+//           }else{
+//                return false;
+//           }
+    }
+    public function getQcRow($order_id , $prod_id){
+        $productCollection = $this->ProductQc->Create()->getCollection()
+            ->addFieldToFilter('incremented', $order_id )
+            ->addFieldToFilter('prd_id', $prod_id );
+            $productCollection = $productCollection->getData();
+            $row = array();
+            foreach($productCollection as $product){
+                
+                $qc_order_table_primary_id = $product['qc_order_table_primary_id'];
+                $OrderCollection = $this->OrderQc->Create()->getCollection()->addFieldToFilter('id', $qc_order_table_primary_id );
+                $qc_row = $OrderCollection->getData();
+                $row[] = $qc_row;
+            }
+            return $row;
+            
+            $qc_order_table_primary_id = $productCollection['0']['qc_order_table_primary_id'];
+            $OrderCollection = $this->OrderQc->Create()->getCollection()->addFieldToFilter('id', $qc_order_table_primary_id );
+            $qc_id = $OrderCollection->getData();
+            $status = $qc_id['0']['status'];
+            return $status;
+            if($status > 0){
+                return true;
+            }else{
+                return false;
+            }
+    }
+    
+    public function GetQuestions(){
+                    
+        $QuestionQc = $this->QuestionQc->create();
+        $QuestionQccollection = $QuestionQc
+            ->getCollection();
+        $questions_data = array();
+        if( $QuestionQccollection->count() > 0 ){
+            foreach($QuestionQccollection as $QuestionQc){
+//                $prd_ids = $CancelOrderCustom['product_ids'];
+//                $selected_row = $CancelOrderCustom;
+                $questions_data[] = $QuestionQc->getData();
+            }
+            return $questions_data;
+        }
+        return false;
+    }
+    
+    public function GetCountryCode($countryCode){
+        $country = $this->_countryFactory->create()->loadByCode($countryCode);
+        return $country->getName();
+    }
+    public function GetAttributeSetName($prd_id) {
+        
+        $product = $this->productRepository->getById( $prd_id );
+        
+        $attributeSetRepository = $this->attributeSet->get($product->getAttributeSetId());
+        return $attributeSetRepository->getAttributeSetName();
+    }
+    public function GetImages($prd_id) {
+        $imgs = '';
+        $product = $this->productRepository->getById( $prd_id );
+        
+        $productimages = $product->getMediaGalleryImages();
+        foreach($productimages as $productimage){
+            $imgs = $imgs.$productimage['url'].",";
+        }
+        return $imgs;
+    }
+    public function GetSimplePrdImages($sku) {
+        $imgs = '';
+        $product = $this->productRepository->get( $sku );
+        
+        $productimages = $product->getMediaGalleryImages();
+        foreach($productimages as $productimage){
+            $imgs = $imgs.$productimage['url'].",";
+            return $imgs;
+        }
+    }
+    public function GetBrand($prd_id) {
+        $product = $this->productRepository->getById( $prd_id );
+//        $brand = $product->getBrand();
+        
+        $brand = $product->getResource()->getAttribute('brand')->getFrontend()->getValue($product);
+        return $brand;
+    }
+    public function GetReturnReason($order_id, $prd_id) {
+        $found = false;
+        $CancelOrderCustomobj = $this->CancelOrderCustom->create();
+        $CancelOrderCustomcollection = $CancelOrderCustomobj
+            ->getCollection()
+            ->addFieldToFilter('order_id', $order_id);
+            
+        $prd_ids = '';
+        if( $CancelOrderCustomcollection->count() > 0 ){
+            foreach($CancelOrderCustomcollection as $CancelOrderCustom){
+                $prd_ids = $prd_ids.",".$CancelOrderCustom['product_ids'];
+                $selected_row = $CancelOrderCustom;
+            }
+//            echo "<br><br>prd_ids".$prd_ids."<br>to get:".$prd_id."<br>";
+            $prd_arr = explode("," , $prd_ids);
+            foreach( $prd_arr as $prd ){
+                if( $prd_id == trim($prd) ){
+                    $found = true;
+                }
+            }
+
+            if( $found == true ){
+    //            print_r( $selected_row->getData() );
+                $return_reason = $selected_row['return_reason'];
+            }else{
+                $return_reason = 'Return reason not mentioned';
+                return false;
+            }
+
+            return $return_reason;
+        }
+        return false;
+    }
+    
+    function GetSettings(){
+        $SettingsDataobj = $this->SettingsData->create();
+        $SettingsDatacollection = $SettingsDataobj
+            ->getCollection();
+        
+        if( $SettingsDatacollection->count() > 0 ){
+            foreach($SettingsDatacollection as $SettingsDatacollection){
+                $setting = $SettingsDatacollection->getData();
+                return $setting;
+            }
+        }
+        return false;
+    }
+    function CreateQcOrder($formdata)
+    {   
+        $settings = $this->GetSettings();
+
+        $pickup_location = $settings['pickup_location'];
+        $token = $settings['token'];
+        $url = $settings['url'];
+        
+        
+        $url = $url;
+        $accessToken = $token;
+        
+        $charactersToRemove = array('!', '@', '#', '$', '%', '&', '/', '|', '');
+        $formdata['name'] = str_replace($charactersToRemove, '', $formdata['name']);
+    
+        $custom_qc_data = "";
+        if( !empty($formdata['product']) ){
+            $i = 0;
+            foreach($formdata['product'] as $prd_data){
+                if($i !=0 ){
+                $custom_qc_data .= ",";    
+                }
+                $custom_qc_data .= '{
+                    "item": "'.$prd_data['attribute_set'].'",
+                    "description": "'.$prd_data['name'].'",
+                    "images": "'.$prd_data['images'].'",
+                    "return_reason": "'.$prd_data['return_reason'].'",
+                    "quantity": '.$prd_data['qty_to_qc'].',
+                    "brand": "'.$prd_data['brand'].'",
+                    "product_category": "'.$prd_data['attribute_set'].'",
+                    "questions": '.$prd_data['question_data'].'
+                }';
+                $i++;
+            }
+        }else{
+            $custom_qc_data = "Empty product array";
+        }
+        
+        
+//                                "order": "'.$formdata['incrementid'].'",
+        $rawData = 'format=json&data={
+                        "shipments": [
+                            {
+                                "client": "KTSVENTURESSURFACE-B2C",
+                                "order": "1000102775",
+                                "city": "'.$formdata['city'].'",
+                                "pin": "'.$formdata['postcode'].'",
+                                "shipping_mode": "Express",
+                                "products_desc": "'.$formdata['product_description'].'",
+                                "quantity": "'.$formdata['qty'].'",
+                                "phone": "'.$formdata['telephone'].'",
+                                "add": "'.$formdata['street'].'",
+                                "payment_mode": "Pickup",
+                                "order_date": "'.$formdata['createdat'].'",
+                                "name": "'.$formdata['name'].'",
+                                "state": "'.$formdata['region'].'",
+                                "qc_type": "param",
+                                "total_amount": "'.$formdata['total_amount'].'",
+                                "custom_qc" : ['.$custom_qc_data.' ]
+                            }
+                        ],
+                        "pickup_location": {
+                            "city": "Chandigarh",
+                            "pin": "160002 ",
+                            "country": "India",
+                            "add": "Plot No. 5, Behind Swami Auto Bikes, Near HDFC Bank, Industrial Area, Phase - 1",
+                            "phone": "9780301182",
+                            "state": "Chandigarh",
+                            "name": "KTSVENTURES SURFACE"
+                        }
+                    }';
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json',
+            'Authorization: '. $accessToken
+        ));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $rawData);
+
+        $response = curl_exec($ch);
+        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        // Check for cURL errors
+        if (curl_errno($ch)) {
+            $error = curl_error($ch);
+            return false;
+        }
+
+        // Close cURL resource
+        curl_close($ch);
+//        echo "<pre>";
+//        print_r($formdata);
+//        echo "<br><br><br><br>";
+//        print_r($response);
+//        echo "</pre>";
+        
+//        exit;
+        $data = array();
+        $data['response'] = $response;
+        $data['rawData'] = $rawData;
+        
+        return $data;
+    }
+
+
+    public function markAsFailed($waybill){
+        $failedData = $this->OrderQcComment->Create()->getCollection()->addFieldToFilter('waybillnumber', $waybill );
+        if(count($failedData) > 0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+}

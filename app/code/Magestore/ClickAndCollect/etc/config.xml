@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+
+<!--
+  ~ Copyright © 2018 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <click_and_collect>
+            <general>
+                <allow_to_choose_collect_data_and_time>0</allow_to_choose_collect_data_and_time>
+                <search_radius>10</search_radius>
+                <show_store_list_on_frontend>1</show_store_list_on_frontend>
+                <staff_sharing_account_between_apps>0</staff_sharing_account_between_apps>
+            </general>
+        </click_and_collect>
+        <carriers>
+            <clickandcollect>
+                <active>0</active>
+                <title>Click &amp; Collect</title>
+                <method_name>Click &amp; Collect</method_name>
+                <price>0.0</price>
+                <displayed_error_message>Click &amp; Collect is not available. To use this delivery method, please contact us.</displayed_error_message>
+                <model>Magestore\ClickAndCollect\Model\Carrier\Method</model>
+            </clickandcollect>
+        </carriers>
+    </default>
+</config>

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>              
+        <add id="ArtM_Analysis::analysis" title="Analysis" module="ArtM_Analysis" sortOrder="300" resource="ArtM_Analysis::analysis" parent="ArtM_BlogEsg::BlogEsgmenu"/>     
+        <add id="ArtM_Analysis::customers" title="Customers" module="ArtM_Analysis" sortOrder="10" action="analysis/data/customers" resource="ArtM_Analysis::customers" parent="ArtM_Analysis::analysis"/>
+        <add id="ArtM_Analysis::asales" title="Sales" module="ArtM_Analysis" sortOrder="20" action="analysis/data/sales" resource="ArtM_Analysis::asales" parent="ArtM_Analysis::analysis"/>
+        
+        
+        <add id="ArtM_Analysis::stockreportheading" title="Stock Report" module="ArtM_Analysis" sortOrder="350" resource="ArtM_Analysis::analysis" parent="ArtM_BlogEsg::BlogEsgmenu"/>     
+        <add id="ArtM_Analysis::stockreport" title="Stock Report" module="ArtM_Analysis" sortOrder="10" action="analysis/data/salesreport" resource="ArtM_Analysis::asales" parent="ArtM_Analysis::stockreportheading"/>
+    </menu>
+</config>

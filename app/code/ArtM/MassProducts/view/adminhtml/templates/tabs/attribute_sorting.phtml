@@ -1,0 +1,41 @@
+<?php
+/** @var \Magento\Backend\Block\Template $block */
+$itemsUrl = $block->getUrl('massproducts/attributesort/items');
+$saveUrl = $block->getUrl('massproducts/attributesort/save');
+?>
+
+<div id="massproducts-attribute-sorting" class="massproducts-attr-sorting"
+     data-items-url="<?= $block->escapeUrl($itemsUrl) ?>"
+     data-save-url="<?= $block->escapeUrl($saveUrl) ?>">
+    <div class="massproducts-as-right" style="width:100%;">
+        <div class="massproducts-as-header">
+            <div class="massproducts-as-title" id="massproducts-as-current-title">Global Attribute Sorting</div>
+            <button type="button" class="action-primary" id="massproducts-as-save">Save</button>
+        </div>
+        <div class="massproducts-as-note">Drag globally enabled attributes and save. This global order will be used in Draft tables.</div>
+        <div class="massproducts-as-items" id="massproducts-as-items"></div>
+    </div>
+</div>
+
+<style>
+    .massproducts-attr-sorting { display:flex; gap:16px; margin-top:12px; }
+    .massproducts-as-right { flex:1; border:1px solid #dcdcdc; background:#fff; min-width:0; }
+    .massproducts-as-title { font-size:14px; font-weight:600; padding:12px; border-bottom:1px solid #efefef; }
+    .massproducts-as-header { display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #efefef; }
+    .massproducts-as-note { padding:8px 12px; color:#666; border-bottom:1px solid #f5f5f5; }
+    .massproducts-as-items { max-height:70vh; overflow:auto; padding:8px 12px 12px; }
+    .massproducts-as-item { background:#fff; border:1px solid #e5e5e5; padding:10px; margin-bottom:8px; cursor:move; }
+    .massproducts-as-item.is-dragging { opacity:.5; }
+    .massproducts-as-empty { padding:12px; color:#666; }
+
+    @media (max-width: 980px) {
+        .massproducts-attr-sorting { flex-direction:column; }
+        .massproducts-as-right { width:100%; }
+    }
+</style>
+
+<script>
+require(['ArtM_MassProducts/js/attribute-sorting-tab'], function (init) {
+    init();
+});
+</script>

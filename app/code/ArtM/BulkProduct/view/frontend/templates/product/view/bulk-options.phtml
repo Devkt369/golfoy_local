@@ -1,0 +1,436 @@
+<?php
+
+/**
+ * @var \ArtM\BulkProduct\Block\Product\View\BulkOptions $block
+ */
+?>
+<?php
+// Debug info - remove after testing
+$sizeOptions = $block->getSizeOptions();
+$product = $block->getProduct();
+echo "<!-- Debug: Product Type: " . $product->getTypeId() . " -->";
+echo "<!-- Debug: Size Options Count: " . count($sizeOptions) . " -->";
+$configurableProductId = $product->getId();
+$optionId = '';
+
+// echo "<pre>";
+
+
+?>
+<?php if ($block->isBulkOrderingEnabled() && $block->hasSizeVariations()): ?>
+
+    <?php
+    // The getOptions() method returns an array of option objects.
+    foreach ($product->getOptions() as $option) {
+        if ($option->getTitle() == 'Customization') {
+            $optionId = $option->getId();
+            break; // Exit the loop once the option is found
+        }
+    }
+
+    ?>
+    <div class="bulk-ordering-section" id="bulk-ordering-options">
+        <!-- <h3 class="bulk-ordering-title"><?= __('Bulk Order Options') ?></h3> -->
+        <!-- <p class="bulk-ordering-description"><?= __('Select quantities for each size below:') ?></p> -->
+
+        <form id="bulk-order-form" class="bulk-order-form">
+            <div class="bulk-options-container">
+                <table class="bulk-options-table">
+                    <thead>
+                        <tr>
+                            <th><?= __('Size') ?></th>
+                            <th><?= __('Price') ?></th>
+                            <th><?= __('Quantity') ?></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($sizeOptions as $sizeOption): ?>
+                            <tr class="bulk-option-row"
+                                data-product-id="<?= $sizeOption['product_id'] ?>"
+                                data-size="<?= $block->escapeHtml($sizeOption['size']) ?>">
+
+                                <!-- Size column -->
+                                <td class="size-cell">
+                                    <strong><?= $block->escapeHtml($sizeOption['label']) ?></strong>
+                                    <?php if (isset($sizeOption['is_saleable']) && $sizeOption['is_saleable']): ?>
+                                        <div class="stock-info">
+                                            <?php
+                                            $stockQty = (int)$sizeOption['stock_qty']; // Ensure the quantity is treated as an integer
+                                            if ($stockQty > 10) {
+                                                echo $block->escapeHtml(__('(10+ available)'));
+                                            } else {
+                                                echo $block->escapeHtml(__('(%1 available)', $stockQty));
+                                            }
+                                            ?>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="stock-info out-of-stock"><?= __('Out of Stock') ?></div>
+                                    <?php endif; ?>
+                                </td>
+
+                                <!-- Price column -->
+                                <td class="price-cell">
+                                    <span class="size-price"><?= $block->escapeHtml(__('₹%1', number_format($sizeOption['price'], 2))) ?></span>
+                                </td>
+
+                                <!-- Quantity column -->
+                                <td class="quantity-cell">
+                                    <?php if (isset($sizeOption['is_saleable']) && $sizeOption['is_saleable']): ?>
+                                        <div class="qty-controls">
+                                            <button type="button" class="qty-btn qty-minus" onclick="decreaseQty('<?= $sizeOption['product_id'] ?>')">-</button>
+                                            <input type="number"
+                                                class="bulk-quantity-input"
+                                                id="qty_<?= $sizeOption['product_id'] ?>"
+                                                name="bulk_qty[<?= $sizeOption['product_id'] ?>]"
+                                                data-product-id="<?= $sizeOption['product_id'] ?>"
+                                                data-price="<?= $sizeOption['price'] ?>"
+                                                data-max-qty="<?= (int)$sizeOption['stock_qty'] ?>"
+                                                data-option-id="<?= $optionId ?>"
+                                                value="0"
+                                                min="0"
+                                                max="<?= (int)$sizeOption['stock_qty'] ?>"
+                                                data-configurable-id="<?= $configurableProductId ?>"
+                                                onchange="validateAndUpdate(this)" />
+                                            <button type="button" class="qty-btn qty-plus" onclick="increaseQty('<?= $sizeOption['product_id'] ?>')">+</button>
+                                        </div>
+                                        <div class="qty-error" id="error_<?= $sizeOption['product_id'] ?>" style="display:none;"></div>
+                                    <?php else: ?>
+                                        <span class="unavailable"><?= __('Unavailable') ?></span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+
+            <div class="bulk-order-summary">
+                <div class="total-items">
+                    <span class="label"><?= __('Total Items:') ?></span>
+                    <span class="value" id="bulk-total-qty">0</span>
+                </div>
+                <div class="total-price">
+                    <span class="label"><?= __('Total Price:') ?></span>
+                    <span class="value" id="bulk-total-price">$0.00</span>
+                </div>
+            </div>
+        </form>
+        <div class="bulk-actions">
+            <button type="button"
+                class="action primary bulk-add-to-cart"
+                id="bulk-add-to-cart-btn"
+                disabled="disabled">
+                <span><?= __('Add All Selected to Cart') ?></span>
+            </button>
+            <button type="button" class="action secondary bulk-clear-all" onclick="clearAllQuantities()"><?= __('Clear All') ?></button>
+        </div>
+    </div>
+
+    <script>
+        function increaseQty(productId) {
+            var input = document.getElementById('qty_' + productId);
+            var currentVal = parseInt(input.value) || 0;
+            var maxQty = parseInt(input.getAttribute('data-max-qty')) || 999;
+
+            if (currentVal < maxQty) {
+                input.value = currentVal + 1;
+                validateAndUpdate(input);
+            }
+        }
+
+        function decreaseQty(productId) {
+            var input = document.getElementById('qty_' + productId);
+            var currentVal = parseInt(input.value) || 0;
+
+            if (currentVal > 0) {
+                input.value = currentVal - 1;
+                validateAndUpdate(input);
+            }
+        }
+
+        function validateAndUpdate(input) {
+            var qty = parseInt(input.value) || 0;
+            var maxQty = parseInt(input.getAttribute('data-max-qty')) || 999;
+            var productId = input.getAttribute('data-product-id');
+            var errorDiv = document.getElementById('error_' + productId);
+
+            // Clear previous error
+            errorDiv.style.display = 'none';
+
+            // Validate quantity
+            if (qty > maxQty) {
+                input.value = maxQty;
+                errorDiv.textContent = 'Maximum available quantity is ' + maxQty + '. Quantity adjusted.';
+                errorDiv.style.display = 'block';
+
+                setTimeout(function() {
+                    errorDiv.style.display = 'none';
+                }, 3000);
+            } else if (qty < 0) {
+                input.value = 0;
+            }
+
+            // Update button states
+            updateButtons(productId);
+            updateTotals();
+        }
+
+        function updateButtons(productId) {
+            var input = document.getElementById('qty_' + productId);
+            var currentVal = parseInt(input.value) || 0;
+            var maxQty = parseInt(input.getAttribute('data-max-qty')) || 999;
+
+            var minusBtn = input.parentNode.querySelector('.qty-minus');
+            var plusBtn = input.parentNode.querySelector('.qty-plus');
+
+            minusBtn.disabled = currentVal <= 0;
+            plusBtn.disabled = currentVal >= maxQty;
+        }
+
+        function updateTotals() {
+            var totalQty = 0;
+            var totalPrice = 0;
+
+            var inputs = document.querySelectorAll('.bulk-quantity-input');
+            inputs.forEach(function(input) {
+                var qty = parseInt(input.value) || 0;
+                var price = parseFloat(input.getAttribute('data-price')) || 0;
+
+                totalQty += qty;
+                totalPrice += (qty * price);
+            });
+
+            document.getElementById('bulk-total-qty').textContent = totalQty;
+            document.getElementById('bulk-total-price').textContent = '₹' + totalPrice.toFixed(2);
+
+            // Enable/disable add to cart button
+            var addToCartBtn = document.getElementById('bulk-add-to-cart-btn');
+            addToCartBtn.disabled = totalQty === 0;
+        }
+
+        // Initialize button states on load
+        document.addEventListener('DOMContentLoaded', function() {
+            var inputs = document.querySelectorAll('.bulk-quantity-input');
+            inputs.forEach(function(input) {
+                var productId = input.getAttribute('data-product-id');
+                updateButtons(productId);
+            });
+            updateTotals();
+        });
+
+        // Clear all function
+        function clearAllQuantities() {
+            var inputs = document.querySelectorAll('.bulk-quantity-input');
+            inputs.forEach(function(input) {
+                input.value = 0;
+                var productId = input.getAttribute('data-product-id');
+                document.getElementById('error_' + productId).style.display = 'none';
+                updateButtons(productId);
+            });
+            updateTotals();
+        }
+    </script>
+
+    <script type="text/x-magento-init">
+        {
+    "#bulk-ordering-options": {
+        "ArtM_BulkProduct/js/bulk-product": <?= $block->getJsonConfig() ?>
+    }
+}
+</script>
+
+    <style>
+        .swatch-opt {
+            display: none;
+        }
+        .box-tocart {
+            display: none !important;
+        }
+        /* === Table Layout for Bulk Options === */
+        .bulk-ordering-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 6px;
+            border-bottom: 2px solid #efefef;
+            padding-bottom: 6px;
+        }
+
+        .bulk-ordering-description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .bulk-options-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .bulk-options-table th {
+            background: #fafafa;
+            text-align: center;
+            font-weight: 600;
+            padding: 10px 12px;
+            border-bottom: 2px solid #eee;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .bulk-options-table td {
+            padding: 12px 12px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+
+        .bulk-order-summary {
+            margin: 18px 0;
+            display: flex;
+            justify-content: flex-start;
+            gap: 30px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .bulk-ordering-section {
+            margin: 25px 0;
+        }
+
+        .bulk-option-row:hover {
+            background-color: #fcfcfc;
+        }
+
+        /* Column structure */
+        .size-cell strong {
+            display: block;
+            color: #000;
+            font-size: 1.2rem;
+            margin-bottom: 2px;
+        }
+
+        .stock-info {
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        .stock-info.out-of-stock {
+            color: #c62828;
+        }
+
+        .size-price {
+            color: #e53935;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        /* Quantity */
+        .quantity-cell {
+            text-align: center;
+        }
+
+        .qty-controls {
+            display: inline-flex;
+            overflow: hidden;
+            background: transparent;
+            height: 34px;
+        }
+
+        .qty-btn {
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            font-weight: 600;
+            color: #e60023;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        button.qty-btn.qty-minus {
+            color: #646464;
+        }
+
+        button.qty-btn.qty-plus:hover,
+        button.qty-btn.qty-plus:active,
+        button.qty-btn.qty-plus:focus {
+            color: #e60023;
+        }
+
+        td.quantity-cell button.qty-btn.qty-plus:hover,
+        td.quantity-cell button.qty-btn.qty-minus:hover,
+        td.quantity-cell button.qty-btn.qty-minus:active,
+        td.quantity-cell button.qty-btn.qty-plus:active,
+        td.quantity-cell button.qty-btn.qty-plus:focus,
+        td.quantity-cell button.qty-btn.qty-minus:focus {
+            background-color: transparent;
+        }
+
+        .qty-btn:disabled {
+            opacity: 0.4;
+        }
+
+        .total-items span,
+        .total-price span {
+            font-size: 12px;
+        }
+
+        .bulk-quantity-input {
+            width: 50px !important;
+            text-align: center;
+            border: none;
+            font-size: 15px;
+            font-family: inherit;
+            font-variant-numeric: tabular-nums;
+            background: transparent;
+            outline: none;
+        }
+
+        .bulk-quantity-input::-webkit-inner-spin-button,
+        .bulk-quantity-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Errors */
+        .qty-error {
+            font-size: 0.8rem;
+            color: #d32f2f;
+            margin-top: 4px;
+        }
+
+        /* Responsive table layout */
+        @media (max-width: 768px) {
+            .bulk-options-table thead {
+                display: none;
+            }
+
+            .bulk-options-table,
+            .bulk-options-table tbody,
+            .bulk-options-table tr,
+            .bulk-options-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .bulk-options-table tr {
+                margin-bottom: 12px;
+                border: 1px solid #eee;
+                border-radius: 8px;
+                padding: 10px;
+            }
+
+            .bulk-options-table td {
+                border: none;
+                padding: 6px 0;
+            }
+
+            .quantity-cell {
+                text-align: left;
+            }
+        }
+    </style>
+<?php endif; ?>

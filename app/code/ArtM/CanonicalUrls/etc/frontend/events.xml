@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework/Event/etc/events.xsd">
+
+    <event name="layout_generate_blocks_after">
+        <observer
+            name="artm_add_cms_canonical"
+            instance="ArtM\CanonicalUrls\Observer\AddCmsCanonical"/>
+    </event>
+
+</config>

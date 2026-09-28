@@ -1,0 +1,1713 @@
+diff --git a/vendor/magento/framework/App/Cache/Frontend/Factory.php b/vendor/magento/framework/App/Cache/Frontend/Factory.php
+index 45e6d580e8650..d96e4f75a980f 100644
+--- a/vendor/magento/framework/App/Cache/Frontend/Factory.php
++++ b/vendor/magento/framework/App/Cache/Frontend/Factory.php
+@@ -28,7 +28,7 @@
+ 
+ /**
+  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+- */
++     */
+ class Factory
+ {
+     /**
+@@ -153,18 +153,7 @@ public function create(array $options)
+     {
+         $options = $this->_getExpandedOptions($options);
+ 
+-        // Optimize: Cache directory operations
+-        foreach (['backend_options', 'slow_backend_options'] as $section) {
+-            if (!empty($options[$section]['cache_dir'])) {
+-                $cacheDir = $options[$section]['cache_dir'];
+-                if (!isset($this->cachedDirectories[$cacheDir])) {
+-                    $directory = $this->_filesystem->getDirectoryWrite(DirectoryList::VAR_DIR);
+-                    $directory->create($cacheDir);
+-                    $this->cachedDirectories[$cacheDir] = $directory->getAbsolutePath($cacheDir);
+-                }
+-                $options[$section]['cache_dir'] = $this->cachedDirectories[$cacheDir];
+-            }
+-        }
++        $this->prepareCacheDirectories($options);
+ 
+         // Optimize: Use cached ID prefix or generate once
+         $idPrefix = $this->getIdPrefix($options);
+@@ -490,15 +479,31 @@ private function prepareCacheDirectories(array &$options): void
+             if (!empty($options[$section]['cache_dir'])) {
+                 $cacheDir = $options[$section]['cache_dir'];
+                 if (!isset($this->cachedDirectories[$cacheDir])) {
+-                    $directory = $this->_filesystem->getDirectoryWrite(DirectoryList::VAR_DIR);
+-                    $directory->create($cacheDir);
+-                    $this->cachedDirectories[$cacheDir] = $directory->getAbsolutePath($cacheDir);
++                    $this->cachedDirectories[$cacheDir] = $this->resolveCacheDir($cacheDir);
+                 }
+                 $options[$section]['cache_dir'] = $this->cachedDirectories[$cacheDir];
+             }
+         }
+     }
+ 
++    /**
++     * Resolve a cache_dir value to an absolute path.
++     *
++     * Absolute paths (e.g. /dev/shm/magento_l1) are required for L2 cache configuration and returned as-is.
++     *
++     * @param string $path
++     * @return string
++     */
++    private function resolveCacheDir(string $path): string
++    {
++        if (str_starts_with($path, DIRECTORY_SEPARATOR)) {
++            return $path;
++        }
++        $directory = $this->_filesystem->getDirectoryWrite(DirectoryList::VAR_DIR);
++        $directory->create($path);
++        return $directory->getAbsolutePath($path);
++    }
++
+     /**
+      * Create cache frontend instance using Symfony Cache
+      *
+@@ -629,9 +634,15 @@ private function createSymfonyCache(array $options): FrontendInterface
+      */
+     private function isCompressionEnabled(array $backendOptions): bool
+     {
+-        // Check if compress_data is explicitly enabled (value '1' or true)
+-        return isset($backendOptions['compress_data'])
+-            && ($backendOptions['compress_data'] === '1' || $backendOptions['compress_data'] === 1);
++        // Opt-in: default OFF when compress_data is not configured (preserves write latency for
++        // installs that never set it, matching the legacy backend). When it IS set, treat any value
++        // other than an explicit falsey ('0', 0, false, 'false', '') as enabled — so 1, '1' and the
++        // boolean true all turn compression on.
++        if (!isset($backendOptions['compress_data'])) {
++            return false;
++        }
++
++        return !in_array($backendOptions['compress_data'], ['0', 0, false, 'false', ''], true);
+     }
+ 
+     /**
+@@ -708,6 +719,25 @@ private function createSymfonyL2Cache(array $options): FrontendInterface
+         // Get local backend configuration (L1 - fast, local)
+         $localBackend = $backendOptions['local_backend'] ?? 'file';
+         $localBackendOptions = $backendOptions['local_backend_options'] ?? [];
++        // Never maintain an on-disk L1 tag index (tags/ + idtags/). The L2 remote (Redis) is the
++        // source of truth for tags and the :hash marker, and the L1 self-heals on read when its
++        // hash no longer matches the remote. This keeps the L1 from accumulating hundreds of
++        // thousands of tiny index files on the node (the post-deploy warmup degradation / tmpfs
++        // ENOSPC); cache data itself is still written normally to the L1 cache_dir, and
++        // clean-by-tag continues to work through the remote.
++        $localBackendOptions['index_tags'] = false;
++
++        // Resolve the L1 file cache directory up front so both the local backend and the L2 wrapper
++        // agree on it. SymfonyL2Cache uses it to gauge disk fill for size-based L1 eviction (the
++        // legacy disk-full safety valve). Only meaningful for the default file L1.
++        if (($localBackend === 'file') && empty($localBackendOptions['cache_dir'])) {
++            if (!isset($this->cachedDirectories['cache'])) {
++                $cacheDir = $this->_filesystem->getDirectoryWrite(DirectoryList::CACHE);
++                $this->cachedDirectories['cache'] = $cacheDir->getAbsolutePath();
++                $cacheDir->create();
++            }
++            $localBackendOptions['cache_dir'] = $this->cachedDirectories['cache'];
++        }
+ 
+         // Get common options
+         $frontend = $this->_getFrontendOptions($options);
+@@ -744,6 +774,7 @@ private function createSymfonyL2Cache(array $options): FrontendInterface
+                     'options' => [
+                         'cleanup_percentage' => $backendOptions['cleanup_percentage'] ?? 90,
+                         'use_stale_cache' => $backendOptions['use_stale_cache'] ?? false,
++                        'local_cache_dir' => $localBackendOptions['cache_dir'] ?? null,
+                     ],
+                 ]
+             );
+diff --git a/vendor/magento/framework/Cache/Backend/SymfonyL2Cache.php b/vendor/magento/framework/Cache/Backend/SymfonyL2Cache.php
+index a1b4e07cba87a..d3d06310972e4 100644
+--- a/vendor/magento/framework/Cache/Backend/SymfonyL2Cache.php
++++ b/vendor/magento/framework/Cache/Backend/SymfonyL2Cache.php
+@@ -9,6 +9,7 @@
+ 
+ use Magento\Framework\Cache\CacheConstants;
+ use Magento\Framework\Cache\Exception\CacheException;
++use Magento\Framework\Cache\Frontend\Adapter\SymfonyAdapters\RedisTagAdapter;
+ use Magento\Framework\Cache\FrontendInterface;
+ 
+ /**
+@@ -17,8 +18,8 @@
+  * This backend provides local + remote caching with automatic synchronization,
+  * designed specifically for Symfony cache adapters (PSR-6 compliant).
+  *
+- * Unlike RemoteSynchronizedCache (which requires ExtendedBackendInterface),
+- * this class works directly with Symfony's FrontendInterface.
++ * This class works directly with Symfony's FrontendInterface and does not require
++ * ExtendedBackendInterface.
+  *
+  * Architecture:
+  * - L1 (Local): Fast cache (file/APCu) - Per worker, ephemeral
+@@ -77,6 +78,54 @@ class SymfonyL2Cache extends AbstractBackend implements ExtendedBackendInterface
+      */
+     private const INVALID_MARK_TTL = 86400;
+ 
++    /**
++     * Regeneration lock key prefix (stored in remote L2)
++     */
++    private const LOCK_PREFIX = '___stale_regen_lock_';
++
++    /**
++     * Regeneration lock lifetime in seconds (auto-expires if a regenerator dies)
++     */
++    private const LOCK_TTL = 10;
++
++    /**
++     * Per-process signature to confirm regeneration-lock ownership
++     *
++     * @var string
++     */
++    private string $lockSign;
++
++    /**
++     * Resolved Redis tag adapter from the remote frontend, used for atomic lock ops.
++     * Null once resolution has run and the remote is not Redis-backed.
++     *
++     * @var RedisTagAdapter|null
++     */
++    private ?RedisTagAdapter $lockAdapter = null;
++
++    /**
++     * Whether lock-adapter resolution has been attempted (so a null result is not re-resolved)
++     *
++     * @var bool
++     */
++    private bool $lockAdapterResolved = false;
++
++    /**
++     * Cache ids for which this process currently holds the regeneration lock, so save() only
++     * issues a release round-trip for locks it actually owns.
++     *
++     * @var array<string, true>
++     */
++    private array $heldLocks = [];
++
++    /**
++     * Absolute path of the L1 (file) cache directory, used to gauge disk fill for size-based
++     * eviction. Null when the L1 is not file-backed (then eviction is disabled).
++     *
++     * @var string|null
++     */
++    private ?string $localCacheDir;
++
+     /**
+      * Constructor
+      *
+@@ -96,6 +145,8 @@ public function __construct(
+         $this->local = $local;
+         $this->cleanupPercentage = (int)($options['cleanup_percentage'] ?? self::DEFAULT_CLEANUP_PERCENTAGE);
+         $this->useStaleCache = (bool)($options['use_stale_cache'] ?? false);
++        $this->localCacheDir = isset($options['local_cache_dir']) ? (string)$options['local_cache_dir'] : null;
++        $this->lockSign = $this->generateLockSign();
+ 
+         // Validate cleanup percentage
+         if ($this->cleanupPercentage < 1 || $this->cleanupPercentage > 100) {
+@@ -148,19 +199,37 @@ public function save($data, $id, $tags = [], $specificLifetime = null)
+         $hashSaved = false;
+ 
+         try {
+-            // Save data first to avoid hash pointing to non-existent data
+-            $remoteSaved = $this->remote->save($data, $id, $tags, $specificLifetime);
+-
+-            if ($remoteSaved !== false) {
+-                // Calculate and save hash to remote for synchronization
+-                $hash = $this->getDataHash($data);
+-                $hashSaved = $this->remote->save($hash, $id . self::HASH_SUFFIX, $tags, $specificLifetime);
++            if ($this->isRemoteUpToDate($data, $id)) {
++                // L2 already holds this exact value — skip the redundant data+hash write. Mirrors the
++                // legacy RemoteSynchronizedCache, which compares the stored hash (and data) before
++                // re-writing, so a repeated identical save (cache warmup, re-render of unchanged block
++                // output, config re-cache) does not hammer Redis with duplicate writes.
++                $remoteSaved = true;
++                $hashSaved = true;
++            } else {
++                // Save data first to avoid hash pointing to non-existent data
++                $remoteSaved = $this->remote->save($data, $id, $tags, $specificLifetime);
++
++                if ($remoteSaved !== false) {
++                    // Calculate and save hash to remote for synchronization
++                    $hash = $this->getDataHash($data);
++                    $hashSaved = $this->remote->save($hash, $id . self::HASH_SUFFIX, $tags, $specificLifetime);
++                }
+             }
+         } catch (\Exception $e) {
+             $remoteSaved = false;
+             $hashSaved = false;
+         }
+ 
++        // Disk-full safety valve: occasionally flush the whole L1 when its partition is nearly full,
++        // BEFORE re-saving this entry so the current value survives the flush. Mirrors legacy
++        // RemoteSynchronizedCache::save(), which probabilistically calls local->clean() when the L1
++        // filling percentage reaches cleanup_percentage. clearLocal() is used (not local->clean(),
++        // which is tag-scoped and cannot see an index_tags=false L1).
++        if ($this->shouldCheckLocalSpace() && $this->isLocalCacheSpaceExceeded()) {
++            $this->clearLocal();
++        }
++
+         // Save to local cache
+         $this->local->save($data, $id, $tags, $specificLifetime);
+ 
+@@ -172,6 +241,12 @@ public function save($data, $id, $tags = [], $specificLifetime = null)
+             }
+         }
+ 
++        // If this process elected itself the regenerator for $id, the fresh value is now in L2,
++        // so release the lock immediately (ownership-safe) instead of leaving it to the TTL. This
++        // lets an immediate re-invalidation elect a new regenerator right away rather than serving
++        // stale until LOCK_TTL expires.
++        $this->releaseRegenLock($id);
++
+         return $remoteSaved;
+     }
+ 
+@@ -212,11 +287,45 @@ public function remove($id)
+      */
+     public function clean($mode = CacheConstants::CLEANING_MODE_ALL, $tags = [])
+     {
+-        // Clean both caches
++        if ($mode === CacheConstants::CLEANING_MODE_ALL) {
++            // Full flush: clear the L1 pool directly. A tag-scoped clean() cannot reach the local
++            // tier when index_tags=false (it has no tag index), so cache:flush would otherwise leave
++            // stale L1 data behind. Mirrors the legacy RemoteSynchronizedCache, whose clean(ALL)
++            // clears the raw local backend.
++            $this->clearLocal();
++            return $this->remote->clean($mode, $tags);
++        }
+         $this->local->clean($mode, $tags);
+         return $this->remote->clean($mode, $tags);
+     }
+ 
++    /**
++     * Fully wipe both cache tiers (L1 + L2). Used by FlushAll / cache:flush via getBackend()->clear().
++     *
++     * @return bool
++     */
++    public function clear(): bool
++    {
++        $this->clearLocal();
++        return (bool)$this->remote->clean(CacheConstants::CLEANING_MODE_ALL);
++    }
++
++    /**
++     * Empty the local (L1) tier completely, bypassing the tag-scoped clean() that cannot see an
++     * index_tags=false file index.
++     *
++     * @return void
++     */
++    private function clearLocal(): void
++    {
++        $localBackend = $this->local->getBackend();
++        if (method_exists($localBackend, 'clear')) {
++            $localBackend->clear();
++        } else {
++            $this->local->clean(CacheConstants::CLEANING_MODE_ALL);
++        }
++    }
++
+     /**
+      * Calculate hash of data for synchronization
+      *
+@@ -228,6 +337,27 @@ private function getDataHash(string $data): string
+         return hash('sha256', $data);
+     }
+ 
++    /**
++     * Whether the remote (L2) already holds exactly this value, so a re-write would be redundant.
++     *
++     * Compares the stored :hash first (cheap) and, only on a match, confirms the data itself is still
++     * present and identical — guarding against the data having been evicted while the hash lingered
++     * under a different TTL. Mirrors legacy RemoteSynchronizedCache::save()'s up-to-date check.
++     *
++     * @param string $data
++     * @param string $id
++     * @return bool
++     */
++    private function isRemoteUpToDate(string $data, string $id): bool
++    {
++        $remoteHash = $this->remote->load($id . self::HASH_SUFFIX);
++        if ($remoteHash === false || $remoteHash !== $this->getDataHash($data)) {
++            return false;
++        }
++        $remoteData = $this->remote->load($id);
++        return $remoteData !== false && $remoteData === $data;
++    }
++
+     /**
+      * @inheritDoc
+      */
+@@ -280,8 +410,44 @@ public function getIdsMatchingAnyTags($tags = [])
+      */
+     public function getFillingPercentage()
+     {
+-        // Cannot determine filling percentage for L2 cache
+-        return 0;
++        // Disk-partition filling percentage of the L1 (file) cache dir, matching the legacy Zend file
++        // backend semantics (used only as a disk-full safety valve). Returns 0 when the L1 is not
++        // file-backed or the dir is unavailable, so eviction never triggers spuriously.
++        if ($this->localCacheDir === null || !is_dir($this->localCacheDir)) {
++            return 0;
++        }
++
++        $free = @disk_free_space($this->localCacheDir);
++        $total = @disk_total_space($this->localCacheDir);
++        if ($free === false || $total === false || $total <= 0 || $free >= $total) {
++            return 0;
++        }
++
++        return (int)(100.0 * ($total - $free) / $total);
++    }
++
++    /**
++     * Whether the L1 partition has reached the configured cleanup threshold.
++     *
++     * @return bool
++     */
++    private function isLocalCacheSpaceExceeded(): bool
++    {
++        return $this->getFillingPercentage() >= $this->cleanupPercentage;
++    }
++
++    /**
++     * Throttle the (syscall-bearing) disk-space check so it does not stat the disk on every save.
++     * Mirrors the legacy ~1/101 probability. Kept as a protected seam so the eviction path can be
++     * exercised deterministically in tests.
++     *
++     * @return bool
++     */
++    protected function shouldCheckLocalSpace(): bool
++    {
++        // mt_rand() here is not for cryptographic use.
++        // phpcs:ignore Magento2.Security.InsecureFunction
++        return !mt_rand(0, 100);
+     }
+ 
+     /**
+@@ -378,12 +544,19 @@ private function markInvalid(string $id): void
+     /**
+      * Mark a cache key as valid (synchronized with remote)
+      *
++     * Only removes the L1 invalid marker when one actually exists. Markers are written without
++     * tags and only when a remote write fails, so on the healthy path (e.g. post-deploy cache
++     * warmup, remote up) there is nothing to clear. Skipping avoids an L1 remove() — and the
++     * FilesystemTagAdapter::onRemove() it triggers — on every successful save.
++     *
+      * @param string $id
+      * @return void
+      */
+     private function markValid(string $id): void
+     {
+-        $this->local->remove(self::INVALID_KEY_PREFIX . $id);
++        if ($this->isInvalid($id)) {
++            $this->local->remove(self::INVALID_KEY_PREFIX . $id);
++        }
+     }
+ 
+     /**
+@@ -433,6 +606,11 @@ private function validateLocalCache(string $id, string $localData)
+         $remoteHash = $this->remote->load($id . self::HASH_SUFFIX);
+ 
+         if ($remoteHash === false && $this->useStaleCache) {
++            // Elect one regenerator: lock winner returns a miss (rebuilds + repopulates L2),
++            // others serve stale L1 without waiting.
++            if ($this->tryLock($id)) {
++                return false;
++            }
+             return $localData;
+         }
+ 
+@@ -445,6 +623,127 @@ private function validateLocalCache(string $id, string $localData)
+         return null;
+     }
+ 
++    /**
++     * Try to acquire the non-blocking regeneration lock; returns true for exactly one reader.
++     *
++     * Uses an atomic SET NX EX on the remote Redis client when available, so exactly one caller
++     * cluster-wide wins the election. Falls back to a best-effort (non-atomic) scheme only when
++     * the remote is not Redis-backed.
++     *
++     * @param string $id
++     * @return bool
++     */
++    private function tryLock(string $id): bool
++    {
++        $adapter = $this->getLockAdapter();
++
++        if ($adapter !== null) {
++            if ($adapter->acquireLock($id, $this->lockSign, self::LOCK_TTL)) {
++                $this->heldLocks[$id] = true;
++                return true;
++            }
++            return false;
++        }
++
++        return $this->tryLockFallback($id);
++    }
++
++    /**
++     * Release the regeneration lock for $id if this process acquired it (ownership-safe, no-op
++     * otherwise). Cheap: only issues a call when this process is recorded as the lock holder.
++     *
++     * @param string $id
++     * @return void
++     */
++    private function releaseRegenLock(string $id): void
++    {
++        if (!isset($this->heldLocks[$id])) {
++            return;
++        }
++
++        $adapter = $this->getLockAdapter();
++        if ($adapter !== null) {
++            $adapter->releaseLock($id, $this->lockSign);
++        }
++        unset($this->heldLocks[$id]);
++    }
++
++    /**
++     * Best-effort, non-atomic lock used only when the remote is not Redis-backed.
++     *
++     * @param string $id
++     * @return bool
++     */
++    private function tryLockFallback(string $id): bool
++    {
++        $lockKey = self::LOCK_PREFIX . $id;
++
++        if ($this->remote->load($lockKey) !== false) {
++            return false;
++        }
++
++        $this->remote->save($this->lockSign, $lockKey, [], self::LOCK_TTL);
++
++        if ($this->remote->load($lockKey) === $this->lockSign) {
++            $this->heldLocks[$id] = true;
++            return true;
++        }
++
++        return false;
++    }
++
++    /**
++     * Lazily resolve the remote frontend's Redis tag adapter for atomic lock operations.
++     *
++     * Reaches through any frontend decorators via getLowLevelFrontend(); returns null (once)
++     * when the remote is not Redis-backed, in which case the best-effort fallback is used.
++     *
++     * @return RedisTagAdapter|null
++     */
++    private function getLockAdapter(): ?RedisTagAdapter
++    {
++        if ($this->lockAdapterResolved) {
++            return $this->lockAdapter;
++        }
++
++        $this->lockAdapterResolved = true;
++
++        try {
++            if (method_exists($this->remote, 'getLowLevelFrontend')) {
++                $lowLevel = $this->remote->getLowLevelFrontend();
++                if (method_exists($lowLevel, 'getTagAdapter')) {
++                    $adapter = $lowLevel->getTagAdapter();
++                    if ($adapter instanceof RedisTagAdapter) {
++                        $this->lockAdapter = $adapter;
++                    }
++                }
++            }
++        } catch (\Throwable $e) {
++            $this->lockAdapter = null;
++        }
++
++        return $this->lockAdapter;
++    }
++
++    /**
++     * Generate a unique per-process lock signature (pid-host-random) so lock ownership
++     * is unambiguous across servers.
++     *
++     * @return string
++     */
++    private function generateLockSign(): string
++    {
++        $sign = implode('-', [getmypid(), crc32((string)gethostname())]);
++
++        try {
++            $sign .= '-' . bin2hex(random_bytes(4));
++        } catch (\Exception $e) {
++            $sign .= '-' . uniqid('-uniqid-');
++        }
++
++        return $sign;
++    }
++
+     /**
+      * Load from remote cache or fallback to stale local data
+      *
+diff --git a/vendor/magento/framework/Cache/Frontend/Adapter/Symfony/LowLevelFrontend.php b/vendor/magento/framework/Cache/Frontend/Adapter/Symfony/LowLevelFrontend.php
+index 27de8a80e1b1c..9657d58a1d826 100644
+--- a/vendor/magento/framework/Cache/Frontend/Adapter/Symfony/LowLevelFrontend.php
++++ b/vendor/magento/framework/Cache/Frontend/Adapter/Symfony/LowLevelFrontend.php
+@@ -118,6 +118,19 @@ public function getIdsMatchingTags(array $tags): array
+         return [];
+     }
+ 
++    /**
++     * Get the backend-specific tag adapter (e.g. RedisTagAdapter) backing this frontend.
++     *
++     * Exposes the adapter so higher-level backends (SymfonyL2Cache) can reach adapter-specific
++     * capabilities such as the atomic regeneration lock, working through any frontend decorators.
++     *
++     * @return TagAdapterInterface
++     */
++    public function getTagAdapter(): TagAdapterInterface
++    {
++        return $this->adapter;
++    }
++
+     /**
+      * Get backend wrapper
+      *
+diff --git a/vendor/magento/framework/Cache/Frontend/Adapter/SymfonyAdapterProvider.php b/vendor/magento/framework/Cache/Frontend/Adapter/SymfonyAdapterProvider.php
+index ae9233ab01d86..a0d93d8066015 100644
+--- a/vendor/magento/framework/Cache/Frontend/Adapter/SymfonyAdapterProvider.php
++++ b/vendor/magento/framework/Cache/Frontend/Adapter/SymfonyAdapterProvider.php
+@@ -138,21 +138,17 @@ public function createAdapter(
+         $backendTypeLower = strtolower($backendType);
+         $resolvedType = $this->adapterTypeMap[$backendTypeLower] ?? 'filesystem';
+ 
+-        // Create adapter based on resolved type with fallback to filesystem
+-        try {
+-            $adapter = match ($resolvedType) {
+-                'redis' => $this->createRedisAdapter($backendOptions, $namespace, $defaultLifetime),
+-                'memcached' => $this->createMemcachedAdapter($backendOptions, $namespace, $defaultLifetime),
+-                'filesystem' => $this->createFilesystemAdapter($backendOptions, $namespace, $defaultLifetime),
+-                'database' => $this->createDatabaseAdapter($backendOptions, $namespace, $defaultLifetime),
+-                'apcu' => $this->createApcuAdapter($namespace, $defaultLifetime),
+-                'twolevel' => $this->createTwoLevelAdapter($backendOptions, $namespace, $defaultLifetime),
+-                default => $this->createFilesystemAdapter($backendOptions, $namespace, $defaultLifetime),
+-            };
+-        } catch (\Exception $e) {
+-            // Fallback to filesystem adapter if the requested adapter fails
+-            $adapter = $this->createFilesystemAdapter($backendOptions, $namespace, $defaultLifetime);
+-        }
++        // Create adapter based on resolved type. No fallback to filesystem: a backend (e.g. Redis)
++        // outage propagates instead of silently degrading to var/cache, matching legacy fail-fast.
++        $adapter = match ($resolvedType) {
++            'redis' => $this->createRedisAdapter($backendOptions, $namespace, $defaultLifetime),
++            'memcached' => $this->createMemcachedAdapter($backendOptions, $namespace, $defaultLifetime),
++            'filesystem' => $this->createFilesystemAdapter($backendOptions, $namespace, $defaultLifetime),
++            'database' => $this->createDatabaseAdapter($backendOptions, $namespace, $defaultLifetime),
++            'apcu' => $this->createApcuAdapter($namespace, $defaultLifetime),
++            'twolevel' => $this->createTwoLevelAdapter($backendOptions, $namespace, $defaultLifetime),
++            default => $this->createFilesystemAdapter($backendOptions, $namespace, $defaultLifetime),
++        };
+ 
+         // Skip TagAwareAdapter for Redis/Filesystem (native tag support)
+         if (in_array($resolvedType, ['redis', 'filesystem'], true)) {
+@@ -198,7 +194,8 @@ public function createTagAdapter(
+                 ),
+                 'filesystem' => new FilesystemTagAdapter(
+                     $cachePool,
+-                    $this->getCacheDirectory()
++                    !empty($backendOptions['cache_dir']) ? $backendOptions['cache_dir'] : $this->getCacheDirectory(),
++                    (bool)($backendOptions['index_tags'] ?? true)
+                 ),
+                 default => new GenericTagAdapter(
+                     $cachePool,
+@@ -542,19 +539,7 @@ private function createFilesystemAdapter(
+         string $namespace,
+         ?int $defaultLifetime
+     ): AdapterInterface {
+-        // Get cache directory (optimized path)
+-        if (isset($options['cache_dir'])) {
+-            $cacheDir = $options['cache_dir'];
+-        } else {
+-            // Cache the directory path for reuse
+-            static $defaultCacheDir = null;
+-            if ($defaultCacheDir === null) {
+-                $directory = $this->filesystem->getDirectoryWrite(DirectoryList::CACHE);
+-                $defaultCacheDir = $directory->getAbsolutePath();
+-                $directory->create();
+-            }
+-            $cacheDir = $defaultCacheDir;
+-        }
++        $cacheDir = !empty($options['cache_dir']) ? $options['cache_dir'] : $this->getCacheDirectory();
+ 
+         // Add igbinary marshaller support for file cache (70% faster, 58% smaller)
+         $serializer = $options['serializer'] ?? null;
+diff --git a/vendor/magento/framework/Cache/Frontend/Adapter/SymfonyAdapters/FilesystemTagAdapter.php b/vendor/magento/framework/Cache/Frontend/Adapter/SymfonyAdapters/FilesystemTagAdapter.php
+index a29ecf7bafbbb..fec7f57e352a2 100644
+--- a/vendor/magento/framework/Cache/Frontend/Adapter/SymfonyAdapters/FilesystemTagAdapter.php
++++ b/vendor/magento/framework/Cache/Frontend/Adapter/SymfonyAdapters/FilesystemTagAdapter.php
+@@ -24,23 +24,96 @@ class FilesystemTagAdapter implements TagAdapterInterface
+      */
+     private string $tagDirectory;
+ 
++    /**
++     * Directory holding the id -> tags reverse index (one file per tagged id). Lets onRemove and
++     * deleteByIds touch only the tag files a given id actually belongs to, instead of scanning the
++     * whole tag directory. Mirrors the reverse index the Redis tier already keeps.
++     *
++     * @var string
++     */
++    private string $reverseDirectory;
++
++    /**
++     * Whether to maintain the on-disk tag index. Disabled for an L1 tier that sits behind a
++     * Redis L2 (tags + :hash live in the remote, local self-heals on read); kept true for a
++     * file-only cache where the file tag index is the sole invalidation source.
++     *
++     * @var bool
++     */
++    private bool $indexTags;
++
+     /**
+      * @param CacheItemPoolInterface $cachePool
+      * @param string $tagDirectory Directory to store tag index files
++     * @param bool $indexTags Whether to write/maintain the on-disk tag index
+      */
+-    public function __construct(CacheItemPoolInterface $cachePool, string $tagDirectory)
++    public function __construct(CacheItemPoolInterface $cachePool, string $tagDirectory, bool $indexTags = true)
+     {
+         $this->cachePool = $cachePool;
+-        $this->tagDirectory = rtrim($tagDirectory, '/') . '/tags/';
+-
+-        // Ensure tag directory exists with proper error handling
+-        if (!is_dir($this->tagDirectory)) {
+-            if (!@mkdir($this->tagDirectory, 0770, true) && !is_dir($this->tagDirectory)) {
+-                throw new \RuntimeException(
+-                    sprintf('Failed to create tag directory: %s', $this->tagDirectory)
+-                );
+-            }
++        $base = rtrim($tagDirectory, '/');
++        $this->tagDirectory = $base . '/tags/';
++        $this->reverseDirectory = $base . '/idtags/';
++        $this->indexTags = $indexTags;
++        // Directories are created lazily on the first real write, so a tier that never indexes tags
++        // leaves no empty var/cache/symfony/{tags,idtags} directories behind.
++    }
++
++    /**
++     * Reverse-index file path for a cache id
++     *
++     * @param string $id
++     * @return string
++     */
++    private function getReverseFile(string $id): string
++    {
++        return $this->reverseDirectory . $id;
++    }
++
++    /**
++     * Read the tags associated with a cache id from the reverse index
++     *
++     * @param string $id
++     * @return array
++     */
++    private function getIdTags(string $id): array
++    {
++        $file = $this->getReverseFile($id);
++        if (!file_exists($file)) {
++            return [];
+         }
++        $content = @file_get_contents($file);
++        return $content === false ? [] : $this->parseIds($content);
++    }
++
++    /**
++     * Store the tags for a cache id in the reverse index (replace), or delete the file when empty
++     *
++     * @param string $id
++     * @param array $tags
++     * @return void
++     */
++    private function setIdTags(string $id, array $tags): void
++    {
++        $this->mutateFileLocked(
++            $this->getReverseFile($id),
++            $this->reverseDirectory,
++            static fn() => array_values(array_unique($tags))
++        );
++    }
++
++    /**
++     * Delete the reverse-index entry for a cache id
++     *
++     * @param string $id
++     * @return void
++     */
++    private function deleteIdTags(string $id): void
++    {
++        $this->mutateFileLocked(
++            $this->getReverseFile($id),
++            $this->reverseDirectory,
++            static fn() => []
++        );
+     }
+ 
+     /**
+@@ -69,43 +142,101 @@ private function getTagIds(string $tag): array
+         }
+ 
+         $content = @file_get_contents($file);
+-        if ($content === false || $content === '') {
++        if ($content === false) {
++            return [];
++        }
++
++        return $this->parseIds($content);
++    }
++
++    /**
++     * Parse the on-disk tag-file body (one id per line) into an array of ids
++     *
++     * @param string $content
++     * @return array
++     */
++    private function parseIds(string $content): array
++    {
++        if ($content === '') {
+             return [];
+         }
+ 
+-        // IDs are stored one per line
+         $ids = trim(substr($content, 0, strrpos($content, "\n") ?: strlen($content)));
+         return $ids !== '' ? explode("\n", $ids) : [];
+     }
+ 
+     /**
+-     * Write IDs to a tag file
++     * Read-modify-write a tag file while holding an exclusive lock for the whole cycle.
++     *
++     * flock(LOCK_EX) spans the read and the write, so concurrent PHP-FPM workers on the same host
++     * can no longer lose an update (the previous getTagIds/setTagIds pair only locked the write,
++     * leaving the read-modify-write racy). $transform receives the current ids and returns the new
++     * ids, or null to signal "no change" (skips the rewrite).
+      *
+      * @param string $tag
+-     * @param array $ids
++     * @param callable $transform fn(array $ids): ?array
+      * @return void
+      */
+-    private function setTagIds(string $tag, array $ids): void
++    private function mutateTagFileLocked(string $tag, callable $transform): void
+     {
+-        $file = $this->getTagFile($tag);
++        $this->mutateFileLocked($this->getTagFile($tag), $this->tagDirectory, $transform);
++    }
+ 
+-        if (empty($ids)) {
+-            // Remove tag file if no IDs
+-            @unlink($file);
++    /**
++     * Read-modify-write a line-per-entry index file while holding an exclusive lock for the whole
++     * cycle. Used for both tag files (tag -> ids) and reverse-index files (id -> tags).
++     *
++     * flock(LOCK_EX) spans the read and the write, so concurrent workers on the same host cannot
++     * lose an update. $transform receives the current entries and returns the new entries, or null
++     * to signal "no change" (skips the rewrite). An empty result deletes the file.
++     *
++     * @param string $file
++     * @param string $dir Directory that must exist before writing
++     * @param callable $transform fn(array $entries): ?array
++     * @return void
++     */
++    private function mutateFileLocked(string $file, string $dir, callable $transform): void
++    {
++        if (!is_dir($dir)) {
++            @mkdir($dir, 0770, true);
++        }
++
++        $fp = @fopen($file, 'c+');
++        if ($fp === false) {
++            return;
++        }
++
++        if (!flock($fp, LOCK_EX)) {
++            fclose($fp);
+             return;
+         }
+ 
+-        // Ensure directory exists before writing (defensive check)
+-        if (!is_dir($this->tagDirectory)) {
+-            @mkdir($this->tagDirectory, 0770, true);
++        $emptied = false;
++        try {
++            $content = stream_get_contents($fp);
++            $current = $this->parseIds($content !== false ? $content : '');
++            $new = $transform($current);
++
++            if ($new === null) {
++                return; // no change; finally still unlocks/closes
++            }
++
++            if (empty($new)) {
++                ftruncate($fp, 0);
++                $emptied = true;
++            } else {
++                ftruncate($fp, 0);
++                rewind($fp);
++                fwrite($fp, implode("\n", $new) . "\n");
++                fflush($fp);
++            }
++        } finally {
++            flock($fp, LOCK_UN);
++            fclose($fp);
+         }
+ 
+-        // Write IDs, one per line, with trailing newline
+-        $content = implode("\n", $ids) . "\n";
+-        if (@file_put_contents($file, $content, LOCK_EX) === false) {
+-            throw new \RuntimeException(
+-                sprintf('Failed to write tag file: %s', $file)
+-            );
++        if ($emptied) {
++            @unlink($file);
+         }
+     }
+ 
+@@ -118,11 +249,13 @@ private function setTagIds(string $tag, array $ids): void
+      */
+     private function addIdToTag(string $tag, string $id): void
+     {
+-        $ids = $this->getTagIds($tag);
+-        if (!in_array($id, $ids, true)) {
++        $this->mutateTagFileLocked($tag, static function (array $ids) use ($id) {
++            if (in_array($id, $ids, true)) {
++                return null;
++            }
+             $ids[] = $id;
+-            $this->setTagIds($tag, $ids);
+-        }
++            return $ids;
++        });
+     }
+ 
+     /**
+@@ -134,13 +267,14 @@ private function addIdToTag(string $tag, string $id): void
+      */
+     private function removeIdFromTag(string $tag, string $id): void
+     {
+-        $ids = $this->getTagIds($tag);
+-        $key = array_search($id, $ids, true);
+-
+-        if ($key !== false) {
++        $this->mutateTagFileLocked($tag, static function (array $ids) use ($id) {
++            $key = array_search($id, $ids, true);
++            if ($key === false) {
++                return null;
++            }
+             unset($ids[$key]);
+-            $this->setTagIds($tag, array_values($ids));
+-        }
++            return array_values($ids);
++        });
+     }
+ 
+     /**
+@@ -253,9 +387,50 @@ public function deleteByIds(array $ids): bool
+             $this->cachePool->commit();
+         }
+ 
++        // Prune the deleted ids from the on-disk tag index so it does not outlive its data. Uses
++        // the id -> tags reverse index to touch only the affected tag files (grouped so each tag
++        // file is rewritten once), instead of scanning the whole tag directory.
++        if ($this->indexTags) {
++            $this->pruneIdsFromIndex($ids);
++        }
++
+         return $success;
+     }
+ 
++    /**
++     * Remove the given ids from their tag files using the reverse index; delete files left empty.
++     *
++     * @param array $ids
++     * @return void
++     */
++    private function pruneIdsFromIndex(array $ids): void
++    {
++        // Build tag -> [ids] from the reverse index so each tag file is rewritten at most once.
++        $tagToIds = [];
++        $reverseToDelete = [];
++        foreach ($ids as $id) {
++            $tags = $this->getIdTags($id);
++            if (empty($tags)) {
++                continue;
++            }
++            foreach ($tags as $tag) {
++                $tagToIds[$tag][$id] = true;
++            }
++            $reverseToDelete[] = $id;
++        }
++
++        foreach ($tagToIds as $tag => $idSet) {
++            $this->mutateTagFileLocked($tag, static function (array $current) use ($idSet) {
++                $remaining = array_values(array_filter($current, static fn($id) => !isset($idSet[$id])));
++                return count($remaining) === count($current) ? null : $remaining;
++            });
++        }
++
++        foreach ($reverseToDelete as $id) {
++            $this->deleteIdTags($id);
++        }
++    }
++
+     /**
+      * @inheritDoc
+      *
+@@ -263,36 +438,50 @@ public function deleteByIds(array $ids): bool
+      */
+     public function onSave(string $id, array $tags): void
+     {
+-        if (empty($tags)) {
++        if (!$this->indexTags || empty($tags)) {
+             return;
+         }
+ 
+-        // Add ID to each tag file
++        // Retag cleanup: drop the id from the forward file of any tag it no longer carries, so a
++        // re-save with a different tag set (e.g. [A,B] then [C]) does not leave the old A/B
++        // memberships dangling once the reverse index is replaced below. Mirrors the legacy
++        // Cm_Cache_Backend_Redis save() which array_diffs the previous tags and removes them.
++        foreach (array_diff($this->getIdTags($id), $tags) as $removedTag) {
++            $this->removeIdFromTag($removedTag, $id);
++        }
++
++        // Forward index: add the id to each tag file.
+         foreach ($tags as $tag) {
+             $this->addIdToTag($tag, $id);
+         }
++
++        // Reverse index: record this id's tags so onRemove/deleteByIds need not scan every tag file.
++        $this->setIdTags($id, $tags);
+     }
+ 
+     /**
+      * @inheritDoc
+      *
+-     * Removes ID from all tag files
++     * Removes ID from only the tag files it belongs to, via the reverse index.
+      */
+     public function onRemove(string $id): void
+     {
+-        // We need to scan all tag files and remove this ID
+-        $tagFiles = glob($this->tagDirectory . '*');
++        if (!$this->indexTags) {
++            return;
++        }
+ 
+-        if ($tagFiles === false) {
++        // No reverse entry => the id was saved without tags (e.g. an L2 invalid marker) or is not
++        // indexed. Either way there is nothing to prune, so this is O(1) rather than a full scan.
++        $tags = $this->getIdTags($id);
++        if (empty($tags)) {
+             return;
+         }
+ 
+-        foreach ($tagFiles as $file) {
+-            if (is_file($file)) {
+-                $tag = basename($file);
+-                $this->removeIdFromTag($tag, $id);
+-            }
++        foreach ($tags as $tag) {
++            $this->removeIdFromTag($tag, $id);
+         }
++
++        $this->deleteIdTags($id);
+     }
+ 
+     /**
+@@ -300,16 +489,16 @@ public function onRemove(string $id): void
+      */
+     public function clearAllIndices(): void
+     {
+-        // Remove all tag files
+-        $tagFiles = glob($this->tagDirectory . '*');
+-
+-        if ($tagFiles === false) {
+-            return;
+-        }
+-
+-        foreach ($tagFiles as $file) {
+-            if (is_file($file)) {
+-                @unlink($file);
++        // Remove all forward tag files and all reverse-index files.
++        foreach ([$this->tagDirectory, $this->reverseDirectory] as $dir) {
++            $files = glob($dir . '*');
++            if ($files === false) {
++                continue;
++            }
++            foreach ($files as $file) {
++                if (is_file($file)) {
++                    @unlink($file);
++                }
+             }
+         }
+     }
+diff --git a/vendor/magento/framework/Cache/Frontend/Adapter/SymfonyAdapters/RedisTagAdapter.php b/vendor/magento/framework/Cache/Frontend/Adapter/SymfonyAdapters/RedisTagAdapter.php
+index 999451b11ce07..04a534e86f104 100644
+--- a/vendor/magento/framework/Cache/Frontend/Adapter/SymfonyAdapters/RedisTagAdapter.php
++++ b/vendor/magento/framework/Cache/Frontend/Adapter/SymfonyAdapters/RedisTagAdapter.php
+@@ -23,6 +23,96 @@ class RedisTagAdapter implements TagAdapterInterface
+ {
+     private const TAG_INDEX_PREFIX = 'cache:tags:';
+     private const ALL_IDS_SET = 'cache:all_ids';
++    private const REVERSE_INDEX_PREFIX = 'cache:id_tags:';
++
++    /**
++     * Key prefix for the stale-cache regeneration lock (owned by SymfonyL2Cache).
++     * Kept here because this adapter owns the raw Redis client and its type handling.
++     */
++    private const REGEN_LOCK_PREFIX = 'cache:regen_lock:';
++
++    /**
++     * Atomically prune the tag index for a batch of ids using their reverse index.
++     *
++     * For each id: read its reverse index (id -> tags), SREM the id from every tag SET, DEL the
++     * reverse index and SREM the id from all_ids. Running inside EVAL makes the whole
++     * read-modify-write atomic, so a concurrent onSave for the same id cannot be half-clobbered.
++     *
++     * Existence guard (finding #4): an id is pruned ONLY when its data key is gone. If a concurrent
++     * save has just (re)written the data, the index is left intact so the index never contradicts
++     * the data (no data-present / index-missing orphan). The guard fails safe: if the data-key
++     * prefix is wrong the EXISTS is 0 and pruning proceeds exactly as before.
++     *
++     * ARGV[1] = tag key prefix, ARGV[2] = namespace, ARGV[3] = data-key prefix (namespace + ':'),
++     * ARGV[4..] = ids to prune.
++     */
++    private const LUA_PRUNE_INDEX = <<<'LUA'
++local tag_prefix = ARGV[1]
++local namespace = ARGV[2]
++local data_prefix = ARGV[3]
++local rev_prefix = 'cache:id_tags:' .. namespace
++local pruned = 0
++for i = 4, #ARGV do
++    local id = ARGV[i]
++    if redis.call('EXISTS', data_prefix .. id) == 0 then
++        local rev = rev_prefix .. id
++        local tags_of_id = redis.call('SMEMBERS', rev)
++        for _, t in ipairs(tags_of_id) do
++            redis.call('SREM', tag_prefix .. namespace .. t, id)
++        end
++        redis.call('DEL', rev)
++        redis.call('SREM', 'cache:all_ids', id)
++        pruned = pruned + 1
++    end
++end
++return pruned
++LUA;
++
++    /**
++     * Atomically (re)build the tag index for one id, but ONLY while its data key exists.
++     *
++     * The pair (LUA_ONSAVE guarded on data-present, LUA_PRUNE_INDEX guarded on data-absent) makes
++     * the two index operations each conditional on the current data state, so the tag index can
++     * never end up contradicting the data under a concurrent save/delete on the same id
++     * (finding #4). The data write is committed before onSave runs, so under normal (non-racing)
++     * saves EXISTS is 1 and the index is written exactly as the old pipeline did.
++     *
++     * ARGV[1] = data key (namespace + ':' + id), ARGV[2] = id, ARGV[3] = all_ids key,
++     * ARGV[4] = tag key prefix, ARGV[5] = namespace, ARGV[6] = reverse index key,
++     * ARGV[7..] = tag names.
++     */
++    private const LUA_ONSAVE = <<<'LUA'
++if redis.call('EXISTS', ARGV[1]) == 0 then
++    return 0
++end
++local id = ARGV[2]
++local all_ids = ARGV[3]
++local tag_prefix = ARGV[4]
++local namespace = ARGV[5]
++local reverse_key = ARGV[6]
++-- Retag cleanup: drop the id from the forward SET of any tag it no longer carries. Without this a
++-- re-save with a different tag set (e.g. [A,B] then [C]) would leave the old A/B memberships
++-- dangling because the reverse index is about to be replaced. Mirrors the legacy
++-- Cm_Cache_Backend_Redis save() which array_diffs the previous tags and SREMs them.
++local keep = {}
++for i = 7, #ARGV do
++    keep[ARGV[i]] = true
++end
++local old_tags = redis.call('SMEMBERS', reverse_key)
++for j = 1, #old_tags do
++    if not keep[old_tags[j]] then
++        redis.call('SREM', tag_prefix .. namespace .. old_tags[j], id)
++    end
++end
++redis.call('SADD', all_ids, id)
++redis.call('DEL', reverse_key)
++for i = 7, #ARGV do
++    local tag = ARGV[i]
++    redis.call('SADD', tag_prefix .. namespace .. tag, id)
++    redis.call('SADD', reverse_key, tag)
++end
++return 1
++LUA;
+ 
+     /**
+      * SUNION chunk size
+@@ -31,6 +121,14 @@ class RedisTagAdapter implements TagAdapterInterface
+      */
+     private const SUNION_CHUNK_SIZE = 500;
+ 
++    /**
++     * Maximum set size for which a single SINTER call is safe.
++     * SINTER is O(N*M) where N = smallest set size. If the smallest set exceeds
++     * this threshold, SINTER blocks Valkey long enough to saturate PHP-FPM workers.
++     * Above the threshold, SMEMBERS + PHP array_intersect is used instead.
++     */
++    private const SINTER_SAFE_SIZE = 500;
++
+     /**
+      * Maximum number of IDs to be removed at a time - matches Zend's $_removeChunkSize
+      * @see vendor/colinmollenhour/cache-backend-redis/Cm/Cache/Backend/Redis.php line 99
+@@ -74,11 +172,21 @@ class RedisTagAdapter implements TagAdapterInterface
+     return 0
+ end
+ 
+--- Delete cache items and remove from indices
++-- Delete cache items and remove from indices (forward tag SETs, reverse index, all_ids)
+ local deleted = 0
++local rev_prefix = 'cache:id_tags:' .. namespace
+ for _, id in ipairs(ids_to_delete) do
+-    -- Delete the actual cache item
+-    local cache_key = namespace .. id
++    -- Remove the id from every tag SET it belongs to, via its reverse index
++    local rev = rev_prefix .. id
++    local tags_of_id = redis.call('SMEMBERS', rev)
++    for _, t in ipairs(tags_of_id) do
++        redis.call('SREM', tag_prefix .. namespace .. t, id)
++    end
++    redis.call('DEL', rev)
++    redis.call('SREM', 'cache:all_ids', id)
++
++    -- Delete the actual cache item (data key is "<namespace>:<id>", note the ':' separator)
++    local cache_key = namespace .. ':' .. id
+     redis.call('DEL', cache_key)
+     deleted = deleted + 1
+ end
+@@ -141,9 +249,18 @@ class RedisTagAdapter implements TagAdapterInterface
+     return 0
+ end
+ 
+--- Step 4: Delete filtered IDs
++-- Step 4: Delete filtered IDs and remove from indices (tag SETs, reverse index, all_ids)
+ local deleted = 0
++local rev_prefix = 'cache:id_tags:' .. namespace
+ for _, id in ipairs(filtered_ids) do
++    local rev = rev_prefix .. id
++    local tags_of_id = redis.call('SMEMBERS', rev)
++    for _, t in ipairs(tags_of_id) do
++        redis.call('SREM', tag_prefix .. namespace .. t, id)
++    end
++    redis.call('DEL', rev)
++    redis.call('SREM', 'cache:all_ids', id)
++
+     local cache_key = namespace .. id
+     redis.call('DEL', cache_key)
+     deleted = deleted + 1
+@@ -254,6 +371,20 @@ private function getTagKey(string $tag): string
+         return self::TAG_INDEX_PREFIX . $this->namespace . $tag;
+     }
+ 
++    /**
++     * Redis key prefix under which the Symfony adapter stores the actual cache DATA item.
++     *
++     * The data key is "<namespace>:<id>" (e.g. "792_:HOTKEY"), i.e. the tag-index namespace plus a
++     * ':' separator — distinct from the tag/reverse index keys which concatenate the namespace with
++     * no separator. Used by the existence guards that keep the index consistent with the data.
++     *
++     * @return string
++     */
++    private function dataKeyPrefix(): string
++    {
++        return $this->namespace . ':';
++    }
++
+     /**
+      * Check if using Predis client (vs phpredis extension)
+      *
+@@ -298,7 +429,10 @@ private function executePipeline($pipeline)
+     /**
+      * @inheritDoc
+      *
+-     * Uses Redis SINTER for efficient set intersection (true AND logic)
++     * Size-adaptive intersection: uses SINTER when the smallest matching set is
++     * small enough to be safe, falls back to SMEMBERS + PHP array_intersect when
++     * any set is large. A bare SINTER on large sets blocks Valkey (single-threaded)
++     * for the full O(N*M) duration, starving all other PHP workers.
+      */
+     public function getIdsMatchingTags(array $tags): array
+     {
+@@ -306,12 +440,71 @@ public function getIdsMatchingTags(array $tags): array
+             return [];
+         }
+ 
+-        // Build tag keys for Redis SINTER
++        if (count($tags) === 1) {
++            return $this->toIdsArray($this->redis->sMembers($this->getTagKey($tags[0])));
++        }
++
+         $tagKeys = array_map([$this, 'getTagKey'], $tags);
++        $sizes = $this->fetchSetSizes($tagKeys);
++
++        // Any empty set means the intersection is empty
++        if (in_array(0, $sizes, true)) {
++            return [];
++        }
+ 
+-        // Redis SINTER returns IDs present in ALL sets
+-        $ids = $this->redis->sinter($tagKeys);
++        // Sort ascending so the smallest set is first — SINTER is most efficient that way
++        array_multisort($sizes, SORT_ASC, $tagKeys);
+ 
++        // When the smallest set is large, a single SINTER would block Valkey, so distribute
++        // the work as multiple O(N) SMEMBERS calls intersected in PHP instead.
++        if ($sizes[0] > self::SINTER_SAFE_SIZE) {
++            return $this->intersectViaMembers($tagKeys);
++        }
++
++        return $this->toIdsArray($this->redis->sinter($tagKeys));
++    }
++
++    /**
++     * Fetch the cardinality of every set in a single pipeline round-trip
++     *
++     * @param string[] $tagKeys
++     * @return int[]
++     */
++    private function fetchSetSizes(array $tagKeys): array
++    {
++        $pipeline = $this->createPipeline();
++        foreach ($tagKeys as $key) {
++            $pipeline->scard($key);
++        }
++
++        return array_map('intval', (array)$this->executePipeline($pipeline));
++    }
++
++    /**
++     * Intersect the given sets client-side using SMEMBERS + array_intersect
++     *
++     * @param string[] $tagKeys
++     * @return string[]
++     */
++    private function intersectViaMembers(array $tagKeys): array
++    {
++        $pipeline = $this->createPipeline();
++        foreach ($tagKeys as $key) {
++            $pipeline->sMembers($key);
++        }
++        $sets = array_map([$this, 'toIdsArray'], (array)$this->executePipeline($pipeline));
++
++        return array_values(array_intersect(...$sets));
++    }
++
++    /**
++     * Normalize a Redis set result to a plain array of IDs
++     *
++     * @param mixed $ids
++     * @return array
++     */
++    private function toIdsArray($ids): array
++    {
+         return is_array($ids) ? $ids : [];
+     }
+ 
+@@ -408,12 +601,10 @@ public function deleteByIds(array $ids): bool
+                     $success = false;
+                 }
+ 
+-                // Remove IDs from all_ids set for this chunk
+-                $pipeline = $this->createPipeline();
+-                foreach ($chunk as $id) {
+-                    $pipeline->srem(self::ALL_IDS_SET, $id);
+-                }
+-                $this->executePipeline($pipeline);
++                // Prune the index (tag sets + reverse index + all_ids) for this chunk so it does
++                // not outlive its data. pruneTagIndex owns the all_ids removal — and, on the atomic
++                // path, guards it on data-absence so a concurrent save is not clobbered (finding #4).
++                $this->pruneTagIndex($chunk);
+ 
+                 // Commit each chunk separately (important for large operations)
+                 if (method_exists($this->cachePool, 'commit')) {
+@@ -426,20 +617,11 @@ public function deleteByIds(array $ids): bool
+ 
+         $success = $this->cachePool->deleteItems($ids);
+ 
+-        if (count($ids) > 10) {
+-            $pipeline = $this->createPipeline();
+-
+-            // Remove each ID from all_ids set in pipeline
+-            foreach ($ids as $id) {
+-                $pipeline->srem(self::ALL_IDS_SET, $id);
+-            }
+-
+-            $this->executePipeline($pipeline);
+-        } else {
+-            // For small batches, use single command (slightly faster)
+-            array_unshift($ids, self::ALL_IDS_SET);
+-            call_user_func_array([$this->redis, 'sRem'], $ids);
+-        }
++        // Prune the index (tag sets + reverse index + all_ids) for the removed ids. all_ids removal
++        // lives inside pruneTagIndex now (data-existence-guarded on the atomic path), so we must NOT
++        // strip all_ids separately here — an unconditional srem would defeat the guard and re-create
++        // the data-present / index-missing orphan (finding #4).
++        $this->pruneTagIndex($ids);
+ 
+         // Ensure changes are committed immediately (important for MFTF and tests)
+         if (method_exists($this->cachePool, 'commit')) {
+@@ -472,7 +654,7 @@ public function cleanMatchingAnyTags(array $tags): bool
+                 }
+ 
+                 return $deleted >= 0; // Lua returns number of items deleted
+-            // phpcs:disable Magento2.CodeAnalysis.EmptyBlock
++                // phpcs:disable Magento2.CodeAnalysis.EmptyBlock
+             } catch (\Exception $e) {
+                 // Intentional: Fall through to PHP implementation on Lua failure
+             }
+@@ -523,7 +705,7 @@ public function cleanMatchingAnyTagsWithScope(array $tags, string $scopeTag): bo
+                 }
+ 
+                 return $deleted >= 0; // Lua returns number of items deleted
+-            // phpcs:disable Magento2.CodeAnalysis.EmptyBlock
++                // phpcs:disable Magento2.CodeAnalysis.EmptyBlock
+             } catch (\Exception $e) {
+                 // Intentional: Fall through to PHP implementation on Lua failure
+             }
+@@ -574,19 +756,78 @@ public function onSave(string $id, array $tags): void
+             return;
+         }
+ 
++        // Prefer the atomic, data-existence-guarded EVAL so a concurrent delete on the same id
++        // cannot leave the index contradicting the data (finding #4). Falls back to the pipeline
++        // when EVAL is unavailable (Predis/cluster) or fails.
++        if ($this->supportsAtomicEval() && $this->onSaveAtomic($id, $tags)) {
++            return;
++        }
++
++        $this->onSavePipelined($id, $tags);
++    }
++
++    /**
++     * Atomically (re)build the index for $id via LUA_ONSAVE, guarded on the data key existing.
++     *
++     * @param string $id
++     * @param array $tags
++     * @return bool True on success, false if EVAL failed (caller should fall back)
++     */
++    private function onSaveAtomic(string $id, array $tags): bool
++    {
++        try {
++            $args = array_merge(
++                [
++                    $this->dataKeyPrefix() . $id,                       // ARGV[1] data key
++                    $id,                                                // ARGV[2] id
++                    self::ALL_IDS_SET,                                  // ARGV[3] all_ids
++                    self::TAG_INDEX_PREFIX,                             // ARGV[4] tag prefix
++                    $this->namespace,                                   // ARGV[5] namespace
++                    self::REVERSE_INDEX_PREFIX . $this->namespace . $id // ARGV[6] reverse key
++                ],
++                array_values($tags)                                     // ARGV[7..] tag names
++            );
++            $this->redis->eval(self::LUA_ONSAVE, $args, 0);
++            return true;
++        } catch (\Throwable $e) {
++            return false;
++        }
++    }
++
++    /**
++     * Non-atomic pipelined index build (fallback for Predis/cluster or when EVAL is disabled).
++     *
++     * @param string $id
++     * @param array $tags
++     * @return void
++     */
++    private function onSavePipelined(string $id, array $tags): void
++    {
++        $idTagsKey = self::REVERSE_INDEX_PREFIX . $this->namespace . $id;
++
++        // Retag cleanup: read the id's previous tags and drop it from the forward SET of any tag it
++        // no longer carries, so stale memberships cannot linger after a re-save with a different tag
++        // set. A separate read is required because a pipeline cannot branch on a value; mirrors the
++        // legacy Cm_Cache_Backend_Redis save() array_diff of old vs new tags.
++        $oldTags = $this->toIdsArray($this->redis->sMembers($idTagsKey));
++        $removedTags = array_diff($oldTags, $tags);
++
+         $pipeline = $this->createPipeline();
+ 
++        // Forward index: drop the id from tags it no longer has.
++        foreach ($removedTags as $tag) {
++            $pipeline->srem($this->getTagKey($tag), $id);
++        }
++
+         // Add ID to all_ids set
+         $pipeline->sadd(self::ALL_IDS_SET, $id);
+ 
+         // Forward index: Add ID to each tag's SET
+         foreach ($tags as $tag) {
+-            $tagKey = $this->getTagKey($tag);
+-            $pipeline->sadd($tagKey, $id);
++            $pipeline->sadd($this->getTagKey($tag), $id);
+         }
+ 
+-        // Reverse index: Store tags for this ID (for cleanup on delete)
+-        $idTagsKey = 'cache:id_tags:' . $this->namespace . $id;
++        // Reverse index: replace the id's tag set with the new tags.
+         $pipeline->del($idTagsKey);  // Clear old tags first
+         foreach ($tags as $tag) {
+             $pipeline->sadd($idTagsKey, $tag);
+@@ -596,6 +837,157 @@ public function onSave(string $id, array $tags): void
+         $this->executePipeline($pipeline);
+     }
+ 
++    /**
++     * Bulk-prune the tag index for the given ids: remove each id from its tag SETs and delete
++     * its reverse-index key. Prefers an atomic EVAL and falls back to a pipelined path.
++     *
++     * @param array $ids
++     * @return void
++     */
++    private function pruneTagIndex(array $ids): void
++    {
++        if (empty($ids)) {
++            return;
++        }
++
++        // Prefer the atomic EVAL path: reading the reverse index and applying the removals in a
++        // single script eliminates the read/write gap that let a concurrent onSave get clobbered.
++        // Falls back to the pipelined path when EVAL is unavailable (Predis/cluster) or fails.
++        if ($this->supportsAtomicEval() && $this->pruneTagIndexAtomic($ids)) {
++            return;
++        }
++
++        $this->pruneTagIndexPipelined($ids);
++    }
++
++    /**
++     * Atomically prune the tag index for the given ids via a single EVAL per chunk.
++     *
++     * @param array $ids
++     * @return bool True on success, false if EVAL failed (caller should fall back)
++     */
++    private function pruneTagIndexAtomic(array $ids): bool
++    {
++        try {
++            foreach (array_chunk(array_values($ids), self::LUA_MAX_CSTACK) as $chunk) {
++                $args = array_merge(
++                    [self::TAG_INDEX_PREFIX, $this->namespace, $this->dataKeyPrefix()],
++                    $chunk
++                );
++                // phpredis eval(script, args, numKeys): numKeys=0 => every arg is an ARGV entry
++                $this->redis->eval(self::LUA_PRUNE_INDEX, $args, 0);
++            }
++            return true;
++        } catch (\Throwable $e) {
++            return false;
++        }
++    }
++
++    /**
++     * Non-atomic pipelined prune (fallback for Predis/cluster or when EVAL is disabled).
++     *
++     * Two pipelines: read the reverse index for every id, then apply removals. There is a
++     * read/write gap here, so a concurrent save for the same id may still be clobbered; the
++     * atomic path above is preferred whenever the client supports it.
++     *
++     * @param array $ids
++     * @return void
++     */
++    private function pruneTagIndexPipelined(array $ids): void
++    {
++        // Read the reverse index (id -> tags) for every id in one pipeline
++        $readPipe = $this->createPipeline();
++        foreach ($ids as $id) {
++            $readPipe->smembers(self::REVERSE_INDEX_PREFIX . $this->namespace . $id);
++        }
++        $tagsPerId = $this->executePipeline($readPipe);
++        if (!is_array($tagsPerId)) {
++            return;
++        }
++
++        // Drop each id from all_ids and its tag SETs, and delete its reverse index, in one
++        // pipeline. all_ids removal is unconditional here (this fallback owns it now that
++        // deleteByIds no longer removes it separately).
++        $writePipe = $this->createPipeline();
++        foreach (array_values($ids) as $i => $id) {
++            $writePipe->srem(self::ALL_IDS_SET, $id);
++            $tags = $tagsPerId[$i] ?? [];
++            if (is_array($tags) && !empty($tags)) {
++                foreach ($tags as $tag) {
++                    $writePipe->srem($this->getTagKey($tag), $id);
++                }
++                $writePipe->del(self::REVERSE_INDEX_PREFIX . $this->namespace . $id);
++            }
++        }
++        $this->executePipeline($writePipe);
++    }
++
++    /**
++     * Whether the underlying client supports atomic single-node EVAL with computed keys.
++     *
++     * True only for phpredis standalone (\Redis). Excludes \RedisCluster (cross-slot EVAL) and
++     * Predis, which use the pipelined fallback.
++     *
++     * @return bool
++     */
++    private function supportsAtomicEval(): bool
++    {
++        return $this->redis instanceof \Redis;
++    }
++
++    /**
++     * Acquire the stale-cache regeneration lock atomically (SET key token NX EX ttl).
++     *
++     * Returns true for exactly one caller cluster-wide; the token identifies the owner so the
++     * lock can be released safely later. Any client error is treated as "not acquired".
++     *
++     * @param string $id Cache id being regenerated
++     * @param string $token Per-process ownership token
++     * @param int $ttl Lock lifetime in seconds (auto-expiry if the owner dies)
++     * @return bool
++     */
++    public function acquireLock(string $id, string $token, int $ttl): bool
++    {
++        $key = self::REGEN_LOCK_PREFIX . $this->namespace . $id;
++
++        try {
++            $result = $this->isPredisClient()
++                ? $this->redis->set($key, $token, 'EX', $ttl, 'NX')
++                : $this->redis->set($key, $token, ['NX', 'EX' => $ttl]);
++
++            // phpredis returns true/false; Predis returns a Status('OK') on set, null when NX fails
++            return $result !== null && $result !== false;
++        } catch (\Throwable $e) {
++            return false;
++        }
++    }
++
++    /**
++     * Release the regeneration lock only if this process still owns it (ownership-safe delete).
++     *
++     * Uses a GET+DEL compare-and-delete in a single EVAL so a lock re-acquired by another owner
++     * (e.g. after TTL expiry) is never deleted out from under it.
++     *
++     * @param string $id Cache id
++     * @param string $token The token used when acquiring
++     * @return bool True if this process owned the lock and it was released
++     */
++    public function releaseLock(string $id, string $token): bool
++    {
++        $key = self::REGEN_LOCK_PREFIX . $this->namespace . $id;
++        $lua = "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) else return 0 end";
++
++        try {
++            $result = $this->isPredisClient()
++                ? $this->redis->eval($lua, 1, $key, $token)
++                : $this->redis->eval($lua, [$key, $token], 1);
++
++            return (int)$result === 1;
++        } catch (\Throwable $e) {
++            return false;
++        }
++    }
++
+     /**
+      * @inheritDoc
+      *
+@@ -770,35 +1162,19 @@ private function cleanMatchingAnyTagsLua(array $tags): int
+             return 0;
+         }
+ 
++        // phpredis expects a SINGLE [KEYS..., ARGV...] array plus the KEY count; passing ARGV as
++        // extra positional params (the previous code) throws ArgumentCountError and never reaches
++        // the script. ARGV order: [tag_prefix, namespace, chunk_size].
++        $args = array_merge($tags, [self::TAG_INDEX_PREFIX, $this->namespace, 100]);
++
+         try {
+-            // Load and execute Lua script
+             $sha = $this->loadLuaScript(self::LUA_CLEAN_MATCHING_ANY_TAGS);
+-
+-            // KEYS: array of tags
+-            // ARGV: [tag_prefix, namespace, chunk_size]
+-            $result = $this->redis->evalSha(
+-                $sha,
+-                $tags,  // KEYS
+-                count($tags),  // Number of KEYS
+-                self::TAG_INDEX_PREFIX,  // ARGV[1]
+-                $this->namespace,  // ARGV[2]
+-                100  // ARGV[3] - chunk size
+-            );
+-
+-            return (int)$result;
+-        } catch (\RedisException $e) {
+-            // Fallback: try executing script directly
++            return (int)$this->redis->evalSha($sha, $args, count($tags));
++        } catch (\Throwable $e) {
++            // Fallback: try executing the script directly
+             try {
+-                $result = $this->redis->eval(
+-                    self::LUA_CLEAN_MATCHING_ANY_TAGS,
+-                    $tags,
+-                    count($tags),
+-                    self::TAG_INDEX_PREFIX,
+-                    $this->namespace,
+-                    100
+-                );
+-                return (int)$result;
+-            } catch (\RedisException $e) {
++                return (int)$this->redis->eval(self::LUA_CLEAN_MATCHING_ANY_TAGS, $args, count($tags));
++            } catch (\Throwable $e) {
+                 // Return -1 to signal error (will fall back to PHP)
+                 return -1;
+             }
+@@ -818,35 +1194,18 @@ private function cleanMatchingAnyTagsWithScopeLua(array $tags, string $scopeTag)
+             return 0;
+         }
+ 
++        // Single [KEYS..., ARGV...] array + KEY count (see cleanMatchingAnyTagsLua).
++        // ARGV order: [tag_prefix, namespace, scope_tag].
++        $args = array_merge($tags, [self::TAG_INDEX_PREFIX, $this->namespace, $scopeTag]);
++
+         try {
+-            // Load and execute Lua script
+             $sha = $this->loadLuaScript(self::LUA_CLEAN_MATCHING_ANY_TAGS_WITH_SCOPE);
+-
+-            // KEYS: array of tags
+-            // ARGV: [tag_prefix, namespace, scope_tag]
+-            $result = $this->redis->evalSha(
+-                $sha,
+-                $tags,  // KEYS
+-                count($tags),  // Number of KEYS
+-                self::TAG_INDEX_PREFIX,  // ARGV[1]
+-                $this->namespace,  // ARGV[2]
+-                $scopeTag  // ARGV[3]
+-            );
+-
+-            return (int)$result;
+-        } catch (\RedisException $e) {
++            return (int)$this->redis->evalSha($sha, $args, count($tags));
++        } catch (\Throwable $e) {
+             // Fallback: try executing script directly
+             try {
+-                $result = $this->redis->eval(
+-                    self::LUA_CLEAN_MATCHING_ANY_TAGS_WITH_SCOPE,
+-                    $tags,
+-                    count($tags),
+-                    self::TAG_INDEX_PREFIX,
+-                    $this->namespace,
+-                    $scopeTag
+-                );
+-                return (int)$result;
+-            } catch (\RedisException $e) {
++                return (int)$this->redis->eval(self::LUA_CLEAN_MATCHING_ANY_TAGS_WITH_SCOPE, $args, count($tags));
++            } catch (\Throwable $e) {
+                 // Return -1 to signal error (will fall back to PHP)
+                 return -1;
+             }
+

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magestore, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/topology.xsd">
+    <exchange name="magento-db" type="topic" connection="db">
+        <binding id="magestorePointyIntegrationSubmitSales" topic="magestore_pointy_integration.submit_sales.topic" destinationType="queue" destination="magestore_pointy_integration.submit_sales.queue"/>
+        <binding id="magestorePointyIntegrationSubmitInventoryBinding"
+                 topic="magestore_pointy_integration.submit_inventory.topic"
+                 destinationType="queue"
+                 destination="magestore_pointy_integration.submit_inventory.queue"/>
+    </exchange>
+</config>

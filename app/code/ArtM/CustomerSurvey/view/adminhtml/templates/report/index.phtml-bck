@@ -1,0 +1,434 @@
+<?php
+
+/** @var \ArtM\CustomerSurvey\Block\Adminhtml\Report\Index $block */
+$listing = $block->getListingData();
+$detail = $block->getDetailData();
+$items = $listing['items'] ?? [];
+$totals = $listing['totals'] ?? ['impressions' => 0, 'opens' => 0, 'responses' => 0];
+$trend = $listing['trend'] ?? [];
+
+$impressions = (int)($totals['impressions'] ?? 0);
+$opens = (int)($totals['opens'] ?? 0);
+$responses = (int)($totals['responses'] ?? 0);
+$base = $impressions;
+$completionRate = $base > 0 ? ($responses * 100) / $base : 0;
+?>
+<div class="customersurvey-report-wrap">
+    <style>
+        .customersurvey-report-wrap {
+            background: #f8f8f8;
+            border: 1px solid #d6dee8;
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .customersurvey-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .customersurvey-filters {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .customersurvey-filters input,
+        .customersurvey-filters select {
+            border: 1px solid #c9d4e1;
+            border-radius: 6px;
+            padding: 6px 8px;
+            background: #fff;
+        }
+
+        .customersurvey-btn {
+            background: #12446b;
+            color: #fff;
+            border: 0;
+            border-radius: 6px;
+            padding: 7px 11px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .customersurvey-btn.alt {
+            background: #276a4f;
+        }
+
+        .customersurvey-kpis {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            margin: 10px 0 18px;
+        }
+
+        .customersurvey-kpi {
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid #dbe4ef;
+            padding: 12px;
+        }
+
+        .customersurvey-kpi h4 {
+            margin: 0 0 6px;
+            color: #4f6071;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .customersurvey-kpi strong {
+            font-size: 20px;
+            color: #0e2940;
+        }
+
+        .customersurvey-grid {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .customersurvey-grid th,
+        .customersurvey-grid td {
+            border: 1px solid #dfdfdf;
+            padding: 10px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .customersurvey-head a:hover,
+        table.customersurvey-grid a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+        .customersurvey-grid th {
+            background: #514943;
+            color: white;
+        }
+
+        .customersurvey-grid tr:hover td {
+            background: #f9fbfd;
+        }
+
+        .customersurvey-charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .customersurvey-chart {
+            background: #fff;
+            border: 1px solid #dbe4ef;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .customersurvey-chart canvas {
+            width: 100%;
+            height: 280px;
+        }
+
+        @media (max-width: 900px) {
+            .customersurvey-charts {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <div class="customersurvey-head">
+        <form method="get" action="<?= $block->escapeUrl($block->getUrl('customersurvey/report/index')) ?>" class="customersurvey-filters">
+            <label>From</label>
+            <input type="date" name="from_date" value="<?= $block->escapeHtmlAttr($block->getFromDate()) ?>" />
+            <label>To</label>
+            <input type="date" name="to_date" value="<?= $block->escapeHtmlAttr($block->getToDate()) ?>" />
+            <label>Survey</label>
+            <select name="survey_id">
+                <option value="0">All</option>
+                <?php foreach ($items as $item): ?>
+                    <option value="<?= (int)$item['survey_id'] ?>" <?= ((int)$block->getSelectedSurveyId() === (int)$item['survey_id']) ? 'selected' : '' ?>>
+                        <?= $block->escapeHtml((string)$item['name']) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <button type="submit" class="customersurvey-btn">Apply</button>
+        </form>
+
+        <div style="display:flex; gap:8px;">
+            <a class="customersurvey-btn" href="<?= $block->escapeUrl($block->getExportCsvUrl()) ?>">Export CSV</a>
+            <a class="customersurvey-btn alt" href="<?= $block->escapeUrl($block->getExportExcelUrl()) ?>">Export Excel</a>
+        </div>
+    </div>
+
+    <div class="customersurvey-kpis">
+        <div class="customersurvey-kpi">
+            <h4>Impressions</h4><strong><?= (int)$impressions ?></strong>
+        </div>
+        <div class="customersurvey-kpi">
+            <h4>Opens</h4><strong><?= (int)$opens ?></strong>
+        </div>
+        <div class="customersurvey-kpi">
+            <h4>Responses</h4><strong><?= (int)$responses ?></strong>
+        </div>
+        <div class="customersurvey-kpi">
+            <h4>Completion Rate</h4><strong><?= number_format($completionRate, 2) ?>%</strong>
+        </div>
+    </div>
+
+    <table class="customersurvey-grid">
+        <thead>
+            <tr>
+                <th>Survey</th>
+                <th>Status</th>
+                <th>Impressions</th>
+                <th>Opens</th>
+                <th>Responses</th>
+                <th>Completion %</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($items as $item): ?>
+                <tr>
+                    <td><?= $block->escapeHtml((string)$item['name']) ?></td>
+                    <td><?= $block->escapeHtml((string)$item['status']) ?></td>
+                    <td><?= (int)$item['impressions'] ?></td>
+                    <td><?= (int)$item['opens'] ?></td>
+                    <td><?= (int)$item['responses'] ?></td>
+                    <td><?= number_format((float)$item['completion_rate'], 2) ?>%</td>
+                    <td>
+                        <a class="customersurvey-btn" href="<?= $block->escapeUrl($block->getUrl('customersurvey/report/view', [
+                                                                'survey_id' => (int)$item['survey_id'],
+                                                                'from_date' => $block->getFromDate(),
+                                                                'to_date' => $block->getToDate()
+                                                            ])) ?>">View</a>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <div class="customersurvey-charts">
+        <div class="customersurvey-chart" style="grid-column: 1 / -1;">
+            <h3>Daily Trend: Impressions / Opens / Responses</h3>
+            <canvas id="customersurvey-trend"></canvas>
+        </div>
+        <div class="customersurvey-chart">
+            <h3>Overall Distribution</h3>
+            <canvas id="customersurvey-distribution"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        var trend = <?= /* @noEscape */ json_encode($trend) ?> || [];
+        var items = <?= /* @noEscape */ json_encode($items) ?> || [];
+
+        function prepCanvas(canvas) {
+            if (!canvas) {
+                return null;
+            }
+            var ratio = window.devicePixelRatio || 1;
+            var width = canvas.clientWidth || 500;
+            var height = 280;
+            canvas.width = Math.floor(width * ratio);
+            canvas.height = Math.floor(height * ratio);
+            var ctx = canvas.getContext('2d');
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            ctx.clearRect(0, 0, width, height);
+            return {
+                ctx: ctx,
+                width: width,
+                height: height
+            };
+        }
+
+        function drawNoData(canvas) {
+            var c = prepCanvas(canvas);
+            if (!c) {
+                return;
+            }
+            c.ctx.fillStyle = '#6b7f96';
+            c.ctx.font = '13px Arial';
+            c.ctx.fillText('No data available', 14, 26);
+        }
+
+        function drawLineChart(canvas, labels, lines) {
+            if (!labels.length || !lines.length) {
+                drawNoData(canvas);
+                return;
+            }
+            var c = prepCanvas(canvas);
+            if (!c) {
+                return;
+            }
+            var ctx = c.ctx;
+            var w = c.width;
+            var h = c.height;
+            var left = 52,
+                right = 14,
+                top = 22,
+                bottom = 56;
+            var plotW = w - left - right;
+            var plotH = h - top - bottom;
+
+            var allValues = [];
+            lines.forEach(function(line) {
+                (line.values || []).forEach(function(v) {
+                    allValues.push(Number(v || 0));
+                });
+            });
+            var maxVal = Math.max.apply(null, allValues.concat([1]));
+
+            ctx.strokeStyle = '#c8d6e5';
+            ctx.beginPath();
+            ctx.moveTo(left, top);
+            ctx.lineTo(left, h - bottom);
+            ctx.lineTo(w - right, h - bottom);
+            ctx.stroke();
+
+            var ticks = 5;
+            ctx.fillStyle = '#566b82';
+            ctx.font = '11px Arial';
+            for (var t = 0; t <= ticks; t++) {
+                var v = Math.round((maxVal / ticks) * t);
+                var yTick = h - bottom - ((v / maxVal) * (plotH - 6));
+                ctx.fillText(String(v), 8, yTick + 4);
+                ctx.strokeStyle = '#edf3f9';
+                ctx.beginPath();
+                ctx.moveTo(left, yTick);
+                ctx.lineTo(w - right, yTick);
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = '#3f556d';
+            ctx.fillText('Count', 8, top - 6);
+            ctx.fillText('Date', Math.max(left, (w / 2) - 12), h - 12);
+
+            var xStep = labels.length > 1 ? (plotW / (labels.length - 1)) : 0;
+            var labelEvery = Math.max(1, Math.ceil(labels.length / 8));
+            for (var lx = 0; lx < labels.length; lx += labelEvery) {
+                var xPos = left + (xStep * lx);
+                var labelText = String(labels[lx] || '');
+                ctx.fillStyle = '#566b82';
+                ctx.font = '10px Arial';
+                ctx.fillText(labelText, xPos - 22, h - bottom + 16);
+            }
+
+            lines.forEach(function(line) {
+                var vals = line.values || [];
+                ctx.strokeStyle = line.color || '#1668a8';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                vals.forEach(function(v, i) {
+                    var x = left + (plotW * (vals.length === 1 ? 0 : (i / (vals.length - 1))));
+                    var y = h - bottom - ((Number(v || 0) / maxVal) * (plotH - 6));
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                ctx.stroke();
+
+                ctx.fillStyle = line.color || '#1668a8';
+                vals.forEach(function(v, i) {
+                    var px = left + (plotW * (vals.length === 1 ? 0 : (i / (vals.length - 1))));
+                    var py = h - bottom - ((Number(v || 0) / maxVal) * (plotH - 6));
+                    ctx.beginPath();
+                    ctx.arc(px, py, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            });
+        }
+
+        function drawPieChart(canvas, labels, values, colors) {
+            if (!labels.length) {
+                drawNoData(canvas);
+                return;
+            }
+            var c = prepCanvas(canvas);
+            if (!c) {
+                return;
+            }
+            var ctx = c.ctx;
+            var w = c.width;
+            var h = c.height;
+            var total = values.reduce(function(sum, v) {
+                return sum + Number(v || 0);
+            }, 0);
+            if (total <= 0) {
+                drawNoData(canvas);
+                return;
+            }
+
+            var cx = Math.min(150, w * 0.35);
+            var cy = h * 0.5;
+            var radius = Math.min(90, h * 0.32);
+            var start = -Math.PI / 2;
+
+            for (var i = 0; i < values.length; i++) {
+                var part = Number(values[i] || 0);
+                var sweep = (part / total) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.arc(cx, cy, radius, start, start + sweep, false);
+                ctx.closePath();
+                ctx.fill();
+                start += sweep;
+            }
+
+            var lx = cx + radius + 24;
+            var ly = cy - radius;
+            labels.forEach(function(label, idx) {
+                ctx.fillStyle = colors[idx % colors.length];
+                ctx.fillRect(lx, ly + (idx * 18), 10, 10);
+                ctx.fillStyle = '#334a62';
+                ctx.font = '12px Arial';
+                ctx.fillText(String(label), lx + 14, ly + 9 + (idx * 18));
+            });
+        }
+
+        drawLineChart(
+            document.getElementById('customersurvey-trend'),
+            trend.map(function(i) {
+                return i.date;
+            }),
+            [{
+                    values: trend.map(function(i) {
+                        return Number(i.impressions || 0);
+                    }),
+                    color: '#98b8d8'
+                },
+                {
+                    values: trend.map(function(i) {
+                        return Number(i.opens || 0);
+                    }),
+                    color: '#2d9a5f'
+                },
+                {
+                    values: trend.map(function(i) {
+                        return Number(i.responses || 0);
+                    }),
+                    color: '#1668a8'
+                }
+            ]
+        );
+
+        drawPieChart(
+            document.getElementById('customersurvey-distribution'),
+            ['Impressions', 'Opens', 'Responses'],
+            [<?= (int)$impressions ?>, <?= (int)$opens ?>, <?= (int)$responses ?>],
+            ['#98b8d8', '#4aa878', '#1668a8']
+        );
+
+    })();
+</script>

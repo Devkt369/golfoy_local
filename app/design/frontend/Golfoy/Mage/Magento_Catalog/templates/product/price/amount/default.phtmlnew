@@ -1,0 +1,67 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+?>
+
+<?php /** @var $block \Magento\Framework\Pricing\Render\Amount */ 
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$product = $objectManager->get('Magento\Framework\Registry')->registry('current_product');//get current product
+if($product){$productName = $product->getName();
+$productUrl = $product->getProductUrl();
+$availableurl = "https://schema.org/InStock";
+if (!$product->isAvailable()){
+    $availableurl = "https://schema.org/OutOfStock";
+}}
+?>
+
+<span class="price-container <?= $block->escapeHtmlAttr($block->getAdjustmentCssClasses()) ?>"
+        <?= $block->getSchema() ? ' itemprop="offers" itemscope itemtype="http://schema.org/Offer"' : '' ?>>
+    <?php if ($block->getDisplayLabel()) :?>
+        <span class="price-label"><?= $block->escapeHtml($block->getDisplayLabel()) ?></span>
+    <?php endif; ?>
+    <span class="price-custom-product"><span class="price">₹&nbsp;<?= number_format($block->escapeHtmlAttr($block->getDisplayValue())) ?></span></span>
+    <?php if ($block->hasAdjustmentsHtml()) :?>
+        <?= $block->getAdjustmentsHtml() ?>
+    <?php endif; ?>
+    <?php if ($block->getSchema()) :?>
+
+    <!-------------itemprop:return policy & shipping info------------------------------->
+        <span itemprop="hasMerchantReturnPolicy" itemtype="https://schema.org/MerchantReturnPolicy" itemscope>
+          <meta itemprop="applicableCountry" content="IN" />
+          <meta itemprop="returnPolicyCategory" content="https://schema.org/MerchantReturnFiniteReturnWindow" />
+          <meta itemprop="merchantReturnDays" content="7" />
+          <meta itemprop="returnMethod" content="https://schema.org/ReturnByMail" />
+          <meta itemprop="returnFees" content="https://schema.org/FreeReturn" />
+        </span>
+        <span itemprop="shippingDetails" itemtype="https://schema.org/OfferShippingDetails" itemscope>
+          <span itemprop="shippingRate" itemtype="https://schema.org/MonetaryAmount" itemscope>
+            <meta itemprop="value" content="0" />
+            <meta itemprop="currency" content="INR" />
+          </span>
+          <span itemprop="shippingDestination" itemtype="https://schema.org/DefinedRegion" itemscope>
+            <meta itemprop="addressCountry" content="IN" />
+          </span>
+          <span itemprop="deliveryTime" itemtype="https://schema.org/ShippingDeliveryTime" itemscope>
+            <span itemprop="handlingTime" itemtype="https://schema.org/QuantitativeValue" itemscope>
+              <meta itemprop="minValue" content="0" />
+              <meta itemprop="maxValue" content="4" />
+              <meta itemprop="unitCode" content="DAY" />
+            </span>
+            <span itemprop="transitTime" itemtype="https://schema.org/QuantitativeValue" itemscope>
+              <meta itemprop="minValue" content="1" />
+              <meta itemprop="maxValue" content="5" />
+              <meta itemprop="unitCode" content="DAY" />
+            </span>
+          </span>
+        </span>
+    <!----------------------------------------------------------->
+        <meta itemprop="price" content="<?= $block->escapeHtmlAttr($block->getDisplayValue()) ?>" />
+        <meta itemprop="priceCurrency" content="<?= $block->escapeHtmlAttr($block->getDisplayCurrencyCode()) ?>" />
+        <?php if($product){ ?> <link itemprop="url" href="<?php echo  $productUrl; ?>" />        
+        <meta itemprop="availability" content="<?php echo $availableurl; ?>" />
+        <?php } ?>
+    <?php endif; ?>
+</span>

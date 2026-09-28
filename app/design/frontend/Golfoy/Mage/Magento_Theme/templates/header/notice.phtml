@@ -1,0 +1,49 @@
+<?php 
+echo $this->getLayout()->createBlock('Magento\Cms\Block\Block')->setBlockId('notice_header')->toHtml();
+?>
+
+<script type="text/javascript">
+    require(["jquery", "bootstrap"], function(jQuery) {
+        jQuery(document).ready(function() {
+            // Add 'no_notice' class to body by default
+            jQuery("body").addClass("no_notice");
+
+            // Function to check and remove 'no_notice' class if 'notice_top' is not found
+            function checkNoticeTop() {
+                if (jQuery(".notice_top").length === 0) {
+                    jQuery("body").removeClass("no_notice");
+                }
+            }
+
+            // Initial check when the page loads
+            checkNoticeTop();
+
+            // Event handler for closing notice
+            jQuery(".close_notice").on("click", function() {
+                jQuery("body").removeClass("no_notice");
+            });
+
+            // Check again after any DOM manipulation or AJAX loading
+            jQuery(document).ajaxComplete(function() {
+                checkNoticeTop();
+            });
+        });
+    });
+</script>
+
+<style>
+    .product.media {
+        min-height: auto !important;
+    }
+
+    .product.media>.tags {
+        height: 0px;
+    }
+
+    body {
+        overflow-x: hidden;
+    }
+</style>
+<?php
+//    echo $window_width = "<script type='text/javascript'>document.write(window.innerWidth);</script>";
+?>

@@ -1,0 +1,838 @@
+<?php
+/** @var \Magento\Backend\Block\Template $block */
+$treeUrl = $block->getUrl('massproducts/categoryreorder/tree');
+$searchUrl = $block->getUrl('massproducts/categoryreorder/search');
+$metaUrl = $block->getUrl('massproducts/categoryreorder/meta');
+$downloadUrl = $block->getUrl('massproducts/categoryreorder/download');
+$uploadValidateUrl = $block->getUrl('massproducts/categoryreorder/uploadvalidate');
+$confirmUrl = $block->getUrl('massproducts/categoryreorder/confirm');
+$historyUrl = $block->getUrl('massproducts/categoryreorder/history');
+$rollbackUrl = $block->getUrl('massproducts/categoryreorder/rollback');
+$historyDownloadUrl = $block->getUrl('massproducts/categoryreorder/historydownload');
+?>
+<div id="artm-reorder-products-root">
+    <style>
+        #artm-reorder-products-root {
+            --reorder-border: #d7dde5;
+            --reorder-muted: #64748b;
+            --reorder-bg: #f7f9fc;
+            --reorder-accent: #1267e9;
+            display: grid;
+            grid-template-columns: minmax(280px, 32%) 1fr;
+            gap: 16px;
+            min-height: 640px;
+        }
+        #artm-reorder-products-root .rp-card {
+            border: 1px solid var(--reorder-border);
+            border-radius: 10px;
+            background: #fff;
+            padding: 12px;
+        }
+        #artm-reorder-products-root .rp-title {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--reorder-muted);
+            margin-bottom: 10px;
+            letter-spacing: .03em;
+        }
+        #artm-reorder-products-root .rp-tree-search input {
+            width: 100%;
+            border: 1px solid var(--reorder-border);
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 13px;
+        }
+        #artm-reorder-products-root .rp-search-results {
+            margin-top: 8px;
+            max-height: 160px;
+            overflow: auto;
+            border: 1px solid var(--reorder-border);
+            border-radius: 8px;
+            display: none;
+            background: #fff;
+        }
+        #artm-reorder-products-root .rp-search-item {
+            padding: 8px 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eef2f6;
+            font-size: 12px;
+        }
+        #artm-reorder-products-root .rp-search-item:hover {
+            background: #f1f5f9;
+        }
+        #artm-reorder-products-root .rp-tree-wrap {
+            margin-top: 10px;
+            max-height: 560px;
+            overflow: auto;
+            background: var(--reorder-bg);
+            border-radius: 8px;
+            padding: 8px;
+        }
+        #artm-reorder-products-root .rp-node {
+            margin: 2px 0;
+        }
+        #artm-reorder-products-root .rp-node-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        #artm-reorder-products-root .rp-node-row:hover {
+            background: #eaf1fb;
+        }
+        #artm-reorder-products-root .rp-node-row.is-selected {
+            background: #d8e7ff;
+            color: #0b3f91;
+            font-weight: 700;
+        }
+        #artm-reorder-products-root .rp-toggle {
+            width: 16px;
+            text-align: center;
+            color: #334155;
+            font-weight: 700;
+        }
+        #artm-reorder-products-root .rp-children {
+            margin-left: 18px;
+            padding-left: 6px;
+            border-left: 1px dashed #cfd9e6;
+        }
+        #artm-reorder-products-root .rp-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        #artm-reorder-products-root .rp-download-options {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid var(--reorder-border);
+            border-radius: 8px;
+            padding: 6px 10px;
+            background: #fbfdff;
+            font-size: 12px;
+            color: #334155;
+        }
+        #artm-reorder-products-root .rp-download-options label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            user-select: none;
+        }
+        #artm-reorder-products-root .rp-selected-category {
+            margin-bottom: 10px;
+            border: 1px solid var(--reorder-border);
+            border-radius: 8px;
+            background: #fbfdff;
+            padding: 8px 10px;
+        }
+        #artm-reorder-products-root .rp-selected-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 2px;
+        }
+        #artm-reorder-products-root .rp-selected-path {
+            font-size: 12px;
+            color: var(--reorder-muted);
+            line-height: 1.35;
+            word-break: break-word;
+        }
+        #artm-reorder-products-root .rp-meta {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(180px, 1fr));
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        #artm-reorder-products-root .rp-meta-item {
+            border: 1px solid var(--reorder-border);
+            border-radius: 8px;
+            padding: 8px;
+            background: #fbfdff;
+        }
+        #artm-reorder-products-root .rp-meta-label {
+            color: var(--reorder-muted);
+            font-size: 11px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+        }
+        #artm-reorder-products-root .rp-meta-value {
+            font-weight: 600;
+            font-size: 13px;
+        }
+        #artm-reorder-products-root .rp-summary {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        #artm-reorder-products-root .rp-pill {
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            background: #e2e8f0;
+        }
+        #artm-reorder-products-root .rp-pill.success { background: #dcfce7; color: #14532d; }
+        #artm-reorder-products-root .rp-pill.failed { background: #fee2e2; color: #7f1d1d; }
+        #artm-reorder-products-root .rp-pill.skipped { background: #fef3c7; color: #78350f; }
+        #artm-reorder-products-root .rp-grid-wrap {
+            border: 1px solid var(--reorder-border);
+            border-radius: 8px;
+            overflow: auto;
+                max-height: 450px;
+            margin-bottom: 10px;
+        }
+        #artm-reorder-products-root table.rp-grid {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        #artm-reorder-products-root .rp-grid th,
+        #artm-reorder-products-root .rp-grid td {
+            padding: 7px 8px;
+            border-bottom: 1px solid #edf2f7;
+            text-align: left;
+            vertical-align: top;
+        }
+        #artm-reorder-products-root .rp-grid thead {
+            background: #f8fafc;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        #artm-reorder-products-root .rp-empty {
+            padding: 18px;
+            color: var(--reorder-muted);
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 12px;
+        }
+        #artm-reorder-products-root .rp-message {
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        @media (max-width: 980px) {
+            #artm-reorder-products-root {
+                grid-template-columns: 1fr;
+            }
+            #artm-reorder-products-root .rp-meta {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <div class="rp-card">
+        <div class="rp-title"><?= $block->escapeHtml(__('Category Tree')) ?></div>
+        <div class="rp-tree-search">
+            <input type="text" id="rp-search-input" placeholder="<?= $block->escapeHtmlAttr(__('Search category...')) ?>" />
+            <div id="rp-search-results" class="rp-search-results"></div>
+        </div>
+        <div id="rp-tree-wrap" class="rp-tree-wrap"></div>
+    </div>
+
+    <div class="rp-card">
+        <div class="rp-title"><?= $block->escapeHtml(__('Category Reorder Management')) ?></div>
+
+        <div id="rp-selected-category" class="rp-selected-category">
+            <div id="rp-selected-name" class="rp-selected-name"><?= $block->escapeHtml(__('No category selected')) ?></div>
+            <div id="rp-selected-path" class="rp-selected-path"><?= $block->escapeHtml(__('Select a category from the left tree to start.')) ?></div>
+        </div>
+
+        <div class="rp-actions">
+            <div class="rp-download-options">
+                <span><?= $block->escapeHtml(__('Download')) ?>:</span>
+                <label>
+                    <input type="radio" name="rp-download-mode" value="all" checked />
+                    <span><?= $block->escapeHtml(__('All')) ?></span>
+                </label>
+                <label>
+                    <input type="radio" name="rp-download-mode" value="skip_children" />
+                    <span><?= $block->escapeHtml(__('Skip Children')) ?></span>
+                </label>
+            </div>
+            <button type="button" id="rp-download-latest" class="action-secondary" disabled>
+                <span><?= $block->escapeHtml(__('Download Latest Sheet')) ?></span>
+            </button>
+            <button type="button" id="rp-upload-btn" class="action-secondary" disabled>
+                <span><?= $block->escapeHtml(__('Upload Updated Sheet')) ?></span>
+            </button>
+            <input type="file" id="rp-upload-file" accept=".xlsx,.csv" style="display:none;" />
+        </div>
+
+        <div class="rp-meta">
+            <div class="rp-meta-item">
+                <div class="rp-meta-label"><?= $block->escapeHtml(__('Last Updated By')) ?></div>
+                <div id="rp-last-updated-by" class="rp-meta-value">-</div>
+            </div>
+            <div class="rp-meta-item">
+                <div class="rp-meta-label"><?= $block->escapeHtml(__('Last Reordered Date')) ?></div>
+                <div id="rp-last-reordered-date" class="rp-meta-value">-</div>
+            </div>
+        </div>
+
+        <div id="rp-message" class="rp-message"></div>
+
+        <div id="rp-preview-block" style="display:none;">
+            <div class="rp-summary" id="rp-summary"></div>
+            <div class="rp-grid-wrap">
+                <table class="rp-grid">
+                    <thead>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('SKU')) ?></th>
+                        <th><?= $block->escapeHtml(__('Product')) ?></th>
+                        <th><?= $block->escapeHtml(__('Old Position')) ?></th>
+                        <th><?= $block->escapeHtml(__('New Position')) ?></th>
+                        <th><?= $block->escapeHtml(__('Status')) ?></th>
+                        <th><?= $block->escapeHtml(__('Remarks')) ?></th>
+                    </tr>
+                    </thead>
+                    <tbody id="rp-preview-body"></tbody>
+                </table>
+            </div>
+            <button type="button" id="rp-confirm" class="action-primary" disabled>
+                <span><?= $block->escapeHtml(__('Confirm Reorder')) ?></span>
+            </button>
+        </div>
+
+        <div id="rp-history-block" style="margin-top:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+                <div class="rp-title" style="margin-bottom:0;"><?= $block->escapeHtml(__('Version History')) ?></div>
+                <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#475569;">
+                    <span><?= $block->escapeHtml(__('Per Page')) ?></span>
+                    <select id="rp-history-page-size" class="admin__control-select" style="width:auto;min-width:72px;">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </label>
+            </div>
+            <div class="rp-grid-wrap">
+                <table class="rp-grid">
+                    <thead>
+                    <tr>
+                        <th><?= $block->escapeHtml(__('Version')) ?></th>
+                        <th><?= $block->escapeHtml(__('File Name')) ?></th>
+                        <th><?= $block->escapeHtml(__('Uploaded By')) ?></th>
+                        <th><?= $block->escapeHtml(__('Uploaded Date')) ?></th>
+                        <th><?= $block->escapeHtml(__('Affected')) ?></th>
+                        <th><?= $block->escapeHtml(__('Success')) ?></th>
+                        <th><?= $block->escapeHtml(__('Failed')) ?></th>
+                        <th><?= $block->escapeHtml(__('Status')) ?></th>
+                        <th><?= $block->escapeHtml(__('Actions')) ?></th>
+                    </tr>
+                    </thead>
+                    <tbody id="rp-history-body"></tbody>
+                </table>
+            </div>
+            <div id="rp-history-pagination" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+require(['jquery'], function ($) {
+    'use strict';
+
+    var urls = {
+        tree: '<?= $block->escapeJs($treeUrl) ?>',
+        search: '<?= $block->escapeJs($searchUrl) ?>',
+        meta: '<?= $block->escapeJs($metaUrl) ?>',
+        download: '<?= $block->escapeJs($downloadUrl) ?>',
+        uploadValidate: '<?= $block->escapeJs($uploadValidateUrl) ?>',
+        confirm: '<?= $block->escapeJs($confirmUrl) ?>',
+        history: '<?= $block->escapeJs($historyUrl) ?>',
+        rollback: '<?= $block->escapeJs($rollbackUrl) ?>',
+        historyDownload: '<?= $block->escapeJs($historyDownloadUrl) ?>'
+    };
+    var formKey = window.FORM_KEY || '';
+
+    var state = {
+        selectedCategoryId: 0,
+        selectedHistoryId: 0,
+        tree: [],
+        categoryPathById: {},
+        categoryNameById: {},
+        expanded: {},
+        preview: [],
+        historyPage: 1,
+        historyPageSize: 20
+    };
+
+    var $root = $('#artm-reorder-products-root');
+    var $treeWrap = $('#rp-tree-wrap');
+    var $message = $('#rp-message');
+    var $summary = $('#rp-summary');
+    var $previewBlock = $('#rp-preview-block');
+    var $previewBody = $('#rp-preview-body');
+    var $historyBody = $('#rp-history-body');
+    var $historyPagination = $('#rp-history-pagination');
+    var $historyPageSize = $('#rp-history-page-size');
+    var $searchInput = $('#rp-search-input');
+    var $searchResults = $('#rp-search-results');
+    var $selectedName = $('#rp-selected-name');
+    var $selectedPath = $('#rp-selected-path');
+
+    function esc(text) {
+        return $('<div>').text(String(text || '')).html();
+    }
+
+    function showMessage(text, isError) {
+        $message
+            .removeClass('message message-success message-error success error')
+            .addClass(isError ? 'message message-error error' : 'message message-success success')
+            .html('<div>' + esc(text) + '</div>');
+    }
+
+    function clearMessage() {
+        $message.removeClass('message message-success message-error success error').empty();
+    }
+
+    function buildCategoryPathMap() {
+        state.categoryPathById = {};
+        state.categoryNameById = {};
+
+        function walk(nodes, parentTrail) {
+            (nodes || []).forEach(function (node) {
+                var currentName = String(node.name || '').trim();
+                var trail = parentTrail.slice();
+                if (currentName) {
+                    trail.push(currentName);
+                }
+
+                state.categoryNameById[node.id] = currentName;
+                state.categoryPathById[node.id] = trail.join(' > ');
+
+                walk(node.children || [], trail);
+            });
+        }
+
+        walk(state.tree || [], []);
+    }
+
+    function renderSelectedCategoryContext() {
+        var categoryId = Number(state.selectedCategoryId || 0);
+        if (!categoryId) {
+            $selectedName.text('No category selected');
+            $selectedPath.text('Select a category from the left tree to start.');
+            return;
+        }
+
+        var name = state.categoryNameById[categoryId] || ('Category ID: ' + categoryId);
+        var path = state.categoryPathById[categoryId] || name;
+        $selectedName.text('Selected Category: ' + name);
+        $selectedPath.text('Path: ' + path);
+    }
+
+    function renderTree() {
+        function renderNodes(nodes, depth) {
+            var html = '';
+            (nodes || []).forEach(function (node) {
+                var hasChildren = (node.children || []).length > 0;
+                var isExpanded = !!state.expanded[node.id];
+                var selected = state.selectedCategoryId === Number(node.id) ? ' is-selected' : '';
+
+                html += '<div class="rp-node" data-id="' + Number(node.id) + '">';
+                html += '<div class="rp-node-row' + selected + '" data-action="select" data-id="' + Number(node.id) + '">';
+                html += '<span class="rp-toggle" data-action="toggle" data-id="' + Number(node.id) + '">' + (hasChildren ? (isExpanded ? '-' : '+') : '&nbsp;') + '</span>';
+                html += '<span>' + esc(node.name) + ' (ID: ' + Number(node.id) + ') (' + Number(node.product_count || 0) + ')</span>';
+                html += '</div>';
+
+                if (hasChildren) {
+                    html += '<div class="rp-children" style="display:' + (isExpanded ? 'block' : 'none') + ';">';
+                    html += renderNodes(node.children, depth + 1);
+                    html += '</div>';
+                }
+                html += '</div>';
+            });
+            return html;
+        }
+
+        $treeWrap.html(renderNodes(state.tree, 0) || '<div class="rp-empty">No categories found.</div>');
+    }
+
+    function markDefaultExpansion(nodes, depth) {
+        depth = Number(depth || 0);
+        (nodes || []).forEach(function (node) {
+            state.expanded[node.id] = depth === 0;
+            markDefaultExpansion(node.children || [], depth + 1);
+        });
+    }
+
+    function loadTree() {
+        $.getJSON(urls.tree, function (resp) {
+            if (!resp || !resp.success) {
+                showMessage(resp && resp.message ? resp.message : 'Unable to load category tree.', true);
+                return;
+            }
+            state.tree = resp.tree || [];
+            state.expanded = {};
+            markDefaultExpansion(state.tree, 0);
+            buildCategoryPathMap();
+            renderTree();
+            renderSelectedCategoryContext();
+        }).fail(function () {
+            showMessage('Unable to load category tree.', true);
+        });
+    }
+
+    function setSelectedCategory(categoryId) {
+        state.selectedCategoryId = Number(categoryId || 0);
+        state.selectedHistoryId = 0;
+        state.preview = [];
+        $previewBody.empty();
+        $previewBlock.hide();
+        $summary.empty();
+
+        var enabled = state.selectedCategoryId > 0;
+        state.historyPage = 1;
+        $('#rp-download-latest, #rp-upload-btn').prop('disabled', !enabled);
+        $('#rp-confirm').prop('disabled', true).find('span').text('Confirm Reorder');
+
+        renderTree();
+        renderSelectedCategoryContext();
+        if (enabled) {
+            loadMeta();
+            loadHistory();
+        }
+    }
+
+    function loadMeta() {
+        $.getJSON(urls.meta, { category_id: state.selectedCategoryId }, function (resp) {
+            if (!resp || !resp.success) {
+                return;
+            }
+            var meta = resp.meta || {};
+            $('#rp-last-updated-by').text(meta.last_updated_by || '-');
+            $('#rp-last-reordered-date').text(meta.last_reordered_date || '-');
+        });
+    }
+
+    function renderHistoryPagination(total, page, pageSize) {
+        total = Number(total || 0);
+        page = Number(page || 1);
+        pageSize = Number(pageSize || 20);
+
+        if (!state.selectedCategoryId || total <= 0) {
+            $historyPagination.empty();
+            return;
+        }
+
+        var totalPages = Math.max(1, Math.ceil(total / pageSize));
+        var start = ((page - 1) * pageSize) + 1;
+        var end = Math.min(total, page * pageSize);
+        var html = '';
+        html += '<div style="font-size:12px;color:#64748b;">Showing ' + start + ' to ' + end + ' of ' + total + '</div>';
+        html += '<div style="display:flex;gap:8px;align-items:center;">';
+        html += '<button type="button" class="action-secondary" data-action="history-prev"' + (page <= 1 ? ' disabled' : '') + '><span>Previous</span></button>';
+        html += '<span style="font-size:12px;color:#334155;">Page ' + page + ' of ' + totalPages + '</span>';
+        html += '<button type="button" class="action-secondary" data-action="history-next"' + (page >= totalPages ? ' disabled' : '') + '><span>Next</span></button>';
+        html += '</div>';
+        $historyPagination.html(html);
+    }
+
+    function loadHistory() {
+        if (!state.selectedCategoryId) {
+            $historyBody.html('<tr><td colspan="9"><div class="rp-empty">Select a category to view history.</div></td></tr>');
+            $historyPagination.empty();
+            return;
+        }
+
+        $.getJSON(urls.history, { category_id: state.selectedCategoryId, page: state.historyPage, page_size: state.historyPageSize }, function (resp) {
+            if (!resp || !resp.success) {
+                $historyBody.html('<tr><td colspan="9"><div class="rp-empty">Unable to load history.</div></td></tr>');
+                $historyPagination.empty();
+                return;
+            }
+
+            var history = resp.history || {};
+            var items = history.items || [];
+            if (!items.length) {
+                $historyBody.html('<tr><td colspan="9"><div class="rp-empty">No history yet for this category.</div></td></tr>');
+                renderHistoryPagination(history.total || 0, history.page || 1, history.page_size || state.historyPageSize);
+                return;
+            }
+
+            var html = '';
+            items.forEach(function (item) {
+                var fileLabel = item.file_name || item.remarks || '-';
+                html += '<tr>';
+                html += '<td>Version ' + Number(item.version || 0) + '</td>';
+                html += '<td>' + esc(fileLabel) + '</td>';
+                html += '<td>' + esc(item.uploaded_by || '-') + '</td>';
+                html += '<td>' + esc(item.uploaded_at || '-') + '</td>';
+                html += '<td>' + Number(item.affected_products || 0) + '</td>';
+                html += '<td>' + Number(item.success_count || 0) + '</td>';
+                html += '<td>' + Number(item.failed_count || 0) + '</td>';
+                html += '<td>' + esc(item.status || '-') + '</td>';
+                html += '<td>';
+                if (item.can_download) {
+                    html += '<button type="button" class="action-secondary" data-action="download-history" data-history-id="' + Number(item.history_id) + '"><span>Download</span></button> ';
+                }
+                html += '<button type="button" class="action-secondary" data-action="rollback" data-history-id="' + Number(item.history_id) + '"><span>Rollback</span></button>';
+                html += '</td>';
+                html += '</tr>';
+            });
+            $historyBody.html(html);
+            renderHistoryPagination(history.total || 0, history.page || state.historyPage, history.page_size || state.historyPageSize);
+        }).fail(function () {
+            $historyBody.html('<tr><td colspan="9"><div class="rp-empty">Unable to load history.</div></td></tr>');
+            $historyPagination.empty();
+        });
+    }
+
+    function renderPreview(data) {
+        var summary = data.summary || {};
+        var preview = data.preview || [];
+        state.preview = preview;
+        state.selectedHistoryId = Number(data.history_id || 0);
+
+        var summaryHtml = '';
+        summaryHtml += '<span class="rp-pill">Total: ' + Number(summary.total || 0) + '</span>';
+        summaryHtml += '<span class="rp-pill success">Success: ' + Number(summary.success || 0) + '</span>';
+        summaryHtml += '<span class="rp-pill failed">Failed: ' + Number(summary.failed || 0) + '</span>';
+        summaryHtml += '<span class="rp-pill skipped">Skipped: ' + Number(summary.skipped || 0) + '</span>';
+        $summary.html(summaryHtml);
+
+        var rowsHtml = '';
+        preview.forEach(function (row) {
+            rowsHtml += '<tr>';
+            rowsHtml += '<td>' + esc(row.sku) + '</td>';
+            rowsHtml += '<td>' + esc(row.product_name) + '</td>';
+            rowsHtml += '<td>' + Number(row.old_position || 0) + '</td>';
+            rowsHtml += '<td>' + Number(row.new_position || 0) + '</td>';
+            rowsHtml += '<td>' + esc(row.status || '') + '</td>';
+            rowsHtml += '<td>' + esc(row.remarks || '') + '</td>';
+            rowsHtml += '</tr>';
+        });
+        $previewBody.html(rowsHtml || '<tr><td colspan="6">No preview rows.</td></tr>');
+
+        var canConfirm = Number(summary.success || 0) > 0 && state.selectedHistoryId > 0;
+        $('#rp-confirm').prop('disabled', !canConfirm).find('span').text('Confirm Reorder');
+        $previewBlock.show();
+    }
+
+    $treeWrap.on('click', '[data-action="toggle"]', function (event) {
+        event.stopPropagation();
+        var id = Number($(this).data('id'));
+        state.expanded[id] = !state.expanded[id];
+        renderTree();
+    });
+
+    $treeWrap.on('click', '[data-action="select"]', function () {
+        setSelectedCategory(Number($(this).data('id')));
+    });
+
+    $('#rp-download-latest').on('click', function () {
+        if (!state.selectedCategoryId) {
+            showMessage('Please select a category first.', true);
+            return;
+        }
+        clearMessage();
+        var downloadMode = String($('input[name="rp-download-mode"]:checked').val() || 'all');
+        window.open(
+            urls.download + '?category_id=' + state.selectedCategoryId + '&download_mode=' + encodeURIComponent(downloadMode),
+            '_blank'
+        );
+        setTimeout(function () {
+            loadMeta();
+            loadHistory();
+        }, 1000);
+    });
+
+    $('#rp-upload-btn').on('click', function () {
+        if (!state.selectedCategoryId) {
+            showMessage('Please select a category first.', true);
+            return;
+        }
+        $('#rp-upload-file').val('');
+        $('#rp-upload-file').trigger('click');
+    });
+
+    $('#rp-upload-file').on('change', function () {
+        var file = this.files && this.files[0] ? this.files[0] : null;
+        if (!file) {
+            return;
+        }
+
+        clearMessage();
+        var formData = new FormData();
+        formData.append('category_id', String(state.selectedCategoryId));
+        formData.append('form_key', formKey);
+        formData.append('reorder_file', file);
+
+        $.ajax({
+            url: urls.uploadValidate,
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'json'
+        }).done(function (resp) {
+            if (!resp || !resp.success) {
+                showMessage(resp && resp.message ? resp.message : 'Validation failed.', true);
+                return;
+            }
+            renderPreview(resp.data || {});
+            showMessage('Validation completed. Review preview and click Confirm Reorder.', false);
+            loadHistory();
+        }).fail(function () {
+            showMessage('Upload validation failed.', true);
+        });
+    });
+
+    $('#rp-confirm').on('click', function () {
+        if (!state.selectedCategoryId || !state.selectedHistoryId) {
+            showMessage('No validated version selected to confirm.', true);
+            return;
+        }
+
+        if (!window.confirm('Apply reordered positions to this category now?')) {
+            return;
+        }
+
+        $('#rp-confirm').prop('disabled', true).find('span').text('Processing...');
+
+        $.ajax({
+            url: urls.confirm,
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                category_id: state.selectedCategoryId,
+                history_id: state.selectedHistoryId,
+                form_key: formKey
+            }
+        }).done(function (resp) {
+            if (!resp || !resp.success) {
+                $('#rp-confirm').prop('disabled', false).find('span').text('Confirm Reorder');
+                showMessage(resp && resp.message ? resp.message : 'Failed to apply reorder.', true);
+                return;
+            }
+
+            var s = resp.summary || {};
+            showMessage('Reorder applied. Success: ' + Number(s.success || 0) + ', Failed: ' + Number(s.failed || 0) + ', Skipped: ' + Number(s.skipped || 0), false);
+            loadMeta();
+            loadHistory();
+            $('#rp-confirm').prop('disabled', true).find('span').text('Reordered');
+        }).fail(function () {
+            $('#rp-confirm').prop('disabled', false).find('span').text('Confirm Reorder');
+            showMessage('Failed to apply reorder.', true);
+        });
+    });
+
+    $historyBody.on('click', '[data-action="download-history"]', function () {
+        var historyId = Number($(this).data('history-id') || 0);
+        if (!historyId) {
+            return;
+        }
+        window.open(urls.historyDownload + '?history_id=' + historyId, '_blank');
+    });
+
+    $historyBody.on('click', '[data-action="rollback"]', function () {
+        var historyId = Number($(this).data('history-id') || 0);
+        if (!historyId || !state.selectedCategoryId) {
+            return;
+        }
+
+        if (!window.confirm('Rollback category positions to this version?')) {
+            return;
+        }
+
+        $.ajax({
+            url: urls.rollback,
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                category_id: state.selectedCategoryId,
+                history_id: historyId,
+                form_key: formKey
+            }
+        }).done(function (resp) {
+            if (!resp || !resp.success) {
+                showMessage(resp && resp.message ? resp.message : 'Rollback failed.', true);
+                return;
+            }
+
+            var summary = (resp.data && resp.data.summary) ? resp.data.summary : {};
+            showMessage('Rollback applied. Success: ' + Number(summary.success || 0) + ', Failed: ' + Number(summary.failed || 0) + ', Skipped: ' + Number(summary.skipped || 0), false);
+            loadMeta();
+            loadHistory();
+        }).fail(function () {
+            showMessage('Rollback failed.', true);
+        });
+    });
+
+    $historyPagination.on('click', '[data-action="history-prev"]', function () {
+        if (state.historyPage <= 1) {
+            return;
+        }
+        state.historyPage -= 1;
+        loadHistory();
+    });
+
+    $historyPagination.on('click', '[data-action="history-next"]', function () {
+        state.historyPage += 1;
+        loadHistory();
+    });
+
+    $historyPageSize.on('change', function () {
+        state.historyPageSize = Number($(this).val() || 20);
+        state.historyPage = 1;
+        loadHistory();
+    });
+
+    var searchTimer = null;
+    $searchInput.on('input', function () {
+        var q = String($(this).val() || '').trim();
+        if (searchTimer) {
+            clearTimeout(searchTimer);
+        }
+
+        if (q.length < 2) {
+            $searchResults.hide().empty();
+            return;
+        }
+
+        searchTimer = setTimeout(function () {
+            $.getJSON(urls.search, { q: q }, function (resp) {
+                if (!resp || !resp.success) {
+                    $searchResults.hide().empty();
+                    return;
+                }
+
+                var items = resp.items || [];
+                if (!items.length) {
+                    $searchResults.html('<div class="rp-search-item">No matches</div>').show();
+                    return;
+                }
+
+                var html = '';
+                items.forEach(function (item) {
+                    html += '<div class="rp-search-item" data-id="' + Number(item.id) + '">' + esc(item.name) + ' (ID: ' + Number(item.id) + ') (' + Number(item.product_count || 0) + ')</div>';
+                });
+                $searchResults.html(html).show();
+            });
+        }, 250);
+    });
+
+    $searchResults.on('click', '.rp-search-item', function () {
+        var id = Number($(this).data('id') || 0);
+        if (!id) {
+            return;
+        }
+        $searchResults.hide().empty();
+        setSelectedCategory(id);
+    });
+
+    loadTree();
+    loadHistory();
+});
+</script>

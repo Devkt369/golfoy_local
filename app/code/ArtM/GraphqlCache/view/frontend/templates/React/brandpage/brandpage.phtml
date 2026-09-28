@@ -1,0 +1,511 @@
+
+
+
+
+<script type="text/javascript">
+require(['react', 'react-dom'], function (React, ReactDOM) {
+    console.log("🚀 React script starting...");
+
+    const { useState, useEffect, createElement, useCallback } = React;
+
+    function formatINR(amount) {
+        return '₹ ' + new Intl.NumberFormat('en-IN').format(amount);
+    }
+
+    function getCategoryIdFromURL(url) {
+        window.history.pushState(null, '', url);
+
+        //console.log("called getCategoryIdFromURL script 2");
+
+        let urlPath = window.location.pathname.replace(/^\//, '').replace('.html', '');
+        const fragmentId = window.location.hash?.replace('#', '');
+        const isNumericId = /^\d+$/.test(fragmentId);
+        const idFromFragment = isNumericId ? fragmentId : null;
+
+        const cacheKey = idFromFragment
+            ? `categoryId_id_${idFromFragment}`
+            : `categoryId_${urlPath}`;
+
+        const cachedCategoryId = sessionStorage.getItem(cacheKey);
+
+        let query = '';
+
+        if (idFromFragment) {
+            query = `{
+                category(id: ${idFromFragment}) {
+                    id
+                    meta_title
+                    description
+                    name
+                    landing_page
+                    staticblockontop
+                }
+            }`;
+        } else {
+            query = `{
+                categoryList(filters: { url_path: { eq: "${urlPath}" } }) {
+                    id
+                    meta_title
+                    image
+                    description
+                    name
+                    landing_page
+                    staticblockontop
+                }
+            }`;
+        }
+
+        return fetch('/graphql', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (
+                data.errors ||
+                (idFromFragment && !data?.data?.category) ||
+                (!idFromFragment && !data?.data?.categoryList?.length)
+            ) {
+                console.error('❌ GraphQL error or category not found:', data.errors);
+                return cachedCategoryId || "1";
+            }
+
+            const category = idFromFragment ? data.data.category : data.data.categoryList[0];
+            const categoryId = category.id || cachedCategoryId || "1";
+            const metaTitle = category.meta_title || category.name;
+            const categoryName = category.name || "Unknown Category";
+            const categoryImage = category.description || "";
+
+            sessionStorage.setItem(cacheKey, categoryId);
+            sessionStorage.setItem(`metaTitle_${cacheKey}`, metaTitle);
+            sessionStorage.setItem(`categoryName_${cacheKey}`, categoryName);
+            sessionStorage.setItem(`categoryImage_${cacheKey}`, categoryImage);
+
+            document.title = metaTitle;
+
+            return categoryId;
+        })
+        .catch(error => {
+            console.error('❌ Error fetching category data:', error);
+            return cachedCategoryId || "1";
+        });
+    }
+
+    function BrandPage({ categoryId }) {
+        const [categoryData, setCategoryData] = useState(null);
+        const [cmsBlockContent, setCmsBlockContent] = useState('');
+        const [loading, setLoading] = useState(true);
+        const [error, setError] = useState(null);
+
+        // 🔹 Added for infinite scroll
+        const [pageInfo, setPageInfo] = useState({});
+        const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+        useEffect(() => {
+            function fetchCategoryAndBlock() {
+                setLoading(true);
+                const categoryQuery = `
+                    query {
+                        category(id: ${categoryId}) {
+                            name
+                            description
+                            image
+                            staticblockontop
+                            children {
+                                id
+                                name
+                                products(pageSize: 10, currentPage: 1) {
+                                    items {
+                                        name
+                                        sku
+                                        url_key
+                                        small_image { url }
+                                        price_range {
+                                            maximum_price {
+                                                regular_price { value currency }
+                                                final_price { value currency }
+                                                discount { amount_off percent_off }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                `;
+                fetch('/graphql', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: categoryQuery })
+                })
+                .then(response => response.json())
+                .then(categoryResult => {
+                    const category = categoryResult?.data?.category;
+                    if (!category) throw new Error('Category not found');
+
+                    if (category.staticblockontop) {
+                        const cmsQuery = `
+                            query {
+                                cmsBlocks(identifiers: ["${category.staticblockontop}"]) {
+                                    items { content }
+                                }
+                            }
+                        `;
+                        return fetch('/graphql', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ query: cmsQuery })
+                        })
+                        .then(cmsRes => cmsRes.json())
+                        .then(cmsResult => {
+                            const cmsContent = cmsResult?.data?.cmsBlocks?.items?.[0]?.content || '';
+                            setCmsBlockContent(cmsContent);
+                            setCategoryData(category);
+                            // 🔹 Initialize page info
+                            const pages = {};
+                            category.children.forEach(c => (pages[c.id] = 1));
+                            setPageInfo(pages);
+                        });
+                    } else {
+                        setCategoryData(category);
+                        // 🔹 Initialize page info
+                        const pages = {};
+                        category.children.forEach(c => (pages[c.id] = 1));
+                        setPageInfo(pages);
+                    }
+                })
+                .catch(e => {
+                    console.error(e);
+                    setError(e.message || 'Error fetching');
+                })
+                .finally(() => setLoading(false));
+            }
+            fetchCategoryAndBlock();
+        }, [categoryId]);
+
+        useEffect(() => {
+            const sidebar = document.querySelector(".sidebar.sidebar-main");
+            const narrow_by_list = document.querySelector("div#narrow-by-list");
+            if (sidebar) {
+                if (loading) {
+                    sidebar.style.pointerEvents = "none";
+                    if (narrow_by_list) narrow_by_list.style.opacity = "0.5";
+                    sidebar.style.cursor = "not-allowed";
+                } else {
+                    sidebar.style.pointerEvents = "auto";
+                    if (narrow_by_list) narrow_by_list.style.opacity = "1";
+                    sidebar.style.cursor = "default";
+                }
+            }
+            if (loading) {
+                document.body.classList.add("loading");
+            } else {
+                document.body.classList.remove("loading");
+            }
+        }, [loading]);
+
+        // 🔹 Function to load more products for a subcategory
+        const fetchMoreProducts = useCallback(async (childId, nextPage) => {
+            if (isFetchingMore) return;
+            setIsFetchingMore(true);
+            try {
+                const query = `
+                    query {
+                        category(id: ${childId}) {
+                            products(pageSize: 10, currentPage: ${nextPage}) {
+                                items {
+                                    name
+                                    sku
+                                    url_key
+                                    small_image { url }
+                                    price_range {
+                                        maximum_price {
+                                            regular_price { value currency }
+                                            final_price { value currency }
+                                            discount { amount_off percent_off }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                `;
+                const res = await fetch('/graphql', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query }),
+                });
+                const result = await res.json();
+                const newItems = result?.data?.category?.products?.items || [];
+
+                setCategoryData(prev => {
+                    const updated = { ...prev };
+                    updated.children = updated.children.map(sub => {
+                        if (sub.id === childId) {
+                            return {
+                                ...sub,
+                                products: {
+                                    ...sub.products,
+                                    items: [...sub.products.items, ...newItems],
+                                },
+                            };
+                        }
+                        return sub;
+                    });
+                    return updated;
+                });
+
+                setPageInfo(prev => ({ ...prev, [childId]: nextPage }));
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setIsFetchingMore(false);
+            }
+        }, [isFetchingMore]);
+
+        // 🔹 Scroll listener
+        useEffect(() => {
+            if (!categoryData) return;
+
+            const isMobile = window.innerWidth <= 768;
+
+            const handleDivScroll = (event) => {
+                if (isFetchingMore) return;
+
+                const div = event.target;
+                const subId = div.getAttribute('data-subid');
+                if (!subId) return;
+
+                if (!isMobile) {
+                    // Desktop vertical scroll
+                    const scrollTop = div.scrollTop;
+                    const scrollHeight = div.scrollHeight;
+                    const clientHeight = div.clientHeight;
+
+                    if (scrollTop + clientHeight >= scrollHeight - 200) {
+                        const currentPage = pageInfo[subId] || 1;
+                        const sub = categoryData.children.find(c => String(c.id) === String(subId));
+                        if (sub && sub.products.items.length >= currentPage * 10) {
+                            fetchMoreProducts(sub.id, currentPage + 1);
+                        }
+                    }
+                } else {
+                    // Mobile horizontal scroll
+                    const scrollLeft = div.scrollLeft;
+                    const scrollWidth = div.scrollWidth;
+                    const clientWidth = div.clientWidth;
+
+                    if (scrollLeft + clientWidth >= scrollWidth - 200) {
+                        const currentPage = pageInfo[subId] || 1;
+                        const sub = categoryData.children.find(c => String(c.id) === String(subId));
+                        if (sub && sub.products.items.length >= currentPage * 10) {
+                            fetchMoreProducts(sub.id, currentPage + 1);
+                        }
+                    }
+                }
+            };
+
+            // Observe DOM changes
+            const observer = new MutationObserver(() => {
+                const scrollContainers = isMobile 
+                    ? document.querySelectorAll('.produc_list') 
+                    : document.querySelectorAll('.produc_name_sec');
+
+                if (scrollContainers.length > 0) {
+                    scrollContainers.forEach(div => {
+                        div.removeEventListener('scroll', handleDivScroll); // avoid duplicates
+                        div.addEventListener('scroll', handleDivScroll);
+                    });
+                }
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+            });
+
+            // Initial attach
+            const initialContainers = isMobile 
+                ? document.querySelectorAll('.produc_list') 
+                : document.querySelectorAll('.produc_name_sec');
+
+            initialContainers.forEach(div => div.addEventListener('scroll', handleDivScroll));
+
+            return () => {
+                observer.disconnect();
+                const cleanupContainers = isMobile 
+                    ? document.querySelectorAll('.produc_list') 
+                    : document.querySelectorAll('.produc_name_sec');
+
+                cleanupContainers.forEach(div => div.removeEventListener('scroll', handleDivScroll));
+            };
+        }, [categoryData, pageInfo, fetchMoreProducts, isFetchingMore]);
+
+        
+        if (loading) {
+            return; // createElement('div', null, 'Loading brand page...');
+        } else {}
+
+        if (error || !categoryData) {
+            return; //createElement('div', null, `❌ Error: ${error || 'No data found'}`);
+        }
+
+        const visibleChildren = categoryData.children.filter(
+            sub => sub.products?.items?.length > 0
+        );
+
+        return createElement('div', { className: 'container' },
+            createElement('div', { className: 'category-view' },
+                createElement('div', { className: 'category_top_block' },
+                    createElement('h1', { className: 'category_name' }, categoryData.name || '')
+                )
+            ),
+            createElement('div', { className: 'columns' },
+                createElement('div', { className: 'column main' },
+                    createElement('div', { className: 'brandpage' },
+                        createElement('div', { className: '' },
+                            createElement('div', { className: 'per_category_section' },
+                                createElement('div', { className: 'two_div_cat' },
+                                    createElement('div', { className: 'row cat_box' },
+                                        createElement('div', { className: 'col-xs-12 order-xs-2' },
+                                            createElement('div', { className: 'col-md-4 col-xs-12 subcategory_sections_box' },
+                                                visibleChildren.map(sub =>
+                                                    createElement('div', { className: 'subcategory_blocks', key: sub.id },
+                                                        createElement('div', { className: 'subcategory_section' },
+                                                            createElement('hr', { className: 'first_hr' }),
+                                                            createElement('div', { className: 'sub_cat_name' },
+                                                                createElement('div', { className: 'subcat_name' },
+                                                                    createElement('a', { href: '#' }, sub.name),
+                                                                    createElement('span', { className: 'toggle-button' }, '+')
+                                                                ),
+                                                                createElement('div', { 
+                                                                    className: 'produc_name_sec',
+                                                                    'data-subid': sub.id,
+                                                                },
+                                                                    createElement('div', { className: 'produc_list', 'data-subid': sub.id },
+                                                                        sub.products.items.map(prod =>
+                                                                            createElement('div', { className: 'product', key: prod.sku },
+                                                                                createElement('a', { href: `/${prod.url_key}.html` },
+                                                                                    prod.small_image?.url &&
+                                                                                    createElement('img', {
+                                                                                        src: prod.small_image.url,
+                                                                                        alt: prod.name,
+                                                                                        className: 'mobile-only'
+                                                                                    }),
+                                                                                    createElement('p', { className: 'product-name' }, prod.name),
+                                                                                    createElement('div', { className: 'price_html_category_page configurable_product' },
+                                                                                        createElement('div', { className: 'price-box price-final_price' },
+                                                                                            createElement('span', { className: 'old-price' },
+                                                                                                createElement('span', { className: 'price-container price-final_price tax weee' },
+                                                                                                    createElement('span', { className: 'price-label' }, 'MRP.'),
+                                                                                                    createElement('span', { className: 'price-wrapper' },
+                                                                                                        createElement('span', { className: 'price' },
+                                                                                                            formatINR(prod.price_range.maximum_price.regular_price.value)
+                                                                                                        )
+                                                                                                    )
+                                                                                                )
+                                                                                            ),
+                                                                                            createElement('div', { className: 'break_here' }),
+                                                                                            createElement('span', { className: 'special-price' },
+                                                                                                createElement('span', { className: 'price-container price-final_price tax weee' },
+                                                                                                    createElement('span', { className: 'price-label' }, 'Deal Price'),
+                                                                                                    createElement('span', { className: 'price-wrapper' },
+                                                                                                        createElement('span', { className: 'price' },
+                                                                                                            formatINR(prod.price_range.maximum_price.final_price.value)
+                                                                                                        )
+                                                                                                    )
+                                                                                                )
+                                                                                            ),
+                                                                                            createElement('div', { className: 'break_here' }),
+                                                                                            createElement('div', { className: 'you-save-statement' },
+                                                                                                createElement('span', { className: 'label_special_price_custom yousave_price_label' }, 'You save:'),
+                                                                                                createElement('span', { className: 'yousave_price' },
+                                                                                                    createElement('span', null, formatINR(prod.price_range.maximum_price.discount.amount_off)),
+                                                                                                    createElement('span', null, " "),
+                                                                                                    createElement('span', null, `(${Math.round(prod.price_range.maximum_price.discount.percent_off)}% OFF)` )
+                                                                                                )
+                                                                                            )
+                                                                                        )
+                                                                                    )
+                                                                                )
+                                                                            )
+                                                                        )
+                                                                    )
+                                                                )
+                                                            )
+                                                        )
+                                                    )
+                                                ),
+                                                isFetchingMore && createElement( 'div', { className: 'loading-more' },
+                                                                                    [
+                                                                                        createElement('span', { key: 's1' }),
+                                                                                        createElement('span', { key: 's2' }),
+                                                                                        createElement('span', { key: 's3' }),
+                                                                                        createElement('span', { key: 's4' })
+                                                                                    ]
+                                                                                )
+                                            )
+                                        ),
+                                        createElement('div', { className: 'col-xs-12 order-xs-1' },
+                                            createElement('div', { className: 'col-sm-12 col-md-8 col-xs-12 category-cms-block' },
+                                                createElement('div', {
+                                                    dangerouslySetInnerHTML: { __html: cmsBlockContent || '' }
+                                                })
+                                            )
+                                        )
+                                    )
+                                ),
+                                createElement('div', { className: 'cat_description_sec' },
+                                    createElement('div', { className: 'row' },
+                                        createElement('div', { className: 'col-12' },
+                                            createElement('div', { className: 'cat_desciption_box' },
+                                                createElement('div', { className: 'col-md-4 col-sm-4 cat_box_img box_Sec' },
+                                                    categoryData.image &&
+                                                    createElement('img', { src: categoryData.image, alt: categoryData.name })
+                                                ),
+                                                createElement('div', { className: 'col-md-8 col-sm-8 cat_box_desc box_Sec' },
+                                                    createElement('h4', { className: 'car_box_head' }, 'About the brand'),
+                                                    createElement('div', {
+                                                        dangerouslySetInnerHTML: { __html: categoryData.description || '' }
+                                                    })
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    createElement('div', { className: 'row' },
+                                        createElement('a', { className: 'explore-brand react-comp', href: '/all-golf-brands-india.html#307' },
+                                            createElement('h5', { className: 'explore-all-brand' }, 'Explore All Brands')
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                ),
+                createElement('div', { className: 'category-description' })
+            )
+        );
+    }
+
+
+    window.callBrandpage = function (url) {
+        //console.log("Called callBrandpage()");
+        getCategoryIdFromURL(url).then(categoryId => {
+            if (!categoryId || categoryId === 'skip') {
+                console.warn("⛔ No valid category ID to render BrandPage");
+                return;
+            }
+            const target = document.getElementById('maincontent');
+            if (target) {
+                ReactDOM.render(
+                    createElement(BrandPage, { categoryId }),
+                    target
+                );
+            } else {
+                console.warn("❌ #maincontent not found");
+            }
+        });
+    };
+});
+</script>

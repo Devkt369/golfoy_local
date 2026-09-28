@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2020 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <virtualType name="ClickAndCollectScheduleCollection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">clickandcollect_schedule</argument>
+            <argument name="resourceModel" xsi:type="string">Magestore\ClickAndCollect\Model\ResourceModel\Schedule</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ClickAndCollectSpecialDayCollection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">clickandcollect_specialday</argument>
+            <argument name="resourceModel" xsi:type="string">Magestore\ClickAndCollect\Model\ResourceModel\SpecialDay</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="clickandcollectadmin_schedule_listing_data_source" xsi:type="string">ClickAndCollectScheduleCollection</item>
+                <item name="clickandcollectadmin_specialday_listing_data_source" xsi:type="string">ClickAndCollectSpecialDayCollection</item>
+                <item name="clickandcollect_select_special_days_listing_data_source" xsi:type="string">ClickAndCollectSpecialDayCollection</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

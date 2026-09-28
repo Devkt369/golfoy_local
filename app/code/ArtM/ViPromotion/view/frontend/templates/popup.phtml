@@ -1,0 +1,183 @@
+<?php
+
+/**
+ * @var \ArtM\ViPromotion\Block\Popup $block
+ */
+?>
+<div id="vipromotion-popup-overlay" class="vipromotion-popup-overlay" style="display:none;">
+    <div class="vipromotion-popup-container">
+        <button class="vipromotion-popup-close" id="vipromotion-popup-close">&times;</button>
+        <div id="vipromotion-popup-content"></div>
+    </div>
+</div>
+
+<script>
+    require(['jquery', 'domReady!'], function($) {
+
+        function initPopup(data) {
+            // console.log('From Event FULL:', JSON.stringify(data, null, 2));
+
+            // ❌ If not eligible → stop
+            if (!data || !data.success || !data.show_popup) {
+                return;
+            }
+
+            var today = new Date().toISOString().split('T')[0];
+            var storageKey = 'vipromotion_popup_' + today;
+
+            // Already closed today
+            if (localStorage.getItem(storageKey) === 'closed') {
+                return;
+            }
+
+            // ✅ Set content
+            $('#vipromotion-popup-content').html(data.popup_content);
+
+            // Show popup
+            setTimeout(function() {
+                $('#vipromotion-popup-overlay').fadeIn(300);
+            }, 1000);
+
+            function closePopup() {
+                $('#vipromotion-popup-overlay').fadeOut(300);
+                localStorage.setItem(storageKey, 'closed');
+            }
+
+            // Close handlers
+            $('#vipromotion-popup-close').on('click', closePopup);
+
+            $('#vipromotion-popup-overlay').on('click', function(e) {
+                if (e.target === this) closePopup();
+            });
+
+            $(document).on('keyup', function(e) {
+                if (e.keyCode === 27) closePopup();
+            });
+        }
+
+        // ✅ CASE 1: Data already available
+        if (window.vipcustomerData) {
+            initPopup(window.vipcustomerData);
+        }
+
+        $(document).on('vipcustomerDataLoaded', function(e, data) {
+            initPopup(data);
+            // console.log('From Event:', data);
+        });
+
+
+    });
+</script>
+
+
+<style>
+    button#vipromotion-popup-close:hover {
+        background: none;
+        border: none;
+    }
+
+    .vipromotion-popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .vipromotion-popup-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        /* background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); */
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: hidden;
+        animation: slideInUp 0.4s ease-out;
+        padding: 20px;
+        position: relative;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .vipromotion-popup-close {
+        position: absolute;
+        top: 35px;
+        right: 20px;
+        background: none;
+        border: none;
+        font-size: 28px;
+        cursor: pointer;
+        color: #ffffffff;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+        z-index: 1;
+    }
+
+    /* .vipromotion-popup-close:hover {
+        background: #f5f5f5;
+        color: #333;
+    } */
+
+    .vipromotion-popup-container h3 {
+        color: #333;
+        margin-top: 0;
+    }
+
+    .vipromotion-popup-container ul {
+        padding-left: 20px;
+    }
+
+    .vipromotion-popup-container li {
+        margin-bottom: 8px;
+    }
+
+    .vipromotion-popup-container img {
+        max-width: 100%;
+        height: auto;
+        width: 100%;
+        border-radius: 8px;
+        margin: 10px 0;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translate(-50%, -40%);
+        }
+
+        to {
+            opacity: 1;
+            transform: translate(-50%, -50%);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .vipromotion-popup-container {
+            width: 95%;
+            padding: 25px 20px 20px 20px;
+            text-align: center;
+        }
+    }
+</style>

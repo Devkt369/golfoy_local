@@ -1,0 +1,45 @@
+<div class="wizzy"></div>
+
+<script>
+    require(["jquery", "bootstrap"], function(jQuery) {
+        jQuery(document).ready(function() {
+            jQuery("#search_mini_form").on("submit", function () {
+                jQuery("main#maincontent").hide();                
+                jQuery(".breadcrumbs").hide();                
+                jQuery(".wizzy-result-container").show(); 
+            });
+
+            // jQuery(document).on('click', 'a[href^="#alpha_"]', function(e) {
+            //     e.preventDefault(); // Stop the URL hash from changing
+            //     var targetId = jQuery(this).attr('href');
+            //     var $target = jQuery(targetId);
+            //     if ($target.length) {
+            //         var scrollTop = $target.offset().top - 400; // Add 200px extra space above
+            //         jQuery('html, body').animate({
+            //             scrollTop: scrollTop
+            //         }, 500); // Adjust speed if needed
+            //     }
+            // });
+
+            jQuery(document).on("click","ul.autocomplete-suggestions-list li.autocomplete-item", function () {
+                jQuery("main#maincontent").hide();                
+                jQuery(".breadcrumbs").hide();                
+                jQuery(".wizzy-result-container").show(); 
+            });
+
+            jQuery(document).on("click","a.logo.react-comp img", function () {
+                jQuery("main#maincontent").show();        
+                jQuery(".breadcrumbs").hide();                
+                jQuery(".wizzy-result-container").hide();        
+            });
+
+            if (jQuery(window).width() > 768) {
+                setTimeout(function(){
+                    jQuery("nav.navigation li.ui-menu-item a.ui-menu-item-wrapper").attr("href", function() {
+                        return jQuery(this).attr("rel-href");
+                    });
+                },3000);
+            }
+        });
+    });
+</script>

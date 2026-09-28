@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+<body>
+        <attribute name="class" value="players_bag_page" />
+    </body>
+        <referenceContainer name="div.players.bag">
+            <block class="Magento\Catalog\Block\Category\View" name="playersbag" template="ArtM_Playersbag::block.phtml" />
+            <block class="Magento\Catalog\Block\Category\View" name="witb.main" template="ArtM_Playersbag::witb_text.phtml" after="playersbag" />
+        </referenceContainer>
+        
+</config>

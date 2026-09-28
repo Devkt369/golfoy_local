@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Magestore\ClickAndCollectMigrate\Api\Data\LocationStoreMapInterface"
+                type="Magestore\ClickAndCollectMigrate\Model\LocationStoreMap"/>
+    <preference for="Magestore\ClickAndCollectMigrate\Api\Data\LocationStoreMapSearchResultsInterface"
+                type="Magestore\ClickAndCollectMigrate\Model\LocationStoreMapSearchResults"/>
+    <preference for="Magestore\ClickAndCollectMigrate\Api\LocationStoreMapRepositoryInterface"
+                type="Magestore\ClickAndCollectMigrate\Model\LocationStoreMapRepository"/>
+
+    <preference for="Magestore\ClickAndCollectMigrate\Api\Data\LogInterface"
+                type="Magestore\ClickAndCollectMigrate\Model\Log"/>
+    <preference for="Magestore\ClickAndCollectMigrate\Api\Data\LogSearchResultsInterface"
+                type="Magestore\ClickAndCollectMigrate\Model\LogSearchResults"/>
+    <preference for="Magestore\ClickAndCollectMigrate\Api\LogRepositoryInterface"
+                type="Magestore\ClickAndCollectMigrate\Model\LogRepository"/>
+
+    <preference for="Magestore\ClickAndCollectMigrate\Api\Console\MigrateServiceInterface"
+                type="Magestore\ClickAndCollectMigrate\Model\Console\MigrateService"/>
+
+    <preference for="Magestore\ClickAndCollectMigrate\Api\Migrate\MigrateLocationServiceInterface"
+                type="Magestore\ClickAndCollectMigrate\Model\Migrate\MigrateLocationService"/>
+    <preference for="Magestore\ClickAndCollectMigrate\Api\Migrate\MigrateSpecialDayServiceInterface"
+                type="Magestore\ClickAndCollectMigrate\Model\Migrate\MigrateSpecialDayService"/>
+    <preference for="Magestore\ClickAndCollectMigrate\Api\Migrate\MigrateOrderServiceInterface"
+                type="Magestore\ClickAndCollectMigrate\Model\Migrate\MigrateOrderService"/>
+
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="migrateClickAndCollectCommand" xsi:type="object">Magestore\ClickAndCollectMigrate\Console\Command\MigrateCommand</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

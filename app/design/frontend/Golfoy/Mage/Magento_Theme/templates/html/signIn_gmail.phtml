@@ -1,0 +1,49 @@
+<?php
+header('Cross-Origin-Opener-Policy: same-origin');
+header('Cross-Origin-Embedder-Policy: require-corp');
+
+?>
+
+<div class="actions-toolbar">
+<div class="primary"><button class="action primary" type="button" id="google-sign-in-button"> Sign In with Gmail </button>
+</div>
+</div>
+
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+<script src="https://apis.google.com/js/api.js"></script>
+<script>
+    gapi.load('auth2', function () {
+        gapi.auth2.init({
+            client_id: '443944902357-4vq47glh0b7eiran1ij8hgk0de06uv4v.apps.googleusercontent.com', // Replace with your Google API Client ID
+        });
+        
+        // Attach the click event to the button
+        document.getElementById('google-sign-in-button').addEventListener('click', function () {
+            gapi.auth2.getAuthInstance().signIn().then(function (googleUser) {
+                console.log('googleUser- ');
+                console.log(googleUser);
+                
+                var profile = googleUser.getBasicProfile();
+                var id_token = googleUser.getAuthResponse().id_token;
+                
+                // Send the id_token to your server for verification
+                // You can use AJAX to send this token to your Magento controller
+                // Example: $.post('/custom/module/verify_google_token', { id_token: id_token }, function(data) {});
+                
+                // Now, you can access user details:
+                console.log('User ID: ' + profile.getId());
+                console.log('Name: ' + profile.getName());
+                console.log('Email: ' + profile.getEmail());
+                console.log('Image URL: ' + profile.getImageUrl());
+            }).catch(function(error) {
+                if (error.error === 'popup_closed_by_user') {
+                    console.error('popup intentionally:', error);
+                    // User closed the popup intentionally, you can ignore this error
+                } else {
+                    // Handle other sign-in errors here
+                    console.error('Sign-in error:', error);
+                }
+            });
+        });
+    });
+</script>

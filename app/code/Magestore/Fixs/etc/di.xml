@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Integration\Helper\Data">
+        <!--disable plugin of webpos-->
+        <plugin name="acl-intergration-data"
+                type="Magestore\Webpos\Plugin\Integration\Data"
+                sortOrder="100"
+                disabled="true"
+        />
+<!--        <plugin name="fixbug-show-acl-intergration-data"-->
+<!--                type="Magestore\Fixs\Plugin\Webpos\Integration\DataPlugin"-->
+<!--                sortOrder="100"-->
+<!--                disabled="false" />-->
+    </type>
+    <preference for="Magestore\Appadmin\Block\Adminhtml\Staff\Role\Edit\Tab\Permission"
+                type="Magestore\Fixs\Rewrite\Appadmin\Block\Adminhtml\Staff\Role\Edit\Tab\Permission"/>
+</config>

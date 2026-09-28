@@ -1,0 +1,59 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+// @codingStandardsIgnoreFile
+
+?>
+<?php /** @var $block \Magento\Checkout\Block\Onepage\Success */ ?>
+<div class="checkout-success default">
+    
+
+    <div class="actions-toolbar">
+        <div class="primary">
+             <div class="container">
+                    <div class="row">
+                       <div class="success_order_page_left">
+                        <h1 class="heading_success">Your order has been received!</h1>
+                        <div class="row tick_success">
+                            <div class="col-xs-12">
+                                <img src="https://golfoy.com/media/sales/download.gif">
+                            </div>
+                        </div>
+                           
+                           <?php if ($block->getOrderId()):?>
+                                <?php if ($block->getCanViewOrder()) :?>
+                                    <p class="order_number" style="margin-bottom:0px;"><?= __('Your order number is: %1.', sprintf('<a href="%s" class="order-number"><strong>%s</strong></a>', $block->escapeHtml($block->getViewOrderUrl()), $block->escapeHtml($block->getOrderId()))) ?></p>
+                           
+                                <?php  else :?>
+                                    <p class="order_number" style="margin-bottom:0px;"><?= __('Your order # is: <span>%1</span>.', $block->escapeHtml($block->getOrderId())) ?></p>
+                                <?php endif;?>
+                                   <?php
+                                        $order_id = $block->escapeHtml($block->getOrderId());  //PASS YOUR ORDER ID HERE
+                                        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+                                        $curr_symbol = $objectManager->create('Magento\Framework\Pricing\PriceCurrencyInterface');
+                                        $order = $objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($order_id);
+
+                                        $price_html = trim($curr_symbol->getCurrencySymbol()).trim((int)$order->getGrandTotal());
+                                   ?>
+                                    <span id="tid" style="display:none;"> <?php $td= $order->getIncrementId(); echo $td; ?></span>
+                                    <span id="ttotal" style="display:none;"> <?php echo $order->getGrandTotal(); ?></span>
+                                    <p class="recive_text"><?= __('You will receive an order confirmation E-mail &amp; SMS with details of your order and a link to track its progress.') ?></p>
+                                    <p class="rewardpoint_text"><?= __('Use Cashback Money to get Upto 10% Off on your next order.View terms &amp; condition for more.') ?></p>
+                           <?php endif;?>
+                           <?= $block->getAdditionalInfoHtml() ?>
+
+
+                        <div class="continue_button">
+                            <button type="button" class="btn btn-warning bt-lg" title="Continue Shopping" onclick="window.location='<?= $block->getContinueUrl(); ?>'"><span><span>Continue Shopping</span></span></button>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+</div>
+
+

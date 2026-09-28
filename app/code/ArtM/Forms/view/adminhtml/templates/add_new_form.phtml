@@ -1,0 +1,33 @@
+<?php
+/**
+ * @var \Magento\Backend\Block\Template $block
+ */
+$actionUrl = $block->getUrl('*/*/saveNew');
+?>
+<form action="<?= $actionUrl ?>" method="post" id="add_new_form_form">
+    <?= $block->getBlockHtml('formkey') ?>
+    <div class="admin__fieldset">
+        <div class="admin__field">
+            <label class="admin__field-label" for="form_name">Form Name</label>
+            <div class="admin__field-control">
+                <input type="text" name="form_name" id="form_name" class="admin__control-text" required />
+            </div>
+        </div>
+        <div class="admin__field">
+            <label class="admin__field-label" for="form_identifier">Identifier</label>
+            <div class="admin__field-control">
+                <input type="text" name="form_identifier" id="form_identifier" class="admin__control-text" required />
+            </div>
+        </div>
+        <div class="admin__field">
+            <label class="admin__field-label" for="form_description">Form Description</label>
+            <div class="admin__field-control">
+                <textarea name="form_description" id="form_description" class="admin__control-text" rows="3"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="admin__footer">
+        <button type="submit" class="action-primary">Save</button>
+        <a href="<?= $block->getUrl('*/*/index') ?>" class="action-secondary">Cancel</a>
+    </div>
+</form>

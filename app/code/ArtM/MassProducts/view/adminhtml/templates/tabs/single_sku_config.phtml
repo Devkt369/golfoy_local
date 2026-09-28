@@ -1,0 +1,673 @@
+<?php
+/** @var \Magento\Backend\Block\Template $block */
+$setsUrl = $block->getUrl('massproducts/attributesassignment/sets');
+$attributesUrl = $block->getUrl('massproducts/singleskulayout/attributes');
+$saveUrl = $block->getUrl('massproducts/singleskulayout/save');
+$groupsUrl = $block->getUrl('massproducts/singleskulayout/groups');
+$groupsSaveUrl = $block->getUrl('massproducts/singleskulayout/groupsave');
+?>
+
+<div id="artm-single-sku-config" class="artm-single-sku-config"
+    data-sets-url="<?= $block->escapeUrl($setsUrl) ?>"
+    data-attributes-url="<?= $block->escapeUrl($attributesUrl) ?>"
+    data-save-url="<?= $block->escapeUrl($saveUrl) ?>"
+    data-groups-url="<?= $block->escapeUrl($groupsUrl) ?>"
+    data-groups-save-url="<?= $block->escapeUrl($groupsSaveUrl) ?>">
+
+    <style>
+        #artm-single-sku-config {
+            margin-top: 12px;
+            color: #1f2937;
+        }
+        #artm-single-sku-config .artm-skcfg-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 14px;
+        }
+        #artm-single-sku-config .artm-skcfg-panel {
+            border: 1px solid #d7e0ea;
+            border-radius: 8px;
+            background: #fff;
+            overflow: hidden;
+        }
+        #artm-single-sku-config .artm-skcfg-head {
+            padding: 12px;
+            border-bottom: 1px solid #e4eaf1;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        }
+        #artm-single-sku-config .artm-skcfg-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+        #artm-single-sku-config .artm-skcfg-subtitle {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        #artm-single-sku-config .artm-skcfg-body {
+            padding: 12px;
+        }
+        #artm-single-sku-config .artm-skcfg-field {
+            margin-bottom: 10px;
+        }
+        #artm-single-sku-config .artm-skcfg-search {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #artm-single-sku-config .artm-skcfg-filters {
+            display: grid;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        #artm-single-sku-config .artm-skcfg-filter {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #374151;
+        }
+        #artm-single-sku-config .artm-skcfg-lib {
+            max-height: 68vh;
+            overflow: auto;
+            border: 1px solid #e4eaf1;
+            border-radius: 6px;
+            padding: 8px;
+        }
+        #artm-single-sku-config .artm-skcfg-lib-item {
+            border: 1px solid #e9eef4;
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 8px;
+            background: #fbfdff;
+        }
+        #artm-single-sku-config .artm-skcfg-lib-item:last-child {
+            margin-bottom: 0;
+        }
+        #artm-single-sku-config .artm-skcfg-lib-name {
+            font-size: 12px;
+            font-weight: 600;
+        }
+        #artm-single-sku-config .artm-skcfg-lib-code {
+            font-size: 11px;
+            color: #6b7280;
+        }
+        #artm-single-sku-config .artm-skcfg-tags {
+            margin-top: 4px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        #artm-single-sku-config .artm-skcfg-tag {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: #eef3fb;
+            color: #38506a;
+        }
+        #artm-single-sku-config .artm-skcfg-toolbar {
+            display: grid;
+            grid-template-columns: 220px 220px 180px auto 1fr auto;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        #artm-single-sku-config .artm-skcfg-message {
+            font-size: 12px;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+        }
+        #artm-single-sku-config .artm-skcfg-grid-wrap {
+            border: 1px solid #dfe7f0;
+            border-radius: 6px;
+            overflow: auto;
+            max-height: 68vh;
+        }
+        #artm-single-sku-config .artm-skcfg-grid {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 950px;
+        }
+        #artm-single-sku-config .artm-skcfg-grid th,
+        #artm-single-sku-config .artm-skcfg-grid td {
+            border-bottom: 1px solid #eef2f7;
+            padding: 8px;
+            text-align: left;
+            font-size: 12px;
+            vertical-align: middle;
+        }
+        #artm-single-sku-config .artm-skcfg-grid th {
+            background: #f8fafd;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        #artm-single-sku-config .artm-skcfg-grid input[type="number"] {
+            width: 90px;
+        }
+        #artm-single-sku-config .artm-skcfg-empty {
+            padding: 14px;
+            color: #6b7280;
+            font-size: 12px;
+        }
+        @media (max-width: 1200px) {
+            #artm-single-sku-config .artm-skcfg-layout {
+                grid-template-columns: 1fr;
+            }
+            #artm-single-sku-config .artm-skcfg-toolbar {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <div class="artm-skcfg-layout">
+        <section class="artm-skcfg-panel">
+            <div class="artm-skcfg-head">
+                <div class="artm-skcfg-title">Right Panel: Group Mapping (Fast Version)</div>
+                <div class="artm-skcfg-subtitle">Enable/disable + group + sort order (no drag-drop in phase 1).</div>
+            </div>
+            <div class="artm-skcfg-body">
+                <div class="artm-skcfg-toolbar">
+                    <select class="admin__control-select" data-role="attribute-set"></select>
+                    <select class="admin__control-select" data-role="quick-group-filter">
+                        <option value="">All Groups</option>
+                    </select>
+                    <input type="text" class="admin__control-text" data-role="new-group-name" placeholder="New custom group" />
+                    <button type="button" class="action-secondary" data-role="add-group-btn"><span>Add Group</span></button>
+                    <div class="artm-skcfg-message" data-role="message">Select an attribute set to configure layout.</div>
+                    <button type="button" class="action-primary" data-role="save-layout-btn"><span>Save Configuration</span></button>
+                </div>
+
+                <div class="artm-skcfg-grid-wrap">
+                    <table class="artm-skcfg-grid" data-role="layout-grid">
+                        <thead>
+                        <tr>
+                            <th>Attribute</th>
+                            <th>Required</th>
+                            <th>System</th>
+                            <th>Visible Front</th>
+                            <th>Enabled</th>
+                            <th>Group</th>
+                            <th>Sort</th>
+                        </tr>
+                        </thead>
+                        <tbody data-role="layout-grid-body">
+                        <tr><td colspan="7" class="artm-skcfg-empty">No attributes loaded.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+require(['jquery'], function ($) {
+    'use strict';
+
+    var $root = $('#artm-single-sku-config');
+    if (!$root.length || $root.data('singleSkuConfigInit')) {
+        return;
+    }
+    $root.data('singleSkuConfigInit', true);
+
+    var setsUrl = String($root.data('sets-url') || '');
+    var attributesUrl = String($root.data('attributes-url') || '');
+    var saveUrl = String($root.data('save-url') || '');
+    var groupsUrl = String($root.data('groups-url') || '');
+    var groupsSaveUrl = String($root.data('groups-save-url') || '');
+
+    var $setSelect = $root.find('[data-role="attribute-set"]');
+    var $groupFilter = $root.find('[data-role="quick-group-filter"]');
+    var $gridBody = $root.find('[data-role="layout-grid-body"]');
+    var $saveBtn = $root.find('[data-role="save-layout-btn"]');
+    var $newGroupName = $root.find('[data-role="new-group-name"]');
+    var $addGroupBtn = $root.find('[data-role="add-group-btn"]');
+    var $message = $root.find('[data-role="message"]');
+    var $search = $root.find('[data-role="search"]');
+    var $filterRequired = $root.find('[data-role="filter-required"]');
+    var $filterOptional = $root.find('[data-role="filter-optional"]');
+    var $filterSystem = $root.find('[data-role="filter-system"]');
+    var $filterCustom = $root.find('[data-role="filter-custom"]');
+    var $filterVisible = $root.find('[data-role="filter-visible"]');
+
+    var currentSetId = 0;
+    var allAttrs = [];
+    var groupMetaMap = {};
+
+    var defaultGroups = [
+        'Basic Info',
+        'Pricing',
+        'SEO',
+        'Inventory',
+        'Product Media',
+        'Shipping',
+        'Technical Details',
+        'Custom Specifications'
+    ];
+    var groupOptions = []; // Start empty — will be populated from DB when set is selected
+
+    function esc(text) {
+        return $('<div/>').text(String(text || '')).html();
+    }
+
+    function normalizeGroupName(name) {
+        var normalized = String(name || '').trim();
+        return normalized || 'Basic Info';
+    }
+
+    function getFormKey() {
+        var metaKey = $('meta[name="form-key"]').attr('content');
+        return metaKey ? String(metaKey) : String(window.FORM_KEY || '');
+    }
+
+    function setMessage(text, isError) {
+        $message.text(String(text || ''));
+        $message.css('color', isError ? '#b91c1c' : '#6b7280');
+    }
+
+    function toFlag(v) {
+        return v ? 'Yes' : 'No';
+    }
+
+    function matchesFilters(item) {
+        var groupFilter = String($groupFilter.val() || '');
+        if (groupFilter && String(item.group_name || '') !== groupFilter) {
+            return false;
+        }
+        return true;
+    }
+
+    function buildGroupOptions(selected) {
+        var groups = groupOptions.slice(0);
+        if (selected && groups.indexOf(selected) === -1) {
+            groups.push(selected);
+        }
+        groups.sort();
+        var html = [];
+        $.each(groups, function (_, groupName) {
+            html.push('<option value="' + esc(groupName) + '"' + (groupName === selected ? ' selected="selected"' : '') + '>' + esc(groupName) + '</option>');
+        });
+        return html.join('');
+    }
+
+    function ensureGroupMeta(name) {
+        var normalized = normalizeGroupName(name);
+        if (!groupMetaMap[normalized]) {
+            groupMetaMap[normalized] = {
+                original_name: normalized,
+                group_name: normalized,
+                is_enabled: 1,
+                column_index: 1,
+                sort_order: 0,
+                is_deleted: 0
+            };
+        }
+        return groupMetaMap[normalized];
+    }
+
+    function syncGroupOptionsFromMeta() {
+        groupOptions = Object.keys(groupMetaMap)
+            .filter(function (name) {
+                return !!name && !groupMetaMap[name].is_deleted;
+            })
+            .sort();
+    }
+
+    function applyGroupsResponse(groups) {
+        groupMetaMap = {};
+
+        $.each(defaultGroups, function (_, name) {
+            var normalized = normalizeGroupName(name);
+            groupMetaMap[normalized] = {
+                original_name: normalized,
+                group_name: normalized,
+                is_enabled: 1,
+                column_index: 1,
+                sort_order: 0,
+                is_deleted: 0
+            };
+        });
+
+        $.each(groups || [], function (_, group) {
+            var normalized = normalizeGroupName(group && group.name ? group.name : '');
+            groupMetaMap[normalized] = {
+                original_name: normalized,
+                group_name: normalized,
+                is_enabled: group && group.is_enabled ? 1 : 0,
+                column_index: Math.max(1, Math.min(3, parseInt(group && group.column_index, 10) || 1)),
+                sort_order: Math.max(0, parseInt(group && group.sort_order, 10) || 0),
+                is_deleted: 0
+            };
+        });
+
+        syncGroupOptionsFromMeta();
+    }
+
+    function collectGroupsPayload() {
+        return Object.keys(groupMetaMap)
+            .filter(function (name) {
+                return !!name && !groupMetaMap[name].is_deleted;
+            })
+            .sort(function (left, right) {
+                return left.localeCompare(right);
+            })
+            .map(function (name) {
+                var meta = ensureGroupMeta(name);
+                return {
+                    original_name: String(meta.original_name || name),
+                    group_name: String(meta.group_name || name),
+                    is_enabled: meta.is_enabled ? 1 : 0,
+                    column_index: Math.max(1, Math.min(3, parseInt(meta.column_index, 10) || 1)),
+                    sort_order: Math.max(0, parseInt(meta.sort_order, 10) || 0),
+                    is_deleted: 0
+                };
+            });
+    }
+
+    function renderGrid(items) {
+        var html = [];
+        $.each(items, function (_, item) {
+            if (!matchesFilters(item)) {
+                return;
+            }
+            html.push('<tr data-role="layout-row" data-code="' + esc(item.attribute_code) + '">'
+                + '<td><strong>' + esc(item.label) + '</strong><br /><span style="color:#6b7280;">' + esc(item.attribute_code) + '</span></td>'
+                + '<td>' + esc(toFlag(item.is_required)) + '</td>'
+                + '<td>' + esc(toFlag(item.is_system)) + '</td>'
+                + '<td>' + esc(toFlag(item.is_visible_on_front)) + '</td>'
+                + '<td><input type="checkbox" data-role="row-enabled"' + (item.is_enabled ? ' checked="checked"' : '') + ' /></td>'
+                + '<td><select class="admin__control-select" data-role="row-group">' + buildGroupOptions(String(item.group_name || 'Basic Info')) + '</select></td>'
+                + '<td><input type="number" class="admin__control-text" data-role="row-sort" min="0" value="' + esc(String(item.sort_order || 0)) + '" /></td>'
+                + '</tr>');
+        });
+
+        if (!html.length) {
+            $gridBody.html('<tr><td colspan="7" class="artm-skcfg-empty">No matching attributes.</td></tr>');
+            return;
+        }
+
+        $gridBody.html(html.join(''));
+    }
+
+    function renderGroupFilterOptions(items) {
+        var seen = {};
+        var html = ['<option value="">All Groups</option>'];
+        $.each(groupOptions, function (_, g) {
+            seen[g] = true;
+        });
+        $.each(items || [], function (_, item) {
+            var g = String(item.group_name || '');
+            if (g) {
+                seen[g] = true;
+            }
+        });
+        Object.keys(seen).sort().forEach(function (groupName) {
+            html.push('<option value="' + esc(groupName) + '">' + esc(groupName) + '</option>');
+        });
+        $groupFilter.html(html.join(''));
+    }
+
+    function renderAll() {
+        renderGrid(allAttrs);
+    }
+
+    function addCustomGroup(name) {
+        var next = normalizeGroupName(name);
+        if (!next) {
+            return;
+        }
+        if (groupOptions.indexOf(next) === -1) {
+            ensureGroupMeta(next);
+            syncGroupOptionsFromMeta();
+        }
+        renderGroupFilterOptions(allAttrs);
+        renderGrid(allAttrs);
+    }
+
+    function saveGroups(callback) {
+        $.ajax({
+            url: groupsSaveUrl,
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                form_key: getFormKey(),
+                attribute_set_id: currentSetId,
+                groups: JSON.stringify(collectGroupsPayload())
+            }
+        }).done(function (resp) {
+            if (resp && resp.success) {
+                if (typeof callback === 'function') {
+                    callback(true);
+                }
+                return;
+            }
+            setMessage((resp && resp.message) ? resp.message : 'Unable to save groups.', true);
+            if (typeof callback === 'function') {
+                callback(false);
+            }
+        }).fail(function () {
+            setMessage('Unable to save groups.', true);
+            if (typeof callback === 'function') {
+                callback(false);
+            }
+        });
+    }
+
+    function loadGroups(setId, onComplete) {
+        $.ajax({
+            url: groupsUrl,
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                attribute_set_id: setId,
+                form_key: getFormKey()
+            }
+        }).done(function (resp) {
+            if (!resp || !resp.success || !Array.isArray(resp.groups)) {
+                setMessage('Unable to load groups for selected set.', true);
+                if (typeof onComplete === 'function') {
+                    onComplete(false);
+                }
+                return;
+            }
+
+            applyGroupsResponse(resp.groups);
+            renderGroupFilterOptions(allAttrs);
+            renderAll();
+
+            if (typeof onComplete === 'function') {
+                onComplete(true);
+            }
+        }).fail(function () {
+            setMessage('Unable to load groups for selected set.', true);
+            if (typeof onComplete === 'function') {
+                onComplete(false);
+            }
+        });
+    }
+
+    function loadSets() {
+        $.ajax({
+            url: setsUrl,
+            type: 'GET',
+            dataType: 'json'
+        }).done(function (resp) {
+            if (!resp || !resp.success || !Array.isArray(resp.items)) {
+                setMessage('Unable to load attribute sets.', true);
+                return;
+            }
+            var html = [];
+            $.each(resp.items, function (_, item) {
+                var id = Number(item.attribute_set_id || 0);
+                var name = String(item.attribute_set_name || ('Set #' + id));
+                html.push('<option value="' + id + '">' + esc(name) + '</option>');
+            });
+            $setSelect.html(html.join(''));
+            currentSetId = parseInt($setSelect.val(), 10) || 0;
+            localStorage.setItem('artm_selected_set_id', currentSetId);
+            loadAttributes(currentSetId);
+        }).fail(function () {
+            setMessage('Unable to load attribute sets.', true);
+        });
+    }
+
+    function loadAttributes(setId) {
+        currentSetId = Number(setId || 0);
+        setMessage('Loading attributes...', false);
+        allAttrs = [];
+        groupMetaMap = {};
+        syncGroupOptionsFromMeta();
+        renderAll();
+
+        $.when(
+            $.ajax({
+            url: attributesUrl,
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                attribute_set_id: currentSetId,
+                form_key: getFormKey()
+            }
+            }),
+            $.ajax({
+                url: groupsUrl,
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                    attribute_set_id: currentSetId,
+                    form_key: getFormKey()
+                }
+            })
+        ).done(function (attrResponse, groupResponse) {
+            var resp = attrResponse[0] || {};
+            var groupsResp = groupResponse[0] || {};
+
+            if (!resp || !resp.success || !Array.isArray(resp.items)) {
+                setMessage('Unable to load attributes for selected set.', true);
+                return;
+            }
+
+            if (!groupsResp || !groupsResp.success || !Array.isArray(groupsResp.groups)) {
+                setMessage('Unable to load groups for selected set.', true);
+                return;
+            }
+
+            allAttrs = resp.items;
+            applyGroupsResponse(groupsResp.groups);
+
+            $.each(allAttrs, function (_, item) {
+                var g = normalizeGroupName(item.group_name || '');
+                ensureGroupMeta(g);
+            });
+
+            syncGroupOptionsFromMeta();
+
+            renderGroupFilterOptions(allAttrs);
+            renderAll();
+
+            setMessage('Loaded ' + allAttrs.length + ' attributes.', false);
+        }).fail(function () {
+            setMessage('Unable to load layout data for selected set.', true);
+        });
+    }
+
+    function collectRowsPayload() {
+        var rows = [];
+        $gridBody.find('[data-role="layout-row"]').each(function () {
+            var $row = $(this);
+            rows.push({
+                attribute_code: String($row.attr('data-code') || ''),
+                is_enabled: $row.find('[data-role="row-enabled"]').is(':checked') ? 1 : 0,
+                group_name: String($row.find('[data-role="row-group"]').val() || 'Basic Info'),
+                sort_order: parseInt($row.find('[data-role="row-sort"]').val(), 10) || 0
+            });
+        });
+        return rows;
+    }
+
+    function saveLayout() {
+        var rows = collectRowsPayload();
+        $saveBtn.prop('disabled', true);
+        setMessage('Saving configuration...', false);
+
+        $.ajax({
+            url: saveUrl,
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                form_key: getFormKey(),
+                attribute_set_id: currentSetId,
+                rows: JSON.stringify(rows)
+            }
+        }).done(function (resp) {
+            if (resp && resp.success) {
+                saveGroups(function (saved) {
+                    if (!saved) {
+                        return;
+                    }
+                    setMessage(resp.message || 'Saved successfully.', false);
+                    loadAttributes(currentSetId);
+                });
+                return;
+            }
+            setMessage((resp && resp.message) ? resp.message : 'Unable to save configuration.', true);
+        }).fail(function () {
+            setMessage('Unable to save configuration.', true);
+        }).always(function () {
+            $saveBtn.prop('disabled', false);
+        });
+    }
+
+    $setSelect.on('change.singleSkuConfig', function () {
+        var id = parseInt($(this).val(), 10) || 0;
+        localStorage.setItem('artm_selected_set_id', id);
+        loadAttributes(id);
+    });
+
+    $saveBtn.on('click.singleSkuConfig', function () {
+        saveLayout();
+    });
+
+    $search.on('input.singleSkuConfig', function () {
+        renderAll();
+    });
+
+    $groupFilter.on('change.singleSkuConfig', function () {
+        renderAll();
+    });
+
+    $filterRequired.on('change.singleSkuConfig', renderAll);
+    $filterOptional.on('change.singleSkuConfig', renderAll);
+    $filterSystem.on('change.singleSkuConfig', renderAll);
+    $filterCustom.on('change.singleSkuConfig', renderAll);
+    $filterVisible.on('change.singleSkuConfig', renderAll);
+
+    $addGroupBtn.on('click.singleSkuConfig', function () {
+        var next = normalizeGroupName($newGroupName.val());
+        if (!next) {
+            return;
+        }
+
+        addCustomGroup(next);
+        $newGroupName.val('');
+        setMessage('Saving group...', false);
+        saveGroups(function (saved) {
+            if (!saved) {
+                return;
+            }
+            renderGroupFilterOptions(allAttrs);
+            renderGrid(allAttrs);
+            setMessage('Group saved.', false);
+        });
+    });
+
+    $newGroupName.on('keydown.singleSkuConfig', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            $addGroupBtn.trigger('click');
+        }
+    });
+
+    loadSets();
+});
+</script>

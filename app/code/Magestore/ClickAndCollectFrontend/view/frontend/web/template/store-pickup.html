@@ -1,0 +1,17 @@
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<li id="store-pickup"
+    if="isVisible"
+    css="'selected-shipping': !isClickAndCollectSelected(), 'selected-store-pickup': isClickAndCollectSelected()"
+>
+    <render args="deliveryMethodSelectorTemplate"></render>
+    <if args="isClickAndCollectSelected">
+        <each args="getRegion('store-selector')">
+            <div template=" {name: getTemplate()}"></div>
+        </each>
+    </if>
+</li>

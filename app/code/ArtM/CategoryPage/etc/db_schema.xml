@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="artm_categorypage_config" resource="default" engine="innodb" comment="ArtM Category Showcase Category Config">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="category_id" unsigned="true" nullable="false" comment="Category ID"/>
+        <column xsi:type="varchar" name="custom_label" nullable="true" length="255" comment="Custom Label"/>
+        <column xsi:type="varchar" name="category_image" nullable="true" length="255" comment="Category Image"/>
+        <column xsi:type="varchar" name="banner_image" nullable="true" length="255" comment="Banner Image"/>
+        <column xsi:type="varchar" name="banner_link" nullable="true" length="255" comment="Banner Link"/>
+        <column xsi:type="smallint" name="is_enabled" nullable="false" default="1" comment="Is Enabled"/>
+        <column xsi:type="int" name="sort_order" nullable="false" default="0" comment="Sort Order"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="false" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ARTM_CATEGORYPAGE_CONFIG_CATEGORY_ID_UNQ">
+            <column name="category_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="ARTM_CATEGORYPAGE_CONFIG_CATEGORY_ID_CATALOG_CATEGORY_ENTITY_ENTITY_ID"
+                    table="artm_categorypage_config" column="category_id"
+                    referenceTable="catalog_category_entity" referenceColumn="entity_id"
+                    onDelete="CASCADE"/>
+        <index referenceId="ARTM_CATEGORYPAGE_CONFIG_SORT_ORDER_IDX">
+            <column name="sort_order"/>
+        </index>
+        <index referenceId="ARTM_CATEGORYPAGE_CONFIG_ENABLED_IDX">
+            <column name="is_enabled"/>
+        </index>
+    </table>
+
+    <table name="artm_categorypage_manual" resource="default" engine="innodb" comment="ArtM Category Showcase Manual Categories">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="parent_category_id" unsigned="true" nullable="false" comment="Parent Category ID"/>
+        <column xsi:type="int" name="group_category_id" nullable="true" comment="Group Category ID or Manual Group ID (negative for manual groups)"/>
+        <column xsi:type="varchar" name="title" nullable="false" length="255" comment="Title"/>
+        <column xsi:type="varchar" name="image" nullable="true" length="255" comment="Image"/>
+        <column xsi:type="varchar" name="url" nullable="true" length="255" comment="URL"/>
+        <column xsi:type="int" name="sort_order" nullable="false" default="0" comment="Sort Order"/>
+        <column xsi:type="smallint" name="is_enabled" nullable="false" default="1" comment="Is Enabled"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="false" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="ARTM_CATEGORYPAGE_MANUAL_PARENT_CATEGORY_ID_CATALOG_CATEGORY_ENTITY_ENTITY_ID"
+                    table="artm_categorypage_manual" column="parent_category_id"
+                    referenceTable="catalog_category_entity" referenceColumn="entity_id"
+                    onDelete="CASCADE"/>
+        <index referenceId="ARTM_CATEGORYPAGE_MANUAL_PARENT_SORT_ORDER_IDX">
+            <column name="parent_category_id"/>
+            <column name="sort_order"/>
+        </index>
+        <index referenceId="ARTM_CATEGORYPAGE_MANUAL_GROUP_SORT_ORDER_IDX">
+            <column name="group_category_id"/>
+            <column name="sort_order"/>
+        </index>
+        <index referenceId="ARTM_CATEGORYPAGE_MANUAL_ENABLED_IDX">
+            <column name="is_enabled"/>
+        </index>
+    </table>
+
+    <table name="artm_categorypage_manual_groups" resource="default" engine="innodb" comment="ArtM Category Showcase Manual Groups">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="category_id" unsigned="true" nullable="false" comment="Parent Category ID"/>
+        <column xsi:type="varchar" name="label" nullable="false" length="255" comment="Group Label"/>
+        <column xsi:type="int" name="sort_order" nullable="false" default="0" comment="Sort Order"/>
+        <column xsi:type="smallint" name="is_enabled" nullable="false" default="1" comment="Is Enabled"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="false" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" nullable="false" default="CURRENT_TIMESTAMP" on_update="true" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="ARTM_CATEGORYPAGE_MANUAL_GROUPS_CATEGORY_ID_CATALOG_CATEGORY_ENTITY_ENTITY_ID"
+                    table="artm_categorypage_manual_groups" column="category_id"
+                    referenceTable="catalog_category_entity" referenceColumn="entity_id"
+                    onDelete="CASCADE"/>
+        <index referenceId="ARTM_CATEGORYPAGE_MANUAL_GROUPS_CATEGORY_SORT_ORDER_IDX">
+            <column name="category_id"/>
+            <column name="sort_order"/>
+        </index>
+        <index referenceId="ARTM_CATEGORYPAGE_MANUAL_GROUPS_ENABLED_IDX">
+            <column name="is_enabled"/>
+        </index>
+    </table>
+</schema>

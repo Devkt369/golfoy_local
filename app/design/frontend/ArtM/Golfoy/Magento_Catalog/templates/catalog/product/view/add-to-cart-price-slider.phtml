@@ -1,0 +1,22 @@
+<?php
+    $product = $block->getProduct();
+    $productImageUrl = $block->getImage($product, 'product_page_image_small')->getImageUrl(); // Use Magento image helper if available
+    $productName = $product->getName();
+?>
+<style>
+</style>
+<div class="right_side_addtocart_button">
+    <div class="left_section">
+        <div class="img_section">
+            <img src="<?= $productImageUrl ?>" alt="<?= htmlspecialchars($productName) ?>">
+        </div>
+    </div>
+    <div class="right_section">
+        <div class="name_section hidden-xs">
+            <?= htmlspecialchars($productName) ?>
+        </div>
+        <div class="button_section">
+            <div class="shop_button" id="staticAddToCartBtn">add to cart</div>
+        </div>
+    </div>
+</div>

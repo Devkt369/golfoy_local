@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright © Magestore. All rights reserved.
+See COPYING.txt for license details.
+-->
+
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">
+                pos_performance_form_overview_listing.pos_performance_form_overview_listing_data_source
+            </item>
+        </item>
+    </argument>
+    <settings>
+        <spinner>pos_performance_form_overview_listing_columns</spinner>
+        <deps>
+            <dep>
+                pos_performance_form_overview_listing.pos_performance_form_overview_listing_data_source
+            </dep>
+        </deps>
+    </settings>
+    <dataSource name="pos_performance_form_overview_listing_data_source"
+                component="Magestore_PosReports/js/report/data-provider">
+        <settings>
+            <updateUrl path="mui/index/render"/>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">id</param>
+                <param name="cacheRequests" xsi:type="boolean">false</param>
+            </storageConfig>
+        </settings>
+        <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider"
+                      name="pos_performance_form_overview_listing_data_source">
+            <settings>
+                <requestFieldName>id</requestFieldName>
+                <primaryFieldName>id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <listingToolbar name="listing_top">
+        <columnsControls name="columns_controls"/>
+        <paging name="listing_paging"/>
+        <bookmark name="bookmarks"/>
+        <exportButton name="export_button" class="Magestore\PosReports\Ui\Component\Listing\ExportButton">
+            <settings>
+                <additionalParams>
+                    <param xsi:type="string" name="reportFilters">${ $.provider}:params.reportFilters</param>
+                </additionalParams>
+                <options>
+                    <option name="csv" xsi:type="array">
+                        <item name="url" xsi:type="string">posreports/reports_export/reportToCsv</item>
+                    </option>
+                </options>
+            </settings>
+        </exportButton>
+        <filters name="listing_filters" />
+    </listingToolbar>
+    <columns name="pos_performance_form_overview_listing_columns">
+        <selectionsColumn name="ids">
+            <settings>
+                <indexField>id</indexField>
+                <preserveSelectionsOnFilter>true</preserveSelectionsOnFilter>
+                <visible>false</visible>
+            </settings>
+        </selectionsColumn>
+        <column name="period" sortOrder="10" class="Magestore\PosReports\Ui\Component\Listing\Column\Interval">
+            <settings>
+                <label translate="true">Interval</label>
+                <filter>dateRange</filter>
+            </settings>
+        </column>
+        <column name="total_count_sum" sortOrder="20">
+            <settings>
+                <label translate="true">Total Request</label>
+                <filter>textRange</filter>
+            </settings>
+        </column>
+        <column name="action_code" component="Magento_Ui/js/grid/columns/select" sortOrder="30">
+            <settings>
+                <label translate="true">Action Code</label>
+                <options class="Magestore\WebposPerformance\Model\ActionTypes"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+            </settings>
+        </column>
+        <column name="average_period"
+                class="Magestore\WebposPerformanceAdminUi\Ui\Component\Listing\Columns\Average"
+                sortOrder="50">
+            <settings>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <filter>textRange</filter>
+                <label translate="true">Average</label>
+                <sortable>true</sortable>
+            </settings>
+        </column>
+        <column name="performance_rate"
+                class="Magestore\WebposPerformanceAdminUi\Ui\Component\Listing\Columns\Status"
+                sortOrder="60">
+            <settings>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <options class="Magestore\WebposPerformance\Model\Source\Adminhtml\PerformanceRate"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Performance Rate</label>
+                <sortable>true</sortable>
+            </settings>
+        </column>
+        <column name="pos_id" component="Magento_Ui/js/grid/columns/select" sortOrder="70">
+            <settings>
+                <filter>select</filter>
+                <options class="Magestore\Webpos\Ui\Component\Listing\Column\Pos"/>
+                <dataType>select</dataType>
+                <label translate="true">POS</label>
+            </settings>
+        </column>
+        <actionsColumn name="actions" sortOrder="80" class="Magestore\WebposPerformanceAdminUi\Ui\Component\Actions\View">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="indexField" xsi:type="string">id</item>
+                    <item name="urlPath" xsi:type="string">webposperformance/index/detail</item>
+                    <item name="label" xsi:type="string" translate="true">Detail</item>
+                    <item name="labelAction" xsi:type="string" translate="true">View</item>
+                </item>
+            </argument>
+        </actionsColumn>
+    </columns>
+</listing>

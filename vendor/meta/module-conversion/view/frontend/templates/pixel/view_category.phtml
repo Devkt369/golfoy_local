@@ -1,0 +1,36 @@
+<?php
+/**
+ * @var \Meta\Conversion\Block\Pixel\ViewCategory $block
+ * @var $escaper \Magento\Framework\Escaper
+ */
+
+$trackerUrl = $block->getTrackerUrl();
+
+if ($block->getFacebookPixelID()) {
+    ?>
+
+    <script type="text/x-magento-init">
+        {
+            "*": {
+                "Meta_Conversion/js/metaPixelTracker" : {
+                    "url" : "<?= $escaper->escapeHtml($trackerUrl); ?>",
+                    "payload": <?= /* @noEscape */
+                    json_encode([
+                    "eventName" => $escaper->escapeHtml($block->getEventToObserveName()),
+                    "categoryId" => $escaper->escapeHtml($block->getCategoryId()),
+                    ]) ?>,
+                    "browserEventData": <?= /* @noEscape */
+                    json_encode([
+                    'fbAgentVersion' => $escaper->escapeHtml($block->getFacebookAgentVersion()),
+                    'fbPixelId' => $escaper->escapeHtml($block->getFacebookPixelID()),
+                    'source' => $escaper->escapeHtml($block->getSource()),
+                    'pluginVersion' => $escaper->escapeHtml($block->getPluginVersion()),
+                    'track' => 'trackCustom',
+                    'event' => 'ViewCategory',
+                    'payload' => ['category_name' => $escaper->escapeHtml($block->getCategoryName())]
+                    ]) ?>
+        }
+    }
+}
+    </script>
+<?php } ?>

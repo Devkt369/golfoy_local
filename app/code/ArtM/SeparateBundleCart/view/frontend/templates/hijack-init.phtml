@@ -1,0 +1,17 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */ 
+
+// Only load the script if we're on a bundle product page
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$registry = $objectManager->get('\Magento\Framework\Registry');
+$product = $registry->registry('current_product');
+
+if ($product && $product->getTypeId() === 'bundle'): ?>
+<script type="text/x-magento-init">
+{
+    "*": {
+        "ArtM_SeparateBundleCart/js/bundle-cart-hijack": {}
+    }
+}
+</script>
+<?php endif; ?>

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>   
+         <add id="ArtM_InvoiceGrid::invoicegrid" title="Export Invoices" module="ArtM_InvoiceGrid" sortOrder="200" resource="ArtM_InvoiceGrid::invoicegrid" parent="ArtM_BlogEsg::BlogEsgmenu"/>     
+          <add id="ArtM_InvoiceGrid::download" title="Download export" module="ArtM_InvoiceGrid" sortOrder="10" action="invoicegrid/export/download" resource="ArtM_InvoiceGrid::download" parent="ArtM_InvoiceGrid::invoicegrid"/>
+          <add id="ArtM_InvoiceGrid::manual" title="Manual export" module="ArtM_InvoiceGrid" sortOrder="20" action="invoicegrid/export/manual" resource="ArtM_InvoiceGrid::manual" parent="ArtM_InvoiceGrid::invoicegrid"/>
+    </menu>
+</config>

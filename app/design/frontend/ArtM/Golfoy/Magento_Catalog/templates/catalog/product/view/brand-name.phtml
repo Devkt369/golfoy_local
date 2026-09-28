@@ -1,0 +1,29 @@
+<?php
+/**
+ * Brand Name Template
+ * 
+ * @var \Magento\Catalog\Block\Product\View $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \ArtM\Common\ViewModel\ProductData $productData
+ */
+$productData = $block->getData('product_data');
+$_product = $block->getProduct();
+if (!$productData) {
+    return;
+}
+
+$brandName = $productData->getBrand();
+if (!$brandName) {
+    return;
+}
+?>
+<div class="product-brand-name">
+    <h2 class="brand-title"><?= $escaper->escapeHtml($brandName) ?></h2>
+</div>
+<meta itemprop="name" content="<?= $escaper->escapeHtmlAttr($productData->getCleanProductName()) ?>" />
+<meta itemprop="sku" content="<?= $escaper->escapeHtmlAttr($_product->getSku()) ?>" />
+<meta itemprop="mpn" content="<?= $escaper->escapeHtmlAttr($_product->getSku()) ?>" />
+
+<div itemprop="brand" itemscope itemtype="https://schema.org/Brand">
+    <meta itemprop="name" content="<?= $escaper->escapeHtmlAttr($brandName) ?>" />
+</div>

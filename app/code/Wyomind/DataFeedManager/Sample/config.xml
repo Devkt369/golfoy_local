@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!--
+  ~ Copyright © 2019 Wyomind. All rights reserved.
+  ~ See LICENSE.txt for license details.
+  -->
+<!-- configuration file used for the Wyomind's demo store: https://demo2.wyomind.com -->
+<config>
+    <login>DataFeedManager</login>
+    <password>DataFeedManager123</password>
+    <acl>
+        Magento_Catalog::catalog
+        Magento_Catalog::catalog_inventory
+        Magento_Catalog::products
+        Wyomind_DataFeedManager::main
+        Wyomind_DataFeedManager::feeds
+        Wyomind_DataFeedManager::variables
+        Wyomind_DataFeedManager::functions
+        {{system/config}}
+        Wyomind_DataFeedManager::datafeedmanager_config
+    </acl>
+    <scenarii>
+        <scenario type="backend" id="feeds" default="1">
+            <label>Data Feeds Generation</label>
+            <comment><![CDATA[See data feed generation in action]]></comment>
+            <actions>
+                <action type="landing_page">
+                    <param name="url">datafeedmanager/feeds/index</param>
+                </action>
+                <action type="script">
+                    <param name="content">require(['dfm_index'], function (index) {
+                        index.generate('{{URL:datafeedmanager/feeds/generate/id/1}}'); });
+                    </param>
+                </action>
+            </actions>
+        </scenario>
+        <scenario type="backend" id="feeds_edition" default="1">
+            <label>Data Feeds Edition</label>
+            <comment><![CDATA[Check the data feed edition panel]]></comment>
+            <actions>
+                <action type="landing_page">
+                    <param name="url">datafeedmanager/feeds/edit/id/1</param>
+                </action>
+            </actions>
+        </scenario>
+    </scenarii>
+</config>

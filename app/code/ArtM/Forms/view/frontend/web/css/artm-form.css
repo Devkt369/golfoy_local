@@ -1,0 +1,96 @@
+/* ArtM Forms Frontend Styles */
+.artm-form {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    padding: 32px 24px 24px 24px;
+    max-width: 600px;
+    margin: 32px auto;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    box-sizing: border-box;
+}
+.artm-form .form-field-row {
+    margin-bottom: 18px;
+}
+.artm-form label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #444;
+}
+.artm-form label.required {
+    /* Only color on error, not by default */
+}
+.artm-form label.artm-error {
+    color: #e60023 !important;
+}
+.artm-form input[type="text"],
+.artm-form input[type="email"],
+.artm-form input[type="tel"],
+.artm-form input[type="file"],
+.artm-form textarea,
+.artm-form select {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid #c8c8c8;
+    border-radius: 4px;
+    font-size: 1em;
+    background: #fff;
+    box-sizing: border-box;
+    margin-bottom: 4px;
+    transition: border-color 0.2s;
+}
+.artm-form input[type="text"]:focus,
+.artm-form input[type="email"]:focus,
+.artm-form input[type="tel"]:focus,
+.artm-form input[type="file"]:focus,
+.artm-form textarea:focus,
+.artm-form select:focus {
+    border-color: #1979c3;
+    outline: none;
+}
+.artm-form input[type="checkbox"],
+.artm-form input[type="radio"] {
+    margin-right: 6px;
+}
+.artm-form .swatch-group {
+    display: flex;
+    gap: 10px;
+}
+.artm-form .swatch-box {
+    border: 1px solid #ccc;
+    padding: 8px 18px;
+    cursor: pointer;
+    border-radius: 6px;
+    user-select: none;
+    background: #f4f6fa;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.artm-form .swatch-box.selected {
+    background: #1979c3;
+    color: #fff;
+    border-color: #1979c3;
+}
+.artm-form button[type="submit"] {
+    background: #1979c3;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 28px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(25,121,195,0.08);
+    margin-top: 10px;
+    transition: background 0.2s;
+}
+.artm-form button[type="submit"]:hover {
+    background: #145a96;
+}
+.artm-file-upload { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.artm-file-btn { background: #f4f6fa; color: #1979c3; border: 1px solid #c8c8c8; border-radius: 4px; padding: 5px 14px; font-size: 1em; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.artm-file-btn .artm-plus { font-size: 1.3em; font-weight: bold; }
+.artm-file-preview { margin-left: 10px; }
+.artm-file-preview img { max-width: 80px; max-height: 80px; border-radius: 6px; border: 1px solid #eee; }
+.artm-file-preview .artm-file-box { background: #f4f6fa; border: 1px solid #c8c8c8; border-radius: 4px; padding: 4px 10px; display: inline-flex; align-items: center; gap: 8px; }
+.artm-file-preview .artm-remove { color: #c00; cursor: pointer; font-size: 1.1em; margin-left: 6px; }

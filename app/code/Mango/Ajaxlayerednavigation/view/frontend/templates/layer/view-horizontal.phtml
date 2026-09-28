@@ -1,0 +1,125 @@
+<?php
+/**
+ * Category layered navigation
+ * @var $block \Magento\LayeredNavigation\Block\Navigation
+ */
+?>
+<?php if ($block->canShowBlock()): ?>
+    <?php
+    /* collapsible filters enabled... */
+    $_hide_attributes = $ajax_helper->getFiltersToHide();
+    $_hide_state = $ajax_helper->getConfigValue('hide_state');
+    ?>
+    <div class="block filter <?php //echo ($_is_collapsible) ? 'collapsible-filters' : ""; ?>" id="layered-filter-block">
+        <?php $filtered = count($block->getLayer()->getState()->getFilters()) ?>
+        <div class="block-title filter-title" data-count="<?= /* @escapeNotVerified */ $filtered; ?>">
+            <strong data-role="title"><?= /* @escapeNotVerified */ __('Shop By') ?></strong>
+        </div>
+        <div class="block-content filter-content">
+            
+            <?php if (!$_hide_state):?>
+                <?= $block->getChildHtml('state') ?>
+                <?php if ($block->getLayer()->getState()->getFilters()): ?>
+                <div class="block-actions filter-actions">
+                    <a href="<?= /* @escapeNotVerified */ $block->getClearUrl() ?>" 
+                       class="action clear filter-clear" 
+                       id="layered-navigation-filter-clear"><span><?= /* @escapeNotVerified */ __('Clear All') ?></span></a>
+                </div>
+            <?php endif; ?>
+            <?php endif;?>
+            
+            <?php $filters_to_show = [];
+            foreach ($block->getFilters() as $filter) {
+                $_code = $filter->getCode();
+                if ($filter->getItemsCount() && !in_array($_code, $_hide_attributes)) {
+                    /*show on horizontal block or default - left */
+                    /* set tooltip for filter title */
+                    $_tooltip_icon = false;
+                    $_tooltip_html = false;
+                    #load static block html
+                    $_cms_block_id = $ajax_helper->getTooltipCode($_code);
+                    $_cms_block_content = false;
+                    if ($_cms_block_id) {
+                        $_cms_block_content = $block->getLayout()->createBlock(\Magento\Cms\Block\Block::class)->setBlockId($_cms_block_id)->toHtml();
+                    }
+                    if ($_cms_block_content) {
+                        # set tooltip icon html
+                        $_tooltip_icon = '<span class="ajax-layered-navigation-tooltip" data-tooltip-content="#'. $_code .'-tooltip-content"><span>?</span></span>';
+                        $_tooltip_html =  '<div class="tooltip-content" id="'. $_code .'-tooltip-content"  style="display:none;" >'.  $_cms_block_content .'</div>'  ;
+                    }
+                    
+                                            /* check if attribute in grouped block */
+                        $filterGroup = $ajax_helper->getAttributeGroupBlock($_code);
+                    
+                        $filter_code = ($filterGroup)? $filterGroup: $_code;
+                        $filter_title = ($filterGroup)? $filterGroup: __($filter->getName());
+                    
+                        
+                        if ($filterGroup && isset($filters_to_show[$filterGroup])) {
+                                $groupFilterData = $filters_to_show[$filterGroup];
+                                # insert title in filter
+                                $html = $groupFilterData["html"] . "<br/><p>" . __($filter->getName()) . "</p>" . $block->getChildBlock('renderer')->render($filter);
+                                $expanded = ($groupFilterData["expanded"] || $filter->isFilterActive() || $ajax_helper->isFilterExpanded($_code));
+                            } else {
+                                # if part of filter group, insert subtitle
+                                $html = (($filterGroup)?"<p>" . __($filter->getName()) . "</p>":"") . $block->getChildBlock('renderer')->render($filter);
+                                $expanded = $filter->isFilterActive() || $ajax_helper->isFilterExpanded($_code);
+                            }
+                        
+                            $filterData = [
+                            'filter' => $filter,
+                            'tooltip_icon' => $_tooltip_icon,
+                            'tooltip_html'  => $_tooltip_html,
+                            'title' => $filter_title,
+                            'html' => $html,
+                            'expanded' => $expanded
+                        ];
+                    
+                            $filters_to_show[$filter_code] = $filterData;
+                        
+                    /*$filters_to_show[$_code] = [
+                            'filter' => $filter,
+                            'tooltip_icon' => $_tooltip_icon,
+                            'tooltip_html'  => $_tooltip_html
+                        ];*/
+                }
+            }
+            ?>
+
+            <?php if (!empty($filters_to_show)):?>
+                <strong role="heading" aria-level="2" class="block-subtitle filter-subtitle"><?= /* @escapeNotVerified */ __('Shopping Options') ?></strong>
+                <div id="horizontal-layered-navigation-container" data-role="content">
+                <?php foreach ($filters_to_show as $_attribute_code => $filter_info):
+                    $filter = $filter_info["filter"];
+                    $tooltip_icon = $filter_info["tooltip_icon"];
+                    $tooltip_html = $filter_info["tooltip_html"];
+                    $filter_title = $filter_info["title"];
+                    $filter_html =  $filter_info["html"];
+                    
+                    ?>
+                    <?php //$_attribute_code = $filter->getCode(); ?>
+                    <div data-role="collapsible" 
+                         class="filter-options-item horizontal-filter" 
+                         id="filter-<?= $filter->getCode();?>-container">
+                        <div data-role="title" 
+                             class="filter-options-title"><?= /* @escapeNotVerified */ $filter_title ?><?= $tooltip_icon;?></div>
+                        <div data-role="content" 
+                             class="filter-options-content" 
+                             style="display:none;"><?= /* @escapeNotVerified */ $filter_html; ?></div>
+                    </div>
+                    <?= $tooltip_html;?>
+                <?php endforeach; ?>
+                </div>
+            <?php else:?>
+                <script>
+                    require([
+                        'jquery'
+                    ], function ($) {
+                        $('#layered-filter-block').addClass('filter-no-options');
+                    });
+                </script>
+            <?php endif;?>
+                
+        </div>
+    </div>
+<?php endif; ?>

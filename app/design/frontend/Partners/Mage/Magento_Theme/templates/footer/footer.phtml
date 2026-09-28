@@ -1,0 +1,250 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+
+$customerSession = $objectManager->get('Magento\Customer\Model\Session');
+
+if ($customerSession->isLoggedIn()) {
+?>
+    <style>
+        div#checkout-shipping-method-load,
+        .checkout-shipping-method>.step-title {
+            display: none;
+        }
+    </style>
+
+<?php
+} else {
+?>
+    <style>
+        div#checkout-shipping-method-load,
+        .checkout-shipping-method>.step-title,
+        div#checkout-step-shipping_method {
+            display: none;
+        }
+    </style>
+<?php
+}
+?>
+
+<div class="">
+    <?php
+    echo $this->getLayout()
+        ->createBlock('Magento\Cms\Block\Block')
+        ->setBlockId('footer_category_icon')
+        ->toHtml();
+    ?>
+</div>
+
+<div class="container-fluid footer_container">
+    <div class="container custom_container footer_container_bottom">
+        <div class="row site-footer">
+            <div class="footer-container">
+                <!-- Navigation Links -->
+                <nav class="footer-nav">
+                    <a href="/request_bulk_purchase/account/bulkorder/">Bulk Orders</a>
+                    <a href="/partners-terms-and-condition">Terms and Conditions</a>
+                    <a href="/contact">Contact Us</a>
+                    <a href="/help-ordering">Help Ordering</a>
+                </nav>
+                <div class="separator-container">
+                    <hr class="separator">
+                </div>
+            </div>
+        </div>
+        <div class="row copyright_outside_block">
+            <div class="col-sm-6 col-md-2 col-xs-12 ssl-icons-block">
+                <div class="ssl-icon">
+                    <img alt="Quality Assured" loading="lazy" src="https://golfoy.com/media/wysiwyg/2024/SSL-Encryption.svg" />
+                    <p>100% Secure <br>256 Bit Encrypted</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-8 col-xs-12 copyright">
+                <div class="copyright_text">
+                    <span>
+                        KTS Ventures © 2012-<?= date('Y'); ?>
+                    </span>
+                    <span>
+                        Golfoy.com | All Rights Reserved
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-2 col-xs-12">
+            </div>
+            <div class="artmais-logo col-xs-12">
+                <!-- <span>powered by</span><a href="https://artamis.in/"><img src="http://staging-golfoy.hyperx.cloud/media/logo/ARTAMIS-LOGO.png" alt="artamis-logo"></a> -->
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .artmais-logo img {
+        width: 100%;
+        max-width: 60px;
+        padding-left: 7px;
+    }
+
+    .artmais-logo {
+        text-align: center;
+        margin-top: 10px;
+        margin-top: 5px;
+    }
+
+    .artmais-logo span {
+        color: #646464;
+        font-size: 12px;
+    }
+
+    .copyright_text {
+        margin-top: 0px;
+    }
+
+    .ssl-icons-block {
+        padding-top: 0px;
+    }
+
+    .artmais-logo {
+        margin-top: 0px;
+        float: left;
+    }
+
+    .copyright {
+        padding: 17px 0px 0px;
+    }
+
+    @media only screen and (max-width:768px) {
+        .ssl-icons-block {
+            padding-top: 0px;
+        }
+
+        .copyright {
+            padding: 4px;
+            display: inline-block;
+            float: right;
+            width: auto;
+        }
+
+        .artmais-logo span {
+            font-size: 10px;
+        }
+    }
+
+
+    /* .site-footer {
+            background-color: #ffffff;
+            width: 100%;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        } */
+    .footer-container {
+        max-width: 1280px;
+        /* Standard container max-width */
+        margin-left: auto;
+        margin-right: auto;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        text-align: center;
+    }
+
+    .footer-nav {
+        display: flex;
+        flex-wrap: wrap;
+        /* Allows links to wrap on smaller screens */
+        justify-content: center;
+        align-items: center;
+        gap: 1rem 2rem;
+        /* Row and column gap */
+        color: #718096;
+        margin-bottom: 1.5rem;
+    }
+
+    .footer-nav a {
+        font-size: 1.1rem;
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .footer-nav a:hover {
+        color: #1a202c;
+    }
+
+    .separator-container {
+        display: flex;
+        justify-content: center;
+    }
+
+    .separator {
+        width: 8rem;
+        border: none;
+        /* Reset default hr border */
+        border-top: 2px solid #cbd5e0;
+    }
+
+    /* Media Query for smaller screens */
+    @media (max-width: 640px) {
+        .footer-nav a {
+            font-size: 0.875rem;
+            /* Smaller font on mobile */
+        }
+
+        .separator {
+            width: 6rem;
+        }
+    }
+
+    .sign_in_banner_sidebar_right .reward_point {
+        display: none;
+    }
+
+    .swatch-qty {
+        display: none;
+    }
+
+    .show-available-qty.stock-message {
+        width: 100%;
+        position: relative;
+        float: left;
+        color: #0d560d;
+        font-weight: 600;
+        font-size: 10px;
+        margin-bottom: 5px;
+        margin-top: 5px;
+        border-left: 2px solid #0d560d;
+        padding-left: 7px;
+        padding-top: 1px;
+    }
+</style>
+
+
+<script>
+    require(['jquery'], function($) {
+        $(document).ready(function() {
+            if (jQuery(window).width() > 768) {
+                setTimeout(function() {
+                    jQuery("nav.navigation li.ui-menu-item a.ui-menu-item-wrapper").each(function() {
+                        var newHref = jQuery(this).attr("rel-href");
+                        if (newHref) {
+                            newHref = newHref.split('#')[0];
+                        }
+                        jQuery(this).attr("href", newHref);
+                    });
+                }, 3000);
+            }
+            $(document).on("click", ".level0 > a", function() {
+                if ($(window).width() < 768) {
+                    var $siblingsUl = $(this).siblings("ul.level0");
+
+                    if ($siblingsUl.hasClass("expanded")) {
+                        $siblingsUl.addClass("collapsed").removeClass("expanded");
+                        $(this).addClass("collapsed").removeClass("expanded");
+                    } else {
+                        $siblingsUl.addClass("expanded").removeClass("collapsed");
+                        $(this).addClass("expanded").removeClass("collapsed");
+                    }
+                } else if ($(window).width() === 768) {
+                    window.location.href = $(this).attr("href");
+                }
+            });
+        });
+    });
+</script>

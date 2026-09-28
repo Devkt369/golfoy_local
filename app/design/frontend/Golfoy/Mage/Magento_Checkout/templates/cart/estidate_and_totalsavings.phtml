@@ -1,0 +1,83 @@
+<?php
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $customerSession = $objectManager->create('Magento\Customer\Model\Session');
+    $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+
+    $cart = $objectManager->get('\Magento\Checkout\Model\Cart'); 
+    $grandTotal = $cart->getQuote()->getGrandTotal();
+    $Total = $cart->getQuote()->getSubtotal();
+    $taxAmount = $cart->getQuote()->getShippingAddress()->getTaxAmount();
+
+
+    $currencysymbol = $objectManager->get('Magento\Directory\Model\Currency');
+    $currencysymbols = $currencysymbol->getCurrencySymbol();
+
+    $priceHelper = $objectManager->create('Magento\Framework\Pricing\Helper\Data');
+    $formattedPayablePrice = $priceHelper->currency($grandTotal, true, false);
+
+    $total_savings = $Total + $taxAmount - $grandTotal;
+    $formattedTotalSavings = $priceHelper->currency($total_savings, true, false);
+
+?>
+<a href="<?php echo $storeManager->getStore()->getBaseUrl(); ?>checkout/" class="action primary checkout pc"> 
+    PROCEED TO CHECKOUT 
+    <span class="price_custom visible-xs">
+        <?php echo $formattedPayablePrice; ?>
+    </span>
+</a>
+<?php 
+    echo "SubTotal: ".$Total."<br>";
+    echo "Tax: ".$taxAmount."<br>";
+    echo "GrandTotal Amount: ". ($Total + $taxAmount)."<br>";
+    echo "Payable Amount: ". $formattedPayablePrice."<br>";
+    echo "Total Savings: ". $formattedTotalSavings;
+?>
+<div class="estimation_time row" id="esta">
+    <div class="col-xs-12">
+        <span class="estimation_time_text"> Estimated delivery date is 
+            <span class="date"> 
+                <span class="estif" id="estif">on the date </span>
+            </span>
+        </span>
+    </div>
+</div>
+
+
+
+<?php
+//use Magento\Checkout\Model\Cart;
+//use Magento\Catalog\Model\ProductRepository;
+//use Magento\Framework\App\Bootstrap;
+//$product = $objectManager->get("\Magento\Catalog\Model\ProductRepository")->getById($productId);
+
+
+// Get all visible items in the cart
+$cartItems = $cart->getQuote()->getAllVisibleItems();
+
+$totalMRP = 0;
+
+foreach ($cartItems as $item) {
+    // Get product object
+    $product = $item->getProduct();
+    
+    // Check if the product is configurable
+    if ($product->getTypeId() == 'configurable') {
+        // If it's configurable, get the associated simple product
+        $childProduct = $item->getOptionByCode('simple_product')->getProduct();
+        
+        // Use the simple product for calculations
+        $product = $childProduct;
+    }
+    
+    // Get product price
+    $productPrice = $product->getPrice();
+    
+    // Get quantity of the item in the cart
+    $qty = $item->getQty();
+    
+    // Calculate total MRP for this item (Price * Quantity)
+    $totalMRP += $productPrice * $qty;
+}
+
+// Display total MRP amount
+echo "Total MRP Amount: " . $totalMRP;

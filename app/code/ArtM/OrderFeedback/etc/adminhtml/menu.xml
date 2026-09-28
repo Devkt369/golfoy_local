@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>        
+        <add id="ArtM_OrderFeedback::orderfeedback" title="Orders Feedback" module="ArtM_OrderFeedback" sortOrder="10" parent="Magento_Sales::sales_operation"
+        resource="Magento_Sales::sales_operation" action = "orderfeedback/data/" />
+        
+        <add id="ArtM_OrderFeedback::nps_calculator" title="NPS Calculator" module="ArtM_OrderFeedback" sortOrder="20" parent="Magento_Sales::sales_operation" action="orderfeedback/index/index" resource="Magento_Sales::sales_operation"/>
+    </menu>
+</config>

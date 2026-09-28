@@ -1,0 +1,46 @@
+<?php /* @var \Magestore\WebposPerformanceAdminUi\Block\Adminhtml\ActionRanking $block */?>
+<main class="page-content">
+    <div class="page-columns">
+        <div class="admin__old">
+            <div id="container" class="main-col">
+                <div class="admin__data-grid-outer-wrap">
+                    <div class="header-chart">
+                        <?= /* @noEscape */ $block->getChildHtml('date.range');?>
+                    </div>
+                    <div id="rank-list" class="BarChart" style="width: 30%; float: left">
+                        <?= /* @noEscape */ $block->getChildHtml('ranking.list');?>
+                    </div>
+                    <div id="action-detail" style="width: 70%; float: left">
+                        <div id="action-info">
+                            <?= /* @noEscape */ $block->getChildHtml('ranking.detail');?>
+                        </div>
+                        <div id="graph-pos" style="display: none" >
+                            <div id="pos_overview_by_action" class="rank-detailed-header-title">
+                                <?= /* @noEscape */ __(
+                                    'Top %1 Slowest POS By Action',
+                                    $block->getNumberOfPosInChart()
+                                ); ?>
+                            </div>
+                            <canvas id="canvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+    require(
+        [
+            'jquery',
+            'Magestore_WebposPerformanceAdminUi/js/performance/by_action'
+        ], function ($, performanceByAction) {
+            $(document).ready(function () {
+                performanceByAction(
+                    '<?= /* @noEscape */ $block->getReloadListUrl(); ?>',
+                    '<?= /* @noEscape */ $block->getReloadDetailUrl(); ?>'
+                );
+            });
+        }
+    );
+</script>

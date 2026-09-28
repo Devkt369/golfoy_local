@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+	<system>
+		<section id="prioritycriteria" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+			<label>Sorting</label>
+			<tab>artm</tab>
+			<resource>ArtM_RecommendedFilter::config_artm_recommendedfilter</resource>
+			<group id="general" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+				<label>General (Include fields for sorting) </label>
+				<field id="sizeroll" type="select" sortOrder="10" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Size roll</label>					
+					<!-- <option value="1">Enabled</option>
+                     <option value="0">Disabled</option>-->
+					<source_model>ArtM\RecommendedFilter\Model\Config\Source\Points</source_model>
+				</field>
+				<field id="quantity" type="select" sortOrder="20" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>High quantity</label>					
+					 <source_model>ArtM\RecommendedFilter\Model\Config\Source\Points</source_model>
+				</field>
+				<field id="discount" type="select" sortOrder="30" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>High discount</label>					
+					 <source_model>ArtM\RecommendedFilter\Model\Config\Source\Points</source_model>
+				</field>
+				<field id="latest" type="select" sortOrder="40" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Last updated</label>					
+					 <source_model>ArtM\RecommendedFilter\Model\Config\Source\Points</source_model>
+				</field>
+				<field id="cgc_warehouse" type="select" sortOrder="50" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>In CGC warehouse</label>					
+					 <source_model>ArtM\RecommendedFilter\Model\Config\Source\Points</source_model>
+				</field>
+				<field id="other_warehouse" type="select" sortOrder="60" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>In other warehouse</label>					
+					 <source_model>ArtM\RecommendedFilter\Model\Config\Source\Points</source_model>
+				</field>	
+				<field id="queue_process_cron" type="select" sortOrder="80" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Queue Product Process (Cron)</label>
+					<source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+				</field>
+			</group>
+		</section>
+	</system>
+</config>

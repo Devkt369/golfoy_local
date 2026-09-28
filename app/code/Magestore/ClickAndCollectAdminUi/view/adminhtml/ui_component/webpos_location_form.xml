@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright © 2018 Magestore. All rights reserved.
+  ~ See COPYING.txt for license details.
+  -->
+
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <fieldset name="general_information">
+        <fieldset name="sub_general_information">
+            <field name="telephone">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="validation" xsi:type="array">
+                            <item name="required-entry" xsi:type="boolean">true</item>
+                        </item>
+                    </item>
+                </argument>
+            </field>
+        </fieldset>
+    </fieldset>
+    <fieldset name="click_and_collect" sortOrder="10">
+        <settings>
+            <label translate="true">Click &amp; Collect</label>
+        </settings>
+        <fieldset name="section_store_schedule">
+            <settings>
+                <level>1</level>
+                <collapsible>false</collapsible>
+                <label translate="true">Store's Schedule</label>
+            </settings>
+            <field name="is_allow_pickup" component="Magestore_ClickAndCollectAdminUi/js/form/element/is-allow-pickup" sortOrder="10" formElement="select">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">location</item>
+                        <item name="default" xsi:type="number">0</item>
+                    </item>
+                </argument>
+                <settings>
+                    <dataType>boolean</dataType>
+                    <label translate="true">Allow Click &amp; Collect</label>
+                    <notice translate="true">Turn this option on if you want to allow this store for Click &amp; Collect
+                        function.
+                    </notice>
+                </settings>
+                <formElements>
+                    <select>
+                        <settings>
+                            <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                        </settings>
+                    </select>
+                </formElements>
+            </field>
+            <field name="schedule_id" sortOrder="20" formElement="select">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="source" xsi:type="string">location</item>
+                    </item>
+                </argument>
+                <settings>
+                    <dataType>integer</dataType>
+                    <label translate="true">Schedule</label>
+                    <dataScope>schedule_id</dataScope>
+                    <imports>
+                        <link name="schedule_id">${ $.provider }:data.click_and_collect.section_store_schedule.schedule_id</link>
+                    </imports>
+                </settings>
+                <formElements>
+                    <select>
+                        <settings>
+                            <options class="Magestore\ClickAndCollectAdminUi\Model\Location\Schedule\Schedule"/>
+                        </settings>
+                    </select>
+                </formElements>
+            </field>
+            <htmlContent name="html_content">
+                <block name="note_schedule" class="Magestore\ClickAndCollectAdminUi\Block\Adminhtml\Location\Edit\Tab\StoreSchedule\Note"/>
+            </htmlContent>
+        </fieldset>
+        <insertListing name="ms_schedule_location_listing">
+            <settings>
+                <dataLinks>
+                    <exports>true</exports>
+                    <imports>true</imports>
+                </dataLinks>
+                <autoRender>true</autoRender>
+                <realTimeLink>true</realTimeLink>
+                <dataScope>location</dataScope>
+                <ns>ms_schedule_location_listing</ns>
+                <externalProvider>
+                    ms_schedule_location_listing.ms_schedule_location_listing_data_source
+                </externalProvider>
+                <imports>
+                    <link name="schedule_id">${ $.provider }:data.click_and_collect.section_store_schedule.schedule_id
+                    </link>
+                </imports>
+                <exports>
+                    <link name="schedule_id">${ $.externalProvider }:params.schedule_id</link>
+                </exports>
+                <externalFilterMode>true</externalFilterMode>
+            </settings>
+        </insertListing>
+        <fieldset name="session_special_days">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Special Days</item>
+                    <item name="collapsible" xsi:type="boolean">false</item>
+                    <item name="opened" xsi:type="boolean">true</item>
+                    <item name="dataScope" xsi:type="string">session_special_days</item>
+                </item>
+            </argument>
+            <container name="modal_button">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="formElement" xsi:type="string">container</item>
+                        <item name="componentType" xsi:type="string">container</item>
+                        <item name="label" xsi:type="boolean">false</item>
+                        <item name="dataScope" xsi:type="string">modal_button</item>
+                    </item>
+                </argument>
+                <button name="add_special_days_button">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="title" xsi:type="string" translate="true">Add Special Days To Store</item>
+                            <item name="actions" xsi:type="array">
+                                <item name="0" xsi:type="array">
+                                    <item name="targetName" xsi:type="string">${ $.parentName}.special_days_modal</item>
+                                    <item name="actionName" xsi:type="string">openModal</item>
+                                </item>
+                            </item>
+                        </item>
+                    </argument>
+                </button>
+                <modal name="special_days_modal">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="dataScope" xsi:type="string">special_days_modal</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <options>
+                            <option name="title" xsi:type="string" translate="true">Add Special Days to Store</option>
+                            <option name="buttons" xsi:type="array">
+                                <item name="0" xsi:type="array">
+                                    <item name="text" xsi:type="string">Cancel</item>
+                                    <item name="actions" xsi:type="array">
+                                        <item name="0" xsi:type="array">
+                                            <item name="targetName" xsi:type="string">${ $.name }</item>
+                                            <item name="actionName" xsi:type="string">actionCancel</item>
+                                        </item>
+                                    </item>
+                                </item>
+                                <item name="1" xsi:type="array">
+                                    <item name="text" xsi:type="string" translate="true">Add Selected Special Days</item>
+                                    <item name="class" xsi:type="string">action-primary</item>
+                                    <item name="actions" xsi:type="array">
+                                        <item name="0" xsi:type="array">
+                                            <item name="targetName" xsi:type="string">index = clickandcollect_select_special_days_listing</item>
+                                            <item name="actionName" xsi:type="string">save</item>
+                                        </item>
+                                        <item name="1" xsi:type="array">
+                                            <item name="targetName" xsi:type="string">${ $.name }</item>
+                                            <item name="actionName" xsi:type="string">actionDone</item>
+                                        </item>
+                                    </item>
+                                </item>
+                            </option>
+                        </options>
+                    </settings>
+                    <insertListing name="clickandcollect_select_special_days_listing"
+                                   provider="webpos_location_form.webpos_location_form_data_source"
+                                   component="Magento_Ui/js/form/components/insert-listing">
+                        <argument name="data" xsi:type="array">
+                            <item name="config" xsi:type="array">
+                                <item name="cssclass" xsi:type="string">noclass</item>
+                            </item>
+                        </argument>
+                        <settings>
+                            <autoRender>true</autoRender>
+                            <realTimeLink>true</realTimeLink>
+                            <dataLinks>
+                                <imports>false</imports>
+                                <exports>true</exports>
+                            </dataLinks>
+                            <behaviourType>simple</behaviourType>
+                            <dataScope>clickandcollect_select_special_days_listing</dataScope>
+                            <ns>clickandcollect_select_special_days_listing</ns>
+                            <externalProvider>clickandcollect_select_special_days_listing.clickandcollect_select_special_days_listing_data_source</externalProvider>
+                            <selectionsProvider>clickandcollect_select_special_days_listing.clickandcollect_select_special_days_listing.clickandcollectadmin_specialday_columns.ids</selectionsProvider>
+                            <externalFilterMode>true</externalFilterMode>
+                        </settings>
+                    </insertListing>
+                </modal>
+            </container>
+            <container name="special_days_dynamic_grid">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="dataScope" xsi:type="string">special_days_dynamic_grid</item>
+                    </item>
+                </argument>
+                <dynamicRows name="special_days_list" component="Magestore_ClickAndCollectAdminUi/js/dynamic-rows/dynamic-rows-grid" template="ui/dynamic-rows/templates/grid">
+                    <argument name="data" xsi:type="array">
+                        <item name="config" xsi:type="array">
+                            <item name="additionalClasses" xsi:type="string">admin__field-wide</item>
+                            <item name="renderDefaultRecord" xsi:type="boolean">false</item>
+                            <item name="itemTemplate" xsi:type="string">record</item>
+                            <item name="deleteButtonLabel" xsi:type="string" translate="true">Remove</item>
+                            <item name="dataProvider" xsi:type="string">data.click_and_collect.session_special_days.modal_button.special_days_modal.clickandcollect_select_special_days_listing</item>
+                            <item name="map" xsi:type="array">
+                                <item name="id" xsi:type="string">specialday_id</item>
+                                <item name="specialday_name" xsi:type="string">specialday_name</item>
+                                <item name="store_status" xsi:type="string">store_status</item>
+                                <item name="repeat" xsi:type="string">repeat</item>
+                                <item name="date_from" xsi:type="string">date_from</item>
+                                <item name="date_to" xsi:type="string">date_to</item>
+                                <item name="time_open" xsi:type="string">time_open</item>
+                                <item name="time_close" xsi:type="string">time_close</item>
+                            </item>
+                            <item name="sortOrder" xsi:type="string">20</item>
+                            <item name="columnsHeader" xsi:type="boolean">false</item>
+                            <item name="columnsHeaderAfterRender" xsi:type="boolean">true</item>
+                        </item>
+                    </argument>
+                    <settings>
+                        <componentType>dynamicRows</componentType>
+                        <addButton>false</addButton>
+                        <dataScope>links</dataScope>
+                        <links>
+                            <link name="insertData">${ $.provider }:${ $.dataProvider }</link>
+                        </links>
+                    </settings>
+                    <container name="record" component="Magento_Ui/js/dynamic-rows/record">
+                        <argument name="data" xsi:type="array">
+                            <item name="config" xsi:type="array">
+                                <item name="isTemplate" xsi:type="boolean">true</item>
+                                <item name="is_collection" xsi:type="boolean">true</item>
+                                <item name="componentType" xsi:type="string">container</item>
+                                <item name="positionProvider" xsi:type="string">position</item>
+                                <item name="dataScope" xsi:type="string"/>
+                            </item>
+                        </argument>
+                        <field name="specialday_name" formElement="input">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="sortOrder" xsi:type="string">15</item>
+                                    <item name="fit" xsi:type="boolean">false</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <componentType>field</componentType>
+                                <dataScope>specialday_name</dataScope>
+                                <dataType>text</dataType>
+                                <label translate="true">Specialday Name</label>
+                                <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                            </settings>
+                        </field>
+                        <field name="store_status" formElement="input">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="sortOrder" xsi:type="string">20</item>
+                                    <item name="fit" xsi:type="boolean">false</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <componentType>field</componentType>
+                                <dataScope>store_status</dataScope>
+                                <dataType>text</dataType>
+                                <label translate="true">Store Status</label>
+                                <elementTmpl>Magestore_ClickAndCollectAdminUi/location/form/cell-status</elementTmpl>
+                            </settings>
+                        </field>
+                        <field name="repeat" formElement="input">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="sortOrder" xsi:type="string">25</item>
+                                    <item name="fit" xsi:type="boolean">false</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <componentType>field</componentType>
+                                <dataScope>repeat</dataScope>
+                                <dataType>text</dataType>
+                                <label translate="true">Repeat</label>
+                                <elementTmpl>Magestore_ClickAndCollectAdminUi/location/form/cell-repeat</elementTmpl>
+                            </settings>
+                        </field>
+                        <field name="date_from" formElement="input" component="Magestore_ClickAndCollectAdminUi/js/form/element/date-by-repeat">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="sortOrder" xsi:type="string">30</item>
+                                    <item name="fit" xsi:type="boolean">false</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <componentType>field</componentType>
+                                <dataScope>date_from</dataScope>
+                                <dataType>text</dataType>
+                                <label translate="true">Date From</label>
+                                <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                            </settings>
+                        </field>
+                        <field name="date_to" formElement="input" component="Magestore_ClickAndCollectAdminUi/js/form/element/date-by-repeat">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="sortOrder" xsi:type="string">35</item>
+                                    <item name="fit" xsi:type="boolean">false</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <componentType>field</componentType>
+                                <dataScope>date_to</dataScope>
+                                <dataType>text</dataType>
+                                <label translate="true">Date To</label>
+                                <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                            </settings>
+                        </field>
+                        <field name="time_open" formElement="input">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="sortOrder" xsi:type="string">40</item>
+                                    <item name="fit" xsi:type="boolean">false</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <componentType>field</componentType>
+                                <dataScope>time_open</dataScope>
+                                <dataType>text</dataType>
+                                <label translate="true">Time Open</label>
+                                <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                            </settings>
+                        </field>
+                        <field name="time_close" formElement="input">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="sortOrder" xsi:type="string">45</item>
+                                    <item name="fit" xsi:type="boolean">false</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <componentType>field</componentType>
+                                <dataScope>time_close</dataScope>
+                                <dataType>text</dataType>
+                                <label translate="true">Time Close</label>
+                                <elementTmpl>ui/dynamic-rows/cells/text</elementTmpl>
+                            </settings>
+                        </field>
+                        <actionDelete name="action_delete" template="Magento_Backend/dynamic-rows/cells/action-delete">
+                            <argument name="data" xsi:type="array">
+                                <item name="config" xsi:type="array">
+                                    <item name="fit" xsi:type="boolean">true</item>
+                                    <item name="sortOrder" xsi:type="string">50</item>
+                                </item>
+                            </argument>
+                            <settings>
+                                <additionalClasses>
+                                    <class name="data-grid-actions-cell">true</class>
+                                </additionalClasses>
+                                <dataType>text</dataType>
+                                <label>Action</label>
+                                <componentType>actionDelete</componentType>
+                                <elementTmpl>Magento_Ui/js/dynamic-rows/action-delete</elementTmpl>
+                            </settings>
+                        </actionDelete>
+                    </container>
+                </dynamicRows>
+            </container>
+        </fieldset>
+    </fieldset>
+</form>

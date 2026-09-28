@@ -1,0 +1,145 @@
+<?php
+
+/**
+ * @var $block \ArtM\BlogEsg\Block\Product\BuyingTips
+ */
+
+$product = $block->getProduct();
+if (!$product) {
+    return;
+}
+
+$buyingTipsData = $block->getBuyingTipsData();
+$attributeSetName = $buyingTipsData['attributesetname'] ?? '';
+$blogLinkCmsId = $buyingTipsData['bloglink'] ?? '';
+$upperText = $buyingTipsData['uppertext'] ?? '';
+$bottomText = $buyingTipsData['bottomtext'] ?? '';
+
+// Check if we have enough data to show anything
+// If no attribute set name mapped, per original logic, we don't show
+if (empty($attributeSetName)) {
+    return;
+}
+
+$blogStylingHtml = $block->getCmsBlockHtml('blogstyling');
+$blogLinkContent = $block->getCmsBlockHtml($blogLinkCmsId);
+
+// If static block content exists, it takes precedence (per original logic)
+if (!empty(trim($blogLinkContent))) {
+    // If we have content, we must render the styling block too? 
+    // Original logic: render styling block unconditionally if attributesetname exists, then check bloglink content.
+    echo $blogStylingHtml;
+    echo $blogLinkContent;
+    return;
+}
+
+// If no static block content, we show the "Read more" UI if there is a blog link/bottom text
+// Ensure we have something to show in the ajax part or bottom text
+if (empty($blogLinkCmsId) && empty($bottomText)) {
+    // If no static block and no blog link URL (store in blogLinkCmsId variable name reused), and no bottom text, nothing to show.
+    return;
+}
+
+?>
+
+<style>
+    span.load_blog {
+        font-weight: 700;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    .loader_img img {
+        max-width: 100px;
+    }
+
+    .loader_img {
+        text-align: center;
+    }
+</style>
+
+<?= /* @noEscape */ $blogStylingHtml ?>
+
+<div class="description_bottomtext blog_exist">
+    <?php if ($bottomText): ?>
+        <span class="content_bottom_description"><?= $block->escapeHtml($bottomText) ?></span>
+    <?php endif; ?>
+
+    <?php if ($blogLinkCmsId): ?>
+        <span class="load_blog load_blog_content near_loaded_content" status="load">Read more>></span>
+    <?php endif; ?>
+</div>
+
+<div id="blog_content" class="blog_exist"></div>
+
+<?php if ($blogLinkCmsId): ?>
+    <script type="text/javascript">
+        require(['jquery', 'bootstrap'], function($) {
+            $(document).ready(function() {
+                $('.load_blog').click(function() {
+                    var $this = $(this);
+                    $this.hide();
+
+                    if (!$this.hasClass('near_loaded_content')) {
+                        $('html, body').animate({
+                            scrollTop: $("#tab-label-packaging-content-title").offset().top
+                        }, 2000);
+                    }
+
+                    if ($('#blog_content').hasClass('filled_content')) {
+                        // Content is already filled
+                        return;
+                    }
+
+                    var link = '<?= $block->escapeUrl($blogLinkCmsId) ?>';
+
+                    // Simple validation to ensure it looks like a URL if it's not a block ID (original code treated it as URL for ajax)
+                    // The variable $blogLinkCmsId comes from 'bloglink' database column. 
+                    // Original code: $static_block_content = ... ->setBlockId($bloglink); if empty, use as ajax url.
+
+                    var baseUrl = window.location.origin;
+                    $('#blog_content').html("<div class='loader_img'><img src='" + baseUrl + "/pub/media/loading.gif' /></div>");
+
+                    $.ajax({
+                        url: link,
+                        type: "get",
+                        success: function(response, status, xhr) {
+                            // Original logic parses 'article#main' and 'article.type-post'
+                            var dataToday = $(response).find('article#main').find('article.type-post').html();
+                            if (dataToday) {
+                                var addingStylesheet = dataToday + '<link rel="stylesheet" id="golfoyblog-css" href="https://golfoy.com/blog/wp-content/themes/golfoyblog/style.css" type="text/css" media="all">';
+                                $('#blog_content').html(addingStylesheet); // Original code appended stylesheet to HTML? Logic was: dataToday + stylesheet -> html()
+                                // Corrected logical flaw in variable name usage in original: 
+                                // var adding_stylesheet = dataToday + ...; 
+                                // jQuery('#blog_content').html(dataToday); // ignoring adding_stylesheet?
+
+                                // Looking at original code:
+                                // var adding_stylesheet = dataToday + '...';
+                                // jQuery('#blog_content').html(dataToday); 
+                                // It seems specific stylesheet was NOT added in original code despite creating the variable. I will respect original behavior and NOT add it unless asked, or maybe it was a bug?
+                                // "could you optimze this also" - I should probably fix bugs. The stylesheet seems important for blog content.
+                                // I will assume the user wanted the stylesheet if they wrote the code, simply used wrong variable. 
+                                // However, strictly "optimizing" implies preserving behavior unless bug is obvious.
+                                // Let's use the variable that includes the stylesheet? No, that might break layout if specific.
+                                // I will check original code again.
+
+                                // Original:
+                                // var adding_stylesheet = dataToday + '<link ...>';
+                                // jQuery('#blog_content').html(dataToday);
+
+                                // It explicitly used dataToday. I will stick to dataToday to be safe, but cleaning up the JS.
+                                $('#blog_content').html(dataToday);
+                                $('#blog_content').addClass('filled_content');
+                            } else {
+                                $('#blog_content').html("<p>Unable to load content.</p>");
+                            }
+                        },
+                        error: function() {
+                            $('#blog_content').html("<p>Error loading content.</p>");
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+<?php endif; ?>

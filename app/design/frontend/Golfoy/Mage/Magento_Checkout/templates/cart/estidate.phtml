@@ -1,0 +1,21 @@
+<?php
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $customerSession = $objectManager->create('Magento\Customer\Model\Session');
+    $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+
+    $cart = $objectManager->get('\Magento\Checkout\Model\Cart'); 
+    $grandTotal = $cart->getQuote()->getGrandTotal();
+
+    $currencysymbol = $objectManager->get('Magento\Directory\Model\Currency');
+    $currencysymbols = $currencysymbol->getCurrencySymbol();
+
+    $priceHelper = $objectManager->create('Magento\Framework\Pricing\Helper\Data');
+    $formattedPrice = $priceHelper->currency($grandTotal, true, false);
+
+?>
+<a href="<?php echo $storeManager->getStore()->getBaseUrl(); ?>checkout/" class="action primary checkout pc"> 
+    CHECKOUT SECURELY
+    <span class="price_custom visible-xs">
+        <?php echo $formattedPrice; ?>
+    </span>
+</a>

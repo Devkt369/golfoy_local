@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">artm_forms_listing.artm_forms_data_source</item>
+            <item name="deps" xsi:type="string">artm_forms_listing.artm_forms_data_source</item>
+        </item>
+        <item name="spinner" xsi:type="string">artm_forms_columns</item>
+        <item name="buttons" xsi:type="array">
+            <item name="add" xsi:type="array">
+                <item name="name" xsi:type="string">add</item>
+                <item name="label" xsi:type="string" translate="true">Add New Form</item>
+                <item name="class" xsi:type="string">primary</item>
+                <item name="url" xsi:type="string">*/*/new</item>
+            </item>
+        </item>
+    </argument>
+
+    <!-- Data Source -->
+    <dataSource name="artm_forms_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider</argument>
+            <argument name="name" xsi:type="string">artm_forms_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">id</argument>
+            <argument name="requestFieldName" xsi:type="string">id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+                    <item name="update_url" xsi:type="url" path="mui/index/render"/>
+                    <item name="storageConfig" xsi:type="array">
+                        <item name="indexField" xsi:type="string">id</item>
+                    </item>
+                </item>
+            </argument>
+        </argument>
+    </dataSource>
+
+    <!-- Toolbar -->
+    <listingToolbar name="listing_top">
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <filters name="listing_filters">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="applied" xsi:type="array">
+                        <item name="is_approved" xsi:type="string">1</item>
+                    </item>
+                </item>
+            </argument>
+        </filters>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+
+    <!-- Columns -->
+    <columns name="artm_forms_columns">
+        <column name="id">
+            <settings>
+                <filter>text</filter>
+                <label>ID</label>
+            </settings>
+        </column>
+        <column name="form_name">
+            <settings>
+                <filter>text</filter>
+                <label>Form Name</label>
+            </settings>
+        </column>
+        <column name="form_identifier">
+            <settings>
+                <filter>text</filter>
+                <label>Form Identifier</label>
+            </settings>
+        </column>
+        <column name="form_description">
+            <settings>
+                <filter>text</filter>
+                <label>Form Description</label>
+            </settings>
+        </column>
+        <column name="created_at">
+            <settings>
+                <filter>dateRange</filter>
+                <label>Created At</label>
+            </settings>
+        </column>
+        <column name="updated_at">
+            <settings>
+                <filter>dateRange</filter>
+                <label>Updated At</label>
+            </settings>
+        </column>
+        <actionsColumn name="actions" class="ArtM\Forms\Ui\Component\Column\Actions">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="indexField" xsi:type="string">id</item>
+                </item>
+            </argument>
+        </actionsColumn>
+    </columns>
+</listing>

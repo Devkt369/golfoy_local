@@ -1,0 +1,240 @@
+<?php
+/** @var \ArtM\CustomerSurvey\Block\Adminhtml\Question\Index $block */
+
+$questions = $block->getQuestions();
+$types = $block->getQuestionTypes();
+$currentPage = $block->getCurrentPage();
+$lastPage = $block->getLastPageNumber();
+$pageWindow = 2;
+$startPage = max(1, $currentPage - $pageWindow);
+$endPage = min($lastPage, $currentPage + $pageWindow);
+?>
+
+<div class="admin__page-section customersurvey-admin customersurvey-index">
+    <div class="admin__page-section-title title-flex">
+        <h2><?= $block->escapeHtml(__('Question Bank')) ?> (<?= (int)$block->getTotalCount() ?>)</h2>
+        <button type="button"
+                class="action-primary"
+                onclick="setLocation('<?= $block->escapeUrl($block->getUrl('customersurvey/question/new')) ?>')">
+            <span><?= $block->escapeHtml(__('Add New Question')) ?></span>
+        </button>
+    </div>
+
+    <form method="get" action="<?= $block->escapeUrl($block->getUrl('customersurvey/question/index')) ?>" class="filter-form">
+        <div class="filter-row">
+            <input type="text"
+                   class="admin__control-text"
+                   name="search"
+                   value="<?= $block->escapeHtmlAttr($block->getSearchValue()) ?>"
+                   placeholder="<?= $block->escapeHtmlAttr(__('Search title or description')) ?>"/>
+
+            <select name="type" class="admin__control-select">
+                <option value=""><?= $block->escapeHtml(__('All Types')) ?></option>
+                <?php foreach ($types as $value => $label): ?>
+                    <option value="<?= $block->escapeHtmlAttr($value) ?>"
+                        <?= $block->getTypeValue() === $value ? 'selected' : '' ?>>
+                        <?= $block->escapeHtml($label) ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
+            <select name="status" class="admin__control-select">
+                <option value=""><?= $block->escapeHtml(__('All Status')) ?></option>
+                <option value="1" <?= $block->getStatusValue() === '1' ? 'selected' : '' ?>>
+                    <?= $block->escapeHtml(__('Enabled')) ?>
+                </option>
+                <option value="0" <?= $block->getStatusValue() === '0' ? 'selected' : '' ?>>
+                    <?= $block->escapeHtml(__('Disabled')) ?>
+                </option>
+            </select>
+
+            <select name="limit" class="admin__control-select">
+                <?php foreach ([20, 50, 100] as $limit): ?>
+                    <option value="<?= (int)$limit ?>" <?= $block->getLimitValue() === $limit ? 'selected' : '' ?>>
+                        <?= (int)$limit ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
+            <button type="submit" class="action-secondary"><span><?= $block->escapeHtml(__('Apply')) ?></span></button>
+            <button type="button"
+                    class="action-secondary"
+                    onclick="setLocation('<?= $block->escapeUrl($block->getUrl('customersurvey/question/index')) ?>')">
+                <span><?= $block->escapeHtml(__('Reset')) ?></span>
+            </button>
+        </div>
+    </form>
+
+    <form id="mass_action_form" method="post">
+        <?= $block->getBlockHtml('formkey') ?>
+
+        <div class="toolbar-row">
+            <div class="toolbar-row__actions">
+                <label><input type="checkbox" id="select_all"/> <?= $block->escapeHtml(__('Select All')) ?></label>
+                <select id="mass_action" class="admin__control-select">
+                    <option value=""><?= $block->escapeHtml(__('Mass Actions')) ?></option>
+                    <option value="delete"><?= $block->escapeHtml(__('Delete')) ?></option>
+                    <option value="enable"><?= $block->escapeHtml(__('Enable')) ?></option>
+                    <option value="disable"><?= $block->escapeHtml(__('Disable')) ?></option>
+                </select>
+                <button type="button" class="action-secondary" id="apply_mass_action">
+                    <span><?= $block->escapeHtml(__('Apply')) ?></span>
+                </button>
+            </div>
+            <div class="toolbar-row__meta">
+                <?= $block->escapeHtml(__('Showing %1-%2 of %3', $block->getFromRecord(), $block->getToRecord(), $block->getTotalCount())) ?>
+            </div>
+        </div>
+
+        <div class="admin-grid-wrap">
+            <table class="data-grid">
+                <thead>
+                <tr>
+                    <th><input type="checkbox" id="select_all_header"/></th>
+                    <th><?= $block->escapeHtml(__('ID')) ?></th>
+                    <th><?= $block->escapeHtml(__('Title')) ?></th>
+                    <th><?= $block->escapeHtml(__('Type')) ?></th>
+                    <th><?= $block->escapeHtml(__('Required')) ?></th>
+                    <th><?= $block->escapeHtml(__('Status')) ?></th>
+                    <th><?= $block->escapeHtml(__('Sort Order')) ?></th>
+                    <th><?= $block->escapeHtml(__('Updated At')) ?></th>
+                    <th><?= $block->escapeHtml(__('Actions')) ?></th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php if ($questions): ?>
+                    <?php foreach ($questions as $question): ?>
+                        <tr>
+                            <td><input type="checkbox" name="question_ids[]" class="row-checkbox" value="<?= (int)$question->getQuestionId() ?>"/></td>
+                            <td><?= (int)$question->getQuestionId() ?></td>
+                            <td>
+                                <strong><?= $block->escapeHtml($question->getTitle()) ?></strong>
+                                <?php if ($question->getDescription()): ?>
+                                    <br/><small><?= $block->escapeHtml(mb_substr((string)$question->getDescription(), 0, 120)) ?></small>
+                                <?php endif; ?>
+                            </td>
+                            <td><?= $block->escapeHtml($types[$question->getType()] ?? $question->getType()) ?></td>
+                            <td><?= (int)$question->getIsRequired() ? $block->escapeHtml(__('Yes')) : $block->escapeHtml(__('No')) ?></td>
+                            <td>
+                                <span class="status-badge status-<?= (int)$question->getStatus() ?>">
+                                    <?= (int)$question->getStatus() ? $block->escapeHtml(__('Enabled')) : $block->escapeHtml(__('Disabled')) ?>
+                                </span>
+                            </td>
+                            <td><?= (int)$question->getSortOrder() ?></td>
+                            <td><?= $block->escapeHtml((string)$question->getUpdatedAt()) ?></td>
+                            <td>
+                                <a href="<?= $block->escapeUrl($block->getUrl('customersurvey/question/edit', ['question_id' => (int)$question->getQuestionId()])) ?>">
+                                    <?= $block->escapeHtml(__('Edit')) ?>
+                                </a>
+                                |
+                                <a href="<?= $block->escapeUrl($block->getUrl('customersurvey/question/delete', ['question_id' => (int)$question->getQuestionId()])) ?>"
+                                   onclick="return confirm('<?= $block->escapeHtmlAttr(__('Delete this question?')) ?>')">
+                                    <?= $block->escapeHtml(__('Delete')) ?>
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="9" class="empty-text"><?= $block->escapeHtml(__('No questions found.')) ?></td>
+                    </tr>
+                <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </form>
+
+    <?php if ($lastPage > 1): ?>
+        <div class="pager-wrap">
+            <?php if ($currentPage > 1): ?>
+                <a class="pager-link" href="<?= $block->escapeUrl($block->getUrl('*/*/*', ['_current' => true, 'p' => 1])) ?>">&laquo; <?= $block->escapeHtml(__('First')) ?></a>
+                <a class="pager-link" href="<?= $block->escapeUrl($block->getUrl('*/*/*', ['_current' => true, 'p' => $currentPage - 1])) ?>">&lsaquo; <?= $block->escapeHtml(__('Prev')) ?></a>
+            <?php endif; ?>
+
+            <div class="pager-pages">
+                <?php for ($page = $startPage; $page <= $endPage; $page++): ?>
+                    <?php if ($page === $currentPage): ?>
+                        <span class="pager-link is-active"><?= (int)$page ?></span>
+                    <?php else: ?>
+                        <a class="pager-link" href="<?= $block->escapeUrl($block->getUrl('*/*/*', ['_current' => true, 'p' => $page])) ?>"><?= (int)$page ?></a>
+                    <?php endif; ?>
+                <?php endfor; ?>
+            </div>
+
+            <?php if ($currentPage < $lastPage): ?>
+                <a class="pager-link" href="<?= $block->escapeUrl($block->getUrl('*/*/*', ['_current' => true, 'p' => $currentPage + 1])) ?>"><?= $block->escapeHtml(__('Next')) ?> &rsaquo;</a>
+                <a class="pager-link" href="<?= $block->escapeUrl($block->getUrl('*/*/*', ['_current' => true, 'p' => $lastPage])) ?>"><?= $block->escapeHtml(__('Last')) ?> &raquo;</a>
+            <?php endif; ?>
+
+            <span class="pager-summary"><?= $block->escapeHtml(__('Page %1 of %2', $currentPage, $lastPage)) ?></span>
+        </div>
+    <?php endif; ?>
+</div>
+
+<script>
+    require([], function () {
+        var selectAll = document.getElementById('select_all');
+        var selectAllHeader = document.getElementById('select_all_header');
+
+        function syncAll(flag) {
+            var boxes = document.querySelectorAll('.row-checkbox');
+            boxes.forEach(function (box) {
+                box.checked = flag;
+            });
+            if (selectAll) {
+                selectAll.checked = flag;
+            }
+            if (selectAllHeader) {
+                selectAllHeader.checked = flag;
+            }
+        }
+
+        if (selectAll) {
+            selectAll.addEventListener('change', function () {
+                syncAll(this.checked);
+            });
+        }
+        if (selectAllHeader) {
+            selectAllHeader.addEventListener('change', function () {
+                syncAll(this.checked);
+            });
+        }
+
+        document.getElementById('apply_mass_action').addEventListener('click', function () {
+            var action = document.getElementById('mass_action').value;
+            if (!action) {
+                alert('<?= $block->escapeJs(__('Please select a mass action.')) ?>');
+                return;
+            }
+
+            var hasChecked = false;
+            document.querySelectorAll('.row-checkbox').forEach(function (box) {
+                if (box.checked) {
+                    hasChecked = true;
+                }
+            });
+
+            if (!hasChecked) {
+                alert('<?= $block->escapeJs(__('Please select at least one question.')) ?>');
+                return;
+            }
+
+            var form = document.getElementById('mass_action_form');
+            if (action === 'delete') {
+                if (!confirm('<?= $block->escapeJs(__('Delete selected questions?')) ?>')) {
+                    return;
+                }
+                form.action = '<?= $block->escapeJs($block->getUrl('customersurvey/question/massDelete')) ?>';
+            } else {
+                form.action = '<?= $block->escapeJs($block->getUrl('customersurvey/question/massStatus')) ?>';
+                var hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = 'status';
+                hidden.value = action === 'enable' ? '1' : '0';
+                form.appendChild(hidden);
+            }
+
+            form.submit();
+        });
+    });
+</script>

@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Magento\Theme\Block\Html\Topmenu" type="ArtM\GraphqlCache\Block\Html\Topmenu" />
+    <type name="Magento\CatalogGraphQl\Model\Resolver\Products">
+        <plugin name="custom_product_sort_plugin" type="ArtM\GraphqlCache\Model\Resolver\SortByRecommend" />
+        <!-- GraphQL cache plugin disabled - Product objects can't be properly serialized/cached -->
+        <!-- <plugin name="graphql_cache_plugin" type="ArtM\GraphqlCache\Plugin\ProductsResolverCache" sortOrder="10" /> -->
+    </type>
+    <!-- <preference for="Magento\CatalogGraphQl\Model\Resolver\Products\DataProvider\ProductSearch"
+                type="ArtM\GraphqlCache\Model\Resolver\Products\DataProvider\ProductSearch" /> -->
+    <preference for="Magento\GraphQl\Controller\GraphQl" type="ArtM\GraphqlCache\Controller\GraphQl" />
+    
+    <!-- GraphQL Cache Configuration -->
+    <type name="ArtM\GraphqlCache\Model\Cache\GraphqlCache">
+        <arguments>
+            <argument name="cache" xsi:type="object">Magento\Framework\App\Cache\Proxy</argument>
+        </arguments>
+    </type>
+
+    <!-- Console Command Registration -->
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="artm_graphql_cache" xsi:type="object">ArtM\GraphqlCache\Console\Command\CacheCommand</item>
+            </argument>
+        </arguments>
+    </type>
+
+</config>

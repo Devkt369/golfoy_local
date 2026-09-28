@@ -1,0 +1,30 @@
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<!--@subject {{trans "A new Click & Collect order has been created with ID #%increment_id" increment_id=$order.increment_id |raw}} @-->
+<!--@vars {
+"var order.increment_id":"Order Id",
+"var order.is_out_of_stock":"Is out of stock",
+"var order.pick_time|raw":"Order Pick Time"
+} @-->
+{{template config_path="design/email/header_template"}}
+
+<p>
+    {{trans "A new Click & Collect order has been created with ID #%increment_id" increment_id=$order.increment_id |raw}}
+</p>
+{{if order.pick_time}}
+<p>
+    {{trans "The customer will collect them at %pick_time" pick_time=$order.pick_time|raw}}
+</p>
+{{/if}}
+
+{{if order.is_out_of_stock}}
+<p>
+    {{trans "There are some out of stock items in that order, please check it."}}
+</p>
+{{/if}}
+
+{{template config_path="design/email/footer_template"}}

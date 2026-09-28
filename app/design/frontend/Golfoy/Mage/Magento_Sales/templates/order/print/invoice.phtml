@@ -1,0 +1,323 @@
+
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+?>
+<?php $_order = $block->getOrder() ?>
+<?php $_invoice = $block->getInvoice() ?>
+<?php if ($_invoice) : ?>
+    <?php $_invoices = [$_invoice]; ?>
+<?php else : ?>
+    <?php $_invoices = $_order->getInvoiceCollection() ?>
+<?php endif; ?>
+<?php foreach ($_invoices as $_invoice) : ?>
+
+<div class="order-details-items invoice">
+<style>
+    body, .price-including-tax .price, .price-excluding-tax .price,
+    .left_address_details pre{font-size:10px;}
+    body.account .page.messages{margin-top:25px;}
+    .columns .column.main{padding-bottom:1px;}
+    small.copyright{display:none;}
+        .order-title * {
+            font-size: 13px !important;
+            margin: 0px !important;
+        }
+    td.left_address_details, .right_info_details{
+        border-bottom: 1px solid black;
+    }
+    table.right_table_details td{
+        border-bottom:1px solid black;
+        padding: 5px;
+    }
+    table{
+        width: 100%;
+    }
+    table.full_table{
+        border:1px solid black;
+        text-align: left;
+    }
+    .right_table_details > tbody > tr td:nth-child(2){
+        border-left: 1px solid black;
+        height: 50px;
+    }
+    div.strong{
+        font-weight:800;
+    }
+    table.right_table_details > tbody > tr:last-child > td {
+        border-bottom: 0px !important;
+    }
+    table.full_table > tbody > tr > td:nth-child(2) {
+        border-left: 1px solid;
+    }
+    .custom_invoice_table {
+        border: 1px solid black !important;
+        margin-top: 10px;
+    }
+    .custom_invoice_table td.col.name, .custom_invoice_table td.col.hsn,
+    .custom_invoice_table td.col.price, .custom_invoice_table td.col.sku,
+    .custom_invoice_table td.col.qty,.custom_invoice_table td.col.subtotal,
+    .custom_invoice_table th.col.name, .custom_invoice_table th.col.hsn,
+    .custom_invoice_table th.col.price, .custom_invoice_table th.col.sku,
+    .custom_invoice_table th.col.qty,.custom_invoice_table th.col.subtotal{
+        border: 1px solid black !important;
+    }
+    tr.totals.tax.details td.mark{font-weight:bold;}
+    .custom_invoice_table th.col.name{width:35%;}
+    .custom_invoice_table th.col.qty{width:8%;}
+    address, pre{margin-bottom:1px;}
+    .order-details-items .item-options dd{margin:0 0 1px;}
+    dl.item-options{margin-bottom:1px;}
+    .custom_invoice_table tbody:last-child th, .custom_invoice_table tbody:last-child td{padding:4px 8px;}
+        .subtotal_invoice{
+            max-width: 500px;
+        }
+        .footer_content {
+            
+    border: 1px solid black;
+    padding: 5px;
+    display: inline-block;
+    width: 100%;
+}
+        .total_amount {
+    border-bottom: 1px solid black;
+    padding: 3px 0px 5px;
+}
+        .declaration_box > div {
+    width: 50%;
+    display: inline-block;
+    float: left;
+}
+        
+        .declaration_box_right {
+    text-align: right;
+}
+        .declaration_box {
+    display: inline-block;
+    width: 100%;
+    margin-top: 50px;
+}
+        .declaration_box_left {
+    position: relative;
+    top: 5px;
+}
+        table.declaration_box_table td {
+    width: 50%;
+}
+        table.declaration_box_table tr td:last-child {
+    border-left: 1px solid black;
+    border-top: 1px solid black;
+}
+        table.declaration_box_table tr td {
+    padding: 10px 0px;
+}
+        table.declaration_box_table {
+    position: relative;
+    bottom: -10px;
+}
+        .footer_line {
+    text-align: center;
+    padding: 10px;
+}
+         pre {
+    font-family: 'spartan';
+    padding: 0px;
+    background-color: transparent;
+    border: 0px;
+}
+@media only screen and (max-width: 767px) { 
+     body{font-size:small;}
+ } 
+ @media print {
+    a[href]:after {
+        content: none !important;
+    }
+    @page { size: auto;  margin: 0mm; }
+}  
+tr.subtotal_incl{display:none !important;}     
+    </style>
+<div class="container-fluid">
+    <table class="full_table">
+        
+        <tr>
+            <td class="left_address_details">
+                <?php
+                $value = \Magento\Framework\App\ObjectManager::getInstance()
+                ->get(\Magento\Framework\App\Config\ScopeConfigInterface::class)
+                ->getValue(
+                    'sales/identity/address',
+                    \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+                );
+                echo "<pre>".$value."</pre>";
+                ?>
+            </td>
+            <td class="right_info_details">
+                <table class="right_table_details">
+                    <tr>
+                        <td class="details_invoice">
+                            <div>Invoice No.</div>
+                            <div class="strong">
+                                <?= $block->escapeHtml(__('Invoice #')) ?><?= (int) $_invoice->getIncrementId() ?>
+                            </div>
+                        </td>
+                        <td class="details_invoice_date">
+                            <div>Dated</div>
+                            <div class="strong">
+                                <?php
+                                    $_invoice_date = date("d-m-Y", strtotime( $_invoice->getCreatedAt() ) );
+                                    echo date('d-m-Y', strtotime($_invoice_date));
+                                ?>    
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div>Buyer’s Order No.</div>
+                            <div class="strong">
+                                <?= $block->escapeHtml(__('Order #')) ?><?= (int) $_order->getIncrementId() ?>
+                            </div>
+                        </td>
+                        <td>
+                            <div>Dated</div>
+                            <div class="strong">
+                                <?php
+                                    $_order_date = date("d-m-Y", strtotime( $_order->getCreatedAt() ) );
+                                    echo date('d-m-Y', strtotime($_order_date));
+                                ?>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr style="display:none !important;">
+                        <td>
+                            <div>Payment Method</div>
+                            <div class="strong">
+                                <?= $block->getPaymentInfoHtml() ?>
+                            </div>
+                        </td>
+                        <td>
+                            <div>Shipping Method</div>
+                            <div class="strong">
+                                <?php if (!$_order->getIsVirtual()) : ?>
+                                <?php if ($_order->getShippingDescription()) : ?>
+                                        <?= $block->escapeHtml($_order->getShippingDescription()) ?>
+                                    <?php else : ?>
+                                        <?= $block->escapeHtml(__('No shipping information available')) ?>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td class="left_buyer_details">
+                <div>
+                    <b>
+                        Bill To:
+                    </b>
+                </div>
+                <?php $_billing = $_invoice->getbillingAddress() ?>
+                    <address><?= /* @noEscape */ $block->formatAddress($_order->getBillingAddress(), 'html') ?></address>
+            </td>
+            <td>
+                <div>
+                    <b>
+                        Ship To:
+                    </b>
+                </div>
+                <?php if (!$_order->getIsVirtual()) : ?>
+                    <?php $_shipping = $_invoice->getShippingAddress() ?>
+                    <address><?= /* @noEscape */ $block->formatAddress($_shipping, 'html') ?></address>
+                <?php endif; ?>
+                
+                
+            </td>
+        </tr>
+        
+    </table>
+</div>
+    
+    
+    
+    
+    
+    <div class="table-wrapper table-order-items invoice">
+        <table class="custom_invoice_table data table table-order-items invoice" id="my-invoice-table-<?= (int) $_invoice->getId() ?>">
+            <tbody>
+            <tr>
+                <th class="col name"><?= $block->escapeHtml(__('Product Name')) ?></th>
+                <th class="col sku"><?= $block->escapeHtml(__('SKU')) ?></th>
+                <th class="col hsn"><?= $block->escapeHtml(__('HSN Code')) ?></th>
+                <th class="col price"><?= $block->escapeHtml(__('Price')) ?></th>
+                <th class="col qty"><?= $block->escapeHtml(__('Qty')) ?></th>                
+                <th class="col subtotal"><?= $block->escapeHtml(__('Subtotal')) ?></th>
+            </tr>
+            </tbody>
+            
+            
+            <?php $_items = $_invoice->getItemsCollection(); ?>
+            <?php foreach ($_items as $_item) : ?>
+                <?php if (!$_item->getOrderItem()->getParentItem()) : ?>
+                    <tbody>
+                        <?= $block->getItemHtml($_item) ?>
+                    </tbody>
+                <?php endif; ?>
+            <?php endforeach; ?>
+            <tfooter>
+                    <?= $block->getInvoiceTotalsHtml($_invoice) ?>
+            </tfooter>
+        </table>
+        <div class="footer_content">
+            <div class="total_amount">
+                <div>Amount Chargeable (in words)</div>
+                <div class="strong">
+                    <?php $amt = $_invoice->getGrandTotal();  
+                    $amtstr = $block->getIndianCurrency((float) $amt); 
+                     echo ucwords($amtstr." only");
+                     ?>
+                </div>
+            </div>
+            <div class="declaration_box">
+                <table class="declaration_box_table">
+                    <tr>
+                        <td>
+                            <div class="declaration_box_left">
+                                <div class="declaration_heading">Declaration</div>
+                                <div class="declaration">
+                                    We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="declaration_box_right">
+                                <div class="company_name">
+                                    for KTS VENTURES
+                                    <br/>
+                                    <br/>
+                                    <br/>
+                                </div>
+                                <!--<div class="signature_here">
+                                    Authorised Signatory
+                                </div>-->
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="footer_line">
+            This is a Computer Generated Invoice
+        </div>
+    </div>
+    
+</div>
+<?php endforeach; ?>
+<script type="text/javascript">
+    require([ 'jquery'], function($){ 
+        $(".totals-tax-summary div.detailed").text("Total Tax");
+     });
+</script>

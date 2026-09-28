@@ -1,0 +1,734 @@
+  <style>
+        .one_rating_box > .rate_count {
+    font-size: 10px;
+}
+        .count_nps_rating_graph {
+    display: inline-block;
+}
+        .question-block {
+    margin: 20px;
+    font-family: Arial, sans-serif;
+    display: inline-block;
+    max-width: 300px;
+    float: left;
+}
+
+.label {
+    font-weight: bold;
+    margin-bottom: 0px;
+}
+.question-block > div {
+    display: inline-block;
+}
+
+.question-block > div.label {
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 400;
+    font-family: sans-serif;
+}
+label {
+    display: inline-block;
+    margin-bottom: 5px;
+    font-size: 16px;
+    width: 100px;
+}
+.one_rating_box > label {
+    text-align: right;
+    margin-right: 10px;
+    text-transform: capitalize;
+    font-size: 10px;
+}
+.image-display {
+    max-width: 100px; /* Adjust size as needed */
+    max-height: 100px; /* Adjust size as needed */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    display: block;
+}
+
+.question-block div img {
+    margin-top: 5px;
+}
+.conteiner_range {
+    width: 150px;
+    display: inline-block;
+    height: 15px;
+    margin-right: 10px;
+    border: 1px solid #ebebeb;
+}
+        .value_range {
+    background-color: #f6b709;
+    height: 100%;
+    display: inline-block;
+}
+        .one_rating_box > * {
+    float: left;
+}
+      .canvases_container_inside_single {
+    width: 30%;
+    float: left;
+    min-height: 250px;
+    margin: 1.5%;
+    text-align: center;
+}
+      .canvases_container.bar_charts {
+    display: flex;
+    grid: none;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+        .canvases_container {
+    display: inline-block;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    margin-bottom: 20px
+}
+        .nps_percentage{
+            widows: 30%;
+            display: inline-block;
+            float: left;
+        } 
+        .details_nps table td, .details_nps table th {
+    border: 1px solid #e1e1e1;
+}
+.details_nps table {
+    border: 1px solid #e1e1e1;
+    width: 100%;
+}
+        
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .filter-container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            max-width: 1000px;
+            margin: 20px auto;
+        }
+
+        .filter-item {
+            display: inline-block;
+            width: 260px;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .filter-item label {
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .filter-item select,
+        .filter-item input[type="date"] {
+            width: 150px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            font-size: 14px;
+        }
+
+        .filter-item select:focus,
+        .filter-item input[type="date"]:focus {
+            outline: none;
+            border-color: #aaa;
+        }
+
+        #date-range {
+            display: none;
+            gap: 10px;
+        }
+
+        .result {
+            margin: 20px auto;
+            max-width: 800px;
+            padding: 10px;
+            background-color: #eef;
+            border-radius: 8px;
+        }
+        div#date-range > label {
+            margin-top: 7px;
+            max-width: 72px;
+            margin-left: 20px;
+            font-weight: 600;
+        }
+
+        div#date-range > * {
+            float: left;
+        }
+        input[type="submit"] {
+            background-color: #dbf2f2;
+            border: 1px solid #4cc0c0;
+            color: #5b5b5b;
+            width: 100px;
+            height: 27px;
+            border-radius: 5px;
+            font-weight: 600;
+            /* text-transform: capitalize; */
+        }
+        div#date-range {
+            width: 500px;
+        }
+    </style>
+
+<?php
+
+// Use the Object Manager to get the resource connection
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
+$connection = $resource->getConnection();
+
+
+$result = $this->getRequest()->getParams();
+$startDate = '';
+$endDate = '';
+
+$tableName = $resource->getTableName('artm_survey_results');
+if(isset($result['time_period'])){
+    $timePeriod = $result['time_period'];
+}else{
+    $timePeriod = "reset";
+}
+    
+    
+if ($timePeriod === 'reset') {
+    // If 'reset', both dates should be empty
+    $startDate = '';
+    $endDate = '';
+} elseif ($timePeriod === 'custom') {
+    $timePeriod = isset($result['time_period']) ? $result['time_period'] : '';
+
+    $startDate = isset($result['start_date']) ? $result['start_date'] : '';
+    $endDate = isset($result['end_date']) ? $result['end_date'] : '';
+} else {
+    // If a specific number of days is selected
+    $n = (int)$timePeriod;
+    $currentDate = new \DateTime();
+    $startDateObj = clone $currentDate;
+    $startDateObj->modify("-$n days");
+
+    // Format dates as 'Y-m-d'
+    $startDate = $startDateObj->format('Y-m-d');
+    $endDate = $currentDate->format('Y-m-d');
+}
+$endDateforinput = $endDate;
+
+
+// Initialize the base query
+$sql = "SELECT survey_results FROM $tableName";
+
+// Check if both start and end dates are provided
+if (!empty($startDate) && !empty($endDate)) {
+    // Sanitize dates to prevent SQL injection
+    $startDate = htmlspecialchars($startDate);
+    $endDate = htmlspecialchars($endDate);
+    
+    // Convert endDate to DateTime object and set the time to the end of the day
+    try {
+        $endDateTime = new DateTime($endDate);
+        $endDateTime->setTime(23, 59, 59);
+        $endDate = $endDateTime->format('Y-m-d H:i:s');
+    } catch (Exception $e) {
+        echo "Error: " . $e->getMessage();
+        return;
+    }
+    
+    // Append the WHERE clause
+    $sql .= " WHERE craeted_at >= '$startDate' AND craeted_at <= '$endDate'";
+}
+
+$nps_month_sql = "
+SELECT
+    DATE_FORMAT(craeted_at, '%Y-%m') AS month,
+    SUM(
+        CASE 
+            WHEN q1_value IN ('9', '10') THEN 1
+            ELSE 0 
+        END
+    ) AS promoters,
+    SUM(
+        CASE 
+            WHEN q1_value IN ('7', '8') THEN 1
+            ELSE 0 
+        END
+    ) AS passives,
+    SUM(
+        CASE 
+            WHEN q1_value IN ('0', '1', '2', '3', '4', '5', '6') THEN 1
+            ELSE 0 
+        END
+    ) AS detractors,
+    COUNT(*) AS totalResponses,
+    CASE 
+        WHEN COUNT(*) > 0 THEN
+            (SUM(CASE WHEN q1_value IN ('9', '10') THEN 1 ELSE 0 END) / COUNT(*) * 100) -
+            (SUM(CASE WHEN q1_value IN ('0', '1', '2', '3', '4', '5', '6') THEN 1 ELSE 0 END) / COUNT(*) * 100)
+        ELSE
+            0
+    END AS nps
+FROM (
+    SELECT
+        craeted_at,
+        SUBSTRING_INDEX(SUBSTRING_INDEX(survey_results, '\"q1\":\"', -1), '\"', 1) AS q1_value
+    FROM artm_survey_results
+) AS q1_extracted
+GROUP BY month
+ORDER BY month;
+";
+
+
+// Execute the query (assuming $connection is your database connection object)
+try {
+    $result = $connection->fetchAll($sql);
+} catch (\Exception $e) {
+    // Handle exception
+    echo "SQL Error: " . $e->getMessage();
+}
+
+// Execute the query (assuming $connection is your database connection object)
+try {
+    $nps_month_result = $connection->fetchAll($nps_month_sql);
+} catch (\Exception $e) {
+    // Handle exception
+    echo "Monthly SQL Error: " . $e->getMessage();
+}
+
+$months = array_column($nps_month_result, 'month');
+$npsValues = array_column($nps_month_result, 'nps');
+
+
+//print_r($nps_month_result);
+
+    
+$results = $connection->fetchAll($sql);
+
+$question_codes = array(
+    'q1' => 'How likely are you to recommend the company to a friend?',
+    'q2' => 'How would you rate your overall satisfaction with the service you received last time?',
+    'q3' => 'How would you rate the quality of the product?',
+    'q4' => 'How would you rate the value for money (ROI) of their product/service?',
+    'q5' => 'How would you rate the quality of customer service?',
+    'q6' => 'q6'
+);
+// Define possible options for each question
+$possibleOptions = [
+    'q1' => array_fill_keys(range(0, 10), 0),
+    'q2' => [
+        'very dissatisfied' => 0,
+        'dissatisfied' => 0,
+        'neither satisfied nor dissatisfied' => 0,
+        'satisfied' => 0,
+        'very satisfied' => 0,
+    ],
+    'q3' => [
+        'poor' => 0,
+        'below' => 0,
+        'average' => 0,
+        'good' => 0,
+        'excellent' => 0,
+    ],
+    'q4' => array_fill_keys(range(0, 10), 0),
+    'q5' => array_fill_keys(range(0, 10), 0),
+    'q6' => [
+        'yes' => 0,
+        'no' => 0,
+    ],
+];
+foreach ($possibleOptions as $question => &$options) {
+    $options['skip'] = 0;
+}
+
+// Initialize an array to hold the counts
+$questionCounts = [];
+//print_r($results);
+if( empty($results) ){
+    $results[0] = array('survey_results' => '{"q1":""}{"q2":""}{"q3":""}{"q4":""}{"q5":""}{"q6":""}' );
+}
+// Process each survey result
+foreach ($results as $result) {
+    // Explode the string by separating each JSON object
+    preg_match_all('/\{.*?\}/', $result['survey_results'], $matches);
+
+    // Iterate through each match
+    foreach ($matches[0] as $jsonString) {
+        // Decode each JSON string into an associative array
+        $surveyData = json_decode($jsonString, true);
+
+        // Iterate through each question and its response
+        foreach ($surveyData as $question => $response) {
+            if($question == 'q6'){
+                continue;
+            }
+            // Initialize the question in the counts array if not already done
+            if (!isset($questionCounts[$question])) {
+                $questionCounts[$question] = $possibleOptions[$question];
+            }
+
+            // Increment the count for the response
+            if (isset($questionCounts[$question][$response])) {
+                $questionCounts[$question][$response]++;
+            }
+        }
+    }
+}
+
+// Get the maximum count value for scaling the range inputs
+$maxValue = 0;
+foreach ($questionCounts as $counts) {
+    foreach ($counts as $value) {
+        if ($value > $maxValue) {
+            $maxValue = $value;
+        }
+    }
+}
+
+
+// Extract q1 responses
+$q1Responses = $questionCounts['q1'];
+$q1Responses['skip'] = 0;
+// Calculate total responses
+$totalResponses = array_sum($q1Responses);
+
+// Calculate number of promoters, passives, and detractors
+$promoters = array_sum(array_slice($q1Responses, 9, 2)); // Scores 9-10
+$passives = array_sum(array_slice($q1Responses, 7, 2)); // Scores 7-8
+$detractors = array_sum(array_slice($q1Responses, 0, 7)); // Scores 0-6
+
+// Calculate percentages
+if($totalResponses > 0){
+    
+    $promoterPercentage = ($promoters / $totalResponses) * 100;
+    $detractorPercentage = ($detractors / $totalResponses) * 100;
+
+    // Calculate NPS
+    $nps = $promoterPercentage - $detractorPercentage;
+}else{
+    
+    $promoterPercentage = 0;
+    $detractorPercentage = 0;
+
+    // Calculate NPS
+    $nps = 0;
+}
+
+?>
+
+  
+
+<form>
+    <div class="filter-container">
+        <div class="filter-item">
+            <label for="time-period">Time Period</label>
+             <select id="time-period" name="time_period">
+                <option value="7" <?php echo $timePeriod == '7' ? 'selected' : ''; ?>>Last 7 days</option>
+                <option value="30" <?php echo $timePeriod == '30' ? 'selected' : ''; ?>>Last 30 days</option>
+                <option value="custom" <?php echo $timePeriod == 'custom' ? 'selected' : ''; ?>>Custom Range</option>
+                <option value="reset" <?php echo $timePeriod == 'reset' ? 'selected' : ''; ?>>Reset</option>
+            </select>
+        </div>
+        <div id="date-range" class="filter-item" style="display: <?php echo $timePeriod == 'custom' ? 'block' : 'none'; ?>; gap: 10px;">
+            <label for="start-date">Start Date</label>
+            <input type="date" id="start-date" name="start_date" value="<?php echo $startDate ?>">
+            <label for="end-date">End Date</label>
+            <input type="date" id="end-date" name="end_date"  value="<?php echo $endDateforinput; ?>">
+        </div>
+        <input type="submit" value="Apply">
+    </div>
+    </form>
+
+
+
+<div class="top_bar_options">
+    <div class="top_bar_options_inside">
+        <div class="single_option choose_timeperiod">
+            <div class="label"></div>
+        </div>
+    </div>
+</div>
+
+<div class="canvases_container bar_charts">
+    <?php foreach ($questionCounts as $key => $data): ?>
+    <div class="canvases_container_inside_single" style="order:<?php echo str_replace("q", "", $key); ?>">
+        
+        <canvas id="chart-<?php echo $key; ?>" data-labels='<?php echo json_encode(array_keys($data)); ?>' data-values='<?php echo json_encode(array_values($data)); ?>' key="<?php echo $key ?>" data-question="<?php echo $question_codes[$key]; ?>"></canvas>
+    </div>
+    <?php endforeach; ?>
+    <div class="canvases_container_inside_single" style="order:6;">  
+        <div class="chart_nps">
+            <canvas id="nps-bar-chart" data-nps="<?php echo $nps; ?>"></canvas>
+        </div>
+        <div class="details_nps">
+            <table>
+                <tr>
+                    <th>Total Responses</th>
+                    <th>Promoters</th>
+                    <th>Passives</th>
+                    <th>Detractors</th>
+                </tr>
+                <tr>
+                    <td><?php echo $totalResponses ?></td>
+                    <td><?php echo "$promoters (" . number_format($promoterPercentage, 1) . "%)" ?></td>
+                    <td><?php echo $passives ?></td>
+                    <td><?php echo "$detractors (" . number_format($detractorPercentage, 1) . "%)" ?></td>
+                </tr>
+                <tr>
+                    <td colspan="4">-</td>
+                </tr>
+                <tr>
+                    <th colspan="2">
+                        NPS SCORE
+                    </th>
+                    <td colspan="2">
+                        <?php 
+                            echo number_format($nps, 1) 
+                        ?>%
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+<style>
+    #npsChart {
+        width: 100% !important;
+        max-width: 800px;
+        height: 400px !important;
+    }
+</style>
+
+
+<div class="canvases_container">
+    <canvas id="npsChart" width="600" height="400"></canvas>
+
+</div>
+        
+ <script type="text/javascript">
+    require(['jquery'], function ($) {
+        $(document).ready(function () {
+            
+            const $timePeriodSelect = $('#time-period');
+            const $dateRangeDiv = $('#date-range');
+            
+            $timePeriodSelect.on('change', function () {
+                if ($timePeriodSelect.val() === 'custom') {
+                    $dateRangeDiv.show();
+                } else {
+                    $dateRangeDiv.hide();
+                }
+            });
+        });
+    });
+</script>
+    <script type="text/javascript">
+        require(['jquery', 'chartJs'], function($, Chart) {
+            $(document).ready(function() {
+                $('canvas').each(function() {
+                    var canvas = $(this);
+                    var labels = JSON.parse(canvas.attr('data-labels'));
+                    var dataValues = JSON.parse(canvas.attr('data-values'));
+                    var question = canvas.attr('data-question');
+
+                    // Ensure data values are integers
+                    dataValues = dataValues.map(function(value) {
+                        return parseInt(value, 10);
+                    });
+
+                    var ctx = canvas[0].getContext('2d');
+                    var chartType = canvas.attr('id') === 'chart-q6' ? 'doughnut' : 'bar';
+
+                    new Chart(ctx, {
+                        type: chartType,
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: question, // Use the question as the label for the dataset
+                                data: dataValues,
+                                backgroundColor: [
+                                    'rgba(255, 99, 132, 0.2)',
+                                    'rgba(54, 162, 235, 0.2)',
+                                    'rgba(255, 206, 86, 0.2)',
+                                    'rgba(75, 192, 192, 0.2)',
+                                    'rgba(153, 102, 255, 0.2)',
+                                    'rgba(255, 159, 64, 0.2)',
+                                    'rgba(199, 199, 199, 0.2)',
+                                    'rgba(83, 102, 255, 0.2)',
+                                    'rgba(255, 205, 86, 0.2)',
+                                    'rgba(75, 102, 64, 0.2)',
+                                    'rgba(155, 159, 64, 0.2)'
+                                ],
+                                borderColor: [
+                                    'rgba(255, 99, 132, 1)',
+                                    'rgba(54, 162, 235, 1)',
+                                    'rgba(255, 206, 86, 1)',
+                                    'rgba(75, 192, 192, 1)',
+                                    'rgba(153, 102, 255, 1)',
+                                    'rgba(255, 159, 64, 1)',
+                                    'rgba(199, 199, 199, 1)',
+                                    'rgba(83, 102, 255, 1)',
+                                    'rgba(255, 205, 86, 1)',
+                                    'rgba(75, 102, 64, 1)',
+                                    'rgba(155, 159, 64, 1)'
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    labels: {
+                                        color: 'rgb(0, 0, 0)'
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        stepSize: 1, // Ensures y-axis shows integer steps
+                                        callback: function(value) {
+                                            return Number.isInteger(value) ? value : null;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
+    
+
+    <script type="text/javascript">
+        require(['jquery', 'chartJs'], function($, Chart) {
+            $(document).ready(function() {
+                var npsValue = parseFloat($('#nps-bar-chart').attr('data-nps'));
+                var ctx = $('#nps-bar-chart')[0].getContext('2d');
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['NPS'],
+                        datasets: [{
+                            label: 'Net Promoter Score',
+                            data: [npsValue],
+                            backgroundColor: npsValue >= 0 ? 'rgba(54, 162, 235, 0.6)' : 'rgba(255, 99, 132, 0.6)',
+                            borderColor: npsValue >= 0 ? 'rgba(54, 162, 235, 1)' : 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                min: -100,
+                                max: 100,
+                                ticks: {
+                                    stepSize: 20 // Adjust step size for better readability
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true
+                            },
+                            tooltip: {
+                                enabled: true
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+
+<script>
+    require(['jquery', 'chartJs'], function($, Chart) {
+        $(document).ready(function() {
+            console.log('jQuery and Chart.js loaded');
+            
+            // Check if the context is available
+            var ctx = document.getElementById('npsChart');
+            if (!ctx) {
+                console.error('Canvas element not found');
+                return;
+            }
+            ctx = ctx.getContext('2d');
+
+            // Log data to verify it's correctly passed
+            console.log('Months:', <?php echo json_encode($months); ?>);
+            console.log('NPS Values:', <?php echo json_encode($npsValues); ?>);
+
+            // Data for the chart
+            var data = {
+                labels: <?php echo json_encode($months); ?>,
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Promoters',
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        data: <?php echo json_encode(array_column($data, 'promoters')); ?>
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Passives',
+                        backgroundColor: 'rgba(255, 206, 86, 0.6)',
+                        data: <?php echo json_encode(array_column($data, 'passives')); ?>
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Detractors',
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        data: <?php echo json_encode(array_column($data, 'detractors')); ?>
+                    },
+                    {
+                        type: 'line',
+                        label: 'NPS',
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        fill: false,
+                        data: <?php echo json_encode($npsValues); ?>
+                    }
+                ]
+            };
+
+            // Configuration options for the chart
+            var options = {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Monthly NPS Growth'
+                    }
+                }
+            };
+
+            // Create the chart
+            try {
+                var npsChart = new Chart(ctx, {
+                    data: data,
+                    options: options
+                });
+                console.log('Chart rendered successfully');
+            } catch (error) {
+                console.error('Error rendering chart:', error);
+            }
+        });
+    });
+</script>

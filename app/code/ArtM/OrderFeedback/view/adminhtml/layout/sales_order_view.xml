@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="admin-2columns-left" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="order_additional_info">
+            <block class="ArtM\OrderFeedback\Block\Adminhtml\Orderfeedback" name="sales_order_view_Orderfeedback" template="ArtM_OrderFeedback::order/view/orderfeedback.phtml" />
+<!--            <uiComponent name="transactionnumber"/>-->
+        </referenceBlock>
+        <referenceBlock name="order_totals">
+            <action method="setTemplate">
+                <argument name="template" xsi:type="string">ArtM_OrderFeedback::order/totals.phtml</argument>
+            </action>
+        </referenceBlock>
+    </body>
+</page>

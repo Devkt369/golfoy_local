@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<page layout="1column" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <link src="js/product-page.js"/>
+        <css src="css/product-page.css"/>
+    </head>
+    <body>
+
+        <referenceBlock name="mp_reward_socials" remove="true" />
+        <referenceBlock name="view.addto.wishlist" remove="true" />
+        <referenceBlock name="breadcrumbs" remove="true"/>
+        <referenceBlock name="view.addto.wishlist.configure" remove="true"/>
+        <referenceBlock name="view.addto.wishlist.simple" remove="true"/>
+        <referenceBlock name="catalog.product.related" remove="true"/>
+        <referenceBlock name="product.info.upsell" remove="true"/>
+
+        <!-- Remove original title and add custom brand + clean name blocks -->
+        <referenceBlock name="page.main.title" remove="true"/>
+        
+        <referenceContainer name="product.info.main">
+            <!-- Brand name first, positioned at the very top -->
+            <block class="Magento\Catalog\Block\Product\View" name="product.brand.name" template="Magento_Catalog::catalog/product/view/brand-name.phtml" before="-">
+                <arguments>
+                    <argument name="product_data" xsi:type="object">ArtM\Common\ViewModel\ProductData</argument>
+                </arguments>
+            </block>
+            
+            <!-- Clean product name immediately after brand -->
+            <block class="Magento\Catalog\Block\Product\View" name="product.clean.title" template="Magento_Catalog::catalog/product/view/product-name-clean.phtml" after="product.brand.name">
+                <arguments>
+                    <argument name="product_data" xsi:type="object">ArtM\Common\ViewModel\ProductData</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+
+        <referenceContainer name="product.info.main">
+            <block class="Magento\Catalog\Block\Product\View" name="inclusive.all.taxes" template="Magento_Catalog::catalog/product/view/Inclusive_text.phtml" />
+            <block class="Magento\Catalog\Block\Product\View" name="no_cost" after="estimation.delivery.module" template="Magento_Catalog::catalog/product/view/no-cost-emi.phtml">
+                <arguments>
+                    <argument name="product_data" xsi:type="object">ArtM\Common\ViewModel\ProductData</argument>
+                </arguments>
+            </block>
+            <block class="Magento\Catalog\Block\Product\View" name="catalog.offer.status" after="estimation.delivery.module" template="Magento_Catalog::catalog/product/view/offerstatus.phtml" />
+        </referenceContainer>     
+
+        <referenceContainer name="before.body.end">
+            <block class="Magento\Catalog\Block\Product\View" name="catalog.myofferstatus" after="-" template="Magento_Catalog::catalog/product/view/offer-callout.phtml" />
+        </referenceContainer>   
+
+        <referenceContainer name="product.info.social">
+            <block class="Magento\Catalog\Block\Product\View" name="product.css.js" template="Magento_Catalog::catalog/product/view/css_js.phtml" />
+            <block class="Magento\Catalog\Block\Product\View" name="product.css.js.test" template="Magento_Catalog::catalog/product/view/css_js_test.phtml" />
+
+             <block class="Magento\Catalog\Block\Product\View" name="emi_text" template="Magento_Catalog::catalog/product/view/icon-info.phtml" after='-'>
+                <arguments>
+                    <argument name="product_icons" xsi:type="object">ArtM\Common\ViewModel\ProductData</argument>
+                </arguments>
+             </block>
+        </referenceContainer>
+
+        <referenceContainer name="product.info.form.options">
+            <block class="Magento\Framework\View\Element\Template" name="custom.after.addtocart.bottom" template="Magento_Catalog::catalog/product/view/product-qty.phtml" after="-">
+                <arguments>
+                    <argument name="product_qty" xsi:type="object">ArtM\Common\ViewModel\ProductData</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+        <referenceContainer name="product.info.form.content">
+            <block class="Magento\Framework\View\Element\Template" name="custom.after.addtocart.bottom2" template="Magento_Catalog::catalog/product/view/product-qty.phtml" before="product.info.addtocart">
+                <arguments>
+                    <argument name="product_qty" xsi:type="object">ArtM\Common\ViewModel\ProductData</argument>
+                </arguments>
+            </block>
+        </referenceContainer>
+
+        <move element="product.info.addtocart.additional" destination="product.info.form.options" after="-"/>
+        <move element="view.addto.wishlist.configure" destination="product.info.form.options" after="product.info.addtocart.additional"/>
+        <move element="product.info.review" destination="product.info.main" before="product.info.price"/>
+        
+        <referenceBlock name="product.info.media">
+            <block class="Magento\Catalog\Block\Product\View" name="catalog.myattribute" before="-" template="Magento_Catalog::catalog/product/view/productattributeset.phtml" />
+        </referenceBlock>
+
+        <referenceBlock name="product.info.form.options">
+            <container name="custom.print" htmlTag="div" htmlClass="custom-print-container" after="-">
+                <container name="custom.print.options" htmlTag="div" htmlClass="custom-print-content">
+                    <block class="Magento\Catalog\Block\Product\View" name="catalog.custom.default" before="-" template="Magento_Catalog::catalog/product/view/customize-default.phtml" />
+                </container>
+            </container>
+        </referenceBlock>
+
+        <move element="product.attributes" destination="product.info.main" after="product.info.summary"/>
+
+        <referenceContainer name="before.body.end">
+            <block class="Magento\Framework\View\Element\Template" name="addtocart.component" template="Magento_Catalog::catalog/product/view/addtocart-popup.phtml"/>
+        </referenceContainer>
+
+        <referenceContainer name="before.body.end">
+            <block class="Magento\Catalog\Block\Product\View" name="add.to.cart.price-slider" as="add_to_cart_price_slider" template="Magento_Catalog::catalog/product/view/add-to-cart-price-slider.phtml" after="-" />
+        </referenceContainer>
+
+        <referenceContainer name="product.info.main">
+            <block class="Magento\Catalog\Block\Product\View" name="product.video.attribute" template="Magento_Catalog::catalog/product/view/product-video.phtml" after="product.attributes" />
+        </referenceContainer>
+
+    </body>
+</page>

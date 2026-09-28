@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Copyright © 2020 Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">clickandcollectadmin_schedule_listing.clickandcollectadmin_schedule_listing_data_source</item>
+            <item name="deps" xsi:type="string">clickandcollectadmin_schedule_listing.clickandcollectadmin_schedule_listing_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <buttons>
+            <button name="add">
+                <url path="*/*/new"/>
+                <class>primary</class>
+                <label translate="true">Add New Schedule</label>
+                <aclResource>Magestore_ClickAndCollectAdminUi::schedule</aclResource>
+            </button>
+        </buttons>
+        <spinner>clickandcollectadmin_schedule_columns</spinner>
+        <deps>
+            <dep>clickandcollectadmin_schedule_listing.clickandcollectadmin_schedule_listing_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="clickandcollectadmin_schedule_listing_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">schedule_id</param>
+            </storageConfig>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <aclResource>Magestore_ClickAndCollectAdminUi::schedule</aclResource>
+        <dataProvider class="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider" name="clickandcollectadmin_schedule_listing_data_source">
+            <settings>
+                <requestFieldName>id</requestFieldName>
+                <primaryFieldName>schedule_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <listingToolbar name="listing_top">
+        <settings>
+            <sticky>true</sticky>
+        </settings>
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <filters name="listing_filters"/>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+    <columns name="clickandcollectadmin_schedule_columns">
+        <selectionsColumn name="ids" sortOrder="1">
+            <settings>
+                <indexField>schedule_id</indexField>
+                <preserveSelectionsOnFilter>true</preserveSelectionsOnFilter>
+                <visible>false</visible>
+            </settings>
+        </selectionsColumn>
+        <column name="schedule_id" sortOrder="10">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">Schedule ID</label>
+                <sortable>true</sortable>
+            </settings>
+        </column>
+        <column name="schedule_name" sortOrder="20">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Schedule Name</label>
+                <sortable>true</sortable>
+            </settings>
+        </column>
+        <column name="monday_status" component="Magento_Ui/js/grid/columns/select" sortOrder="30">
+            <settings>
+                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\OpenCloseStatus"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Monday Status</label>
+                <sortable>true</sortable>
+            </settings>
+        </column>
+        <column name="tuesday_status" component="Magento_Ui/js/grid/columns/select" sortOrder="40">
+            <settings>
+                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\OpenCloseStatus"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Tuesday Status</label>
+                <sortable>true</sortable>
+            </settings>
+        </column>
+        <column name="wednesday_status" component="Magento_Ui/js/grid/columns/select" sortOrder="50">
+            <settings>
+                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\OpenCloseStatus"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Wednesday Status</label>
+                <sortable>true</sortable>
+            </settings>
+        </column>
+        <column name="thursday_status" component="Magento_Ui/js/grid/columns/select" sortOrder="60">
+            <settings>
+                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\OpenCloseStatus"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Thursday Status</label>
+                <sortable>true</sortable>
+            </settings>
+        </column>
+        <column name="friday_status" component="Magento_Ui/js/grid/columns/select" sortOrder="70">
+            <settings>
+                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\OpenCloseStatus"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Friday Status</label>
+                <sortable>true</sortable>
+            </settings>
+        </column>
+        <column name="saturday_status" component="Magento_Ui/js/grid/columns/select" sortOrder="80">
+            <settings>
+                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\OpenCloseStatus"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Saturday Status</label>
+                <sortable>true</sortable>
+            </settings>
+        </column>
+        <column name="sunday_status" component="Magento_Ui/js/grid/columns/select" sortOrder="90">
+            <settings>
+                <options class="Magestore\ClickAndCollectAdminUi\Model\Source\Schedule\OpenCloseStatus"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
+                <label translate="true">Sunday Status</label>
+                <sortable>true</sortable>
+            </settings>
+        </column>
+        <actionsColumn name="actions" class="Magestore\ClickAndCollectAdminUi\Ui\Component\Listing\Column\ScheduleActions">
+            <settings>
+                <indexField>schedule_id</indexField>
+                <resizeEnabled>false</resizeEnabled>
+                <resizeDefaultWidth>107</resizeDefaultWidth>
+            </settings>
+        </actionsColumn>
+    </columns>
+</listing>

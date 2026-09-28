@@ -1,0 +1,244 @@
+
+<?php
+$category = $block->getCurrentCategory();
+
+if ($category):
+    if($category->getId() == 220){
+        return;
+    }
+
+    $categoryName = $block->escapeHtml($category->getName());
+
+    $mediaUrl = "https://golfoy.com/media/";
+
+    // Remove domain if present
+    $imagePath = strip_tags($category->getDescription());
+    $imagePath = str_replace($block->getBaseUrl(), '', $imagePath);
+    $imagePath = ltrim($imagePath, '/');
+
+    // Ensure it starts with wysiwyg/
+    if (strpos($imagePath, 'wysiwyg/') !== false) {
+        $imageUrl = $mediaUrl . $imagePath;
+    } else {
+        $imageUrl = '';
+    }
+?>
+
+    <div class="playerbag_img">
+        <?php if ($imageUrl): ?>
+            <img src="<?= $block->escapeUrl($imageUrl); ?>"
+                alt="<?= $categoryName; ?>"
+                loading="lazy"
+                decoding="async">
+        <?php endif; ?>
+
+        <div class="players_name">
+            <!-- <div class="category_name new_cat_name">
+                <?= $categoryName; ?>
+            </div> -->
+        </div>
+    </div>
+
+<?php endif; ?>
+<style>
+    .players_bag_page .playerbag_img {
+        position: relative;
+        height: 100%;
+    }
+
+    .players_bag_page .product-item-info:hover {
+        border: none !important;
+    }
+
+    .players_bag_page .product-item-info {
+        border: none !important;
+    }
+
+    .players_bag_page .product-item-info .brand_name {
+        font-size: 16px;
+    }
+
+    .players_bag_page .playerbag_img::before {
+        background: linear-gradient(360deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.5) 23%, transparent 100%);
+        content: ' ';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1;
+        height: 100%;
+        transition: background-color 0.3s ease;
+        /* Added transition property */
+    }
+
+    .players_bag_page .column.main {
+        width: 100% !important;
+    }
+
+    .players_bag_page .category_top_block .category_name {
+        border-bottom: none;
+        color: white;
+        font-size: 27px;
+    }
+
+    .players_bag_page .category-view {
+        height: 0 !important;
+    }
+
+    .players_bag_page.catalog-category-view.page-layout-playersbag .product.details.product-item-details,
+    .product_slider_container .product.details.product-item-details,
+    .catalogsearch-result-index .product.details.product-item-details,
+    .similarproduct .product.details.product-item-details {
+        padding: 0px 10px 10px 10px !important;
+    }
+
+    .players_bag_page .products.wrapper.grid.products-grid {
+        width: 100%;
+        max-width: 1280px;
+        margin: auto !important;
+    }
+
+    .players_bag_page .customratinghtml.star_back {
+        height: 10px;
+    }
+
+    .category_name.new_cat_name {
+        color: white !important;
+        position: absolute;
+        bottom: 10px;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 27px;
+        width: 100%;
+        text-align: center;
+        display: block;
+        z-index: 1111111;
+    }
+
+    .witb_text {
+        display: none;
+    }
+
+    .page-layout-playersbag div#ajaxlist-reload-product_list {
+        margin-top: 30px;
+    }
+
+    @media only screen and (max-width:768px) {
+        .players_bag_page .playersbag {
+            height: auto;
+        }
+
+        .category_name.new_cat_name {
+            font-size: 22px;
+        }
+
+        .page-layout-playersbag .wrapper {
+            padding: 10px 5px 10px 5px;
+        }
+
+        .players_bag_page.catalog-category-view.page-layout-playersbag .product.details.product-item-details {
+            padding: 0px 10px 147px 10px !important;
+        }
+    }
+
+    @media only screen and (max-width: 480px) {
+        .category_name.new_cat_name {
+            font-size: 15px;
+        }
+
+        .players_bag_page.no_notice .column.main {
+            margin-top: 0px !important;
+        }
+
+        .category_name.new_cat_name {
+            bottom: 0px;
+        }
+
+        .witb_text {
+            padding: 0px !important;
+        }
+
+        .witb_text h1 {
+            font-size: 17px !important;
+        }
+
+        .playerbag_img img {
+            height: 150px;
+            object-fit: cover;
+        }
+    }
+
+    .players_bag_page .toolbar.toolbar-products {
+        display: none;
+    }
+
+    .players_bag_page span.normal-price {
+        margin-left: 5px;
+    }
+
+    .cms-witb.container main#maincontent {
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+
+    .players_bag_page main#maincontent {
+        padding: 0px;
+        max-width: 1920px !important;
+    }
+
+    .players_bag_page .products {
+        margin: 10px 7px 10px 0px !important;
+    }
+
+    /* players-bag css */
+    .page-layout-playersbag .breadcrumbs,
+    .page-layout-playersbag div#narrow-by-list,
+    .page-layout-playersbag .toolbar-products,
+    .page-layout-playersbag .express-delivery-placeholder,
+    .page-layout-playersbag .custom-rating {
+        display: none;
+
+    }
+
+    .page-layout-playersbag.catalog-category-view span.product-image-wrapper {
+        background-color: white !important;
+    }
+
+    .page-layout-playersbag .product-item-info {
+        border: 1px solid transparent;
+        border-radius: 26px;
+        box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+        background: white;
+    }
+
+    .page-layout-playersbag main#maincontent {
+        padding: 0px !important;
+    }
+
+    .page-layout-playersbag .all_flares {
+        top: 12px;
+    }
+
+    .page-layout-playersbag span.product-image-wrapper {
+        border-radius: 38px;
+    }
+
+    .page-layout-playersbag.catalog-category-view .columns .column.main {
+        width: 100%;
+        margin: auto;
+        display: block;
+        text-align: center;
+    }
+
+    .page-layout-playersbag .product.details.product-item-details {
+        text-align: left;
+    }
+
+    .page-layout-playersbag .products.wrapper.grid.products-grid {
+        width: 100%;
+        max-width: 1280px;
+        margin: auto !important;
+    }
+
+    /*player-bag  end here */
+</style>

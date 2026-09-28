@@ -1,0 +1,1384 @@
+<?php
+
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+use Magento\Framework\View\Element\Template;
+
+/**
+ * @var $block \Magento\Shipping\Block\Tracking\Popup
+ * @var \Magento\Framework\View\Helper\SecureHtmlRenderer $secureRenderer
+ */
+
+$results = $block->getTrackingInfo();
+
+?>
+
+<style>
+    .timeline {
+        display: flex;
+        flex-direction: column-reverse;
+    }
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    body {
+        font-family: 'spartan';
+        margin: 0;
+        padding: 16px;
+        background: #f3f4f6;
+        min-height: auto;
+        color: #2f3542;
+    }
+
+    main#maincontent {
+        padding: 0px !important;
+    }
+
+    div#textSlider {
+        display: none !important;
+    }
+
+    .page-wrapper {
+        padding-top: 0px !important;
+    }
+
+    .floating-whatsapp {
+        display: none !important;
+    }
+
+    .location-details h3 {
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    .page.tracking {
+        max-width: 100%;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+        padding: 16px;
+    }
+
+    .order.subtitle.caption {
+        font-size: 13px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #e4e7eb;
+    }
+
+    .tracking-container {
+        margin: 10px 0;
+    }
+
+    .tracking-header {
+        background: #f8f9fb;
+        color: black;
+        padding: 12px;
+        border-radius: 8px 8px 0 0;
+        box-shadow: none;
+    }
+
+    .page-main>.page-title-wrapper .page-title {
+        display: none;
+    }
+
+    .tracking-header h2 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.3;
+        text-align: left;
+        color: #2f3542;
+    }
+
+    h1.page-title {
+        text-align: center;
+        margin: auto;
+        width: 100%;
+    }
+
+    h1.page-title span.base {
+        font-size: 21px;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .tracking-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .info-item {
+        background: #f0f2f5;
+        padding: 9px 10px;
+        border-radius: 6px;
+        border: 1px solid #ebeef2;
+    }
+
+    .info-item label {
+        display: block;
+        font-size: 9px;
+        opacity: 0.75;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .info-item .value {
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .status-current {
+        background: white;
+        padding: 10px 12px;
+        margin: 10px 0;
+        border-radius: 8px;
+        border-left: 3px solid #66bb6a;
+        box-shadow: none;
+    }
+
+    .status-current h3 {
+        margin: 0 0 6px 0;
+        color: #30343c;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .status-current .status-text {
+        font-size: 11px;
+        color: #333;
+        margin: 4px 0;
+    }
+
+    .status-current .status-location {
+        color: #6c7380;
+        font-size: 10px;
+    }
+
+    .status-current .status-date {
+        color: #9aa2af;
+        font-size: 10px;
+        margin-top: 4px;
+    }
+
+    .timeline-container {
+        background: white;
+        padding: 12px;
+        border-radius: 0 0 8px 8px;
+        box-shadow: none;
+    }
+
+    .timeline-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #30343c;
+        margin-bottom: 12px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #eceff3;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 36px;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 13px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #8a8f99;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 12px;
+        padding: 11px 12px;
+        background: #f4f6f8;
+        border-radius: 8px;
+        transition: none;
+    }
+
+    .timeline-item:hover {
+        background: #f4f6f8;
+        transform: none;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -29px;
+        top: 14px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #fff;
+        border: 2px solid #3f4652;
+        box-shadow: 0 0 0 2px #fff;
+        z-index: 1;
+    }
+
+    .timeline-item::after {
+        content: '';
+        position: absolute;
+        left: -25px;
+        top: 18px;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: #343b47;
+        z-index: 2;
+    }
+
+    .timeline-item.active::before {
+        background: #f3fff5;
+        border-color: #4caf50;
+        box-shadow: 0 0 0 2px #fff, 0 0 0 6px rgba(76, 175, 80, 0.35);
+        animation: none;
+    }
+
+    .timeline-item.active::after {
+        background: #4caf50;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            box-shadow: 0 0 0 3px #4caf50, 0 0 0 6px rgba(76, 175, 80, 0.2);
+        }
+
+        50% {
+            box-shadow: 0 0 0 3px #4caf50, 0 0 0 10px rgba(76, 175, 80, 0.1);
+        }
+    }
+
+    .timeline-status {
+        font-size: 13px;
+        font-weight: 600;
+        color: #39424e;
+        margin-bottom: 3px;
+        line-height: 1.3;
+    }
+
+    .timeline-instruction {
+        font-size: 11px;
+        color: #68707d;
+        margin-bottom: 4px;
+        font-weight: 400;
+        line-height: 1.4;
+    }
+
+    .timeline-location {
+        font-size: 10px;
+        color: #7f8794;
+        display: flex;
+        align-items: center;
+        margin-bottom: 2px;
+        font-weight: 400;
+    }
+
+
+    .timeline-date {
+        font-size: 10px;
+        color: #9aa2af;
+        display: flex;
+        font-weight: 400;
+        align-items: center;
+    }
+
+    .timeline-date::before {
+        content: '◷';
+        margin-right: 6px;
+        font-size: 10px;
+    }
+
+    .location-details {
+        background: #fff;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        display: none;
+    }
+
+    .location-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 15px;
+    }
+
+    .location-box {
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+    }
+
+    .location-box h4 {
+        margin: 0 0 10px 0;
+        color: #333;
+        font-size: 14px;
+    }
+
+    .location-box p {
+        margin: 5px 0;
+        font-size: 12px;
+        color: #666;
+    }
+
+    .contact-details {
+        background: #f8f9fa;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 8px;
+        border-left: 4px solid #ffc107;
+    }
+
+    .contact-details h4 {
+        margin: 0 0 10px 0;
+        color: #333;
+    }
+
+    .contact-details p {
+        margin: 5px 0;
+        color: #666;
+        font-size: 13px;
+    }
+
+    .actions {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .action.close {
+        background: #e60023;
+        color: white;
+        border: none;
+        padding: 14px 35px 12px 35px;
+        border-radius: 5px;
+        font-size: 12px;
+        text-transform: uppercase;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .action.close:hover {
+        transform: translateY(-2px);
+    }
+
+    .message.info.empty {
+        text-align: center;
+        padding: 40px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        color: #666;
+        font-size: 16px;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 1px 7px;
+        border-radius: 12px;
+        font-size: 9px;
+        font-weight: 600;
+        margin-left: 6px;
+    }
+
+    .badge-success {
+        background: #e8e8e8;
+        color: #646464;
+    }
+
+    .badge-info {
+        background: #e8e8e8;
+        color: #646464;
+    }
+
+    .badge-warning {
+        background: #e8e8e8;
+        color: #646464;
+    }
+
+    @media (max-width: 768px) {
+        body {
+            padding: 8px;
+        }
+
+        .tracking-info {
+            grid-template-columns: 1fr;
+        }
+
+        .location-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page.tracking {
+            padding: 8px;
+            border-radius: 10px;
+        }
+
+        .tracking-info {
+            gap: 8px;
+        }
+
+        .tracking-header h2 {
+            font-size: 13px;
+        }
+
+        .order.subtitle.caption {
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .timeline {
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            left: 10px;
+        }
+
+        .timeline-item {
+            padding: 9px;
+            margin-bottom: 9px;
+            border-radius: 8px;
+        }
+
+        .timeline-item::before {
+            left: -26px;
+            top: 13px;
+            width: 11px;
+            height: 11px;
+        }
+
+        .timeline-item::after {
+            left: -22px;
+            top: 17px;
+            width: 6.7px;
+            height: 6.7px;
+        }
+
+        .timeline-status {
+            font-size: 12px;
+        }
+
+        .timeline-instruction {
+            font-size: 10px;
+        }
+
+        .timeline-location,
+        .timeline-date,
+        .info-item .value,
+        .info-item label,
+        .location-box p {
+            font-size: 10px;
+        }
+
+        .action.close {
+            padding: 14px 21px 12px 21px;
+        }
+    }
+
+    .tracking-pending-card {
+        max-width: 650px;
+        margin: 10px auto;
+        padding: 15px;
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+        text-align: center;
+        font-family: Arial, sans-serif;
+        border: 1px solid #e5e7eb;
+    }
+
+    .tracking-icon {
+        font-size: 52px;
+        margin-bottom: 15px;
+    }
+
+    .tracking-pending-card h3 {
+        margin: 0;
+        color: #111827;
+        font-size: 24px;
+    }
+
+    .tracking-message {
+        color: #6b7280;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 10px;
+    }
+
+    .tracking-steps {
+        text-align: left;
+        margin: 25px 0;
+    }
+
+    .step {
+        padding: 14px 16px;
+        margin-bottom: 12px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    .step.active {
+        background: #ecfdf5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+    }
+
+    .step.pending {
+        background: #fff7ed;
+        color: #9a3412;
+        border: 1px solid #fdba74;
+    }
+
+    .tracking-note {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #6b7280;
+        line-height: 1.6;
+    }
+
+    .shipment-items {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .shipment-item-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px;
+        border: 1px solid #e5e5e5;
+        border-radius: 10px;
+        background: #fff;
+    }
+
+    .shipment-item-image {
+        width: 100px;
+        height: 100px;
+        flex-shrink: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #f8f8f8;
+    }
+
+    .shipment-item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .shipment-item-info {
+        flex: 1;
+    }
+
+    .shipment-item-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #222;
+        line-height: 1.4;
+        margin-bottom: 6px;
+    }
+
+    .shipment-item-qty {
+        font-size: 13px;
+        color: #666;
+    }
+
+    .timeline-item.Do.not.show {
+        display: none;
+    }
+
+    .status-text {
+        text-transform: capitalize;
+    }
+</style>
+
+<div class="page tracking">
+    <?php if (!empty($results)): ?>
+        <?php foreach ($results as $shipId => $result): ?>
+            <?php if ($shipId): ?>
+                <div class="order subtitle caption">
+                    <?= /* @noEscape */ $block->escapeHtml(__('Shipment #')) . $shipId ?>
+                </div>
+            <?php endif; ?>
+            <?php if (!empty($result)): ?>
+                <?php foreach ($result as $counter => $track): ?>
+                    <?php
+
+                    $title = $track['title'];
+                    $trackNumber = $track['number'];
+                    $orderId = 123131;
+
+                    $response = $block->getCheckDeliveryStatus()->processTracking($title, $trackNumber, $orderId);
+
+                    if (is_array($response)) {
+                        $response = json_decode($response['response'], true);
+                    }
+
+                    if (is_string($response) && $response == "matching not found") {
+                        $response = json_encode([], true);
+                    }
+
+                    $responseItemsDetails = $block->getCheckDeliveryStatus()->getShipmentItemsDetails($shipId);
+                    $mediaUrl = $block->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+
+                    if ($title == 'shippingpartner' || $title == 'Shipping Partner') {
+                        $title = $block->getCheckDeliveryStatus()->getTrackingTitleByNumber($trackNumber);
+                    }
+                    // print_r($response);die;
+                    ?>
+                    <div class="shipment-items">
+                        <?php foreach ($responseItemsDetails as $item): ?>
+
+                            <div class="shipment-item-card">
+
+                                <div class="shipment-item-image">
+                                    <img
+                                        src="<?= $block->escapeUrl($mediaUrl . 'media/catalog/product' . $item['image']) ?>"
+                                        alt="<?= $block->escapeHtml($item['name']) ?>">
+                                </div>
+
+                                <div class="shipment-item-info">
+                                    <div class="shipment-item-name">
+                                        <?= $block->escapeHtml($item['name']) ?>
+                                    </div>
+
+                                    <div class="shipment-item-qty">
+                                        Qty × <?= (int)$item['qty_shipped'] ?>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        <?php endforeach; ?>
+                    </div>
+                    <?php
+                    $data = json_decode($response, true);
+                    // print_r($response);
+                    // echo "<pre>";
+                    // print_r($data);die;
+                    if ((isset($data['Error']) && $data['Error'] != "") || empty($data)) {
+
+                    ?>
+                        <div class="tracking-header">
+                            <h2>Tracking Information</h2>
+
+                            <div class="tracking-info">
+                                <div class="info-item courier">
+                                    <label>Courier Partner</label>
+                                    <div class="value">
+                                        <?= $block->escapeHtml($title) ?>
+                                    </div>
+                                </div>
+
+                                <div class="info-item awb">
+                                    <label>AWB Number</label>
+                                    <div class="value">
+                                        <?= $block->escapeHtml($trackNumber) ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tracking-pending-card">
+                            <h3>Order Confirmed</h3>
+                            <p class="tracking-message">
+                                Your order has been packed and will be dispatched shortly.
+                            </p>
+                            <div class="tracking-steps">
+                                <div class="step active">
+                                    ✔ Order Confirmed
+                                </div>
+                                <div class="step active">
+                                    ✔ Item Packed
+                                </div>
+                                <div class="step pending">
+                                    Pickup by Delivery Partner Soon
+                                </div>
+                            </div>
+                            <p class="tracking-note">
+                                Delivery updates will appear here once your shipment is picked up.
+                            </p>
+                        </div>
+                    <?php
+                        continue;
+                    }
+
+                    ?>
+
+                    <div class="tracking-container">
+                        <?php if ($block->getCheckDeliveryStatus()->isCourierMatch($title, ['shree maruti', 'shreemaruti'])): ?>
+                            <?php
+                            $data = json_decode($response, true);
+                            // echo "<pre>";
+                            // print_r($data);die;
+                            if ($data && isset($data['orderInformation'])):
+                                $orderInfo = $data['orderInformation'];
+                                $statuses = $data['statuses'] ?? [];
+                            ?>
+                                <div class="tracking-header">
+                                    <h2>Shree Maruti Courier Tracking</h2>
+                                    <div class="tracking-info">
+                                        <div class="info-item tracking">
+                                            <label>Tracking ID</label>
+                                            <div class="value"><?= $orderInfo['trackingId'] ?></div>
+                                        </div>
+                                        <div class="info-item order_id">
+                                            <label>Order ID</label>
+                                            <div class="value"><?= $orderId ?></div>
+                                        </div>
+                                        <div class="info-item type">
+                                            <label>Type</label>
+                                            <div class="value"><?= strtoupper($orderInfo['type']) ?></div>
+                                        </div>
+                                        <div class="info-item movement">
+                                            <label>Movement Type</label>
+                                            <div class="value"><?= ucfirst($orderInfo['movement_type']) ?></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <?php if (!empty($statuses[0])): ?>
+                                    <div class="status-current">
+                                        <h3>Current Status <span class="badge badge-success">Latest</span></h3>
+                                        <div class="status-text"><?= $statuses[0]['status'] ?></div>
+                                        <div class="status-location"><?= $statuses[0]['location'] ?></div>
+                                        <div class="status-date">
+                                            <?= date('F d, Y h:i A', $statuses[0]['statusTimestamp'] / 1000) ?>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
+                                <div class="location-details">
+                                    <h3 style="margin-top: 0; color: #333;">Shipment Details</h3>
+                                    <div class="location-grid">
+                                        <div class="location-box">
+                                            <h4>Source Location</h4>
+                                            <p><strong>City:</strong> <?= $orderInfo['sourceLocation']['city'] ?></p>
+                                            <p><strong>State:</strong> <?= $orderInfo['sourceLocation']['state'] ?></p>
+                                            <p><strong>Pincode:</strong> <?= $orderInfo['sourceLocation']['pincode'] ?></p>
+                                        </div>
+                                        <div class="location-box">
+                                            <h4>Destination Location</h4>
+                                            <p><strong>City:</strong> <?= $orderInfo['destinationLocation']['city'] ?></p>
+                                            <p><strong>State:</strong> <?= $orderInfo['destinationLocation']['state'] ?></p>
+                                            <p><strong>Pincode:</strong> <?= $orderInfo['destinationLocation']['pincode'] ?></p>
+                                        </div>
+                                    </div>
+
+                                    <div class="location-grid" style="margin-top: 20px;">
+                                        <div class="contact-details">
+                                            <h4>Sender Details</h4>
+                                            <p><strong>Name:</strong> <?= $orderInfo['senderDetails']['sender_name'] ?></p>
+                                            <p><strong>Mobile:</strong> <?= $orderInfo['senderDetails']['sender_mobile'] ?></p>
+                                        </div>
+                                        <div class="contact-details">
+                                            <h4>Receiver Details</h4>
+                                            <p><strong>Name:</strong> <?= $orderInfo['receiverDetails']['receiver_name'] ?></p>
+                                            <p><strong>Mobile:</strong> <?= $orderInfo['receiverDetails']['receiver_mobile'] ?></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="timeline-container">
+                                    <div class="timeline-title">Tracking History</div>
+                                    <div class="timeline">
+                                        <?php
+                                        // 1. Check if 'rto' exists anywhere in the movement types
+                                        $hasRto = in_array('rto', array_column($statuses, 'movement_type'));
+                                        ?>
+
+                                        <?php if ($hasRto): ?>
+                                            <div class="timeline-item-rto-exception-block" style="border-left: 2px solid #dc3545; padding-left: 15px; margin-top: 15px;">
+                                                <div class="timeline-status" style="color: #dc3545; font-weight: bold; font-size: 1.1em;">
+                                                    <span class="badge badge-danger" style="background-color: #dc3545; color: white; padding: 3px 8px; border-radius: 3px; margin-right: 5px;">RTO</span>
+                                                    Return to Origin Initiated
+                                                </div>
+                                                <div class="timeline-location" style="margin-top: 5px; color: #6c757d;">
+                                                    The delivery lookups were terminated because this shipment has been marked for return to our warehouse.
+                                                </div>
+                                            </div>
+
+                                        <?php else: ?>
+                                            <?php foreach ($statuses as $index => $status): ?>
+                                                <div class="timeline-item shreemaruti <?= $index === 0 ? 'active' : '' ?>">
+                                                    <div class="timeline-status">
+                                                        <?= $block->getMappedStatus($status['status'], $title, $trackNumber) ?>
+                                                        <?php if ($index === 0): ?>
+                                                            <span class="badge badge-success">Current</span>
+                                                        <?php endif; ?>
+                                                    </div>
+
+                                                    <div class="timeline-location"><?= $status['location'] ?></div>
+
+                                                    <div class="timeline-date">
+                                                        <?= date('F d, Y h:i A', $status['statusTimestamp'] / 1000) ?>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        <?php elseif ($block->getCheckDeliveryStatus()->isCourierMatch($title, ['india post', 'indiapost', 'speed post', 'speedpost'])): ?>
+                            <?php
+                            // die('India Post API is currently unavailable. Please try again later.');
+                            $data = json_decode($response, true);
+                            // echo "<pre>";
+                            // print_r($data);die;
+
+                            if ($data && !empty($data['data'][0])) :
+
+                                $shipment = $data['data'][0];
+                                $booking = $shipment['booking_details'];
+                                $tracking = $shipment['tracking_details'];
+                                $deliveryStatus = ucfirst($shipment['del_status']['del_status'] ?? 'Unknown');
+
+                                $latestEvent = $tracking[0] ?? [];
+                            ?>
+                                <div class="tracking-header">
+                                    <h2>India Post Tracking</h2>
+
+                                    <div class="tracking-info">
+                                        <div class="info-item article">
+                                            <label>Article Number</label>
+                                            <div class="value"><?= $booking['article_number'] ?></div>
+                                        </div>
+
+                                        <div class="info-item booked">
+                                            <label>Booked At</label>
+                                            <div class="value"><?= $booking['booked_at'] ?? $booking['booked_on'] ?></div>
+                                        </div>
+
+                                        <div class="info-item origin">
+                                            <label>Origin Pincode</label>
+                                            <div class="value"><?= $booking['origin_pincode'] ?></div>
+                                        </div>
+
+                                        <div class="info-item destination">
+                                            <label>Destination Pincode</label>
+                                            <div class="value"><?= $booking['destination_pincode'] ?></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="status-current">
+                                    <h3>
+                                        Current Status
+                                        <span class="badge badge-success">
+                                            <?= $deliveryStatus ?>
+                                        </span>
+                                    </h3>
+
+                                    <div class="status-text">
+                                        <?= $block->getMappedStatus($latestEvent['event'] ?? '', $title, $trackNumber) ?>
+                                    </div>
+
+                                    <div class="status-location">
+                                        <?= __($latestEvent['office'] ?? '') ?>
+                                    </div>
+
+                                    <div class="status-date">
+                                        <?= !empty($latestEvent['date'])
+                                            ? date('F d, Y h:i A', strtotime($latestEvent['date']))
+                                            : '' ?>
+                                    </div>
+                                </div>
+
+                                <div class="location-details">
+                                    <h3 style="margin-top:0;color:#333;">Shipment Journey</h3>
+
+                                    <div class="location-grid">
+                                        <div class="location-box">
+                                            <h4>Origin</h4>
+                                            <p><?= $booking['booked_at'] ?></p>
+                                            <p>
+                                                <small>
+                                                    <?= date('F d, Y h:i A', strtotime($booking['booked_on'])) ?>
+                                                </small>
+                                            </p>
+                                        </div>
+
+                                        <div class="location-box">
+                                            <h4>Destination</h4>
+                                            <p><?= $booking['delivery_location'] ?></p>
+                                            <p>
+                                                <small>
+                                                    Delivered:
+                                                    <?= date('F d, Y h:i A', strtotime($booking['delivery_confirmed_on'] ?? '')) ?>
+                                                </small>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="timeline-container">
+                                    <div class="timeline-title">Tracking History</div>
+
+                                    <div class="timeline">
+                                        <?php foreach ($tracking as $index => $event): ?>
+                                            <div class="timeline-item <?= $index === 0 ? 'active' : '' ?>">
+
+                                                <div class="timeline-status">
+                                                    <?= $block->getMappedStatus($event['event'], $title, $trackNumber) ?>
+
+                                                    <?php if ($index === 0): ?>
+                                                        <span class="badge badge-info">Latest</span>
+                                                    <?php endif; ?>
+                                                </div>
+
+                                                <?php if (!empty($event['remarks'])) : ?>
+                                                    <div class="timeline-instruction">
+                                                        <?= __($event['remarks']) ?>
+                                                    </div>
+                                                <?php endif; ?>
+
+                                                <div class="timeline-location">
+                                                    <?= __($event['office']) ?>
+                                                </div>
+
+                                                <div class="timeline-date">
+                                                    <?= date('F d, Y h:i A', strtotime($event['date'])) ?>
+                                                </div>
+
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        <?php elseif ($block->getCheckDeliveryStatus()->isCourierMatch($title, ['delhivery'])): ?>
+                            <?php
+                            $data = json_decode($response, true);
+                            if ($data && isset($data['ShipmentData'][0]['Shipment'])):
+                                $shipment = $data['ShipmentData'][0]['Shipment'];
+                                $scans = $shipment['Scans'] ?? [];
+                                $currentStatus = $shipment['Status'];
+                            ?>
+                                <div class="tracking-header">
+                                    <h2>Delhivery Tracking</h2>
+                                    <div class="tracking-info">
+                                        <div class="info-item awb-number">
+                                            <label>AWB Number</label>
+                                            <div class="value"><?= $shipment['AWB'] ?></div>
+                                        </div>
+                                        <div class="info-item refrence">
+                                            <label>Reference No</label>
+                                            <div class="value"><?= $shipment['ReferenceNo'] ?></div>
+                                        </div>
+                                        <div class="info-item order-type">
+                                            <label>Order Type</label>
+                                            <div class="value"><?= $shipment['OrderType'] ?></div>
+                                        </div>
+                                        <div class="info-item cod">
+                                            <label>COD Amount</label>
+                                            <div class="value">₹<?= number_format($shipment['CODAmount'], 2) ?></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="status-current">
+                                    <h3>Current Status <span class="badge badge-info">Latest</span></h3>
+                                    <div class="status-text"><?= __($currentStatus['Instructions']) ?></div>
+                                    <div class="status-location"><?= $currentStatus['StatusLocation'] ?></div>
+                                    <div class="status-date">
+                                        <?= date('F d, Y h:i A', strtotime($currentStatus['StatusDateTime'])) ?>
+                                    </div>
+                                </div>
+
+                                <div class="location-details">
+                                    <h3 style="margin-top: 0; color: #333;">Shipment Journey</h3>
+                                    <div class="location-grid">
+                                        <div class="location-box">
+                                            <h4>Origin</h4>
+                                            <p><?= $shipment['Origin'] ?></p>
+                                            <p><small>Pickup: <?= date('F d, Y h:i A', strtotime($shipment['PickUpDate'])) ?></small></p>
+                                        </div>
+                                        <div class="location-box">
+                                            <h4>Destination</h4>
+                                            <p><?= $shipment['Destination'] ?></p>
+                                            <p><small>Expected: <?= date('F d, Y', strtotime($shipment['ExpectedDeliveryDate'] ?? '')) ?></small></p>
+                                        </div>
+                                    </div>
+
+                                    <div class="contact-details" style="margin-top: 20px;">
+                                        <h4>Consignee Details</h4>
+                                        <p><strong>Name:</strong> <?= $shipment['Consignee']['Name'] ?></p>
+                                        <p><strong>Address:</strong> <?= $shipment['Consignee']['City'] ?>, <?= $shipment['Consignee']['State'] ?> - <?= $shipment['Consignee']['PinCode'] ?></p>
+                                    </div>
+                                </div>
+
+                                <div class="timeline-container">
+                                    <div class="timeline-title">Tracking History</div>
+                                    <div class="timeline">
+                                        <?php
+                                        $scans = array_reverse($scans);
+                                        // echo "<pre>";
+                                        // print_r($scans);die;
+                                        foreach ($scans as $index => $scan):
+                                            $scanDetail = $scan['ScanDetail'];
+                                            if(isset($scanDetail['ScanType']) && $scanDetail['ScanType'] == "RT") {
+                                                continue;
+                                            }
+                                        ?>
+                                            <div class="timeline-item delhivery <?= $index === 0 ? 'active' : '' ?> <?= $block->getMappedStatus($scanDetail['Instructions'], $title, $trackNumber) ?>">
+                                                <div class="timeline-status">
+                                                    <?= $block->getMappedStatus($scanDetail['Instructions'], $title, $trackNumber) ?>
+                                                    <?php if ($index === 0): ?>
+                                                        <span class="badge badge-info">Current</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div class="timeline-location"><?= __($scanDetail['ScannedLocation']) ?></div>
+                                                <div class="timeline-date">
+                                                    <?= date('F d, Y h:i A', strtotime($scanDetail['ScanDateTime'])) ?>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        <?php elseif ($block->getCheckDeliveryStatus()->isCourierMatch($title, ['bluedart', 'eshipz', 'blue dart'])): ?>
+
+                            <?php
+                            $data = json_decode($response, true);
+                            // echo "<pre>";
+                            // print_r($data);die;
+                            if ($data && isset($data['checkpoints'])):
+                                $trackingInfo = $data['tracking_info'] ?? [];
+                                $checkpoints  = $data['checkpoints'] ?? [];
+                                $currentStatus = $checkpoints[0] ?? [];
+                                $formatBlueDartStatus = function ($value) {
+                                    $value = trim((string)$value);
+
+                                    if ($value === '') {
+                                        return 'Unknown';
+                                    }
+
+                                    $value = str_replace(['_', '-'], ' ', $value);
+                                    $value = preg_replace('/(?<!^)([A-Z])/', ' $1', $value);
+                                    $value = preg_replace('/\s+/', ' ', $value);
+
+                                    return ucwords(strtolower($value));
+                                };
+                                $currentTag = $formatBlueDartStatus($currentStatus['tag'] ?? ($currentStatus['subtag'] ?? ''));
+                                $currentLocation = $currentStatus['location'] ?? ($currentStatus['city'] ?? '');
+                                $expectedDelivery = $currentStatus['edd'] ?? ($trackingInfo['edd'] ?? '');
+                            ?>
+                                <div class="tracking-header">
+                                    <h2>BlueDart Tracking</h2>
+                                    <div class="tracking-info">
+                                        <div class="info-item tracking">
+                                            <label>Tracking Number</label>
+                                            <div class="value">
+                                                <?= $block->escapeHtml($trackingInfo['tracking_number'] ?? $trackNumber) ?>
+                                            </div>
+                                        </div>
+                                        <?php if (!empty($currentStatus['slug'])): ?>
+                                            <div class="info-item courier">
+                                                <label>Courier</label>
+                                                <div class="value">
+                                                    <?= $block->escapeHtml(ucwords((string)$currentStatus['slug'])) ?>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($currentLocation)): ?>
+                                            <div class="info-item current-location">
+                                                <label>Current Location</label>
+                                                <div class="value">
+                                                    <?= $block->escapeHtml($currentLocation) ?>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($expectedDelivery)): ?>
+                                            <div class="info-item expected-delivery">
+                                                <label>Expected Delivery</label>
+                                                <div class="value">
+                                                    <?= date('F d, Y', strtotime($expectedDelivery)) ?>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <div class="status-current">
+                                    <h3>
+                                        Current Status
+                                        <span class="badge badge-info">
+                                            <?= $block->escapeHtml($currentTag) ?>
+                                        </span>
+                                    </h3>
+                                    <div class="status-text">
+                                        <?= $block->escapeHtml(__(trim($currentStatus['message'])) ?? '') ?>
+                                    </div>
+                                    <?php if (!empty($currentLocation)): ?>
+                                        <div class="status-location">
+                                            <?= $block->escapeHtml($currentLocation) ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="status-date">
+                                        <?= !empty($currentStatus['checkpoint_time'])
+                                            ? date('F d, Y h:i A', strtotime($currentStatus['checkpoint_time']))
+                                            : '' ?>
+                                    </div>
+                                </div>
+                                <?php if (false): ?>
+                                    <div class="delivered-message">
+                                        <div class="delivered-icon">✅</div>
+                                        <h3>
+                                            Package Delivered Successfully!
+                                        </h3>
+                                        <p>
+                                            Your package has been delivered successfully.
+                                        </p>
+                                        <p>
+                                            <strong>Delivered At:</strong>
+                                            <?= $currentStatus['location'] ?? $currentStatus['city'] ?? '' ?>
+                                        </p>
+                                        <p>
+                                            <strong>Delivered On:</strong>
+                                            <?= !empty($currentStatus['checkpoint_time'])
+                                                ? date('F d, Y h:i A', strtotime($currentStatus['checkpoint_time']))
+                                                : '' ?>
+                                        </p>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="timeline-container">
+                                        <div class="timeline-title">
+                                            Tracking History
+                                        </div>
+                                        <div class="timeline">
+                                            <?php foreach ($checkpoints as $index => $checkpoint): ?>
+                                                <?php
+                                                $checkpointTag = $formatBlueDartStatus($checkpoint['tag'] ?? ($checkpoint['subtag'] ?? ''));
+                                                $checkpointLocation = $checkpoint['location'] ?? ($checkpoint['city'] ?? '');
+                                                // die($checkpointTag);
+                                                // if()
+                                                ?>
+                                                <div class="timeline-item bluedart <?= $index === 0 ? 'active' : '' ?>">
+                                                    <div class="timeline-status">
+                                                        <?= $block->getMappedStatus($checkpoint['message'], $title, $trackNumber) ?? '' ?>
+
+                                                        <?php if ($index === 0): ?>
+                                                            <span class="badge badge-info">
+                                                                Current
+                                                            </span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    <!-- <div class="timeline-instruction">
+                                                        <?= $block->escapeHtml(__(trim($checkpoint['message'])) ?? '') ?>
+                                                    </div> -->
+                                                    <?php if (!empty($checkpointLocation)): ?>
+                                                        <div class="timeline-location">
+                                                            <?= $block->escapeHtml($checkpointLocation) ?>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                    <div class="timeline-date">
+                                                        <?= !empty($checkpoint['checkpoint_time'])
+                                                            ? date('F d, Y h:i A', strtotime($checkpoint['checkpoint_time']))
+                                                            : '' ?>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <div class="tracking-header">
+                                <h2>Tracking Information</h2>
+                                <div class="tracking-info">
+                                    <div class="info-item cou">
+                                        <label>Courier</label>
+                                        <div class="value"><?= $title ?></div>
+                                    </div>
+                                    <div class="info-item track">
+                                        <label>Tracking Number</label>
+                                        <div class="value"><?= $trackNumber ?></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="timeline-container">
+                                <div class="message info empty">
+                                    <div class="tracking-header">
+                                        <h2>Tracking Information</h2>
+
+                                        <div class="tracking-info">
+                                            <div class="info-item courier-partn">
+                                                <label>Courier Partner</label>
+                                                <div class="value">
+                                                    <?= $block->escapeHtml($title) ?>
+                                                </div>
+                                            </div>
+
+                                            <div class="info-item awb-number">
+                                                <label>AWB Number</label>
+                                                <div class="value">
+                                                    <?= $block->escapeHtml($trackNumber) ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tracking-pending-card">
+                                        <h3>Order Confirmed</h3>
+                                        <p class="tracking-message">
+                                            Your order has been packed and will be dispatched shortly.
+                                        </p>
+                                        <div class="tracking-steps">
+                                            <div class="step active">
+                                                ✔ Order Confirmed
+                                            </div>
+                                            <div class="step active">
+                                                ✔ Item Packed
+                                            </div>
+                                            <div class="step pending">
+                                                Pickup by Delivery Partner Soon
+                                            </div>
+                                        </div>
+                                        <p class="tracking-note">
+                                            Delivery updates will appear here once your shipment is picked up. Please contact customer support for more inquiries.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="message info empty">
+                    <div><?= $block->escapeHtml(__('There is no tracking available for this shipment. Please contact customer support for more inquiries.')) ?></div>
+                </div>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <div class="message info empty">
+            <div><?= $block->escapeHtml(__('There is no tracking available.')) ?></div>
+        </div>
+    <?php endif; ?>
+
+    <div class="actions">
+        <button type="button"
+            title="<?= $block->escapeHtml(__('Close Window')) ?>"
+            class="action close">
+            <span><?= $block->escapeHtml(__('Close Window')) ?></span>
+        </button>
+        <?= /* @noEscape */ $secureRenderer->renderEventListenerAsTag(
+            'onclick',
+            "window.close(); window.opener.focus();",
+            'button.action.close'
+        ) ?>
+    </div>
+</div>
+
+<?php
+$scriptString = <<<script
+
+require([
+    'jquery'
+], function (jQuery) {
+
+    /* hide the close button when the content doesn't open in a modal window */
+    if (window.opener === null || typeof window.opener === "undefined") {
+        jQuery('.actions button.close').hide();
+    }
+
+    const groups = {};
+
+    jQuery('.timeline-item').each(function () {
+        const \$item = jQuery(this);
+
+        // Get courier name (all classes except timeline-item and active)
+        const classes = (\$item.attr('class') || '').split(/\s+/);
+        const courier = classes.find(c =>
+            c !== 'timeline-item' &&
+            c !== 'active' &&
+            c !== 'In' &&
+            c !== 'transit'
+        ) || 'unknown';
+
+        const location = \$item.find('.timeline-location').text().trim();
+
+        const status = \$item
+            .find('.timeline-status')
+            .clone()
+            .children()
+            .remove()
+            .end()
+            .text()
+            .trim();
+
+        const dateText = \$item.find('.timeline-date').text().trim();
+        const timestamp = new Date(dateText).getTime();
+
+        // Same courier + same location + same status = duplicate group
+        const key = `\${courier}|\${location}|\${status}`;
+
+        if (!groups[key]) {
+            groups[key] = [];
+        }
+
+        groups[key].push({
+            element: \$item,
+            timestamp: timestamp
+        });
+    });
+
+    jQuery.each(groups, function (key, items) {
+        if (items.length > 1) {
+            items.sort((a, b) => b.timestamp - a.timestamp);
+
+            // Hide all except newest
+            for (let i = 1; i < items.length; i++) {
+                items[i].element.hide();
+            }
+        }
+    });
+
+
+    jQuery('.timeline-location').each(function () {
+        const \$el = jQuery(this);
+        const text = \$el.text().trim();
+
+        const parts = text.split(',').map(part => part.trim());
+
+        if (
+            parts.length >= 3 &&
+            parts[parts.length - 1].toLowerCase() === parts[parts.length - 2].toLowerCase()
+        ) {
+            parts.pop(); // remove last duplicate city/state
+            \$el.text(parts.join(', '));
+        }
+    });
+
+
+    
+
+});
+
+script;
+?>
+
+<?= /* @noEscape */ $secureRenderer->renderTag('script', [], $scriptString, false) ?>

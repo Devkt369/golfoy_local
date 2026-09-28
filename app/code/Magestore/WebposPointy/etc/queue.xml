@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magestore, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/queue.xsd">
+    <broker topic="magestore_pointy_integration.submit_sales.topic" exchange="magento-db" type="db">
+        <queue name="magestore_pointy_integration.submit_sales.queue" consumer="magestore_pointy_integration.submit_sales.consumer" consumerInstance="Magento\Framework\MessageQueue\Consumer" handler="Magestore\WebposPointy\Model\SubmitSales\Consumer::execute"/>
+    </broker>
+    <broker topic="magestore_pointy_integration.submit_inventory.topic" exchange="magento-db" type="db">
+        <queue name="magestore_pointy_integration.submit_inventory.queue"
+               consumer="magestore_pointy_integration.submit_inventory.consumer"
+               consumerInstance="Magento\Framework\MessageQueue\Consumer"
+               handler="Magestore\WebposPointy\Model\Inventory\Consumer::execute"/>
+    </broker>
+</config>

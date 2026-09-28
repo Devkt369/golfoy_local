@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="default">
+        <job instance="Snapcommerce\Snapmint\Cron\AuthorizeOrder" method="execute" name="snapmint_authorize_order">
+            <schedule>*/20 * * * *</schedule>
+        </job>
+        <job instance="Snapcommerce\Snapmint\Cron\CaptureOrder" method="execute" name="snapmint_capture_order">
+            <schedule>*/40 * * * *</schedule>
+        </job>
+    </group>
+</config>

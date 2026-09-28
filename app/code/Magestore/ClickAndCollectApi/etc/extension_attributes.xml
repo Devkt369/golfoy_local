@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Api/etc/extension_attributes.xsd">
+    <extension_attributes for="Magento\Sales\Api\Data\OrderInterface">
+        <attribute code="location_pickup_id" type="int" />
+        <attribute code="pickup_date_time" type="string" />
+        <attribute code="pickup_date_only" type="string" />
+        <attribute code="pickup_status" type="string" />
+        <attribute code="ready_pick_date" type="string" />
+    </extension_attributes>
+    <extension_attributes for="Magento\Quote\Api\Data\AddressInterface">
+        <attribute code="location_pickup_id" type="int" />
+        <attribute code="pickup_date_time" type="string" />
+        <attribute code="pickup_date_only" type="string" />
+        <attribute code="pickup_status" type="string" />
+    </extension_attributes>
+    <extension_attributes for="Magestore\Webpos\Api\Data\Location\LocationInterface">
+        <attribute code="is_allow_pickup" type="int" />
+        <attribute code="schedule_id" type="int" />
+    </extension_attributes>
+    <extension_attributes for="Magestore\Webpos\Api\Data\Checkout\OrderInterface">
+        <attribute code="location_pickup_id" type="int" />
+        <attribute code="pickup_date_time" type="string" />
+        <attribute code="pickup_date_only" type="string" />
+        <attribute code="pickup_status" type="string" />
+        <attribute code="ready_pick_date" type="string" />
+        <attribute code="is_enough_qty_in_stock" type="boolean" />
+        <attribute code="customer_firstname" type="string" />
+        <attribute code="customer_lastname" type="string" />
+        <attribute code="packages" type="Magestore\ClickAndCollectApi\Api\Data\PackageInterface[]" />
+    </extension_attributes>
+    <extension_attributes for="Magestore\Webpos\Api\Data\Checkout\SimpleOrderInterface">
+        <attribute code="location_pickup_id" type="int" />
+        <attribute code="pickup_date_time" type="string" />
+        <attribute code="pickup_date_only" type="string" />
+        <attribute code="pickup_status" type="string" />
+        <attribute code="customer_firstname" type="string" />
+        <attribute code="customer_lastname" type="string" />
+    </extension_attributes>
+</config>

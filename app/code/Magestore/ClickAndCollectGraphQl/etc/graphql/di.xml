@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\QuoteGraphQl\Model\Cart\GetShippingAddress">
+        <plugin name="adapt_set_shipping_address_on_cart_for_click_collect_plugin" type="Magestore\ClickAndCollectGraphQl\Plugin\Cart\GetShippingAddress\AdaptGetShippingAddressPlugin"/>
+    </type>
+    <preference for="Magento\Framework\Authorization\RoleLocatorInterface" type="Magento\Webapi\Model\WebapiRoleLocator" />
+    <type name="Magento\StoreGraphQl\Model\Resolver\Store\StoreConfigDataProvider">
+        <arguments>
+            <argument name="extendedConfigData" xsi:type="array">
+                <item name="magestore_click_and_collect_general_allow_to_choose_collect_data_and_time" xsi:type="string">click_and_collect/general/allow_to_choose_collect_data_and_time</item>
+                <item name="magestore_click_and_collect_general_search_radius" xsi:type="string">click_and_collect/general/search_radius</item>
+                <item name="magestore_click_and_collect_general_show_store_list_on_frontend" xsi:type="string">click_and_collect/general/show_store_list_on_frontend</item>
+                <item name="magento_carrier_clickandcollect_active" xsi:type="string">carriers/clickandcollect/active</item>
+                <item name="magento_carrier_clickandcollect_title" xsi:type="string">carriers/clickandcollect/title</item>
+                <item name="magento_carrier_clickandcollect_method_name" xsi:type="string">carriers/clickandcollect/method_name</item>
+                <item name="magento_carrier_clickandcollect_price" xsi:type="string">carriers/clickandcollect/price</item>
+                <item name="magento_carrier_clickandcollect_displayed_error_message" xsi:type="string">carriers/clickandcollect/displayed_error_message</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Framework\GraphQl\Schema\Type\Enum\DefaultDataMapper">
+        <arguments>
+            <argument name="map" xsi:type="array">
+                <item name="ProductStockStatus" xsi:type="array">
+                    <item name="in_stock" xsi:type="string">true</item>
+                    <item name="out_of_stock" xsi:type="string">false</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <!-- Need ignore plugin clear customer session because we use graphql at normal Theme, not PWA Theme -->
+    <!-- We still need customer session -->
+    <type name="Magento\CustomerGraphQl\Plugin\ClearCustomerSessionAfterRequest">
+        <plugin name="IgnoreClearCustomerSessionAfterRequest" type="Magestore\ClickAndCollectGraphQl\Plugin\IgnoreClearCustomerSessionAfterRequest" sortOrder="1" disabled="false" />
+    </type>
+</config>

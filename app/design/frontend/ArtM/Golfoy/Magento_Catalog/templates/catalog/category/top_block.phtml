@@ -1,0 +1,17 @@
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$category = $objectManager->get('Magento\Framework\Registry')->registry('current_category');
+$curr_cat_id = $category ? $category->getId() : 0;
+$getSubcategoriesontop = $category ? $category->getSubcategoriesontop() : '';
+// Render top block directly on page if subcat on top is enabled.
+if ($getSubcategoriesontop == '1'):
+    $topBlockHtml = '';
+    if ((int)$curr_cat_id > 0) {
+        $topBlockHtml = $block->getLayout()
+            ->createBlock(\ArtM\Customcache\Block\TopBlock::class)
+            ->setData('cat_id', (int)$curr_cat_id)
+            ->toHtml();
+    }
+?>
+<?= $topBlockHtml ?>
+<?php endif; ?>

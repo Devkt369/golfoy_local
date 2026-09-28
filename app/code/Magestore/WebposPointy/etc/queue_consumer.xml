@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magestore, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework-message-queue:etc/consumer.xsd">
+    <consumer name="magestore_pointy_integration.submit_sales.consumer" queue="magestore_pointy_integration.submit_sales.queue" connection="db" maxMessages="2000" consumerInstance="Magento\Framework\MessageQueue\Consumer" handler="Magestore\WebposPointy\Model\SubmitSales\Consumer::execute" />
+    <consumer name="magestore_pointy_integration.submit_inventory.consumer"
+              queue="magestore_pointy_integration.submit_inventory.queue"
+              connection="db"
+              maxMessages="200"
+              consumerInstance="Magento\Framework\MessageQueue\Consumer"
+              handler="Magestore\WebposPointy\Model\Inventory\Consumer::execute" />
+</config>

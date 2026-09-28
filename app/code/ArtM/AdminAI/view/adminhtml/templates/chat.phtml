@@ -1,0 +1,658 @@
+<?php
+/** @var \ArtM\AdminAI\Block\Adminhtml\Chat $block */
+$supportedIntents = $block->getSupportedIntents();
+$intentGroups = [];
+
+$preferredGroupOrder = ['Catalog', 'Sales', 'Reviews', 'Customer', 'Other'];
+
+foreach ($supportedIntents as $intent) {
+    $group = $intent['group'] ?? 'Catalog';
+    if (!isset($intentGroups[$group])) {
+        $intentGroups[$group] = [];
+    }
+    $intentGroups[$group][] = $intent;
+}
+
+uksort($intentGroups, static function ($a, $b) use ($preferredGroupOrder) {
+    $aIndex = array_search($a, $preferredGroupOrder, true);
+    $bIndex = array_search($b, $preferredGroupOrder, true);
+
+    if ($aIndex === false && $bIndex === false) {
+        return strcmp($a, $b);
+    }
+    if ($aIndex === false) {
+        return 1;
+    }
+    if ($bIndex === false) {
+        return -1;
+    }
+
+    return $aIndex <=> $bIndex;
+});
+?>
+<style>
+    .adminai-wrap { max-width: 1500px; }
+
+    .adminai-grid {
+        display: grid;
+        grid-template-columns: 300px minmax(560px, 1fr) 360px;
+        gap: 16px;
+        align-items: stretch;
+    }
+
+    .adminai-card {
+        background: #fff;
+        border: 1px solid #d6d6d6;
+        border-radius: 4px;
+    }
+
+    .adminai-sessions,
+    .adminai-chat,
+    .adminai-sidebar {
+        padding: 12px;
+        height: calc(100vh - 130px);
+        box-sizing: border-box;
+    }
+
+    .adminai-sessions,
+    .adminai-chat {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .adminai-sidebar {
+        max-height: calc(100vh - 130px);
+        overflow-y: auto;
+    }
+
+    .adminai-panel-title {
+        margin: 0 0 10px;
+        font-size: 16px;
+    }
+
+    .adminai-search-sessions {
+        width: 100%;
+        margin-bottom: 8px;
+        box-sizing: border-box;
+    }
+
+    .adminai-session-actions {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .adminai-session-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+    }
+
+    .adminai-session-item {
+        border: 1px solid #e5e5e5;
+        border-radius: 4px;
+        padding: 8px;
+        margin-bottom: 8px;
+        background: #fafafa;
+        cursor: pointer;
+    }
+
+    .adminai-session-item.is-active {
+        border-color: #0a6ecb;
+        background: #edf6ff;
+    }
+
+    .adminai-session-title {
+        font-weight: 600;
+        font-size: 13px;
+        margin-bottom: 4px;
+    }
+
+    .adminai-session-date,
+    .adminai-session-preview {
+        font-size: 12px;
+        color: #5f5f5f;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .adminai-mode-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding: 8px 10px;
+        border: 1px solid #d6d6d6;
+        border-radius: 4px;
+        background: #f8f8f8;
+    }
+
+    .adminai-messages {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        border: 1px solid #d6d6d6;
+        border-radius: 4px;
+        background: #fff;
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    .adminai-input-row { display: flex; gap: 10px; align-items: center; }
+
+    .adminai-message { margin: 0 0 10px; }
+    .adminai-message strong { display: block; margin-bottom: 4px; }
+
+    .adminai-message-content {
+        border: 1px solid #e8e8e8;
+        border-radius: 4px;
+        padding: 8px 10px;
+        background: #fcfcfc;
+        white-space: pre-wrap;
+        line-height: 1.45;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        font-size: 13px;
+        overflow-wrap: break-word;
+    }
+
+    .adminai-message-user strong { color: #006bb4; }
+    .adminai-message-user .adminai-message-content { background: #eef7ff; border-color: #cfe8ff; }
+    .adminai-message-assistant .adminai-message-content { background: #f7f7f7; }
+
+    .adminai-user-intent-display {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .adminai-intent-command {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        background: #fff;
+        border: 1px solid #0a6ecb;
+        border-radius: 4px;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+    }
+
+    .adminai-intent-command code {
+        flex: 1;
+        color: #006bb4;
+        font-weight: 500;
+        word-break: break-all;
+    }
+
+    .adminai-copy-command {
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        padding: 4px 8px;
+        font-size: 14px;
+        line-height: 1;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+
+    .adminai-copy-command:hover {
+        opacity: 1;
+    }
+
+    .adminai-intent-explanation {
+        padding: 8px 12px;
+        font-size: 12px;
+        color: #4a4a4a;
+        line-height: 1.6;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+    }
+
+    .adminai-intent-separator {
+        border: 0;
+        border-top: 1px dashed #adc8e8;
+        margin: 0 12px;
+    }
+
+    .adminai-group { margin-bottom: 12px; }
+    .adminai-group-title {
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: #1d1d1d;
+        font-size: 13px;
+    }
+    .adminai-group-title:after { content: " >"; color: #6b6b6b; }
+    .adminai-intent-list {
+        margin: 0 0 0 8px;
+        padding: 0 0 0 10px;
+        list-style: none;
+        border-left: 1px solid #dcdcdc;
+    }
+
+    .adminai-intent-item {
+        border: 1px solid #efefef;
+        border-radius: 4px;
+        padding: 6px 8px;
+        margin-bottom: 6px;
+        background: #fcfcfc;
+        position: relative;
+    }
+
+    .adminai-intent-item.is-open {
+        border-color: #cddff4;
+        background: #f7fbff;
+    }
+
+    .adminai-intent-main { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+    .adminai-intent-trigger {
+        border: 0;
+        background: transparent;
+        padding: 0;
+        text-align: left;
+        cursor: pointer;
+        flex: 1;
+        font-size: 13px;
+        color: #1b1b1b;
+    }
+
+    .adminai-intent-trigger:hover { color: #005fb3; }
+
+    .adminai-intent-edit {
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        opacity: 0;
+        color: #666;
+        font-size: 13px;
+        padding: 3px;
+        border-radius: 3px;
+    }
+
+    .adminai-intent-item:hover .adminai-intent-edit,
+    .adminai-intent-item.is-open .adminai-intent-edit { opacity: 1; }
+    .adminai-intent-edit:hover { color: #111; background: #ebebeb; }
+
+    .adminai-intent-code {
+        display: none;
+        font-family: monospace;
+        padding: 1px 6px;
+        border-radius: 3px;
+        background: #ececec;
+        margin-bottom: 4px;
+    }
+
+    .adminai-intent-title { font-weight: 600; }
+
+    .adminai-intent-meta {
+        display: none;
+        margin-top: 6px;
+        padding-top: 6px;
+        border-top: 1px dashed #d6d6d6;
+    }
+
+    .adminai-intent-item.is-open .adminai-intent-meta { display: block; }
+
+    .adminai-intent-desc {
+        font-size: 12px;
+        color: #4a4a4a;
+        margin-bottom: 4px;
+    }
+
+    .adminai-intent-example {
+        display: block;
+        font-family: monospace;
+        margin-top: 4px;
+        margin-bottom: 6px;
+        color: #2f2f2f;
+    }
+
+    .adminai-intent-editor {
+        display: block;
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+    }
+
+    .adminai-param-row { margin-bottom: 8px; }
+    .adminai-param-error { border-color: #e22626 !important; box-shadow: 0 0 0 1px rgba(226, 38, 38, 0.15); }
+    .adminai-param-label { display: block; font-size: 12px; margin-bottom: 4px; color: #444; }
+    .adminai-param-description { display: block; margin-bottom: 6px; font-size: 11px; color: #666; line-height: 1.4; font-style: italic; }
+    .adminai-param-hint { display: block; margin-top: 3px; font-size: 11px; color: #6d6d6d; }
+    .adminai-param-required { color: #b30000; }
+    .adminai-intent-send { margin-top: 4px; }
+
+    .adminai-attr-picker { margin-top: 6px; }
+    .adminai-attr-tokens { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+    .adminai-attr-token {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1px solid #bfdcff;
+        background: #edf6ff;
+        border-radius: 14px;
+        padding: 3px 8px;
+        font-size: 12px;
+        line-height: 1;
+    }
+    .adminai-attr-token-remove {
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        color: #b30000;
+        font-weight: 700;
+        padding: 0;
+        line-height: 1;
+    }
+    .adminai-attr-search-wrap { position: relative; }
+    .adminai-attr-search { width: 100%; }
+    .adminai-attr-dropdown {
+        display: none;
+        position: static;
+        width: 100%;
+        margin-top: 4px;
+        max-height: 170px;
+        overflow-y: auto;
+        background: #fff;
+        border: 1px solid #d6d6d6;
+        border-radius: 3px;
+    }
+    .adminai-attr-option {
+        width: 100%;
+        text-align: left;
+        border: 0;
+        background: #fff;
+        cursor: pointer;
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+    .adminai-attr-option:hover { background: #f3f8ff; }
+
+    .adminai-message-content a {
+        color: #005db1;
+        text-decoration: underline;
+        word-break: break-all;
+    }
+    .adminai-message-content .adminai-chat-prefill {
+        margin: 4px 6px 4px 0;
+    }
+    .adminai-message-content .adminai-chat-inline-input {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin: 6px 0;
+    }
+    .adminai-message-content .adminai-chat-inline-field {
+        min-width: 220px;
+        height: 30px;
+    }
+    .adminai-message-content .adminai-chat-inline-send {
+        height: 30px;
+        padding: 0 10px;
+    }
+    .adminai-message-content .adminai-chat-cmd-edit {
+        border: 1px solid #d6d6d6;
+        background: #f5f5f5;
+        color: #333;
+        border-radius: 3px;
+        padding: 0 4px;
+        font-size: 11px;
+        line-height: 16px;
+        height: 18px;
+        cursor: pointer;
+        vertical-align: middle;
+        margin-left: 6px;
+    }
+    .adminai-message-content .adminai-chat-cmd-edit:hover {
+        background: #e9f2ff;
+        border-color: #b7d5f5;
+        color: #0b5cab;
+    }
+    .adminai-message-content .adminai-admin-link {
+        display: inline-block;
+        margin-left: 6px;
+        font-size: 11px;
+        color: #0b5cab;
+        text-decoration: underline;
+        cursor: pointer;
+    }
+    .adminai-result-sep {
+        display: block;
+        border-top: 1px solid #e1e1e1;
+        margin: 8px 0;
+    }
+
+    @media (max-width: 1320px) {
+        .adminai-grid { grid-template-columns: 1fr; }
+        .adminai-session-list { max-height: 240px; }
+    }
+
+    /* Expand/Collapse toolbar */
+    .adminai-toolbar {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 8px;
+    }
+
+    .adminai-expand-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 14px;
+        border: 1px solid #bbb;
+        border-radius: 4px;
+        background: #fff;
+        font-size: 13px;
+        cursor: pointer;
+        color: #333;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    .adminai-expand-btn:hover { background: #f0f7ff; border-color: #0a6ecb; color: #0a6ecb; }
+
+    /* Fullscreen overlay */
+    body.adminai-fullscreen-open { overflow: hidden; }
+
+    .adminai-wrap.is-fullscreen {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        max-width: 100% !important;
+        background: #f5f5f5;
+        padding: 16px;
+        box-sizing: border-box;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .adminai-wrap.is-fullscreen .adminai-grid {
+        flex: 1;
+        min-height: 0;
+    }
+
+    .adminai-wrap.is-fullscreen .adminai-sessions,
+    .adminai-wrap.is-fullscreen .adminai-chat,
+    .adminai-wrap.is-fullscreen .adminai-sidebar {
+        height: calc(100vh - 80px);
+    }
+</style>
+
+<div class="admin-ai-assistant adminai-wrap">
+    <div id="ai-chat-container"
+         data-ask-url="<?= $block->escapeUrl($block->getAskUrl()) ?>"
+         data-sessions-url="<?= $block->escapeUrl($block->getSessionsUrl()) ?>"
+         data-messages-url="<?= $block->escapeUrl($block->getMessagesUrl()) ?>"
+         data-create-session-url="<?= $block->escapeUrl($block->getCreateSessionUrl()) ?>"
+            data-rename-session-url="<?= $block->escapeUrl($block->getRenameSessionUrl()) ?>"
+            data-attributes-url="<?= $block->escapeUrl($block->getAttributesUrl()) ?>"
+            data-customer-edit-url-template="<?= $block->escapeUrl($block->getCustomerEditUrlTemplate()) ?>"
+            data-product-edit-url-template="<?= $block->escapeUrl($block->getProductEditUrlTemplate()) ?>"
+            data-order-view-url-template="<?= $block->escapeUrl($block->getOrderViewUrlTemplate()) ?>"
+            data-orders-grid-url="<?= $block->escapeUrl($block->getOrdersGridUrl()) ?>">
+        <div class="adminai-toolbar">
+            <button type="button" class="adminai-expand-btn" id="adminai-expand-btn" title="Expand to full screen">
+                <span class="adminai-expand-icon">&#x26F6;</span>
+                <span class="adminai-expand-label">Expand</span>
+            </button>
+        </div>
+        <div class="adminai-grid">
+            <aside class="adminai-card adminai-sessions">
+                <h2 class="adminai-panel-title">Chats</h2>
+                <div class="adminai-session-actions">
+                    <button type="button" class="action-default scalable primary adminai-new-chat"><span>New Chat</span></button>
+                    <button type="button" class="action-default scalable adminai-rename-chat"><span>Rename</span></button>
+                </div>
+                <input type="text" class="admin__control-text adminai-search-sessions" placeholder="Search chats..." />
+                <ul class="adminai-session-list"></ul>
+            </aside>
+
+            <section class="adminai-card adminai-chat">
+                <div class="adminai-mode-row">
+                    <strong class="adminai-mode-label"></strong>
+                    <button type="button" class="action-default scalable adminai-toggle-mode"><span></span></button>
+                </div>
+
+                <div class="adminai-messages"></div>
+
+                <div class="adminai-input-row">
+                    <input type="text" class="adminai-input admin__control-text" placeholder="Type your message..." style="flex:1;" />
+                    <button type="button" class="action-default scalable primary adminai-send"><span>Send</span></button>
+                </div>
+            </section>
+
+            <aside class="adminai-card adminai-sidebar">
+                <h2 class="adminai-panel-title">Supported Intents</h2>
+
+                <?php foreach ($intentGroups as $groupName => $groupIntents): ?>
+                    <?php if (empty($groupIntents)): ?>
+                        <?php continue; ?>
+                    <?php endif; ?>
+
+                    <div class="adminai-group">
+                        <div class="adminai-group-title"><?= $block->escapeHtml($groupName) ?></div>
+                        <ul class="adminai-intent-list">
+                            <?php foreach ($groupIntents as $intent): ?>
+                                <?php
+                                $params = $intent['params'] ?? [];
+                                $command = (string)($intent['command'] ?? ($intent['code'] ?? ''));
+                                ?>
+                                <li class="adminai-intent-item"
+                                    data-intent-code="<?= $block->escapeHtmlAttr($intent['code'] ?? '') ?>"
+                                    data-command-template="<?= $block->escapeHtmlAttr($command) ?>"
+                                    data-has-params="<?= !empty($params) ? '1' : '0' ?>">
+                                    <div class="adminai-intent-main">
+                                        <button type="button" class="adminai-intent-trigger" title="Click to use this intent">
+                                            <span class="adminai-intent-title"><?= $block->escapeHtml($intent['label'] ?? '') ?></span>
+                                        </button>
+                                        <button type="button" class="adminai-intent-edit" title="Expand">▾</button>
+                                    </div>
+
+                                    <div class="adminai-intent-meta">
+                                        <?php if (!empty($intent['description'])): ?>
+                                            <div class="adminai-intent-desc"><?= $block->escapeHtml($intent['description']) ?></div>
+                                        <?php endif; ?>
+
+                                        <?php if (!empty($intent['example'])): ?>
+                                            <span class="adminai-intent-example">Example: <?= $block->escapeHtml($intent['example']) ?></span>
+                                        <?php endif; ?>
+
+                                        <div class="adminai-intent-editor">
+                                            <?php foreach ($params as $param): ?>
+                                                <?php
+                                                $paramName = (string)($param['name'] ?? '');
+                                                $inputType = (string)($param['type'] ?? 'text');
+                                                if ($inputType === 'text' && in_array($paramName, ['date', 'from_date', 'to_date'], true)) {
+                                                    $inputType = 'date';
+                                                }
+
+                                                $hintParts = [];
+                                                if (isset($param['default']) && $param['default'] !== '') {
+                                                    $hintParts[] = 'Default: ' . (string)$param['default'];
+                                                }
+                                                if (isset($param['max']) && $param['max'] !== '') {
+                                                    $hintParts[] = 'Max: ' . (string)$param['max'];
+                                                }
+                                                if (isset($param['max_range']) && $param['max_range'] === '1_year') {
+                                                    $hintParts[] = 'Max range: 1 year';
+                                                }
+                                                if (in_array($paramName, ['date', 'from_date', 'to_date'], true)) {
+                                                    $hintParts[] = 'Format: YYYY-MM-DD';
+                                                }
+                                                ?>
+                                                <div class="adminai-param-row">
+                                                    <label class="adminai-param-label">
+                                                        <?= $block->escapeHtml($param['label'] ?? ($param['name'] ?? 'Parameter')) ?>
+                                                        <?php if (!empty($param['required'])): ?>
+                                                            <span class="adminai-param-required">*</span>
+                                                        <?php endif; ?>
+                                                    </label>
+                                                    <?php if (!empty($param['description'])): ?>
+                                                        <small class="adminai-param-description"><?= $block->escapeHtml($param['description']) ?></small>
+                                                    <?php endif; ?>
+                                                    <?php if ($inputType === 'select' && !empty($param['options']) && is_array($param['options'])): ?>
+                                                        <select
+                                                            class="admin__control-text adminai-param-input"
+                                                            data-param-name="<?= $block->escapeHtmlAttr($param['name'] ?? '') ?>"
+                                                            data-entity-type="<?= $block->escapeHtmlAttr($param['entity_type'] ?? '') ?>"
+                                                            data-options-source="<?= $block->escapeHtmlAttr($param['options_source'] ?? '') ?>"
+                                                            data-required="<?= !empty($param['required']) ? '1' : '0' ?>"
+                                                        >
+                                                            <?php foreach ($param['options'] as $option): ?>
+                                                                <?php
+                                                                $optionValue = (string)($option['value'] ?? '');
+                                                                $optionLabel = (string)($option['label'] ?? $optionValue);
+                                                                $isSelected = isset($param['default']) && (string)$param['default'] === $optionValue;
+                                                                ?>
+                                                                <option value="<?= $block->escapeHtmlAttr($optionValue) ?>"<?= $isSelected ? ' selected="selected"' : '' ?>>
+                                                                    <?= $block->escapeHtml($optionLabel) ?>
+                                                                </option>
+                                                            <?php endforeach; ?>
+                                                        </select>
+                                                    <?php else: ?>
+                                                        <input
+                                                            type="<?= $block->escapeHtmlAttr($inputType) ?>"
+                                                            class="admin__control-text adminai-param-input"
+                                                            data-param-name="<?= $block->escapeHtmlAttr($param['name'] ?? '') ?>"
+                                                            data-entity-type="<?= $block->escapeHtmlAttr($param['entity_type'] ?? '') ?>"
+                                                            data-options-source="<?= $block->escapeHtmlAttr($param['options_source'] ?? '') ?>"
+                                                            data-required="<?= !empty($param['required']) ? '1' : '0' ?>"
+                                                            placeholder="<?= $block->escapeHtmlAttr($param['placeholder'] ?? '') ?>"
+                                                        />
+                                                    <?php endif; ?>
+                                                    <?php if (!empty($hintParts)): ?>
+                                                        <small class="adminai-param-hint"><?= $block->escapeHtml(implode(' | ', $hintParts)) ?></small>
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php endforeach; ?>
+                                            <button type="button" class="action-default scalable primary adminai-intent-send">
+                                                <span>Send</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                <?php endforeach; ?>
+            </aside>
+        </div>
+    </div>
+</div>
+<script>
+require(['jquery'], function ($) {
+    'use strict';
+    $('#adminai-expand-btn').on('click', function () {
+        var $wrap = $(this).closest('.adminai-wrap');
+        var expanded = $wrap.toggleClass('is-fullscreen').hasClass('is-fullscreen');
+        $('body').toggleClass('adminai-fullscreen-open', expanded);
+        $(this).find('.adminai-expand-icon').html(expanded ? '&#x2715;' : '&#x26F6;');
+        $(this).find('.adminai-expand-label').text(expanded ? 'Collapse' : 'Expand');
+        $(this).attr('title', expanded ? 'Collapse' : 'Expand to full screen');
+    });
+});
+</script>

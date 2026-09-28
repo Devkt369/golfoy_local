@@ -1,0 +1,30 @@
+<style>
+</style>
+<div class="logout_button_sidebar"> 
+    <?php
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $customerSession = $objectManager->get('\Magento\Customer\Model\Session');
+        if( $customerSession->isLoggedIn() ) {
+    ?>
+        <a class= "header_account_link" href="<?php echo $this->getUrl("customer/account/logout");?>"><?php echo __('Log out')?></a>
+    <?php
+        }
+    ?>
+</div>
+
+<script type="text/javascript">
+    require(['jquery', 'bootstrap'],function(jQuery){
+        jQuery(document).ready(function() {
+            /*
+            if( jQuery(window).width() < 768 ) {
+                jQuery('.block.discount > .title').siblings('.content').slideUp();
+            }*/
+            if( jQuery(window).width() < 768 ) {
+                jQuery('.block.discount > .title').click(function(){
+                    jQuery(this).toggleClass('expanded');
+                    jQuery(this).siblings('.content').slideToggle();
+                });
+            }
+        });
+    });
+</script>

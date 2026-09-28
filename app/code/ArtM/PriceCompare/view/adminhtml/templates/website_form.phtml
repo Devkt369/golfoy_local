@@ -1,0 +1,65 @@
+<form id="website_form" method="post" enctype="multipart/form-data" action="<?= $block->getUrl('pricecompare/managewebsites/save') ?>">
+    <?= $block->getBlockHtml('formkey') ?>
+    <div class="admin__field">
+        <label for="website_name" class="admin__field-label">Website Name</label>
+        <div class="admin__field-control">
+            <input type="text" name="website_name" id="website_name" class="admin__control-text" required />
+        </div>
+    </div>
+    <div class="admin__field">
+        <label for="website_url" class="admin__field-label">Website URL</label>
+        <div class="admin__field-control">
+            <input type="url" name="website_url" id="website_url" class="admin__control-text" required />
+        </div>
+    </div>
+    <div class="admin__field">
+        <label for="website_logo" class="admin__field-label">Logo</label>
+        <div class="admin__field-control">
+            <input type="file" name="website_logo" id="website_logo" class="admin__control-file" />
+        </div>
+    </div>
+    <div class="admin__field">
+        <label for="price_selectors" class="admin__field-label">Price Selectors (comma separated)</label>
+        <div class="admin__field-control">
+            <input type="text" name="price_selectors" id="price_selectors" class="admin__control-text" required />
+        </div>
+    </div>
+    <div class="admin__field">
+        <button type="submit" class="action-default scalable save primary">Save Website</button>
+    </div>
+</form>
+<script type="text/javascript">
+    require(['ArtM_PriceCompare/js/brand_category_popup']);
+</script>
+
+<h2>All Websites</h2>
+<table class="admin__table-primary">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>URL</th>
+            <th>Logo</th>
+            <th>Price Selectors</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $websiteCollection = $objectManager->create('ArtM\\PriceCompare\\Model\\ResourceModel\\Website\\Collection');
+        foreach ($websiteCollection as $website): ?>
+        <tr>
+            <td><?= $website->getId() ?></td>
+            <td><?= $website->getName() ?></td>
+            <td><?= $website->getUrl() ?></td>
+            <td><?php if ($website->getLogo()): ?><img src="<?= $block->getBaseUrl(['_type' => \Magento\Framework\UrlInterface::URL_TYPE_MEDIA]) ."media/". $website->getLogo() ?>" width="50"/><?php endif; ?></td>
+            <td><?= $website->getPriceSelectors() ?></td>
+            <td>
+                <a href="#" class="action-edit">Edit</a> |
+                <a href="#" class="action-delete">Delete</a>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>

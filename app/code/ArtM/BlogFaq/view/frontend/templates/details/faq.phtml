@@ -1,0 +1,82 @@
+<?php
+
+/**
+ * @var $block \ArtM\BlogFaq\Block\Product\Faq
+ */
+$_product = $block->getProduct();
+if (!$_product) {
+    return;
+}
+
+$faqData = $block->getFaqData();
+$attributeFaqBlockId = $faqData['bloglink'] ?? '';
+$attributeFaqHtml = $block->getCmsBlockHtml($attributeFaqBlockId);
+
+$productFaqBlockId = $_product->getData('faq_block');
+$productFaqHtml = $block->getCmsBlockHtml($productFaqBlockId);
+
+$videoUrl = $block->getVideoUrl();
+
+$hasAttributeFaq = !empty(trim($attributeFaqHtml));
+$hasProductFaq = !empty(trim($productFaqHtml));
+$hasVideo = !empty($videoUrl);
+
+// If there is no content to show, return early so the tab is not rendered
+if (!$hasAttributeFaq && !$hasProductFaq) {
+    return;
+}
+?>
+
+<div class="row">
+    <div class="col-md-12 des float-right">
+        <?php if ($hasVideo): ?>
+            <!-- <video style="width:100%;height:auto;" width="520" height="350" playsinline autoplay loop muted>
+                <source src="<?= $block->escapeUrl($videoUrl) ?>" type="video/mp4" />
+                Your browser does not support the video tag.
+            </video> -->
+        <?php endif; ?>
+    </div>
+
+
+    <div class="col-md-12 faqs_description">
+        <?php if ($hasAttributeFaq || $hasProductFaq): ?>
+            <div class="row">
+                <div class="col-xs-12">
+                    <h2 class="heading_product_description">FAQs</h2>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($hasAttributeFaq): ?>
+            <div class="attribute_based_faq_block faq_block_common">
+                <div class="row hide subheading_product_block">
+                    <div class="col-xs-12">
+                        <div class="subheading_product_description">Attribute Based FAQs</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="questions_product_description"><?= /* @noEscape */ $attributeFaqHtml ?></div>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($hasProductFaq): ?>
+            <div class="product_based_faq_block faq_block_common">
+                <div class="row hide subheading_product_block">
+                    <div class="col-xs-12">
+                        <div class="subheading_product_description">Product Based FAQs</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="questions_product_description"><?= /* @noEscape */ $productFaqHtml ?></div>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
+    </div>
+
+</div>

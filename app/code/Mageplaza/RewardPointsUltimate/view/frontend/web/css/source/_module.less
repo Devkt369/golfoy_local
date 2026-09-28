@@ -1,0 +1,380 @@
+/**
+ * Mageplaza
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the mageplaza.com license that is
+ * available through the world-wide-web at this URL:
+ * https://www.mageplaza.com/LICENSE.txt
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade this extension to newer
+ * version in the future.
+ *
+ * @category    Mageplaza
+ * @package     Mageplaza_RewardPointsUltimate
+ * @copyright   Copyright (c) Mageplaza (https://www.mageplaza.com/)
+ * @license     https://www.mageplaza.com/LICENSE.txt
+ */
+
+.mp-rw-social {
+    float: left;
+    margin: 5px;
+}
+
+.mp-reward-vertical .mp-reward-progress {
+    margin-left: 40%;
+    width: 150px;
+}
+
+.mp-reward-vertical .mp-reward-progress-step {
+    height: 150px;
+}
+
+.mp-reward-vertical .mp-reward-progress-step:after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 100%;
+    margin: auto 5px auto 0;
+    bottom: 100px;
+    left: 20px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+}
+
+.mp-reward-vertical .mp-reward-step-end:after{
+    display: none;
+}
+
+.mp-reward-vertical .mp-reward-step-range {
+    position: absolute;
+    height: 100%;
+    width: 16px;
+    bottom: 100px;
+    left: 22px;
+    z-index: 1;
+}
+
+.mp-reward-vertical .mp-reward-tier-name {
+    position: absolute;
+    top: 15px;
+    left: -110px;
+    width: 100px;
+    text-align: right;
+}
+
+.mp-reward-vertical .mp-reward-tier-min-point {
+    position: absolute;
+    top: 15px;
+    left: 70px;
+    width: 100px;
+    text-align: left;
+}
+
+.mp-reward-vertical .reward-milestone-tier {
+    width: 70%;
+}
+
+.mp-reward-horizontal .mp-reward-progress{
+    display: flex;
+    height: 100px;
+    margin-top: 40px;
+}
+
+.mp-reward-progress-step {
+    position: relative;
+}
+
+.mp-reward-horizontal .mp-reward-progress-step {
+    width: 28%;
+}
+
+.mp-reward-step-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    text-align: center;
+    z-index: 2;
+    position: absolute;
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+}
+
+.mp-reward-step-image img {
+    margin: 5px 0;
+    width: 50px;
+    height: 50px;
+}
+
+#mp-reward-milestone-tier .mp-reward-step-image.mp-step-pass {
+    box-shadow: none;
+}
+
+.mp-reward-horizontal .mp-reward-step-range {
+    width: 100%;
+    height: 16px;
+    z-index: 1;
+    position: absolute;
+    top: 22px;
+    border-radius: 3px;
+    left: 50px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+}
+
+#mp-reward-milestone-tier.mp-reward-horizontal .mp-reward-step-end {
+    width: 5%;
+}
+
+.mp-reward-horizontal .mp-reward-progress-step:after {
+    content: '';
+    position: absolute;
+    width: 96%;
+    height: 20px;
+    margin: auto 5px auto 0;
+    top: 20px;
+    left: 15px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+}
+
+.mp-reward-horizontal .mp-reward-step-end:after{
+    display: none;
+}
+
+.mp-reward-horizontal .mp-reward-tier-info .mp-reward-tier-name {
+    position: absolute;
+    top: -35px;
+    left: 5px;
+    width: 200px;
+    text-align: justify;
+}
+
+.mp-reward-horizontal .mp-reward-tier-info .mp-reward-tier-min-point {
+    position: absolute;
+    top: 65px;
+    left: 5px;
+    width: 50px;
+    text-align: center;
+}
+
+.reward-milestone-tier .block-content .box-milestone-tier .box-image {
+    height: 75px;
+    margin-right: 10px;
+}
+
+.reward-milestone-tier .block-content .box-milestone-tier {
+    display: flex;
+    width: 100%;
+}
+
+.mp-reward-tier-description {
+    position: absolute;
+    top: 45px;
+    left: 60px;
+    font-size: 1rem;
+    width: 90px;
+    z-index: 3;
+    background-color: white;
+    padding: 2px;
+    height: 45px;
+    box-shadow: 5px 2px 7px grey;
+    text-align: justify;
+    overflow: auto;
+    display: none;
+}
+
+#mp-reward-milestone-tier.mp-reward-horizontal .mp-reward-step-end .mp-reward-tier-description {
+    left: -135px;
+}
+
+@media only screen and (min-width: 600px) {
+    .mp-reward-horizontal .mp-reward-progress-step {
+        width: 30%;
+    }
+
+    .mp-reward-vertical {
+        display: flex;
+    }
+
+    .mp-reward-vertical .mp-reward-progress {
+        margin-left: 100px;
+    }
+
+    #mp-reward-milestone-tier.mp-reward-vertical .box-milestone-tier {
+        width: 100%;
+    }
+
+    .mp-reward-tier-description {
+        width: 130px;
+    }
+}
+
+@media only screen and (min-width: 1024px) {
+    .mp-reward-horizontal .mp-reward-progress-step {
+        width: 31%;
+    }
+
+    .mp-reward-vertical {
+        display: flex;
+    }
+
+    .mp-reward-vertical .mp-reward-progress {
+        margin-left: 100px;
+    }
+}
+
+.mp-reward-tier-info {
+    font-size: 2rem;
+    font-weight: 400;
+}
+
+.mp-reward-slide {
+    position: relative;
+    height: 300px;
+}
+
+.mp-reward-slide .reward-milestone-tier {
+    position: absolute;
+    margin-top: 220px;
+    width: 100%;
+}
+
+.mp-reward-container {
+    position:absolute;
+    height:200px;
+    left:0;
+    right:0;
+    margin:auto;
+    background-color: #bdf2ff;
+    overflow:hidden;
+}
+
+.mask {
+    position:absolute;
+    width:100%;
+    height:100%;
+    background-image: linear-gradient(to right, rgba(107, 192, 223, 1), rgba(107, 192, 223, 0.1), rgba(107, 192, 223, 0), rgba(107, 192, 223, 0.1), rgba(107, 192, 223, 1));
+}
+
+.mp-reward-slide .mp-reward-tier-description {
+    background-color: white;
+}
+
+.mp-reward-slide .mp-reward-tier-min-point {
+    color: #333333;
+    font-weight: 700;
+}
+
+.mp-reward-step-progress {
+    position:relative;
+    top:35%;
+    left:0;
+    width:75%;
+    right:0;
+    margin:auto;
+}
+
+.mp-tier {
+    position:absolute;
+    text-align: center;
+    border-radius: 50%;
+    color: inherit;
+    width: 40px;
+    height: 40px;
+    z-index: 2;
+}
+
+.mp-reward-slide .mp-tier img {
+    width: 35px;
+    height: 35px;
+    margin-top: 2px;
+}
+
+.progress {
+    width:35%;
+    height:10px;
+    position:absolute;
+    top:15px;
+}
+
+.bar {
+    height: 100%;
+    width:0;
+    transform: skew(-30deg)
+}
+
+.mp-reward-control div {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    top: 75%;
+    font-size: 3rem;
+    text-align: center;
+    opacity: 0.25;
+}
+
+.mp-reward-control div:hover {
+    opacity: 1;
+}
+
+.mp-next-bar {
+    right: 0;
+}
+
+.mp-next-bar:before {
+    content: '\e608';
+    font-family: 'luma-icons';
+}
+
+.mp-back-bar {
+    left: 0;
+}
+
+.mp-back-bar:before {
+    content: '\e617';
+    font-family: 'luma-icons';
+}
+
+.mp-reward-slide .mp-reward-tier-name {
+    position: absolute;
+    top: -25px;
+    left: 0;
+    text-align: justify;
+    width: 200px;
+    font-weight: 700;
+    color: #333333;
+}
+
+.mp-reward-slide .mp-reward-tier-description {
+    position: absolute;
+    width: 60%;
+    height: 30px;
+    left: 20%;
+    text-align: justify;
+    display: block;
+    top: 80%;
+    font-size: 1.5rem;
+    padding: 2px 5px;
+    overflow: auto;
+    border-radius: 5px;
+}
+
+.block-reward-dashboard .box-milestone-tier .box-image img {
+    height: 75px;
+}
+
+/** Style on category page **/
+.action.to_cart_by_points {
+    display: inline-block;
+    vertical-align: bottom;
+    padding: 0 12px 0 5px;
+    margin: 0;
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+.action.to_cart_by_points img {
+    width: 20px;
+    height: 20px;
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * ArtM ShortVideos DI Configuration
+ *
+ * @category  ArtM
+ * @package   ArtM_ShortVideos
+ * @author    ArtM
+ * @copyright Copyright (c) 2025 ArtM
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Plugin for CMS Block -->
+    <type name="Magento\Cms\Block\Block">
+        <plugin name="artm_shortvideos_cms_block" type="ArtM\ShortVideos\Plugin\CmsBlockPlugin" sortOrder="10"/>
+    </type>
+    
+    <!-- Plugin for CMS Page -->
+    <type name="Magento\Cms\Block\Page">
+        <plugin name="artm_shortvideos_cms_page" type="ArtM\ShortVideos\Plugin\CmsPagePlugin" sortOrder="10"/>
+    </type>
+</config>

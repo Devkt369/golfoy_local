@@ -1,0 +1,16 @@
+<?php
+/**
+ * No Cost EMI Template - Optimized with ViewModel
+ * 
+ * @var \Magento\Catalog\Block\Product\View $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \ArtM\Common\ViewModel\ProductData $productData
+ */
+$productData = $block->getData('product_data');
+if (!$productData || !$productData->shouldShowEmi()) {
+    return;
+}
+
+$emiAmount = $productData->getFormattedEmiAmount();
+?>
+<div class='no-cos-emi-line'><b>No Cost EMI</b> starts at <span>₹<?= $escaper->escapeHtml($emiAmount) ?></span> Per month.</div>

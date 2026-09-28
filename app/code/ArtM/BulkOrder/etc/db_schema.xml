@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup:Schema:db_schema.xsd">
+    <table name="artm_bulkorder_partner" resource="default" engine="innodb" comment="Artm Bulk Order Partner Table">
+        <column xsi:type="int" name="id" identity="true" nullable="false" unsigned="true"/>
+        <column xsi:type="varchar" name="dealer_name" length="100" nullable="false"/>
+        <column xsi:type="varchar" name="dealer_email" length="100" nullable="false"/>
+        <column xsi:type="datetime" name="created_at" nullable="false" default="CURRENT_TIMESTAMP"/>
+        <column xsi:type="text" name="order_file" nullable="false"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id"/>
+        </constraint>
+    </table>
+</schema>

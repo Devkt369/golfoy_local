@@ -1,0 +1,54 @@
+{
+    "artm_tracking_status_mapping": {
+        "column": {
+            "mapping_id": true,
+            "raw_status": true,
+            "display_label": true,
+            "carrier_name": true,
+            "is_active": true,
+            "is_mapped": true,
+            "seen_count": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "ARTM_TRACKING_STATUS_MAPPING_IS_MAPPED": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ARTM_TRACKING_STATUS_MAPPING_RAW_STATUS": true
+        }
+    },
+    "artm_tracking_status_log": {
+        "column": {
+            "log_id": true,
+            "tracking_status": true,
+            "order_id": true,
+            "marked_delivered_at": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "artm_shipment_tracking_partner": {
+        "column": {
+            "partner_id": true,
+            "partner_name": true,
+            "is_active": true,
+            "api_url": true,
+            "username": true,
+            "auth_type": true,
+            "token": true,
+            "last_sync_at": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "ARTM_SHIPMENT_TRACKING_PARTNER_IS_ACTIVE": true,
+            "ARTM_SHIPMENT_TRACKING_PARTNER_PARTNER_NAME": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    }
+}

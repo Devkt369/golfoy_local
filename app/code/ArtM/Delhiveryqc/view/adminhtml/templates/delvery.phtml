@@ -1,0 +1,291 @@
+<style>
+    .delhivery_list {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .delhivery_list table {
+        width: 100%;
+        white-space: nowrap;
+    }
+
+    .delhivery_list th,
+    .delhivery_list td {
+        padding: 8px 16px;
+    }
+
+    tr.deliver_head {
+        border-bottom: 1px solid #d6d6d6;
+        background-color: whitesmoke;
+        padding: 5px;
+        padding-left: 20px;
+    }
+
+    .delhivery_list td {
+        border-bottom: 1px solid #d6d6d6;
+    }
+
+    table th,
+    table td {
+        text-align: left;
+    }
+
+    /* pagination */
+    .pagination {
+        text-align: right;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+
+    .pagination-button {
+        display: inline-block;
+        padding: 5px 10px;
+        text-decoration: none;
+        color: #000;
+        margin: 0 5px;
+        transition: background-color 0.3s;
+        font-weight: bold;
+        background: #e3e3e3;
+        border-color: #adadad;
+        color: #514943;
+        width: 4.4rem;
+        text-align: center;
+
+    }
+
+    .pagination-button.prev {
+        margin-right: 10px;
+    }
+
+    .pagination-button.next {
+        margin-left: 10px;
+    }
+
+    .pagination-button:hover {
+        background-color: #333;
+        color: #fff;
+    }
+
+    .pagination-button.active {
+        background-color: #333;
+        color: #fff;
+    }
+
+    .pagination_section {
+        display: flex;
+        justify-content: end;
+        align-items: center;
+    }
+
+    .go_page {
+        padding: 2.2px 5px;
+    }
+    td.data_img img {
+    width: 100px;
+    height: auto;
+}
+</style>
+
+<?php
+$pagesize = 10;
+$currpage = isset($_GET['currpage']) ? $_GET['currpage'] : 1;
+$searchOrder = isset($_GET['searchOrder']) ? $_GET['searchOrder'] : '';
+
+$orders = $block->getDelhiveryQcOrders($pagesize, $currpage);
+$orders->setOrder('id', 'DESC');
+
+if (!empty($searchOrder)) {
+    $orders->addFieldToFilter('order', $searchOrder);
+}
+
+
+$collectionsize = $orders->getSize();
+
+$paginationsize = (int)($collectionsize / $pagesize);
+$paginationsizerem = $collectionsize % $pagesize;
+if ($paginationsizerem > 0) {
+    $paginationsize = $paginationsize + 1;
+}
+
+echo "<div class='search_section'>";
+echo "<label for='searchOrder'>Search by Order ID:</label>";
+echo "<input type='text' id='searchOrder' name='searchOrder' value='" . htmlentities($searchOrder) . "' placeholder='Enter Order ID'>";
+echo "<button onclick='searchByOrderId()' class='search_button'>Search</button>";
+echo "</div>";
+
+echo "<div class='pagination_section pg_sec'>";
+echo "<div class='pagination pg_sec'>";
+
+$startpage = max(1, $currpage - 4);
+$endpage = min($startpage + 5, $paginationsize);
+
+if ($currpage > 1) {
+    $prevpage = $currpage - 1;
+    echo "<a class='pagination-button prev' href='?currpage=" . $prevpage . "'>&lt;</a>";
+}
+
+for ($i = $startpage; $i <= $endpage; $i++) {
+    if ($i == $currpage) {
+        echo "<span class='pagination-button active'>" . $i . "</span>";
+    } else {
+        echo "<a class='pagination-button' href='?currpage=" . $i . "'>" . $i . "</a>";
+    }
+}
+
+if ($currpage < $paginationsize) {
+    $nextpage = $currpage + 1;
+    echo "<a class='pagination-button next' href='?currpage=" . $nextpage . "'>&gt;</a>";
+}
+
+echo "</div>";
+
+echo "<div class='page-input'>";
+echo "<input type='text' id='pageInput' placeholder='Enter page number'>";
+echo "<button onclick='goToPage()' class='go_page'>Go</button>";
+echo "</div>";
+
+// Display the total number of pages
+echo "<div class='total-pages'>Total Pages: " . $paginationsize . "</div>";
+
+echo "</div>";
+
+
+echo "<script>
+function goToPage() {
+    var pageInput = document.getElementById('pageInput');
+    var pageNumber = parseInt(pageInput.value);
+    if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= $paginationsize) {
+        window.location.href = '?currpage=' + pageNumber;
+    }
+}
+</script>";
+
+//search by order id script
+echo "<script>
+function searchByOrderId() {
+    var searchInput = document.getElementById('searchOrder');
+    var orderId = searchInput.value.trim();
+    if (orderId !== '') {
+        window.location.href = '?searchOrder=' + encodeURIComponent(orderId);
+    }
+}
+</script>";
+
+
+// changes end
+$ordersData = $orders->getData();
+
+echo '<div class="delhivery_list">
+  <table>
+    <thead>
+      <tr class="deliver_head">
+        <th>ID</th>
+        <th>QC ID</th>
+        <th>Order</th>
+        <th>Phone</th>
+        <th>Product Description</th>
+        <th>Name</th>
+        <th>Country</th>
+        <th>Order Date</th>
+        <th>Total Amount</th>
+        <th>Address</th>
+        <th>Pincode</th>
+        <th>Quantity</th>
+        <th>Payment Mode</th>
+        <th>State</th>
+        <th>City</th>
+        <th>Number of Products</th>
+        <th>Additional Info</th>
+        <th>Created At</th>
+      </tr>
+    </thead>
+    <tbody>';
+foreach ($ordersData as $data) {
+    echo '<tr>';
+    echo '<td><div class="order_id">' . $data['id'] . '</div></td>';
+    echo '<td><div class="order_qc_id">' . $data['qc_id'] . '</div></td>';
+    echo '<td><div class="order_order">' . $data['order'] . '</div></td>';
+    echo '<td><div class="order_phone">' . $data['phone'] . '</div></td>';
+    echo '<td><div class="order_products_desc">' . $data['products_desc'] . '</div></td>';
+    echo '<td><div class="order_name">' . $data['name'] . '</div></td>';
+    echo '<td><div class="order_country">' . $data['country'] . '</div></td>';
+    echo '<td><div class="order_order_date">' . $data['order_date'] . '</div></td>';
+    echo '<td><div class="order_total_amount">' . $data['total_amount'] . '</div></td>';
+    echo '<td><div class="order_address">' . $data['address'] . '</div></td>';
+    echo '<td><div class="order_pincode">' . $data['pincode'] . '</div></td>';
+    echo '<td><div class="order_quantity">' . $data['quantity'] . '</div></td>';
+    echo '<td><div class="order_payment_mode">' . $data['payment_mode'] . '</div></td>';
+    echo '<td><div class="order_state">' . $data['state'] . '</div></td>';
+    echo '<td><div class="order_city">' . $data['city'] . '</div></td>';
+    echo '<td><div class="order_num_of_prds">' . $data['num_of_prds'] . '</div></td>';
+    echo '<td><div class="order_additional_info">' . $data['additional_info'] . '</div></td>';
+    echo '<td><div class="order_created_at">' . $data['created_at'] . '</div></td>';
+    echo '</tr>';
+    echo "<tr>";
+    echo "<td></td>";
+    echo "<td colspan='17'>";
+
+
+
+    $productData = $this->getProductData($data['id']);
+    echo '<table>
+                <thead>
+                    <tr class="deliver_head">
+                        <th>id</th>
+                        <th>qc_order_table_primary_id</th>
+                        <th>item</th>
+                        <th>incremented</th>
+                        <th>prd_sku</th>
+                        <th>prd_id</th>
+                        <th>description</th>
+                        <th>images</th>
+                        <th>return_reason</th>
+                        <th>quantity</th>
+                        <th>brand</th>
+                        <th>product_category</th>
+                        <th>questions_ids</th>
+                        <th>created_at</th>
+                        <th>additional_info</th>
+                    </tr>
+                </thead>
+                <tbody>';
+    foreach ($productData as $Pdata) {
+
+        echo '<tr>';
+        echo '<td><div class="product_id">' . $Pdata['id'] . '</div></td>';
+        echo '<td><div class="product_qc_order_table_primary_id">' . $Pdata['qc_order_table_primary_id'] . '</div></td>';
+        echo '<td><div class="product_item">' . $Pdata['item'] . '</div></td>';
+        echo '<td><div class="product_incremented">' . $Pdata['incremented'] . '</div></td>';
+        echo '<td><div class="product_prd_sku">' . $Pdata['prd_sku'] . '</div></td>';
+        echo '<td><div class="product_prd_id">' . $Pdata['prd_id'] . '</div></td>';
+        echo '<td><div class="product_description">' . $Pdata['description'] . '</div></td>';
+        // Convert image URLs into <img> tags
+        echo '<td class="data_img"><div class="product_images">';
+        $imageUrls = explode(',', $Pdata['images']);
+        foreach ($imageUrls as $imageUrl) {
+            if( trim($imageUrl) == '' ){
+                continue;
+            }
+            echo '<img src="' . $imageUrl . '" alt="Product Image">';
+        }
+        echo '</div></td>';
+        // end
+        echo '<td><div class="product_return_reason">' . $Pdata['return_reason'] . '</div></td>';
+        echo '<td><div class="product_quantity">' . $Pdata['quantity'] . '</div></td>';
+        echo '<td><div class="product_brand">' . $Pdata['brand'] . '</div></td>';
+        echo '<td><div class="product_product_category">' . $Pdata['product_category'] . '</div></td>';
+        echo '<td><div class="product_questions_ids">' . $Pdata['questions_ids'] . '</div></td>';
+        echo '<td><div class="product_created_at">' . $Pdata['created_at'] . '</div></td>';
+        echo '<td><div class="product_additional_info">' . $Pdata['additional_info'] . '</div></td>';
+        echo '</tr>';
+    }
+
+    echo '</tbody>
+            </table>';
+    echo "</td>";
+    echo "</tr>";
+}
+echo '</tbody>
+  </table>
+</div>';
+?>

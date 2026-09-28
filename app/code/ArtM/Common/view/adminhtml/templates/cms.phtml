@@ -1,0 +1,1123 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<style>
+    .result-container {
+        max-width: 1160px;
+        display: block;
+        margin: auto;
+    }
+
+    .result-container.outputContainer.mobile {
+        width: 45%;
+        display: block;
+        margin: auto;
+    }
+
+    .code_text {
+        position: absolute;
+        font-weight: 600;
+        margin: 5px;
+    }
+
+    hr {
+        margin: 30px 0px 40px 0px;
+    }
+
+    .cms-golf-shoes .breadcrumbs {
+        display: none;
+    }
+
+    .custom-col {
+        width: 12.5%;
+        /* 100% / 8 columns = 12.5% */
+        padding: 0;
+    }
+
+    h2.shoes_head.by_gender {
+        margin-top: 0px !important;
+    }
+
+    .carousel-indicators .active {
+        width: 10px;
+        height: 10px;
+    }
+
+    .col-sm-12.background-full-width {
+        padding: 0px;
+    }
+
+    .shoes_size_div {
+        padding: 0px 10px;
+    }
+
+    .shoes-top-space {
+        margin: 60px 0px 10px 0px !important;
+    }
+
+    .three_block_shoes_outer {
+        position: relative;
+    }
+
+    .shoes_three_div_blocks {
+        display: block;
+        margin: 0px auto;
+        text-align: center;
+    }
+
+    .col-sm-12.background-full-width {
+        position: relative;
+        width: 100%;
+        max-width: initial !important;
+        padding: 0;
+    }
+
+    .shoes_blocks.shoes_three_block.three_block_sales {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        transform: translateY(-45%);
+    }
+
+    .shoes_three_div_blocks img {
+        display: block;
+        margin: auto;
+        width: 100%;
+        max-width: 270px;
+        height: 40px;
+        text-align: center;
+        object-fit: contain;
+        transition: transform 0.3s ease-in-out;
+        cursor: pointer;
+    }
+
+    .shoes_three_div_blocks img:hover {
+        transform: scale(1.1);
+    }
+
+    .shoes_header {
+        text-align: center;
+    }
+
+    .shoes_header h1 {
+        font-weight: 600;
+        font-size: 25px;
+        border-bottom: 2px solid #000;
+        display: inline-block;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    h2.shoes_head {
+        font-size: 30px;
+        font-family: "headpro";
+        font-weight: 500;
+        margin-bottom: 20px;
+        color: black;
+        text-transform: uppercase;
+        text-align: center;
+        margin-top: 0px;
+    }
+
+    ol.carousel-indicators.shoes-carousel {
+        left: 50%;
+    }
+
+    .col-sm-4.col-xs-4.shoes_three_div_blocks.under {
+        margin-top: 5px;
+    }
+
+    .shoes_blocks_div {
+        display: flex;
+        overflow: hidden;
+        width: 100%;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        margin: 0;
+        padding: 0;
+        justify-content: space-evenly;
+        align-items: center;
+    }
+
+    .shoes_six_div {
+        flex: 0 0 calc(150px + 10px);
+        /* Image width + margin */
+        /* margin-right: 10px; */
+        /* Adjust margin as needed */
+        scroll-snap-align: start;
+    }
+
+    .shoes_six_blocks {
+        transition: transform 0.5s ease-in-out;
+    }
+
+    .col-sm-2.col-xs-4.shoes_six_div img {
+        max-width: 110px;
+        width: 100%;
+    }
+
+    .html-content {
+        overflow: hidden !important;
+    }
+
+    .six_block_mobile>.row {
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    h3 {
+        text-decoration: underline;
+        font-weight: 400;
+        display: none;
+    }
+
+    textarea {
+        width: 100%;
+        padding: 20px;
+        border: 1px solid #ccc;
+    }
+
+    h2.center_heading {
+        font-size: 30px;
+        font-family: "headpro";
+        font-weight: 500;
+        margin-bottom: 0px;
+        color: black;
+        margin-top: 30px !important;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .main_header h2 {
+        font-weight: 600;
+        font-size: 25px;
+        border-bottom: 2px solid #000;
+        display: inline-block;
+        text-transform: uppercase;
+        text-align: center;
+    }
+
+    .main_header {
+        text-align: center;
+        padding-bottom: 30px;
+    }
+
+    .row.eight_block>* {
+        width: 12.5%;
+    }
+
+    #eight_block {
+        padding: 30px 0px 30px 0px;
+    }
+
+    #six_block_web {
+        padding: 30px 0px 30px 0px;
+    }
+
+    #four_block {
+        padding: 30px 0px 30px 0px;
+    }
+
+    .heading_block {
+        padding: 30px 0px 30px 0px;
+    }
+
+    #three_block {
+        padding: 30px 0px 30px 0px;
+    }
+
+    #two_block {
+        padding: 30px 0px 30px 0px;
+    }
+
+    #full_block_web {
+        padding: 30px 0px 30px 0px;
+    }
+
+    #full_block_mobile {
+        padding: 20px 0px;
+    }
+
+    #six_block_mobile {
+        padding: 20px 0px;
+    }
+
+    .outputContainer {
+        border: 1px solid #050505;
+        padding: 10px 20px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+
+    .copy-code-button {
+        position: absolute;
+        top: 5px;
+        right: 22px;
+        cursor: copy;
+        color: red;
+    }
+
+    label {
+        display: block;
+    }
+
+    .code-container {
+        display: none;
+    }
+
+
+    #golfoy_container {
+        max-width: 1440px;
+        width: 100%;
+    }
+
+    .head_golfoy>h2,
+    .feature_head h2 {
+        font-size: 30px;
+        font-family: 'headpro';
+        font-weight: 700;
+        color: black;
+        text-transform: uppercase;
+        text-align: left;
+    }
+
+    .product_slider_container {
+        margin: 10px 0px 0px !important;
+    }
+
+    .feature_head h2 {
+        text-align: left !important;
+    }
+
+    main#maincontent {
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+
+    .columns .column.main {
+        padding-bottom: 0px !important;
+    }
+
+    .product-slider-first {
+        margin-bottom: 30px;
+    }
+
+    .product_slider_container .header_content_product_slider_inside .heading_golfoy.left h2 {
+        font-size: 30px;
+        font-family: 'headpro';
+        font-weight: 700;
+        color: black;
+        text-transform: uppercase;
+        text-align: center !important;
+    }
+
+    .row.callout_four_block.diffrent_block {
+        margin: 20px 0px;
+    }
+
+    #golfoy_container {
+        max-width: 1440px;
+        width: 100%;
+    }
+
+    .head_golfoy>h2,
+    .feature_head h2 {
+        font-size: 30px;
+        font-family: 'headpro';
+        font-weight: 700;
+        color: black;
+        text-transform: uppercase;
+        text-align: left;
+    }
+
+    .product_slider_container {
+        margin: 10px 0px 0px !important;
+    }
+
+    .feature_head h2 {
+        text-align: left !important;
+    }
+
+    main#maincontent {
+        padding-left: 0px !important;
+        padding-right: 0px !important;
+    }
+
+    .columns .column.main {
+        padding-bottom: 0px !important;
+    }
+
+    .product-slider-first {
+        margin-bottom: 30px;
+    }
+
+    .product_slider_container .header_content_product_slider_inside .heading_golfoy.left h2 {
+        font-size: 30px;
+        font-family: 'headpro';
+        font-weight: 700;
+        color: black;
+        text-transform: uppercase;
+        text-align: center !important;
+    }
+
+    .row.callout_four_block.diffrent_block {
+        margin: 20px 0px;
+    }
+
+    .overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        overflow: hidden;
+        width: 100%;
+        height: 50%;
+        transition: .5s ease;
+        top: 63%;
+        z-index: -1;
+    }
+
+    .slide.opened .overlay {
+        top: 65%;
+        height: 100%;
+        margin-left: 10px;
+        position: absolute;
+        transition: all .7s;
+        z-index: 111;
+    }
+
+    .image {
+        /*display: block;*/
+        height: auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .slide {
+        position: relative;
+    }
+
+    .text {
+        padding: 0px 40px;
+        position: absolute;
+        top: 70%;
+        left: 50.5%;
+        -webkit-transform: translate(-50%, -80%);
+        -ms-transform: translate(-50%, -80%);
+        transform: translate(-50%, -80%);
+    }
+
+    .block_col.col-md-2.col-sm-4.col-xs-6.pa_re {
+        padding: 0px 30px !important;
+        margin-bottom: 100px;
+    }
+
+    .row.b_o_s {
+        text-align: center;
+        margin: auto;
+    }
+
+    .heading_golfoy>h1 {
+        margin-top: 0px !important;
+    }
+
+    .title_block {
+        padding-top: 30px;
+    }
+
+    /*-----------New css dev---------*/
+    .six_block_new_change {
+        padding-top: 40px;
+    }
+
+    .heading_golfoy.left.newcenter {
+        padding-top: 40px;
+    }
+
+    @media screen and (max-width:1024px) {
+        .shoes_blocks.shoes_three_block.three_block_sales {
+            bottom: 11px;
+        }
+
+        .shoes_six_div {
+            flex: 0 0 calc(150px + 5px);
+        }
+
+        .col-sm-2.col-xs-4.shoes_six_div img {
+            min-height: 110px;
+        }
+    }
+
+    @media screen and (max-width:768px) {
+        .shoes_six_div {
+            flex: 0 0 calc(110px + 5px);
+        }
+
+        .col-sm-2.col-xs-4.shoes_six_div img {
+            max-width: 90px;
+        }
+
+        .shoes_blocks.shoes_three_block.three_block_sales {
+            bottom: 2px;
+        }
+
+        #golfoy_container {
+            width: 100% !important;
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+
+        .two_coll {
+            padding-bottom: 15px;
+        }
+
+        .three-coll {
+            padding-bottom: 15px;
+        }
+
+        .row.callout_four_block.diffrent_block .block_col {
+            padding-bottom: 20px;
+        }
+
+        #golfoy_container {
+            width: 100% !important;
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+
+        .two_coll {
+            padding-bottom: 15px;
+        }
+
+        .three-coll {
+            padding-bottom: 15px;
+        }
+
+        .row.callout_four_block.diffrent_block .block_col {
+            padding-bottom: 20px;
+        }
+    }
+
+    @media only screen and (max-width: 768px) and (max-width:480px) {
+        .row.callout_four_block.diffrent_block .block_col {
+            padding-bottom: 20px;
+        }
+
+        .col-sm-4.col-xs-12.block_col.three_coll {
+            margin-bottom: 20px !important;
+        }
+    }
+
+    /* Mobile-specific styles */
+    @media (max-width: 767px) {
+        .shoes_blocks_div {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            justify-content: normal;
+            -ms-overflow-style: none;
+        }
+    }
+
+
+    @media only screen and (max-width:480px) {
+        #full_block_mobile {
+            padding: 20px 0px;
+        }
+
+        #six_block_mobile {
+            padding: 20px 0px;
+        }
+
+        .shoes-top-space.row.shoes_blocks.shoes_three_block.mobile-space {
+            margin: 40px 0px 0px 0px !important;
+        }
+
+        .shoes-cat-left {
+            padding-left: 0px !important;
+        }
+
+        .shoes-cat-right {
+            padding-right: 0px !important;
+        }
+
+        .container.lazy_load_container.shoes_category_page {
+            padding: 0px;
+        }
+
+        .row.shoes-top-space.three_block_shoes_outer.three_column {
+            margin: 30px 0px 10px 0px !important;
+        }
+
+        .shoes-top-space.row.shoes_blocks.shoes_two_block {
+            margin: 0px !important;
+        }
+
+        .shoes_six_div {
+            flex: 0 0 calc(125px + 7px);
+        }
+
+        .col-sm-2.col-xs-4.shoes_six_div img {
+            max-width: 95px;
+            min-height: 120px;
+        }
+
+        .shoes_blocks_div::-webkit-scrollbar {
+            -webkit-appearance: none;
+            width: 0px !important;
+            height: 0px !important;
+            display: none !important;
+            margin-top: 20px !important;
+            padding-top: 20px !important;
+            -ms-overflow-style: none !important;
+            -webkit-scrollbar-width: thin !important;
+            -webkit-scrollbar-color: transparent transparent !important;
+        }
+
+        .shoes_blocks_div::-webkit-scrollbar-track {
+            -webkit-appearance: none;
+            background-color: transparent !important;
+            border: 1px solid transparent !important;
+            margin-top: 20px !important;
+            padding-top: 20px !important;
+            display: none !important;
+            width: 0px !important;
+            height: 0px !important;
+            -ms-overflow-style: none !important;
+            -webkit-scrollbar-width: thin !important;
+            -webkit-scrollbar-color: transparent transparent !important;
+        }
+
+        .col-sm-4.col-xs-4.shoes_three_div_blocks.under {
+            margin-top: 0px;
+        }
+
+        .shoes_blocks_div::-webkit-scrollbar-button {
+            display: none !important;
+            width: 0px !important;
+            height: 0px !important;
+        }
+
+        .col-sm-6.col-xs-6.shoes_two_div {
+            padding: 0px 5px;
+        }
+
+        .shoes-top-space {
+            margin: 40px 0px 10px 0px !important;
+        }
+
+        .shoes_blocks.shoes_three_block.three_block_sales {
+            bottom: 5px;
+        }
+
+        .custom-col {
+            width: 25%;
+            margin-bottom: 10px;
+        }
+
+        .col-sm-3.col-xs-6.shoes_four_div_first,
+        .col-sm-3.col-xs-6.shoes_four_div_third {
+            padding-left: 0px;
+            padding-right: 5px;
+        }
+
+        .col-sm-3.col-xs-6.shoes_four_div_second,
+        .col-sm-3.col-xs-6.shoes_four_div_fourth {
+            padding-right: 0px;
+            padding-left: 5px;
+        }
+
+        .col-sm-3.col-xs-6.shoes_four_div_third,
+        .col-sm-3.col-xs-6.shoes_four_div_fourth {
+            margin-top: 10px;
+        }
+
+        .row.shoes_blocks.shoes_three_block>div,
+        .row.shoes_blocks.shoes_two_block>div {
+            padding-bottom: 10px;
+        }
+
+        ol.carousel-indicators.shoes-carousel {
+            top: 85%;
+        }
+
+        .col-xs-12.block_col.item.pc_banner_home {
+            padding: 0px;
+        }
+
+        .shoes_size_inner_html .col-6 {
+            flex-basis: calc(25% - 10px);
+            max-width: 50%;
+            margin-bottom: 10px;
+        }
+
+        .shoes_three_div_blocks img {
+            padding: 5px;
+            object-fit: cover;
+        }
+
+        .col-sm-12.background-full-width img {
+            height: 50px;
+        }
+
+        .row.shoes_blocks.shoes_three_block.three_block_sales {
+            top: -75px;
+        }
+
+        .col-sm-12.background-full-width {
+            padding: 0px;
+        }
+
+        .col-sm-12.background-full-width {
+            max-width: 390px;
+        }
+
+        .shoes_size_div.col-sm-3.col-sm-3.col-xs-3.custom-col {
+            padding: 3px;
+        }
+
+        .col-sm-4.col-xs-6.shoes_three_div {
+            padding: 5px;
+        }
+
+        .col-sm-4.col-xs-12.shoes_three_div {
+            padding: 0px;
+        }
+
+        .row.eight_block>* {
+            width: 25%;
+            margin-bottom: 10px;
+            padding: 3px;
+        }
+
+        .block_col.col-md-2.col-sm-4.col-xs-6.pa_re {
+            padding: 0px 0px !important;
+        }
+
+        .text {
+            padding: 0px 10px;
+        }
+    }
+
+    @media screen and (max-width:380px) {
+        .col-sm-6.col-xs-6.shoes_two_div {
+            padding: 0px 5px;
+        }
+
+        .shoes-top-space.row.shoes_blocks.shoes_three_block.mobile-space {
+            margin: 40px 0px 0px 0px !important;
+        }
+
+        .shoes-cat-left {
+            padding-left: 0px !important;
+        }
+
+        .shoes-cat-right {
+            padding-right: 0px !important;
+        }
+
+        .shoes_six_div {
+            flex: 0 0 calc(110px + 8px);
+        }
+
+        .col-sm-2.col-xs-4.shoes_six_div img {
+            max-width: 90px;
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+            min-height: 120px;
+        }
+    }
+</style>
+
+<?php
+$topHeadingHtml = $block->getTopHeadingHtml();
+$headingblockHtml = $block->getHeadingBlockHtml();
+$leftheadingHtml = $block->getHeadingBlockLeftHtml();
+$sliderHtml = $block->getSliderHtml();
+$eightblockHtml = $block->getEightBlockHtml();
+$sixblockHtml = $block->getSixBlockHtml();
+$sixblockmobileHtml = $block->getSixBlockMobileHtml();
+$fourblockHtml = $block->getFourBlockHtml();
+$threehoverHtml = $block->getThreehoverHtml();
+$threeblockHtml = $block->getThreeBlockHtml();
+$twoblockHtml = $block->getTwoBlockHtml();
+$fullblockHtml = $block->getFullBlockHtml();
+$fullblockmobileHtml = $block->getFullBlockMobileHtml();
+$brandsloveHtml = $block->getBrandslove();
+$fourblockintotwoblockHtml = $block->getFourBlockIntoTwoBlock();
+
+
+?>
+
+<!-- Top Heading Form -->
+<div id="golfoy_container" class="container">
+    <div class="html-content">
+        <h2>HTML CONTENT</h2>
+        <br>
+        <strong style="margin:20px 10px;font-size:16px;">Note :- For the basic class which is used everywhere, use: <code>&lt;div class="container main-top-block mobile-padd"&gt;</code>. Inside this, every code goes.<code>&lt;/div&gt;</code></p>
+        </strong>
+        <h3>Top Heading</h3>
+        <div class="result-container outputContainer">
+            <strong>Output For Main Heading:</strong>
+            <div id="result1"></div>
+
+            <form id="form1" action="" method="post" class="editor-container">
+                <div style="position: relative;">
+                    <div class="code_text">Code:</div>
+                    <textarea name="textarea" id="textarea1" rows="4" cols="50"><?php echo $topHeadingHtml; ?></textarea>
+                    <div class="copy-code-button" onclick="copyCode('textarea1')">Copy</div>
+                </div>
+            </form>
+        </div>
+        <hr>
+        </hr>
+
+        <!--Heading Above Block Form  center-->
+        <h3>Heading Above Block Form(center)</h3>
+        <div class="result-container outputContainer">
+            <strong>Output For Center Heading:</strong>
+            <div style="text-align: center;"><img class="img-fluid" src="https://staging-golfoy.hyperx.cloud/media/wysiwyg/2023_homepage/headerr.png" alt="header" loading="lazy"></div>
+
+            <form id="form3" action="" method="post" class="editor-container">
+                <div style="position: relative;">
+                    <div class="code_text">Code:</div>
+                    <textarea name="textarea" id="textarea3" rows="4" cols="50">
+                <?php echo $headingblockHtml; ?>
+            </textarea>
+                    <div class="copy-code-button" onclick="copyCode('textarea3')">Copy</div>
+                </div>
+            </form>
+        </div>
+        <hr>
+        </hr>
+
+        <!--Heading Above Block Form  left-->
+        <h3>Heading Above Block Form(left)</h3>
+        <div class="result-container outputContainer">
+            <strong>Output For Left Heading:</strong>
+            <div style="text-align: center;"><img class="img-fluid" src="https://staging-golfoy.hyperx.cloud/media/wysiwyg/2023_homepage/left-headingg.png" alt="left-header" loading="lazy"></div>
+            <form id="form31" action="" method="post" class="editor-container">
+                <div style="position: relative;">
+                    <div class="code_text">Code:</div>
+                    <textarea name="textarea" id="textarea31" rows="4" cols="50">
+                <?php echo $leftheadingHtml; ?>
+            </textarea>
+                    <div class="copy-code-button" onclick="copyCode('textarea31')">Copy</div>
+                </div>
+            </form>
+        </div>
+        <hr>
+        </hr>
+        <!-- END -->
+
+        <!-- Slider Form -->
+        <h3>Slider Form</h3>
+        <div class="result-container outputContainer">
+            <strong>Output:</strong>
+            <div id="result2"></div>
+
+            <form id="form2" action="" method="post" class="editor-container">
+                <div style="position: relative;">
+                    <div class="code_text">Code:</div>
+                    <textarea name="textarea" id="textarea2" rows="4" cols="50">
+                     <?php echo $sliderHtml; ?>
+                </textarea>
+                    <div class="copy-code-button" onclick="copyCode('textarea2')">Copy</div>
+                </div>
+            </form>
+        </div>
+        <hr>
+        </hr>
+
+        <!-- Eight Block Form  -->
+        <h3>Eight Block Form </h3>
+        <div class="result-container outputContainer">
+            <strong>Output:</strong>
+            <div id="result4"></div>
+            <form id="form4" action="" method="post" class="editor-container">
+                <div style="position: relative;">
+                    <div class="code_text">Code:</div>
+                    <textarea name="textarea" id="textarea4" rows="4" cols="50">
+                  <?php echo $eightblockHtml; ?>
+                </textarea>
+                    <div class="copy-code-button" onclick="copyCode('textarea4')">Copy</div>
+                </div>
+            </form>
+        </div>
+        <hr>
+        </hr>
+
+        <!--Six Block Form -->
+        <h3>Six Block Form</h3>
+        <div class="result-container outputContainer">
+            <strong>Output For Web:</strong>
+            <div id="result5"></div>
+            <form id="form5" action="" method="post" class="editor-container">
+                <div style="position: relative;">
+                    <div class="code_text">Code:</div>
+                    <textarea name="textarea" id="textarea5" rows="4" cols="50">
+                    <?php echo $sixblockHtml; ?>
+                </textarea>
+                    <div class="copy-code-button" onclick="copyCode('textarea5')">Copy</div>
+                </div>
+            </form>
+        </div>
+        <div class="result-container outputContainer mobile">
+            <strong>Output For Mobile:</strong>
+            <div style="text-align:center;"><img class="img-fluid" src="https://staging-golfoy.hyperx.cloud/media/wysiwyg/2023_homepage/sixx.png" alt="six" loading="lazy"></div>
+            <form id="form51" action="" method="post" class="editor-container">
+                <div style="position: relative;">
+                    <div class="code_text">Code:</div>
+                    <textarea name="textarea" id="textarea51" rows="4" cols="50">
+                   <?php echo $sixblockmobileHtml; ?>
+                </textarea>
+                    <div class="copy-code-button" onclick="copyCode('textarea51')">Copy</div>
+                </div>
+            </form>
+        </div>
+
+        <hr>
+        </hr>
+
+        <!-- Four Block Form -->
+        <h3>Four Block Form</h3>
+        <div class="result-container outputContainer">
+            <strong> Output:</strong>
+            <div id="result6"></div>
+            <form id="form6" action="" method="post" class="editor-container">
+                <div style="position: relative;">
+                    <div class="code_text">Code:</div>
+                    <textarea name="textarea" id="textarea6" rows="4" cols="50">
+                    <?php echo $fourblockHtml; ?>
+                 </textarea>
+                    <div class="copy-code-button" onclick="copyCode('textarea6')">Copy</div>
+                </div>
+            </form>
+        </div>
+        <hr>
+        </hr>
+
+        <!-- Three Block Column in One Row Form-->
+        <h3>Three Block Column in One Row Form</h3>
+        <div class="result-container outputContainer">
+            <strong>Output:</strong>
+            <div style="text-align:center;"><img class="img-fluid" src="https://staging-golfoy.hyperx.cloud/media/wysiwyg/2023_homepage/bstt.png" alt="six" loading="lazy"></div>
+            <form id="form7" action="" method="post" class="editor-container">
+                <div style="position: relative;">
+                    <div class="code_text">Code:</div>
+                    <textarea name="textarea" id="textarea7" rows="4" cols="50">
+                 <?php echo $threehoverHtml; ?>
+             </textarea>
+                    <div class="copy-code-button" onclick="copyCode('textarea7')">Copy</div>
+                </div>
+            </form>
+        </div>
+        <hr>
+        </hr>
+
+        <!-- Three Block Form -->
+        <h3>Three Block Form</h3>
+        <div class="result-container outputContainer">
+            <strong>Output:</strong>
+            <div id="result8"></div>
+            <form id="form8" action="" method="post" class="editor-container">
+                <div style="position: relative;">
+                    <div class="code_text">Code:</div>
+                    <textarea name="textarea" id="textarea8" rows="4" cols="50">
+                 <?php echo $threeblockHtml; ?>
+            </textarea>
+                    <div class="copy-code-button" onclick="copyCode('textarea8')">Copy</div>
+                </div>
+            </form>
+        </div>
+        <hr>
+        </hr>
+
+        <!-- Two Block Form -->
+        <h3>Two Block Form</h3>
+        <div class="result-container outputContainer">
+            <strong>Output:</strong>
+            <div id="result9"></div>
+            <form id="form9" action="" method="post" class="editor-container">
+                <div style="position: relative;">
+                    <div class="code_text">Code:</div>
+                    <textarea name="textarea" id="textarea9" rows="4" cols="50">
+                    <?php echo $twoblockHtml; ?>
+            </textarea>
+                    <div class="copy-code-button" onclick="copyCode('textarea9')">Copy</div>
+                </div>
+            </form>
+        </div>
+        <hr>
+        </hr>
+
+        <!-- Full Width Block Form -->
+        <h3>Full Width Block Form</h3>
+        <div class="result-container outputContainer">
+            <strong>Output For Web:</strong>
+            <div id="result01"></div>
+            <form id="form01" action="" method="post" class="editor-container">
+                <div style="position: relative;">
+                    <div class="code_text">Code:</div>
+                    <textarea name="textarea" id="textarea01" rows="4" cols="50">
+                      <?php echo $fullblockHtml ?>
+                    </textarea>
+                    <div class="copy-code-button" onclick="copyCode('textarea01')">Copy</div>
+                </div>
+            </form>
+        </div>
+
+        <div class="result-container outputContainer mobile">
+            <strong>Output For Mobile:</strong>
+            <div id="result011" class="result-container"></div>
+            <form id="form011" action="" method="post" class="editor-container">
+                <div style="position: relative;">
+                    <div class="code_text">Code:</div>
+                    <textarea name="textarea" id="textarea011" rows="4" cols="50">
+                     <?php echo $fullblockmobileHtml ?>
+                </textarea>
+                    <div class="copy-code-button" onclick="copyCode('textarea011')">Copy</div>
+                </div>
+            </form>
+        </div>
+        <hr>
+        </hr>
+
+        <!-- brand loves -->
+        <!-- Two Block Form -->
+        <h3>Brands love</h3>
+        <div class="result-container outputContainer">
+            <strong>Output:</strong>
+            <div id="result02" class="result-container"></div>
+            <form id="form02" action="" method="post" class="editor-container">
+                <div style="position: relative;">
+                    <div class="code_text">Code:</div>
+                    <textarea name="textarea" id="textarea02" rows="4" cols="50">
+                    <?php echo $brandsloveHtml; ?>
+            </textarea>
+                    <div class="copy-code-button" onclick="copyCode('textarea02')">Copy</div>
+                </div>
+            </form>
+        </div>
+        <hr>
+        </hr>
+
+        <!-- four block two block -->
+        <h3>Four Block Two Block</h3>
+        <div class="result-container outputContainer">
+            <strong>Output:</strong>
+            <div id="result04" class="result-container"></div>
+            <form action="" method="post" class="editor-container" id="form04">
+                <div class="code_text">Code:</div>
+                <textarea name="textarea" id="textarea04" rows="4" cols="50">
+                    <?php echo $fourblockintotwoblockHtml; ?>
+            </textarea>
+                <div class="copy-code-button" onclick="copycode('textarea04')">Copy</div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- landing page css -->
+
+
+<script>
+    require([
+        'jquery'
+    ], function($) {
+        $(window).scroll(function() {
+            $('.b_o_s').children('.pa_re').each(function() {
+                var curr_div_top_height = $(this).offset().top;
+                var curr_div_top_height_outer = $(this).outerHeight();
+                var window_height = $(window).height();
+                var scroll_top = $(window).scrollTop();
+                if (scroll_top > (curr_div_top_height + curr_div_top_height_outer - window_height + 100)) {
+                    $(this).addClass("opened");
+                }
+            });
+
+        });
+    });
+</script>
+
+<script>
+    // JavaScript for the slider functionality on mobile
+    if (window.innerWidth <= 767) {
+        const slider = document.querySelector('.shoes_six_blocks');
+        let translateValue = 0;
+
+        function slide(direction) {
+            const itemWidth = slider.clientWidth / 3;
+            translateValue += direction * itemWidth;
+            translateValue = Math.min(0, Math.max(-itemWidth * 2, translateValue)); // Limit translation
+            slider.style.transform = `translateX(${translateValue}px)`;
+        }
+
+        document.querySelector('.shoes_blocks_div').addEventListener('mousedown', (e) => {
+            let startX = e.clientX;
+            const onMouseMove = (e) => {
+                const deltaX = e.clientX - startX;
+                if (Math.abs(deltaX) > 20) {
+                    slide(deltaX > 0 ? -1 : 1);
+                    startX = e.clientX;
+                }
+            };
+            const onMouseUp = () => {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            };
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+    }
+</script>
+
+<script>
+    require([
+        'jquery'
+    ], function($) {
+        toggleEditor('form1', 'result1');
+        toggleEditor('form2', 'result2');
+        toggleEditor('form3', 'result3');
+        toggleEditor('form31', 'result31');
+        toggleEditor('form4', 'result4');
+        toggleEditor('form5', 'result5');
+        toggleEditor('form51', 'result51');
+        toggleEditor('form6', 'result6');
+        toggleEditor('form7', 'result7');
+        toggleEditor('form8', 'result8');
+        toggleEditor('form9', 'result9');
+        toggleEditor('form01', 'result01');
+        toggleEditor('form011', 'result011');
+        toggleEditor('form02', 'result02');
+        toggleEditor('form03', 'result03');
+        toggleEditor('form04', 'result04');
+
+
+        function toggleEditor(formId, resultId) {
+            var form = $('#' + formId);
+            var textarea = form.find('textarea');
+            var resultContainer = $('#' + resultId);
+
+            if (textarea.is(':visible')) {
+                // Switch to HTML code view
+                resultContainer.html(textarea.val());
+                textarea.show();
+                resultContainer.show();
+            } else {
+                // Switch to WYSIWYG editor
+                textarea.val(resultContainer.html());
+                textarea.show();
+                resultContainer.show();
+            }
+        }
+    });
+</script>
+
+<script>
+    function copyCode(textareaId) {
+        var textarea = document.getElementById(textareaId);
+        textarea.select();
+        document.execCommand('copy');
+        alert('Code copied to clipboard!');
+    }
+</script>

@@ -1,0 +1,57 @@
+<?php
+
+/**
+ * Login/Signup text template with account icon and user status - Performance Optimized
+ */
+// Cache URLs for better performance
+static $urlCache = null;
+if ($urlCache === null) {
+    $urlCache = [
+        'login' => $this->getUrl('customer/account/login'),
+        'register' => $this->getUrl('customer/account/create'),
+        'account' => $this->getUrl('customer/account'),
+        'orders' => $this->getUrl('sales/order/history'),
+        'wishlist' => $this->getUrl('wishlist'),
+        'rewards' => $this->getUrl('customer/rewards'),
+        'giftcard' => $this->getUrl('giftvoucher'),
+        'logout' => $this->getUrl('customer/account/logout'),
+        'customerData' => $block->getUrl('common/customer/data')
+    ];
+}
+?>
+
+<div class="account-section" data-customer-data-url="<?= $urlCache['customerData'] ?>">
+    <!-- Permanent Account Icon - Always Visible -->
+    <div class="account-icon permanent-icon">
+        <img src="https://golfoy.com/media/logo/LoginIcon.svg" alt="Account Icon" />
+    </div>
+
+    <!-- Logged Out State (Hidden initially) -->
+    <div class="account-logged-out" data-customer-container="logged-out" style="display:none;">
+        <div class="account-text">
+            <a href="<?= $urlCache['login'] ?>" class="login-link">Login</a> /
+            <a href="<?= $urlCache['register'] ?>" class="signup-link">Sign up</a>
+        </div>
+    </div>
+
+    <!-- Logged In State (Hidden initially) -->
+    <div class="account-logged-in" data-customer-container="logged-in" style="display:none;">
+        <div class="account-info">
+            <div class="welcome-text">Hi <span data-customer-name></span></div>
+            <div class="account-dropdown-trigger">
+                My Account <span class="dropdown-arrow"></span>
+            </div>
+            <!-- Dropdown Menu -->
+            <div class="account-dropdown-menu">
+                <ul>
+                    <li><a href="<?= $urlCache['account'] ?>"><i class="fas fa-user"></i> My Account</a></li>
+                    <li><a href="<?= $urlCache['orders'] ?>"><i class="fas fa-shopping-cart" data-cart-icon></i> My Orders</a></li>
+                    <li><a href="<?= $urlCache['wishlist'] ?>"><i class="fas fa-heart"></i> My Wish List</a></li>
+                    <li><a href="<?= $urlCache['rewards'] ?>"><i class="fas fa-trophy"></i> Reward Points</a></li>
+                    <li><a href="<?= $urlCache['giftcard'] ?>"><i class="fas fa-gift"></i> Gift card</a></li>
+                    <li><a href="<?= $urlCache['logout'] ?>"><i class="fa fa-sign-out" aria-hidden="true"></i> Log out</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

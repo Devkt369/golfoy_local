@@ -1,0 +1,55 @@
+<?php
+/** @var \Magento\Backend\Block\Template $block */
+?>
+<div id="artm-inventory-update-root" style="padding:16px;">
+    <div class="admin__page-section">
+        <div class="admin__page-section-title">
+            <span class="title"><?= $block->escapeHtml(__('Inventory Update')) ?></span>
+        </div>
+        <div class="admin__page-section-content">
+            <p style="color:#64748b;font-size:13px;margin-bottom:16px;">
+                <?= $block->escapeHtml(__('Upload a CSV file to update stock quantities for existing products by SKU.')) ?>
+            </p>
+            <div class="admin__field" style="max-width:520px;">
+                <label class="admin__field-label" for="artm-inv-file">
+                    <span><?= $block->escapeHtml(__('Inventory CSV File')) ?></span>
+                </label>
+                <div class="admin__field-control">
+                    <input type="file" id="artm-inv-file" accept=".csv" class="admin__control-file" />
+                </div>
+            </div>
+            <div style="margin-top:12px;">
+                <button type="button" id="artm-inv-upload-btn" class="action-primary">
+                    <span><?= $block->escapeHtml(__('Upload &amp; Update')) ?></span>
+                </button>
+            </div>
+            <div id="artm-inv-message" style="margin-top:12px;display:none;"></div>
+        </div>
+    </div>
+</div>
+<script>
+require(['jquery'], function ($) {
+    'use strict';
+
+    var $root = $('#artm-inventory-update-root');
+    var $fileInput = $root.find('#artm-inv-file');
+    var $btn = $root.find('#artm-inv-upload-btn');
+    var $msg = $root.find('#artm-inv-message');
+
+    function showMessage(text, isError) {
+        $msg.removeClass('message-success message-error success error')
+            .addClass(isError ? 'message message-error error' : 'message message-success success')
+            .html('<div>' + $('<div>').text(text).html() + '</div>')
+            .show();
+    }
+
+    $btn.on('click', function () {
+        var file = $fileInput[0] && $fileInput[0].files ? $fileInput[0].files[0] : null;
+        if (!file) {
+            showMessage('Please select a CSV file first.', true);
+            return;
+        }
+        showMessage('Feature coming soon. Please map your CSV and use the Upload tab for now.', false);
+    });
+});
+</script>

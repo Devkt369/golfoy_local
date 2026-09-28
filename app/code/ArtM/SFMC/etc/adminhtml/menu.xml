@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="ArtM_SFMC::sfmc" title="SFMC" module="ArtM_SFMC" sortOrder="700" resource="ArtM_SFMC::sfmc" parent="ArtM_BlogEsg::BlogEsgmenu" />
+        <add id="ArtM_SFMC::index" title="SFMC" module="ArtM_SFMC" sortOrder="20"  action="sfmc/index/index" resource="ArtM_SFMC::index" parent="ArtM_SFMC::sfmc" />
+		<add id="ArtM_SFMC::cron_customer" title="cron customer" module="ArtM_SFMC" sortOrder="9999" resource="ArtM_SFMC::cron_customer" parent="ArtM_SFMC::sfmc" action="sfmc/cron/customer"/>
+		<add id="ArtM_SFMC::discount" title="Dicount Cron" module="ArtM_SFMC" sortOrder="9999" resource="ArtM_SFMC::cron_customer" parent="ArtM_SFMC::sfmc" action="sfmc/index/coupon"/>
+    </menu>
+</config>

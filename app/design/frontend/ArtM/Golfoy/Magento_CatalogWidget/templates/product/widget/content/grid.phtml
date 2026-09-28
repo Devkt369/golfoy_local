@@ -1,0 +1,276 @@
+<?php
+
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+use Magento\Catalog\Block\Product\ReviewRendererInterface;
+use Magento\CatalogWidget\Block\Product\ProductsList;
+use Magento\Framework\Escaper;
+
+/** @var Escaper $escaper */
+/** @var ProductsList $block */
+
+// phpcs:disable Generic.Files.LineLength.TooLong
+// phpcs:disable Magento2.Templates.ThisInTemplate.FoundHelper
+// phpcs:disable Magento2.Templates.ThisInTemplate.FoundThis
+?>
+<?php if ($exist = ($block->getProductCollection() && $block->getProductCollection()->count())): ?>
+    <?php
+    $type = 'widget-product-grid';
+
+    $mode = 'grid';
+
+    $image = 'category_page_grid';
+    $items = $block->getProductCollection()->getItems();
+
+    $templateType = ReviewRendererInterface::SHORT_VIEW;
+    $description = false;
+    ?>
+    <div class="block widget block-products-list <?= /* @noEscape */ $mode ?>">
+        <?php if ($block->getTitle()): ?>
+            <div class="block-title">
+                <strong><?= $escaper->escapeHtml(__($block->getTitle())) ?></strong>
+            </div>
+        <?php endif ?>
+
+        <div class="block-content widget-slider-wrap">
+            <button class="slider-arrow left">&#10094;</button>
+
+            <div class="slider-container">
+                <ol class="product-items <?= $type ?> slider-track">
+                    <?php $iterator = 1; ?>
+                    <?php foreach ($items as $_item): ?>
+                        <?= ($iterator++ == 1) ? '<li class="product-item">' : '</li><li class="product-item">' ?>
+                        <div class="product-item-info">
+                            <a href="<?= $escaper->escapeUrl($block->getProductUrl($_item)) ?>" class="product-item-photo">
+                                <?= $block->getImage($_item, $image)->toHtml() ?>
+                            </a>
+                            <div class="product-item-details">
+                                <strong class="product-item-name">
+                                    <a title="<?= $escaper->escapeHtml($_item->getName()) ?>"
+                                        href="<?= $escaper->escapeUrl($block->getProductUrl($_item)) ?>"
+                                        class="product-item-link">
+                                        <?= $escaper->escapeHtml($_item->getName()) ?>
+                                    </a>
+                                </strong>
+
+                                <?= $block->getReviewsSummaryHtml($_item, $templateType) ?>
+                                <?= $block->getProductPriceHtml($_item, $type) ?>
+                                <?= $block->getProductDetailsHtml($_item) ?>
+                            </div>
+                        </div>
+                        <?= ($iterator == count($items) + 1) ? '</li>' : '' ?>
+                    <?php endforeach ?>
+                </ol>
+            </div>
+
+            <button class="slider-arrow right">&#10095;</button>
+        </div>
+
+    </div>
+<?php endif; ?>
+
+<style>
+    .product-item .price-box,
+    .product-item .old-price,
+    .product-item .old-price .price-container,
+    .product-item .old-price .price-wrapper {
+        display: block !important;
+        float: none !important;
+        width: 100% !important;
+        clear: both !important;
+        white-space: normal;
+    }
+
+    .product-item {
+        list-style: none;
+        display: inline-block;
+        vertical-align: top;
+        width: 250px;
+        /* adjust based on slider item width */
+        max-width: 300px;
+        background: #fff;
+        padding: 5px;
+        box-sizing: border-box;
+    }
+
+    .product-item:last-child {
+        margin-right: 0 !important;
+    }
+
+    /* Product Box Wrapper */
+    .product-item-info {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Image */
+    .product-item-photo img {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 6px;
+    }
+
+    /* Content Box */
+    .product-item-details {
+        margin-top: 10px;
+        width: 100%;
+        display: block;
+    }
+
+    /* Title Wrap - stops overflow */
+    .product-item-name,
+    .product-item-name a {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        /* show only 2 lines */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+        word-break: break-word;
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 1.3;
+        color: #222;
+    }
+
+    /* Price Wrap - FIX PRICE FALLING ISSUE */
+    .price-box {
+        margin: 8px 0 5px;
+        width: 100%;
+        display: block;
+        float: none;
+    }
+
+    span.product-image-wrapper {
+        background-color: #efefef7d !important;
+    }
+
+    span.product-image-wrapper img {
+        mix-blend-mode: darken;
+        width: 100%;
+    }
+
+    /* Price Styling */
+    .price-container .price {
+        font-size: 16px;
+        font-weight: 700;
+        color: #111;
+    }
+
+    .old-price .price {
+        font-size: 14px;
+        color: #999;
+        text-decoration: line-through;
+    }
+
+    /* Swatches */
+    [class*="swatch-opt"] {
+        margin-top: 8px;
+        display: block;
+        width: 100%;
+        clear: both;
+    }
+
+    /* Prevent any floating issues */
+    .product-item * {
+        float: none !important;
+    }
+
+
+    .widget-slider-wrap {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        display: block;
+        margin-bottom: 30px;
+    }
+
+    .slider-container {
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        width: 100%;
+        display: block;
+    }
+
+    .slider-track {
+        display: inline-flex;
+        flex-wrap: nowrap;
+        width: max-content;
+    }
+
+    .slider-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #000;
+        color: #fff;
+        padding: 10px 14px;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 9;
+    }
+
+    .slider-arrow.left {
+        left: 5px;
+    }
+
+    .slider-arrow.right {
+        right: 5px;
+    }
+
+    .widget-slider-wrap+.widget-slider-wrap {
+        clear: both;
+        /* stops overlap */
+    }
+
+    @media (max-width: 768px) {
+        .slider-arrow {
+            top: 40% !important;
+        }
+    }
+</style>
+
+<script>
+    require(['jquery'], function($) {
+
+        $(document).ready(function() {
+            $('.widget-slider-wrap').each(function() {
+                var slider = $(this);
+                var container = slider.find('.slider-container');
+                var leftBtn = slider.find('.slider-arrow.left');
+                var rightBtn = slider.find('.slider-arrow.right');
+
+                // If arrows are missing, skip this slider
+                if (leftBtn.length === 0 || rightBtn.length === 0) {
+                    return;
+                }
+
+                // Responsive slide width
+                var itemWidth = ($(window).width() < 768) ? (250 * 1) : (270 * 3);
+
+                // Right arrow click
+                rightBtn.on('click', function() {
+                    container.animate({
+                        scrollLeft: container.scrollLeft() + itemWidth
+                    }, 400);
+                });
+
+                // Left arrow click
+                leftBtn.on('click', function() {
+                    container.animate({
+                        scrollLeft: container.scrollLeft() - itemWidth
+                    }, 400);
+                });
+
+            });
+        });
+
+    });
+</script>

@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Catalog\Model\ResourceModel\Product">
+        <plugin name="wizzyProductsObserver" type="Wizzy\Search\Model\Observer\ProductsObserver"/>
+    </type>
+    <type name="Magento\Catalog\Model\Product\Action">
+        <plugin name="wizzyProductsBulkUpdateObserver" type="Wizzy\Search\Model\Observer\ProductsObserver"/>
+    </type>
+    <type name="Magento\Catalog\Model\Category">
+        <plugin name="wizzyCategoriesObserver" type="Wizzy\Search\Model\Observer\CategoriesObserver"/>
+    </type>
+    <type name="Magento\Catalog\Model\ResourceModel\Attribute">
+        <plugin name="wizzyAttributesObserver" type="Wizzy\Search\Model\Observer\AttributesObserver"/>
+    </type>
+    <type name="Magento\Inventory\Model\ResourceModel\SourceItem\SaveMultiple">
+        <plugin name="wizzy_after_source_item_save" type="Wizzy\Search\Plugin\Import\AfterSourceItemsUpdated"/>
+    </type>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="wizzy_search_queue_listing_data_source" xsi:type="string">Wizzy\Search\Model\ResourceModel\Queue\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Wizzy\Search\Model\ResourceModel\Queue\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">wizzy_sync_queue</argument>
+            <argument name="resourceModel" xsi:type="string">Wizzy\Search\Model\ResourceModel\Queue</argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="wizzy_search_skipped_entities_listing_data_source" xsi:type="string">Wizzy\Search\Model\ResourceModel\SyncSkippedEntities\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+    <virtualType name="Wizzy\Search\Model\ResourceModel\SyncSkippedEntities\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">wizzy_sync_skipped_entities</argument>
+            <argument name="resourceModel" xsi:type="string">Wizzy\Search\Model\ResourceModel\SyncSkippedEntities</argument>
+        </arguments>
+    </virtualType>
+</config>

@@ -1,0 +1,118 @@
+<?php
+/**
+ * @var $block \Magento\Backend\Block\Template
+ */
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$websiteCollection = $objectManager->create('ArtM\\PriceCompare\\Model\\ResourceModel\\Website\\Collection');
+?>
+<form id="attribute_selector_form" method="post" action="<?= $block->getUrl('pricecompare/manageattributes/save') ?>">
+    <?= $block->getBlockHtml('formkey') ?>
+    <div id="attribute-message"></div>
+    <!-- Product field removed as requested -->
+    <div class="admin__field">
+        <label for="website_id" class="admin__field-label">Website</label>
+        <div class="admin__field-control">
+            <select name="website_id" id="website_id" class="admin__control-select" required>
+                <option value="">-- Select Website --</option>
+                <?php foreach ($websiteCollection as $website): ?>
+                    <option value="<?= $website->getId() ?>"><?= $website->getName() ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+    </div>
+    <?php
+    $resource = \Magento\Framework\App\ObjectManager::getInstance()->get('Magento\Framework\App\ResourceConnection');
+    $connection = $resource->getConnection();
+    $table = $resource->getTableName('artm_pricecompare_attribute_selector');
+    // Fetch all unique attribute names for datalist
+    $attributeNames = $connection->fetchCol("SELECT DISTINCT attribute_name FROM $table ORDER BY attribute_name ASC");
+    ?>
+    <div class="admin__field">
+        <label for="attribute_name" class="admin__field-label">Attribute Name</label>
+        <div class="admin__field-control">
+            <input type="text" name="attribute_name" id="attribute_name" class="admin__control-text" list="attribute_name_list" required />
+            <datalist id="attribute_name_list">
+                <?php foreach ($attributeNames as $attr): ?>
+                    <option value="<?= htmlspecialchars($attr) ?>">
+                <?php endforeach; ?>
+            </datalist>
+        </div>
+    </div>
+    <div class="admin__field">
+        <label for="selector" class="admin__field-label">Selector</label>
+        <div class="admin__field-control">
+            <input type="text" name="selector" id="selector" class="admin__control-text" required />
+        </div>
+    </div>
+    <div class="admin__field">
+        <button type="submit" class="action-default scalable save primary">Save Attribute Selector</button>
+    </div>
+</form>
+
+<?php
+$websiteTable = $resource->getTableName('artm_pricecompare_website');
+$rows = $connection->fetchAll("SELECT s.*, w.name as website_name FROM $table s LEFT JOIN $websiteTable w ON s.website_id = w.website_id ORDER BY s.updated_at DESC");
+?>
+
+<h2>All Attribute Selectors</h2>
+<table class="admin__table-primary">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Website</th>
+            <th>Attribute Name</th>
+            <th>Selector</th>
+            <th>Updated At</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($rows as $row): ?>
+            <tr>
+                <td><?= $row['id'] ?></td>
+                <td><?= $row['website_name'] ?></td>
+                <td><?= $row['attribute_name'] ?></td>
+                <td><?= $row['selector'] ?></td>
+                <td><?= $row['updated_at'] ?></td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+
+<script type="text/javascript">
+require(['jquery'], function($) {
+    $(function() {
+        $('#attribute_selector_form').on('submit', function(e) {
+            e.preventDefault();
+            var $form = $(this);
+            var formData = $form.serialize();
+            var actionUrl = $form.attr('action');
+            $('#attribute-message').html('');
+            $.ajax({
+                url: actionUrl,
+                type: 'POST',
+                data: formData,
+                dataType: 'html',
+                success: function(data, status, xhr) {
+                    // Try to detect success by checking for redirect or message
+                    var isRedirect = xhr && xhr.responseURL && xhr.responseURL !== window.location.href;
+                    if (isRedirect) {
+                        $('#attribute-message').html('<div class="message-success success message"><div>Attribute selector saved successfully.</div></div>');
+                        // Optionally reload the table below
+                        setTimeout(function(){ location.reload(); }, 1000);
+                    } else {
+                        $('#attribute-message').html('<div class="message-success success message"><div>Attribute selector saved successfully.</div></div>');
+                        setTimeout(function(){ location.reload(); }, 1000);
+                    }
+                },
+                error: function(xhr) {
+                    var msg = 'Error saving attribute selector.';
+                    if (xhr.responseText) {
+                        msg += ' ' + xhr.responseText;
+                    }
+                    $('#attribute-message').html('<div class="message-error error message"><div>' + msg + '</div></div>');
+                }
+            });
+        });
+    });
+});
+</script>

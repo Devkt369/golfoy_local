@@ -1,0 +1,75 @@
+<?php
+/** @var \ArtM\ProductSlider\Block\Group $block */
+$group = $block->getGroupData();
+if (!$group) {
+    return;
+}
+
+$tabs = $block->getTabs();
+$settings = $block->getSettings();
+$defaultTabIndex = $block->getDefaultTabIndex();
+$groupIdentifier = trim((string)($group['identifier'] ?? ''));
+$groupId = (int)($group['group_id'] ?? 0);
+$containerClasses = array_filter([
+    'artm-productslider-group',
+    $block->getDeviceVisibilityClass(),
+], static fn($v): bool => (string)$v !== '');
+?>
+<div class="<?= $block->escapeHtmlAttr(implode(' ', $containerClasses)) ?>"
+     data-role="artm-productslider-group"
+     data-default-tab="<?= (int)$defaultTabIndex ?>"
+     data-group-identifier="<?= $block->escapeHtmlAttr($groupIdentifier) ?>"
+     data-group-id="<?= (int)$groupId ?>"
+    data-mage-init='{"ArtM_ProductSlider/js/group-tabs": {"ajaxUrl": "<?= $block->escapeJs($block->getUrl('artm_productslider/ajax/grouptab')) ?>"}}'>
+    <?php if (!empty($settings['heading'])): ?>
+        <h2 class="artm-productslider-group__title"><?= $block->escapeHtml((string)$settings['heading']) ?></h2>
+    <?php elseif (!empty($group['name'])): ?>
+        <h2 class="artm-productslider-group__title"><?= $block->escapeHtml((string)$group['name']) ?></h2>
+    <?php endif; ?>
+
+    <?php if (!empty($settings['sub_heading'])): ?>
+        <p class="artm-productslider-group__subtitle"><?= $block->escapeHtml((string)$settings['sub_heading']) ?></p>
+    <?php endif; ?>
+
+    <div class="artm-productslider-group__tabs" data-role="group-tabs-nav" role="tablist">
+        <?php foreach ($tabs as $index => $tab): ?>
+            <?php $isActive = (int)$index === (int)$defaultTabIndex; ?>
+            <button type="button"
+                    class="artm-productslider-group__tab-btn <?= $isActive ? 'is-active' : '' ?>"
+                    data-role="group-tab-btn"
+                    data-tab-index="<?= (int)$index ?>"
+                    role="tab"
+                    aria-selected="<?= $isActive ? 'true' : 'false' ?>">
+                <?= $block->escapeHtml((string)($tab['tab_name'] !== '' ? $tab['tab_name'] : ('Tab ' . ((int)$index + 1))) ) ?>
+            </button>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="artm-productslider-group__panes" data-role="group-tabs-panes">
+        <?php foreach ($tabs as $index => $tab): ?>
+            <?php
+            $isActive = (int)$index === (int)$defaultTabIndex;
+            $initialHtml = $isActive ? $block->getTabHtml($tab) : '';
+            $viewAll = $block->getTabViewAll($tab);
+            ?>
+            <section class="artm-productslider-group__pane <?= $isActive ? 'is-active' : '' ?>"
+                     data-role="group-tab-pane"
+                     data-tab-index="<?= (int)$index ?>"
+                     data-loaded="<?= $isActive ? '1' : '0' ?>"
+                     data-slider-identifier="<?= $block->escapeHtmlAttr((string)($tab['slider_identifier'] ?? '')) ?>"
+                     <?= $isActive ? '' : 'hidden' ?>>
+                <?php if (!empty($viewAll['show'])): ?>
+                    <div class="artm-productslider-group__view-all-wrap">
+                        <a class="artm-productslider-group__view-all" href="<?= $block->escapeUrl((string)$viewAll['url']) ?>">
+                            <?= $block->escapeHtml((string)($viewAll['text'] ?? 'View All')) ?>
+                        </a>
+                    </div>
+                <?php endif; ?>
+                <div data-role="group-tab-content">
+                    <?= /* @noEscape */ $initialHtml ?>
+                </div>
+                <div class="artm-productslider-group__loading" data-role="group-tab-loading" hidden>Loading...</div>
+            </section>
+        <?php endforeach; ?>
+    </div>
+</div>

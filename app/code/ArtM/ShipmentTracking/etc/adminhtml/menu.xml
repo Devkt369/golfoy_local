@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="ArtM_ShipmentTracking::shipment_tracking"
+             title="Shipment Tracking"
+             module="ArtM_ShipmentTracking"
+             sortOrder="100"
+             parent="ArtM_BlogEsg::BlogEsgmenu"
+             resource="ArtM_ShipmentTracking::shipment_tracking"/>
+
+        <add id="ArtM_ShipmentTracking::shipment_logs"
+             title="Shipment Logs"
+             module="ArtM_ShipmentTracking"
+             sortOrder="10"
+             parent="ArtM_ShipmentTracking::shipment_tracking"
+             action="artm_shipmenttracking/shipmentlogs/index"
+             resource="ArtM_ShipmentTracking::shipment_logs"/>
+
+        <add id="ArtM_ShipmentTracking::partner_management"
+             title="Partner Management"
+             module="ArtM_ShipmentTracking"
+             sortOrder="20"
+             parent="ArtM_ShipmentTracking::shipment_tracking"
+             action="artm_shipmenttracking/partner/index"
+             resource="ArtM_ShipmentTracking::partner_management"/>
+
+        <add id="ArtM_ShipmentTracking::tracking_status"
+             title="Tracking Status Mappings"
+             module="ArtM_ShipmentTracking"
+             sortOrder="30"
+             parent="ArtM_ShipmentTracking::shipment_tracking"
+             action="artm_shipmenttracking/trackingstatus/index"
+             resource="ArtM_ShipmentTracking::tracking_status"/>
+    </menu>
+</config>

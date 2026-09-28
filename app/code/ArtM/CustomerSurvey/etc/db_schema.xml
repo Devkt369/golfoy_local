@@ -1,0 +1,545 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="artm_customersurvey_question" resource="default" engine="innodb" comment="ArtM Customer Survey Questions">
+        <column xsi:type="int" name="question_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Question ID"/>
+        <column xsi:type="varchar" name="title" nullable="false" length="255" comment="Title"/>
+        <column xsi:type="text" name="description" nullable="true" comment="Description"/>
+        <column xsi:type="varchar" name="type" nullable="false" length="32" comment="Question Type"/>
+        <column xsi:type="smallint" name="is_required" nullable="false" default="0" comment="Is Required"/>
+        <column xsi:type="int" name="min_selection" nullable="true" comment="Min Selection"/>
+        <column xsi:type="int" name="max_selection" nullable="true" comment="Max Selection"/>
+        <column xsi:type="int" name="sort_order" nullable="false" default="0" comment="Sort Order"/>
+        <column xsi:type="smallint" name="status" nullable="false" default="1" comment="Status"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="question_id"/>
+        </constraint>
+        <index referenceId="ARTM_CUSTOMERSURVEY_QUESTION_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+        <index referenceId="ARTM_CUSTOMERSURVEY_QUESTION_TYPE" indexType="btree">
+            <column name="type"/>
+        </index>
+    </table>
+
+    <table name="artm_customersurvey_question_option" resource="default" engine="innodb" comment="ArtM Customer Survey Question Options">
+        <column xsi:type="int" name="option_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Option ID"/>
+        <column xsi:type="int" name="question_id" padding="10" unsigned="true" nullable="false" comment="Question ID"/>
+        <column xsi:type="varchar" name="title" nullable="false" length="255" comment="Title"/>
+        <column xsi:type="varchar" name="value" nullable="false" length="255" comment="Value"/>
+        <column xsi:type="varchar" name="image" nullable="true" length="255" comment="Image"/>
+        <column xsi:type="int" name="sort_order" nullable="false" default="0" comment="Sort Order"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="option_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CUSTOMERSURVEY_QOPT_QUESTION_ID_ARTM_CUSTOMERSURVEY_QUESTION_QUESTION_ID"
+                    table="artm_customersurvey_question_option"
+                    column="question_id"
+                    referenceTable="artm_customersurvey_question"
+                    referenceColumn="question_id"
+                    onDelete="CASCADE"/>
+        <index referenceId="ARTM_CUSTOMERSURVEY_QOPT_QUESTION_ID" indexType="btree">
+            <column name="question_id"/>
+        </index>
+    </table>
+
+    <table name="artm_customersurvey_location" resource="default" engine="innodb" comment="ArtM Customer Survey Locations">
+        <column xsi:type="int" name="location_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Location ID"/>
+        <column xsi:type="varchar" name="name" nullable="false" length="255" comment="Name"/>
+        <column xsi:type="text" name="description" nullable="true" comment="Description"/>
+        <column xsi:type="varchar" name="page_type" nullable="false" length="32" comment="Page Type"/>
+        <column xsi:type="varchar" name="url_pattern" nullable="true" length="255" comment="URL Pattern"/>
+        <column xsi:type="varchar" name="css_selector" nullable="false" length="255" comment="CSS Selector"/>
+        <column xsi:type="varchar" name="position" nullable="false" length="32" comment="Position"/>
+        <column xsi:type="varchar" name="screenshot" nullable="true" length="255" comment="Screenshot"/>
+        <column xsi:type="smallint" name="status" nullable="false" default="1" comment="Status"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="location_id"/>
+        </constraint>
+        <index referenceId="ARTM_CUSTOMERSURVEY_LOCATION_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+        <index referenceId="ARTM_CUSTOMERSURVEY_LOCATION_PAGE_TYPE" indexType="btree">
+            <column name="page_type"/>
+        </index>
+    </table>
+
+    <table name="artm_customersurvey_survey" resource="default" engine="innodb" comment="ArtM Customer Survey Journeys">
+        <column xsi:type="int" name="survey_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Survey ID"/>
+        <column xsi:type="varchar" name="name" nullable="false" length="255" comment="Name"/>
+        <column xsi:type="text" name="description" nullable="true" comment="Description"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="16" default="draft" comment="Status"/>
+        <column xsi:type="int" name="priority" nullable="false" default="0" comment="Priority"/>
+        <column xsi:type="int" name="sort_order" nullable="false" default="0" comment="Sort Order"/>
+        <column xsi:type="datetime" name="start_date" nullable="true" comment="Start Date"/>
+        <column xsi:type="datetime" name="end_date" nullable="true" comment="End Date"/>
+        <column xsi:type="varchar" name="display_type" nullable="false" length="16" default="inline" comment="Display Type"/>
+        <column xsi:type="varchar" name="inline_position" nullable="true" length="16" comment="Inline Position"/>
+        <column xsi:type="varchar" name="inline_selector" nullable="true" length="255" comment="Inline Selector"/>
+        <column xsi:type="text" name="popup_triggers" nullable="true" comment="Popup Triggers CSV"/>
+        <column xsi:type="int" name="popup_delay_seconds" nullable="true" comment="Popup Delay Seconds"/>
+        <column xsi:type="int" name="popup_page_views" nullable="true" comment="Popup After Page Views"/>
+        <column xsi:type="varchar" name="frequency_if_not_answered" nullable="false" length="32" default="every_visit" comment="Frequency If Not Answered"/>
+        <column xsi:type="int" name="frequency_if_not_answered_days" nullable="true" comment="Not Answered Show Again After Days"/>
+        <column xsi:type="varchar" name="frequency_if_answered" nullable="false" length="32" default="never" comment="Frequency If Answered"/>
+        <column xsi:type="int" name="frequency_if_answered_days" nullable="true" comment="Answered Show Again After Days"/>
+        <column xsi:type="int" name="max_impressions" nullable="true" comment="Maximum Impressions"/>
+        <column xsi:type="int" name="limit_daily" nullable="true" comment="Daily Limit"/>
+        <column xsi:type="int" name="limit_weekly" nullable="true" comment="Weekly Limit"/>
+        <column xsi:type="int" name="limit_monthly" nullable="true" comment="Monthly Limit"/>
+        <column xsi:type="int" name="max_response_count" nullable="true" comment="Maximum Response Count"/>
+        <column xsi:type="varchar" name="store_ids" nullable="true" length="255" comment="Store IDs CSV"/>
+        <column xsi:type="varchar" name="customer_group_ids" nullable="true" length="255" comment="Customer Group IDs CSV"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="survey_id"/>
+        </constraint>
+        <index referenceId="ARTM_CUSTOMERSURVEY_SURVEY_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+        <index referenceId="ARTM_CUSTOMERSURVEY_SURVEY_PRIORITY" indexType="btree">
+            <column name="priority"/>
+        </index>
+        <index referenceId="ARTM_CUSTOMERSURVEY_SURVEY_SORT_ORDER" indexType="btree">
+            <column name="sort_order"/>
+        </index>
+        <index referenceId="ARTM_CUSTOMERSURVEY_SURVEY_STORE_IDS" indexType="btree">
+            <column name="store_ids"/>
+        </index>
+        <index referenceId="ARTM_CUSTOMERSURVEY_SURVEY_CUSTOMER_GROUP_IDS" indexType="btree">
+            <column name="customer_group_ids"/>
+        </index>
+    </table>
+
+    <table name="artm_customersurvey_event" resource="default" engine="innodb" comment="ArtM Customer Survey Events">
+        <column xsi:type="int" name="event_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Event ID"/>
+        <column xsi:type="int" name="survey_id" padding="10" unsigned="true" nullable="false" comment="Survey ID"/>
+        <column xsi:type="varchar" name="visitor_key" nullable="false" length="128" comment="Visitor Key"/>
+        <column xsi:type="int" name="customer_id" padding="10" unsigned="true" nullable="true" comment="Customer ID"/>
+        <column xsi:type="varchar" name="event_type" nullable="false" length="16" comment="Event Type"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="event_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_EVENT_SURVEY_ID_ARTM_CSURVEY_SURVEY_SURVEY_ID"
+                    table="artm_customersurvey_event"
+                    column="survey_id"
+                    referenceTable="artm_customersurvey_survey"
+                    referenceColumn="survey_id"
+                    onDelete="CASCADE"/>
+        <index referenceId="ARTM_CSURVEY_EVENT_SURVEY_ID" indexType="btree">
+            <column name="survey_id"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_EVENT_VISITOR_KEY" indexType="btree">
+            <column name="visitor_key"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_EVENT_TYPE" indexType="btree">
+            <column name="event_type"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_EVENT_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+
+    <table name="artm_customersurvey_audience_state" resource="default" engine="innodb" comment="ArtM Customer Survey Audience State">
+        <column xsi:type="int" name="state_id" padding="10" unsigned="true" nullable="false" identity="true" comment="State ID"/>
+        <column xsi:type="int" name="survey_id" padding="10" unsigned="true" nullable="false" comment="Survey ID"/>
+        <column xsi:type="varchar" name="visitor_key" nullable="false" length="128" comment="Visitor Key"/>
+        <column xsi:type="int" name="customer_id" padding="10" unsigned="true" nullable="true" comment="Customer ID"/>
+        <column xsi:type="int" name="impression_count" nullable="false" default="0" comment="Impression Count"/>
+        <column xsi:type="int" name="popup_open_count" nullable="false" default="0" comment="Popup Open Count"/>
+        <column xsi:type="int" name="close_count" nullable="false" default="0" comment="Close Count"/>
+        <column xsi:type="int" name="answer_count" nullable="false" default="0" comment="Answer Count"/>
+        <column xsi:type="timestamp" name="last_impression_at" nullable="true" comment="Last Impression At"/>
+        <column xsi:type="timestamp" name="next_allowed_display_at" nullable="true" comment="Next Allowed Display At"/>
+        <column xsi:type="timestamp" name="closed_at" nullable="true" comment="Closed At"/>
+        <column xsi:type="timestamp" name="answered_at" nullable="true" comment="Answered At"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="state_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_AUDIENCE_SURVEY_ID_ARTM_CSURVEY_SURVEY_SURVEY_ID"
+                    table="artm_customersurvey_audience_state"
+                    column="survey_id"
+                    referenceTable="artm_customersurvey_survey"
+                    referenceColumn="survey_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="unique" referenceId="ARTM_CSURVEY_AUDIENCE_SURVEY_VISITOR_UNQ">
+            <column name="survey_id"/>
+            <column name="visitor_key"/>
+        </constraint>
+        <index referenceId="ARTM_CSURVEY_AUDIENCE_SURVEY_ID" indexType="btree">
+            <column name="survey_id"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_AUDIENCE_VISITOR_KEY" indexType="btree">
+            <column name="visitor_key"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_AUDIENCE_NEXT_ALLOWED" indexType="btree">
+            <column name="next_allowed_display_at"/>
+        </index>
+    </table>
+
+    <table name="artm_customersurvey_response" resource="default" engine="innodb" comment="ArtM Customer Survey Responses">
+        <column xsi:type="int" name="response_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Response ID"/>
+        <column xsi:type="int" name="survey_id" padding="10" unsigned="true" nullable="false" comment="Survey ID"/>
+        <column xsi:type="int" name="customer_id" padding="10" unsigned="true" nullable="true" comment="Customer ID"/>
+        <column xsi:type="varchar" name="guest_identifier" nullable="true" length="128" comment="Guest Identifier"/>
+        <column xsi:type="int" name="location_id" padding="10" unsigned="true" nullable="true" comment="Location ID"/>
+        <column xsi:type="text" name="page_url" nullable="true" comment="Page URL"/>
+        <column xsi:type="varchar" name="device" nullable="true" length="128" comment="Device"/>
+        <column xsi:type="varchar" name="browser" nullable="true" length="128" comment="Browser"/>
+        <column xsi:type="varchar" name="ip_address" nullable="true" length="45" comment="IP Address"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="response_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_RESPONSE_SURVEY_ID_ARTM_CSURVEY_SURVEY_SURVEY_ID"
+                    table="artm_customersurvey_response"
+                    column="survey_id"
+                    referenceTable="artm_customersurvey_survey"
+                    referenceColumn="survey_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_RESPONSE_LOCATION_ID_ARTM_CSURVEY_LOCATION_LOCATION_ID"
+                    table="artm_customersurvey_response"
+                    column="location_id"
+                    referenceTable="artm_customersurvey_location"
+                    referenceColumn="location_id"
+                    onDelete="SET NULL"/>
+        <index referenceId="ARTM_CSURVEY_RESPONSE_SURVEY_ID" indexType="btree">
+            <column name="survey_id"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_RESPONSE_CUSTOMER_ID" indexType="btree">
+            <column name="customer_id"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_RESPONSE_GUEST_IDENTIFIER" indexType="btree">
+            <column name="guest_identifier"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_RESPONSE_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+
+    <table name="artm_customersurvey_response_item" resource="default" engine="innodb" comment="ArtM Customer Survey Response Items">
+        <column xsi:type="int" name="item_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Item ID"/>
+        <column xsi:type="int" name="response_id" padding="10" unsigned="true" nullable="false" comment="Response ID"/>
+        <column xsi:type="int" name="question_id" padding="10" unsigned="true" nullable="false" comment="Question ID"/>
+        <column xsi:type="int" name="option_id" padding="10" unsigned="true" nullable="true" comment="Option ID"/>
+        <column xsi:type="text" name="answer_text" nullable="true" comment="Answer Text"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="item_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_RESPONSE_ITEM_RESPONSE_ID_ARTM_CSURVEY_RESPONSE_RESPONSE_ID"
+                    table="artm_customersurvey_response_item"
+                    column="response_id"
+                    referenceTable="artm_customersurvey_response"
+                    referenceColumn="response_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_RESPONSE_ITEM_QUESTION_ID_ARTM_CSURVEY_QUESTION_QUESTION_ID"
+                    table="artm_customersurvey_response_item"
+                    column="question_id"
+                    referenceTable="artm_customersurvey_question"
+                    referenceColumn="question_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_RESPONSE_ITEM_OPTION_ID_ARTM_CUSTOMERSURVEY_QOPT_OPTION_ID"
+                    table="artm_customersurvey_response_item"
+                    column="option_id"
+                    referenceTable="artm_customersurvey_question_option"
+                    referenceColumn="option_id"
+                    onDelete="SET NULL"/>
+        <index referenceId="ARTM_CSURVEY_RESPONSE_ITEM_RESPONSE_ID" indexType="btree">
+            <column name="response_id"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_RESPONSE_ITEM_QUESTION_ID" indexType="btree">
+            <column name="question_id"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_RESPONSE_ITEM_OPTION_ID" indexType="btree">
+            <column name="option_id"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_RESPONSE_ITEM_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+
+    <table name="artm_customersurvey_stats_daily" resource="default" engine="innodb" comment="ArtM Customer Survey Daily Stats">
+        <column xsi:type="int" name="stat_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Stat ID"/>
+        <column xsi:type="date" name="stat_date" nullable="false" comment="Stat Date"/>
+        <column xsi:type="int" name="survey_id" padding="10" unsigned="true" nullable="false" comment="Survey ID"/>
+        <column xsi:type="int" name="location_id" padding="10" unsigned="true" nullable="false" default="0" comment="Location ID"/>
+        <column xsi:type="varchar" name="device" nullable="false" length="64" default="all" comment="Device"/>
+        <column xsi:type="varchar" name="customer_type" nullable="false" length="16" default="all" comment="Customer Type"/>
+        <column xsi:type="int" name="impressions" nullable="false" default="0" comment="Impressions"/>
+        <column xsi:type="int" name="opens" nullable="false" default="0" comment="Popup Opens"/>
+        <column xsi:type="int" name="responses" nullable="false" default="0" comment="Responses"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="stat_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_STATS_DAILY_SURVEY_ID_ARTM_CSURVEY_SURVEY_SURVEY_ID"
+                    table="artm_customersurvey_stats_daily"
+                    column="survey_id"
+                    referenceTable="artm_customersurvey_survey"
+                    referenceColumn="survey_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="unique" referenceId="ARTM_CSURVEY_STATS_DAILY_UNQ">
+            <column name="stat_date"/>
+            <column name="survey_id"/>
+            <column name="location_id"/>
+            <column name="device"/>
+            <column name="customer_type"/>
+        </constraint>
+        <index referenceId="ARTM_CSURVEY_STATS_DAILY_DATE" indexType="btree">
+            <column name="stat_date"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_STATS_DAILY_SURVEY_ID" indexType="btree">
+            <column name="survey_id"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_STATS_DAILY_LOCATION_ID" indexType="btree">
+            <column name="location_id"/>
+        </index>
+    </table>
+
+    <table name="artm_customersurvey_stats_answer_daily" resource="default" engine="innodb" comment="ArtM Customer Survey Daily Answer Stats">
+        <column xsi:type="int" name="stat_answer_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Stat Answer ID"/>
+        <column xsi:type="date" name="stat_date" nullable="false" comment="Stat Date"/>
+        <column xsi:type="int" name="survey_id" padding="10" unsigned="true" nullable="false" comment="Survey ID"/>
+        <column xsi:type="int" name="question_id" padding="10" unsigned="true" nullable="false" comment="Question ID"/>
+        <column xsi:type="int" name="option_id" padding="10" unsigned="true" nullable="false" default="0" comment="Option ID"/>
+        <column xsi:type="varchar" name="answer_type" nullable="false" length="16" default="option" comment="Answer Type"/>
+        <column xsi:type="int" name="answer_count" nullable="false" default="0" comment="Answer Count"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="stat_answer_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_STATS_ANSWER_DAILY_SURVEY_ID_ARTM_CSURVEY_SURVEY_SURVEY_ID"
+                    table="artm_customersurvey_stats_answer_daily"
+                    column="survey_id"
+                    referenceTable="artm_customersurvey_survey"
+                    referenceColumn="survey_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_STATS_ANSWER_DAILY_QUESTION_ID_ARTM_CSURVEY_QUESTION_QUESTION_ID"
+                    table="artm_customersurvey_stats_answer_daily"
+                    column="question_id"
+                    referenceTable="artm_customersurvey_question"
+                    referenceColumn="question_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="unique" referenceId="ARTM_CSURVEY_STATS_ANSWER_DAILY_UNQ">
+            <column name="stat_date"/>
+            <column name="survey_id"/>
+            <column name="question_id"/>
+            <column name="option_id"/>
+            <column name="answer_type"/>
+        </constraint>
+        <index referenceId="ARTM_CSURVEY_STATS_ANSWER_DAILY_DATE" indexType="btree">
+            <column name="stat_date"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_STATS_ANSWER_DAILY_SURVEY_ID" indexType="btree">
+            <column name="survey_id"/>
+        </index>
+    </table>
+
+    <table name="artm_customersurvey_template" resource="default" engine="innodb" comment="ArtM Customer Survey Templates">
+        <column xsi:type="int" name="template_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Template ID"/>
+        <column xsi:type="varchar" name="name" nullable="false" length="255" comment="Template Name"/>
+        <column xsi:type="text" name="description" nullable="true" comment="Description"/>
+        <column xsi:type="text" name="template_payload" nullable="false" comment="Template JSON Payload"/>
+        <column xsi:type="smallint" name="status" nullable="false" default="1" comment="Status"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="template_id"/>
+        </constraint>
+        <index referenceId="ARTM_CSURVEY_TEMPLATE_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+    </table>
+
+    <table name="artm_customersurvey_experiment" resource="default" engine="innodb" comment="ArtM Customer Survey Experiments">
+        <column xsi:type="int" name="experiment_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Experiment ID"/>
+        <column xsi:type="varchar" name="name" nullable="false" length="255" comment="Experiment Name"/>
+        <column xsi:type="int" name="survey_a_id" padding="10" unsigned="true" nullable="false" comment="Survey A ID"/>
+        <column xsi:type="int" name="survey_b_id" padding="10" unsigned="true" nullable="false" comment="Survey B ID"/>
+        <column xsi:type="decimal" name="traffic_split_a" scale="4" precision="12" nullable="false" default="0.5000" comment="Traffic Split A"/>
+        <column xsi:type="smallint" name="status" nullable="false" default="0" comment="Status"/>
+        <column xsi:type="datetime" name="start_date" nullable="true" comment="Start Date"/>
+        <column xsi:type="datetime" name="end_date" nullable="true" comment="End Date"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="experiment_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_EXPERIMENT_SURVEY_A_ID_ARTM_CSURVEY_SURVEY_SURVEY_ID"
+                    table="artm_customersurvey_experiment"
+                    column="survey_a_id"
+                    referenceTable="artm_customersurvey_survey"
+                    referenceColumn="survey_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_EXPERIMENT_SURVEY_B_ID_ARTM_CSURVEY_SURVEY_SURVEY_ID"
+                    table="artm_customersurvey_experiment"
+                    column="survey_b_id"
+                    referenceTable="artm_customersurvey_survey"
+                    referenceColumn="survey_id"
+                    onDelete="CASCADE"/>
+        <index referenceId="ARTM_CSURVEY_EXPERIMENT_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+    </table>
+
+    <table name="artm_customersurvey_reward_queue" resource="default" engine="innodb" comment="ArtM Customer Survey Reward Queue">
+        <column xsi:type="int" name="queue_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Queue ID"/>
+        <column xsi:type="int" name="response_id" padding="10" unsigned="true" nullable="false" comment="Response ID"/>
+        <column xsi:type="int" name="customer_id" padding="10" unsigned="true" nullable="true" comment="Customer ID"/>
+        <column xsi:type="varchar" name="coupon_code" nullable="true" length="64" comment="Coupon Code"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="16" default="pending" comment="Status"/>
+        <column xsi:type="text" name="payload" nullable="true" comment="Payload"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="processed_at" nullable="true" comment="Processed At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="queue_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_REWARD_QUEUE_RESPONSE_ID_ARTM_CSURVEY_RESPONSE_RESPONSE_ID"
+                    table="artm_customersurvey_reward_queue"
+                    column="response_id"
+                    referenceTable="artm_customersurvey_response"
+                    referenceColumn="response_id"
+                    onDelete="CASCADE"/>
+        <index referenceId="ARTM_CSURVEY_REWARD_QUEUE_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_REWARD_QUEUE_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+
+    <table name="artm_customersurvey_ai_sentiment_queue" resource="default" engine="innodb" comment="ArtM Customer Survey AI Sentiment Queue">
+        <column xsi:type="int" name="queue_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Queue ID"/>
+        <column xsi:type="int" name="response_item_id" padding="10" unsigned="true" nullable="false" comment="Response Item ID"/>
+        <column xsi:type="varchar" name="status" nullable="false" length="16" default="pending" comment="Status"/>
+        <column xsi:type="decimal" name="sentiment_score" scale="4" precision="12" nullable="true" comment="Sentiment Score"/>
+        <column xsi:type="varchar" name="provider" nullable="true" length="64" comment="AI Provider"/>
+        <column xsi:type="text" name="payload" nullable="true" comment="Payload"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="processed_at" nullable="true" comment="Processed At"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="queue_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_AI_QUEUE_RESPONSE_ITEM_ID_ARTM_CSURVEY_RESPONSE_ITEM_ITEM_ID"
+                    table="artm_customersurvey_ai_sentiment_queue"
+                    column="response_item_id"
+                    referenceTable="artm_customersurvey_response_item"
+                    referenceColumn="item_id"
+                    onDelete="CASCADE"/>
+        <index referenceId="ARTM_CSURVEY_AI_QUEUE_STATUS" indexType="btree">
+            <column name="status"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_AI_QUEUE_CREATED_AT" indexType="btree">
+            <column name="created_at"/>
+        </index>
+    </table>
+
+    <table name="artm_customersurvey_survey_question" resource="default" engine="innodb" comment="ArtM Customer Survey Questions Mapping">
+        <column xsi:type="int" name="entity_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="survey_id" padding="10" unsigned="true" nullable="false" comment="Survey ID"/>
+        <column xsi:type="int" name="question_id" padding="10" unsigned="true" nullable="false" comment="Question ID"/>
+        <column xsi:type="int" name="question_order" nullable="false" default="0" comment="Question Order"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_SQ_SURVEY_ID_ARTM_CSURVEY_SURVEY_SURVEY_ID"
+                    table="artm_customersurvey_survey_question"
+                    column="survey_id"
+                    referenceTable="artm_customersurvey_survey"
+                    referenceColumn="survey_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_SQ_QUESTION_ID_ARTM_CSURVEY_QUESTION_QUESTION_ID"
+                    table="artm_customersurvey_survey_question"
+                    column="question_id"
+                    referenceTable="artm_customersurvey_question"
+                    referenceColumn="question_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="unique" referenceId="ARTM_CSURVEY_SQ_SURVEY_QUESTION_UNIQUE">
+            <column name="survey_id"/>
+            <column name="question_id"/>
+        </constraint>
+        <index referenceId="ARTM_CSURVEY_SQ_SURVEY_ID" indexType="btree">
+            <column name="survey_id"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_SQ_QUESTION_ID" indexType="btree">
+            <column name="question_id"/>
+        </index>
+    </table>
+
+    <table name="artm_customersurvey_survey_location" resource="default" engine="innodb" comment="ArtM Customer Survey Locations Mapping">
+        <column xsi:type="int" name="entity_id" padding="10" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="survey_id" padding="10" unsigned="true" nullable="false" comment="Survey ID"/>
+        <column xsi:type="int" name="location_id" padding="10" unsigned="true" nullable="false" comment="Location ID"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_SL_SURVEY_ID_ARTM_CSURVEY_SURVEY_SURVEY_ID"
+                    table="artm_customersurvey_survey_location"
+                    column="survey_id"
+                    referenceTable="artm_customersurvey_survey"
+                    referenceColumn="survey_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="foreign"
+                    referenceId="ARTM_CSURVEY_SL_LOCATION_ID_ARTM_CSURVEY_LOCATION_LOCATION_ID"
+                    table="artm_customersurvey_survey_location"
+                    column="location_id"
+                    referenceTable="artm_customersurvey_location"
+                    referenceColumn="location_id"
+                    onDelete="CASCADE"/>
+        <constraint xsi:type="unique" referenceId="ARTM_CSURVEY_SL_SURVEY_LOCATION_UNIQUE">
+            <column name="survey_id"/>
+            <column name="location_id"/>
+        </constraint>
+        <index referenceId="ARTM_CSURVEY_SL_SURVEY_ID" indexType="btree">
+            <column name="survey_id"/>
+        </index>
+        <index referenceId="ARTM_CSURVEY_SL_LOCATION_ID" indexType="btree">
+            <column name="location_id"/>
+        </index>
+    </table>
+</schema>

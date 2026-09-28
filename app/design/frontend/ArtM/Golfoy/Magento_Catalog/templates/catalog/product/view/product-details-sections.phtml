@@ -1,0 +1,149 @@
+<?php
+/**
+ * Product Details Sections - Replace Tabs with Sequential Heading/Content Layout
+ * 
+ * @var $block \Magento\Catalog\Block\Product\View
+ */
+
+$_product = $block->getProduct();
+?>
+
+<div class="product-details-sections">
+
+    <?php
+    // Get product description
+    $description = $_product->getDescription();
+    if ($description):
+    ?>
+    <div class="details-section">
+        <h2 class="section-heading">Product Description</h2>
+        <div class="section-content">
+            <?= $this->helper('Magento\Catalog\Helper\Output')->productAttribute($_product, $description, 'description') ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php
+    // Get additional attributes for specifications
+    $attributes = $_product->getAttributes();
+    $additionalData = [];
+    
+    foreach ($attributes as $attribute) {
+        if ($attribute->getIsVisibleOnFront() && !in_array($attribute->getAttributeCode(), [
+            'name', 'description', 'short_description', 'sku', 'price', 'special_price', 
+            'status', 'visibility', 'category_ids', 'image', 'small_image', 'thumbnail'
+        ])) {
+            $value = $attribute->getFrontend()->getValue($_product);
+            if ($value && $value != 'No' && $value != 'N/A') {
+                $additionalData[] = [
+                    'label' => $attribute->getStoreLabel() ?: $attribute->getFrontendLabel(),
+                    'value' => $value
+                ];
+            }
+        }
+    }
+    
+    if (!empty($additionalData)):
+    ?>
+    <div class="details-section">
+        <h2 class="section-heading">Product Specifications</h2>
+        <div class="section-content">
+            <table>
+                <tbody>
+                <?php foreach ($additionalData as $data): ?>
+                    <tr>
+                        <th><?= $this->escapeHtml($data['label']) ?></th>
+                        <td><?= $this->escapeHtml($data['value']) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php
+    // Expert Advice Section (if exists)
+    $expertAdvice = $_product->getTabExpertAdvice();
+    if ($expertAdvice):
+    ?>
+    <div class="details-section">
+        <h2 class="section-heading">Expert Advice</h2>
+        <div class="section-content">
+            <div class="expert-review-section">
+                <div class="expert-img">
+                    <img src="https://golfoy.com/media/wysiwyg/expert-advice/expert-placeholder.jpg" alt="Golf Expert" />
+                </div>
+                <div class="expert-details">
+                    <h3>Golf Expert Review</h3>
+                    <div class="expert-review-content">
+                        <?= $this->helper('Magento\Catalog\Helper\Output')->productAttribute($_product, $expertAdvice, 'tab_expert_advice') ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php
+    // Product Reviews Section
+    $reviewsCollection = $this->helper('Magento\Review\Helper\Data')->getReviewsCollection()->addStoreFilter(
+        $this->_storeManager->getStore()->getId()
+    )->addStatusFilter(
+        \Magento\Review\Model\Review::STATUS_APPROVED
+    )->addEntityFilter(
+        'product', $_product->getId()
+    )->setDateOrder();
+    
+    $reviewsCount = $reviewsCollection->getSize();
+    if ($reviewsCount > 0):
+    ?>
+    <div class="details-section">
+        <h2 class="section-heading">Customer Reviews (<?= $reviewsCount ?>)</h2>
+        <div class="section-content">
+            <?php if ($_product->getRatingSummary()): ?>
+            <div class="reviews-summary">
+                <div class="rating-summary">
+                    <?= $this->getLayout()->createBlock('Magento\Review\Block\Product\ReviewRenderer')->getReviewsSummaryHtml($_product, 'short') ?>
+                </div>
+                <p style="margin-top: 10px;">Based on <?= $reviewsCount ?> customer review<?= $reviewsCount > 1 ? 's' : '' ?></p>
+            </div>
+            <?php endif; ?>
+            
+            <?php
+            // Load review block content
+            $reviewBlock = $this->getLayout()->createBlock('Magento\Review\Block\Product\View')->setTemplate('Magento_Review::product/view/list.phtml');
+            echo $reviewBlock->toHtml();
+            ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php
+    // Size Guide or Care Instructions (if exists)  
+    $sizeGuide = $_product->getSizeGuide();
+    if ($sizeGuide):
+    ?>
+    <div class="details-section">
+        <h2 class="section-heading">Size Guide & Care Instructions</h2>
+        <div class="section-content">
+            <?= $this->helper('Magento\Catalog\Helper\Output')->productAttribute($_product, $sizeGuide, 'size_guide') ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php
+    // Warranty Information (if exists)
+    $warranty = $_product->getWarranty();
+    if ($warranty && $warranty !== 'No'):
+    ?>
+    <div class="details-section">
+        <h2 class="section-heading">Warranty Information</h2>
+        <div class="section-content">
+            <p><strong>Warranty Period:</strong> <?= $this->escapeHtml($warranty) ?></p>
+            <p>This product comes with manufacturer warranty. For warranty claims and support, please contact our customer service team with your order details.</p>
+        </div>
+    </div>
+    <?php endif; ?>
+
+</div>

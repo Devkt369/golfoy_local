@@ -1,0 +1,19 @@
+<?php
+$urlInterface = \Magento\Framework\App\ObjectManager::getInstance()->get('Magento\Framework\UrlInterface');
+$curr_url = $urlInterface->getCurrentUrl();
+?>
+
+<?php
+    //if($request->getFullActionName() == 'cms_index_index') : 
+?>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Golfoy.com - India's Largest Online Golf Store | Shop Latest Golf Equipment at Best Price with Free Shipping & Cash on Delivery across India | Golfoy.com" />
+    <meta property="og:description" content="Here at Golfoy.com, shop latest golf clubs, golf balls, golf apparel, golf shoes, golf bags, golf equipment & gear online from India's #1 golf store at best-discounted prices with Free shipping & cash on delivery across India." />
+    <meta property="og:url" content="<?php echo $curr_url; ?>" />
+    <meta property="og:image" content="https://golfoy.com/media/wysiwyg/golfoy_logo.svg" />
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="og:locale" content="en_US" />
+
+<?php 
+    //endif; 
+?>

@@ -1,0 +1,493 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/* @var $block \Magento\Catalog\Block\Product\View\Options */
+?>
+
+<?php
+
+$preDefineTextId = '';
+$createLogohtml = '';
+$optionLogoId = '';
+$fontStyleHtml = '';
+$chooseFontHtml = '';
+$optionTextId = '';
+$optionId = '';
+$preDefinedTextHtml = '';
+
+$_options = $block->decorateArray($block->getOptions()) ?>
+<?php $_productId = $block->getProduct()->getId() ?>
+<?php if (count($_options)) : ?>
+    <script type="text/x-magento-init">
+        {
+        "#product_addtocart_form": {
+            "priceOptions": {
+                "optionConfig": <?= /* @noEscape */ $block->getJsonConfig() ?>,
+                "controlContainer": ".field",
+                "priceHolderSelector": "[data-product-id='<?= $block->escapeHtml($_productId) ?>'][data-role=priceBox]"
+            }
+        }
+    }
+</script>
+    <!-------------custom print------------->
+    <?php
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $attributeSet = $objectManager->create('Magento\Eav\Api\AttributeSetRepositoryInterface');
+    $custprintHelper = $this->helper('\ArtM\CustomPrinting\Helper\Data');
+    $_product = $block->getProduct();
+    $attributeSetRepository = $attributeSet->get($_product->getAttributeSetId());
+    $attribute_set_name = $attributeSetRepository->getAttributeSetName();
+    //print_r($attribute_set_name); die;
+    if ($attribute_set_name == 'Irons' || $attribute_set_name == 'Putter' || $attribute_set_name == 'Wedges' || $attribute_set_name == 'Individual Irons') {
+        $print_txt = 'Custom Engrave on The Hosel ?';
+    } else {
+        $print_txt = 'Custom Print on This Product ?';
+    }
+
+    //echo  $print_txt."/n /n".$attribute_set_name;
+    $custprint_data = $custprintHelper->getrow(strtolower($attribute_set_name));
+    if (isset($custprint_data[0])) {
+        $printType = $custprint_data[0]['printtype'];
+        $textlabel = $custprint_data[0]['textlabel'];
+        $logolabel = $custprint_data[0]['logolabel'];
+    }
+
+    $optionTextId = '';
+    $pi = $_product->getData('can_print');
+    $customOptions = $objectManager->get('Magento\Catalog\Model\Product\Option')->getProductOptionCollection($_product);
+    $isPrintfield = false;
+    $hasTextfield = false;
+    $hasLogofield = false;
+    foreach ($customOptions as $_option) {
+        if (stripos($_option->getTitle(), 'print') !== false) {
+            $isPrintfield = true;
+            break;
+        }
+    }
+    foreach ($customOptions as $_option) {
+        if (stripos($_option->getTitle(), 'print') !== false && (stripos($_option->getTitle(), 'text') !== false)) {
+            $hasTextfield = true;
+            $optionTextId = $_option->getId();
+            break;
+        }
+    }
+    foreach ($customOptions as $_option) {
+        if (stripos($_option->getTitle(), 'print') !== false && (stripos($_option->getTitle(), 'logo') !== false)) {
+            $hasLogofield = true;
+            $optionLogoId = $_option->getId();
+            break;
+        }
+    }
+    foreach ($customOptions as $_option) {
+        $flagArray[] = $_option->getTitle();
+    }
+
+
+    // $preDefinedText = '<div class="pre-defined">
+    //                         <div class="custom-pre-defined-text">Golfoy</div>
+    //                         <div class="custom-pre-defined-text">Chandigarh</div>
+    //                         <div class="custom-pre-defined-text">GOlf</div>
+    //                    </div>';
+
+    //  print_r($customOptions->getData());die;
+    $optionId = '';
+    $flag = false;
+    foreach ($customOptions as $_option) {
+        $flagArray[] = $_option->getTitle();
+        if (stripos($_option->getTitle(), 'Pre-define-logo') !== false) {
+            $preDefineTextId = $_option->getId();
+    ?>
+            <script>
+                require(['jquery'], function($) {
+                    $(document).ready(function() {
+                        var preDefineTextId = `<?php echo $preDefineTextId; ?>`;
+                        $('select#select_' + preDefineTextId).addClass('hide');
+                        $('label.label[for="select_' + preDefineTextId + '"]').addClass('hide');
+                    });
+                });
+            </script>
+            <?php
+            $optionValues = $_option->getValues();
+            $forProductPredefineLogo = [];
+
+            $scopeConfig = $objectManager->get('Magento\Framework\App\Config\ScopeConfigInterface');
+            $configPath = 'customprint/Attrconf/pre_define_image';
+            $configValue = $scopeConfig->getValue($configPath, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+            $preDefinedLogo = '';
+            $preDefinedLogo = htmlspecialchars($configValue ?? '', ENT_QUOTES, 'UTF-8');
+            $preDefinedLogo = explode('||', $preDefinedLogo);
+
+            foreach ($optionValues as $value) {
+                $forProductPredefineLogo[] = $value->getTitle();
+            }
+            $allPreDefineLogo = array_merge($forProductPredefineLogo, $preDefinedLogo);
+            $createLogohtml .= '<div class="pre-defined-img"><div class="pre-define-img-title s">Suggested Image</div>';
+            foreach ($allPreDefineLogo as $logoURL) {
+                if ($logoURL != '') {
+                    $createLogohtml .= '<span class="pre-defined-img">
+                                        <img src="' . $logoURL . '" alt="callaway logo" loading="lazy">
+                                    </span>';
+                }
+            }
+            $createLogohtml .= '</div>';
+        }
+        $flag = true;
+    }
+    if ($flag !== true && !in_array('Pre-define-logo', $flagArray)) {
+
+        $forProductPredefineLogo = [];
+
+        $scopeConfig = $objectManager->get('Magento\Framework\App\Config\ScopeConfigInterface');
+        $configPath = 'customprint/Attrconf/pre_define_image';
+        $configValue = $scopeConfig->getValue($configPath, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        $preDefinedLogo = '';
+        $preDefinedLogo = htmlspecialchars($configValue ?? '', ENT_QUOTES, 'UTF-8');
+        $logoDefined = false;
+        if ($preDefinedLogo != '') {
+            $logoDefined = true;
+        }
+        $preDefinedLogo = explode('||', $preDefinedLogo);
+
+        $allPreDefineLogo = $preDefinedLogo;
+        if ($logoDefined == true) {
+            $createLogohtml .= '<div class="pre-defined-img"><div class="pre-define-img-title ss">Suggested Image</div>';
+            foreach ($allPreDefineLogo as $logoURL) {
+                if ($logoURL != '') {
+                    $createLogohtml .= '<span class="pre-defined-img">
+                                        <img src="' . $logoURL . '" alt="callaway logo" loading="lazy">
+                                    </span>';
+                }
+            }
+            $createLogohtml .= '</div>';
+        }
+    }
+
+    foreach ($customOptions as $_option) {
+        $forProductPredefineText = [];
+
+        if (stripos($_option->getTitle(), 'Pre-define-text') !== false) {
+            // die($_option->getTitle());
+            $preDefineTextId = $_option->getId();
+            ?>
+            <script>
+                require(['jquery'], function($) {
+                    $(document).ready(function() {
+                        var preDefineTextId = `<?php echo $preDefineTextId; ?>`;
+                        $('select#select_' + preDefineTextId).addClass('hide');
+                        $('label.label[for="select_' + preDefineTextId + '"]').addClass('hide');
+                    });
+                });
+            </script>
+            <?php
+            $optionValues = $_option->getValues();
+            $forProductPredefineText = [];
+            foreach ($optionValues as $value) {
+                $forProductPredefineText[] = $value->getTitle();
+            }
+            // var_dump($forProductPredefineText);
+            $preDefinedText = '';
+            $scopeConfig = $objectManager->get('Magento\Framework\App\Config\ScopeConfigInterface');
+            $configPath = 'customprint/Attrconf/pre_define_text';
+            $configValue = $scopeConfig->getValue($configPath, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+            $preDefinedText = htmlspecialchars($configValue ?? '', ENT_QUOTES, 'UTF-8');
+
+            if ($preDefinedText == '') {
+                $preDefinedText = $forProductPredefineText;
+            } else {
+                $preDefinedText = explode('||', $preDefinedText);
+                if (isset($forProductPredefineText)) {
+                    $preDefinedText = array_merge($preDefinedText, $forProductPredefineText);
+                }
+            }
+            $preDefinedTextHtml = '<div class="pre-defined"><span class="helper-pre-define ss">Suggested words</span>';
+            foreach ($preDefinedText as $text) {
+                if ($text != '') {
+                    $preDefinedTextHtml .= '<div class="custom-pre-defined-text">' . $text . '</div>';
+                }
+            }
+            $preDefinedTextHtml .= '</div>';
+        }
+        if (!in_array('Pre-define-text', $flagArray)) {
+
+            $scopeConfig = $objectManager->get('Magento\Framework\App\Config\ScopeConfigInterface');
+            $configPath = 'customprint/Attrconf/pre_define_text';
+            $configValue = $scopeConfig->getValue($configPath, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+            $preDefinedText = '';
+            $preDefinedText = htmlspecialchars($configValue ?? '', ENT_QUOTES, 'UTF-8');
+
+            if ($preDefinedText !== '') {
+                $preDefinedText = explode('||', $preDefinedText);
+
+                $preDefinedTextHtml = '<div class="pre-defined"><span class="helper-pre-define">Suggested words</span>';
+                foreach ($preDefinedText as $text) {
+                    if ($text != '') {
+                        $preDefinedTextHtml .= '<div class="custom-pre-defined-text">' . $text . '</div>';
+                    }
+                }
+                $preDefinedTextHtml .= '</div>';
+            }
+        }
+
+
+        if (stripos($_option->getTitle(), 'Font Style') !== false) {
+            $chooseFontHtml = '<div class="font-style">Choose font</div>';
+
+            $flags = false;
+
+            $optionId = $_option->getId();
+            $configPath = 'customprint/Attrconf/text_font_family';
+            $configValue = $scopeConfig->getValue($configPath, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+            $preDefinedTextFont = htmlspecialchars($configValue ?? '', ENT_QUOTES, 'UTF-8');
+
+            $preDefinedText = explode('||', $preDefinedTextFont);
+            foreach ($preDefinedText as $value) {
+                // echo $value;die;
+                $fontStyleHtml .= '<input type="radio"  name=' . $optionId . ' id="' . $optionId . '" class="hide" rel="' . $value . '"/>
+                               <label for="' . $value . '" id="' . $value . '">' . $value . '</label>';
+            }
+
+
+
+            ?>
+            <script>
+                require(['jquery'], function($) {
+                    $(document).ready(function() {
+                        // Properly escape the PHP output using json_encode
+                        var fontStyleHtml = `<?php echo $fontStyleHtml; ?>`;
+                        var optionId = `<?php echo $optionId; ?>`;
+                        var optionTextId = `<?php echo $optionTextId; ?>`;
+                        // var fontPreDefineHtml = `<?php //echo $preDefinedTextHtml; 
+                                                    ?>`;
+                        // $("div#ptextdiv").append(fontPreDefineHtml);
+
+                        // $('select#select_'+optionId).addClass('hide');
+                        $('input#options_' + optionId + '_text').addClass('hide');
+                        $('label.label[for="options_' + optionId + '_text"]').addClass('hide');
+
+                        $(document).on("click", "#imgtextprint", function() {
+                            if ($(this).find('.choose_button.ptextdiv').hasClass('active')) {
+                                $("#ptextdiv").find('input[type="radio"], label, .font-style').remove();
+                                // $("#ptextdiv").append(fontStyleHtml);
+                            }
+                        });
+
+                        $(document).on('click', 'input#imgprint , .choose_button.pimgdiv', function() {
+                            $('input#options_' + optionId + '_text').val('').trigger('change');
+                        });
+
+                        $(document).on('click', '.pre-defined .custom-pre-defined-text', function() {
+                            $('.pre-defined .custom-pre-defined-text').removeClass('active');
+                            $(this).addClass('active');
+                            var optionsTextId = '#options_' + optionTextId + '_text';
+                            var preText = $(this).text();
+                            $('input#print_text').val(preText).trigger('change');
+                            $(optionsTextId).val(preText).trigger('change');
+                            $('input#print_text').change();
+                            $("#ptextdiv").find('input[type="radio"], label , .font-style').remove();
+                            $("#ptextdiv").append(fontStyleHtml);
+                            $('div#ptextdiv label').first().click();
+                            $('div#ptextdiv label').text(preText);
+                            // alert(preText);
+                        });
+
+                        $(document).on("keyup", "input#print_text", function() {
+                            var text = $(this).val();
+                            if (text.length > 0) {
+                                $("#ptextdiv").find('input[type="radio"], label , .font-style').remove();
+                                $("#ptextdiv").append('<div class="font-style">Choose font</div>');
+                                $("#ptextdiv").append(fontStyleHtml);
+                                $('div#ptextdiv label').first().click();
+                                $('.custom-pre-defined-text').removeClass('active');
+                            } else {
+                                $("#ptextdiv").find('input[type="radio"], label, .font-style').remove();
+                                $('input#options_' + optionId + '_text').val('').trigger('change');
+                            }
+                            $('div#ptextdiv label').text(text);
+                        });
+
+                        $(document).on("click", "#printcheck", function() {
+                            if ($('#imgtextprint').find('.choose_button.ptextdiv').hasClass('active')) {
+                                // $("#ptextdiv").find('input[type="radio"], label').remove();
+                                // $("#ptextdiv").append(fontStyleHtml);
+                            }
+                        });
+
+                        function updateLabelFontFamilies() {
+                            $("div#ptextdiv > input[type='radio']").each(function() {
+                                var labelText = $(this).attr('rel');
+                                // alert(labelText);
+                                var labelFor = $(this).attr('rel');
+                                $("label[for='" + labelFor + "']").css('font-family', labelText);
+                            });
+                        }
+                        setInterval(updateLabelFontFamilies, 100);
+
+                        $(document).on("click", "div#ptextdiv label", function() {
+                            var lableid = jQuery(this).attr('id');
+                            var lableid = jQuery(this).attr('id');
+
+                            var labelToChange = $('label[for="' + lableid + '"]');
+                            $('input[type="radio"]').removeClass('active');
+                            $('label').removeClass('active');
+                            $(this).addClass('active');
+                            labelToChange.addClass('active');
+                            $('input#options_' + optionId + '_text').val(lableid);
+                        });
+
+
+
+                    });
+                });
+            </script>
+
+        <?php
+        }
+    }
+
+    if ($isPrintfield && $pi == 1 && isset($custprint_data[0])) {
+        $customprintHTML = <<<HTML
+        <div class="printq" style="margin-top:20px;margin-bottom:10px;margin-top:10px;">
+            <div class="label_printon_it">
+                <label for="printcheck">
+                    <input type="checkbox" id="printcheck" />
+                    {$print_txt} <span class="combine_pricefield"></span>
+
+                </label>
+            </div>
+            <div id="imgtextprint" style="display:none;">
+                <div class="choose_buttons row">
+        HTML;
+        if ($hasTextfield && ($printType == 'text' || $printType == 'both')) {
+            $customprintHTML .= <<<HTML
+                        <div class="choose_button ptextdiv col-sm-6">
+                            <i class="fa fa-font" aria-hidden="true"></i>
+                            <input type="radio" name='textimage' id="textprint" class="hide" />
+                            <label for="textprint"> {$textlabel} </label>
+                        </div>
+        HTML;
+        }
+        if ($hasLogofield && ($printType == 'logo' || $printType == 'both')) {
+            $customprintHTML .= <<<HTML
+                        <div class="choose_button pimgdiv col-sm-6">
+                            <i class="fa fa-file-image-o" aria-hidden="true"></i>
+                            <input type="radio" name='textimage' id="imgprint" class="hide" />
+                            <label for="imgprint"> {$logolabel} </label>
+                        </div>
+        HTML;
+        }
+        $customprintHTML .= <<<HTML
+                </div>
+            </div>
+        </div>
+        HTML;
+    ?>
+    <script>
+        require(['jquery'], function($) {
+            $(document).ready(function() {
+                var customprintHTML = <?= json_encode($customprintHTML); ?>;
+                $('div.custom-print-content').append(customprintHTML);
+            });
+        });
+    </script>
+    <?php
+    } 
+    
+    ?>
+
+    <!-------------custom print------------->
+    <?php foreach ($_options as $_option) : ?>
+
+        <?= $block->getOptionHtml($_option) ?>
+    <?php endforeach; ?>
+<?php endif; ?>
+<?php
+
+?>
+
+<script>
+    require(['jquery'], function($) {
+        $(document).ready(function() {
+            var appendLocation = $('div#pimgdiv');
+            var preDefinedLogo = `<?php echo $createLogohtml; ?>`;
+            appendLocation.append(preDefinedLogo);
+            var logoid = `<?php echo $optionLogoId; ?>`;
+            var optionTextId = `<?php echo $optionTextId; ?>`;
+
+            var fontPreDefineHtml = `<?php echo $preDefinedTextHtml; ?>`;
+            $("div#ptextdiv").append(fontPreDefineHtml);
+            var chooseFontHtml = `<?php echo $chooseFontHtml; ?>`;
+
+            var fontStyleHtml = `<?php echo $fontStyleHtml; ?>`;
+            $(document).on('click', '.pre-defined .custom-pre-defined-text', function() {
+                $('.pre-defined .custom-pre-defined-text').removeClass('active');
+                $(this).addClass('active');
+                var optionsTextId = '#options_' + optionTextId + '_text';
+                var preText = $(this).text();
+                $('input#print_text').val(preText).trigger('change');
+                $(optionsTextId).val(preText).trigger('change');
+                $('input#print_text').change();
+                $("#ptextdiv").find('input[type="radio"], label , .font-style').remove();
+                $("#ptextdiv").append(chooseFontHtml);
+                $("#ptextdiv").append(fontStyleHtml);
+                $('div#ptextdiv label').first().click();
+                $('div#ptextdiv label').text(preText);
+                // alert(preText);
+            });
+
+            // $(document).on('click', 'input#printcheck' , function(){
+            //     $("#ptextdiv").append(chooseFontHtml);
+            //     $("#ptextdiv").append(fontStyleHtml);
+            //     $('div#ptextdiv label').first().click();
+            //     $('div#ptextdiv label').text(preText);
+            // });
+
+
+
+            $(document).on('click', 'div.pre-defined-img span.pre-defined-img img', function() {
+                $('div.pre-defined-img span.pre-defined-img').removeClass('select');
+                $(this).addClass('select');
+                $(this).parent('span.pre-defined-img').addClass('select');
+                var imgSrc = $(this).attr('src');
+                $('input#options_' + logoid + '_text').val(imgSrc);
+                $('input#options_' + logoid + '_text').trigger('change');
+
+                $('div#drag-area').addClass('hide');
+                $('div#pimgdiv .addaphoto').addClass('hide');
+
+                $('div#pre-defined-img-select img').remove();
+                $('div#pre-defined-img-select .remove-pre-define-image').remove();
+                $('div#pre-defined-img-select').append('<div class="remove-pre-define-image"></div><img src="' + imgSrc + '" >');
+            });
+
+            $(document).on('click', 'div#pre-defined-img-select .remove-pre-define-image', function() {
+                $('div#drag-area').removeClass('hide');
+                $('div#pimgdiv .addaphoto').removeClass('hide');
+                $('div#pre-defined-img-select img').remove();
+                $('div#pre-defined-img-select .remove-pre-define-image').remove();
+                $('input#options_' + logoid + '_text').val('');
+                $('input#options_' + logoid + '_text').trigger('change');
+                $('span.pre-defined-img.select').removeClass('select');
+                $('p.alert.alert-success').removeClass('hide');
+            });
+
+            $(document).on('click', '.pre-defined-img', function() {
+                $('p.alert.alert-success').addClass('hide');
+            });
+
+
+            if ($('#pimgdiv').length) {
+                $('#pimgdiv').appendTo('.custom-print-content');
+            }
+
+            // Move print text div
+            if ($('#ptextdiv').length) {
+                $('#ptextdiv').appendTo('.custom-print-content');
+            }
+
+
+        });
+    });
+</script>

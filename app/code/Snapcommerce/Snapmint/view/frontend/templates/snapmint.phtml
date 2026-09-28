@@ -1,0 +1,32 @@
+<script>
+      var mid="<?php echo $block->getMerchantId(); ?>";
+      var min_cart_amount='<?php echo $block->getMinValue(); ?>';
+      var env_mid = '<?php echo $block->getMerchantId() ?>';
+</script>
+
+        <script>
+         require(['jquery', 'jquery/ui'], function($){
+
+                setTimeout(function () {
+                    try{
+       
+                        var snapmint = document.createElement('script');
+                        snapmint.type = 'text/javascript';
+                        snapmint.async = true;
+                        snapmint.dataset.page='product';
+                        snapmint.id='snapmintScript';
+                        snapmint.src = 'https://checkout-merchant.snapmint.com/js/v1/'+env_mid;
+                        var s =
+                        document.getElementsByTagName('script')[0];
+                        s.parentNode.insertBefore(snapmint, s);
+                    }catch(e){
+                        console.log(e);
+                    }
+
+            }, 2000);
+
+    });
+
+</script>
+
+    

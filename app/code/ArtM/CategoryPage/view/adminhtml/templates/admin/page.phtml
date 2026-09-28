@@ -1,0 +1,119 @@
+<?php /** @var \ArtM\CategoryPage\Block\Admin\Page $block */ ?>
+<?php $mode = $block->getMode(); ?>
+<div id="artm-categorypage-admin" class="artm-categorypage-shell" data-page-config='<?= $block->escapeHtmlAttr($block->getPageConfigJson()) ?>' data-mode="<?= $block->escapeHtmlAttr($mode) ?>">
+    <style>
+        #artm-categorypage-admin{display:grid;grid-template-columns:minmax(240px,300px) minmax(0,1fr);gap:18px;font-family:inherit;color:#0f172a;}
+        #artm-categorypage-admin .artm-sidebar{background:#fff;border:1px solid #dbe2ea;border-radius:18px;box-shadow:0 14px 35px rgba(15,23,42,.08);padding:14px;max-height:calc(100vh - 160px);overflow:auto;}
+        #artm-categorypage-admin .artm-sidebar-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;cursor:pointer;transition:background .16s ease,transform .16s ease;}
+        #artm-categorypage-admin .artm-sidebar-item:hover{background:#eff6ff;transform:translateX(2px);}
+        #artm-categorypage-admin .artm-sidebar-item.is-active{background:#dbeafe;border:1px solid #60a5fa;}
+        #artm-categorypage-admin .artm-sidebar-item img{width:40px;height:40px;border-radius:10px;object-fit:cover;background:#f8fafc;border:1px solid #e2e8f0;}
+        #artm-categorypage-admin .artm-main{min-width:0;}
+        #artm-categorypage-admin .artm-panel{background:#fff;border:1px solid #dbe2ea;border-radius:22px;box-shadow:0 18px 40px rgba(15,23,42,.08);padding:18px;}
+        #artm-categorypage-admin .artm-banner{border-radius:18px;overflow:hidden;min-height:180px;background:linear-gradient(135deg,#0f172a 0%,#0f766e 100%);margin-bottom:16px;position:relative;}
+        #artm-categorypage-admin .artm-banner img{width:100%;height:100%;object-fit:cover;display:block;opacity:.9;}
+        #artm-categorypage-admin .artm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+        #artm-categorypage-admin .artm-card{border:1px solid #dbe2ea;border-radius:16px;padding:12px;background:#fff;box-shadow:0 10px 20px rgba(15,23,42,.04);}
+        #artm-categorypage-admin .artm-card.artm-is-hidden{opacity:.6;border-style:dashed;}
+        #artm-categorypage-admin .artm-card.artm-card-add{display:flex;align-items:center;justify-content:center;min-height:180px;border:1px dashed #94a3b8;background:#f8fafc;}
+        #artm-categorypage-admin .artm-card img{width:100%;height:140px;object-fit:cover;border-radius:12px;background:#f8fafc;margin-bottom:10px;}
+        #artm-categorypage-admin .artm-visibility-toggle{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;color:#0f172a;cursor:pointer;font-size:18px;line-height:1;display:inline-flex;align-items:center;justify-content:center;}
+        #artm-categorypage-admin .artm-sortable-group strong{position:relative;display:inline-flex;align-items:center;gap:8px;}
+        #artm-categorypage-admin .artm-sortable-group.artm-is-hidden strong{opacity:.6;}
+        #artm-categorypage-admin .artm-group-visibility-toggle{width:28px;height:28px;border-radius:8px;border:1px solid #cbd5e1;background:#fff;color:#0f172a;cursor:pointer;font-size:16px;line-height:1;display:inline-flex;align-items:center;justify-content:center;padding:0;}
+        #artm-categorypage-admin .artm-group-edit-toggle{width:28px;height:28px;border-radius:8px;border:1px solid #cbd5e1;background:#fff;color:#0f172a;cursor:pointer;font-size:16px;line-height:1;display:inline-flex;align-items:center;justify-content:center;padding:0;}
+        #artm-categorypage-admin .artm-group-delete-toggle{width:28px;height:28px;border-radius:8px;border:1px solid #fecaca;background:#fff;color:#b91c1c;cursor:pointer;font-size:16px;line-height:1;display:inline-flex;align-items:center;justify-content:center;padding:0;}
+        #artm-categorypage-admin .artm-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px;}
+        #artm-categorypage-admin .artm-field{display:flex;flex-direction:column;gap:6px;}
+        #artm-categorypage-admin .artm-field input,#artm-categorypage-admin .artm-field select{width:100%;}
+        #artm-categorypage-admin .artm-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+        #artm-categorypage-admin .artm-note{padding:12px 14px;border-radius:14px;background:#f8fafc;border:1px dashed #cbd5e1;margin-bottom:12px;}
+        #artm-categorypage-admin .artm-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;}
+        #artm-categorypage-admin .artm-icon-link{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:12px;border:1px solid #cbd5e1;background:#fff;color:#0f172a;text-decoration:none;font-size:20px;}
+        #artm-categorypage-admin .artm-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.45);z-index:9999;}
+        #artm-categorypage-admin .artm-modal.is-open{display:flex;}
+        #artm-categorypage-admin .artm-modal-dialog{width:min(680px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:22px;box-shadow:0 24px 60px rgba(15,23,42,.24);padding:20px;}
+        @media (max-width: 960px){#artm-categorypage-admin{grid-template-columns:1fr;}#artm-categorypage-admin .artm-sidebar{max-height:none;display:flex;gap:10px;overflow:auto;white-space:nowrap;}#artm-categorypage-admin .artm-sidebar-item{min-width:220px;}#artm-categorypage-admin .artm-form-grid{grid-template-columns:1fr;}}
+    </style>
+
+    <aside class="artm-sidebar" data-role="sidebar"></aside>
+    <section class="artm-main">
+        <div class="artm-panel" data-role="content">
+            <div class="artm-note"><?= $block->escapeHtml(__('Loading category data...')) ?></div>
+        </div>
+    </section>
+    <div class="artm-modal" data-role="manual-modal">
+        <div class="artm-modal-dialog">
+            <div class="artm-header">
+                <div>
+                    <h2 style="margin:0;" data-role="manual-modal-title"><?= $block->escapeHtml(__('Add Manual Card')) ?></h2>
+                    <div style="color:#64748b;margin-top:6px;" data-role="manual-modal-subtitle"><?= $block->escapeHtml(__('This card will be added to the selected group.')) ?></div>
+                </div>
+                <button type="button" class="action-secondary" data-role="manual-close"><?= $block->escapeHtml(__('Close')) ?></button>
+            </div>
+            <div class="artm-form-grid">
+                <input type="hidden" name="manual_entity_id" value="0"/>
+                <input type="hidden" name="manual_parent_category_id" value=""/>
+                <input type="hidden" name="manual_group_category_id" value=""/>
+                <div class="artm-field"><label><?= $block->escapeHtml(__('Label')) ?></label><input type="text" name="manual_title" value=""/></div>
+                <div class="artm-field"><label><?= $block->escapeHtml(__('URL')) ?></label><input type="text" name="manual_url" value=""/></div>
+                <div class="artm-field"><label><?= $block->escapeHtml(__('Sort Order')) ?></label><input type="number" name="manual_sort_order" value="0"/></div>
+                <div class="artm-field"><label><?= $block->escapeHtml(__('Enabled')) ?></label><select name="manual_is_enabled"><option value="1"><?= $block->escapeHtml(__('Yes')) ?></option><option value="0"><?= $block->escapeHtml(__('No')) ?></option></select></div>
+            </div>
+            <div class="artm-field" style="margin-top:12px;">
+                <label><?= $block->escapeHtml(__('Image')) ?></label>
+                <input type="hidden" name="manual_image" value=""/>
+                <input type="file" class="artm-upload-input" data-field="image" data-folder="manual" accept="image/*"/>
+                <div class="artm-preview"></div>
+            </div>
+            <div class="artm-actions">
+                <button type="button" class="action-primary" data-role="manual-save"><?= $block->escapeHtml(__('Save Card')) ?></button>
+                <button type="button" class="action-secondary" data-role="manual-close"><?= $block->escapeHtml(__('Cancel')) ?></button>
+            </div>
+        </div>
+    </div>
+    <div class="artm-modal" data-role="group-edit-modal">
+        <div class="artm-modal-dialog">
+            <div class="artm-header">
+                <div>
+                    <h2 style="margin:0;"><?= $block->escapeHtml(__('Edit Group')) ?></h2>
+                    <div style="color:#64748b;margin-top:6px;"><?= $block->escapeHtml(__('Update group label and sort order.')) ?></div>
+                </div>
+                <button type="button" class="action-secondary" data-role="group-edit-close"><?= $block->escapeHtml(__('Close')) ?></button>
+            </div>
+            <div class="artm-form-grid" style="grid-template-columns:1fr;">
+                <input type="hidden" name="group_edit_heading_id" value=""/>
+                <div class="artm-field"><label><?= $block->escapeHtml(__('Group Label')) ?></label><input type="text" name="group_edit_label" value=""/></div>
+                <div class="artm-field"><label><?= $block->escapeHtml(__('Sort Order')) ?></label><input type="number" name="group_edit_sort_order" value="0"/></div>
+            </div>
+            <div class="artm-actions">
+                <button type="button" class="action-primary" data-role="group-edit-save"><?= $block->escapeHtml(__('Save Group')) ?></button>
+                <button type="button" class="action-secondary" data-role="group-edit-close"><?= $block->escapeHtml(__('Cancel')) ?></button>
+            </div>
+        </div>
+    </div>
+    <div class="artm-modal" data-role="add-group-modal">
+        <div class="artm-modal-dialog">
+            <div class="artm-header">
+                <div>
+                    <h2 style="margin:0;"><?= $block->escapeHtml(__('Create New Group')) ?></h2>
+                    <div style="color:#64748b;margin-top:6px;"><?= $block->escapeHtml(__('Add a custom group to organize cards.')) ?></div>
+                </div>
+                <button type="button" class="action-secondary" data-role="add-group-close"><?= $block->escapeHtml(__('Close')) ?></button>
+            </div>
+            <div class="artm-form-grid" style="grid-template-columns:1fr;">
+                <div class="artm-field"><label><?= $block->escapeHtml(__('Group Label')) ?></label><input type="text" name="add_group_label" value=""/></div>
+                <div class="artm-field"><label><?= $block->escapeHtml(__('Sort Order')) ?></label><input type="number" name="add_group_sort_order" value="0"/></div>
+            </div>
+            <div class="artm-actions">
+                <button type="button" class="action-primary" data-role="add-group-save"><?= $block->escapeHtml(__('Create Group')) ?></button>
+                <button type="button" class="action-secondary" data-role="add-group-close"><?= $block->escapeHtml(__('Cancel')) ?></button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+require(['jquery','ArtM_CategoryPage/js/admin-category-page'], function ($, initAdminPage) {
+    initAdminPage($('#artm-categorypage-admin'), JSON.parse($('#artm-categorypage-admin').attr('data-page-config') || '{}'));
+});
+</script>

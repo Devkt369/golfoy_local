@@ -1,0 +1,249 @@
+<?php
+
+$shipment = $block->getData('shipment');
+$orderStatus = $shipment->getOrder()->getStatus();
+
+if (!$shipment || $orderStatus === 'canceled' || $orderStatus === 'closed') {
+    return;
+}
+
+$timeline = $block->getTimelineData($shipment);
+
+if (!$timeline) {
+    return;
+}
+
+if (empty($timeline['delivered_at'])) : ?>
+    <div class="shipment-track-action">
+        <a href="#"
+            class="action primary iframe-popup"
+            title="<?= $block->escapeHtml(__('Track Shipment')) ?>"
+            data-window-url="<?= $block->escapeUrl(
+                                    $this->helper(\Magento\Shipping\Helper\Data::class)
+                                        ->getTrackingPopupUrlBySalesModel($shipment)
+                                ) ?>">
+            <span><?= $block->escapeHtml(__('Track Shipment')) ?></span>
+        </a>
+    </div>
+    <?php return; ?>
+<?php endif; ?>
+
+<?php
+
+$formatDate = function ($date) {
+    return $date ? date('g:i A', strtotime($date)) : '';
+};
+
+$formatDay = function ($date) {
+    return $date ? date('j M Y', strtotime($date)) : '';
+};
+?>
+
+<div class="shipment-timeline">
+
+    <!-- title row -->
+    <div class="tl-titles">
+        <div class="tl-title">Order Confirmed</div>
+        <div class="tl-title">Shipped</div>
+        <div class="tl-title">Out for Delivery</div>
+        <div class="tl-title">Delivered</div>
+    </div>
+
+    <!-- icon row with the connecting line -->
+    <div class="tl-icon-row">
+        <div class="tl-icon">✓</div>
+        <div class="tl-icon">✓</div>
+        <div class="tl-icon">✓</div>
+        <div class="tl-icon">✓</div>
+    </div>
+
+    <!-- date/time row -->
+    <div class="tl-dates">
+        <div class="tl-date">
+            <span class="tl-time"><?= $formatDate($timeline['order_created_at']) ?></span>
+            <span class="tl-day"><?= $formatDay($timeline['order_created_at']) ?></span>
+        </div>
+        <div class="tl-date">
+            <span class="tl-time"><?= $formatDate($timeline['shipment_created_at']) ?></span>
+            <span class="tl-day"><?= $formatDay($timeline['shipment_created_at']) ?></span>
+        </div>
+        <div class="tl-date">
+            <span class="tl-time"><?= $formatDate($timeline['out_for_delivery_at']) ?></span>
+            <span class="tl-day"><?= $formatDay($timeline['out_for_delivery_at']) ?></span>
+        </div>
+        <div class="tl-date">
+            <span class="tl-time"><?= $formatDate($timeline['delivered_at']) ?></span>
+            <span class="tl-day"><?= $formatDay($timeline['delivered_at']) ?></span>
+        </div>
+    </div>
+
+</div>
+
+<style>
+    /* ── Wrapper ── */
+    .shipment-timeline {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        overflow: hidden;
+        margin: 30px 0;
+        box-sizing: border-box;
+    }
+
+    /* ── Shared 4-column grid used by all three rows ── */
+    .tl-titles,
+    .tl-icon-row,
+    .tl-dates {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* ═══ TITLE ROW ═══ */
+    .tl-title {
+        text-align: center;
+        font-size: 13px;
+        font-weight: 600;
+        color: #333;
+        line-height: 1.3;
+        padding: 0 4px 10px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        min-height: 36px;
+        box-sizing: border-box;
+    }
+
+    /* ═══ ICON ROW ═══ */
+    .tl-icon-row {
+        position: relative;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    /* Green line spanning from first icon center to last icon center */
+    .tl-icon-row::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        /* half of icon width (14px) inset from each side so line starts/ends at icon centers */
+        left: calc(12.5% - 0px);
+        right: calc(12.5% - 0px);
+        transform: translateY(-50%);
+        height: 3px;
+        background: #3f9142;
+        z-index: 0;
+    }
+
+    .tl-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #3f9142;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+        box-sizing: border-box;
+    }
+
+    /* ═══ DATE ROW ═══ */
+    .tl-date {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 0 2px;
+        box-sizing: border-box;
+    }
+
+    .tl-time {
+        font-size: 13px;
+        color: #555;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
+    .tl-day {
+        font-size: 13px;
+        color: #555;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
+    /* ══ TABLET (≤ 768px) ══ */
+    @media (max-width: 768px) {
+        .shipment-timeline {
+            margin: 20px 0;
+        }
+
+        .tl-title {
+            font-size: 11px;
+            min-height: 30px;
+            padding-bottom: 8px;
+        }
+
+        .tl-icon {
+            width: 22px;
+            height: 22px;
+            font-size: 10px;
+        }
+
+        .tl-icon-row::before {
+            height: 2px;
+        }
+
+        .tl-time,
+        .tl-day {
+            font-size: 11px;
+        }
+    }
+
+    /* ══ MOBILE (≤ 480px) ══ */
+    @media (max-width: 480px) {
+        .shipment-timeline {
+            margin: 15px 0;
+        }
+
+        .tl-title {
+            font-size: 9px;
+            min-height: 26px;
+            padding-bottom: 6px;
+        }
+
+        .tl-icon {
+            width: 18px;
+            height: 18px;
+            font-size: 9px;
+        }
+
+        .tl-time,
+        .tl-day {
+            font-size: 10px;
+        }
+    }
+
+    /* ══ VERY SMALL (≤ 360px) ══ */
+    @media (max-width: 360px) {
+        .tl-title {
+            font-size: 9px;
+        }
+
+        .tl-icon {
+            width: 16px;
+            height: 16px;
+            font-size: 8px;
+        }
+
+        .tl-time,
+        .tl-day {
+            font-size: 9px;
+        }
+    }
+</style>

@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\StoreGraphQl\Model\Resolver\Store\StoreConfigDataProvider">
+        <arguments>
+            <argument name="extendedConfigData" xsi:type="array">
+                <item name="magestore_customercredit_general_enable" xsi:type="string">customercredit/general/enable</item>
+                <item name="magestore_customercredit_general_enable_send_credit" xsi:type="string">customercredit/general/enable_send_credit</item>
+                <item name="magestore_customercredit_general_validate" xsi:type="string">customercredit/general/validate</item>
+                <item name="magestore_customercredit_spend_shipping" xsi:type="string">customercredit/spend/shipping</item>
+                <item name="magestore_customercredit_email_creditcode" xsi:type="string">customercredit/email/creditcode</item>
+                <item name="magestore_customercredit_email_verify" xsi:type="string">customercredit/email/verify</item>
+                <item name="magestore_customercredit_email_notify" xsi:type="string">customercredit/email/notify</item>
+                <item name="magestore_customercredit_email_notify_success" xsi:type="string">customercredit/email/notify_success</item>
+                <item name="magestore_customercredit_report_ytd_start" xsi:type="string">customercredit/report/ytd_start</item>
+                <item name="magestore_customercredit_report_mtd_start" xsi:type="string">customercredit/report/mtd_start</item>
+                <item name="magestore_customercredit_style_management_background_title" xsi:type="string">customercredit/style_management/background_title</item>
+                <item name="magestore_customercredit_style_management_color_title" xsi:type="string">customercredit/style_management/color_title</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Framework\GraphQl\Schema\Type\Entity\DefaultMapper">
+        <arguments>
+            <argument name="map" xsi:type="array">
+                <item name="catalog_product" xsi:type="array">
+                    <item name="customercredit" xsi:type="string">StoreCreditProduct</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\CatalogGraphQl\Model\ProductInterfaceTypeResolverComposite">
+        <arguments>
+            <argument name="productTypeNameResolvers" xsi:type="array">
+                <item name="customercredit_product_type_resolver" xsi:type="object">Magestore\CustomercreditGraphQl\Model\StoreCreditProductTypeResolver</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\QuoteGraphQl\Model\Cart\BuyRequest\BuyRequestBuilder">
+        <arguments>
+            <argument name="providers" xsi:type="array">
+                <item name="storecredit_options" xsi:type="object">Magestore\CustomercreditGraphQl\Model\Cart\BuyRequest\StoreCreditDataProvider</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

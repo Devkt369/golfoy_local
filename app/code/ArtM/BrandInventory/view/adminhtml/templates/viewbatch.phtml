@@ -1,0 +1,298 @@
+<?php
+/** @var $block \ArtM\BrandInventory\Block\Adminhtml\Data\View */
+
+$batchId = $block->getBatchId();
+$rows = $block->getBatchRows();
+
+$filterLinkedSku = $block->getFilterLinkedSku();
+$filterStatus    = $block->getFilterStatus();
+$filterSource    = $block->getFilterSource();
+
+$current      = $block->getCurrentPage();
+$pageSize     = $block->getPageSize();
+$totalPages   = $block->getTotalPages();
+$totalRecords = $block->getTotalCount();
+
+$uniqueStatuses = $block->getAllStatuses();
+$uniqueSources  = $block->getAllSources();
+
+$baseParams = [];
+if ($batchId > 0) $baseParams['id'] = $batchId;
+if ($filterLinkedSku !== '') $baseParams['filter_linked_sku'] = $filterLinkedSku;
+if ($filterStatus !== '')    $baseParams['filter_status'] = $filterStatus;
+if ($filterSource !== '')    $baseParams['filter_source'] = $filterSource;
+if ($pageSize != 50)         $baseParams['pageSize'] = $pageSize;
+
+$hasActiveFilters = ($filterLinkedSku !== '' || $filterStatus !== '' || $filterSource !== '');
+$isAllView = $batchId === 0;
+?>
+
+<div class="manual-match-wrap">
+    <div class="mm-header">
+        <h2><?= $isAllView ? 'All Records Across All Batches' : 'Magento Mapped SKUs' ?></h2>
+        <a href="<?= $block->getUrl('brandinventory/data/updates') ?>" class="mm-back">← Back</a>
+    </div>
+
+    <?php if ($isAllView): ?>
+        <div class="mm-info"><strong>View:</strong> All Batches Combined</div>
+    <?php else: ?>
+        <div class="mm-info"><strong>Batch ID:</strong> <?= htmlspecialchars($batchId) ?></div>
+    <?php endif; ?>
+
+    <!-- Filter Form -->
+    <form method="get" id="filter-form">
+        <?php if ($batchId > 0): ?><input type="hidden" name="id" value="<?= htmlspecialchars($batchId) ?>" /><?php endif; ?>
+        <?php if ($pageSize != 50): ?><input type="hidden" name="pageSize" value="<?= $pageSize ?>" /><?php endif; ?>
+
+        <div class="mm-filter-bar">
+            <div class="mm-filter-group">
+                <label>Linked SKU</label>
+                <input type="text" name="filter_linked_sku" id="filter-linked-sku" value="<?= htmlspecialchars($filterLinkedSku) ?>" placeholder="Search..." />
+            </div>
+            <div class="mm-filter-group">
+                <label>Status</label>
+                <select name="filter_status" id="filter-status">
+                    <option value="">All</option>
+                    <?php foreach ($uniqueStatuses as $st): ?>
+                        <option value="<?= htmlspecialchars($st) ?>" <?= ($filterStatus === $st) ? 'selected' : '' ?>><?= htmlspecialchars($st) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="mm-filter-group">
+                <label>Source</label>
+                <select name="filter_source" id="filter-source">
+                    <option value="">All</option>
+                    <?php foreach ($uniqueSources as $src): ?>
+                        <option value="<?= htmlspecialchars($src) ?>" <?= ($filterSource === $src) ? 'selected' : '' ?>><?= htmlspecialchars($src) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="mm-filter-group">
+                <label>&nbsp;</label>
+                <button type="submit" class="mm-btn mm-btn-filter">Filter</button>
+            </div>
+            <div class="mm-filter-group">
+                <label>&nbsp;</label>
+                <a href="<?= $block->getUrl('*/*/*', $baseParams) ?>" class="mm-btn mm-btn-clear" id="btn-clear-filters">Clear</a>
+            </div>
+        </div>
+    </form>
+
+    <?php if (empty($rows)): ?>
+        <div id="no-results-message" class="mm-no-results">
+            <div class="mm-no-results-icon">🔍</div>
+            <div class="mm-no-results-text">No records found</div>
+        </div>
+    <?php else: ?>
+        <!-- Toolbar -->
+        <div class="mm-toolbar">
+            <div class="mm-per-page">
+                <form method="get" style="display:inline;">
+                    <?php if ($batchId > 0): ?><input type="hidden" name="id" value="<?= htmlspecialchars($batchId) ?>" /><?php endif; ?>
+                    <?php if ($filterLinkedSku): ?><input type="hidden" name="filter_linked_sku" value="<?= htmlspecialchars($filterLinkedSku) ?>" /><?php endif; ?>
+                    <?php if ($filterStatus): ?><input type="hidden" name="filter_status" value="<?= htmlspecialchars($filterStatus) ?>" /><?php endif; ?>
+                    <?php if ($filterSource): ?><input type="hidden" name="filter_source" value="<?= htmlspecialchars($filterSource) ?>" /><?php endif; ?>
+                    <label>Per page:
+                        <select name="pageSize" onchange="this.form.submit()">
+                            <?php foreach ([10,25,50,100,200] as $opt): ?>
+                                <option value="<?= $opt ?>" <?= ($pageSize == $opt) ? 'selected' : '' ?>><?= $opt ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                </form>
+            </div>
+            <?php if ($batchId > 0): ?>
+                <a href="<?= $block->getUrl('brandinventory/data/download') ?>?batch_id=<?= urlencode($batchId) ?>&type=report_manual" class="mm-export">⬇ Export CSV</a>
+            <?php endif; ?>
+        </div>
+
+        <!-- Table -->
+        <table class="mm-table" id="manual-match-table">
+            <thead>
+                <tr>
+                    <?php if ($isAllView): ?><th>Batch ID</th><?php endif; ?>
+                    <th>ID</th>
+                    <th>Brand SKU</th>
+                    <th>Size</th>
+                    <th>Color</th>
+                    <th>Linked SKU</th>
+                    <th>Status</th>
+                    <th>Source</th>
+                    <th>Created At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($rows as $r): ?>
+                <?php $bcs = $r['brand_created_sku_decoded'] ?? []; ?>
+                <?php $rowId = (int)($r['id'] ?? 0); ?>
+                <?php $rowBatchId = (int)($r['batch_id'] ?? 0); ?>
+                <tr data-row-id="<?= $rowId ?>">
+                    <?php if ($isAllView): ?><td><?= $rowBatchId ?></td><?php endif; ?>
+                    <td><?= $rowId ?></td>
+                    <td><?= htmlspecialchars($bcs['brand_sku'] ?? ($bcs['style_group'] ?? '-')) ?></td>
+                    <td><?= htmlspecialchars($bcs['size'] ?? '-') ?></td>
+                    <td><?= htmlspecialchars($bcs['color'] ?? '-') ?></td>
+                    <td class="linked-sku-cell">
+                        <span class="linked-sku-text"><?= htmlspecialchars($r['linked_sku'] ?? '') ?></span>
+                        <input type="text" class="linked-sku-input" value="<?= htmlspecialchars($r['linked_sku'] ?? '') ?>" style="display:none;" />
+                    </td>
+                    <td><?= htmlspecialchars($r['status'] ?? '') ?></td>
+                    <td><?= htmlspecialchars($r['source_code'] ?? '') ?></td>
+                    <td><?= htmlspecialchars($r['created_date'] ?? '') ?></td>
+                    <td class="mm-actions">
+                        <button type="button" class="mm-btn mm-btn-edit btn-edit" data-id="<?= $rowId ?>" data-batch="<?= htmlspecialchars($rowBatchId) ?>">Edit</button>
+                        <button type="button" class="mm-btn mm-btn-save btn-save" data-id="<?= $rowId ?>" data-batch="<?= htmlspecialchars($rowBatchId) ?>" style="display:none;">Save</button>
+                        <button type="button" class="mm-btn mm-btn-cancel btn-cancel" data-id="<?= $rowId ?>" style="display:none;">Cancel</button>
+                        <button type="button" class="mm-btn mm-btn-delete btn-delete" data-id="<?= $rowId ?>" data-batch="<?= htmlspecialchars($rowBatchId) ?>">Delete</button>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <?php if ($totalPages > 1): ?>
+            <div class="mm-pagination">
+                <?php if ($current > 1): ?>
+                    <a href="<?= $block->getUrl('*/*/*', array_merge($baseParams, ['page' => $current - 1])) ?>">← Prev</a>
+                <?php endif; ?>
+
+                <?php
+                $start = max(1, $current - 2);
+                $end   = min($totalPages, $current + 2);
+
+                if ($start > 1) {
+                    echo '<a href="' . $block->getUrl('*/*/*', array_merge($baseParams, ['page' => 1])) . '">1</a>';
+                    if ($start > 2) echo '<span class="mm-page-dots">...</span>';
+                }
+
+                for ($p = $start; $p <= $end; $p++):
+                    if ($p == $current): ?>
+                        <span class="mm-page-current"><?= $p ?></span>
+                    <?php else: ?>
+                        <a href="<?= $block->getUrl('*/*/*', array_merge($baseParams, ['page' => $p])) ?>"><?= $p ?></a>
+                    <?php endif;
+                endfor;
+
+                if ($end < $totalPages) {
+                    if ($end < $totalPages - 1) echo '<span class="mm-page-dots">...</span>';
+                    echo '<a href="' . $block->getUrl('*/*/*', array_merge($baseParams, ['page' => $totalPages])) . '">' . $totalPages . '</a>';
+                }
+                ?>
+
+                <?php if ($current < $totalPages): ?>
+                    <a href="<?= $block->getUrl('*/*/*', array_merge($baseParams, ['page' => $current + 1])) ?>">Next →</a>
+                <?php endif; ?>
+
+                <span class="mm-page-info">Page <?= $current ?> of <?= $totalPages ?> (<?= $totalRecords ?> records)</span>
+            </div>
+        <?php endif; ?>
+    <?php endif; ?>
+</div>
+
+<script>
+require(['jquery'], function($) {
+    var FORM_KEY = '<?= $block->getFormKey() ?>';
+
+    $(document).on('click', '.btn-edit', function() {
+        var $btn = $(this);
+        var $row = $btn.closest('tr');
+        var $cell = $row.find('.linked-sku-cell');
+        $cell.find('.linked-sku-text').hide();
+        $cell.find('.linked-sku-input').show().focus();
+        $btn.hide();
+        $row.find('.btn-save, .btn-cancel').show();
+    });
+
+    $(document).on('click', '.btn-cancel', function() {
+        var $btn = $(this);
+        var $row = $btn.closest('tr');
+        var $cell = $row.find('.linked-sku-cell');
+        var original = $cell.find('.linked-sku-text').text();
+        $cell.find('.linked-sku-input').val(original).hide();
+        $cell.find('.linked-sku-text').show();
+        $btn.hide();
+        $row.find('.btn-save').hide();
+        $row.find('.btn-edit').show();
+    });
+
+    $(document).on('click', '.btn-save', function() {
+        var $btn = $(this);
+        var $row = $btn.closest('tr');
+        var rowId = $btn.data('id');
+        var batchId = $btn.data('batch');
+        var $cell = $row.find('.linked-sku-cell');
+        var newSku = $cell.find('.linked-sku-input').val().trim();
+        var oldSku = $cell.find('.linked-sku-text').text();
+
+        if (newSku === oldSku) {
+            $row.find('.btn-cancel').click();
+            return;
+        }
+
+        $btn.prop('disabled', true).text('Saving...');
+
+        $.ajax({
+            url: '<?= $block->getUrl("brandinventory/data/updates") ?>',
+            type: 'POST',
+            data: {
+                action: 'updateManualMatch',
+                id: rowId,
+                batch_id: batchId,
+                linked_sku: newSku,
+                form_key: FORM_KEY
+            },
+            success: function(res) {
+                if (res.success) {
+                    $cell.find('.linked-sku-text').text(newSku).show();
+                    $cell.find('.linked-sku-input').hide();
+                    $btn.prop('disabled', false).text('Save').hide();
+                    $row.find('.btn-cancel').hide();
+                    $row.find('.btn-edit').show();
+                } else {
+                    alert(res.message || 'Update failed');
+                    $btn.prop('disabled', false).text('Save');
+                }
+            },
+            error: function() {
+                alert('Error saving data');
+                $btn.prop('disabled', false).text('Save');
+            }
+        });
+    });
+
+    $(document).on('click', '.btn-delete', function() {
+        var $btn = $(this);
+        var rowId = $btn.data('id');
+        var batchId = $btn.data('batch');
+
+        if (!confirm('Delete this manual match record?')) return;
+
+        $btn.prop('disabled', true).text('Deleting...');
+
+        $.ajax({
+            url: '<?= $block->getUrl("brandinventory/data/updates") ?>',
+            type: 'POST',
+            data: {
+                action: 'deleteManualMatch',
+                id: rowId,
+                batch_id: batchId,
+                form_key: FORM_KEY
+            },
+            success: function(res) {
+                if (res.success) {
+                    $btn.closest('tr').fadeOut(200, function() { $(this).remove(); });
+                } else {
+                    alert(res.message || 'Delete failed');
+                    $btn.prop('disabled', false).text('Delete');
+                }
+            },
+            error: function() {
+                alert('Error deleting record');
+                $btn.prop('disabled', false).text('Delete');
+            }
+        });
+    });
+});
+</script>

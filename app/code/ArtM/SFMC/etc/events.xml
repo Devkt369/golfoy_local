@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+	<event name="adminhtml_customer_save_after">
+		<observer name="artm_sfmc_observer_adminhtml_customersaveafter_adminhtml_customer_save_after" instance="ArtM\SFMC\Observer\Adminhtml\CustomerSaveAfter"/>
+	</event>
+	<event name="catalog_product_save_before">
+        <observer name="artm_sfmc_observer_catalog_product_save_before" instance="ArtM\SFMC\Observer\Catalog\ProductSaveBefore"/>
+    </event>
+	<event name="sales_order_save_after">
+        <observer name="artm_sfmc_observer_sales_order_save_after" instance="ArtM\SFMC\Observer\Sales\OrderSaveAfter"/>
+    </event>
+	<event name="checkout_onepage_controller_success_action">
+        <observer name="tracking_order_send" instance="ArtM\SFMC\Observer\Frontend\Order\CreateAfter" />
+    </event>
+</config>

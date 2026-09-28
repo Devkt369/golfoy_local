@@ -1,0 +1,235 @@
+<?php
+/**
+ * Category layered navigation
+ * @var $block \Magento\LayeredNavigation\Block\Navigation
+ */
+?>
+<?php if ($block->canShowBlock()) : ?>
+    <?php
+    /* collapsible filters enabled... */
+    $_is_collapsible = $ajax_helper->getConfigValue('collapse');
+    $_horizontal_filters = $ajax_helper->getHorizontalFilters();
+    $_hide_attributes = $ajax_helper->getFiltersToHide();
+    $_hide_state = $ajax_helper->getConfigValue('hide_state');
+    $_grouped_filters = $ajax_helper->getGroupedFiltersConfiguration();
+    ?>
+    <div class="block filter <?= ($_is_collapsible) ? 'collapsible-filters' : ""; ?>" id="layered-filter-block">
+        <?php $filtered = !empty($block->getLayer()->getState()->getFilters()) ?>
+        <div class="block-title filter-title" data-count="<?= /* @escapeNotVerified */ $filtered; ?>">
+            <strong data-role="title"><?= /* @escapeNotVerified */ __('Shop By') ?></strong>
+        </div>
+        <div class="block-content filter-content">
+            
+            <?php if (!$_hide_state) :?>
+                <?= $block->getChildHtml('state') ?>
+                <?php if ($block->getLayer()->getState()->getFilters()) : ?>
+                    <div class="block-actions filter-actions">
+                        <a href="<?= /* @escapeNotVerified */ $block->getClearUrl() ?>" 
+                           class="action clear filter-clear" 
+                           id="layered-navigation-filter-clear"><span><?= /* @escapeNotVerified */ __('Clear All') ?></span></a>
+                    </div>
+                <?php endif; ?>
+            <?php else:?>
+                    <?php
+                    $stateBlock = $block->getChildBlock('state');
+                    $_filters = $stateBlock->getActiveFilters();
+                    if (!empty($_filters)) {
+                        foreach ($_filters as $_filter) {
+                            ?>
+                            <a style="display: none;" 
+                               class="action remove filter-state-<?= $_filter->getFilter()->getRequestVar(); ?>" 
+                               data-filter-value="<?=((is_array($_filter->getValue()) ? join(",", $_filter->getValue()): $_filter->getValue()));?>">&nbsp;</a>
+                        <?php
+                        }
+                    }
+                    ?>
+            <?php endif; ?>
+            
+            <?php $filters_to_show = [];
+            $horizontal_filters_to_show = [];
+            foreach ($block->getFilters() as $filter) {
+                $_code = $filter->getCode();
+                if ($filter->getItemsCount() && !in_array($_code, $_hide_attributes)) {
+                    /*show on horizontal block or default - left */
+                    /* set tooltip for filter title */
+                    $_tooltip_icon = false;
+                    $_tooltip_html = false;
+                    #load static block html
+                    $_cms_block_id = $ajax_helper->getTooltipCode($_code);
+                    $_cms_block_content = false;
+                    if ($_cms_block_id) {
+                            $_cms_block_content = $block->getLayout()->createBlock(\Magento\Cms\Block\Block::class)->setBlockId($_cms_block_id)->toHtml();
+                    }
+                    if ($_cms_block_content) {
+                        # set tooltip icon html
+                        $_tooltip_icon = '<span class="ajax-layered-navigation-tooltip" data-tooltip-content="#'
+                            . $_code .'-tooltip-content"><span>?</span></span>';
+                        $_tooltip_html =  '<div class="tooltip-content" id="'. $_code
+                            .'-tooltip-content"  style="display:none;" >'.  $_cms_block_content .'</div>';
+                    }
+                    
+                    /* check if attribute in grouped block */
+                    $filterGroup = $ajax_helper->getAttributeGroupBlock($_code);
+                    
+                    $filter_code = ($filterGroup)? $filterGroup: $_code;
+                    $filter_title = ($filterGroup)? $filterGroup: __($filter->getName());
+                    
+                    # data in horizontal filters
+                    if (!empty($_horizontal_filters) && in_array($_code, $_horizontal_filters)) {
+                        if($filterGroup  && isset($horizontal_filters_to_show[$filterGroup])){
+                            $groupFilterData = $horizontal_filters_to_show[$filterGroup];
+                            # insert title in filter
+                            $html = $groupFilterData["html"] . "<br/><p>" . __($filter->getName()) . "</p>" . $block->getChildBlock('renderer')->render($filter);
+                            $expanded = ($groupFilterData["expanded"] || $filter->isFilterActive() || $ajax_helper->isFilterExpanded($_code));
+                        }else{
+                            # if part of filter group, insert subtitle
+                            $html = (($filterGroup)?"<p>" . __($filter->getName()) . "</p>":"") . $block->getChildBlock('renderer')->render($filter);
+                            $expanded = $filter->isFilterActive() || $ajax_helper->isFilterExpanded($_code);
+                        }
+                        
+                        $filterData = [
+                            'filter' => $filter,
+                            'tooltip_icon' => $_tooltip_icon,
+                            'tooltip_html'  => $_tooltip_html,
+                            'title' => $filter_title,
+                            'html' => $html,
+                            'expanded' => $expanded
+                        ];
+
+                        $horizontal_filters_to_show[$filter_code] = $filterData;
+                    } else { ## blocks in left layered navigation
+                        if($filterGroup  && isset($filters_to_show[$filterGroup])){
+                            $groupFilterData = $filters_to_show[$filterGroup];
+                            # insert title in filter
+                            $html = $groupFilterData["html"] . "<br/><p>" . __($filter->getName()) . "</p>" . $block->getChildBlock('renderer')->render($filter);
+                            $expanded = ($groupFilterData["expanded"] || $filter->isFilterActive() || $ajax_helper->isFilterExpanded($_code));
+                    } else {
+                            # if part of filter group, insert subtitle
+                            $html = (($filterGroup)?"<p>" . __($filter->getName()) . "</p>":"") . $block->getChildBlock('renderer')->render($filter);
+                            $expanded = $filter->isFilterActive() || $ajax_helper->isFilterExpanded($_code);
+                        }
+                        
+                        $filterData = [
+                            'filter' => $filter,
+                            'tooltip_icon' => $_tooltip_icon,
+                            'tooltip_html'  => $_tooltip_html,
+                            'title' => $filter_title,
+                            'html' => $html,
+                            'expanded' => $expanded
+                        ];
+                    
+                        $filters_to_show[$filter_code] = $filterData;
+                    }
+                }
+            }
+            
+            ?>
+
+            <?php if (!empty($filters_to_show)) :?>
+                <!-- <strong role="heading" 
+                        aria-level="2" 
+                        class="block-subtitle filter-subtitle" id="filters"><?= /* @escapeNotVerified */ __('Filters') ?></strong> -->
+                <div class="custom_toolbar_category_page">
+                <div class="filter_heading visible-xs close">
+                    <div class="filter_svg_icon filter_sort_icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" width="300" height="300"><g width="100%" height="100%" transform="matrix(1,0,0,1,0,0)"><g>
+	
+                                <linearGradient id="Settings_00000075861288888784205750000000478932812083334023_" gradientUnits="userSpaceOnUse" x1="0" y1="256" x2="512" y2="256">
+                                <stop offset="0" style="" stop-color="rgb(157, 214, 252)"/>
+                                <stop offset="0.0056" style="" stop-color="rgb(157, 214, 252)"/>
+                                <stop offset="1" style="" stop-color="rgb(209, 127, 247)"/>
+                            </linearGradient>
+                            
+                                <path id="Settings" style="stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 10;" d="&#10;&#9;&#9;M20,96h80 M180,96h312 M140,56c-22.091,0-40,17.909-40,40s17.909,40,40,40s40-17.909,40-40S162.091,56,140,56z M20,256h312&#10;&#9;&#9; M412,256h80 M372,216c-22.091,0-40,17.909-40,40s17.909,40,40,40s40-17.909,40-40S394.091,216,372,216z M20,416h80 M180,416h312&#10;&#9;&#9; M140,376c-22.091,0-40,17.909-40,40s17.909,40,40,40s40-17.909,40-40S162.091,376,140,376z" fill="none" fill-opacity="1" stroke="#000000ff" stroke-opacity="1" data-original-stroke-color="#000000ff" stroke-width="20" data-original-stroke-width="40"/>
+                        </g></g></svg>
+                    </div>
+                    <div class="filter_heading_text filter_sort_text">
+                        Filters
+                    </div>
+                </div>
+                <div class="sorting_overlay visible-xs">
+                    
+                    <div class="sort_svg_icon filter_sort_icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" id="Layer_1" height="300" viewBox="0 0 512 512" width="300" data-name="Layer 1" version="1.1"><g width="100%" height="100%" transform="matrix(1,0,0,1,0,0)"><path d="m213.708 12v488a12 12 0 0 1 -20.485 8.485l-114.054-114.053a12 12 0 0 1 16.971-16.971l93.568 93.568v-459.029a12 12 0 0 1 24 0zm219.123 105.568-114.054-114.053a12 12 0 0 0 -20.485 8.485v488a12 12 0 0 0 24 0v-459.029l93.568 93.568a12 12 0 0 0 16.971-16.971z" fill="#000000" fill-opacity="1" data-original-color="#000000ff" stroke="none" stroke-opacity="1"/></g></svg>
+                    </div>
+                    <div class="sort_heading_text filter_sort_text">
+                        Sort
+                    </div>
+                </div>
+            </div>
+                <!-- Custom Sort Overlay for Mobile -->
+                <div class="custom-sort-overlay visible-xs">
+                    <div class="custom-sort-options"></div>
+                </div>
+                
+                <div class="filter-options" id="narrow-by-list" data-role="content">
+                    <div class="filter_heading_popup">Filters</div>
+                    <?php foreach ($filters_to_show as $_attribute_code => $filter_info) :
+                        $filter = $filter_info["filter"];
+                        $tooltip_icon = $filter_info["tooltip_icon"];
+                        $tooltip_html = $filter_info["tooltip_html"];
+                        $filter_title = $filter_info["title"];
+                        $filter_html =  $filter_info["html"];
+                        $filter_expanded = $filter_info['expanded'];
+                        ?>
+                        <?php //$_attribute_code = $filter->getCode(); ?>
+                        <div data-role="collapsible" class="filter-options-item <?php if ($filter_expanded): ?> active <?php endif; ?>">
+                            <div data-role="title" class="filter-options-title"><?= /* @escapeNotVerified */ $filter_title ?><?= $tooltip_icon;?></div>
+                            <div data-role="content" class="filter-options-content" <?php if (!$filter_expanded) :?> style="display:none;" <?php endif; ?>>
+                                <?= /* @escapeNotVerified */ $filter_html; ?>
+                            </div>
+                        </div>
+                        <?= $tooltip_html;?>
+                    <?php endforeach; ?>
+                    <div class="apply-bar">
+                        
+                        <div class="close-icon-category filter_toggler filter-cross-btn visible-xs apply-bar-btn">
+                            Show Results
+                        </div>
+                        <div class="clear_all_button visible-xs">
+                            <div class="filter-cross-btn">
+                                <a href="#" 
+                            class="filter-clear action_click" target="layered-navigation-filter-clear"><span><?= /* @escapeNotVerified */ __('Clear All') ?></span></a>
+                            </div>
+                        </div>
+                        
+                        
+                    </div>
+                    
+                </div>
+            <?php else :?>
+                <script>
+                    require([
+                        'jquery'
+                    ], function ($) {
+                        $('#layered-filter-block').addClass('filter-no-options');
+                    });
+                </script>
+            <?php endif;?>
+            
+            <?php if (!empty($horizontal_filters_to_show)) :?>
+                <div id="horizontal-layered-navigation-container" data-role="content">
+                <?php foreach ($horizontal_filters_to_show as $_attribute_code => $filter_info) :
+                    $filter = $filter_info["filter"];
+                    $tooltip_icon = $filter_info["tooltip_icon"];
+                    $tooltip_html = $filter_info["tooltip_html"];
+                    $filter_title = $filter_info["title"];
+                    $filter_html =  $filter_info["html"];
+                    ?>
+                        <?php //$_attribute_code = $filter->getCode(); ?>
+                        <div data-role="collapsible" 
+                             class="filter-options-item horizontal-filter" 
+                             id="filter-<?= $filter->getCode();?>-container">
+                            <div data-role="title" class="filter-options-title"><?= /* @escapeNotVerified */ $filter_title ?><?= $tooltip_icon;?></div>
+                            <div data-role="content" class="filter-options-content">
+                                <?= /* @escapeNotVerified */ $filter_html; ?>
+                            </div>
+                        </div>
+                    <?= $tooltip_html;?>
+                <?php endforeach; ?>
+                </div>
+            <?php endif;?>
+                
+        </div>
+    </div>
+<?php endif; ?>

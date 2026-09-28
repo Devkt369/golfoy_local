@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">artm_tradein_listing.artm_tradein_listing_data_source</item>
+        </item>
+    </argument>
+    <settings>
+        <spinner>artm_tradein_listing_columns</spinner>
+        <deps>
+            <dep>artm_tradein_listing.artm_tradein_listing_data_source</dep>
+        </deps>
+    </settings>
+    <dataSource name="artm_tradein_listing_data_source" component="Magento_Ui/js/grid/provider">
+        <settings>
+            <storageConfig>
+                <param name="indexField" xsi:type="string">tradein_id</param>
+            </storageConfig>
+            <updateUrl path="mui/index/render"/>
+        </settings>
+        <dataProvider class="ArtM\TradeIn\Ui\DataProvider\TradeInDataProvider" name="artm_tradein_listing_data_source">
+            <settings>
+                <requestFieldName>tradein_id</requestFieldName>
+                <primaryFieldName>tradein_id</primaryFieldName>
+            </settings>
+        </dataProvider>
+    </dataSource>
+    <listingToolbar name="listing_top">
+        <settings>
+            <sticky>true</sticky>
+        </settings>
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <filterSearch name="fulltext"/>
+        <filters name="listing_filters">
+            <filterSelect name="status" provider="${ $.parentName }">
+                <settings>
+                    <captionValue>0</captionValue>
+                    <options class="ArtM\TradeIn\Ui\Component\Listing\Column\Status\Options"/>
+                    <caption translate="true">Select...</caption>
+                    <dataScope>status</dataScope>
+                    <label translate="true">Status</label>
+                </settings>
+            </filterSelect>
+        </filters>
+        <massaction name="listing_massaction">
+            <!-- <action name="delete">
+                <settings>
+                    <confirm>
+                        <message translate="true">Are you sure you want to delete selected items?</message>
+                        <title translate="true">Delete items</title>
+                    </confirm>
+                    <url path="artmtradein/index/massDelete"/>
+                    <type>delete</type>
+                    <label translate="true">Delete</label>
+                </settings>
+            </action> -->
+            <action name="update_status">
+                <settings>
+                    <type>update_status</type>
+                    <label translate="true">Update Status</label>
+                    <url path="artmtradein/index/massUpdateStatus"/>
+                </settings>
+            </action>
+        </massaction>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+    <columns name="artm_tradein_listing_columns">
+        <settings>
+            <editorConfig>
+                <param name="clientConfig" xsi:type="array">
+                    <item name="saveUrl" xsi:type="url" path="artmtradein/index/inlineEdit"/>
+                    <item name="validateBeforeSave" xsi:type="boolean">false</item>
+                </param>
+                <param name="indexField" xsi:type="string">tradein_id</param>
+                <param name="enabled" xsi:type="boolean">true</param>
+                <param name="selectProvider" xsi:type="string">artm_tradein_listing.artm_tradein_listing.artm_tradein_listing_columns.ids</param>
+            </editorConfig>
+            <childDefaults>
+                <param name="fieldAction" xsi:type="array">
+                    <item name="provider" xsi:type="string">artm_tradein_listing.artm_tradein_listing.artm_tradein_listing_columns_editor</item>
+                    <item name="target" xsi:type="string">startEdit</item>
+                    <item name="params" xsi:type="array">
+                        <item name="0" xsi:type="string">${ $.$data.rowIndex }</item>
+                        <item name="1" xsi:type="boolean">true</item>
+                    </item>
+                </param>
+            </childDefaults>
+        </settings>
+        <selectionsColumn name="ids">
+            <settings>
+                <indexField>tradein_id</indexField>
+            </settings>
+        </selectionsColumn>
+        <column name="tradein_id">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">Trade ID</label>
+                <sorting>asc</sorting>
+            </settings>
+        </column>
+        <column name="ad_id">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Ad ID</label>
+            </settings>
+        </column>
+        <column name="images" class="ArtM\TradeIn\Ui\Component\Listing\Column\Images">
+            <settings>
+                <label translate="true">Images</label>
+                <sortable>false</sortable>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+            </settings>
+        </column>
+        <column name="status" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <filter>select</filter>
+                <label translate="true">Status</label>
+                <options class="ArtM\TradeIn\Ui\Component\Listing\Column\Status\Options"/>
+                <dataType>select</dataType>
+                <editor>
+                    <editorType>select</editorType>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">false</rule>
+                    </validation>
+                </editor>
+            </settings>
+        </column>
+        <column name="cust_id">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Customer ID</label>
+            </settings>
+        </column>
+        <column name="email">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Email</label>
+            </settings>
+        </column>
+        <column name="equipment">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Equipment</label>
+            </settings>
+        </column>
+        <column name="brand">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Brand</label>
+            </settings>
+        </column>
+        <column name="model">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Model</label>
+            </settings>
+        </column>
+        <column name="specification">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Specification</label>
+            </settings>
+        </column>
+        <column name="condition">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Condition</label>
+            </settings>
+        </column>
+        <column name="name">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Name</label>
+            </settings>
+        </column>
+        <column name="contact_number">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Contact Number</label>
+            </settings>
+        </column>
+        <column name="created_at" class="Magento\Ui\Component\Listing\Columns\Date" component="Magento_Ui/js/grid/columns/date">
+            <settings>
+                <filter>dateRange</filter>
+                <dataType>date</dataType>
+                <label translate="true">Created At</label>
+                <sorting>desc</sorting>
+            </settings>
+        </column>
+        <column name="payment_method" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <filter>select</filter>
+                <label translate="true">Payment Method</label>
+                <dataType>select</dataType>
+                <options class="ArtM\TradeIn\Ui\Component\Listing\Column\PaymentMethod\Options"/>
+                <editor>
+                    <editorType>select</editorType>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">false</rule>
+                    </validation>
+                </editor>
+            </settings>
+        </column>
+        <column name="ref_id">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Ref ID</label>
+                <editor>
+                    <editorType>text</editorType>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">false</rule>
+                    </validation>
+                </editor>
+            </settings>
+        </column>
+        <!-- all all thse menu `purchase_date`, `invoice_file`, `purchased_from`, `seller_name`, `order_id`, -->
+        <column name="purchase_date">
+            <settings>
+                <filter>dateRange</filter>
+                <label translate="true">Purchase Date</label>
+                <dataType>date</dataType>
+            </settings>
+        </column>
+        <actionsColumn name="invoice_file" class="ArtM\TradeIn\Ui\Component\Listing\Column\ViewInvoiceFile">
+            <settings>
+                <label translate="true">Invoice File</label>
+                <sortable>false</sortable>
+                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+            </settings>
+        </actionsColumn>
+
+        <column name="purchased_from">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Purchased From</label>
+            </settings>
+        </column>
+        <column name="seller_name">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Seller Name</label>
+            </settings>
+        </column>
+        <column name="order_id">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Order ID</label>
+            </settings>
+        </column>
+        <column name="amount">
+            <settings>
+                <filter>textRange</filter>
+                <label translate="true">Amount</label>
+                <editor>
+                    <editorType>text</editorType>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">false</rule>
+                        <rule name="validate-number" xsi:type="boolean">true</rule>
+                    </validation>
+                </editor>
+            </settings>
+        </column>
+        <column name="is_listed" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <filter>select</filter>
+                <label translate="true">Listed</label>
+                <dataType>select</dataType>
+                <options class="ArtM\TradeIn\Ui\Component\Listing\Column\Listed\Options"/>
+                <editor>
+                    <editorType>select</editorType>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">false</rule>
+                    </validation>
+                </editor>
+            </settings>
+        </column>
+        <column name="customer_expected_price">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Customer Expected Price</label>
+                <editor>
+                    <editorType>text</editorType>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">false</rule>
+                    </validation>
+                </editor>
+            </settings>
+        </column>
+        <column name="show_customer_expected_price" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <filter>select</filter>
+                <label translate="true">Show Cust. Expected Price</label>
+                <dataType>select</dataType>
+                <options class="ArtM\TradeIn\Ui\Component\Listing\Column\YesNo\Options"/>
+                <editor>
+                    <editorType>select</editorType>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">false</rule>
+                    </validation>
+                </editor>
+            </settings>
+        </column>
+        <column name="our_offered_price">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Our Offered Price</label>
+                <editor>
+                    <editorType>text</editorType>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">false</rule>
+                    </validation>
+                </editor>
+            </settings>
+        </column>
+        <column name="show_our_offered_price" component="Magento_Ui/js/grid/columns/select">
+            <settings>
+                <filter>select</filter>
+                <label translate="true">Show Our Offered Price</label>
+                <dataType>select</dataType>
+                <options class="ArtM\TradeIn\Ui\Component\Listing\Column\YesNo\Options"/>
+                <editor>
+                    <editorType>select</editorType>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">false</rule>
+                    </validation>
+                </editor>
+            </settings>
+        </column>
+        <column name="comment_history">
+            <settings>
+                <filter>text</filter>
+                <label translate="true">Comment History</label>
+                <editor>
+                    <editorType>text</editorType>
+                    <validation>
+                        <rule name="required-entry" xsi:type="boolean">false</rule>
+                    </validation>
+                </editor>
+            </settings>
+        </column>
+        <!-- <actionsColumn name="actions" class="ArtM\TradeIn\Ui\Component\Listing\Column\Actions">
+            <settings>
+                <indexField>tradein_id</indexField>
+                <resizeEnabled>false</resizeEnabled>
+                <resizeDefaultWidth>107</resizeDefaultWidth>
+            </settings>
+        </actionsColumn> -->
+    </columns>
+</listing>

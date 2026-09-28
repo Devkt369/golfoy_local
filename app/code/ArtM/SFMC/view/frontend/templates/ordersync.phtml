@@ -1,0 +1,27 @@
+<?php
+/** @var \Magento\Checkout\Block\Onepage\Success $block */
+$orderId = $block->getOrderId(); // works for single order
+return;
+?>
+<?php if ($orderId): ?>
+    <script type="text/javascript">
+        require(['jquery'], function($) {
+            $(document).ready(function() {
+                var orderId = <?= $orderId ?>;
+                $.ajax({
+                    url: '<?php echo $block->getUrl('sfmc/ajaxsync/ordersync'); ?>',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: { order_id: orderId },
+                    success: function(response) {
+                        console.log('Order Synced', response)
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', error); 
+                    }
+                });
+            });
+        });
+    </script>
+<?php endif; ?>
+

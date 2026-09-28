@@ -1,0 +1,153 @@
+<style>
+    .attribute-set-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        margin-bottom: 5px;
+    }
+
+    .attribute-set-name {
+        font-size: 16px;
+        font-weight: bold;
+        margin-right: 10px;
+        flex-grow: 1;
+        text-align: left;
+    }
+
+    .crone_form {
+        width: 100%;
+        max-width: 790px;
+        margin: auto;
+        padding: 10px;
+    }
+
+    .attribute-set-button {
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .crone_form div:nth-child(odd) {
+        background-color: #f2f2f2;
+    }
+    .updated_date{
+        margin-right: 15px;
+}
+    
+</style> 
+<?php
+
+if(isset($_GET['pin']) && $_GET['pin'] == 'Gol_Artamis_Dev1'){
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$helper = $this->helper('ArtM\RecommendedFilter\Helper\Data');
+$attributeSetCollection = $objectManager->create('Magento\Eav\Model\ResourceModel\Entity\Attribute\Set\CollectionFactory')->create();
+$attributeSetCollection->addFieldToFilter('entity_type_id', 4);
+$attributeSetCollection->setOrder('attribute_set_name', 'ASC');
+echo "<div class=\"crone_form\">";
+foreach ($attributeSetCollection as $attributeSet) {
+    $lastCron = $helper->CronLogStatus($attributeSet->getAttributeSetId());
+    $btnclss = 'btn-primary';
+    $btntxt = 'Run Cron';
+    $lastupdated = "";
+    
+    if (!empty($lastCron)) {
+
+        if ($lastCron['status'] == 'processing') {
+            $btnclss = 'btn-danger';
+            $btntxt = 'Processing';
+        } elseif ($lastCron['status'] == 'compelete') {
+            $btnclss = 'btn-success';
+            $btntxt = 'Compelete';
+        }
+        $lastupdated = $lastCron['cron_last_updated_date_time'];
+    }
+    if($lastupdated !=''){
+        $objdate = new DateTime($lastupdated);
+        $objdate->setTimezone(new DateTimeZone('Asia/Kolkata')); 
+        $lastupdateddate = $objdate->format('M d, Y, h:i:s A');
+        $lastupdateddate = "updated: ".$lastupdateddate;
+
+    }else{
+        $lastupdateddate ='';
+    }
+    
+
+    // print_r($attributeSet->getData());attribute_set_id
+    echo "<div class=\"attribute-set-container\">";
+    echo "<span class=\"attribute-set-name\">" . $attributeSet->getAttributeSetName() . "</span>";
+    echo "<div class='updated_date'>" . $lastupdateddate . "</div>";
+    echo "<button class=\"attribute-set-button $btnclss\" type = 'partial' rel = '" . $attributeSet->getAttributeSetId() . "'>$btntxt</button>";
+    if(isset($lastCron['status'])) { 
+        if($lastCron['status'] == 'compelete') {  
+        echo "&nbsp; <button class=\"attribute-set-button btn-primary\" type = 'full' rel = '" . $attributeSet->getAttributeSetId() . "'> Re-run </button>";
+        }      
+    }
+    echo "</div>";
+}
+echo '<button class= "btn-primary" style="float:right;" id ="setsortingpoints"> Set sortingpoints</button>';
+echo "</div>";
+
+}else{ ?>
+    <script> window.location.href = '<?php echo $this->getUrl(); ?>';</script>
+  <?php  echo "<h2><center>Unauthorized</center></h2>";
+}
+?>
+
+<script type="text/javascript">
+    require(['jquery', 'bootstrap'], function(jQuery) {
+        jQuery(document).on("click", ".attribute-set-button", function() {
+            var rel = jQuery(this).attr("rel");
+            var type = jQuery(this).attr("type");
+            var el = jQuery(this);
+            el.text('Processing');
+            el.removeClass('btn-primary').addClass('btn-info');
+            jQuery.ajax({
+                url: "/recommendedfilter/reindex/ajaxcron",
+                type: "POST",
+                data: {
+                    rel: rel,
+                    type: type
+                },
+                dataType: 'json',
+                showLoader: true,
+                success: function(res) {
+                    if (res.result) {
+                        el.text('Complete');
+                        el.removeClass('btn-info').addClass('btn-success');
+                    } else {
+                        el.text('Processing');
+                        el.removeClass('btn-info').addClass('btn-danger');
+                    }
+                }
+            });
+        });
+        jQuery(document).on("click", "#setsortingpoints", function() {           
+            var el = jQuery(this);
+            el.text('Processing');
+            el.removeClass('btn-primary').addClass('btn-info');
+            jQuery.ajax({
+                url: "/recommendedfilter/reindex/ajaxsetpts",
+                dataType: 'json',
+                showLoader: true,
+                success: function(res) {
+                    if (res.result) {
+                        el.text('Complete');
+                        el.removeClass('btn-info').addClass('btn-success');
+                    } else {
+                        el.text('Processing');
+                        el.removeClass('btn-info').addClass('btn-danger');
+                    }
+                }
+            });
+        });
+    });
+</script>

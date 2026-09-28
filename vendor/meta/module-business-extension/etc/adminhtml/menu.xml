@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Meta_BusinessExtension::facebook"
+             title="Facebook and Instagram"
+             translate="title"
+             module="Meta_BusinessExtension"
+             sortOrder="50"
+             dependsOnModule="Meta_BusinessExtension"
+             resource="Meta_BusinessExtension::facebook"/>
+        <add id="Meta_BusinessExtension::facebook_business_extension"
+             title="Overview"
+             translate="title"
+             module="Meta_BusinessExtension"
+             parent="Meta_BusinessExtension::facebook"
+             sortOrder="10"
+             dependsOnModule="Meta_BusinessExtension"
+             action="fbeadmin/setup/index"
+             resource="Meta_BusinessExtension::facebook"/>
+        <add id="Meta_BusinessExtension::configuration"
+             title="Configuration"
+             translate="title"
+             module="Meta_BusinessExtension"
+             parent="Meta_BusinessExtension::facebook"
+             sortOrder="20"
+             dependsOnModule="Meta_BusinessExtension"
+             action="adminhtml/system_config/edit/section/facebook_business_extension"
+             resource="Meta_BusinessExtension::facebook"/>
+    </menu>
+</config>

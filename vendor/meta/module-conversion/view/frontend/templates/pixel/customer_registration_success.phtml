@@ -1,0 +1,35 @@
+<?php
+/**
+ * @var \Meta\Conversion\Block\Pixel\CustomerRegistrationSuccess $block
+ * @var $escaper \Magento\Framework\Escaper
+ */
+$trackerUrl = $block->getTrackerUrl();
+?>
+<?php if ($block->getFacebookPixelID()) { ?>
+    <script type="text/x-magento-init">
+        {
+            "*": {
+                "Meta_Conversion/js/customerRegistration": {
+                    "url" : "<?= $escaper->escapeUrl($trackerUrl); ?>",
+                    "payload": <?= /* @noEscape */
+                    json_encode([
+                        "eventName" => $block->getEventToObserveName(),
+                        "eventId" => $block->getEventId()
+                    ]) ?>,
+                    "browserEventData": <?= /* @noEscape */
+                    json_encode([
+                    'fbAgentVersion' => $block->getFacebookAgentVersion(),
+                    'fbPixelId' => $block->getFacebookPixelID(),
+                    'source' => $block->getSource(),
+                    'pluginVersion' => $block->getPluginVersion(),
+                    'track' => 'track',
+                    'event' => 'CompleteRegistration',
+                    'payload' => [
+                    'currency' => $block->getCurrency()
+                    ]
+                    ]) ?>
+        }
+    }
+}
+    </script>
+<?php } ?>

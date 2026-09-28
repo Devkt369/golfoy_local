@@ -1,0 +1,1924 @@
+<?php
+return;
+?>
+
+<style>
+    .input_fields {
+        /*        border: 1px solid #e9e9e9;*/
+        padding: 10px;
+        padding-bottom: 0px;
+        margin: 10px 0px 0px;
+        border-radius: 5px;
+    }
+
+    .account_existed label,
+    div#refund_upi_text label,
+    .account_new {
+        color: #646464;
+    }
+
+    div#refund_upi_text {
+        margin-left: 14px;
+        border: 1px solid #e9e9e9;
+        border-radius: 5px;
+    }
+
+    .refund_types_block_inside_single.refund-upi {
+        margin-bottom: 10px;
+    }
+
+    .refund_types_block_inside_single.refund-upi label.return_method_label {
+        width: 90%;
+    }
+
+    .refund-upi label.return_method_label p {
+        max-width: 300px;
+    }
+
+    .input_fields input,
+    .input_fields textarea,
+    .input_fields select {
+        background-color: white !important;
+        border: 1px solid #cdcdcd !important;
+        padding-left: 10px !important;
+        border-radius: 5px;
+    }
+
+    .row.input_fields.main_details>div {
+        border-right: 1px solid #e9e9e9;
+    }
+
+    .row.product_info_return {
+        border-bottom: 1px solid #e9e9e9;
+        margin-bottom: 0px;
+        padding-bottom: 5px;
+        padding: 10px !important;
+    }
+
+    .input_fields.reason_and_photo>div:first-child {
+        border-right: 1px solid #e9e9e9;
+        min-height: 120px;
+    }
+
+    .refund_types_block_inside>div {
+        display: inline-block;
+        width: 100%;
+    }
+
+    body.account main#maincontent>.columns {
+        max-width: 1280px;
+        margin: auto;
+    }
+
+    .return_form_form_container>label {
+        border-bottom: 1px solid #e9e9e9;
+        display: inline-block;
+        width: 100%;
+        padding-bottom: 8px;
+    }
+
+    select#firstreason option:first-child {
+        color: #74777c;
+    }
+
+    /*select:invalid option{
+        color: black;
+    }*/
+    select:invalid {
+        color: #74777c;
+    }
+
+    select:invalid option:nth-child(2),
+    select:invalid option:nth-child(3),
+    select:invalid option:nth-child(4),
+    select:invalid option:nth-child(5),
+    select:invalid option:nth-child(6) {
+        /*        color: #74777c;*/
+        color: black;
+    }
+
+    select:focus {
+        box-shadow: none !important;
+    }
+
+    .account_existed {
+        display: inline-block;
+    }
+
+    .account_existed>label {
+        border: 1px solid #e9e9e9;
+        display: inline-block;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        padding: 10px 15px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    .account_existed.account_number_return_replace input {
+        display: none;
+    }
+
+    .account_new.account_number_return_replace input {
+        display: none;
+    }
+
+    .account_new.account_number_return_replace>label:after {
+        content: "+";
+    }
+
+    .account_new.account_number_return_replace>label {
+        border: 1px solid #a7a6a6;
+        padding: 0px 14px;
+        display: inline-block;
+        font-size: 38px;
+        font-weight: 300;
+        line-height: 45px;
+        padding-top: 7px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .account_new.account_number_return_replace.selected>label {
+        border: 2px solid #a7a6a6;
+        font-weight: 300;
+    }
+
+    .account_existed .bank_branch,
+    {
+    opacity: .8;
+    font-weight: 500;
+    text-transform: lowercase;
+    font-size: 12px;
+    margin-bottom: 15px;
+    }
+
+    div#refund_bank_text_fields {
+        max-width: 300px;
+        /* width: 100%; */
+        margin-top: 10px;
+        padding-left: 10px;
+    }
+
+    span#ifscdetail {
+        display: inline-block;
+    }
+
+    div#refund_bank_text,
+    .payment_method_subcontent {
+        padding-left: 10px;
+        padding: 10px;
+    }
+
+    .account_existed.account_number_return_replace.selected label {
+        border: 1px solid #adadad;
+        box-shadow: 0px 0px 4px 0px #b9b9b9;
+    }
+
+    .photo_subtitle {
+        color: #707070;
+        font-weight: 400;
+        font-size: 10px;
+    }
+
+    div#review-drag-area {
+        border: 3px solid #eef2f3;
+        background-color: #eef2f3;
+        border-radius: 10px;
+    }
+
+    div#review-drag-area p {
+        color: #93a0a6;
+        text-align: center;
+    }
+
+    #cancelcustomform .customError {
+        border: 1px solid #e60023 !important;
+    }
+
+    .payment_method_subcontent p {
+        margin-bottom: 0px;
+    }
+
+    .account_existed.account_number_return_replace.selected {
+        opacity: 1;
+    }
+
+    .account_existed.account_number_return_replace {
+        opacity: .6;
+    }
+
+    .account_existed.account_number_return_replace .bank_name {
+        font-weight: 600;
+        color: black;
+    }
+
+    .payment_method_subcontent p {
+        font-weight: 500;
+    }
+
+    @media only screen and (max-width:480px) {
+
+        /*.refund_types_block_inside_single, .refund_types_block_inside_single > label {
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+            margin: auto;
+        }
+        .refund_types_block_inside {
+            text-align: center;
+        }*/
+        body.account ul.items.order-links>li {
+            padding: 15px 12px !important;
+        }
+
+        .input_fields.reason_and_photo>div:first-child {
+            min-height: 80px;
+        }
+
+        .review-img-cross {
+            right: 0px !important;
+            top: 0px !important;
+        }
+    }
+
+    body.account strong.product.name.product-item-name {
+        text-transform: capitalize;
+    }
+
+    .review-resultimg {
+        width: 77px;
+        display: inline-block;
+        position: relative;
+        margin-right: 8px;
+        height: 88px;
+        float: left;
+        border: 1px solid #eef2f3;
+        border-radius: 5px;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+    }
+
+    .review-resultimg img:first-child {
+        height: 100%;
+        width: 100%;
+    }
+
+    .review-img-cross {
+        position: absolute;
+        right: -5px;
+        cursor: pointer;
+        top: -5px;
+        border-radius: 31px;
+        width: 15px;
+        height: 15px;
+        background: #fff;
+        border: 1px solid gray;
+        text-align: center;
+        padding-top: 2px;
+        font-size: 7px;
+    }
+
+    .reason_and_photo select {
+        max-width: 300px;
+        padding-left: 5px !important;
+    }
+
+    .reason_and_photo>div>label {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    label.return_method_label>p {
+        color: #6e6e6e;
+        font-weight: 400;
+        font-size: 11px;
+    }
+
+    .refund_types_block_inside_single>* {
+        float: left;
+    }
+
+    div#refund_bank_text {
+        width: 100%;
+    }
+
+    .bank_branch {
+        font-weight: 400;
+        font-size: 11px;
+        margin-bottom: 10px;
+    }
+
+    .refund_types_block {
+        margin-top: 15px;
+    }
+
+    /*.refund_types_block_inside input[type='radio']:after {
+        width: 15px;
+        height: 15px;
+        border-radius: 15px;
+        top: 1px;
+        left: 1px;
+        position: relative;
+        background-color: #d1d3d1;
+        content: '';
+        display: inline-block;
+        visibility: visible;
+        border: 2px solid white;
+    }
+    input[type=radio]:checked {
+        accent-color: black;
+    }
+    .refund_types_block_inside input[type='radio'] {
+        width: 17px;
+        height: 17px;
+    }
+    .refund_types_block_inside input[type='radio']:checked:after {
+        width: 15px;
+        height: 15px;
+        border-radius: 15px;
+        top: 1px;
+        left: 1px;
+        position: relative;
+        background-color: black;
+        content: '';
+        display: inline-block;
+        visibility: visible;
+        border: 2px solid white;
+    }*/
+    label.return_consent {
+        font-weight: 500;
+        font-size: 12px;
+    }
+
+    input.return_submit.primary.tocart {
+        margin-top: 0px;
+    }
+
+    input.return_submit.primary.tocart {
+        text-transform: capitalize;
+        /* font-weight: 800 !important; */
+    }
+
+    .return_request_button>label {
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .return_request_button {
+        border: 1px solid #d9d9d9;
+        padding: 10px 20px;
+        display: inline-block;
+        margin-bottom: 10px;
+        border-radius: 5px;
+    }
+
+    .row.input_area {
+        margin-top: 0px !important;
+    }
+
+    .row.product_info_return label {
+        font-weight: 500;
+        color: grey;
+        font-size: 13px;
+        width: 100%;
+    }
+
+    form#cancelcustomform>label {
+        background-color: #f6f6f6;
+        width: 100%;
+        padding: 15px 10px;
+        color: #5e5e5e;
+        font-weight: 600;
+    }
+
+    .msgcstm {
+        padding: 0px;
+    }
+
+    input.return_submit.primary.tocart,
+    input#return_consent {
+        margin-left: 15px;
+    }
+
+    label.return_consent {
+        padding: 0px 14px !important;
+    }
+
+    label.return_consent>input {
+        margin-left: 0px !important;
+    }
+
+    .error_return {
+        padding-left: 15px;
+        margin-bottom: 5px;
+    }
+
+    #cancelcustomform .review-img-cross {
+        right: 0;
+        top: 0;
+    }
+
+    .productids {
+        display: none;
+    }
+
+    .show_all_prds:after {
+        font-family: 'icons-blank-theme';
+        content: '\e617';
+        font-size: 47px;
+        line-height: 0px;
+        margin-top: -5px !important;
+        position: absolute;
+    }
+
+    .show_all_prds {
+        display: inline-block;
+        width: 42px;
+        cursor: pointer;
+    }
+
+    .product_info_return>div>label {
+        display: inline-block;
+        width: 100%;
+    }
+
+    .product_cta button,
+    .product_cta a {
+        border-radius: 5px !important;
+        font-weight: 600;
+        box-sizing: border-box;
+        vertical-align: middle;
+        outline: 0 !important;
+        border: 0 !important;
+        display: block;
+        width: 100%;
+        height: auto;
+        margin: 10px 0px;
+        max-width: 200px;
+        margin: auto;
+        margin-bottom: 10px;
+        text-transform: capitalize;
+    }
+
+    .product_cta button.requested,
+    .product_cta button.disable {
+        cursor: not-allowed;
+    }
+
+    .product_info.info_sec {
+        margin-left: 10px;
+        border-left: 1px solid #ededed;
+        padding-left: 10px;
+    }
+
+    .product_cta button.primary {
+        background: #e60023;
+        color: white;
+    }
+
+    .product_cta button.disable {
+        background: none;
+        color: #979797;
+        font-weight: 500;
+        font-size: 11px;
+        max-width: 200px;
+        height: auto;
+        color: black;
+    }
+
+    .product_cta button.requested {
+        background: none;
+        border: 1px solid #b5b5b5 !important;
+        font-weight: 400;
+        height: auto;
+        font-size: 12px;
+    }
+
+    .product_image.info_sec img {
+        max-width: 100%;
+        width: 90px;
+        height: 90px;
+    }
+
+    .product_image.info_sec {
+        max-width: 123px;
+        display: inline-block !important;
+        float: left;
+        text-align: center;
+        margin-right: 20px;
+        border: 1px solid #f3f3f3;
+        padding: 5px;
+        border-radius: 5px;
+    }
+
+    .product_info_price {
+        color: #e60023;
+        font-size: 14px;
+        font-weight: 700;
+        margin-top: 8px;
+    }
+
+    .product_info_prd_action_buttons>div {
+        display: inline-block;
+        border: 1px solid #c7c7c7;
+        border-radius: 5px;
+        padding: 4px 9px;
+        font-size: 11px;
+        height: auto;
+        line-height: 16px;
+        margin-right: 5px;
+        cursor: pointer;
+    }
+
+    .product_info_prd_action_buttons>a {
+        display: inline-block;
+        border: 1px solid #c7c7c7;
+        border-radius: 5px;
+        padding: 4px 9px;
+        font-size: 11px;
+        height: auto;
+        line-height: 16px;
+        margin-right: 5px;
+        cursor: pointer;
+        color: black;
+        text-decoration: none;
+        background-color: #F6F6F6;
+    }
+
+    .product_info_prd_action_buttons {
+        margin-top: 15px;
+    }
+
+    .product_cta a {
+        border: 0px solid black;
+        background-color: #ebebeb;
+        color: black;
+        text-decoration: none;
+        padding: 8px;
+        display: inline-block;
+        border-radius: 5px;
+        width: 100%;
+        text-align: center;
+        max-width: 202px;
+        margin: auto !important;
+    }
+
+    .product_info_brand {
+        font-weight: 600;
+        color: black;
+    }
+
+    .product_cta {
+        text-align: center;
+    }
+
+    .product_cta>button.primary:hover,
+    .product_cta>button.secondary:hover,
+    .product_cta>a:hover {
+        opacity: .7;
+    }
+
+    .product_cta button.primary {
+        background: #646464;
+        color: white;
+    }
+
+    input[type='submit'].ordercancel {
+        color: white !important;
+        border: none !important;
+    }
+
+    form.form.cancelcustomform_form input.ordercancel {
+        background-color: #f6f6f6 !important;
+        color: black !important;
+        border: 1px solid #cdcdcd !important;
+    }
+
+    @media only screen and (max-width:768px) {
+        .product_cta {
+            margin-top: 20px !important;
+            display: inline-block;
+        }
+    }
+</style>
+
+<style>
+    #review-drag-area {
+        width: 80px;
+        min-height: 85px;
+        display: inline-block;
+    }
+
+    p.review-dragdrop {
+        font-size: 35px;
+        margin: 0px;
+        cursor: pointer;
+        padding: 15px 15px;
+    }
+
+    .review-resultimg.image {
+        position: relative;
+        margin-top: 0px !important;
+        margin-left: 0px !important;
+        width: 100% !important;
+    }
+</style>
+
+<style>
+    /* here is css 19-jan*/
+    @media only screen and (max-width:767px) {
+        .return_request_button {
+            margin-top: 35px;
+        }
+
+        #review-drag-area {
+            display: inline-block !important;
+        }
+
+        .product_cta button,
+        .product_cta a {
+            max-width: 100%;
+        }
+
+        form#cancelcustomform label .col-xs-12 {
+            padding: 0px;
+        }
+
+    }
+
+    input:focus {
+        outline: none !important;
+        outline: none !important;
+        outline-offset: none !important;
+    }
+
+    /* here ends */
+</style>
+
+<?php
+
+//echo $block->getOrder()->getId();
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$customerSession = $objectManager->create('Magento\Customer\Model\Session');
+$incorderId = $block->getOrder()->getIncrementId();
+$orderId = $block->getOrder()->getId();
+$payment = $block->getOrder()->getPayment();
+$ordersituation = $block->getOrderStateLabel($orderId);
+$orderstatus = $block->getOrderStatusLabel($orderId);
+$customerid = $block->getOrder()->getCustomerId();
+$order_created = $block->getOrder()->getCreatedAt();
+$paymentMethod = $payment->getMethodInstance();
+$paymentmethodcode = $paymentMethod->getCode();
+$phone = '';
+if (!empty($block->getOrder()->getShippingAddress())) {
+    $phone = $block->getOrder()->getShippingAddress()->getTelephone();
+}
+$today = date('Y-m-d');
+$datelimit = date('Y-m-d', strtotime($order_created . ' + 10 days'));
+/*
+
+
+echo "<br>orderId : ".$orderId;
+echo "<br>ordersituation : ".$ordersituation;
+echo "<br>orderstatus : ".$orderstatus;
+echo "<br>customerid : ".$customerid;
+echo "<br>order_created : ".$order_created;
+*/
+
+//////////////////////////Checking for Status to Cancel/////////////////////////////////
+
+$flag_show_button = false;
+if ($ordersituation == 'processing') {
+    $url = $this->getUrl('cancelorder/index/submit');
+    $flag_show_button = true;
+    if (trim(strtolower($orderstatus)) == 'order cancellation requested') {
+        $flag_show_button = false;
+    }
+} else if ($ordersituation == 'new') {
+    $url = $this->getUrl('cancelorder/index/submit');
+    $flag_show_button = true;
+} else {
+    $url = '';
+    $flag_show_button = false;
+}
+
+if ($flag_show_button) {
+
+    if ($customerSession->isLoggedIn()) {
+        $customer_name = $customerSession->getCustomer()->getName();  // get  Full Name
+        $customer_email = $customerSession->getCustomer()->getEmail();
+    }
+?>
+
+    <?php
+    $showForm = false;
+    foreach ($block->getOrder()->getAllVisibleItems() as $_item) {
+        $productTypeId = $_item->getProduct()->getTypeId();
+        if ($productTypeId !== 'giftvoucher') {
+            // If any item is not a gift voucher, we'll set $showForm to true and break the loop
+            $showForm = true;
+            break;
+        }
+    }
+    ?>
+
+    <?php if ($showForm) { ?>
+        <form method="post" class="form cancelcustomform_form" action="<?php echo $url; ?>">
+            <input type="hidden" value="<?= $customer_name ?>" name="customer_name" />
+            <input type="hidden" value="<?= $customer_email ?>" name="customer_email" />
+            <input type="hidden" value="<?= $orderId ?>" name="order_id" />
+            <input type="hidden" value="<?= $incorderId ?>" name="incremented_id" />
+            <input type="hidden" value="<?= $ordersituation ?>" name="order_state" />
+            <input type="hidden" value="<?= $orderstatus ?>" name="order_status" />
+            <input type="hidden" value="cancel" name="return_cancel_status" />
+            <input type="hidden" value="<?= $customerid ?>" name="customer_id" />
+            <input type="hidden" value="<?= $phone ?>" name="customer_phone" />
+            <input name="form_key" type="hidden" value="<?php echo $block->getFormKey(); ?>" />
+            <input type="submit" value="Cancel Order" class="ordercancel" />
+        </form>
+    <?php } ?>
+
+
+
+<?php
+}
+
+
+if ($ordersituation == 'processing' && strtolower($orderstatus) == 'order cancellation requested') {
+    echo "<div class='order_request_text'>Order Cancellation request was sent</div>";
+}
+
+//////////////////////////Return the order code starts/////////////////////////////////
+if ($customerSession->isLoggedIn()) {
+    $customer_name = $customerSession->getCustomer()->getName();  // get  Full Name
+    $customer_email = $customerSession->getCustomer()->getEmail();
+    $phone = '';
+
+    if (!empty($block->getOrder()->getShippingAddress())) {
+        $phone = $block->getOrder()->getShippingAddress()->getTelephone();
+    }
+
+    if ($phone == '') {
+        //if phone is still empty > in case shipping address is not given then it will pick phone from billing address
+        if (!empty($block->getOrder()->getBillingAddress())) {
+            $billing = $block->getOrder()->getBillingAddress()->getData();
+            $phone = $billing['telephone'];
+        }
+    }
+} else {
+    $customer_name = '';
+    $customer_email = '';
+    $phone = '';
+}
+/*
+    if( $ordersituation == 'complete' && strtolower($orderstatus) == 'replacement requested' ){
+        echo "<div class='order_request_text'>Order Return/Replace request was sent</div>";
+    }else if( $ordersituation == 'complete' && strtolower($orderstatus) == 'replacement request placed' ){
+        echo "<div class='order_request_text'>Order Return/Replace request was sent</div>";
+    }else if (($ordersituation=='complete') && ($datelimit>= $today)){*/
+if (($datelimit >= $today)) {
+
+
+
+    $url = $this->getUrl('cancelorder/index/submit', ['_secure' => true]);
+?>
+
+    <?php
+    $showForm = false;
+    foreach ($block->getOrder()->getAllVisibleItems() as $_item) {
+        $productTypeId = $_item->getProduct()->getTypeId();
+        if ($productTypeId !== 'giftvoucher') {
+            $showForm = true;
+            break;
+        }
+    }
+    ?>
+
+    <?php if ($showForm) { ?>
+        <div class="triggercstm">
+            <?php if ($ordersituation == 'complete') {
+                if ($orderstatus != 'Replaced Order') {
+
+
+            ?> <div class="return_request_button">
+                        <input type="checkbox" class="checkbox checkbox--red checkbox_return_button" id="return_order_checkbox" value="<?= $customer_name ?>">
+                        <label for="return_order_checkbox" id="return_order_checkbox_text">Return/Exchange Order</label>
+                    </div> <?php
+                        }
+                    }
+                            ?>
+            <div class="msgcstm" style="display:none;">
+                <form class="return_quest_form" class="form" action="<?php echo $url; ?>" id="cancelcustomform" method="post" enctype="multipart/form-data">
+                    <?php
+                    $i = 0;
+                    ?>
+
+                    <label>
+                        <span class="back_button show_all_prds hide"></span>
+                        Select products to Return or Exchange
+                    </label>
+
+                    <?php
+                    foreach ($block->getOrder()->getAllItems() as $_item) {
+                        $product = $_item->getProduct();
+                        if ($product->getTypeId() == 'giftvoucher') {
+                            continue;
+                        }
+                        if ($product->getTypeId() == 'configurable') {
+                            continue;
+                        }
+
+                    ?>
+                        <div class="row product_info_return" block_box="input_<?php echo $i; ?>_prd">
+                            <div class="col-xs-12">
+                                <!-- checkingh if returnable or not -->
+
+                                <?php
+                                $returnable = false;
+                                $replacable = true;
+
+                                $rprid = $_item->getProductId();
+
+                                $rproduct = '';
+                                $rproduct = $objectManager->get('Magento\Catalog\Model\Product')->load($rprid);
+                                //                
+                                $attr = $rproduct->getData('returnable');
+                                $repttr = $rproduct->getData('replacement_policy');
+
+                                if ($attr == 1) {
+                                    $returnable = true;
+                                }
+
+                                if ($repttr == 1439) {
+                                    $replacable = false;
+                                } else if ($repttr == '') {
+                                    $replacable = false;
+                                }
+                                ?>
+                                <input type="checkbox" id="input_<?php echo $i; ?>_prd" value="<?= $_item->getProductId() ?>" name="productids" class="productids">
+                                <label for="input_<?php //echo $i; 
+                                                    ?>_prd">
+                                    <?php
+
+                                    $prd_name = $_item->getName();
+
+                                    echo '<input type="hidden" value="' . $prd_name . '" name="product_name" >';
+
+                                    $price = ceil($_item->getData('price'));
+                                    $priceHelper = $objectManager->create('Magento\Framework\Pricing\Helper\Data');
+                                    $formattedPrice = $priceHelper->currency($price, true, false);
+
+                                    $helperImport = $objectManager->get('\Magento\Catalog\Helper\Image');
+                                    $imageUrl = $helperImport->init($rproduct, 'product_page_image_small')
+                                        ->setImageFile($rproduct->getSmallImage()) // image,small_image,thumbnail
+                                        ->resize(380)
+                                        ->getUrl();
+
+                                    ?>
+                                    <?php /*
+                                    <div class="single_product_block row">
+                                        <div class="product_info_all col-sm-8 col-xs-12">
+                                            <div class="product_image">
+                                                <img src="<?php echo $imageUrl; ?>" />
+                                            </div>
+                                            <div class="product_info">
+                                                <div class="product_info_name"><?php echo $prd_name; ?></div>
+                                                <div class="product_info_price"><?php echo $formattedPrice; ?></div>
+                                            </div>
+                                        </div>
+                                        <div class="product_cta col-sm-4 col-xs-12">
+                                            <?php
+                                                if ( $block->IsExistReplacementProduct($orderId , $_item->getProductId()) ){
+                                                    $StatusReplacementProduct = $block->StatusReplacementProduct($orderId , $_item->getProductId());
+
+                                                    if( $StatusReplacementProduct != false ){
+                                                        if( strtolower($StatusReplacementProduct) == 'return'){
+                                                            echo "Return requested";
+                                                        }else if( strtolower($StatusReplacementProduct) == 'replace'){
+                                                            echo "Replacement requested";
+                                                        }
+                                                    }
+
+                                                }else{
+                                                    if( $returnable == true ){
+                                                        echo '<button class="return_button return_replace_button" prd_checkbox="input_'.$i.'_prd" value="return">Return </button>';
+                                                    }
+                                                    if( $replacable == true ){
+                                                        echo '<button class="replace_button return_replace_button" prd_checkbox="input_'.$i.'_prd" value="replace">Replace </button>';
+                                                    }
+                                                }
+                                            ?>
+                                        </div>
+                                    </div>
+                                    */
+                                    ?>
+                                    <div class="col-xs-12">
+                                        <!-- checkingh if returnable or not -->
+                                        <label for="input__prd">
+                                            <div class="single_product_block row">
+                                                <div class="product_info_all col-sm-8 col-xs-12">
+                                                    <div class="product_image info_sec">
+                                                        <img src="<?php echo $imageUrl; ?>" />
+                                                    </div>
+                                                    <div class="product_info info_sec">
+                                                        <div class="product_info_brand">
+                                                            <?php echo $brand_name = $rproduct->getResource()->getAttribute('brand')->getFrontend()->getValue($rproduct); ?>
+                                                        </div>
+                                                        <div class="product_info_name">
+                                                            <?php echo str_replace($brand_name, '', $prd_name);
+
+
+                                                            ?>
+                                                        </div>
+                                                        <!--<div class="product_info_prd_action_buttons hide">
+                                                            <a target="_blank" href="<?php //echo $rproduct->getProductUrl(); 
+                                                                                        ?>" class="product_info_prd_action_buttons_reorder">Reorder</a>
+                                                            <a target="_blank" href="<?php //echo $rproduct->getProductUrl(); 
+                                                                                        ?>" class="product_info_prd_action_buttons_view">View Product</a>
+                                                        </div>-->
+                                                    </div>
+                                                </div>
+                                                <div class="product_cta col-sm-4 col-xs-12">
+                                                    <?php
+
+
+
+                                                    if ($block->IsExistReplacementProduct($orderId, $_item->getProductId())) {
+
+                                                        $StatusReplacementProduct = $block->StatusReplacementProduct($orderId, $_item->getProductId());
+
+                                                        $StatusReplacementProductGrid = $block->ReplacementProductGrid($orderId, $_item->getProductId());
+                                                        foreach ($StatusReplacementProductGrid as $CancelOrderCustom) {
+                                                            $current_status = $CancelOrderCustom['current_status'];
+                                                        }
+                                                        echo '<button class="requested">' . $current_status . '</button>';
+
+                                                        /* 
+                                                            if( $StatusReplacementProduct != false ){
+                                                                // ?get status here
+                                                                if( strtolower($StatusReplacementProduct) == 'return'){
+//                                                                    echo "Return requested";
+                                                                    echo '<button class="requested">Return Requested</button>';
+                                                                }else if( strtolower($StatusReplacementProduct) == 'replace'){
+//                                                                    echo "Replacement requested";
+                                                                    echo '<button class="requested">Replacement Requested</button>';
+                                                                }
+                                                            }*/
+                                                    } else {
+                                                        if ($ordersituation == 'complete') {
+
+
+                                                            $customdataprint = $block->returnExchangedisable($_item);
+
+
+                                                            if ($returnable == true && $customdataprint == true) {
+                                                                echo '<button class="return_button return_replace_button primary" prd_checkbox="input_' . $i . '_prd" value="return">Return </button>';
+                                                            }
+                                                            if ($replacable == true && $customdataprint == true) {
+                                                                echo '<button class="replace_button return_replace_button primary" prd_checkbox="input_' . $i . '_prd" value="replace">Exchange </button>';
+                                                            }
+                                                            if ($returnable == false && $replacable == false && $customdataprint == true) {
+                                                                echo '<button class="disable">Return or Exchange not Applicable on this product</button>';
+                                                            }
+                                                            if ($customdataprint == false) {
+                                                                echo '<button class="disable">Return or Exchange not Applicable on this product</button>';
+                                                            }
+                                                        }
+                                                    }
+                                                    ?>
+                                                    <!--                                                    <a target="_blank" href="<?php //echo $rproduct->getProductUrl(); 
+                                                                                                                                        ?>" class="return_button return_replace_button secondary">Write a review</a>-->
+
+                                                    <!--<button class="return_button return_replace_button" prd_checkbox="input_1_prd" value="return">Return</button>
+                                                    <button class="return_button return_replace_button" prd_checkbox="input_1_prd" value="return">Replace</button>
+                                                    <button class="return_button return_replace_button" prd_checkbox="input_1_prd" value="return">Return/Replace Requested</button>-->
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </label>
+                                <?php
+
+
+                                /*
+                                if($repttr==1439) {
+                                    
+                                    ?>
+                                        <label for="input_<?php echo $i; ?>_prd">
+                                            <input disabled type="checkbox" id="input_<?php echo $i; ?>_prd" value="<?= $_item->getProductId() ?>" name="productids" class="productids"> 
+                                            <strike> <?= $_item->getName() ?> </strike> 
+                                            <span style="color:#e60023"> &nbsp;&nbsp;  Not Refundable/ No Exchangable</span>
+                                        </label> 
+                                <?php } else  { ?>
+                                        <label for="input_<?php echo $i; ?>_prd">
+                                            <?php if($attr == 1){
+                                               $label =  "Refundable/ Exchangable";  
+                                               $rel   =  1;                                         
+                                            }else{
+                                                 $label =  "Not Refundable/ Only Exchangable";
+                                                 $rel   =  0;      
+                                            } ?>
+
+                                            <input  type="checkbox" id="input_<?php echo $i; ?>_prd" rel = "<?php echo  $rel; ?>" value="<?= $_item->getProductId() ?>" name="productids" class="productids"> 
+                                            <?= $_item->getName() ?> <span style="color:#e60023"> &nbsp;&nbsp; <?php echo  $label; ?>                                       
+                                               
+                                            </span>
+                                        </label>
+                                    <?php
+                                        }
+                                        */
+                                ?>
+
+
+                                <img src="<?= $_item->getProductThumbnail() ?>">
+                            </div>
+                        </div>
+
+
+                    <?php
+
+                        $i++;
+                    }
+
+                    ?>
+                    <div class="return_form_form_container" style="display:none;">
+                        <label class="hide">
+                            Personal Details
+                        </label>
+                        <div class="row input_fields main_details hide">
+                            <div class="col-sm-6 col-xs-12 input_area">
+                                <label for="customer_name">Name</label>
+                                <input type="text" name="customer_name" id="customer_name" value="<?= $customer_name ?>" required>
+                            </div>
+                            <div class="col-sm-6 col-xs-12 input_area">
+                                <label for="customer_email">Email</label>
+                                <input type="text" name="customer_email" id="customer_email" value="<?= $customer_email ?>" required>
+                            </div>
+                            <div class="col-sm-6 col-xs-12 input_area">
+                                <label for="customer_phone">Phone</label>
+                                <input type="text" name="customer_phone" id="customer_phone" value="<?= $phone ?>" required>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!--   ****************    Drop down menu ******************  -->
+
+                    <label class="hide">
+                        Reason
+                    </label>
+                    <div class="row input_fields reason_and_photo hide">
+                        <?php
+
+                        $firstreason = [
+                            "0" => "Size/color Issue",
+                            "1" => "Did not like the Product",
+                            "2" => "Defective/Damage Product received",
+                            "3" => "Wrong item Shipped",
+                            "show" => "Other"
+                        ];
+
+                        $subreason = [
+                            "0" => "Wrong Color Delivered",
+                            "1" => "Different from what was ordered",
+                            "2" => "Delivered wrong size",
+                            "3" => "Product not as displayed on website"
+                        ];
+                        ?>
+                        <div class="col-md-6 col-sm-5 col-xs-12">
+                            <label for="Setect reson">Select Reason</label>
+                            <select class="form-select form-select-sm" name="firstreson" id="firstreason">
+                                <option selected value="">Select Reason First</option>
+                                <?php foreach ($firstreason as $key => $v) {
+                                    echo '<option value="' . $key . '">' . $v . '</option>';
+                                }
+
+                                ?>
+
+                            </select>
+
+                            <select class="form-select form-select-sm" name="subreson" style="display: none !important; margin-top:10px;" id="subfield">
+
+                                <?php foreach ($subreason as $keys => $vs) {
+                                    echo '<option value="' . $keys . '">' . $vs . '</option>';
+                                }
+
+                                ?>
+
+                            </select>
+
+                            <div class="row input_area" style="display: none !important;" id="inputField">
+                                <br>
+                                <label for="return_reason" class="return_label">Reason to return </label>
+                                <textarea name="return_reason" id="return_reason"></textarea>
+
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-6 col-sm-7 col-xs-12">
+                            <div class="field review-field-media" class="review-form" method="post" id="review-form">
+                                <label class="label" style="margin-top:10px;">
+                                    <span>
+                                        <?php /* @escapeNotVerified */ echo __('Add a photo ') ?>
+                                    </span>
+                                    <div class="photo_subtitle">
+                                        Capture a clear image of the product and tag (min. 2)
+                                    </div>
+                                </label>
+                                <div class="control">
+                                    <input type="file" style="display:none !important;" name="review_media[]" id="review_media" accept=".png, .jpg, .jpeg" multiple="multiple" />
+
+                                </div>
+                                <!--------------------------------------->
+                                <div id="review-drag-area" class="review-drag-area">
+                                    <p class="review-dragdrop">+ </p>
+                                </div>
+                                <!--------------------------------------->
+                                <div for="media_field" generated="true" class="mage-error" id="media_field-error" style="display: none;">
+                                    <?php /* @escapeNotVerified */ echo __('You can Upload minimum 2 and maximum 5 images.') ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Return image upload  -->
+                    <?php $return_orderId = $block->getOrder()->getIncrementId();  ?>
+
+
+
+                    <script>
+                        require(
+                            ['jquery', 'jquery/ui'],
+                            function($) {
+                                //----------------drag drop upload-----------------
+                                $("html").on("dragover", function(e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+
+                                });
+
+                                $("html").on("drop", function(e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                });
+
+                                // Drag enter        
+                                $("#review-form").on("dragenter", ".review-drag-area", function(e) {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                });
+
+                                // Drag over         
+                                $("#review-form").on("dragover", ".review-drag-area", function(e) {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                });
+
+                                // Drop         
+                                $("#review-form").on("drop", ".review-drag-area", function(e) {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    var file = e.originalEvent.dataTransfer.files;
+                                    var ins = file.length;
+                                    var ln = $(".review-resultimg").length;
+                                    var tc = 0;
+                                    if (ln) {
+                                        tc = parseInt(ln) + parseInt(tc);
+                                    }
+                                    if (ins) {
+                                        tc = parseInt(ins) + parseInt(tc);
+                                    }
+                                    if (tc > 5) {
+                                        $("#media_field-error").show();
+                                    } else {
+                                        $("#media_field-error").hide();
+                                        for (var x = 0; x < ins; x++) {
+                                            var fdata = new FormData();
+                                            fdata.append("files[]", file[x]);
+                                            uploadlogofunc(fdata);
+                                        }
+                                    }
+                                });
+
+                                function uploadlogofunc(fdata) {
+                                    if (fdata != null && fdata != '') {
+                                        //var fd = $('#file_data');
+
+                                        $.ajax({
+                                            url: "/cancelorder/index/ajaxupload?orderid=<?php echo $return_orderId ?>",
+                                            type: "POST",
+                                            cache: false,
+                                            contentType: false,
+                                            processData: false,
+                                            data: fdata,
+                                            dataType: 'json',
+                                            showLoader: true,
+                                            success: function(res) {
+                                                if (res.path) {
+                                                    $htmlstr = '<div class ="review-resultimg" ><img src = "/media/return_image/<?php echo $return_orderId ?>' + res.path + '"><div class="review-img-cross" rel = "' + res.path + '">&#10006;</div>';
+                                                    $htmlstr = $htmlstr + '<input type="hidden" name = "review_media_files[]" value ="' + res.path + '"></div>';
+                                                    //console.log(res.path);
+                                                    var temp = $('#file_data').val();
+                                                    var newtemp = temp + "," + res.path;
+                                                    $('#file_data').val(newtemp);
+
+                                                    $($htmlstr).insertBefore("#review-drag-area");
+
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                                $("#review-form").on("click", ".review-dragdrop", function() {
+                                    $("#review_media").trigger('click');
+                                });
+                                $("#review-form").on("click", ".review-img-cross", function() {
+                                    var el = $(this).parent(".review-resultimg");
+                                    var rel = $(this).attr('rel');
+                                    var path = 'return_image/<?php echo $return_orderId ?>' + rel;
+                                    $.ajax({
+                                        url: "/cancelorder/index/deleteajaxupload",
+                                        type: "POST",
+                                        data: 'path=' + path,
+                                        dataType: 'json',
+                                        showLoader: true,
+                                        success: function(res) {
+                                            el.remove();
+                                            $("#media_field-error").hide();
+                                        }
+                                    });
+                                })
+                                $(document).on('change', '#review_media', function() {
+                                    var files = $(this)[0].files;
+                                    var ins = files.length;
+                                    var tc = 0;
+                                    var ln = $(".review-resultimg").length;
+                                    if (ln) {
+                                        tc = parseInt(ln) + parseInt(tc);
+                                    }
+                                    if (ins) {
+                                        tc = parseInt(ins) + parseInt(tc);
+                                    }
+                                    if (tc > 5) {
+                                        $(this).val('');
+                                        $("#media_field-error").show();
+                                    } else {
+                                        for (var x = 0; x < ins; x++) {
+                                            var fdata = new FormData();
+                                            fdata.append("files[]", document.getElementById('review_media').files[x]);
+                                            uploadlogofunc(fdata);
+                                        }
+                                        $("#media_field-error").hide();
+                                    }
+                                });
+
+                                $("#firstreason").change(function() {
+                                    var selectedOption = $(this).val();
+                                    var inputField = $("#inputField");
+                                    var subfield = $("#subfield");
+
+                                    if (selectedOption === "show") {
+                                        inputField.show();
+                                        subfield.hide();
+
+                                    } else if (selectedOption === "0") {
+                                        subfield.show();
+                                        inputField.hide();
+                                    } else {
+                                        inputField.hide();
+                                        subfield.hide();
+                                    }
+                                });
+
+                            });
+                    </script>
+
+
+
+                    <!-- end return image upload -->
+
+
+
+
+                    <!--<input name="form_key" type="hidden" value="<?php /* @escapeNotVerified */ //echo $block->getFormKey(); 
+                                                                    ?>" />-->
+
+                    <label class="hide">
+                        Mode of Return
+                    </label>
+                    <div class="row input_area input_fields mode_of_return hide">
+                        <div class="col-xs-12">
+                            <label for="refund_type">How would you like your refund?</label>
+                            <div class="refund_types_block">
+                                <div class="refund_types_block_inside">
+                                    <div class="refund_types_block_inside_single">
+                                        <input type="radio" name="refund_type" checked value="refund_wallet" id="return_in_gw" class="">
+                                        <label for="return_in_gw" class="return_method_label">
+                                            Golfoy Wallet
+                                            <p>Refund will credit in 24 hours as Golfoy points</p>
+                                        </label>
+                                    </div>
+
+                                    <?php if ($paymentmethodcode == "cashondelivery") : ?>
+                                        <div class="refund_types_block_inside_single refund-upi">
+                                            <input type="radio" name="refund_type" value="refund_upi" id="return_in_upi" class="">
+                                            <label for="return_in_upi" class="return_method_label">
+                                                UPI
+                                                <p>UPI refunds are processed directly to your bank account within 72 working hours.</p>
+                                            </label>
+
+                                            <div id="refund_upi_content" style="display:none; margin-left:14px;">
+                                                <?php
+                                                $showFields = true;
+                                                $custId = $customerSession->getCustomer()->getId();
+
+                                                if ($custId) {
+                                                    $collection =  $this->getAccounts($custId, 'refund_upi');
+                                                    if (!empty($collection)) {
+
+                                                        foreach ($collection as $item) {
+                                                            if ($item['method'] == 'refund_upi') {
+                                                                $upiId =  $item['details'];
+                                                                // $length = strlen($upiId);
+                                                                // if ($length < 4) {
+                                                                //     $maskedString = $upiId;
+                                                                // } else {
+                                                                //     $maskedString = str_repeat("*", $length - 4) . substr($upiId, -4);
+                                                                // }
+                                                                echo '<div class="account_existed">';
+                                                                echo '<input type="radio" name="upi_refund_account_id" checked value="' . $item['id'] . '" id="upi_acc_' . $item['id'] . '">';
+                                                                echo '<label for="upi_acc_' . $item['id'] . '" style="font-weight:normal; margin-left:5px;"> ' . $upiId . '</label>';
+                                                                echo "</div>";
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                ?>
+
+                                                <div class="account_new">
+                                                    <input type="radio" name="upi_refund_account_id" value="0" id="add_new_upi">
+                                                    <label for="add_new_upi" style="font-weight:normal; margin-left:5px; font-weight: bold;">Add New UPI ID</label>
+                                                </div>
+
+                                                <div class="refund_upi_text payment_method_subcontent" id="refund_upi_text" style="display:none;">
+                                                    <label for="refund_upi_id">Enter UPI ID</label>
+                                                    <input type="text" name="refund_upi_id" id="refund_upi_id" placeholder="e.g. name@bank" style="width: 100%;">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <div class="refund_types_block_inside_single">
+                                        <input type="radio" name="refund_type" value="refund_bank" id="return_in_imps" class="">
+                                        <label for="return_in_imps" class="return_method_label">
+                                            IMPS(Bank Transfer)
+                                            <p>Refund will credit in 5-7 working days</p>
+                                        </label>
+                                        <div class="refund_bank_text payment_method_subcontent" id="refund_bank_text" style="display:none;">
+                                            <!--<p>Refund to original payment mode- Refund will be credit in 5-7 working days</p>-->
+                                            <?php
+                                            $showFields = true;
+                                            $custId = $customerSession->getCustomer()->getId();
+
+                                            if ($custId) {
+                                                $collection =  $this->getAccounts($custId, 'refund_bank');
+                                                if (!empty($collection)) {
+                                                    $i = 0;
+                                                    foreach ($collection as $item) {
+                                                        if ($item['method'] == 'refund_bank') {
+                                                            $title = 'Account Number';
+                                                            $Accdetails =  explode('||', $item['details']);
+
+                                                            $accNumber = $Accdetails[0];
+                                                            $ifsc = $Accdetails[1];
+                                                            $bank_name = $Accdetails[2];
+                                                            $bank_branch = $Accdetails[3];
+
+                                                            $length = strlen($accNumber);
+                                                            if ($length < 4) {
+                                                                $maskedString = $accNumber;
+                                                            } else {
+                                                                $maskedString = str_repeat("*", $length - 4) . substr($accNumber, -4);
+                                                            }
+                                                            $chked = "";
+                                                            $sltd = "";
+                                                            if ($i == 0) {
+                                                                $chked = "checked";
+                                                                $sltd = " selected";
+                                                            }
+                                                            echo '<div class="account_existed account_number_return_replace' . $sltd . '">';
+                                                            echo '<input type="radio" name="bankrefund" ' . $chked . ' value="' . $item['id'] . '" id="radio_btn_' . $i . '">';
+                                                            echo '<label for="radio_btn_' . $i . '">';
+                                                            echo '<div class="bank_name">' . $bank_name . '</div>';
+                                                            echo '<div class="bank_branch">' . $bank_branch . '</div>';
+                                                            echo '<div class="acccount_num">' . $maskedString . '</div>';
+                                                            echo '</label>';
+                                                            echo "</div>";
+                                                            $i++;
+                                                        }
+                                                    }
+                                                    $showFields = false;
+                                                    echo "<div class='account_new account_number_return_replace'>";
+                                                    echo '<input type="radio" name="bankrefund" value="0" id="add_new_account"><label for="add_new_account"></label>';
+                                                    echo "</div>";
+                                                } else {
+                                                    echo '<input type="radio" style= "display:none !important;" name="bankrefund" value="0" checked>';
+                                                }
+                                            }
+                                            if ($showFields) {
+                                                echo '<div class = "refund_bank_text_fields" id = "refund_bank_text_fields">';
+                                            } else {
+                                                echo '<div class = "refund_bank_text_fields" id = "refund_bank_text_fields" style="display:none;">';
+                                            }
+                                            ?>
+
+                                            <label for="refund_type">Account Number</label>
+                                            <input type="number" name="refund_bank_accnumber" class="numbers_only" id="refund_bank_accnumber">
+
+                                            <label for="refund_type"> Confirm Account Number</label>
+                                            <input type="password" name="refund_bank_confirmaccnumber" class="numbers_only" id="refund_bank_confirmaccnumber">
+
+                                            <label for="refund_type">IFSC Code</label> <br />
+                                            <input style="width:200px" maxlength="11" type="text" name="refund_bank_ifsccode" id="refund_bank_ifsccode" class="alphanumeric">
+
+                                            <span id="ifscdetail" style="font-size:11px;color:#333;"></span>
+                                            <input type="hidden" name="ifscverify" value='1' id="ifscverify">
+                                            <input type="hidden" name="refund_bank_name" id="refund_bank_name" />
+                                            <input type="hidden" name="refund_bank_branch" id="refund_bank_branch" />
+                                            <?php
+                                            echo "</div>";
+                                            ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="refund_types_block_inside_single">
+                                        <?php
+                                        if ($paymentmethodcode != "cashondelivery") {
+                                            echo '<input type="radio" name="refund_type" value="refund_source" id="return_in_src"  class="">
+                                            <label for="return_in_src" class="return_method_label">
+                                                Refund to source
+                                                <p>Refund will credit in 5-7 working days</p>
+                                            </label>';
+                                            //                                            echo '<div class = "refund_source_text payment_method_subcontent" id = "refund_source_text" style="display:none;" >';
+                                            //                                                echo '<p>Refund to original payment mode- Refund will be credit in 5-7 working days</p>';
+                                            //                                            echo '</div>';
+
+                                        }
+                                        ?>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+                    </div> <!--mode_of_return  div ends-->
+
+                    <div class="row input_area agree_statement hide" style="margin-top:10px;">
+                        <label for="return_consent" class="return_consent">
+                            <input type="checkbox" class="checkbox " name="return_consent" id="return_consent">
+                            I haven't used this product. All tags, box are intact (if possible).
+                        </label>
+                    </div>
+
+                    <input type="hidden" name="product_ids" class="product_ids" id="product_ids">
+                    <input type="hidden" value="<?= $orderId ?>" name="order_id" />
+                    <input type="hidden" value="<?= $ordersituation ?>" name="order_state" />
+                    <input type="hidden" value="<?= $orderstatus ?>" name="order_status" />
+                    <input type="hidden" value="return" name="return_cancel_status" id="return_cancel_status" />
+                    <input type="hidden" value="<?= $customerid ?>" name="customer_id" />
+                    <input type="hidden" value="" id="file_data" name="file_name" />
+                    <input type="hidden" value="<?= $return_orderId ?>" name="incremented_id" />
+                    <input type="hidden" value="0" id="isreturnable" name="isreturnable" />
+                    <div class="error_return"></div>
+
+                    <input type="submit" id="crosubmit" name="submit" value="Send Request" class="return_submit primary tocart" style="font-weight:600 !important;">
+                </form>
+            </div>
+        </div>
+    <?php } ?>
+
+    <script>
+        require(['jquery'], function($) {
+            jQuery(document).ready(function() {
+
+                jQuery('form#cancelcustomform').submit(function(e) {
+                    //e.preventDefault();
+                    var empty = false;
+                    var error = [];
+                    var count = $('input[name^="review_media_fi"]').length;
+                    //console.log(count);
+
+                    if (jQuery("#product_ids").val() == '') {
+                        empty = true;
+                    }
+
+                    if (count < 2 || count > 5) {
+                        jQuery("#review-drag-area").addClass('customError');
+                        error.push({
+                            'i': 'Please Upload minimum 2 and maximum 5 images.'
+                        });
+                    } else {
+                        jQuery("#review-drag-area").removeClass('customError');
+                    }
+
+
+                    if (jQuery("#firstreason").val() == '') {
+                        jQuery("#firstreason").addClass('customError');
+                        empty = true;
+                    } else {
+                        jQuery("#firstreason").removeClass('customError');
+                    }
+
+
+                    if (jQuery("#firstreason").val() == 'show' && jQuery("#return_reason").val() == '') {
+                        jQuery("#return_reason").addClass('customError');
+                        empty = true;
+                    } else {
+                        jQuery("#return_reason").removeClass('customError');
+                    }
+                    //------------------------
+
+                    if (jQuery("input[name='refund_type']:checked").val() == 'refund_bank') {
+                        var refundAcc = jQuery("input[name='bankrefund']:checked").val();
+                        var isreturnable = jQuery('#isreturnable').val();
+                        if (refundAcc == 0 && isreturnable == '1') {
+                            if (jQuery("#refund_bank_accnumber").val() == '' ||
+                                jQuery("#refund_bank_confirmaccnumber").val() == '') {
+                                jQuery("#refund_bank_accnumber").addClass('customError');
+                                empty = true;
+                            } else {
+                                jQuery("#refund_bank_accnumber").removeClass('customError');
+                            }
+
+                            if (jQuery("#refund_bank_ifsccode").val() == '') {
+                                jQuery("#refund_bank_ifsccode").addClass('customError');
+                                empty = true;
+                            } else {
+                                jQuery("#refund_bank_ifsccode").removeClass('customError');
+                            }
+
+
+                            if (jQuery("#refund_bank_accnumber").val() !=
+                                jQuery("#refund_bank_confirmaccnumber").val()) {
+                                jQuery("#refund_bank_confirmaccnumber").addClass('customError');
+                                error.push({
+                                    'm': 'Account number does not match.'
+                                });
+                            } else {
+                                jQuery("#refund_bank_confirmaccnumber").removeClass('customError');
+                            }
+
+                            var ifscelmtval = jQuery("#ifscverify").val();
+                            if (ifscelmtval != '1') {
+                                jQuery("#ifscverify").addClass('customError');
+                                error.push({
+                                    'v': 'ifsc code is not valid.'
+                                });
+                                'Account number does not match'
+                            } else {
+                                jQuery("#ifscverify").removeClass('customError');
+                            }
+                        }
+                    }
+
+                    if (jQuery("input[name='refund_type']:checked").val() == 'refund_upi') {
+                        // Check if "Add New" is selected (value 0) or if no account selected (should not happen if checked by default but logic safety)
+                        // Actually, if radios share name 'upi_refund_account_id', we just check the value
+                        var selectedUpiAccount = jQuery("input[name='upi_refund_account_id']:checked").val();
+
+                        if (selectedUpiAccount == '0') {
+                            if (jQuery("#refund_upi_id").val() == '') {
+                                jQuery("#refund_upi_id").addClass('customError');
+                                empty = true;
+                            } else {
+                                // Simple regex for UPI ID validation (vpa)
+                                var upiRegex = /^[\w.-]+@[\w.-]+$/;
+                                if (!upiRegex.test(jQuery("#refund_upi_id").val())) {
+                                    jQuery("#refund_upi_id").addClass('customError');
+                                    error.push({
+                                        'u': 'Please enter a valid UPI ID.'
+                                    });
+                                } else {
+                                    jQuery("#refund_upi_id").removeClass('customError');
+                                }
+                            }
+                        } else if (selectedUpiAccount === undefined) {
+                            // If user hasn't selected any account (e.g. if they uncheck or something, though radio logic prevents easy uncheck without checking another)
+                            // But since we have "Add New" with ID 0, one must be checked.
+                            // If none checked, we might want to force check, but 'empty' check works.
+                            // Add error if really nothing selected?
+                            // Let's assume one is always checked by default if exists, or user must check.
+                            if (jQuery("input[name='upi_refund_account_id']").length > 0) {
+                                error.push({
+                                    'u': 'Please select a UPI ID or add a new one.'
+                                });
+                            }
+                        }
+                    }
+
+                    if (!jQuery('#return_consent').is(':checked')) {
+                        jQuery("#return_consent").addClass('customError');
+                        empty = true;
+                    } else {
+                        jQuery("#return_consent").removeClass('customError');
+                    }
+
+                    if (empty) {
+                        error.push({
+                            'e': 'Some required fields are empty.'
+                        });
+                    }
+
+                    if (error.length == 0) {
+                        jQuery('.error_return').html('');
+                        jQuery('#crosubmit').prop("disabled", true);
+                        jQuery('form#cancelcustomform').submit();
+                    } else {
+                        var errorstr = '';
+                        jQuery.each(error, function(key, value) {
+                            jQuery.each(value, function(k, v) {
+                                errorstr = errorstr + v + '<br/>';
+                            });
+                        });
+                        jQuery('.error_return').html(errorstr);
+                        e.preventDefault();
+                    }
+
+                });
+
+                jQuery('form#cancelcustomform').children().each(function() {
+                    if (jQuery(this).hasClass('product_info_return')) {} else {
+                        //                            jQuery('.reason_and_photo').slideUp('slow');
+                    }
+                });
+                jQuery('.productids').click(function() {
+                    /*if(jQuery('.productids:checked').length){
+                        jQuery('.return_form_form_container').slideDown('slow');
+                    }else{
+                        jQuery('.return_form_form_container').slideUp('slow');
+                    }*/
+                    var prd_ids = '';
+                    var totalReturnable = 0;
+                    jQuery('.productids').each(function() {
+                        if (jQuery(this).is(':checked')) {
+                            prd_ids = prd_ids + "," + jQuery(this).val();
+                            var relVal = jQuery(this).attr('rel');
+                            if (relVal == '1') {
+                                totalReturnable++;
+                            }
+                        }
+                    });
+                    if (totalReturnable > 0) {
+                        jQuery('#isreturnable').val('1');
+                        jQuery('.mode_of_return').removeClass('hide');
+                    } else {
+                        jQuery('#isreturnable').val('0');
+                        jQuery('.mode_of_return').addClass('hide');
+                    }
+                    prd_ids = prd_ids.replace(/^,/, '');
+                    jQuery("#product_ids").val(prd_ids);
+
+                    if (prd_ids != '') {
+                        jQuery('form#cancelcustomform').children().each(function() {
+
+                            if (jQuery(this).hasClass('product_info_return')) {
+
+                            } else {
+                                //                                    jQuery(this).slideDown('slow');
+                            }
+                        });
+
+                    } else {
+                        jQuery('form#cancelcustomform').children().each(function() {
+
+                            if (jQuery(this).hasClass('product_info_return')) {
+
+                            } else {
+                                //jQuery(this).slideUp('slow');
+                            }
+                        });
+                    }
+
+                });
+
+                jQuery('.return_request_button').click(function() {
+                    if (jQuery(this).children('input').is(':checked')) {
+                        jQuery('.msgcstm').slideDown();
+                    } else {
+                        jQuery('.msgcstm').slideUp();
+                    }
+
+                });
+                //--------------------refund type ---------------------------
+                jQuery('input[name="refund_type"]').change(function() {
+                    var selectedOption = jQuery(this).val();
+
+                    if (selectedOption == "refund_bank") {
+                        jQuery("#refund_bank_text").show();
+                        jQuery("#refund_wallet_text").hide();
+                        jQuery("#refund_source_text").hide();
+                        jQuery("#refund_upi_text").hide();
+                        jQuery("#refund_upi_content").hide();
+
+                    } else if (selectedOption == "refund_source") {
+                        jQuery("#refund_bank_text").hide();
+                        jQuery("#refund_source_text").show();
+                        jQuery("#refund_wallet_text").hide();
+                        jQuery("#refund_upi_text").hide();
+                    } else if (selectedOption == "refund_upi") {
+                        jQuery("#refund_bank_text").hide();
+                        jQuery("#refund_source_text").hide();
+                        jQuery("#refund_wallet_text").hide();
+                        // Show UPI content container
+                        jQuery("#refund_upi_content").show();
+
+                        // Check 'Add New' logic to show input if needed
+                        var upiAcc = jQuery("input[name='upi_refund_account_id']:checked").val();
+                        if (upiAcc == '0') {
+                            jQuery("#refund_upi_text").show();
+                        } else {
+                            jQuery("#refund_upi_text").hide();
+                        }
+                    } else {
+                        jQuery("#refund_bank_text, #refund_source_text, #refund_upi_text").hide();
+                        jQuery("#refund_wallet_text").show();
+                        jQuery("#refund_upi_content").hide();
+                    }
+                });
+
+                // UPI Account Radio Change
+                jQuery(document).on('change', 'input[name="upi_refund_account_id"]', function() {
+                    if (jQuery(this).val() == '0') {
+                        jQuery("#refund_upi_text").show();
+                    } else {
+                        jQuery("#refund_upi_text").hide();
+                    }
+                });
+                jQuery('input[name="bankrefund"]').change(function() {
+                    var selectedOption = jQuery(this).val();
+
+                    if (selectedOption == "0") {
+                        jQuery("#refund_bank_text_fields").show();
+                    } else {
+                        jQuery("#refund_bank_text_fields").hide();
+                    }
+                });
+                jQuery("#refund_bank_ifsccode").blur(function() {
+                    var val = jQuery(this).val();
+                    var ifscelmt = jQuery("#ifscverify");
+                    if (val != '') {
+                        val = val.trim();
+                        var length = val.length;
+                        if (length < 11) {
+                            jQuery.ajax({
+                                url: "https://ifsc.razorpay.com/" + val,
+                                type: "GET",
+                                success: function(response) {
+                                    ifscelmt.val('1');
+                                    jQuery("#ifscdetail").html('&#9989;' + response.BANK + ', ' + response.BRANCH);
+                                },
+                                error: function(jqXHR, textStatus, errorThrown) {
+                                    ifscelmt.val('0');
+                                    jQuery("#ifscdetail").html('not valid');
+                                }
+                            });
+                        }
+                    }
+                });
+                jQuery("#refund_bank_ifsccode").keyup(function() {
+                    var val = jQuery(this).val();
+                    var ifscelmt = jQuery("#ifscverify");
+                    var bnkname = jQuery("#refund_bank_name");
+                    var bnkbranch = jQuery("#refund_bank_branch");
+                    if (val != '') {
+                        val = val.trim();
+                        var length = val.length;
+                        if (length == 11) {
+                            jQuery.ajax({
+                                url: "https://ifsc.razorpay.com/" + val,
+                                type: "GET",
+                                success: function(response) {
+                                    ifscelmt.val('1');
+                                    bnkbranch.val(response.BRANCH);
+                                    bnkname.val(response.BANK);
+                                    jQuery("#ifscdetail").html('&#9989;' + response.BANK + ', ' + response.BRANCH);
+                                },
+                                error: function(jqXHR, textStatus, errorThrown) {
+                                    ifscelmt.val('0');
+                                    jQuery("#ifscdetail").html('not valid');
+                                }
+                            });
+                        }
+                    }
+                });
+                //---------------------------------------------
+
+                jQuery('.refund_types_block_inside_single').click(function() {
+                    jQuery('.refund_types_block_inside_single').removeClass('selected');
+                    jQuery(this).addClass('selected');
+                });
+                jQuery('.account_number_return_replace').click(function() {
+                    jQuery('.account_number_return_replace').removeClass('selected');
+                    jQuery(this).addClass('selected');
+                });
+                jQuery('.numbers_only').keyup(function() {
+                    this.value = this.value.replace(/[^0-9\.]/g, '');
+                });
+
+                jQuery('.return_replace_button').click(function() {
+
+                    var prd_checkbox = jQuery(this).attr('prd_checkbox');
+                    var product_to_return_or_replace = jQuery('#' + prd_checkbox + '').val();
+
+                    //check the checkbox of respective product
+                    if (!jQuery('#' + prd_checkbox + '').is(':checked')) {
+                        jQuery('#' + prd_checkbox + '').click();
+                        //                            jQuery('#'+prd_checkbox+'').attr('checked','checked');
+
+                        //hide all return replace button
+                        jQuery('.return_replace_button').hide();
+
+                        //show back button
+                        jQuery('.show_all_prds').removeClass('hide');
+                    }
+
+                    //slide up all other products except selected one
+                    jQuery('.product_info_return').each(function() {
+                        if (jQuery(this).attr('block_box') != prd_checkbox) {
+                            jQuery(this).hide();
+                        }
+                    });
+
+                    jQuery('.reason_and_photo').removeClass('hide');
+                    //show payment reverse method as well for return only
+                    if (jQuery(this).hasClass('return_button')) {
+                        jQuery('.mode_of_return').removeClass('hide');
+                        jQuery('#return_cancel_status').val('return');
+                    } else if (jQuery(this).hasClass('replace_button')) {
+                        jQuery('#return_cancel_status').val('replace');
+                    }
+
+                    //show agreement line
+                    jQuery('.agree_statement').removeClass('hide');
+
+                    //show submit button
+                    jQuery('input#crosubmit').removeClass('hide');
+                    jQuery('.error_return').removeClass('hide');
+                });
+
+
+                jQuery('.show_all_prds').click(function() {
+                    //show all return replace button
+                    jQuery('.return_replace_button').show();
+
+                    //hide back button
+                    //                        jQuery('.show_all_prds').removeClass('hide');
+
+                    //hide back button
+                    jQuery('span.back_button.show_all_prds').addClass('hide');
+
+                    //show all products
+                    jQuery('.product_info_return').show();
+
+                    jQuery('.productids').each(function() {
+
+                        if (jQuery(this).is(':checked')) {
+                            jQuery(this).click();
+                        }
+
+                    });
+
+                    // hide payment reverse method as well for return only
+                    jQuery('.mode_of_return').addClass('hide');
+
+                    //hide reason and photo section
+                    jQuery('.input_fields.reason_and_photo').addClass('hide');
+
+
+                    //hide agreement line
+                    jQuery('.agree_statement').addClass('hide');
+
+                    //uncheck return conset checkbox
+                    if (jQuery('#return_consent').is(':checked')) {
+                        jQuery('#return_consent').click();
+                    }
+
+                    //hide submit button
+                    jQuery('input#crosubmit').addClass('hide');
+                    jQuery('.error_return').addClass('hide');
+                });
+
+
+            });
+        });
+    </script>
+<?php
+
+}
+?>

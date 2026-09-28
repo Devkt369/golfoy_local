@@ -1,0 +1,135 @@
+<?php
+/** @var \ArtM\MassProducts\Block\Adminhtml\Draft\Edit $block */
+$draft = $block->getDraft();
+$values = $block->getDraftValues();
+$groups = $block->getAttributeGroupsWithAttributes();
+$draftId = (int)($draft['entity_id'] ?? 0);
+$completion = $block->getCompletionSummary();
+$progress = (int)($completion['progress_percent'] ?? 0);
+$progressColor = '#2f7d32';
+if ($progress < 50) {
+    $progressColor = '#c0392b';
+} elseif ($progress <= 80) {
+    $progressColor = '#d35400';
+}
+?>
+<div class="admin__page-section">
+    <div style="margin-bottom:10px;">
+        <a href="<?= $block->escapeUrl($block->getBackUrl()) ?>" class="action-secondary"><span><?= $block->escapeHtml(__('Back')) ?></span></a>
+    </div>
+
+    <div class="admin__fieldset-wrapper" style="margin-bottom:16px;">
+        <div class="admin__fieldset-wrapper-title"><strong><?= $block->escapeHtml(__('Draft Summary')) ?></strong></div>
+        <div class="admin__fieldset-wrapper-content">
+            <p><strong><?= $block->escapeHtml(__('SKU:')) ?></strong> <?= $block->escapeHtml((string)($draft['sku'] ?? '')) ?></p>
+            <p><strong><?= $block->escapeHtml(__('Product Name:')) ?></strong> <?= $block->escapeHtml((string)($draft['product_name'] ?? '')) ?></p>
+            <p><strong><?= $block->escapeHtml(__('Attribute Set:')) ?></strong> <?= $block->escapeHtml((string)($draft['attribute_set'] ?? '')) ?></p>
+            <p><strong><?= $block->escapeHtml(__('Operation Type:')) ?></strong> <?= $block->escapeHtml((string)($draft['operation_type'] ?? 'create')) ?></p>
+            <p><strong><?= $block->escapeHtml(__('Status:')) ?></strong> <?= $block->escapeHtml((string)($draft['status'] ?? 'incomplete')) ?></p>
+            <p>
+                <strong><?= $block->escapeHtml(__('Completion:')) ?></strong>
+                <?= (int)($completion['filled_required'] ?? 0) ?> / <?= (int)($completion['total_required'] ?? 0) ?>
+                <span style="color:<?= $block->escapeHtmlAttr($progressColor) ?>;"><?= (int)$progress ?>%</span>
+            </p>
+        </div>
+    </div>
+
+    <div id="artm-draft-save-msg" class="message" style="display:none;"></div>
+
+    <form id="artm-draft-edit-form" method="post" action="<?= $block->escapeUrl($block->getSaveUrl()) ?>">
+        <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>"/>
+        <input type="hidden" name="draft_id" value="<?= (int)$draftId ?>"/>
+
+        <?php foreach ($groups as $group): ?>
+            <div class="admin__fieldset-wrapper" style="margin-bottom:16px;">
+                <div class="admin__fieldset-wrapper-title"><strong><?= $block->escapeHtml((string)$group['group_name']) ?></strong></div>
+                <div class="admin__fieldset-wrapper-content">
+                    <?php foreach ($group['attributes'] as $attr):
+                        $code = (string)$attr['attribute_code'];
+                        $label = (string)$attr['frontend_label'];
+                        $inputType = (string)$attr['frontend_input'];
+                        $required = !empty($attr['is_required']);
+                        $value = $values[$code] ?? '';
+                    ?>
+                        <div class="admin__field" style="margin-bottom:10px;">
+                            <label class="admin__field-label" for="artm-attr-<?= $block->escapeHtmlAttr($code) ?>">
+                                <span><?= $block->escapeHtml($label) ?><?= $required ? ' *' : '' ?></span>
+                            </label>
+                            <div class="admin__field-control">
+                                <?php if ($inputType === 'textarea'): ?>
+                                    <textarea id="artm-attr-<?= $block->escapeHtmlAttr($code) ?>" name="values[<?= $block->escapeHtmlAttr($code) ?>]" class="admin__control-textarea"><?= $block->escapeHtml((string)$value) ?></textarea>
+                                <?php elseif ($inputType === 'select' || $inputType === 'boolean'): ?>
+                                    <select id="artm-attr-<?= $block->escapeHtmlAttr($code) ?>" name="values[<?= $block->escapeHtmlAttr($code) ?>]" class="admin__control-select">
+                                        <option value=""><?= $block->escapeHtml(__('-- Select --')) ?></option>
+                                        <?php foreach ((array)$attr['options'] as $option): ?>
+                                            <?php $optVal = (string)($option['value'] ?? ''); $optLabel = (string)($option['label'] ?? $optVal); ?>
+                                            <option value="<?= $block->escapeHtmlAttr($optVal) ?>" <?= ((string)$value === $optVal ? 'selected="selected"' : '') ?>><?= $block->escapeHtml($optLabel) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                <?php elseif ($inputType === 'multiselect'): ?>
+                                    <?php $selected = array_filter(array_map('trim', explode(',', (string)$value))); ?>
+                                    <select id="artm-attr-<?= $block->escapeHtmlAttr($code) ?>" name="values[<?= $block->escapeHtmlAttr($code) ?>][]" class="admin__control-multiselect" multiple="multiple" size="6">
+                                        <?php foreach ((array)$attr['options'] as $option): ?>
+                                            <?php $optVal = (string)($option['value'] ?? ''); $optLabel = (string)($option['label'] ?? $optVal); ?>
+                                            <option value="<?= $block->escapeHtmlAttr($optVal) ?>" <?= (in_array($optVal, $selected, true) ? 'selected="selected"' : '') ?>><?= $block->escapeHtml($optLabel) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                <?php elseif ($inputType === 'date'): ?>
+                                    <input id="artm-attr-<?= $block->escapeHtmlAttr($code) ?>" type="date" name="values[<?= $block->escapeHtmlAttr($code) ?>]" value="<?= $block->escapeHtmlAttr((string)$value) ?>" class="admin__control-text"/>
+                                <?php elseif ($inputType === 'price' || $inputType === 'weight'): ?>
+                                    <input id="artm-attr-<?= $block->escapeHtmlAttr($code) ?>" type="number" step="0.0001" name="values[<?= $block->escapeHtmlAttr($code) ?>]" value="<?= $block->escapeHtmlAttr((string)$value) ?>" class="admin__control-text"/>
+                                <?php else: ?>
+                                    <input id="artm-attr-<?= $block->escapeHtmlAttr($code) ?>" type="text" name="values[<?= $block->escapeHtmlAttr($code) ?>]" value="<?= $block->escapeHtmlAttr((string)$value) ?>" class="admin__control-text"/>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
+
+        <div>
+            <button type="submit" class="action-primary"><span><?= $block->escapeHtml(__('Save Draft')) ?></span></button>
+        </div>
+    </form>
+</div>
+
+<script>
+require(['jquery'], function ($) {
+    'use strict';
+
+    $('#artm-draft-edit-form').on('submit', function (e) {
+        e.preventDefault();
+        var $form = $(this);
+        $.ajax({
+            url: $form.attr('action'),
+            type: 'POST',
+            dataType: 'json',
+            data: $form.serialize()
+        }).done(function (resp) {
+            var $msg = $('#artm-draft-save-msg');
+            if (!resp || !resp.success) {
+                $msg.attr('class', 'message message-error error').html('<div>' + (resp && resp.message ? resp.message : 'Unable to save draft.') + '</div>').show();
+                return;
+            }
+
+            var progress = parseInt(resp.progress_percent, 10) || 0;
+            var color = '#2f7d32';
+            if (progress < 50) {
+                color = '#c0392b';
+            } else if (progress <= 80) {
+                color = '#d35400';
+            }
+
+            $msg.attr('class', 'message message-success success').html(
+                '<div>' + (resp.message || 'Draft saved successfully.') + '</div>' +
+                '<div><strong>Status:</strong> ' + (resp.status || 'incomplete') + '</div>' +
+                '<div><strong>Completion:</strong> ' + (resp.filled_required || 0) + ' / ' + (resp.total_required || 0) +
+                ' <span style="color:' + color + ';">(' + progress + '%)</span></div>'
+            ).show();
+        }).fail(function () {
+            $('#artm-draft-save-msg').attr('class', 'message message-error error').html('<div>Unable to save draft.</div>').show();
+        });
+    });
+});
+</script>

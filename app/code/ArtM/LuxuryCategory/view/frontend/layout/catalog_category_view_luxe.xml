@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+    Applied automatically (via layout_load_before, see
+    Observer/AddLuxuryLayoutHandleObserver) whenever the current request is
+    in luxury mode. Currently only sets the body class; this handle is the
+    intended extension point for any future luxury-mode-specific layout
+    customization (theme overrides, extra blocks, etc.) without touching
+    the router/plugins.
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <attribute name="class" value="luxury-mode"/>
+    </body>
+    <referenceContainer name="content">
+        <!--
+            TEMPORARY: diagnostic panel, only renders when ?luxe_debug=1 is
+            on the URL (see Block\Debug::isDebugEnabled()). Remove this
+            block reference, Block/Debug.php and
+            view/frontend/templates/debug.phtml once debugging is done.
+        -->
+        <block class="ArtM\LuxuryCategory\Block\Debug"
+               name="artm.luxury.debug"
+               template="ArtM_LuxuryCategory::debug.phtml"
+               after="-"/>
+    </referenceContainer>
+</page>

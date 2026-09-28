@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+    <argument name="data" xsi:type="array">
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">customersurvey_location_form.customersurvey_location_form_data_source</item>
+            <item name="deps" xsi:type="string">customersurvey_location_form.customersurvey_location_form_data_source</item>
+        </item>
+        <item name="label" xsi:type="string" translate="true">Location Information</item>
+        <item name="config" xsi:type="array">
+            <item name="dataScope" xsi:type="string">data</item>
+            <item name="namespace" xsi:type="string">customersurvey_location_form</item>
+        </item>
+        <item name="spinner" xsi:type="string">location_general</item>
+        <item name="buttons" xsi:type="array">
+            <item name="back" xsi:type="string">ArtM\CustomerSurvey\Block\Adminhtml\Location\Edit\Button\Back</item>
+            <item name="delete" xsi:type="string">ArtM\CustomerSurvey\Block\Adminhtml\Location\Edit\Button\Delete</item>
+            <item name="save" xsi:type="string">ArtM\CustomerSurvey\Block\Adminhtml\Location\Edit\Button\Save</item>
+            <item name="save_and_continue" xsi:type="string">ArtM\CustomerSurvey\Block\Adminhtml\Location\Edit\Button\SaveAndContinue</item>
+        </item>
+        <item name="template" xsi:type="string">templates/form/collapsible</item>
+    </argument>
+
+    <dataSource name="customersurvey_location_form_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">ArtM\CustomerSurvey\Ui\DataProvider\Location\Form\DataProvider</argument>
+            <argument name="name" xsi:type="string">customersurvey_location_form_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">location_id</argument>
+            <argument name="requestFieldName" xsi:type="string">location_id</argument>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="submit_url" xsi:type="url" path="customersurvey/location/save"/>
+                </item>
+            </argument>
+        </argument>
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+            </item>
+        </argument>
+    </dataSource>
+
+    <fieldset name="location_general">
+        <settings>
+            <label translate="true">Location Details</label>
+            <collapsible>false</collapsible>
+        </settings>
+
+        <field name="location_id" formElement="input" sortOrder="5">
+            <settings>
+                <visible>false</visible>
+                <dataType>text</dataType>
+                <dataScope>location_id</dataScope>
+            </settings>
+        </field>
+
+        <field name="name" formElement="input" sortOrder="10">
+            <settings>
+                <label translate="true">Name</label>
+                <dataType>text</dataType>
+                <dataScope>name</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+
+        <field name="description" formElement="textarea" sortOrder="20">
+            <settings>
+                <label translate="true">Description</label>
+                <dataType>text</dataType>
+                <dataScope>description</dataScope>
+            </settings>
+        </field>
+
+        <field name="page_type" formElement="select" sortOrder="30">
+            <settings>
+                <label translate="true">Page Type</label>
+                <dataType>text</dataType>
+                <dataScope>page_type</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="ArtM\CustomerSurvey\Model\Source\PageType"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="url_pattern" formElement="input" sortOrder="40">
+            <settings>
+                <label translate="true">URL Pattern</label>
+                <notice translate="true">Required for custom URL page type. Example: /golf/*</notice>
+                <dataType>text</dataType>
+                <dataScope>url_pattern</dataScope>
+            </settings>
+        </field>
+
+        <field name="css_selector" formElement="input" sortOrder="50">
+            <settings>
+                <label translate="true">CSS Selector</label>
+                <notice translate="true">Example: #maincontent .product-info-main</notice>
+                <dataType>text</dataType>
+                <dataScope>css_selector</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+        </field>
+
+        <field name="position" formElement="select" sortOrder="60">
+            <settings>
+                <label translate="true">Position</label>
+                <dataType>text</dataType>
+                <dataScope>position</dataScope>
+                <validation>
+                    <rule name="required-entry" xsi:type="boolean">true</rule>
+                </validation>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="ArtM\CustomerSurvey\Model\Source\Position"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+
+        <field name="screenshot" formElement="imageUploader" sortOrder="70">
+            <settings>
+                <label translate="true">Screenshot / Image</label>
+                <dataType>string</dataType>
+                <dataScope>screenshot</dataScope>
+            </settings>
+            <formElements>
+                <imageUploader>
+                    <settings>
+                        <uploaderConfig>
+                            <param xsi:type="string" name="url">customersurvey/location/upload</param>
+                        </uploaderConfig>
+                    </settings>
+                </imageUploader>
+            </formElements>
+        </field>
+
+        <field name="status" formElement="select" sortOrder="80">
+            <settings>
+                <label translate="true">Status</label>
+                <dataType>number</dataType>
+                <dataScope>status</dataScope>
+            </settings>
+            <formElements>
+                <select>
+                    <settings>
+                        <options class="Magento\Config\Model\Config\Source\Yesno"/>
+                    </settings>
+                </select>
+            </formElements>
+        </field>
+    </fieldset>
+</form>

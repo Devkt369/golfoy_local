@@ -1,0 +1,213 @@
+/**
+ * ArtM SeparateBundleCart Debug Script
+ * Intercepts add to cart and shows debug information
+ */
+
+define([
+    'jquery',
+    'mage/url'
+], function ($, urlBuilder) {
+    'use strict';
+
+    return function (config) {
+        
+        // Override the addToCart function for bundle products
+        $(document).ready(function () {
+            
+            // Flag to prevent double submission
+            var isProcessing = false;
+            var shouldProcessSeparately = false;
+            
+            // Intercept ALL form events more aggressively
+            $(document).on('submit', 'form[data-role="tocart-form"], #product_addtocart_form', function (e) {
+                console.log('Form submission intercepted');
+                
+                // Always prevent initial submission
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
+                // Prevent double processing
+                if (isProcessing) {
+                    console.log('Already processing, blocking');
+                    return false;
+                }
+                isProcessing = true;
+                
+                var form = $(this);
+                var formData = form.serialize();
+                var debugData = {};
+                
+                // Get product ID
+                debugData.productId = form.find('input[name="product"]').val();
+                
+                // Get product SKU from the page
+                debugData.productSku = $('.product-info-main .product.attribute.sku .value').text() || 'SKU not found';
+                
+                // Get bundle options
+                var bundleOptions = {};
+                var bundleOptionQty = {};
+                
+                form.find('select[name^="bundle_option"], input[name^="bundle_option"]:checked').each(function() {
+                    var name = $(this).attr('name');
+                    var value = $(this).val();
+                    var optionId = name.match(/bundle_option\[(\d+)\]/);
+                    
+                    if (optionId) {
+                        if (!bundleOptions[optionId[1]]) {
+                            bundleOptions[optionId[1]] = [];
+                        }
+                        bundleOptions[optionId[1]].push(value);
+                    }
+                });
+                
+                form.find('input[name^="bundle_option_qty"]').each(function() {
+                    var name = $(this).attr('name');
+                    var value = $(this).val();
+                    var optionId = name.match(/bundle_option_qty\[(\d+)\]/);
+                    
+                    if (optionId) {
+                        bundleOptionQty[optionId[1]] = value;
+                    }
+                });
+                
+                debugData.bundleOptions = bundleOptions;
+                debugData.bundleOptionQty = bundleOptionQty;
+                
+                // Get quantity
+                debugData.qty = form.find('input[name="qty"]').val() || 1;
+                
+                // Make AJAX call to get product attribute value
+                $.ajax({
+                    url: urlBuilder.build('artm_separatebundlecart/debug/productinfo'),
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        product_id: debugData.productId,
+                        form_key: $('input[name="form_key"]').val()
+                    },
+                    success: function(response) {
+                        debugData.attributeValue = response.add_product_separate || 'Attribute not found';
+                        debugData.productType = response.product_type || 'Unknown';
+                        debugData.selectedProducts = response.selected_products || [];
+                        
+                        // Set flag if should process separately
+                        shouldProcessSeparately = (debugData.productType === 'bundle' && 
+                                                 (debugData.attributeValue == 1 || debugData.attributeValue === 'Yes'));
+                        
+                        console.log('Should process separately:', shouldProcessSeparately);
+                        
+                        // Show debug alert
+                        showDebugAlert(debugData, form);
+                    },
+                    error: function() {
+                        debugData.attributeValue = 'Error getting attribute';
+                        debugData.productType = 'Error';
+                        debugData.selectedProducts = [];
+                        shouldProcessSeparately = false;
+                        
+                        // Show debug alert anyway
+                        showDebugAlert(debugData, form);
+                    }
+                });
+                
+                return false;
+            });
+            
+            function showDebugAlert(data, form) {
+                var alertMessage = "=== ADD TO CART DEBUG INFO ===\n\n";
+                alertMessage += "Product ID: " + data.productId + "\n";
+                alertMessage += "Product SKU: " + data.productSku + "\n";
+                alertMessage += "Product Type: " + data.productType + "\n";
+                alertMessage += "Quantity: " + data.qty + "\n\n";
+                alertMessage += "add_product_separate Attribute: " + data.attributeValue + "\n\n";
+                
+                if (Object.keys(data.bundleOptions).length > 0) {
+                    alertMessage += "BUNDLE OPTIONS SELECTED:\n";
+                    for (var optionId in data.bundleOptions) {
+                        alertMessage += "Option " + optionId + ": " + data.bundleOptions[optionId].join(', ') + "\n";
+                        if (data.bundleOptionQty[optionId]) {
+                            alertMessage += "  Quantity: " + data.bundleOptionQty[optionId] + "\n";
+                        }
+                    }
+                    alertMessage += "\n";
+                }
+                
+                if (data.selectedProducts && data.selectedProducts.length > 0) {
+                    alertMessage += "SELECTED SIMPLE PRODUCTS:\n";
+                    data.selectedProducts.forEach(function(product) {
+                        alertMessage += "- " + product.name + " (ID: " + product.id + ", SKU: " + product.sku + ")\n";
+                    });
+                    alertMessage += "\n";
+                }
+                
+                alertMessage += "Form Data: " + JSON.stringify(data, null, 2);
+                
+                alert(alertMessage);
+                
+                // Check if we should process separately
+                if (shouldProcessSeparately) {
+                    console.log('Processing bundle product separately via AJAX');
+                    alert("Bundle product with add_product_separate = Yes detected!\n\nProcessing individual products via AJAX...");
+                    
+                    // COMPLETELY disable the form to prevent any submission
+                    form.find('button[type="submit"], input[type="submit"]').prop('disabled', true);
+                    
+                    // Process via AJAX instead of normal form submission
+                    $.ajax({
+                        url: urlBuilder.build('artm_separatebundlecart/ajax/addtocart'),
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            product_id: data.productId,
+                            bundle_options: data.bundleOptions,
+                            bundle_option_qty: data.bundleOptionQty,
+                            qty: data.qty,
+                            form_key: $('input[name="form_key"]').val()
+                        },
+                        success: function(response) {
+                            console.log('AJAX success:', response);
+                            if (response.success) {
+                                alert("Success! Added individual products:\n" + response.message);
+                                // Redirect to cart immediately - this should prevent any other submissions
+                                window.location.replace(urlBuilder.build('checkout/cart'));
+                            } else {
+                                alert("Error: " + response.message);
+                                // Re-enable form on error
+                                form.find('button[type="submit"], input[type="submit"]').prop('disabled', false);
+                                isProcessing = false;
+                            }
+                        },
+                        error: function() {
+                            console.log('AJAX error');
+                            alert("AJAX Error occurred");
+                            // Re-enable form on error
+                            form.find('button[type="submit"], input[type="submit"]').prop('disabled', false);
+                            isProcessing = false;
+                        }
+                    });
+                    
+                    // ABSOLUTELY DO NOT ALLOW NORMAL FORM SUBMISSION
+                    return false;
+                    
+                } else {
+                    console.log('Processing normally or user choice');
+                    // Reset processing flag
+                    isProcessing = false;
+                    
+                    // Ask if user wants to proceed with normal submission
+                    if (confirm("Do you want to proceed with adding to cart normally?")) {
+                        console.log('User confirmed normal submission');
+                        // Create a temporary form to avoid our event handler
+                        var tempForm = form.clone();
+                        tempForm.removeAttr('id').removeClass();
+                        form.after(tempForm);
+                        tempForm.submit();
+                    } else {
+                        console.log('User cancelled submission');
+                    }
+                }
+            }
+        });
+    };
+});

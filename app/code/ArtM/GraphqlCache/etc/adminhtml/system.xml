@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework/Config/etc/system_file.xsd">
+    <system>
+        <section id="react_config" translate="label" type="text" sortOrder="300"
+                 showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>React + GraphQL Configuration</label>
+            <tab>general</tab>
+            <resource>Magento_Backend::admin</resource>
+
+            <group id="general" translate="label" type="text" sortOrder="10"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General</label>
+                <field id="enable" translate="label" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>React UI</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                </field>
+            </group>
+
+            <group id="security" translate="label" type="text" sortOrder="20"
+                   showInDefault="1" showInWebsite="1">
+                <label>GraphQL Security</label>
+                <field id="allowed_domains" translate="label" type="textarea" sortOrder="10"
+                       showInDefault="1" showInWebsite="1">
+                    <label>Allowed GraphQL Origins (comma-separated)</label>
+                    <comment>Example: https://yourdomain.com,https://staging.yourdomain.com</comment>
+                </field>
+            </group>
+
+        </section>
+    </system>
+</config>

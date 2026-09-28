@@ -1,0 +1,28 @@
+<?php
+/** @var \Magento\Backend\Block\Template $block */
+$uploadUrl = $block->getUrl('massproducts/upload/save');
+$validateUrl = $block->getUrl('massproducts/upload/validate');
+$attributeSetsUrl = $block->getUrl('massproducts/attributesets/index');
+$attributesBySetUrl = $block->getUrl('massproducts/attribute/bySet');
+$mappingSaveUrl = $block->getUrl('massproducts/mapping/save');
+$draftCreateUrl = $block->getUrl('massproducts/draft/create');
+$draftTabUrl = $block->getUrl('massproducts/index/index', ['active_tab' => 'products_upload', 'child_tab' => 'draft']);
+?>
+<div id="upload-root">
+    <div class="admin__page-section-item-content"></div>
+</div>
+
+<script>
+require(['ArtM_MassProducts/js/mapping'], function (initMapping) {
+    initMapping({
+        rootSelector: '#upload-root',
+        uploadUrl: '<?= $block->escapeJs($uploadUrl) ?>',
+        validateUrl: '<?= $block->escapeJs($validateUrl) ?>',
+        attributeSetsUrl: '<?= $block->escapeJs($attributeSetsUrl) ?>',
+        attributesBySetUrl: '<?= $block->escapeJs($attributesBySetUrl) ?>',
+        mappingSaveUrl: '<?= $block->escapeJs($mappingSaveUrl) ?>',
+        draftCreateUrl: '<?= $block->escapeJs($draftCreateUrl) ?>',
+        draftTabUrl: '<?= $block->escapeJs($draftTabUrl) ?>'
+    });
+});
+</script>

@@ -1,0 +1,165 @@
+efe
+<table border="1">
+    <tr>
+        <th>Order id</th>
+        <th>Product ids and it's Attribute sets</th>
+        <th>Attribute sets</th>
+        <th>Balls in order?</th>
+        <th>Custom_printing</th>
+        <th>Invoice number</th>
+        <th>Shipment number</th>
+        <th>Order date</th>
+        <th>Order status</th>
+    </tr>
+    
+    
+<?php
+    
+    
+        $from = $this->getRequest()->getParam('from');
+        $to = $this->getRequest()->getParam('to');
+        $_objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $order_config = $_objectManager->get('\Magento\Sales\Model\ResourceModel\Order\CollectionFactory');
+        $orderinstance = $_objectManager->create('Magento\Sales\Model\Order');
+        $orderfactory = $_objectManager->create('Magento\Sales\Model\OrderFactory');
+        $objectproduct = $_objectManager->create('Magento\Catalog\Model\Product');
+        
+        $attributeSet = $_objectManager->create('Magento\Eav\Api\AttributeSetRepositoryInterface');
+
+    
+//        \Magento\Sales\Model\Order $orderInstance
+//        $this->order_instance = $orderInstance;
+//        $orderinstance = $this->order_instance->loadByIncrementId($orderId);
+    
+        $from = -$from;
+        $to = -$to;
+    
+        $return_array = array();
+        date_default_timezone_set("Asia/Calcutta");   //India time (GMT+5:30)
+        $date = date('Y-m-d H:i:s' );
+        
+//        $searchcritiria_array = array('complete' , 'closed');
+        echo "<br><br><br>";
+        echo $from_date = date('Y-m-d  H:i:s', strtotime($date. ''.$from.' days'));
+        echo $to_date = date('Y-m-d H:i:s', strtotime($date. ''.$to.' days'));
+        $ordercollection = $order_config->create()
+            ->addFieldToSelect('*')
+            ->addFieldToFilter('created_at', array('gteq' => $from_date))
+            ->addFieldToFilter('created_at', array('lteq' => $to_date))
+            ->addAttributeToFilter('state', array('in' => $searchcritiria_array ))
+            ->setOrder('increment_id','DESC');
+        
+        
+        if ($ordercollection->getTotalCount() > 0) {
+            $orders = $ordercollection->getItems();
+            $i = 0;
+            $total_orders = 0;
+            foreach ($orders as $item) {
+                echo "<tr>";
+                
+                //if it comes to second required order
+                if($i > 100){
+//                    break;
+                }
+                $curr_order_id = $item->getIncrementId();
+                
+                $order = $_objectManager->create('Magento\Sales\Model\Order')->loadByIncrementId($curr_order_id);
+                
+//                $order = $orderinstance->loadByIncrementId($curr_order_id);
+                
+                $orderItems = $order->getAllItems();
+                
+                $attr_set_list = '';
+                $balls_in_order = 0;
+                $prd_html = '';
+                $invoice_html = array();
+                $custom_printing_text = array();
+                foreach ($orderItems as $orderinstance) {
+                    $prd_ids = '';
+                    if( $orderinstance->getParentItemId() == '' ){
+                        $prd_ids = $orderinstance->getProductId();
+                        
+                        $product = $objectproduct->load($prd_ids);
+                        
+                        $attributeSetRepository = $attributeSet->get( $product->getAttributeSetId() );
+                        $attribute_set_name = $attributeSetRepository->getAttributeSetName();
+                        if( strtolower($attribute_set_name) == 'ball' ){
+                            $balls_in_order++;
+                            $total_orders++;
+                        }
+                        
+                        if( strtolower($attribute_set_name) == 'ball' ){
+                            $prd_html = $prd_html."<div><span>".$prd_ids."</span><span class='hide'>".$attribute_set_name."</span></div>";
+                            $attr_set_list = $attr_set_list.$attribute_set_name."<br>";
+                            
+                            
+                            foreach ($order->getAllVisibleItems() as $_item) {
+                                $product_attrs = $_item->debug();
+                                $options = $product_attrs['product_options']['info_buyRequest'];
+//                                echo "count".count($options)."<br>";
+//                                echo '<pre>';
+                                $custom_printing_text = $options;
+//                                echo '</pre>';
+
+                            }
+                        }
+                        
+                        foreach ($order->getInvoiceCollection() as $invoice)
+                        {
+                            $invoice_id = $invoice->getIncrementId();
+                        }
+                        foreach ($order->getShipmentsCollection () as $shipment)
+                        {
+                            $shipment_id = $shipment->getIncrementId();
+                        }
+                        
+                    }
+                }
+                
+                
+                if( $balls_in_order > 0 ){
+                    echo "<td>".$curr_order_id."</td>";
+                    echo "<td>";
+                    echo $prd_html;
+                    echo "</td>";
+                    echo "<td>".$attr_set_list."</td>";
+                    echo "<td>".$balls_in_order."</td>";
+                    echo "<td>";
+                    
+                    if (array_key_exists("options",$custom_printing_text)){
+//                                    echo "<br>options exists<br>";
+                        if( count($options['options']) > 0 ){
+                                        print_r($options['options']);
+                        }else{
+                            echo "option is empty";
+                        }
+                    }else{
+                        echo "<br>options not exists<br>";
+                    }
+                    
+                    echo "</td>";
+                    
+
+                        
+                    echo "<td>".$invoice_id."</td>";
+                    echo "<td>".$shipment_id."</td>";
+                    echo "<td>".$order->getCreatedAt()."</td>";
+                    echo "<td>".$order->getState()." - ".$order->getStatus()."</td>";
+//                    echo "<td>".print_r(get_class_methods($order))."</td>";
+//                    echo "<td>".print_r($invoice_html)."</td>";
+                }
+                
+                $i++;
+                echo "</tr>";
+                
+            }
+        }else{
+            echo "order collection not found";
+            return false;
+        }
+?>
+        
+</table>
+<?php
+    echo $total_orders;
+?>

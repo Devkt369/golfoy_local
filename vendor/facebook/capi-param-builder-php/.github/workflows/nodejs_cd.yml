@@ -1,0 +1,37 @@
+name: Publish NodeJS package to the NPM Repository
+
+on:
+  push:
+    tags:
+      - v*-nodejs
+  workflow_dispatch:
+
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: nodejs/capi-param-builder
+
+    steps:
+      - uses: actions/checkout@v5
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run and build
+        run: npm run build --if-present
+      - name: Unit test
+        run: npm test
+      - name: Publish to npm
+        run: npm publish
+      - name: Show npm debug log if publish failed
+        if: failure()
+        run: cat /home/runner/.npm/_logs/*.log || echo "No npm log found"

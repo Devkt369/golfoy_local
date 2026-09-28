@@ -1,0 +1,141 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<div class="modal fade not-login-page" id="signon_button" role="dialog">
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body_sso">
+                <div class="sign-up-forms-details">
+                    <form name="login-number" id="login-number" action="#">
+                        <div class="sign-up-content">
+                            <div class="login-heading">
+                                <img src="https://golfoy.com/media/partners/Golfoy-partners-black.png" title="Golfoy.com: India Online Golf Shop" alt="Golfoy.com India Online Golf Shop" loading="lazy" width="403" height="103">
+                                <p>Please enter your mobile number to <br> Sign In / Sign Up</p>
+                            </div>
+                            <div class="input_form_div">
+                                <div class="form-group">
+                                    <div class="mobile-number-login__dateSlct">+91</div>
+                                    <input type="text" inputmode="numeric" oninput="javascript: if (this.value.length > 10) this.value = this.value.slice(0, 10);" maxlength="10" class="mobile-number-login__form_control" name="mobileNumber" placeholder="Enter Mobile Number" autocomplete="off" id="mobileNumber" value="">
+                                </div>
+                            </div>
+                            <h2 class="use-email" id="use_email">Sign in using E-mail</h2>
+                            <div class="terms-condition-content">
+                                <p>On Clicking Continue, I agree to <a href="https://golfoy.com/terms-and-conditions" class="acnhor_page">Terms of Service</a><a href="https://golfoy.com/privacy-policy-cookie-restriction-mode" class="acnhor_page"> & Privacy Policy </a>
+                                </p>
+                            </div>
+                            <div class="submit_form_button">
+                                <button class="sbmt_btn" type="">continue</button>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+                <div class="guest-user">
+                    <p>Didn't have an account?</p>
+                    <button class="create-account" id="create_account" onclick="window.location.href='/contact'">Contact Us</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    require(["jquery"], function(jQuery) {
+        jQuery(document).ready(function() {
+
+            function checkBodyClass() {
+                var inputValueLengthLogin = jQuery('body').hasClass('customer-account-login');
+                var inputValueLengthCreate = jQuery('body').hasClass('customer-account-create');
+                var inputValueLengthcheckout = jQuery('body').hasClass('checkout-index-index');
+                if (inputValueLengthLogin || inputValueLengthCreate || inputValueLengthcheckout) {
+                    jQuery(".modal.fade.not-login-page").remove();
+                    jQuery(".signin_signout_blockoutside.not-logged-in.sso-model-popup").addClass('active-login-page');
+                } else {
+                    jQuery(".signin_signout_blockoutside.not-logged-in.sso-model-popup").removeClass('active-login-page');
+                }
+
+            }
+            setInterval(checkBodyClass, 1000);
+
+        });
+    });
+</script>
+
+<!-- <script>
+    const customerInput = document.querySelector('.customerInput');
+    const customerName = document.querySelector('.customerName');
+
+    customerInput.addEventListener('focus', () => {
+        customerName.classList.add('active');
+    });
+
+    customerInput.addEventListener('blur', () => {
+        if (customerInput.value === '') {
+            customerName.classList.remove('active');
+        }
+    });
+</script> -->
+
+
+
+<script>
+    var emailInput = document.querySelector('.email-input');
+    var emailLabel = document.querySelector('.email-label');
+
+     if (emailInput) {
+        emailInput.addEventListener('focus', () => {
+            emailLabel.classList.add('active');
+        });
+        emailInput.addEventListener('blur', () => {
+            if (emailInput.value === '') {
+                emailLabel.classList.remove('active');
+            }
+        });
+     }
+
+    var passwordInput = document.querySelector('.password-input');
+    var passwordLabel = document.querySelector('.password-label');
+
+     if (passwordInput) {
+        passwordInput.addEventListener('focus', () => {
+            passwordLabel.classList.add('active');
+        });
+
+        passwordInput.addEventListener('blur', () => {
+            if (passwordInput.value === '') {
+                passwordLabel.classList.remove('active');
+            }
+        });
+     }
+    var passwordInput = document.querySelector('.first-name');
+    var passwordLabel = document.querySelector('.first-name-label');
+
+    
+     if (passwordInput) {
+        passwordInput.addEventListener('focus', () => {
+            passwordLabel.classList.add('active');
+        });
+
+        passwordInput.addEventListener('blur', () => {
+            if (passwordInput.value === '') {
+                passwordLabel.classList.remove('active');
+            }
+        });
+     }
+    var passwordInput = document.querySelector('.new-mobile-number');
+    var passwordLabel = document.querySelector('.phone-no-label');
+
+     if (passwordInput) {
+        passwordInput.addEventListener('focus', () => {
+            passwordLabel.classList.add('active');
+        });
+
+        passwordInput.addEventListener('blur', () => {
+            if (passwordInput.value === '') {
+                passwordLabel.classList.remove('active');
+            }
+        });
+     }
+</script>
