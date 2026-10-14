@@ -3,16 +3,23 @@
     <aside class="artm-inbox__rail">
         <div class="artm-inbox__rail-head">
             <h1>Customer Care</h1>
-            <span id="artm-inbox-connection">Connecting...</span>
+            <div class="artm-inbox__rail-status">
+                <span id="artm-inbox-connection">Connecting...</span>
+                <button id="artm-inbox-notify" type="button" title="Enable desktop notifications">Enable alerts</button>
+                <span class="artm-inbox__unread-total" id="artm-inbox-unread-total" aria-label="Unread messages" hidden></span>
+            </div>
         </div>
         <div id="artm-inbox-list" class="artm-inbox__list" aria-label="Open conversations"></div>
     </aside>
     <section class="artm-inbox__thread" aria-label="Selected conversation">
         <header class="artm-inbox__thread-head">
-            <div><strong id="artm-inbox-customer">Select a conversation</strong><span id="artm-inbox-email"></span></div>
+            <div><strong id="artm-inbox-customer">Select a conversation</strong><span id="artm-inbox-email"></span><span id="artm-inbox-status"></span></div>
             <button id="artm-inbox-close" type="button" title="Close conversation" aria-label="Close conversation" disabled>Close chat</button>
         </header>
+        <button id="artm-inbox-older" class="artm-inbox__older" type="button" hidden>See older chat</button>
+        <section id="artm-inbox-request" class="artm-inbox__request" aria-live="polite" hidden></section>
         <div id="artm-inbox-messages" class="artm-inbox__messages" role="log" aria-label="Conversation messages"></div>
+        <div id="artm-inbox-typing" class="artm-inbox__typing" role="status" aria-live="polite" hidden></div>
         <form id="artm-inbox-form" class="artm-inbox__form">
             <input id="artm-inbox-input" maxlength="2000" autocomplete="off" placeholder="Reply to customer..." disabled>
             <button type="submit" title="Send reply" aria-label="Send reply" disabled>
@@ -20,6 +27,7 @@
             </button>
         </form>
     </section>
+    <button class="artm-inbox__toast" id="artm-inbox-toast" type="button" aria-live="polite" hidden></button>
 </div>
 <script type="text/x-magento-init">
     {"#artm-livechat-inbox":{"ArtM_LiveChat/js/inbox":<?= /* @noEscape */ $block->getJsConfig() ?>}}

@@ -34,10 +34,11 @@ class Token extends Action
         }
 
         try {
+            $agentName = trim((string) $admin->getFirstName() . ' ' . (string) $admin->getLastName());
             $accessToken = $this->token->issue([
                 'sub' => (string) $admin->getId(),
                 'role' => 'agent',
-                'name' => (string) $admin->getUserName(),
+                'name' => $agentName !== '' ? $agentName : (string) $admin->getUserName(),
                 'email' => (string) $admin->getEmail(),
             ]);
         } catch (RuntimeException $exception) {

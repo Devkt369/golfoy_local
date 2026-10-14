@@ -8,6 +8,10 @@
         <column xsi:type="varchar" name="status" nullable="false" length="24" default="open" comment="Conversation Status"/>
         <column xsi:type="int" name="assigned_agent_id" padding="10" unsigned="true" nullable="true" comment="Assigned Agent ID"/>
         <column xsi:type="varchar" name="assigned_agent_name" nullable="true" length="255" comment="Assigned Agent Name"/>
+        <column xsi:type="varchar" name="intake_category" nullable="true" length="32" comment="Customer Request Category"/>
+        <column xsi:type="varchar" name="order_number" nullable="true" length="64" comment="Customer Order Number"/>
+        <column xsi:type="varchar" name="issue_summary" nullable="true" length="255" comment="Customer Issue Summary"/>
+        <column xsi:type="text" name="customer_message" nullable="true" comment="Customer Issue Description"/>
         <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
         <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
@@ -20,6 +24,11 @@
         <index referenceId="ARTM_LIVECHAT_STATUS_UPDATED" indexType="btree">
             <column name="status"/>
             <column name="updated_at"/>
+        </index>
+        <index referenceId="ARTM_LIVECHAT_REQUEST_QUEUE" indexType="btree">
+            <column name="status"/>
+            <column name="assigned_agent_id"/>
+            <column name="created_at"/>
         </index>
     </table>
     <table name="artm_livechat_message" resource="default" engine="innodb" comment="ArtM Live Chat Message">
