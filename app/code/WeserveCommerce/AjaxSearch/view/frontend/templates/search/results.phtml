@@ -1,0 +1,120 @@
+<?php
+/** @var \WeserveCommerce\AjaxSearch\Block\SearchResults $block */
+/** @var \Magento\Framework\Escaper $escaper */
+$query = trim((string)$block->getRequest()->getParam('q', ''));
+$searchResults = $block->getSearchResults($query);
+$products = $searchResults['products'] ?? [];
+$total = (int)($searchResults['total'] ?? 0);
+$limit = max(1, $block->getSearchLimit());
+$currentPage = max(1, (int)($searchResults['page'] ?? $block->getCurrentPage()));
+$totalPages = (int)ceil($total / $limit);
+$loadingMode = $block->getResultsLoadingMode();
+?>
+<section class="ajax-search-page"
+         data-loading-mode="<?= $escaper->escapeHtmlAttr($loadingMode) ?>"
+         data-query="<?= $escaper->escapeHtmlAttr($query) ?>"
+         data-page="<?= $currentPage ?>"
+         data-total-pages="<?= $totalPages ?>"
+         data-limit="<?= $limit ?>"
+         data-endpoint="<?= $escaper->escapeUrl($block->getAutocompleteUrl()) ?>">
+    <h1 class="page-title">
+        <span><?= $escaper->escapeHtml(__('Search results for: %1', $query)) ?></span>
+    </h1>
+    <?php if ($block->hasSearchError()): ?>
+        <div class="message error">
+            <div><?= $escaper->escapeHtml(__('Search results are temporarily unavailable. Please try again.')) ?></div>
+        </div>
+    <?php elseif ($query === ''): ?>
+        <div class="message info">
+            <div><?= $escaper->escapeHtml(__('Enter a search term to find products.')) ?></div>
+        </div>
+    <?php elseif (!$products): ?>
+        <div class="message info empty">
+            <div><?= $escaper->escapeHtml(__('We couldn\'t find products matching the selection.')) ?></div>
+        </div>
+    <?php else: ?>
+        <div class="ajax-search-page-summary" aria-live="polite">
+            <?= $escaper->escapeHtml(__('%1 products found', $total)) ?>
+        </div>
+        <div class="products wrapper grid products-grid">
+            <ol class="products list items product-items">
+                <?php foreach ($products as $product): ?>
+                    <li class="item product product-item">
+                        <div class="product-item-info">
+                            <a class="product photo product-item-photo"
+                               href="<?= $escaper->escapeUrl($product['url'] ?? '') ?>">
+                                <?php if (!empty($product['image'])): ?>
+                                    <span class="product-image-container">
+                                        <span class="product-image-wrapper">
+                                            <img class="product-image-photo"
+                                                 src="<?= $escaper->escapeUrl($product['image']) ?>"
+                                                 alt="<?= $escaper->escapeHtmlAttr($product['name'] ?? '') ?>"/>
+                                        </span>
+                                    </span>
+                                <?php endif; ?>
+                            </a>
+                            <div class="product details product-item-details">
+                                <strong class="product name product-item-name">
+                                    <a class="product-item-link"
+                                       href="<?= $escaper->escapeUrl($product['url'] ?? '') ?>">
+                                        <?= $escaper->escapeHtml($product['name'] ?? '') ?>
+                                    </a>
+                                </strong>
+                                <?php if (!empty($product['brand'])): ?>
+                                    <div class="product-item-brand">
+                                        <?= $escaper->escapeHtml($product['brand']) ?>
+                                    </div>
+                                <?php endif; ?>
+                                <div class="price-box price-final_price">
+                                    <?php if (!empty($product['special_price'])): ?>
+                                        <span class="old-price">
+                                            <span class="price-container">
+                                                <span class="price-label"><?= $escaper->escapeHtml(__('MRP')) ?></span>
+                                                <span class="price"><?= $escaper->escapeHtml($block->formatPrice($product['price'] ?? 0)) ?></span>
+                                            </span>
+                                        </span>
+                                        <span class="special-price">
+                                            <span class="price-container">
+                                                <span class="price-label"><?= $escaper->escapeHtml(__('Special Price')) ?></span>
+                                                <span class="price"><?= $escaper->escapeHtml($block->formatPrice($product['special_price'])) ?></span>
+                                            </span>
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="price-container">
+                                            <span class="price"><?= $escaper->escapeHtml($block->formatPrice($product['price'] ?? 0)) ?></span>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                <?php endforeach; ?>
+            </ol>
+        </div>
+        <?php if ($totalPages > 1 && $loadingMode === 'pagination'): ?>
+            <nav class="ajax-search-pagination" aria-label="<?= $escaper->escapeHtmlAttr(__('Search result pages')) ?>">
+                <?php if ($currentPage > 1): ?>
+                    <a class="action previous" href="<?= $escaper->escapeUrl($block->getPageUrl($query, $currentPage - 1)) ?>">
+                        <?= $escaper->escapeHtml(__('Previous')) ?>
+                    </a>
+                <?php endif; ?>
+                <span class="ajax-search-pagination-status">
+                    <?= $escaper->escapeHtml(__('Page %1 of %2', $currentPage, $totalPages)) ?>
+                </span>
+                <?php if ($currentPage < $totalPages): ?>
+                    <a class="action next" href="<?= $escaper->escapeUrl($block->getPageUrl($query, $currentPage + 1)) ?>">
+                        <?= $escaper->escapeHtml(__('Next')) ?>
+                    </a>
+                <?php endif; ?>
+            </nav>
+        <?php elseif ($totalPages > $currentPage && $loadingMode === 'infinite_scroll'): ?>
+            <div class="ajax-search-load-more" aria-live="polite">
+                <div class="ajax-search-scroll-sentinel" aria-hidden="true"></div>
+                <span class="ajax-search-loading-message" role="status" hidden>
+                    <?= $escaper->escapeHtml(__('Loading more products...')) ?>
+                </span>
+                <span class="ajax-search-error-message" role="alert" hidden></span>
+            </div>
+        <?php endif; ?>
+    <?php endif; ?>
+</section>

@@ -1,0 +1,159 @@
+.block-search {
+    position: relative;
+}
+
+#search_autocomplete {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    background: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    padding: 15px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+#search_autocomplete .products.wrapper {
+    margin: 0;
+}
+
+#search_autocomplete .product-items {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#search_autocomplete .product-item {
+    margin: 0;
+    padding: 0;
+    width: auto;
+}
+
+#search_autocomplete .product-item-info {
+    width: 100%;
+}
+
+#search_autocomplete .product-image-container,
+#search_autocomplete .product-image-wrapper {
+    display: block;
+    width: 100%;
+}
+
+#search_autocomplete .product-image-wrapper {
+    height: auto;
+    padding-bottom: 100%;
+    position: relative;
+}
+
+#search_autocomplete .product-image-photo {
+    height: 100%;
+    left: 0;
+    object-fit: contain;
+    position: absolute;
+    top: 0;
+    width: 100%;
+}
+
+#search_autocomplete .product-item-brand {
+    color: #777;
+    font-size: 12px;
+    margin: 4px 0;
+}
+
+#search_autocomplete .price-box .old-price {
+    margin-right: 8px;
+    text-decoration: line-through;
+}
+
+#search_autocomplete .price-box .special-price {
+    color: #c00;
+}
+
+.ajax-search-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.ajax-search-product {
+    display: block;
+    text-decoration: none;
+    color: #222;
+    background: #fff;
+    border: 1px solid #eee;
+    padding: 10px;
+    transition: box-shadow 0.2s ease;
+}
+
+.ajax-search-product:hover {
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+}
+
+.ajax-search-product-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.ajax-search-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.ajax-search-product-name {
+    font-size: 14px;
+    line-height: 20px;
+    margin-bottom: 5px;
+}
+
+.ajax-search-product-brand {
+    font-size: 12px;
+    color: #777;
+    margin-bottom: 5px;
+}
+
+.ajax-search-product-price {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.ajax-search-price-mrp,
+.ajax-search-price-special {
+    display: inline-block;
+    text-decoration: line-through;
+}
+
+.ajax-search-price-special {
+    margin-left: 8px;
+}
+
+.ajax-search-product-discount {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 11px;
+}
+
+.ajax-search-loading,
+.ajax-search-empty,
+.ajax-search-error {
+    padding: 20px;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    #search_autocomplete .product-items {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ajax-search-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="WeserveCommerce_AjaxSearch::css/fast-search.css" />
+        <css src="WeserveCommerce_AjaxSearch::css/ajax-search.css"/>
+    </head>
+    <body>
+        <!-- <referenceContainer name="header.panel">
+            <block class="WeserveCommerce\AjaxSearch\Block\Search" name="ajaxsearch.block" before="-" template="WeserveCommerce_AjaxSearch::search.phtml" />
+        </referenceContainer> -->
+        <!-- Override core mini search template -->
+        <!-- <referenceBlock name="minisearch">
+            <action method="setTemplate">
+                <argument name="template" xsi:type="string">WeserveCommerce_AjaxSearch::form/form.mini.phtml</argument>
+            </action>
+        </referenceBlock> -->
+        <referenceBlock name="top.search">
+            <action method="setTemplate">
+                <argument name="template" xsi:type="string">
+                    WeserveCommerce_AjaxSearch::form/form.mini.phtml
+                </argument>
+            </action>
+        </referenceBlock>
+    </body>
+</page>

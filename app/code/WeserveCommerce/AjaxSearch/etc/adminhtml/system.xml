@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="fastsearch" translate="label" type="text" sortOrder="250" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Fast Search &amp; Autocomplete</label>
+            <tab>catalog</tab>
+            <resource>WeserveCommerce_AjaxSearch::config</resource>
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General Configuration</label>
+                <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Fast Search</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="autocomplete_enabled" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Autocomplete</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="autocomplete_limit" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Autocomplete Limit</label>
+                    <comment>Number of items to show in autocomplete dropdown (default: 8)</comment>
+                </field>
+                <field id="search_limit" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Full Search Limit</label>
+                    <comment>Number of items per page in search results (default: 20)</comment>
+                </field>
+                <field id="results_loading_mode" translate="label" type="select" sortOrder="45" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Search Results Loading Mode</label>
+                    <comment>Choose numbered pagination or load additional results automatically while scrolling.</comment>
+                    <source_model>WeserveCommerce\AjaxSearch\Model\Config\Source\ResultsLoadingMode</source_model>
+                </field>
+                <field id="min_query_length" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Minimum Query Length</label>
+                </field>
+                <field id="max_query_length" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Maximum Query Length</label>
+                </field>
+                <field id="debug_mode" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Include Debug Performance Metadata</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+            <group id="engine" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Search Engine Settings</label>
+                <field id="use_magento_config" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Use Magento Search Settings</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="host" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Host Override</label>
+                    <comment>Leave empty to use Magento catalog search host</comment>
+                </field>
+                <field id="port" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Port Override</label>
+                </field>
+                <field id="index_prefix" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Index Prefix Override</label>
+                </field>
+                <field id="timeout" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Timeout (seconds)</label>
+                </field>
+            </group>
+            <group id="filtering" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Product Filter Rules</label>
+                <field id="hide_out_of_stock" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Hide Out-of-Stock Products</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="fuzzy_search" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Fuzzy Search</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+            <group id="synonyms" translate="label" type="text" sortOrder="35" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Search Synonyms</label>
+                <field id="compound_word_synonyms" translate="label comment" type="textarea" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Compound Word Synonyms</label>
+                    <comment><![CDATA[One mapping per line, format: <b>term=variant</b> (e.g. <code>tshirt=t shirt</code>). Lets a shopper typing "tshirt" also match products indexed as "t shirt" or "t-shirt". Matching tries both the typed term and its listed variant, so you only need one direction per line.<br/><br/>Example:<br/>tshirt=t shirt<br/>tshirts=t shirts<br/>sweatshirt=sweat shirt<br/>activewear=active wear]]></comment>
+                </field>
+            </group>
+            <group id="indexing" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Quick Search Index</label>
+                <field id="attributes" translate="label" type="multiselect" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Product Attributes</label>
+                    <comment>Attributes used for quick-search matching and copied to its private index. Reindex after changing this list.</comment>
+                    <source_model>WeserveCommerce\AjaxSearch\Model\Config\Source\SearchableProductAttributes</source_model>
+                </field>
+                <field id="autocomplete_attributes" translate="label" type="multiselect" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Autocomplete Response Attributes</label>
+                    <comment>Selected product attributes are returned in each autocomplete product under the attributes object. Reindex after changing this list.</comment>
+                    <source_model>WeserveCommerce\AjaxSearch\Model\Config\Source\AutocompleteProductAttributes</source_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

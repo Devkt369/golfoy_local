@@ -1,0 +1,260 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+?>
+<?php
+/** @var $block \Magento\Framework\View\Element\Template */
+/** @var $escaper \Magento\Framework\Escaper */
+/** @var $configProvider \Magento\Search\ViewModel\ConfigProvider */
+$configProvider = $block->getData('configProvider');
+/** @var $versionManager \Magento\Search\ViewModel\AdditionalSearchFormData */
+$additionalSearchFormData = $block->getData('additionalSearchFormData');
+/** @var $helper \Magento\Search\Helper\Data */
+$helper = $configProvider->getSearchHelperData();
+$quickSearchUrl = $escaper->escapeUrl($helper->getSuggestUrl());
+?>
+<div class="block block-search">
+    <div class="block block-title"><strong><?= $escaper->escapeHtml(__('Search')) ?></strong></div>
+    <div class="block block-content">
+        <form class="form minisearch wrwerwerwer" id="search_mini_form"
+              action="<?= $escaper->escapeUrl($helper->getResultUrl()) ?>" method="get">
+            <?php  if (!empty($queryParams = $additionalSearchFormData->getFormData())): ?>
+                <?php foreach ($queryParams as $param): ?>
+                    <input type="hidden" name="<?= $escaper->escapeHtmlAttr($param['name']) ?>"
+                           value="<?= $escaper->escapeHtmlAttr($param['value']) ?>"/>
+                <?php endforeach; ?>
+            <?php endif; ?>
+            <div class="field search">
+                <label class="label" for="search" data-role="minisearch-label">
+                    <span><?= $escaper->escapeHtml(__('Search')) ?></span>
+                </label>
+                <div class="control">
+                    <input id="search"
+                           data-mage-init='{
+                            "quickSearch": {
+                                "formSelector": "#search_mini_form",
+                                "url": "<?= /* @noEscape */ $quickSearchUrl ?>",
+                                "destinationSelector": "#search_autocomplete",
+                                "minSearchLength": "<?= $escaper->escapeHtml($helper->getMinQueryLength()) ?>"
+                            }
+                        }'
+                           type="text"
+                           name="<?= $escaper->escapeHtmlAttr($helper->getQueryParamName()) ?>"
+                           value="<?= /* @noEscape */ $helper->getEscapedQueryText() ?>"
+                           placeholder="<?= $escaper->escapeHtmlAttr(__('Search entire store here...')) ?>"
+                           class="input-text"
+                           maxlength="<?= $escaper->escapeHtmlAttr($helper->getMaxQueryLength()) ?>"
+                           role="combobox"
+                           aria-haspopup="false"
+                           aria-autocomplete="both"
+                           autocomplete="off"
+                           aria-expanded="false"/>
+                    <div id="search_autocomplete" class="search-autocomplete"></div>
+                    <?= $block->getChildHtml() ?>
+                </div>
+            </div>
+            <div class="actions">
+                <button type="submit"
+                        title="<?= $escaper->escapeHtml(__('Search')) ?>"
+                        class="action search"
+                        aria-label="Search"
+                >
+                    <span><?= $escaper->escapeHtml(__('Search')) ?></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+require([
+    'jquery'
+], function ($) {
+    'use strict';
+
+    var $search = $('#search');
+    var $autocomplete = $('#search_autocomplete');
+
+    if (!$search.length || !$autocomplete.length) {
+        return;
+    }
+
+    var ajaxRequest = null;
+    var debounceTimer = null;
+
+    function escapeHtml(value) {
+        return $('<div>').text(value || '').html();
+    }
+
+    function formatPrice(value) {
+        var amount = Number(value);
+        if (!isFinite(amount)) {
+            return '';
+        }
+        try {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 2
+            }).format(amount);
+        } catch (e) {
+            return '₹' + amount.toLocaleString('en-IN');
+        }
+    }
+
+    function renderProducts(products) {
+        if (!products || !products.length) {
+            $autocomplete.html(
+                '<div class="ajax-search-empty">No products found.</div>'
+            ).show();
+
+            return;
+        }
+
+        var html = '<div class="products wrapper grid products-grid">' +
+            '<ol class="products list items product-items">';
+
+        $.each(products, function (index, product) {
+            var productUrl = escapeHtml(product.url);
+            html += '<li class="item product product-item">' +
+                '<div class="product-item-info">' +
+                '<a class="product photo product-item-photo" href="' + productUrl + '">';
+
+            if (product.image) {
+                html += '<span class="product-image-container">' +
+                    '<span class="product-image-wrapper">' +
+                    '<img class="product-image-photo" src="' + escapeHtml(product.image) +
+                    '" alt="' + escapeHtml(product.name) + '">' +
+                    '</span></span>';
+            }
+
+            html += '</a><div class="product details product-item-details">' +
+                '<strong class="product name product-item-name">' +
+                '<a class="product-item-link" href="' + productUrl + '">' +
+                escapeHtml(product.name) + '</a></strong>';
+
+            if (product.brand) {
+                html += '<div class="product-item-brand">' + escapeHtml(product.brand) + '</div>';
+            }
+
+            html += '<div class="price-box price-final_price">';
+            if (product.special_price !== null && Number(product.special_price) > 0) {
+                html += '<span class="old-price"><span class="price-container">' +
+                    '<span class="price-label">MRP</span>' +
+                    '<span class="price">' + escapeHtml(formatPrice(product.price)) + '</span>' +
+                    '</span></span><span class="special-price"><span class="price-container">' +
+                    '<span class="price-label">Special Price</span>' +
+                    '<span class="price">' + escapeHtml(formatPrice(product.special_price)) + '</span>' +
+                    '</span></span>';
+            } else {
+                html += '<span class="price-container"><span class="price">' +
+                    escapeHtml(formatPrice(product.price)) +
+                    '</span></span>';
+            }
+            html += '</div></div></div></li>';
+        });
+
+        html += '</ol></div>';
+
+        $autocomplete.html(html).show();
+    }
+
+    function searchProducts(query) {
+
+        if (ajaxRequest) {
+            ajaxRequest.abort();
+        }
+
+        ajaxRequest = $.ajax({
+            url: '/ajaxsearch/search/autocomplete',
+            type: 'GET',
+            dataType: 'json',
+
+            data: {
+                q: query
+            },
+
+            beforeSend: function () {
+                $autocomplete
+                    .html('<div class="ajax-search-loading">Loading...</div>')
+                    .show();
+            },
+
+            success: function (response) {
+
+                console.log('Ajax Search Response:', response);
+                
+                console.log('Ajax Search Products:', response.products);
+
+                if (response && response.products) {
+                    renderProducts(response.products);
+                } else {
+                    renderProducts([]);
+                }
+            },
+
+            error: function (xhr, status, error) {
+
+                if (status !== 'abort') {
+
+                    console.error(
+                        'Ajax Search Error:',
+                        xhr.responseText
+                    );
+
+                    $autocomplete.html(
+                        '<div class="ajax-search-error">' +
+                        'Unable to load products.' +
+                        '</div>'
+                    ).show();
+                }
+            },
+
+            complete: function () {
+                ajaxRequest = null;
+            }
+        });
+    }
+
+    $search.on('input', function () {
+
+        var query = $.trim($(this).val());
+
+        clearTimeout(debounceTimer);
+
+        if (query.length < 2) {
+            $autocomplete.hide().empty();
+            return;
+        }
+
+        debounceTimer = setTimeout(function () {
+            searchProducts(query);
+        }, 300);
+    });
+
+    // $(document).on('click', function (event) {
+
+    //     if (!$(event.target).closest('.block-search').length) {
+    //         $autocomplete.hide();
+    //     }
+    // });
+    $search.on('focus', function () {
+        var query = $.trim($(this).val());
+
+        if (query.length >= 2 && $autocomplete.children().length) {
+            $autocomplete.show();
+        }
+    });
+
+    $search.on('blur', function () {
+        setTimeout(function () {
+            if (!$autocomplete.is(':hover')) {
+                $autocomplete.hide();
+            }
+        }, 150);
+    });
+
+});
+</script>

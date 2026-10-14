@@ -1,0 +1,8 @@
+<div class="fast-search-wrapper" data-mage-init='{"ajaxSearch":{}}'>
+    <?php if ($block->isEnabled()): ?>
+        <input type="text" id="ajaxsearch-input" class="ajaxsearch-input" placeholder="Search products..." autocomplete="off" data-limit="<?php echo $block->getAutocompleteLimit(); ?>" />
+        <div id="ajaxsearch-results" class="ajaxsearch-results hidden"></div>
+    <?php else: ?>
+        <!-- Fast search is disabled in configuration -->
+    <?php endif; ?>
+</div>
